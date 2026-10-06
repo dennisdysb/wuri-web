@@ -43,8 +43,16 @@ var JingWen = (function () {
   function ensureLoaded(id, cb) {
     if (window.JINGWEN && JINGWEN[id]) { cb && cb(); return; }
     if (loaded[id] === 'loading') {
+      var tries = 0;
       var iv = setInterval(function () {
-        if (window.JINGWEN && JINGWEN[id]) { clearInterval(iv); cb && cb(); }
+        tries++;
+        if (window.JINGWEN && JINGWEN[id]) { clearInterval(iv); cb && cb(); return; }
+        // 6秒还没加载出来：放弃等待，重置状态让下次点击重新加载
+        if (tries > 30 || loaded[id] === 'error') {
+          clearInterval(iv);
+          if (loaded[id] !== 'done') loaded[id] = null;
+          cb && cb();
+        }
       }, 200);
       return;
     }
@@ -53,6 +61,10 @@ var JingWen = (function () {
     sc.src = 'jing/' + id + '.js';
     sc.onload = function () { loaded[id] = 'done'; cb && cb(); };
     sc.onerror = function () { loaded[id] = 'error'; cb && cb(); };
+    // 保险：10秒还没 onload/onerror，强制重置
+    setTimeout(function () {
+      if (loaded[id] === 'loading') loaded[id] = null;
+    }, 10000);
     document.head.appendChild(sc);
   }
 
@@ -132,10 +144,17 @@ var JingWen = (function () {
     return out;
   }
 
-  function openReader(id) {
+  function openReader(id, _retry) {
     ensureLoaded(id, function () {
       var d = window.JINGWEN && JINGWEN[id];
-      if (!d) return;
+      if (!d) {
+        // 数据没加载出来：重置后重试一次，避免点击无反应
+        if (!_retry) {
+          loaded[id] = null;
+          setTimeout(function () { openReader(id, true); }, 300);
+        }
+        return;
+      }
       currentId = id;
       $('#jing-home').hidden = true;
       $('#jing-reader').hidden = false;
