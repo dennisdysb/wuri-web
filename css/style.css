@@ -924,7 +924,8 @@ details[open] summary:before{content:"▾ "}
 
 /* 平板：内容加宽，字稍大 */
 @media (min-width: 768px) {
-  .tab{max-width:720px;margin:0 auto;padding:0 24px}
+  .tab{display:none;max-width:720px;margin:0 auto;padding:0 24px}
+  .tab.active{display:block}
   #tabbar{max-width:720px}
   .card{padding:20px 24px}
   body{font-size:17px}
@@ -948,7 +949,8 @@ details[open] summary:before{content:"▾ "}
   #tabbar button.active{border-left-color:var(--teal-deep);background:color-mix(in srgb,var(--teal-deep) 7%,transparent)}
   /* 内容区：左侧留出导航栏宽度，占满剩余屏幕 */
   body{padding-left:210px}
-  .tab{max-width:none;margin:0;padding:0 48px 60px}
+  .tab{display:none;max-width:none;margin:0;padding:0 48px 60px}
+  .tab.active{display:block}
   .view{max-width:none;margin:0;padding:0 48px 60px}
   /* 首页卡片单列加宽 */
   #tab-home{max-width:800px}
