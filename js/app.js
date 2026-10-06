@@ -277,6 +277,13 @@ function renderCalendar() {
         '<span class="l">' + ltxt + '</span>' + dots;
       cell.addEventListener('click', function () {
         sel = { y: viewY, m: viewM, d: d }; renderCalendar();
+        // 选中日期后自动滚动到详情区
+        var detail = document.getElementById('day-detail');
+        if (detail) {
+          setTimeout(function () {
+            detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 50);
+        }
       });
       grid.appendChild(cell);
     })(d);
