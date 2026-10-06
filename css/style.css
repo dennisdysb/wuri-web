@@ -914,3 +914,6 @@ details[open] summary:before{content:"▾ "}
   z-index:60;display:none}
 .jing-back-fab.show{display:block}
 .jing-back-fab:active{transform:scale(.92)}
+
+/* 置顶按钮用不同位置避免重叠 */
+.jing-back-fab.to-top{left:auto;right:18px;font-size:1.4rem}

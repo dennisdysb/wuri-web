@@ -462,12 +462,25 @@ var JingWen = (function () {
   function updateFab() {
     var fab = document.getElementById('qing-btn');
     var backFab = document.getElementById('jing-back-fab');
-    // 只在经文阅读页显示（jing-reader 可见时）
+    var lyBackFab = document.getElementById('liuyao-back-fab');
+    var topFab = document.getElementById('to-top-fab');
+    // 经文阅读器
     var reader = document.getElementById('jing-reader');
-    var tab = document.getElementById('tab-jing');
-    var show = reader && !reader.hidden && tab && !tab.hidden;
-    if (fab) fab.classList.toggle('show', !!show);
-    if (backFab) backFab.classList.toggle('show', !!show);
+    var jingTab = document.getElementById('tab-jing');
+    var showReader = reader && !reader.hidden && jingTab && !jingTab.hidden;
+    if (fab) fab.classList.toggle('show', !!showReader);
+    if (backFab) backFab.classList.toggle('show', !!showReader);
+    // 六爻占卜视图
+    var lyView = document.getElementById('view-liuyao');
+    var showLy = lyView && !lyView.hidden;
+    if (lyBackFab) lyBackFab.classList.toggle('show', !!showLy);
+    // 黄历/提醒置顶按钮（滚动超过一屏时显示）
+    var calTab = document.getElementById('tab-cal');
+    var remTab = document.getElementById('tab-remind');
+    var showCal = calTab && !calTab.hidden;
+    var showRem = remTab && !remTab.hidden;
+    var scrolled = (window.scrollY || document.documentElement.scrollTop) > 400;
+    if (topFab) topFab.classList.toggle('show', !!(scrolled && (showCal || showRem)));
   }
   document.addEventListener('DOMContentLoaded', function () {
     var fab = document.getElementById('qing-btn');
@@ -490,6 +503,23 @@ var JingWen = (function () {
         closeReader();
       });
     }
+    // 六爻浮动返回：回到六爻主页面
+    var lyBackFab = document.getElementById('liuyao-back-fab');
+    if (lyBackFab) {
+      lyBackFab.addEventListener('click', function () {
+        var btn = document.getElementById('liuyao-back');
+        if (btn) btn.click();
+      });
+    }
+    // 置顶按钮：滚动到顶部
+    var topFab = document.getElementById('to-top-fab');
+    if (topFab) {
+      topFab.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+    // 监听滚动，更新置顶按钮显示
+    window.addEventListener('scroll', updateFab, { passive: true });
     // 监听视图切换
     setInterval(updateFab, 500);
   });
