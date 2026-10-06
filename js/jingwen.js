@@ -445,7 +445,8 @@ var JingWen = (function () {
   }
 
   document.addEventListener('DOMContentLoaded', init);
-  return { openReader: openReader, search: search };
+  window.closeReader = closeReader; // 供 Android 系统返回键调用
+  return { openReader: openReader, search: search, closeReader: closeReader };
 })();
 
 /* ---------- 敲磬 ---------- */
@@ -460,12 +461,13 @@ var JingWen = (function () {
   }
   function updateFab() {
     var fab = document.getElementById('qing-btn');
-    if (!fab) return;
+    var backFab = document.getElementById('jing-back-fab');
     // 只在经文阅读页显示（jing-reader 可见时）
     var reader = document.getElementById('jing-reader');
     var tab = document.getElementById('tab-jing');
     var show = reader && !reader.hidden && tab && !tab.hidden;
-    fab.classList.toggle('show', !!show);
+    if (fab) fab.classList.toggle('show', !!show);
+    if (backFab) backFab.classList.toggle('show', !!show);
   }
   document.addEventListener('DOMContentLoaded', function () {
     var fab = document.getElementById('qing-btn');
@@ -479,6 +481,13 @@ var JingWen = (function () {
           fab.style.transform = 'scale(0.9)';
           setTimeout(function () { fab.style.transform = ''; }, 150);
         } catch (e) {}
+      });
+    }
+    // 浮动返回按钮：点击关闭阅读器回目录
+    var backFab = document.getElementById('jing-back-fab');
+    if (backFab) {
+      backFab.addEventListener('click', function () {
+        closeReader();
       });
     }
     // 监听视图切换

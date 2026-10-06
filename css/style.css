@@ -906,3 +906,11 @@ details[open] summary:before{content:"▾ "}
 .recite-sen .recite-first{font-weight:700;font-size:1.15em;color:#5a4a2a}
 .recite-sen.open{border-bottom-style:solid;background:#faf6ea}
 .recite-sen.open .recite-first{font-weight:400;font-size:1em}
+
+/* 阅读器浮动返回按钮（左下） */
+.jing-back-fab{position:fixed;left:18px;bottom:90px;width:56px;height:56px;border-radius:50%;
+  background:var(--teal-deep);color:#fff;font-size:1.8rem;line-height:1;
+  border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
+  z-index:60;display:none}
+.jing-back-fab.show{display:block}
+.jing-back-fab:active{transform:scale(.92)}
