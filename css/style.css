@@ -950,9 +950,9 @@ details[open] summary:before{content:"▾ "}
   body{padding-left:210px}
   .tab{max-width:none;margin:0;padding:0 48px 60px}
   .view{max-width:none;margin:0;padding:0 48px 60px}
-  /* 首页卡片双列 */
-  #tab-home{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
-  #tab-home .card{margin-bottom:0}
+  /* 首页卡片单列加宽 */
+  #tab-home{max-width:800px}
+  #tab-home .card{margin-bottom:20px}
   /* 阅读器正文加宽，字更大 */
   .jing-body{max-width:800px;margin:0 auto;font-size:1.28rem;line-height:2.3}
   /* 黄历月历加宽 */
