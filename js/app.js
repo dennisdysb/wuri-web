@@ -135,7 +135,6 @@ $$('#tabbar button').forEach(function (btn) {
       var v = document.getElementById(vid);
       if (v) v.hidden = true;
     });
-    updateFloatingButtons();
     if (btn.getAttribute('data-tab') === 'tab-remind') refreshPermUI();
     window.scrollTo(0, 0);
   });
@@ -931,7 +930,6 @@ function updateFloatingButtons() {
       }
     });
     setInterval(updateFloatingButtons, 500);
-    updateFloatingButtons();
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

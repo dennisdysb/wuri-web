@@ -91,6 +91,7 @@
 
   <!-- ============ 黄历 ============ -->
   <main id="tab-cal" class="tab">
+    <button class="jing-back-fab to-top show" style="position:fixed" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部">↑</button>
     <header class="appbar brand">
       <img class="brand-logo" src="img/logo.png" alt="戊日不上香">
       <h1 class="brand-title" data-i18n="cal_title">道历黄历</h1>
@@ -196,12 +197,7 @@
       <button id="qing-btn" class="qing-fab" title="敲磬">磬</button>
       <!-- 阅读器浮动返回按钮 -->
       <button id="jing-back-fab" class="jing-back-fab" title="返回目录">‹</button>
-      <!-- 六爻浮动返回 -->
-      <button id="fab-back-ly" class="jing-back-fab" title="返回">‹</button>
-      <!-- 各标签页浮动置顶 -->
-      <button id="fab-top-cal" class="jing-back-fab to-top" title="回到顶部">↑</button>
-      <button id="fab-top-remind" class="jing-back-fab to-top" title="回到顶部">↑</button>
-      <button id="fab-top-me" class="jing-back-fab to-top" title="回到顶部">↑</button>
+
 
       <div class="tab-spacer"></div>
     </div>
@@ -210,6 +206,7 @@
 
   <!-- ============ 提醒 ============ -->
   <main id="tab-remind" class="tab">
+    <button class="jing-back-fab to-top show" style="position:fixed" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部">↑</button>
     <header class="appbar brand">
       <img class="brand-logo" src="img/logo.png" alt="戊日不上香">
       <h1 class="brand-title" data-i18n="remind_title">上香提醒</h1>
@@ -309,6 +306,7 @@
 
   <!-- ============ 六爻占卜 ============ -->
   <main id="view-liuyao" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('liuyao-back').click()" title="返回">‹</button>
     <header class="appbar">
       <button class="mini-btn" id="liuyao-back">‹ 返回</button>
       <h1 class="brand-title">六爻占卜</h1>
@@ -365,6 +363,7 @@
 
   <!-- ============ 我的 ============ -->
   <main id="tab-me" class="tab">
+    <button class="jing-back-fab to-top show" style="position:fixed" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部">↑</button>
     <header class="appbar brand">
       <img class="brand-logo" src="img/logo.png" alt="戊日不上香">
       <h1 class="brand-title" data-i18n="tab_me">我的</h1>
