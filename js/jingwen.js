@@ -504,9 +504,8 @@ var JingWen = (function () {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
-    // 监听滚动，更新置顶按钮显示
-    window.addEventListener('scroll', updateFab, { passive: true });
-    // 监听视图切换
+    // 定时更新浮动按钮
     setInterval(updateFab, 500);
+    updateFab();
   });
 })();
