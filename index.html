@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#F5F1E6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="戊日不上香">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>戊日不上香</title>
+<script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ 首页 ============ -->
+  <main id="tab-home" class="tab active">
+    <header class="appbar brand">
+      <img class="brand-logo" src="img/logo.png" alt="戊日不上香">
+      <h1 class="brand-title" data-i18n="app_title">戊日不上香</h1>
+      <button class="theme-toggle" data-theme-toggle data-i18n-aria="theme_toggle" aria-label="切换主题">◐</button>
+    </header>
+    <p id="home-date-line" class="date-line"></p>
+
+    <!-- 今日状态大卡片 -->
+    <section id="status-card" class="card status">
+      <div id="status-title" class="status-title"></div>
+      <div id="status-sub" class="status-sub"></div>
+      <details id="anwu-note" class="anwu-note" hidden>
+        <summary data-i18n="anwu_what">什么是暗戊日？</summary>
+        <p data-i18n="anwu_explain"></p>
+      </details>
+    </section>
+
+    <!-- 倒计时 -->
+    <section class="card countdown">
+      <div class="count-label" data-i18n="count_label">距离下个明戊日还有</div>
+      <div class="count-main"><span id="count-days">–</span><span class="count-unit" data-i18n="count_unit">天</span></div>
+      <div id="count-date" class="count-date"></div>
+      <div id="count-anwu" class="count-date anwu-line"></div>
+    </section>
+
+    <!-- 值年太岁 -->
+    <div id="taisui-line" class="taisui"></div>
+
+    <!-- 时钟 + 四柱 + 节气 -->
+    <section class="card">
+      <div class="card-title centered" data-i18n="home_bazi">此刻干支</div>
+      <div id="clock" class="clock">--:--:--</div>
+      <div class="bazi">
+        <div class="pillar"><span class="pz" id="pz-year">–</span><span class="pl" data-i18n="pillar_year">年柱</span></div>
+        <div class="pillar"><span class="pz" id="pz-month">–</span><span class="pl" data-i18n="pillar_month">月柱</span></div>
+        <div class="pillar"><span class="pz" id="pz-day">–</span><span class="pl" data-i18n="pillar_day">日柱</span></div>
+        <div class="pillar"><span class="pz" id="pz-time">–</span><span class="pl" data-i18n="pillar_time">时柱</span></div>
+      </div>
+      <div id="jieqi-line" class="jieqi"></div>
+      <div id="zhishen-line" class="zhishen"></div>
+    </section>
+
+    <!-- 修行日程（Pro）入口 -->
+    <section class="card" id="practice-entry-card">
+      <div class="card-title" data-i18n="practice_title">修行打卡</div>
+      <p class="hint" data-i18n="practice_hint">每日打坐内练，早晚功课打卡；坚持就是修行。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="practice-enter" data-i18n="practice_enter">进入修行打卡</button>
+      </div>
+    </section>
+
+    <!-- 八字排盘（Pro）入口 -->
+    <section class="card" id="bazi-entry-card">
+      <div class="card-title" data-i18n="bazi_title">八字排盘</div>
+      <p class="hint" data-i18n="bazi_hint">输入出生时间，一键起四柱八字、大运。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="bazi-enter" data-i18n="bazi_enter">开始排盘</button>
+      </div>
+    </section>
+
+    <!-- 六爻占卜（Pro）入口 -->
+    <section class="card" id="liuyao-entry-card">
+      <div class="card-title">六爻占卜</div>
+      <p class="hint">摇一摇手机，龟壳落铜钱，六爻成卦，断吉凶。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="liuyao-enter">开始占卜</button>
+      </div>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 黄历 ============ -->
+  <main id="tab-cal" class="tab">
+    <header class="appbar brand">
+      <img class="brand-logo" src="img/logo.png" alt="戊日不上香">
+      <h1 class="brand-title" data-i18n="cal_title">道历黄历</h1>
+      <button class="theme-toggle" data-theme-toggle data-i18n-aria="theme_toggle" aria-label="切换主题">◐</button>
+    </header>
+    <section class="card">
+      <div class="cal-head">
+        <button id="cal-prev" class="nav-btn" data-i18n-aria="nav_prev" aria-label="上个月">‹</button>
+        <div id="cal-title" class="cal-title"></div>
+        <button id="cal-next" class="nav-btn" data-i18n-aria="nav_next" aria-label="下个月">›</button>
+      </div>
+      <div id="date-jump" class="date-jump" hidden>
+        <div class="wheels">
+          <div class="wheel" id="wh-y" aria-label="年"><div class="wheel-list"></div></div><span class="dj-u" data-i18n="u_year">年</span>
+          <div class="wheel" id="wh-m" aria-label="月"><div class="wheel-list"></div></div><span class="dj-u" data-i18n="u_month">月</span>
+          <div class="wheel" id="wh-d" aria-label="日"><div class="wheel-list"></div></div><span class="dj-u" data-i18n="u_day">日</span>
+          <div class="wheel-band"></div>
+        </div>
+        <div class="dj-btns">
+          <button id="dj-go" class="dj-btn" data-i18n="dj_go">确定</button>
+          <button id="dj-today" class="dj-btn ghost" data-i18n="dj_today">回到今天</button>
+          <button id="dj-cancel" class="dj-btn ghost" data-i18n="dj_cancel">取消</button>
+        </div>
+      </div>
+      <div class="cal-week"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+      <div id="cal-grid" class="cal-grid"></div>
+      <div class="yv-bar"><button class="mini-btn" data-yv="open" data-i18n="yv_year_view">年览</button></div>
+      <div id="year-view" hidden>
+        <div class="yv-head">
+          <button class="nav-btn" data-yv="prev" aria-label="上一年">‹</button>
+          <div id="yv-title" class="cal-title"></div>
+          <button class="nav-btn" data-yv="next" aria-label="下一年">›</button>
+        </div>
+        <div class="yv-tools">
+          <button class="mini-btn" data-yv="close" data-i18n="yv_back">月历</button>
+          <button class="mini-btn" data-yv="export" data-i18n="yv_export">导出图片</button>
+          <button class="mini-btn" data-yv="print" data-i18n="yv_print">打印</button>
+        </div>
+        <div id="yv-grid" class="yv-grid"></div>
+        <div class="legend"><span><i class="dot wu"></i><em data-i18n="legend_ming">明戊日</em></span><span><i class="dot anwu"></i><em data-i18n="legend_an">暗戊日</em></span><span><i class="bdstar">★</i><em data-i18n="legend_baidou">拜斗日</em></span><span><i class="sdot-lg">🍑</i><em data-i18n="legend_shendan">神诞日</em></span></div>
+      </div>
+      <div class="legend" id="month-legend"><span><i class="dot wu"></i><em data-i18n="legend_ming">明戊日</em></span><span><i class="dot anwu"></i><em data-i18n="legend_an">暗戊日</em></span><span><i class="bdstar">★</i><em data-i18n="legend_baidou">拜斗日</em></span><span><i class="sdot-lg">🍑</i><em data-i18n="legend_shendan">神诞日</em></span><span><i class="dot today"></i><em data-i18n="legend_today">今天</em></span></div>
+    </section>
+    <section class="card" id="day-detail">
+      <div class="card-title" id="detail-title">—</div>
+      <div id="detail-wu" class="detail-wu"></div>
+      <div id="detail-anwu-note" class="detail-anwu-note" hidden></div>
+      <div id="detail-baidou-note" class="detail-baidou-note" hidden></div>
+      <div id="detail-tags" class="detail-tags"></div>
+      <div class="detail-row"><span class="dl" data-i18n="d_lunar">农历</span><span id="detail-lunar"></span></div>
+      <div class="detail-row"><span class="dl" data-i18n="d_gz">干支</span><span id="detail-gz"></span></div>
+      <div class="detail-row"><span class="dl" data-i18n="d_jieqi">节气</span><span id="detail-jq"></span></div>
+      <div class="detail-row"><span class="dl" data-i18n="d_chongsha">冲煞</span><span id="detail-chong"></span></div>
+      <div class="detail-row"><span class="dl" data-i18n="d_zhishen">值神</span><span id="detail-zhishen"></span></div>
+      <div class="yiji"><span class="yi" data-i18n="yi">宜</span><p id="detail-yi"></p></div>
+      <div class="yiji"><span class="ji" data-i18n="ji">忌</span><p id="detail-ji"></p></div>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 经文（Pro） ============ -->
+  <main id="tab-jing" class="tab">
+    <header class="appbar brand">
+      <img class="brand-logo" src="img/logo.png" alt="戊日不上香">
+      <h1 class="brand-title" data-i18n="tab_jing">经文</h1>
+      <button class="theme-toggle" data-theme-toggle data-i18n-aria="theme_toggle" aria-label="切换主题">◐</button>
+    </header>
+    <div id="jing-lock" class="card lock-card">
+      <div class="lock-char">鎖</div>
+      <div class="card-title" data-i18n="pro_title">高级版</div>
+      <p class="hint" data-i18n="jing_lock_hint">经文库为高级版功能，解锁后可读诵、检索道藏精选经文。</p>
+      <button class="btn primary" data-pro-act="paywall" data-pro-from="jing" data-i18n="pro_unlock">解锁高级版</button>
+    </div>
+    <div id="jing-body">
+      <div id="jing-home">
+        <div class="jing-search"><input id="jing-q" data-i18n-ph="jing_search_ph" placeholder="搜索经文…" aria-label="搜索经文"></div>
+        <div id="jing-results" hidden></div>
+        <div class="jing-filter">
+      <button class="btn small active" data-jing-filter="all">全部</button>
+      <button class="btn small" data-jing-filter="quanzhen">全真</button>
+      <button class="btn small" data-jing-filter="zhengyi">正一</button>
+    </div>
+<div id="jing-list"></div>
+      </div>
+      <div id="jing-reader" hidden>
+        <div class="jing-rhead">
+          <button class="mini-btn" id="jing-back" data-i18n="jing_back">‹ 目录</button>
+          <div class="jing-rtools">
+            <button class="mini-btn tiny" id="jing-pybtn">注音开</button>
+            <button class="mini-btn tiny" id="jing-font-dec">小</button>
+            <button class="mini-btn tiny" id="jing-font-inc">大</button>
+            <button class="mini-btn tiny" id="jing-recite" data-i18n="jing_recite">背诵</button>
+            <button class="mini-btn tiny" id="jing-speak" data-i18n="jing_speak">诵读</button>
+            <button class="mini-btn tiny" id="jing-tts-set">语音设置</button>
+            <button class="mini-btn tiny" id="jing-stop" data-i18n="jing_stop" hidden>停止</button>
+            <button class="mini-btn tiny" id="jing-foldall">全部展开</button>
+          </div>
+        </div>
+        <h2 id="jing-title" class="jing-book-title"></h2>
+        <div id="jing-content" class="jing-content"></div>
+      </div>
+      <!-- 敲磬悬浮按钮 -->
+      <button id="qing-btn" class="qing-fab" title="敲磬">磬</button>
+      <div class="tab-spacer"></div>
+    </div>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 提醒 ============ -->
+  <main id="tab-remind" class="tab">
+    <header class="appbar brand">
+      <img class="brand-logo" src="img/logo.png" alt="戊日不上香">
+      <h1 class="brand-title" data-i18n="remind_title">上香提醒</h1>
+      <button class="theme-toggle" data-theme-toggle data-i18n-aria="theme_toggle" aria-label="切换主题">◐</button>
+    </header>
+
+    <section class="card">
+      <div class="row-between">
+        <div><div class="row-title" data-i18n="remind_wu">明戊日提醒</div><div class="row-sub" data-i18n="remind_wu_sub">戊日不朝真，提前提醒您不上香</div></div>
+        <label class="switch"><input type="checkbox" id="sw-wu"><span></span></label>
+      </div>
+      <div class="row-between">
+        <div><div class="row-title" data-i18n="remind_anwu">暗戊日提醒</div><div class="row-sub" data-i18n="remind_anwu_sub">各派做法不一，仅作提示</div></div>
+        <label class="switch"><input type="checkbox" id="sw-anwu"><span></span></label>
+      </div>
+      <div class="row-between">
+        <div><div class="row-title" data-i18n="remind_baidou">拜斗日提醒</div><div class="row-sub" data-i18n="remind_baidou_sub">朔望礼斗、九皇斋期，宜斋戒敬香</div></div>
+        <label class="switch"><input type="checkbox" id="sw-baidou"><span></span></label>
+      </div>
+      <div class="timing-label" data-i18n="remind_timing">提醒时机</div>
+      <div class="form-row preset-row">
+        <label class="preset"><input type="checkbox" name="wu-kind" value="day1"> <span data-i18n="kind_day1">提前1天</span></label>
+        <label class="preset"><input type="checkbox" name="wu-kind" value="today"> <span data-i18n="kind_today">当天</span></label>
+        <label class="preset"><input type="checkbox" name="wu-kind" value="custom"> <span data-i18n="kind_custom">自选</span></label>
+      </div>
+      <div class="form-row offset-row" id="wu-offset-row" hidden>
+        <span class="offset-label" data-i18n="offset_label">提前</span>
+        <input type="number" id="wu-offset-num" min="0" max="99999" inputmode="numeric" aria-label="提前数量">
+        <select id="wu-offset-unit" aria-label="提前单位">
+          <option value="1" data-i18n="unit_min">分钟</option>
+          <option value="60" data-i18n="unit_hour">小时</option>
+          <option value="1440" data-i18n="unit_day">天</option>
+          <option value="10080" data-i18n="unit_week">周</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="inp-time" data-i18n="remind_time">提醒时间</label>
+        <input type="time" id="inp-time" value="17:00">
+      </div>
+      <p class="hint" id="schedule-info"></p>
+    </section>
+
+    <section class="card">
+      <details id="adv-details">
+        <summary data-i18n="adv_section">进阶提醒（道教斋醮日）</summary>
+        <div class="adv-list">
+          <div class="row-between"><div><div class="row-title" data-i18n="adv_gengshen">庚申日</div><div class="row-sub" data-i18n="adv_gengshen_sub">庚申日守庚申</div></div><label class="switch"><input type="checkbox" data-adv="gengshen"><span></span></label></div>
+          <div class="row-between"><div><div class="row-title" data-i18n="adv_jiazi">甲子日</div><div class="row-sub" data-i18n="adv_jiazi_sub">甲子日斋醮</div></div><label class="switch"><input type="checkbox" data-adv="jiazi"><span></span></label></div>
+          <div class="row-between"><div><div class="row-title" data-i18n="adv_cysw">初一 · 十五</div><div class="row-sub" data-i18n="adv_cysw_sub">月朔月望，宜斋戒</div></div><label class="switch"><input type="checkbox" data-adv="chuyishiwu"><span></span></label></div>
+          <div class="row-between"><div><div class="row-title" data-i18n="adv_bajie">八节</div><div class="row-sub" data-i18n="adv_bajie_sub">立春、春分、立夏、夏至、立秋、秋分、立冬、冬至</div></div><label class="switch"><input type="checkbox" data-adv="bajie"><span></span></label></div>
+          <div class="row-between"><div><div class="row-title" data-i18n="adv_sanyuan">三元</div><div class="row-sub" data-i18n="adv_sanyuan_sub">正月十五上元、七月十五中元、十月十五下元</div></div><label class="switch"><input type="checkbox" data-adv="sanyuan"><span></span></label></div>
+          <div class="row-between"><div><div class="row-title" data-i18n="adv_wula">五腊日</div><div class="row-sub" data-i18n="adv_wula_sub">正月初一、五月初五、七月初七、十月初一、十二月初八</div></div><label class="switch"><input type="checkbox" data-adv="wula"><span></span></label></div>
+          <div class="row-between"><div><div class="row-title" data-i18n="adv_shendan">神诞日</div><div class="row-sub" data-i18n="adv_shendan_sub">诸神圣诞，宜斋戒敬香</div></div><label class="switch"><input type="checkbox" data-adv="shendan"><span></span></label></div>
+        </div>
+        <div class="timing-label" data-i18n="remind_timing">提醒时机</div>
+        <div class="form-row preset-row">
+          <label class="preset"><input type="checkbox" name="adv-kind" value="day1"> <span data-i18n="kind_day1">提前1天</span></label>
+          <label class="preset"><input type="checkbox" name="adv-kind" value="today"> <span data-i18n="kind_today">当天</span></label>
+          <label class="preset"><input type="checkbox" name="adv-kind" value="custom"> <span data-i18n="kind_custom">自选</span></label>
+        </div>
+        <div class="form-row offset-row" id="adv-offset-row" hidden>
+          <span class="offset-label" data-i18n="offset_label">提前</span>
+          <input type="number" id="adv-offset-num" min="0" max="99999" inputmode="numeric" aria-label="提前数量">
+          <select id="adv-offset-unit" aria-label="提前单位">
+            <option value="1" data-i18n="unit_min">分钟</option>
+            <option value="60" data-i18n="unit_hour">小时</option>
+            <option value="1440" data-i18n="unit_day">天</option>
+            <option value="10080" data-i18n="unit_week">周</option>
+          </select>
+        </div>
+        <p class="hint" data-i18n="adv_note">进阶提醒时间与戊日提醒相同。</p>
+      </details>
+    </section>
+    <section class="card">
+      <div class="card-title" data-i18n="perm_title">权限状态</div>
+      <div class="detail-row"><span class="dl" data-i18n="perm_notif">通知权限</span><span id="perm-notif" data-i18n="perm_checking">检测中…</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="perm_alarm">精确闹钟</span><span id="perm-alarm" data-i18n="perm_checking">检测中…</span></div>
+      <div class="btn-row">
+        <button id="btn-perm" class="btn" data-i18n="btn_perm">申请通知权限</button>
+        <button id="btn-alarm" class="btn" data-i18n="btn_alarm">去开启精确闹钟</button>
+      </div>
+      <p class="hint" id="perm-hint" data-i18n="perm_hint">如果提醒不准时，请到手机「设置 → 应用 → 戊日不上香」中允许「通知」与「闹钟和提醒」。应用被省电策略清理后台也可能影响提醒，可将本应用设为「不受电池优化限制」。</p>
+    </section>
+
+    <!--TEST-ONLY-->
+    <section class="card">
+      <div class="card-title" data-i18n="test_title">测试提醒</div>
+      <div class="btn-row">
+        <button id="btn-test" class="btn" data-i18n="test_btn">发送测试提醒</button>
+      </div>
+      <p class="hint" id="test-info"></p>
+      <p class="hint" data-i18n="test_hint1">测试用，不影响正式提醒排期。点击后约 15 秒内发出一条测试通知，用于验证通知权限与提醒通道是否正常。</p>
+    </section>
+    <!--/TEST-ONLY-->
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 六爻占卜 ============ -->
+  <main id="view-liuyao" class="view" hidden>
+    <header class="appbar">
+      <button class="mini-btn" id="liuyao-back">‹ 返回</button>
+      <h1 class="brand-title">六爻占卜</h1>
+      <span class="spacer"></span>
+    </header>
+
+    <section class="card ly-shell-card">
+      <div class="ly-question">
+        <input type="text" id="ly-question-input" placeholder="心中默念所问之事（可不填）" maxlength="50">
+      </div>
+      <div class="ly-stage">
+        <div class="ly-tortoise-wrap">
+          <img class="ly-tortoise" id="ly-tortoise" src="img/liuyao/tortoise-shell.png" alt="龟壳">
+        </div>
+        <div class="ly-coins" id="ly-coins"></div>
+      </div>
+      <div class="ly-status" id="ly-status">摇一摇手机，或点下方按钮开始</div>
+      <div class="btn-row ly-btns">
+        <button class="btn primary" id="ly-shake-all">一键出六爻</button>
+        <button class="btn" id="ly-reset">重摇</button>
+      </div>
+    </section>
+
+    <section class="card" id="ly-result-card" hidden>
+      <div class="card-title">本卦</div>
+      <div class="ly-gua-display">
+        <div class="ly-gua-lines" id="ly-lines"></div>
+        <div class="ly-gua-info">
+          <div class="ly-gua-name" id="ly-gua-name"></div>
+          <div class="ly-gua-ci" id="ly-gua-ci"></div>
+        </div>
+      </div>
+      <div id="ly-biangua" hidden>
+        <div class="card-title">变卦</div>
+        <div class="ly-gua-display">
+          <div class="ly-gua-lines" id="ly-lines-bian"></div>
+          <div class="ly-gua-info">
+            <div class="ly-gua-name" id="ly-gua-name-bian"></div>
+            <div class="ly-gua-ci" id="ly-gua-ci-bian"></div>
+          </div>
+        </div>
+      </div>
+      <div class="ly-yao-detail" id="ly-yao-detail"></div>
+    </section>
+
+    <section class="card">
+      <details id="ly-history-details">
+        <summary class="card-title" style="cursor:pointer">历史记录 <span id="ly-history-count" style="font-weight:400;font-size:.85rem;color:var(--muted)"></span></summary>
+        <div id="ly-history-list"></div>
+      </details>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 我的 ============ -->
+  <main id="tab-me" class="tab">
+    <header class="appbar brand">
+      <img class="brand-logo" src="img/logo.png" alt="戊日不上香">
+      <h1 class="brand-title" data-i18n="tab_me">我的</h1>
+      <button class="theme-toggle" data-theme-toggle data-i18n-aria="theme_toggle" aria-label="切换主题">◐</button>
+    </header>
+    <section class="card pro-card">
+      <div class="card-title"><span data-i18n="pro_title">高级版</span> <span class="pro-state" data-pro-state data-i18n="pro_locked">未解锁</span></div>
+      <p class="hint" data-i18n="pro_card_hint">经文库、桌面小组件、年历总览、修行打卡、八字排盘，一次买断，永久使用。</p>
+      <div class="btn-row">
+        <button class="btn primary" data-pro-act="paywall" data-pro-from="me" data-pro-buybtn data-i18n="pro_unlock">解锁高级版</button>
+        <button class="btn" data-pro-act="restore" data-i18n="pro_restore">恢复购买</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="redeem-btn">🎁 兑换码</button>
+      </div>
+      <div class="redeem-box" id="redeem-box" hidden>
+        <input type="text" id="redeem-input" placeholder="输入6位兑换码" maxlength="6" autocomplete="off" autocapitalize="characters">
+        <div class="btn-row">
+          <button class="btn primary" id="redeem-confirm">兑换</button>
+          <button class="btn" id="redeem-cancel">取消</button>
+        </div>
+        <p class="hint" id="redeem-msg"></p>
+      </div>
+      <!--TEST-ONLY-->
+      <div class="btn-row"><button class="btn" data-pro-act="testunlock" data-pro-testbtn>测试解锁 Pro（测试包专用）</button></div>
+      <!--/TEST-ONLY-->
+    </section>
+    <section class="card">
+      <div class="card-title" data-i18n="me_tz">排盘时区</div>
+      <label class="radio"><input type="radio" name="tz" value="auto" checked> <span data-i18n="tz_auto">跟随手机时区</span></label>
+      <label class="radio"><input type="radio" name="tz" value="beijing"> <span data-i18n="tz_beijing">北京时间（东八区）</span></label>
+      <p class="hint" data-i18n="tz_hint">身在海外时，若按国内老黄历对照请选择「北京时间」。</p>
+    </section>
+    <section class="card">
+      <div class="card-title" data-i18n="me_theme">外观主题</div>
+      <label class="radio"><input type="radio" name="theme" value="auto" checked> <span data-i18n="theme_auto">跟随系统</span></label>
+      <label class="radio"><input type="radio" name="theme" value="day"> <span data-i18n="theme_day">白天 · 宣纸</span></label>
+      <label class="radio"><input type="radio" name="theme" value="night"> <span data-i18n="theme_night">黑夜 · 玄黑</span></label>
+    </section>
+    <section class="card">
+      <div class="card-title" data-i18n="me_lang">语言</div>
+      <label class="radio"><input type="radio" name="lang" value="auto" checked> <span data-i18n="lang_auto">跟随系统</span></label>
+      <label class="radio"><input type="radio" name="lang" value="zh-CN"> <span data-i18n="lang_cn">简体中文</span></label>
+      <label class="radio"><input type="radio" name="lang" value="zh-TW"> <span data-i18n="lang_tw">繁體中文</span></label>
+    </section>
+    <section class="card">
+      <div class="card-title" data-i18n="me_about">关于</div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.1.0</span></div>
+      <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
+    </section>
+    <section class="card">
+      <details>
+        <summary data-i18n="privacy">隐私政策</summary>
+        <div class="privacy">
+          <p><strong data-i18n="app_title">戊日不上香</strong> <strong data-i18n="privacy">隐私政策</strong></p>
+          <p data-i18n="privacy_effective">生效日期：2026年9月28日</p>
+          <p data-i18n="priv_p1"></p>
+          <p data-i18n="priv_p2"></p>
+          <p>· <span data-i18n="priv_perm1"></span><br>· <span data-i18n="priv_perm2"></span></p>
+          <p data-i18n="priv_p3"></p>
+        </div>
+      </details>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 底部导航 ============ -->
+  <nav id="tabbar">
+    <button data-tab="tab-home" class="active"><span class="ti">☯︎</span><span data-i18n="tab_home">首页</span></button>
+    <button data-tab="tab-cal"><span class="ti">曆</span><span data-i18n="tab_cal">黄历</span></button>
+    <button data-tab="tab-jing"><span class="ti">經</span><span data-i18n="tab_jing">经文</span></button>
+    <button data-tab="tab-remind"><span class="ti">鈴</span><span data-i18n="tab_remind">提醒</span></button>
+    <button data-tab="tab-me"><span class="ti">吾</span><span data-i18n="tab_me">我的</span></button>
+  </nav>
+
+  <!-- ============ 修行打卡（Pro） ============ -->
+  <div id="practice-view" hidden>
+    <header class="appbar brand">
+      <button class="mini-btn" id="practice-back">‹ 返回</button>
+      <h1 class="brand-title">修行打卡</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <!-- 今日打卡 -->
+    <section class="card">
+      <div class="card-title">今日打卡 <span class="daka-date" id="daka-today-date"></span></div>
+      <div id="daka-habit-list"></div>
+      <div class="btn-row"><button class="btn" id="daka-add-btn">＋ 自建打卡项</button></div>
+    </section>
+
+    <!-- 倒计时弹窗 -->
+    <div id="daka-timer-mask" class="daka-mask">
+      <div class="daka-timer-box">
+        <div class="daka-timer-name" id="daka-timer-name"></div>
+        <div class="daka-dur-row" id="daka-dur-row">
+          <button class="mini-btn tiny on" data-dur="15">15分钟</button>
+          <button class="mini-btn tiny" data-dur="30">30分钟</button>
+          <button class="mini-btn tiny" data-dur="custom">自选</button>
+          <input type="number" id="daka-custom-min" class="daka-custom-min" min="1" max="180" placeholder="分钟" hidden>
+        </div>
+        <div class="daka-timer-time" id="daka-timer-time">15:00</div>
+        <div class="btn-row">
+          <button class="btn primary" id="daka-timer-toggle">开始</button>
+          <button class="btn" id="daka-timer-done">完成</button>
+          <button class="btn" id="daka-timer-cancel">取消</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 自建表单 -->
+    <section class="card" id="daka-form-wrap" hidden>
+      <div class="card-title">＋ 自建打卡项</div>
+      <div class="form-row">
+        <label for="df-name">名称</label>
+        <input type="text" id="df-name" placeholder="如：抄经、拜忏">
+      </div>
+      <div class="form-row">
+        <label for="df-type">类型</label>
+        <select id="df-type">
+          <option value="count">计次（每天打卡一次）</option>
+          <option value="timed">计时（记录时长）</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="df-remind-time">提醒时间</label>
+        <input type="time" id="df-remind-time">
+      </div>
+      <p class="hint">设置提醒时间后，每天到点会收到通知。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="df-save">保存</button>
+        <button class="btn" id="df-cancel">取消</button>
+      </div>
+    </section>
+
+    <!-- 统计 -->
+    <section class="card">
+      <div class="card-title">我的坚持</div>
+      <div id="daka-stats" class="daka-stats"></div>
+    </section>
+
+    <!-- 月历 -->
+    <section class="card">
+      <div class="card-title daka-cal-head">
+        <button class="mini-btn tiny" id="daka-cal-prev">‹</button>
+        <span id="daka-cal-title"></span>
+        <button class="mini-btn tiny" id="daka-cal-next">›</button>
+      </div>
+      <div id="daka-cal" class="daka-cal"></div>
+      <p class="hint">颜色越深，打卡越多。</p>
+    </section>
+
+    <div class="tab-spacer"></div>
+  </div>
+
+  <!-- ============ 八字排盘（Pro） ============ -->
+  <div id="bazi-view" hidden>
+    <header class="appbar brand">
+      <button class="mini-btn" id="bazi-back" data-i18n="bazi_back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="bazi_title">八字排盘</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <nav class="bz-tabs">
+      <button data-bztab="input" class="active">起盘</button>
+      <button data-bztab="result">细盘</button>
+      <button data-bztab="history">记录</button>
+    </nav>
+    <section class="card" id="bz-tab-input">
+      <div class="card-title" data-i18n="bazi_input">出生信息</div>
+      <div class="form-row">
+        <label for="bz-name" data-i18n="bazi_name">姓名</label>
+        <input type="text" id="bz-name" data-i18n-ph="bazi_name_ph" placeholder="可选">
+      </div>
+      <div class="form-row">
+        <label data-i18n="bazi_gender">性别</label>
+        <label class="radio"><input type="radio" name="bz-gender" value="1" checked> <span data-i18n="bazi_male">男</span></label>
+        <label class="radio"><input type="radio" name="bz-gender" value="0"> <span data-i18n="bazi_female">女</span></label>
+      </div>
+      <div class="form-row">
+        <label data-i18n="bazi_calendar">历法</label>
+        <label class="radio"><input type="radio" name="bz-cal" value="solar" checked> <span data-i18n="bazi_solar">公历</span></label>
+        <label class="radio"><input type="radio" name="bz-cal" value="lunar"> <span data-i18n="bazi_lunar">农历</span></label>
+      </div>
+      <div class="form-row">
+        <label for="bz-date" data-i18n="bazi_birth_date">出生日期</label>
+        <input type="date" id="bz-date" min="1900-01-01" max="2100-12-31">
+      </div>
+      <div class="form-row">
+        <label for="bz-time" data-i18n="bazi_birth_time">出生时间</label>
+        <input type="time" id="bz-time">
+      </div>
+      <p class="hint" data-i18n="bazi_time_hint">时间不详可留空，则只排三柱（年/月/日）。</p>
+      <div class="form-row">
+        <label class="check"><input type="checkbox" id="bz-true"> <span data-i18n="bazi_true_solar">真太阳时换算</span></label>
+      </div>
+      <div class="form-row">
+        <label data-i18n="bazi_birthplace">出生地区</label>
+        <button type="button" class="btn" id="bz-city-btn" style="flex:1;text-align:left">请选择城市</button>
+        <input type="hidden" id="bz-lon" value="116.42">
+        <input type="hidden" id="bz-cityname" value="">
+      </div>
+      <p class="hint" id="bz-city-hint">按城市经度自动换算真太阳时（未含均时差，仅供参考）。</p>
+      <!-- 城市选择器弹窗 -->
+      <div id="bz-city-modal" hidden>
+        <div class="bz-city-box">
+          <div class="bz-city-head">
+            <input type="text" id="bz-city-search" placeholder="搜索城市…">
+            <button class="mini-btn" id="bz-city-close">关闭</button>
+          </div>
+          <div class="bz-city-nav" id="bz-city-nav"></div>
+          <div class="bz-city-list" id="bz-city-list"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="bz-group" data-i18n="bazi_group">分组</label>
+        <input type="text" id="bz-group" data-i18n-ph="bazi_group_ph" placeholder="如：家人（可选）">
+      </div>
+      <div class="form-row">
+        <label class="check"><input type="checkbox" id="bz-save" checked> <span data-i18n="bazi_save_hist">保存到历史记录</span></label>
+      </div>
+      <p class="hint" data-i18n="bazi_gender_hint">性别影响大运顺逆。真太阳时按出生地经度换算，仅供参考。</p>
+      <div class="btn-row">
+        <button class="btn primary big" id="bz-go" data-i18n="bazi_go">起盘</button>
+      </div>
+    </section>
+    <section class="card" id="bz-tab-history" hidden>
+      <div class="card-title">记录</div>
+      <div id="bz-hist-list"></div>
+    </section>
+    <section class="card" id="bz-tab-result" hidden></section>
+    <div class="tab-spacer"></div>
+  </div>
+
+  <!-- ============ 高级版付费墙 ============ -->
+  <div id="paywall" class="modal">
+    <div class="modal-card">
+      <button class="modal-close" data-pro-act="close" aria-label="关闭">×</button>
+      <div class="pay-title" data-i18n="pro_title">高级版</div>
+      <div class="pay-sub" data-i18n="pro_pay_sub">一次买断，永久使用</div>
+      <ul class="pay-feats">
+        <li data-i18n="pro_feat_jing">经文库：道藏精选、拼音注音、诵读、全文检索</li>
+        <li data-i18n="pro_feat_widget">桌面小组件：每日干支与戊日一目了然</li>
+        <li data-i18n="pro_feat_year">全年总览：一页纵览全年戊日，导出分享</li>
+        <li data-i18n="pro_feat_practice">修行日程：诵经打坐排期，自动校验戊日</li>
+        <li data-i18n="pro_feat_bazi">八字排盘：出生时间一键起盘</li>
+      </ul>
+      <button class="btn primary big" data-pro-act="buy"><span data-i18n="pro_buy">立即解锁</span> · <span data-pro-price>US$4.99</span></button>
+      <button class="linklike" data-pro-act="restore" data-i18n="pro_restore">恢复购买</button>
+      <p class="hint small" data-i18n="pro_pay_note">通过 Google Play 安全支付。更换设备或重装后，可用「恢复购买」找回高级版。</p>
+    </div>
+  </div>
+</div>
+
+<!--TEST-ONLY--><script>window.__wuriTestBuild = true;</script><!--/TEST-ONLY-->
+<!--DEMO-ONLY--><script>window.__wuriProDemo = true;</script><!--/DEMO-ONLY-->
+<script src="js/lunar.min.js"></script>
+<script src="js/capacitor.js"></script>
+<script src="js/ln-plugin.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pro.js"></script>
+  <script src="js/liuyao.js"></script>
+<script src="js/yearview.js"></script>
+<script src="js/practice.js"></script>
+<script src="js/citydata.js"></script>
+<script src="js/bazi.js"></script>
+<script src="jing/index.js"></script>
+<script src="js/jingwen.js"></script>
+<script>
+// PWA: 注册 Service Worker（原生壳内跳过，file:// 不支持 SW）
+if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.WuBridge) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
