@@ -474,13 +474,12 @@ var JingWen = (function () {
     var lyView = document.getElementById('view-liuyao');
     var showLy = lyView && !lyView.hidden;
     if (lyBackFab) lyBackFab.classList.toggle('show', !!showLy);
-    // 黄历/提醒置顶按钮（tab用active类，滚动超过一屏时显示）
+    // 黄历/提醒置顶按钮（tab用active类，常驻显示）
     var calTab = document.getElementById('tab-cal');
     var remTab = document.getElementById('tab-remind');
     var showCal = calTab && calTab.classList.contains('active');
     var showRem = remTab && remTab.classList.contains('active');
-    var scrolled = (window.scrollY || document.documentElement.scrollTop) > 400;
-    if (topFab) topFab.classList.toggle('show', !!(scrolled && (showCal || showRem)));
+    if (topFab) topFab.classList.toggle('show', !!(showCal || showRem));
   }
   document.addEventListener('DOMContentLoaded', function () {
     var fab = document.getElementById('qing-btn');
