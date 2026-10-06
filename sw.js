@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v8-20251006-tabfix';
+const CACHE = 'wuri-v9-20251006-jingbtn';
 const ASSETS = [
   './',
   './index.html',
