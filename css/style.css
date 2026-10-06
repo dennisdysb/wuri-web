@@ -948,16 +948,17 @@ details[open] summary:before{content:"▾ "}
   #tabbar button.active{border-left-color:var(--teal-deep);background:color-mix(in srgb,var(--teal-deep) 7%,transparent)}
   /* 内容区：左侧留出导航栏宽度 */
   body{padding-left:210px}
-  .tab{max-width:880px;margin:0 auto;padding:0 40px 60px}
-  .view{max-width:880px;margin:0 auto;padding:0 40px 60px}
-  /* 首页卡片 */
-  #tab-home .card{margin-bottom:20px}
+  .tab{max-width:1200px;margin:0 auto;padding:0 48px 60px}
+  .view{max-width:1200px;margin:0 auto;padding:0 48px 60px}
+  /* 首页卡片双列 */
+  #tab-home{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  #tab-home .card{margin-bottom:0}
   /* 阅读器正文加宽，字更大 */
-  .jing-body{max-width:720px;margin:0 auto;font-size:1.28rem;line-height:2.3}
+  .jing-body{max-width:800px;margin:0 auto;font-size:1.28rem;line-height:2.3}
   /* 黄历月历加宽 */
-  .cal-grid{max-width:620px;margin:0 auto}
+  .cal-grid{max-width:700px;margin:0 auto}
   /* 六爻、八字结果区加宽 */
-  .ly-result,.bazi-result{max-width:720px;margin:0 auto}
+  .ly-result,.bazi-result{max-width:800px;margin:0 auto}
   /* 浮动按钮避开左侧导航 */
   .jing-back-fab{left:228px}
   .jing-back-fab.to-top{left:auto}
