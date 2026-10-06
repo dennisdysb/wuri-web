@@ -462,24 +462,13 @@ var JingWen = (function () {
   function updateFab() {
     var fab = document.getElementById('qing-btn');
     var backFab = document.getElementById('jing-back-fab');
-    var lyBackFab = document.getElementById('liuyao-back-fab');
-    var topFab = document.getElementById('to-top-fab');
     // 经文阅读器（tab用active类，reader用hidden属性）
     var reader = document.getElementById('jing-reader');
     var jingTab = document.getElementById('tab-jing');
     var showReader = reader && !reader.hidden && jingTab && jingTab.classList.contains('active');
     if (fab) fab.classList.toggle('show', !!showReader);
     if (backFab) backFab.classList.toggle('show', !!showReader);
-    // 六爻占卜视图（用hidden属性）
-    var lyView = document.getElementById('view-liuyao');
-    var showLy = lyView && !lyView.hidden;
-    if (lyBackFab) lyBackFab.classList.toggle('show', !!showLy);
-    // 黄历/提醒置顶按钮（tab用active类，常驻显示）
-    var calTab = document.getElementById('tab-cal');
-    var remTab = document.getElementById('tab-remind');
-    var showCal = calTab && calTab.classList.contains('active');
-    var showRem = remTab && remTab.classList.contains('active');
-    if (topFab) topFab.classList.toggle('show', !!(showCal || showRem));
+
   }
   document.addEventListener('DOMContentLoaded', function () {
     var fab = document.getElementById('qing-btn');
@@ -503,7 +492,6 @@ var JingWen = (function () {
       });
     }
     // 六爻浮动返回：回到六爻主页面
-    var lyBackFab = document.getElementById('liuyao-back-fab');
     if (lyBackFab) {
       lyBackFab.addEventListener('click', function () {
         var btn = document.getElementById('liuyao-back');
@@ -511,7 +499,6 @@ var JingWen = (function () {
       });
     }
     // 置顶按钮：滚动到顶部
-    var topFab = document.getElementById('to-top-fab');
     if (topFab) {
       topFab.addEventListener('click', function () {
         window.scrollTo({ top: 0, behavior: 'smooth' });

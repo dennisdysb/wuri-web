@@ -130,6 +130,12 @@ $$('#tabbar button').forEach(function (btn) {
     btn.classList.add('active');
     $$('.tab').forEach(function (t) { t.classList.remove('active'); });
     $('#' + btn.getAttribute('data-tab')).classList.add('active');
+    // 切换标签时隐藏六爻等独立视图，防止内容泄漏
+    ['view-liuyao'].forEach(function (vid) {
+      var v = document.getElementById(vid);
+      if (v) v.hidden = true;
+    });
+    updateFloatingButtons();
     if (btn.getAttribute('data-tab') === 'tab-remind') refreshPermUI();
     window.scrollTo(0, 0);
   });
@@ -880,4 +886,56 @@ window.__wuriCal = {
   }, { passive: true });
 })();
 
+})();
+
+/* ---------------- 浮动按钮管理 ---------------- */
+function updateFloatingButtons() {
+  var backLy = document.getElementById('fab-back-ly');
+  var topCal = document.getElementById('fab-top-cal');
+  var topRemind = document.getElementById('fab-top-remind');
+  var topMe = document.getElementById('fab-top-me');
+  
+  // 六爻视图：显示返回键
+  var lyView = document.getElementById('view-liuyao');
+  var showLyBack = lyView && !lyView.hidden;
+  if (backLy) backLy.classList.toggle('show', !!showLyBack);
+  
+  // 各标签页：显示置顶键（常驻）
+  var calEl = document.getElementById('tab-cal');
+  var remindEl = document.getElementById('tab-remind');
+  var meEl = document.getElementById('tab-me');
+  var calActive = calEl && calEl.classList.contains('active');
+  var remindActive = remindEl && remindEl.classList.contains('active');
+  var meActive = meEl && meEl.classList.contains('active');
+  if (topCal) topCal.classList.toggle('show', !!calActive);
+  if (topRemind) topRemind.classList.toggle('show', !!remindActive);
+  if (topMe) topMe.classList.toggle('show', !!meActive);
+}
+
+// 初始化浮动按钮点击事件
+(function initFabButtons() {
+  function init() {
+    var backLy = document.getElementById('fab-back-ly');
+    if (backLy) {
+      backLy.addEventListener('click', function() {
+        var btn = document.getElementById('liuyao-back');
+        if (btn) btn.click();
+      });
+    }
+    ['fab-top-cal', 'fab-top-remind', 'fab-top-me'].forEach(function(id) {
+      var btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener('click', function() {
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+      }
+    });
+    setInterval(updateFloatingButtons, 500);
+    updateFloatingButtons();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

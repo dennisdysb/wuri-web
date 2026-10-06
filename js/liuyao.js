@@ -322,6 +322,7 @@ var LiuYao = (function () {
 
   function open() {
     $('view-liuyao').hidden = false;
+    if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
     // 隐藏其他view
     ['view-bazi', 'view-practice'].forEach(function (id) {
       var el = document.getElementById(id);
@@ -336,6 +337,7 @@ var LiuYao = (function () {
 
   function close() {
     $('view-liuyao').hidden = true;
+    if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
     document.getElementById('tab-home').classList.add('active');
     if (window._lyShakeHandler) {
       window.removeEventListener('devicemotion', window._lyShakeHandler);
