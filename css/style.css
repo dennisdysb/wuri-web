@@ -34,6 +34,8 @@
   --shadow:0 1px 2px rgba(74,62,36,.06),0 8px 20px rgba(74,62,36,.06);
   --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
   --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  /* 四柱五行配色（日间·宣纸底）：木绿 火红 土黄 金金色 水深蓝 */
+  --wx-mu:#2E7D32; --wx-huo:#C62828; --wx-tu:#8A6D1B; --wx-jin:#93701F; --wx-shui:#1565C0;
 }
 [data-theme="night"]{
   color-scheme:dark;
@@ -61,6 +63,8 @@
   --seal:#a83222;
   --on-accent:#060608;
   --shadow:none;
+  /* 四柱五行配色（夜间·玄青底） */
+  --wx-mu:#81C784; --wx-huo:#E57373; --wx-tu:#D9B64F; --wx-jin:#D4AF37; --wx-shui:#64B5F6;
 }
 /* 黑夜：衬线中文、宽字距标题、去厚重卡片、留白疏朗 */
 [data-theme="night"] body{font-family:var(--serif)}
@@ -98,7 +102,7 @@ body::before{
 
 /* ---------- Tab 切换：克制淡入 ---------- */
 .tab{display:none;padding:0 16px}
-.tab.active{display:block;animation:tabin .22s ease}
+.tab.active{display:block}
 @keyframes tabin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
@@ -135,6 +139,11 @@ body::before{
   flex:none;width:46px;height:46px;border-radius:50%;cursor:pointer;
   background:var(--card);border:1px solid var(--line);color:var(--gold-deep);
   font-size:1.2rem;line-height:1;
+  /* 与 .brand-logo 像素级对称：外圈 3px，视觉外径 52px，视觉边距相等 */
+  box-shadow:0 0 0 3px var(--gold-wash),0 2px 8px rgba(60,45,20,.18);
+}
+[data-theme="night"] .theme-toggle{
+  box-shadow:0 0 0 3px rgba(201,168,106,.22),0 0 14px rgba(201,168,106,.35);
 }
 .theme-toggle:active{transform:scale(.94)}
 .date-line{display:block;color:var(--muted);font-size:.88rem;margin:4px 4px 0;letter-spacing:.05em}
@@ -144,6 +153,8 @@ body::before{
   content:"";display:block;margin:12px 2px 4px;height:1px;position:relative;
   background:linear-gradient(90deg,transparent,var(--line) 18%,var(--line) 82%,transparent);
 }
+/* .brand 头栏是 flex：::after 饰线若参与 flex 会挤占布局（实测把主题键向左顶 16px），改为绝对定位 */
+.appbar.brand::after{position:absolute;left:14px;right:14px;bottom:0;margin:0;}
 
 /* ---------- 卡片 ---------- */
 .card{
@@ -225,6 +236,14 @@ body::before{
   font-family:var(--serif);font-size:1.75rem;font-weight:700;color:var(--ink);
   writing-mode:vertical-rl;letter-spacing:.12em;line-height:1.25;
 }
+/* 四柱单字五行色（2026-10-08 用户定：木绿 火红 土黄 金金色 水深蓝，按字着色） */
+.wxg-mu{color:var(--wx-mu)}
+.wxg-huo{color:var(--wx-huo)}
+.wxg-tu{color:var(--wx-tu)}
+.wxg-jin{color:var(--wx-jin)}
+.wxg-shui{color:var(--wx-shui)}
+/* 语义单元不拆散：只允许在单元之间换行（节气行/值神行排版用） */
+.nw{white-space:nowrap}
 .pl{font-size:.84rem;color:var(--muted);letter-spacing:.2em}
 .jieqi{margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft);
   text-align:center;color:var(--muted);font-size:.96rem}
@@ -517,8 +536,11 @@ details[open] summary:before{content:"▾ "}
 .yv-sd{position:absolute;top:2px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--gold-deep)}
 
 /* ---------- 经文库（Pro） ---------- */
-.jing-search{margin:4px 0 10px}
+.jing-search{margin:4px 0 10px;position:relative}
 .jing-search input{width:100%;box-sizing:border-box;padding:12px 16px;font-size:1rem;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-family:var(--sans)}
+.jing-q-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:none;border-radius:50%;background:var(--line);color:var(--muted);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.jing-q-clear[hidden]{display:none}
+.jing-q-clear:active{background:#ccc}
 .jing-item{display:flex;align-items:center;gap:14px;padding:15px 6px;border-bottom:1px solid var(--line-soft);cursor:pointer}
 .jing-item:active{background:var(--teal-wash)}
 .jing-book{font-family:var(--serif);font-size:1.3rem;color:var(--gold-deep);border:1.5px solid var(--gold);border-radius:8px;width:44px;height:44px;line-height:42px;text-align:center;flex:none}
@@ -573,14 +595,14 @@ details[open] summary:before{content:"▾ "}
 #practice-view .form-row input,#practice-view .form-row select{flex:1;min-width:0}
 
 /* ============ 八字排盘（Pro） ============ */
-#bazi-view{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 40px}
-#bazi-view[hidden]{display:none}
-#bazi-view .appbar{position:sticky;top:0;z-index:2}
-#bazi-view .card{margin:12px 16px}
-#bazi-view .form-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-#bazi-view .form-row label{flex:none;min-width:4em;color:var(--ink-2)}
-#bazi-view .form-row input{flex:1;min-width:0;padding:10px 12px;font-size:1rem;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:var(--sans)}
-#bazi-view .radio{display:inline-flex;align-items:center;gap:6px;margin-right:16px}
+#bazi-view,#view-ziwei{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 40px}
+#bazi-view[hidden],#view-ziwei[hidden]{display:none}
+#bazi-view .appbar,#view-ziwei .appbar{position:sticky;top:0;z-index:20;background:var(--paper)}
+#bazi-view .card,#view-ziwei .card{margin:12px 16px}
+#bazi-view .form-row,#view-ziwei .form-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+#bazi-view .form-row label,#view-ziwei .form-row label{flex:none;min-width:4em;color:var(--ink-2)}
+#bazi-view .form-row input,#view-ziwei .form-row input{flex:1;min-width:0;padding:10px 12px;font-size:1rem;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:var(--sans)}
+#bazi-view .radio,#view-ziwei .radio{display:inline-flex;align-items:center;gap:6px;margin-right:16px}
 .bz-head{text-align:center;margin-bottom:14px}
 .bz-title{font-size:1.25rem;font-weight:700;color:var(--ink)}
 .bz-sub{color:var(--muted);margin-top:4px}
@@ -644,6 +666,14 @@ details[open] summary:before{content:"▾ "}
   color: var(--ink);
   line-height: 1.6;
   text-wrap: balance;
+}
+/* 传本标注（如：闾山三奶派传本、非道藏所载） */
+.jing-book-subtitle {
+  text-align: center;
+  font-size: .82em;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin: -10px 0 16px;
 }
 /* 二级标题（各经各咒统一） */
 .jing-sec-h {
@@ -716,13 +746,13 @@ details[open] summary:before{content:"▾ "}
 .bz-hist-item{padding:10px 4px;border-bottom:1px solid var(--line-soft);cursor:pointer}
 .bz-hist-item:last-child{border-bottom:none}
 .bz-hist-item .small{font-size:.82rem}
-#bazi-view .radio{display:inline-flex;align-items:center;gap:6px;margin-right:12px;cursor:pointer}
-#bazi-view .radio input{accent-color:var(--teal-deep)}
-#bazi-view .check{display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)}
-#bazi-view .check input{width:18px;height:18px;accent-color:var(--teal-deep)}
-#bazi-view select,#bazi-view input[type="date"],#bazi-view input[type="time"],#bazi-view input[type="text"],#bazi-view input[type="number"]{padding:10px 12px;font-size:1rem;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:var(--sans);flex:1;min-width:0}
-#bazi-view .form-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-#bazi-view .form-row label{flex:none;min-width:3.5em;color:var(--ink-2)}
+#bazi-view .radio,#view-ziwei .radio{display:inline-flex;align-items:center;gap:6px;margin-right:12px;cursor:pointer}
+#bazi-view .radio input,#view-ziwei .radio input{accent-color:var(--teal-deep)}
+#bazi-view .check,#view-ziwei .check{display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ink)}
+#bazi-view .check input,#view-ziwei .check input{width:18px;height:18px;accent-color:var(--teal-deep)}
+#bazi-view select,#view-ziwei select,#bazi-view input[type="date"],#view-ziwei input[type="date"],#bazi-view input[type="time"],#view-ziwei input[type="time"],#bazi-view input[type="text"],#view-ziwei input[type="text"],#bazi-view input[type="number"],#view-ziwei input[type="number"],#view-ziwei select,#view-ziwei input[type="date"],#view-ziwei input[type="time"],#view-ziwei input[type="text"],#view-ziwei input[type="number"]{padding:10px 12px;font-size:1rem;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:var(--sans);flex:1;min-width:0}
+#bazi-view .form-row,#view-ziwei .form-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+#bazi-view .form-row label,#view-ziwei .form-row label{flex:none;min-width:3.5em;color:var(--ink-2)}
 
 /* ===== 八字三页 ===== */
 .bz-tabs{display:flex;gap:8px;padding:10px 16px 0;position:sticky;top:0;z-index:2;background:var(--paper)}
@@ -812,6 +842,9 @@ details[open] summary:before{content:"▾ "}
 
 .daka-dur-row{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
 .daka-dur-row .mini-btn.tiny.on{background:var(--teal-deep);color:#fff;border-color:var(--teal-deep)}
+.daka-bgm-label{align-self:center;font-size:.85rem;color:var(--muted);letter-spacing:.1em}
+.daka-bgm-wrap{flex-wrap:wrap}
+.daka-bgm-vol{width:90px;accent-color:var(--teal-deep);align-self:center}
 .daka-custom-min{width:70px;text-align:center;padding:6px;border:1px solid var(--line);border-radius:8px}
 
 /* 倒计时弹窗按钮居中 */
@@ -915,6 +948,14 @@ details[open] summary:before{content:"▾ "}
 .jing-back-fab.show{display:block}
 .jing-back-fab:active{transform:scale(.92)}
 
+/* 书签悬浮按钮（仅内丹书阅读时显示） */
+.jing-bookmark-fab{position:fixed;left:18px;bottom:160px;width:56px;height:56px;border-radius:50%;
+  background:#b8860b;color:#fff;font-size:1.5rem;line-height:1;
+  border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
+  z-index:60;display:none}
+.jing-bookmark-fab.show{display:block}
+.jing-bookmark-fab:active{transform:scale(.92)}
+
 /* 置顶按钮用不同位置避免重叠 */
 .jing-back-fab.to-top{left:auto;right:18px;font-size:1.4rem}
 
@@ -965,3 +1006,191 @@ details[open] summary:before{content:"▾ "}
   .jing-back-fab{left:228px}
   .jing-back-fab.to-top{left:auto}
 }
+
+/* 书签高亮 */
+.hl-pop{position:fixed;z-index:9999;background:#333;color:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center;justify-content:center;max-width:92vw;flex-wrap:wrap}
+/* 底部固定模式：选中文字后从底部升起，避开系统菜单 */
+.hl-pop.hl-bottom{left:50%;transform:translateX(-50%);bottom:80px;top:auto !important}
+.hl-pop[hidden]{display:none}
+.hl-pop button{border:none;border-radius:6px;padding:6px 12px;font-size:14px;cursor:pointer;background:#555;color:#fff}
+.hl-pop button.primary{background:#f5c518;color:#333}
+.hl-pop .hl-color-btn{width:32px;height:32px;border-radius:50%;padding:0;font-weight:bold;color:#333}
+.hl-pop .hl-yellow{background:#fff3a3}
+.hl-pop .hl-green{background:#c8f0c8}
+.hl-pop .hl-blue{background:#c8e0f8}
+.hl-pop .hl-red{background:#f8c8c8}
+/* 正文高亮颜色 */
+.jing-para .hl{border-radius:3px;padding:1px 0;cursor:pointer}
+.jing-para .hl-yellow{background:#fff3a3}
+.jing-para .hl-green{background:#c8f0c8}
+.jing-para .hl-blue{background:#c8e0f8}
+.jing-para .hl-red{background:#f8c8c8}
+.jing-para .hl-flash{outline:2px solid #f5c518;outline-offset:2px}
+/* 夜间模式：高亮用深色底，保证浅色文字可读 */
+[data-theme="night"] .jing-para .hl-yellow{background:#7a6a1a;color:#fff}
+[data-theme="night"] .jing-para .hl-green{background:#2d6a2d;color:#fff}
+[data-theme="night"] .jing-para .hl-blue{background:#2a4d7a;color:#fff}
+[data-theme="night"] .jing-para .hl-red{background:#7a2d2d;color:#fff}
+.jing-hl-item{padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.jing-hl-item .hl-text{padding:2px 4px;border-radius:3px}
+.jing-hl-item .hl-text.hl-yellow{background:#fff3a3}
+.jing-hl-item .hl-text.hl-green{background:#c8f0c8}
+.jing-hl-item .hl-text.hl-blue{background:#c8e0f8}
+.jing-hl-item .hl-text.hl-red{background:#f8c8c8}
+[data-theme="night"] .jing-hl-item .hl-text.hl-yellow{background:#7a6a1a;color:#fff}
+[data-theme="night"] .jing-hl-item .hl-text.hl-green{background:#2d6a2d;color:#fff}
+[data-theme="night"] .jing-hl-item .hl-text.hl-blue{background:#2a4d7a;color:#fff}
+[data-theme="night"] .jing-hl-item .hl-text.hl-red{background:#7a2d2d;color:#fff}
+.jing-hl-item .hl-meta{font-size:12px;color:var(--muted);margin-top:4px}
+.jing-hl-item .hl-del{float:right;color:#c00;font-size:12px}
+/* 我的标记页签 */
+.marks-tabs{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.marks-tab{flex:1;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px;font-size:14px;cursor:pointer}
+.marks-tab.active{background:#333;color:#fff;border-color:#333}
+/* 心得列表 */
+.jing-hl-item .note-preview{font-size:15px;line-height:1.6}
+.jing-hl-item .note-quote{font-size:13px;color:var(--muted);margin-top:6px;padding:6px 10px;background:var(--bg2,#f5f5f5);border-left:3px solid #f5c518;border-radius:0 6px 6px 0}
+/* 心得悬浮窗 */
+.note-modal{position:fixed;inset:0;z-index:10000}
+.note-modal[hidden]{display:none}
+.note-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.note-box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,480px);max-height:84vh;overflow:auto;background:var(--bg,#fff);border-radius:12px;padding:18px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.note-title{font-size:17px;font-weight:bold;margin-bottom:10px}
+.note-quote{font-size:14px;color:var(--muted);background:var(--bg2,#f5f5f5);border-left:3px solid #f5c518;padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px;line-height:1.7}
+.note-input{width:100%;min-height:120px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:15px;line-height:1.7;resize:vertical;box-sizing:border-box}
+.note-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+.note-btns button{border:1px solid var(--line);border-radius:8px;padding:8px 20px;font-size:15px;cursor:pointer;background:var(--bg)}
+.note-btns button.primary{background:#f5c518;border-color:#f5c518;color:#333;font-weight:bold}
+/* 紫微斗数命盘 4x4 */
+.zw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);font-size:11px}
+.zw-palace{background:var(--card-bg,#fff);padding:4px;min-height:88px}
+.zw-center{background:var(--card-bg,#fff);min-height:88px}
+.zw-ming{background:#fff8e7}
+[data-theme="night"] .zw-ming{background:#2a2416}
+.zw-pname{font-weight:700;font-size:12px;color:#a33}
+.zw-gz{color:var(--muted);font-size:10px}
+.zw-stars{line-height:1.7}
+.zw-major{color:#c00;font-weight:700;margin-right:2px}
+.zw-soft{color:#060;margin-right:2px}
+.zw-minor{color:var(--ink);margin-right:2px}
+.zw-bright{font-size:9px;color:var(--muted)}
+.zw-hua{font-size:9px;color:#fff;background:#c00;border-radius:2px;padding:0 2px;margin-left:1px}
+.zw-center-info{text-align:center;padding:8px;font-size:12px;color:var(--muted)}
+/* 六爻装卦表 */
+.ly-table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.ly-table th,.ly-table td{border:1px solid var(--line);padding:3px 4px;text-align:center}
+.ly-table th{background:var(--card-bg2,#f5f0e6);font-weight:600}
+.ly-dong-row{background:#fff3e0}
+[data-theme="night"] .ly-dong-row{background:#3a2e18}
+.ly-hcz{font-size:12px;color:var(--muted);padding:6px 0}
+.ly-table sup{color:#c00;font-size:9px}
+.zw-daxian{font-size:10px;color:#a33;margin-top:2px}
+.zw-shen{font-size:10px;color:var(--muted);margin-top:2px}
+.ly-sizhu{display:flex;justify-content:space-around;text-align:center;font-size:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.ly-sizhu .ly-sz-label{font-weight:bold;color:var(--ink)}
+.ly-gua-names{display:flex;justify-content:space-around;font-size:16px;font-weight:bold;padding:10px 0}
+.ly-table-pro{width:100%;border-collapse:collapse;font-size:13px}
+.ly-table-pro th,.ly-table-pro td{border:1px solid var(--line);padding:6px 4px;text-align:center}
+.ly-table-pro th{background:var(--card2);font-weight:bold}
+.ly-fushen{color:#a33;font-size:12px}
+.zw-grid-pro{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);font-size:10px}
+.zw-cell{background:var(--card);padding:4px;min-height:110px;position:relative}
+.zw-cell.zw-ming{background:#fff8e7}
+.zw-stars-pro{line-height:1.3;margin-bottom:2px}
+.zw-boshi{color:#666;font-size:9px}
+.zw-cs{color:#666;font-size:9px}
+.zw-sqjq{color:#888;font-size:9px}
+.zw-xiaoxian{color:#999;font-size:8px;white-space:nowrap;overflow:hidden}
+.zw-gz-pro{font-size:16px;font-weight:bold;margin-top:2px}
+.zw-pname-pro{color:#a33;font-weight:bold;font-size:11px}
+.zw-center-pro{background:var(--card);padding:8px;text-align:center;grid-column:span 2;grid-row:span 2}
+.zw-c-name{font-size:14px;font-weight:bold}
+.zw-c-time{font-size:10px;color:#666;margin:2px 0}
+.zw-c-soul{font-size:10px;color:#888}
+.ly-zhanwen{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.ly-zhanwen .ly-zw-label{font-weight:bold;color:var(--ink);white-space:nowrap}
+.ly-zhanwen input{flex:1;border:1px solid var(--line);border-radius:4px;padding:6px 10px;font-size:14px;background:var(--card)}
+.zw-loading{text-align:center;padding:40px 20px}
+.zw-loading-title{font-size:16px;margin-bottom:16px;color:var(--ink)}
+.zw-loading-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;max-width:200px;margin:0 auto}
+.zw-loading-fill{height:100%;width:40%;background:#a33;border-radius:3px;animation:zwload 1s infinite}
+@keyframes zwload{0%{margin-left:-40%}100%{margin-left:100%}}
+.zw-zoom-wrap{overflow:auto;touch-action:pan-x pan-y pinch-zoom}
+.zw-grid-pro{transform-origin:0 0}
+.zw-liunian{color:#999;font-size:8px;white-space:nowrap;overflow:hidden}
+.zw-c-lunar{font-size:10px;color:#666}
+.zw-c-dayun{font-size:9px;color:#888;margin:2px 0}
+.view{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:50;overflow-y:auto;padding:0 16px 80px}
+.view[hidden]{display:none}
+#view-liuyao{background:#f5f0e6 !important;}
+/* 六爻专业排版：无边框 + 粗爻线 */
+.ly-pro-header,.ly-pro-row{display:flex;align-items:center;padding:8px 0;font-size:0.95rem}
+.ly-pro-header{font-weight:bold;color:var(--ink-2);border-bottom:1px solid var(--line);margin-bottom:4px}
+.ly-pro-header span,.ly-pro-row span.ly-c-shen,.ly-pro-row span.ly-c-fu{flex:0 0 3em;text-align:center}
+.ly-pro-row span.ly-c-ben,.ly-pro-row span.ly-c-bian{flex:1;display:flex;align-items:center;gap:8px}
+.ly-pro-row.ly-dong-row{background:rgba(180,40,40,0.06)}
+.ly-yao-wrap{display:inline-flex;align-items:center;gap:4px}
+.ly-yao-yang{display:inline-block;width:44px;height:6px;background:var(--ink);border-radius:2px}
+.ly-yao-yin{display:inline-block;width:20px;height:6px;background:var(--ink);border-radius:2px}
+.ly-dong-mark{color:#b42828;font-weight:bold;margin-left:2px}
+/* 强制紫微输入页与八字一致 */
+#view-ziwei .form-row{display:flex!important;align-items:center!important;gap:10px!important}
+#view-ziwei .form-row label{flex:none!important;min-width:4em!important}
+#view-ziwei input[type="text"],#view-ziwei input[type="date"],#view-ziwei input[type="time"]{flex:1!important;min-width:0!important;padding:10px 12px!important;font-size:1rem!important;border:1px solid var(--line)!important;border-radius:10px!important;background:var(--card)!important;color:var(--ink)!important}
+#view-ziwei .radio{display:inline-flex!important;align-items:center!important;gap:6px!important;margin-right:16px!important}
+/* 六爻无边框表格 */
+.ly-table-noborder{width:100%;border-collapse:collapse}
+.ly-table-noborder th,.ly-table-noborder td{border:none!important;padding:8px 4px;text-align:left;font-size:0.95rem;vertical-align:middle}
+.ly-table-noborder th{color:var(--ink-2);font-weight:bold}
+.ly-yao-cell{white-space:nowrap}
+.ly-yao-yang{display:inline-block;width:40px;height:7px;background:var(--ink);border-radius:2px;vertical-align:middle;margin:0 4px}
+.ly-yao-yin{display:inline-block;width:18px;height:7px;background:var(--ink);border-radius:2px;vertical-align:middle;margin:0 2px}
+.ly-dong-mark{color:#b42828;font-weight:bold;vertical-align:middle}
+.zw-c-sizhu{font-size:11px;margin:3px 0;letter-spacing:1px}
+.zw-c-dayun{font-size:9px;color:#555;margin:2px 0;line-height:1.4}
+.ly-head-pro{margin:0 0 12px;padding:10px 12px;background:var(--card);border-radius:10px;font-size:0.9rem}
+.ly-head-row{display:flex;margin-bottom:6px}
+.ly-head-row:last-child{margin-bottom:0}
+.ly-head-label{flex:none;min-width:3em;color:var(--ink-2)}
+.ly-head-val{flex:1;color:var(--ink)}
+#ly-zhanwen-disp{cursor:pointer;color:var(--teal-deep)}
+.zw-c-dayun-full{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0;font-size:9px}
+.zw-dy-item{text-align:center;padding:2px 4px;background:rgba(0,0,0,0.03);border-radius:4px;line-height:1.3}
+.zw-c-qiyun{font-size:10px;color:#666;margin:2px 0}
+/* === 六爻像素级重写（干净版）=== */
+.lyb{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px;line-height:1.6}
+.lyb th,.lyb td{border:none;padding:6px 2px;text-align:left;vertical-align:middle;white-space:nowrap;overflow:hidden}
+.lyb th{color:var(--ink-2);font-weight:600;font-size:12px}
+.lyb td:first-child,.lyb th:first-child{width:3em;text-align:center}
+.lyb td:nth-child(2),.lyb th:nth-child(2){width:4em;text-align:center}
+.lyb td:nth-child(3),.lyb td:nth-child(4){width:auto}
+.lyb .lyb-mv{background:rgba(180,40,40,0.05)}
+.lyb-y,.lyb-n{display:inline-block;height:6px;background:#333;border-radius:3px;vertical-align:middle}
+.lyb-y{width:36px}
+.lyb-n{width:16px;margin-right:4px}
+.lyb-d{color:#c0392b;font-weight:700;margin-left:2px}
+.lyb sup{color:#c0392b;font-size:9px}
+[data-theme="night"] .lyb-y,[data-theme="night"] .lyb-n{background:#ddd}
+/* === 六爻像素级（照专业盘实测）=== */
+.lyx{width:100%;border-collapse:collapse;font-size:12px;line-height:1.8}
+.lyx th,.lyx td{border:none;padding:4px 4px;vertical-align:middle}
+.lyx th:first-child,.lyx td.lyx-shen{white-space:nowrap;padding-right:12px}
+.lyx td:nth-child(2),.lyx td:nth-child(3){white-space:nowrap}
+.lyx .lyx-info{display:inline-block;min-width:4.2em;vertical-align:middle}
+.lyx .lyx-info sup{font-size:9px;color:#c0392b;vertical-align:super;line-height:1;margin-left:1px}
+.lyx-y,.lyx-n{display:inline-block;height:6px;background:#2c2c2c;border-radius:2px;vertical-align:middle}
+.lyx-y{width:32px}
+.lyx-n{width:14px}
+.lyx-n + .lyx-n{margin-left:5px}
+.lyx th{color:var(--ink-2);font-weight:600;font-size:14px;text-align:left}
+.lyx th:first-child,.lyx td.lyx-shen{width:5.5em;text-align:left}
+.lyx td:nth-child(2),.lyx td:nth-child(3){width:auto;text-align:left}
+.lyx-mv{background:rgba(180,40,40,0.06)}
+.lyx-y,.lyx-n{display:inline-block;height:7px;background:#2c2c2c;border-radius:2px;vertical-align:middle}
+.lyx-y{width:38px}
+.lyx-n{width:17px}
+.lyx-n + .lyx-n{margin-left:6px}
+.lyx-d{color:#c0392b;font-weight:700;margin-left:3px;font-size:15px}
+.lyx sup{color:#c0392b;font-size:10px}
+[data-theme="night"] .lyx-y,[data-theme="night"] .lyx-n{background:#e0e0e0}
+.ly-cat-sel{padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:0.9rem}

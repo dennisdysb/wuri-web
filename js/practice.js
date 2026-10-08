@@ -223,6 +223,60 @@ var Practice = (function () {
   /* ---------- 倒计时 ---------- */
   var timerHid = null, timerTotal = 15 * 60, timerLeft = 15 * 60, timerInt = 0, timerRunning = false;
   var doneAudio = null;
+  /* 背景音乐（打坐/内练）：v1 用 WebView Audio 循环；正式曲目（用户授权取得后）替换 URL 即可 */
+  var BGM_LIST = [
+    { id: 'test1', name: '静心曲·测试', url: 'https://dennisdysb.github.io/wuri-web/audio/music/test-calm.mp3' }
+  ];
+  var bgmAudio = null;
+  var bgmId = '';
+  var bgmWantPlay = true; /* 用户是否想听（独立暂停键控制） */
+  try { bgmId = localStorage.getItem('wuri_daka_bgm') || ''; } catch (e) {}
+  function getBgmAudio() {
+    if (!bgmAudio) {
+      bgmAudio = new Audio(); bgmAudio.loop = true; bgmAudio.preload = 'auto';
+      try { bgmAudio.volume = (parseInt(localStorage.getItem('wuri_daka_bgmvol') || '60', 10) || 60) / 100; } catch (e) {}
+    }
+    return bgmAudio;
+  }
+  function bgmPlay(id) {
+    try {
+      var t = null;
+      for (var i = 0; i < BGM_LIST.length; i++) if (BGM_LIST[i].id === id) t = BGM_LIST[i];
+      var a = getBgmAudio();
+      if (!t) { bgmStop(); return; }
+      if (a.getAttribute('src') !== t.url) a.src = t.url;
+      var p = a.play();
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
+  }
+  function bgmPause() { try { if (bgmAudio) bgmAudio.pause(); } catch (e) {} }
+  function bgmStop() { try { if (bgmAudio) { bgmAudio.pause(); bgmAudio.currentTime = 0; } } catch (e) {} }
+  function bgmSelect(id) {
+    bgmId = id || '';
+    bgmWantPlay = true;
+    try { localStorage.setItem('wuri_daka_bgm', bgmId); } catch (e) {}
+    $all('#daka-bgm-row [data-bgm]').forEach(function (b) {
+      b.classList.toggle('on', (b.getAttribute('data-bgm') || '') === bgmId);
+    });
+    bgmUpdateCtrl();
+    // 计时进行中切换：直接换曲
+    if (timerRunning && timerHid) bgmPlay(bgmId);
+    else if (!timerRunning) bgmStop();
+  }
+  /* 音乐独立暂停键 + 音量条显隐 */
+  function bgmUpdateCtrl() {
+    var tgl = $('#daka-bgm-toggle'), vol = $('#daka-bgm-vol');
+    var show = !!bgmId;
+    if (tgl) { tgl.hidden = !show; tgl.textContent = isBgmPlaying() ? '⏸' : '♪'; }
+    if (vol) vol.hidden = !show;
+  }
+  function isBgmPlaying() { return !!(bgmAudio && !bgmAudio.paused && bgmAudio.src); }
+  function bgmToggleManual() {
+    if (!bgmId) return;
+    if (isBgmPlaying()) { bgmWantPlay = false; bgmPause(); }
+    else { bgmWantPlay = true; bgmPlay(bgmId); }
+    bgmUpdateCtrl();
+  }
   function getDoneAudio() {
     if (!doneAudio) { doneAudio = new Audio('audio/done.wav'); doneAudio.preload = 'auto'; }
     return doneAudio;
@@ -242,6 +296,12 @@ var Practice = (function () {
       b.classList.toggle('on', b.getAttribute('data-dur') === '15');
     });
     $('#daka-custom-min').hidden = true;
+    // 背景音乐选项回显上次选择
+    $all('#daka-bgm-row [data-bgm]').forEach(function (b) {
+      b.classList.toggle('on', (b.getAttribute('data-bgm') || '') === bgmId);
+    });
+    bgmWantPlay = true;
+    bgmUpdateCtrl();
     $('#daka-timer-mask').classList.add('show');
   }
   function closeTimer() {
@@ -251,6 +311,7 @@ var Practice = (function () {
   function stopTimer() {
     if (timerInt) clearInterval(timerInt);
     timerInt = 0; timerRunning = false; timerHid = null;
+    bgmStop();
   }
   function playDone() {
     try {
@@ -298,6 +359,8 @@ var Practice = (function () {
       if (!timerHid) return;
       if (timerRunning) {
         clearInterval(timerInt); timerInt = 0; timerRunning = false;
+        bgmPause();
+        bgmUpdateCtrl();
         this.textContent = '继续';
       } else {
         var self = this;
@@ -305,11 +368,14 @@ var Practice = (function () {
         if (timerLeft <= 0) { timerLeft = timerTotal; }
         timerRunning = true;
         self.textContent = '暂停';
+        if (bgmId && bgmWantPlay) bgmPlay(bgmId);
+        bgmUpdateCtrl();
         timerInt = setInterval(function () {
           timerLeft--;
           $('#daka-timer-time').textContent = fmtLeft(Math.max(0, timerLeft));
           if (timerLeft <= 0) {
             clearInterval(timerInt); timerInt = 0; timerRunning = false;
+            bgmStop();
             playDone();
             // 自动记一次打卡（用设定的时长）
             if (timerHid) addRecord(timerHid, timerTotal);
@@ -319,6 +385,22 @@ var Practice = (function () {
         }, 1000);
       }
     });
+    // 背景音乐选择
+    $all('#daka-bgm-row [data-bgm]').forEach(function (b) {
+      b.addEventListener('click', function () { bgmSelect(b.getAttribute('data-bgm') || ''); });
+    });
+    // 音乐独立暂停/继续
+    $('#daka-bgm-toggle').addEventListener('click', function () { bgmToggleManual(); });
+    // 音量
+    (function () {
+      var vol = $('#daka-bgm-vol');
+      if (!vol) return;
+      try { vol.value = localStorage.getItem('wuri_daka_bgmvol') || '60'; } catch (e) {}
+      vol.addEventListener('input', function () {
+        try { localStorage.setItem('wuri_daka_bgmvol', vol.value); } catch (e) {}
+        getBgmAudio().volume = (parseInt(vol.value, 10) || 0) / 100;
+      });
+    })();
     // 完成（提前结束，按已用时间记）
     $('#daka-timer-done').addEventListener('click', function () {
       if (timerHid) {

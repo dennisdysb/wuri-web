@@ -74,16 +74,141 @@ var LiuYao = (function () {
     '010101': ['未济', '亨，小狐汔济，濡其尾，无攸利。', '事未成，如火在水上。此时亨通。小狐渡河，濡其尾，无所利。虽未济但终可济，要谨慎，不可冒进。'],
   };
 
+  /* ============ 纳甲六亲六兽世应 ============ */
+  // 八宫：宫名, 宫五行, 本宫8卦(按二进制key)
+  var BAGONG = [
+    ['乾', '金', ['111111', '111110', '111010', '111011', '101011', '011011', '101111', '101110']],
+    ['坎', '水', ['010010', '010011', '010001', '010000', '110000', '100000', '100010', '100011']],
+    ['艮', '土', ['001001', '001000', '001110', '001111', '111101', '111100']],
+    ['震', '木', ['100100', '100101', '100111', '100110', '000110', '010110', '010100', '010101']],
+    ['巽', '木', ['011010', '011000', '011001', '111001', '101001', '101010']],
+    ['离', '火', ['101101', '101100', '001111', '011111', '011101', '011100']],
+    ['坤', '土', ['000000', '000001', '000011', '000010', '100010', '110010', '110000', '110001']],
+    ['兑', '金', ['110110', '110111', '110101', '110100', '010100', '000100', '000110', '000111']]
+  ];
+  // 纳干：[内卦干, 外卦干]，按上卦(外)下卦(内)的八卦
+  var NA_GAN = { '111': ['壬', '甲'], '000': ['癸', '乙'], '100': ['庚', '庚'], '011': ['辛', '辛'], '010': ['戊', '戊'], '101': ['己', '己'], '001': ['丙', '丙'], '110': ['丁', '丁'] };
+  // 纳支：内卦起支，外卦起支；阳顺阴逆
+  // 下卦(内)：乾甲子 震甲子 巽丑 坎寅 艮辰 兑巳 离卯 坤未
+  var NA_ZHI_NEI = { '111': '子', '100': '子', '011': '丑', '010': '寅', '001': '辰', '110': '巳', '101': '卯', '000': '未' };
+  var ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  var ZHI_WX = { '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土', '巳': '火', '午': '火', '未': '土', '申': '金', '酉': '金', '戌': '土', '亥': '水' };
+  function zhiIdx(z) { return ZHI.indexOf(z); }
+  // 六亲：以宫五行为我
+  function liuqin(gongWx, yaoWx) {
+    if (gongWx === yaoWx) return '兄弟';
+    var sheng = { '木': '火', '火': '土', '土': '金', '金': '水', '水': '木' };
+    var ke = { '木': '土', '土': '水', '水': '火', '火': '金', '金': '木' };
+    if (sheng[yaoWx] === gongWx) return '父母'; // 生我
+    if (sheng[gongWx] === yaoWx) return '子孙'; // 我生
+    if (ke[gongWx] === yaoWx) return '妻财';   // 我克
+    return '官鬼'; // 克我
+  }
+  // 六兽：按日干
+  function liushou(dayGan) {
+    var start = { '甲': 0, '乙': 0, '丙': 1, '丁': 1, '戊': 2, '己': 3, '庚': 4, '辛': 4, '壬': 5, '癸': 5 }[dayGan] || 0;
+    var beasts = ['青龙', '朱雀', '勾陈', '螣蛇', '白虎', '玄武'];
+    var r = [];
+    for (var i = 0; i < 6; i++) r.push(beasts[(start + i) % 6]);
+    return r;
+  }
+  // 世应：返回世爻索引(0-5, 0为初爻)
+  var SHI_YING = {
+    '111111': 5, '000000': 5, // 乾坤为六世
+    '111110': 0, '000001': 0, // 天风姤/地雷复为一世
+    '111010': 1, '000010': 1, // 天山遁/地泽临为二世
+    '111011': 2, '000011': 2, // 天地否/地天泰为三世
+    '101011': 3, '010100': 3, // 风地观/水山蹇为四世
+    '011011': 4, '100010': 4  // 泽山咸/山水蒙为五世
+    // 游魂/归魂另算，简化：不在表中的按一世处理
+  };
+  function getShiYing(guaKey) {
+    var shi = SHI_YING[guaKey];
+    if (shi === undefined) shi = 0;
+    return { shi: shi, ying: (shi + 3) % 6 };
+  }
+  function getGong(guaKey) {
+    for (var i = 0; i < BAGONG.length; i++) {
+      if (BAGONG[i][2].indexOf(guaKey) >= 0) return { name: BAGONG[i][0], wx: BAGONG[i][1] };
+    }
+    return { name: '?', wx: '?' };
+  }
+  // 纳甲装卦：返回每爻 {gan, zhi}
+  function najia(guaKey) {
+    // guaKey: 6位，下爻在前。如 '111111' 为乾
+    var lower = guaKey.slice(0, 3).split('').reverse().join(''); // 下卦，上爻在前
+    var upper = guaKey.slice(3, 6).split('').reverse().join(''); // 上卦
+    // 注意：GUA的key是"下爻在前"，如乾'111111'，前3位是下卦(111)，后3位是上卦(111)
+    // 但NA_GAN的key是"上爻在前"的3位二进制，如乾卦111
+    var lowerKey = guaKey.slice(0, 3).split('').reverse().join('');
+    var upperKey = guaKey.slice(3, 6).split('').reverse().join('');
+    var ganNei = NA_GAN[lowerKey][1], ganWai = NA_GAN[upperKey][0];
+    var zhiNeiStart = NA_ZHI_NEI[lowerKey], zhiWaiStart = NA_ZHI_NEI[upperKey];
+    // 判断阴阳：下卦
+    var lowerYang = (guaKey[0] === '1' && guaKey[1] === '1' && guaKey[2] === '1') || (lowerKey === '111' || lowerKey === '100' || lowerKey === '010' || lowerKey === '001');
+    // 简化：阳卦顺行，阴卦逆行。乾震坎艮为阳，巽离坤兑为阴
+    var yangGua = { '111': 1, '100': 1, '010': 1, '001': 1 };
+    var neiYang = !!yangGua[lowerKey], waiYang = !!yangGua[upperKey];
+    var res = [];
+    var zi = zhiIdx(zhiNeiStart);
+    for (var i = 0; i < 3; i++) {
+      // 内卦初二三爻：隔位跳（子→寅→辰...阳顺；子→戌→申...阴逆）
+      var z = ZHI[(zi + (neiYang ? i * 2 : -i * 2) + 24) % 12];
+      res.push({ gan: ganNei, zhi: z });
+    }
+    zi = zhiIdx(zhiWaiStart);
+    for (var j = 0; j < 3; j++) {
+      var z2 = ZHI[(zi + (waiYang ? j * 2 : -j * 2) + 24) % 12];
+      res.push({ gan: ganWai, zhi: z2 });
+    }
+    return res;
+  }
+  // 旬空：按日柱天干地支
+  function xunkong(dayGanZhi) {
+    var gan = dayGanZhi[0], zhi = dayGanZhi[1];
+    var xunMap = { '子': '戌亥', '戌': '申酉', '申': '午未', '午': '辰巳', '辰': '寅卯', '寅': '子丑' };
+    // 找旬首：地支往前推到子/戌/申/午/辰/寅
+    var zi = zhiIdx(zhi);
+    var ganIdx = '甲乙丙丁戊己庚辛壬癸'.indexOf(gan);
+    // 旬首地支 = 日支 - 天干序
+    var xunZhi = ZHI[(zi - ganIdx + 24) % 12];
+    // 规范到六甲旬首
+    var xunKeys = ['子', '戌', '申', '午', '辰', '寅'];
+    var xk = xunKeys[Math.floor(xunKeys.indexOf(xunZhi) / 1)] || '子';
+    // 简化：直接用映射
+    for (var k in xunMap) { if (xunZhi === k) return xunMap[k]; }
+    return '';
+  }
+  // 互卦/错卦/综卦名
+  function huGua(key) {
+    // 互卦：2-3-4为下，3-4-5为上（key是下爻在前，索引0=初爻）
+    var lower = key[1] + key[2] + key[3]; // 二三四爻
+    var upper = key[2] + key[3] + key[4]; // 三四五爻
+    return lower + upper;
+  }
+  function cuoGua(key) { return key.split('').map(function (c) { return c === '1' ? '0' : '1'; }).join(''); }
+  function zongGua(key) { return key.split('').reverse().join(''); }
+
   var lines = [];  // 已摇出的爻，自下而上：{yao: 0/1, dong: bool, coins: [h,h,h]}
   var shaking = false;
 
   function $(id) { return document.getElementById(id); }
 
-  /* 摇一次：三枚铜钱 */
+  /* 摇一次：三枚铜钱（真随机：crypto.getRandomValues，降级Math.random） */
+  function randBit() {
+    try {
+      if (window.crypto && window.crypto.getRandomValues) {
+        var a = new Uint32Array(1);
+        window.crypto.getRandomValues(a);
+        return a[0] % 2;
+      }
+    } catch (e) {}
+    return Math.random() < 0.5 ? 0 : 1;
+  }
   function throwCoins() {
     var coins = [];
     for (var i = 0; i < 3; i++) {
-      coins.push(Math.random() < 0.5 ? 0 : 1);  // 0=字(阴), 1=花(阳)
+      coins.push(randBit());  // 0=字(阴), 1=花(阳)
     }
     var yang = coins[0] + coins[1] + coins[2];
     var yao, dong = false;
@@ -167,53 +292,190 @@ var LiuYao = (function () {
     var key = guaKey(lines);
     var g = GUA[key];
     $('ly-result-card').hidden = false;
-    if (g) {
-      $('ly-gua-name').textContent = g[0] + '卦';
-      $('ly-gua-ci').innerHTML = '<div class="ly-ci-old">' + g[1] + '</div>' +
-        (g[2] ? '<div class="ly-ci-modern">' + g[2] + '</div>' : '');
-    } else {
-      $('ly-gua-name').textContent = '（卦象异常）';
-      $('ly-gua-ci').textContent = '';
-    }
+    // 占问/归档/时间头（照专业 App）
+    try {
+      var zhanwen = '';
+      try { zhanwen = localStorage.getItem('wuri_ly_zhanwen') || ''; } catch (e) {}
+      var now = new Date();
+      var weekStr = '日一二三四五六'[now.getDay()];
+      var timeStr = '公历:' + now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日 '
+        + now.getHours() + '时' + now.getMinutes() + '分 <nobr>星期' + weekStr + '</nobr>';
+      var lunarStr = '';
+      try {
+        if (window.Lunar) {
+          var l = window.Lunar.fromDate(now);
+          lunarStr = '<br>农历:' + l.getYearInChinese() + '年' + l.getMonthInChinese() + '月' + l.getDayInChinese();
+        }
+      } catch (e) {}
+      var cats = ['综合','感情','事业','财运','健康','学业','出行','其他'];
+      var curCat = '';
+      try { curCat = localStorage.getItem('wuri_ly_cat') || '综合'; } catch (e) { curCat = '综合'; }
+      var catOpts = cats.map(function (cc) {
+        return '<option value="' + cc + '"' + (cc === curCat ? ' selected' : '') + '>' + cc + '</option>';
+      }).join('');
+      var headerHtml = '<div class="ly-head-pro">'
+        + '<div class="ly-head-row"><span class="ly-head-label">占问</span><span class="ly-head-val" id="ly-zhanwen-disp" onclick="(function(){var cur="";try{cur=localStorage.getItem("wuri_ly_zhanwen")||"";}catch(e){}var v=prompt("占问事由",cur);if(v!==null){try{localStorage.setItem("wuri_ly_zhanwen",v);}catch(e){}document.getElementById("ly-zhanwen-disp").textContent=v||"点击此处编辑占问事由";}})()" style="cursor:pointer">' + (zhanwen ? escHtml(zhanwen) : '点击此处编辑占问事由') + '</span></div>'
+        + '<div class="ly-head-row"><span class="ly-head-label">分类</span><select id="ly-cat-sel" class="ly-cat-sel">' + catOpts + '</select></div>'
+        + '<div class="ly-head-row"><span class="ly-head-label">归档</span><span class="ly-head-val" id="ly-cat-disp">' + curCat + '</span></div>'
+        + '<div class="ly-head-row"><span class="ly-head-label">时间</span><span class="ly-head-val">' + timeStr + lunarStr + '</span></div>'
+        + '</div>';
+      var detail = $('ly-yao-detail');
+      // 分类选择事件
+      setTimeout(function () {
+        var sel = $('ly-cat-sel');
+        if (sel) sel.addEventListener('change', function () {
+          try { localStorage.setItem('wuri_ly_cat', this.value); } catch (e) {}
+          var d = $('ly-cat-disp');
+          if (d) d.textContent = this.value;
+        });
+      }, 100);
+
+      // 把 header 插到 detail 前面
+      if (detail && !$('ly-head-pro-inserted')) {
+        var tmp = document.createElement('div');
+        tmp.innerHTML = headerHtml;
+        tmp.id = 'ly-head-pro-inserted';
+        detail.parentNode.insertBefore(tmp, detail);
+      }
+    } catch (e) {}
+    // escHtml helper
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     // 变卦
     var hasDong = lines.some(function (l) { return l.dong; });
-    if (hasDong) {
-      var bianLines = lines.map(function (l) {
-        return { yao: l.dong ? (1 - l.yao) : l.yao, dong: false };
-      });
-      var bkey = guaKey(bianLines);
-      var bg = GUA[bkey];
-      $('ly-biangua').hidden = false;
-      // 渲染变卦爻
-      var box = $('ly-lines-bian');
-      box.innerHTML = '';
-      for (var i = 5; i >= 0; i--) {
-        var l = bianLines[i];
-        var d = document.createElement('div');
-        d.className = 'ly-line ' + (l.yao === 1 ? 'yang' : 'yin');
-        d.innerHTML = l.yao === 1 ? '<span class="ly-bar"></span>'
-          : '<span class="ly-bar left"></span><span class="ly-bar right"></span>';
-        box.appendChild(d);
-      }
-      if (bg) {
-        $('ly-gua-name-bian').textContent = bg[0] + '卦';
-        $('ly-gua-ci-bian').innerHTML = '<div class="ly-ci-old">' + bg[1] + '</div>' +
-          (bg[2] ? '<div class="ly-ci-modern">' + bg[2] + '</div>' : '');
-      }
-    } else {
-      $('ly-biangua').hidden = true;
-    }
-    // 爻辞详情
+    // 爻位详情：紧凑装卦表（六兽|六亲|干支|爻|世应|变爻）
     var detail = $('ly-yao-detail');
     var names = ['初', '二', '三', '四', '五', '上'];
-    var html = '<div class="card-title">爻位</div>';
-    // 从上爻到初爻，跟图形顺序一致（上在上，初在下）
+    var gong = getGong(key);
+    var sy = getShiYing(key);
+    var nj = najia(key);
+    // 日辰：用当前日期的干支（lunar-javascript）
+    var dayGz = '', dayGan = '甲';
+    try {
+      if (window.Lunar) {
+        var now = new Date();
+        var l = window.Lunar.fromDate(now);
+        dayGz = l.getDayGan() + l.getDayZhi();
+        dayGan = l.getDayGan();
+      }
+    } catch (e) {}
+    var xk = dayGz ? xunkong(dayGz) : '';
+    var beasts = liushou(dayGan);
+    // 四柱（带五行颜色）
+    var sizhu = ['', '', '', ''];
+    var sizhuHtml = '';
+    try {
+      if (window.Lunar) {
+        var now = new Date();
+        var l = window.Lunar.fromDate(now);
+        sizhu = [l.getYearGan() + l.getYearZhi(), l.getMonthGan() + l.getMonthZhi(), l.getDayGan() + l.getDayZhi(), l.getTimeGan() + l.getTimeZhi()];
+        var wxC = {'金':'#b8860b','木':'#2e8b57','水':'#4169e1','火':'#dc143c','土':'#8b6914'};
+        var gWx = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+        var zWx = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+        sizhuHtml = sizhu.map(function (gz) {
+          if (!gz) return '';
+          var g = gz[0], z = gz[1];
+          return '<span style="color:' + (wxC[gWx[g]]||'#333') + '">' + g + '</span><span style="color:' + (wxC[zWx[z]]||'#333') + '">' + z + '</span>';
+        }).join(' ');
+      }
+    } catch (e) {}
+    // 伏神：本宫首卦中缺的六亲
+    var fuShen = ['', '', '', '', '', ''];
+    try {
+      var pureKey = null;
+      for (var bi = 0; bi < BAGONG.length; bi++) {
+        if (BAGONG[bi][0] === gong.name) { pureKey = BAGONG[bi][2][0]; break; }
+      }
+      if (pureKey) {
+        var pureNj = najia(pureKey);
+        var curQin = {};
+        for (var ci = 0; ci < 6; ci++) curQin[liuqin(gong.wx, ZHI_WX[nj[ci].zhi])] = 1;
+        for (var fi = 0; fi < 6; fi++) {
+          var fq = liuqin(gong.wx, ZHI_WX[pureNj[fi].zhi]);
+          if (!curQin[fq]) fuShen[fi] = fq + pureNj[fi].gan + pureNj[fi].zhi;
+        }
+      }
+    } catch (e) {}
+    // 变卦信息
+    var bianLines = hasDong ? lines.map(function (l) { return { yao: l.dong ? (1 - l.yao) : l.yao }; }) : null;
+    var bianKey = hasDong ? guaKey(bianLines) : null;
+    var bianG = hasDong ? GUA[bianKey] : null;
+    var bianNj = hasDong ? najia(bianKey) : null;
+    var bianGong = hasDong ? getGong(bianKey) : null;
+    var bianSy = hasDong ? getShiYing(bianKey) : null;
+    // 标题：四柱+旬空
+    // 四柱 HTML：直接用 sizhuHtml（已经是4组，空格分隔），不用 split
+    var szSpans = ['', '', '', '', ''];
+    try {
+      if (window.Lunar) {
+        var now2 = new Date();
+        var l2 = window.Lunar.fromDate(now2);
+        var gzs = [l2.getYearGan()+l2.getYearZhi(), l2.getMonthGan()+l2.getMonthZhi(), l2.getDayGan()+l2.getDayZhi(), l2.getTimeGan()+l2.getTimeZhi()];
+        var wxC2 = {'金':'#b8860b','木':'#2e8b57','水':'#4169e1','火':'#dc143c','土':'#8b6914'};
+        var gWx2 = {'甲':'木','乙':'木','丙':'火','丁':'火','戊':'土','己':'土','庚':'金','辛':'金','壬':'水','癸':'水'};
+        var zWx2 = {'子':'水','丑':'土','寅':'木','卯':'木','辰':'土','巳':'火','午':'火','未':'土','申':'金','酉':'金','戌':'土','亥':'水'};
+        for (var si = 0; si < 4; si++) {
+          var gz = gzs[si];
+          var g = gz[0], z = gz[1];
+          szSpans[si] = '<span style="color:' + (wxC2[gWx2[g]]||'#333') + '">' + g + '</span><span style="color:' + (wxC2[zWx2[z]]||'#333') + '">' + z + '</span>';
+        }
+      }
+    } catch (e) {}
+    var html = '<div class="ly-sizhu"><span class="ly-sz-label">四柱</span>'
+      + '<span>年柱<br>' + szSpans[0] + '</span><span>月柱<br>' + szSpans[1] + '</span>'
+      + '<span>日柱<br>' + szSpans[2] + '</span><span>时柱<br>' + szSpans[3] + '</span>'
+      + '<span>旬空<br>' + (xk || '') + '</span></div>';
+    // 本卦/变卦名
+    // 变卦名：无动爻时显示本卦名
+    var bianName = (hasDong && bianG) ? bianG[0] + '(' + bianGong.name + ')' : (g ? g[0] + '(' + gong.name + ')' : '?');
+    html += '<div class="ly-gua-names"><div class="ly-gua-name-l">' + (g ? g[0] : '?') + '(' + gong.name + ')</div>'
+      + '<div class="ly-gua-name-r">' + bianName + '</div></div>';
+    // 主表：六神|伏神|本卦|变卦
+    // === 像素级：照专业盘（无伏神独立列，伏神跟六神同行）===
+    function yaoBar3(isYang) {
+      if (isYang) return '<i class="lyx-y"></i>';
+      return '<i class="lyx-n"></i><i class="lyx-n"></i>';
+    }
+    html += '<table class="lyx"><tr><th>六神</th><th>本卦</th><th>变卦</th></tr>';
     for (var i = 5; i >= 0; i--) {
       var l = lines[i];
-      html += '<div class="ly-yao-row"><span>' + names[i] + '爻</span><span>' +
-        (l.yao === 1 ? '阳' : '阴') + (l.dong ? '（动）' : '') + '</span></div>';
+      var yaoWx = ZHI_WX[nj[i].zhi];
+      var qinFull = liuqin(gong.wx, yaoWx);
+      var qin = {'官鬼':'官','父母':'父','兄弟':'兄','妻财':'财','子孙':'孙'}[qinFull] || qinFull;
+      var isKong = xk && xk.indexOf(nj[i].zhi) >= 0;
+      var info = qin + ' ' + nj[i].gan + nj[i].zhi + (isKong ? '<sup>空</sup>' : '');
+      var bar = yaoBar3(l.yao === 1);
+      var dong = l.dong ? (l.yao === 1 ? '<b class="lyx-d">○</b>' : '<b class="lyx-d">×</b>') : '';
+      var syMark = '';
+      if (i === sy.shi) syMark = ' 世';
+      else if (i === sy.ying) syMark = ' 应';
+      // 六神+伏神同行
+      var shenFu = beasts[i] + (fuShen[i] ? ' ' + fuShen[i] : '');
+      // 变卦
+      var bInfo = info, bBar = yaoBar3(l.yao === 1), bSY = syMark;
+      if (hasDong && bianNj) {
+        var bWx = ZHI_WX[bianNj[i].zhi];
+        var bQinFull = liuqin(bianGong.wx, bWx);
+        var bQin = {'官鬼':'官','父母':'父','兄弟':'兄','妻财':'财','子孙':'孙'}[bQinFull] || bQinFull;
+        bInfo = bQin + ' ' + bianNj[i].gan + bianNj[i].zhi;
+        bBar = yaoBar3(bianLines[i].yao === 1);
+        bSY = '';
+        if (i === bianSy.shi) bSY = ' 世';
+        else if (i === bianSy.ying) bSY = ' 应';
+      }
+      html += '<tr' + (l.dong ? ' class="lyx-mv"' : '') + '>'
+        + '<td class="lyx-shen">' + shenFu + '</td>'
+        + '<td><span class="lyx-info">' + info + '</span>' + bar + dong + syMark + '</td>'
+        + '<td><span class="lyx-info">' + bInfo + '</span>' + bBar + bSY + '</td></tr>';
     }
+    html += '</table>';
+    // 互卦/错卦/综卦
+    var hg = GUA[huGua(key)], cg = GUA[cuoGua(key)], zg = GUA[zongGua(key)];
+    html += '<div class="ly-hcz">互卦：' + (hg ? hg[0] : '?') + '　错卦：' + (cg ? cg[0] : '?') + '　综卦：' + (zg ? zg[0] : '?') + '</div>';
     detail.innerHTML = html;
+    var zwInput = $('ly-zhanwen-input');
+    if (zwInput) zwInput.addEventListener('change', function () {
+      try { localStorage.setItem('wuri_ly_zhanwen', this.value); } catch (e) {}
+    });
     // 保存历史
     var bianName = '';
     if (hasDong) {
@@ -414,7 +676,33 @@ var LiuYao = (function () {
     renderLines();
   }
 
+  function buildChartText() {
+    if (lines.length < 6) return;
+    var key = guaKey(lines);
+    var g = GUA[key];
+    var gong = getGong(key);
+    var zhanwen = '';
+    try { zhanwen = localStorage.getItem('wuri_ly_zhanwen') || ''; } catch (e) {}
+    var nowQ = new Date();
+    var qTime = nowQ.getFullYear() + '年' + (nowQ.getMonth()+1) + '月' + nowQ.getDate() + '日 '
+      + nowQ.getHours() + '时' + nowQ.getMinutes() + '分' + nowQ.getSeconds() + '秒';
+    var txt = '所问事由：' + (zhanwen || '未填写') + '\n起卦时间：' + qTime + '\n';
+    txt += '本卦：' + (g ? g[0] : '?') + '（' + gong.name + '宫）\n';
+    var names = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
+    var nj = najia(key);
+    var sy = getShiYing(key);
+    for (var i = 0; i < 6; i++) {
+      var l = lines[i];
+      txt += names[i] + '：' + nj[i].gan + nj[i].zhi + ' ' + liuqin(gong.wx, ZHI_WX[nj[i].zhi])
+        + ' ' + (l.yao === 1 ? '阳' : '阴') + (l.dong ? ' 动' : '')
+        + (i === sy.shi ? ' 世' : '') + (i === sy.ying ? ' 应' : '') + '\n';
+    }
+    if (g) txt += '卦辞：' + g[1] + '\n';
+    window.__wuriChartText = window.__wuriChartText || {};
+    window.__wuriChartText.liuyao = txt;
+  }
+
   document.addEventListener('DOMContentLoaded', init);
 
-  return { open: open, close: close };
+  return { open: open, close: close, buildChartText: buildChartText };
 })();

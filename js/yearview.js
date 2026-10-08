@@ -9,7 +9,7 @@ var YearView = (function () {
   var yvYear = null; // null=月视图
 
   function open(year) {
-    if (window.WuriPro && !WuriPro.requirePro('year')) return;
+    if (!window.IS_FREE_BUILD && window.WuriPro && !WuriPro.requirePro('year')) return;
     yvYear = year || (WC.getView ? WC.getView().y : new Date().getFullYear());
     document.getElementById('cal-grid').hidden = true;
     document.querySelector('#tab-cal .cal-week').hidden = true;
