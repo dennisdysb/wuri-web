@@ -142,8 +142,19 @@ var Bazi = (function () {
     $('#bz-tab-input').hidden = which !== 'input';
     $('#bz-tab-result').hidden = which !== 'result';
     $('#bz-tab-history').hidden = which !== 'history';
+    var aiBtn = $('#bz-ai-btn');
+    if (aiBtn) aiBtn.hidden = which !== 'result';
     if (which === 'history') renderHistory();
     if (which === 'input') initInputDefaults();
+  }
+
+  function buildChartText() {
+    try {
+      var host = $('#bz-tab-result');
+      var txt = host ? host.innerText.slice(0, 3000) : '';
+      window.__wuriChartText = window.__wuriChartText || {};
+      window.__wuriChartText.bazi = '八字排盘\n' + txt;
+    } catch (e) {}
   }
 
   function loadHist() {
@@ -158,6 +169,14 @@ var Bazi = (function () {
       d.value = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
     }
     if (d) d.max = new Date().toISOString().slice(0, 10);
+    /* 全局时间基准（我的→设置）：默认真太阳时；八字与时值神共用 */
+    try {
+      var _gc = (window.__wuriGetCfg && window.__wuriGetCfg()) || {};
+      var _bt = $('#bz-true');
+      if (_bt && !_bt.dataset.seeded) { _bt.checked = ((_gc.timebase || 'true') === 'true'); _bt.dataset.seeded = '1'; }
+      var _bl = $('#bz-lon');
+      if (_bl && !_bl.value && _gc.lon) _bl.value = _gc.lon;
+    } catch (e) {}
   }
 
   function trueSolar(y, m, d, h, mi, lon) {
@@ -215,7 +234,7 @@ var Bazi = (function () {
       dateStr: date + (hasTime ? ' ' + timeStr : ''),
       y: y, m: m, d: d, hh: hh, mm: mm, hasTime: hasTime,
       useTrue: useTrue, lon: lon, cityName: cityName,
-      group: ($('#bz-group').value || '').trim()
+      group: (function(){ var s=$('#bz-group'), cu=$('#bz-group-custom'); if(s && s.value==='__custom' && cu) return (cu.value||'').trim(); return ((s&&s.value)||'').trim(); })()
     };
     var data;
     try { data = buildData(p); } catch (e) { alert('排盘失败：' + e.message); return; }
@@ -657,6 +676,13 @@ var Bazi = (function () {
   function init() {
     var entry = $('#bazi-enter');
     if (entry) entry.addEventListener('click', open);
+    // 分组自定义
+    var gSel = $('#bz-group'), gCus = $('#bz-group-custom');
+    if (gSel && gCus) {
+      gSel.addEventListener('change', function () {
+        gCus.style.display = this.value === '__custom' ? 'block' : 'none';
+      });
+    }
     var back = $('#bazi-back');
     if (back) back.addEventListener('click', close);
     $all('[data-bztab]').forEach(function (b) {
@@ -673,7 +699,7 @@ var Bazi = (function () {
     }
   }
 
-  return { init: init, open: open, close: close, showTab: showTab };
+  return { init: init, open: open, close: close, showTab: showTab, buildChartText: buildChartText };
 })();
 
 document.addEventListener('DOMContentLoaded', function () { Bazi.init(); });

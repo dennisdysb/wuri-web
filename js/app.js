@@ -12,6 +12,7 @@ function advLabel(k) { return k === 'chuyishiwu' ? t('adv_cysw') : t('adv_' + k)
 var DEFAULTS = {
   tz: 'auto',
   theme: 'auto', // auto=跟随系统 day=白天宣纸 night=黑夜玄黑
+  timebase: 'true', // 时间基准：'true'=真太阳时（默认） 'local'=当地平太阳时；八字与时值神共用
   // kinds: 多选 ['day1'=提前1天 'today'=当天 'custom'=自选偏移]；offsetMin 仅 custom 有效（分钟）
   wu: { on: true, kinds: ['day1'], offsetMin: 0, time: '17:00' },
   baidou: { on: false },
@@ -69,6 +70,8 @@ function loadCfg() {
     lang: c.lang || DEFAULTS.lang,
     tz: c.tz || DEFAULTS.tz,
     theme: c.theme || DEFAULTS.theme,
+    timebase: c.timebase || DEFAULTS.timebase,
+    lon: (c.lon != null && c.lon !== '') ? String(c.lon) : '',
     wu: { on: !(c.wu && c.wu.on === false), kinds: wu.kinds, offsetMin: wu.offsetMin, time: (c.wu && c.wu.time) || '17:00' },
     baidou: { on: !!(c.baidou && c.baidou.on) },
     anwu: { on: !!(c.anwu && c.anwu.on) },
@@ -128,14 +131,33 @@ $$('#tabbar button').forEach(function (btn) {
   btn.addEventListener('click', function () {
     $$('#tabbar button').forEach(function (b) { b.classList.remove('active'); });
     btn.classList.add('active');
-    $$('.tab').forEach(function (t) { t.classList.remove('active'); });
-    $('#' + btn.getAttribute('data-tab')).classList.add('active');
-    // 切换标签时隐藏六爻等独立视图，防止内容泄漏
-    ['view-liuyao'].forEach(function (vid) {
+    $$('.tab').forEach(function (t) {
+      t.classList.remove('active');
+      t.style.display = 'none';
+    });
+    var target = $('#' + btn.getAttribute('data-tab'));
+    target.classList.add('active');
+    target.style.display = 'block';
+    // 切换标签时隐藏六爻/八字/紫微等独立视图，防止内容泄漏
+    ['view-liuyao', 'bazi-view', 'view-ziwei'].forEach(function (vid) {
       var v = document.getElementById(vid);
       if (v) v.hidden = true;
     });
     if (btn.getAttribute('data-tab') === 'tab-remind') refreshPermUI();
+    // 进入经文 tab 时重置回目录页（问题1修复）
+    if (btn.getAttribute('data-tab') === 'tab-jing') {
+      if (window.JingWen && window.JingWen.resetToCatalog) {
+        window.JingWen.resetToCatalog();
+      } else {
+        // 降级：直接操作 DOM
+        var listEl = document.getElementById('jing-list');
+        var marksEl = document.getElementById('jing-marks');
+        var resultsEl = document.getElementById('jing-results');
+        if (listEl) listEl.hidden = false;
+        if (marksEl) marksEl.hidden = true;
+        if (resultsEl) resultsEl.hidden = true;
+      }
+    }
     window.scrollTo(0, 0);
   });
 });
@@ -169,6 +191,13 @@ function monthAnWuList(y, m) {
 }
 function fmtYmdShort(s) { // "2026-09-23" -> "9月23日"
   var p = s.split('-'); return parseInt(p[1], 10) + '月' + parseInt(p[2], 10) + '日';
+}
+/* 四柱单字五行（2026-10-08 用户定配色：木绿 火红 土黄 金金色 水深蓝，每字按自身五行着色） */
+var GAN_WX = {甲:'mu',乙:'mu',丙:'huo',丁:'huo',戊:'tu',己:'tu',庚:'jin',辛:'jin',壬:'shui',癸:'shui'};
+var ZHI_WX = {寅:'mu',卯:'mu',巳:'huo',午:'huo',辰:'tu',戌:'tu',丑:'tu',未:'tu',申:'jin',酉:'jin',亥:'shui',子:'shui'};
+function pzHTML(g, z) {
+  var wg = GAN_WX[g] || 'mu', wz = ZHI_WX[z] || 'mu';
+  return '<span class="wxg wxg-' + wg + '">' + g + '</span><span class="wxg wxg-' + wz + '">' + z + '</span>';
 }
 function renderHome() {
   var td = ymd(now());
@@ -212,41 +241,48 @@ function renderHome() {
   var yi = lunar.getDayYi(), ji = lunar.getDayJi();
   void yi; void ji; // 首页不再展示宜忌（v1.2.0 移除）
 
-  /* 值年太岁 */
-  var ln0ts = Solar.fromDate(now()).getLunar();
-  var yg = ln0ts.getYearGan() + ln0ts.getYearZhi();
-  var tn = TAISUI[yg];
+  /* 值年太岁（A1：以立春时刻为年界，修复库正月初一年分界 bug） */
+  var ygNow = yearGodOf(now());
   var tsl = $('#taisui-line');
-  if (tsl) tsl.textContent = tn ? tf(t('taisui_line'), tx(yg), tx(tn)) : '';
+  if (tsl) tsl.textContent = ygNow.name ? tf(t('taisui_line'), tx(ygNow.ganzhi), tx(ygNow.name)) : '';
 
-  // 四柱（直接取库输出，不做任何换算与改名）
-  var ln2 = Solar.fromDate(now()).getLunar();
-  $('#pz-year').textContent = ln2.getYearGan() + ln2.getYearZhi();
-  $('#pz-month').textContent = ln2.getMonthGan() + ln2.getMonthZhi();
-  $('#pz-day').textContent = ln2.getDayGan() + ln2.getDayZhi();
-  $('#pz-time').textContent = ln2.getTimeGan() + ln2.getTimeZhi();
+  // 四柱（按全局时间基准取库输出，不做任何换算与改名；默认真太阳时；每字按自身五行着色）
+  var ln2 = Solar.fromDate(solarNow()).getLunar();
+  $('#pz-year').innerHTML = pzHTML(ln2.getYearGan(), ln2.getYearZhi());
+  $('#pz-month').innerHTML = pzHTML(ln2.getMonthGan(), ln2.getMonthZhi());
+  $('#pz-day').innerHTML = pzHTML(ln2.getDayGan(), ln2.getDayZhi());
+  $('#pz-time').innerHTML = pzHTML(ln2.getTimeGan(), ln2.getTimeZhi());
 
-  // 节气（动态）
+  // 节气（动态）：语义单元锁为不换行整体，只在单元之间换行，避免"日）"之类被甩单
   var jqToday = lunar.getJieQi();
   var prev = lunar.getPrevJieQi(), next = lunar.getNextJieQi();
-  var s = t('jieqi_now') + '<b>' + tx(prev.getName()) + '</b>（' + fmtYmdShort(prev.getSolar().toYmd()) +
-    ' — ' + tx(next.getName()) + ' ' + fmtYmdShort(next.getSolar().toYmd()) + '）';
-  if (jqToday) s += '<br>' + t('jieqi_today') + '<b>' + tx(jqToday) + '</b>';
+  var s = '<span class="nw">' + t('jieqi_now') + '<b>' + tx(prev.getName()) + '</b></span>' +
+    ' <span class="nw">（' + fmtYmdShort(prev.getSolar().toYmd()) +
+    ' — ' + tx(next.getName()) + fmtYmdShort(next.getSolar().toYmd()) + '）</span>';
+  if (jqToday) s += '<br><span class="nw">' + t('jieqi_today') + '<b>' + tx(jqToday) + '</b></span>';
   $('#jieqi-line').innerHTML = s;
 
-  /* 四值功曹（名号固定，随语言切换重渲染） */
+  /* 四值神（一行摘要，随语言切换重渲染）：每柱一个不换行单元，分隔符"·"收进单元内不落单 */
   var zsl = $('#zhishen-line');
-  if (zsl) zsl.textContent = t('sizhi_title') + '：' + sizhiText();
+  if (zsl) {
+    var _zs = zhishenOf(td.y, td.m, td.d, true);
+    zsl.innerHTML = '<span class="nw">' + t('zhishen_title') + '：' + t('zs_year') + tx(_zs.year.name) + ' ·</span> ' +
+      '<span class="nw">' + t('zs_month') + tx(_zs.month.name) + ' ·</span> ' +
+      '<span class="nw">' + t('zs_day') + tx(_zs.day.xiu) + '（' + tx(_zs.day.jian) + '） ·</span> ' +
+      '<span class="nw">' + t('zs_hour') + tx(_zs.hour ? _zs.hour.name : '—') + '</span>';
+  }
 }
 function tickClock() {
   var n = now(), p = function (x) { return (x < 10 ? '0' : '') + x; };
   $('#clock').textContent = p(n.getHours()) + ':' + p(n.getMinutes()) + ':' + p(n.getSeconds());
 }
-var lastDayKey = '';
+var lastHourKey = '';
 function heartbeat() {
   tickClock();
   var t = ymd(now()), key = t.y + '-' + t.m + '-' + t.d;
-  if (key !== lastDayKey) { lastDayKey = key; renderHome(); renderCalendar(); }
+  /* 时值神每时辰（2 小时）一变：日期或时辰变化都重算，否则首页/黄历的时值神会停留在旧时辰 */
+  var hk = key + '|' + hourZhiIndex(solarNow());
+  if (hk !== lastHourKey) { lastHourKey = hk; renderHome(); renderCalendar(); }
 }
 
 /* ---------------- 黄历 ---------------- */
@@ -329,9 +365,28 @@ function renderDetail() {
   $('#detail-gz').textContent = l.getYearGan() + l.getYearZhi() + '年 ' + l.getMonthGan() + l.getMonthZhi() + '月 ' + l.getDayGan() + l.getDayZhi() + '日';
   var jq = l.getJieQi();
   $('#detail-jq').textContent = tx(jq) || '—';
-  /* 四值功曹 */
+  /* 四值神：所选日期的年/月/日值神（含名号＋一句话简介，悬停/长按看简介）；
+   * 时值神只对"今日"展示（非今日日期不展示时值神）。 */
   var zsd = $('#detail-zhishen');
-  if (zsd) zsd.textContent = sizhiText();
+  if (zsd) {
+    var _dz = zhishenOf(sel.y, sel.m, sel.d, false);
+    var _ty = ymd(now());
+    var _isT = (_ty.y === sel.y && _ty.m === sel.m && _ty.d === sel.d);
+    var _rows = [
+      [t('zs_year') + '：' + _dz.year.ganzhi + ' ' + tx(_dz.year.name) + '太岁', ''],
+      [t('zs_month') + '：' + tx(_dz.month.name) + '（' + tx(_dz.month.diZhi) + '将）', _dz.month.desc],
+      [t('zs_day') + '：' + tx(_dz.day.xiu) + '宿（' + tx(_dz.day.jian) + '日）',
+        _dz.day.xiuDesc + '；' + _dz.day.jianDesc]
+    ];
+    if (_isT) {
+      var _sn = solarNow(), _hi = hourZhiIndex(_sn);
+      var _hg = hourGodOf(l.getDayZhi(), _hi);
+      if (_hg) _rows.push([t('zs_hour') + '：' + tx(_hg.name) + '（' + tx(DIZHI[_hi] + '时') + '）', _hg.desc]);
+    }
+    zsd.innerHTML = _rows.map(function (r) {
+      return '<span title="' + escA(r[1]) + '">' + escA(r[0]) + '</span>';
+    }).join('<br>');
+  }
   $('#detail-chong').textContent = tx('冲' + l.getDayChongShengXiao() + '（' + l.getDayChong() + '）煞' + l.getDaySha());
   $('#detail-yi').textContent = l.getDayYi().map(tx).join(' ') || '—';
   $('#detail-ji').textContent = l.getDayJi().map(tx).join(' ') || '—';
@@ -464,30 +519,110 @@ function shendanName(l) {
   if (isLeapM(l)) return null;
   return SHENDAN[l.getMonth() + '-' + l.getDay()] || null;
 }
-/* ============ 六十甲子·值年太岁名 ============ */
-var TAISUI = {
-  '甲子':'金辨','乙丑':'陈材','丙寅':'耿章','丁卯':'沈兴','戊辰':'赵达','己巳':'郭灿',
-  '庚午':'王清','辛未':'李訽','壬申':'刘旺','癸酉':'康志','甲戌':'施广','乙亥':'任保',
-  '丙子':'郭嘉','丁丑':'汪文','戊寅':'鲁先','己卯':'龙仲','庚辰':'董德','辛巳':'郑但',
-  '壬午':'陆明','癸未':'魏仁','甲申':'方杰','乙酉':'蒋崇','丙戌':'白敏','丁亥':'封济',
-  '戊子':'邹铛','己丑':'傅佑','庚寅':'邬桓','辛卯':'范宁','壬辰':'彭泰','癸巳':'徐单',
-  '甲午':'章词','乙未':'杨仙','丙申':'管仲','丁酉':'唐杰','戊戌':'姜武','己亥':'谢太',
-  '庚子':'卢秘','辛丑':'杨信','壬寅':'贺谔','癸卯':'皮时','甲辰':'李诚','乙巳':'吴遂',
-  '丙午':'文哲','丁未':'缪丙','戊申':'俞忠','己酉':'程宝','庚戌':'倪秘','辛亥':'叶坚',
-  '壬子':'丘德','癸丑':'朱得','甲寅':'张朝','乙卯':'万清','丙辰':'辛亚','丁巳':'杨彦',
-  '戊午':'黎卿','己未':'傅党','庚申':'毛梓','辛酉':'石政','壬戌':'洪充','癸亥':'虞程'
-};
+/* 六十甲子·值年太岁名：见 js/zhishen-data.js 的 TAISUI60
+ * （2026-10-08 用户定底本：北京白云观元辰殿《岁君解厄延生法忏》版本） */
 
-/* ============ 四值功曹 ·v1.2.0 ============ */
-/* 道教科仪四值功曹，分掌年、月、日、时之值守，名号固定：
- * 值年功曹李丙、值月功曹黄承乙、值日功曹周登、值时功曹刘洪。
- * 注：App 内仅列名号，不注经名出处（出处未及核验道藏原文）。 */
-var GONGCAO_NAMES = ['李丙', '黄承乙', '周登', '刘洪'];
-var GONGCAO_KEYS = ['gc_year', 'gc_month', 'gc_day', 'gc_hour'];
-function sizhiText() {
-  var parts = [];
-  for (var i = 0; i < 4; i++) parts.push(tx(t(GONGCAO_KEYS[i]) + GONGCAO_NAMES[i]));
-  return parts.join(' · ');
+/* ============ 时间基准（真太阳时 / 当地平太阳时） ============
+ * 2026-10-08 用户定：默认真太阳时，"我的→设置"可切换；八字排盘与时值神共用。
+ * 真太阳时换算沿用 bazi.js 口径：经度修正 (lon-子午线)*4 分钟（不计均时差）。
+ * solarNow() 仅用于时辰判定（时值神、首页时柱）；日期级逻辑（戊日、节气、提醒）仍用 now()。 */
+function baseMeridian() {
+  if (CFG.tz === 'beijing') return 120;
+  return -new Date().getTimezoneOffset() / 4; // 如 EDT(UTC-4) → -60
+}
+function solarNow() {
+  var n = now();
+  if ((CFG.timebase || 'true') !== 'true') return n;
+  var lon = parseFloat(CFG.lon);
+  if (isNaN(lon)) return n; // 未填经度时退回当地平时（设置页有提示）
+  return new Date(n.getTime() + (lon - baseMeridian()) * 4 * 60000);
+}
+function hourZhiIndex(d) {
+  var h = d.getHours();
+  return Math.floor((((h + 1) % 24) / 2)); // 0=子 … 11=亥
+}
+var DIZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+function escA(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+/* ============ 四值神 · 推算算法 ============
+ * 2026-10-08 用户定：只做动态四值神，不放静态四值功曹。
+ * （旧代码说明：四值功曹固定名号「李丙/黄承乙/周登/刘洪」于 2026-10-08 移除，
+ *  因道藏核验结论——该四名号在道藏中查无出处，仅见 2025 年闾山派现代网文，
+ *  道藏中该职官一律作"四直功曹"配符箓内讳；App 改按历法动态推算四值神。） */
+/* A1 年值神：以立春时刻为年界（不用库的正月初一年分界）
+ * 注意 lunar-javascript 的 getJieQiTable() 冬春季中英双键，
+ * 此处归一化后按公历年过滤，取当年立春。 */
+var _jqCache = {};
+function jieqiTableNorm(y) {
+  if (_jqCache[y]) return _jqCache[y];
+  var out = [], seen = {};
+  [y - 1, y, y + 1].forEach(function (yy) {
+    var tbl = Solar.fromYmd(yy, 6, 15).getLunar().getJieQiTable();
+    Object.keys(tbl).forEach(function (k) {
+      var name = (typeof JIEQI_EN2CN !== 'undefined' && JIEQI_EN2CN[k]) || k;
+      var s = tbl[k];
+      var t = new Date(s.getYear(), s.getMonth() - 1, s.getDay(), s.getHour(), s.getMinute(), s.getSecond()).getTime();
+      var key = name + '@' + t;
+      if (!seen[key]) { seen[key] = 1; out.push({ name: name, time: t }); }
+    });
+  });
+  _jqCache[y] = out;
+  return out;
+}
+function jieqiMoment(y, name) {
+  var list = jieqiTableNorm(y), best = -1;
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].name !== name) continue;
+    if (new Date(list[i].time).getFullYear() !== y) continue;
+    if (list[i].time > best) best = list[i].time;
+  }
+  return best >= 0 ? new Date(best) : null;
+}
+function ganzhiYearOf(date) {
+  var y = date.getFullYear();
+  var yy = date.getTime() >= jieqiMoment(y, '立春').getTime() ? y : y - 1;
+  var idx = (((yy - 1984) % 60) + 60) % 60; // 1984=甲子
+  var GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+  return GAN[idx % 10] + DIZHI[idx % 12];
+}
+function yearGodOf(date) {
+  var gz = ganzhiYearOf(date);
+  return { ganzhi: gz, name: TAISUI60[gz] || '' };
+}
+/* A2 月将：取 ≤date 的最晚中气 → 登明…神后（归一化节气表，无跨年断档） */
+function yuejiangOf(date) {
+  var list = jieqiTableNorm(date.getFullYear()), best = null, bestT = -1;
+  for (var i = 0; i < list.length; i++) {
+    if (ZHONGQI_ORDER.indexOf(list[i].name) < 0) continue;
+    if (list[i].time <= date.getTime() && list[i].time > bestT) { bestT = list[i].time; best = list[i].name; }
+  }
+  return best ? YUEJIANG[best] : YUEJIANG['大寒'];
+}
+/* A3 日值神：二十八宿（库 getXiu）＋ 建星（月支起建顺排至日支） */
+function dayGodsOf(lunar) {
+  var xiu = lunar.getXiu();
+  var xs = XINGSU28[xiu] || { group: '', desc: '' };
+  var mz = DIZHI.indexOf(lunar.getMonthZhi()), dz = DIZHI.indexOf(lunar.getDayZhi());
+  var jian = JIANXING12[(dz - mz + 12) % 12];
+  return { xiu: xiu, xiuGroup: xs.group, xiuDesc: xs.desc, jian: jian.name, jianDesc: jian.desc };
+}
+/* A4 时值神：「日起青龙」，日支定子时之神，十二时辰顺排 */
+function hourGodOf(dayZhi, hourZhiIdx) {
+  var start = SHIZHI_START[dayZhi];
+  if (start == null || hourZhiIdx == null) return null;
+  return SHIZHI12[(start + hourZhiIdx) % 12];
+}
+/* 当日四值神汇总（hour: 是否含时值神，用 solarNow 的时辰） */
+function zhishenOf(y, m, d, withHour) {
+  var date = new Date(y, m - 1, d, 12, 0, 0);
+  var lunar = Solar.fromYmd(y, m, d).getLunar();
+  var out = { year: yearGodOf(date), month: yuejiangOf(date), day: dayGodsOf(lunar), hour: null };
+  if (withHour) {
+    var sn = solarNow();
+    var hg = hourGodOf(lunar.getDayZhi(), hourZhiIndex(sn));
+    if (hg) out.hour = { name: hg.name, type: hg.type, desc: hg.desc, zhi: DIZHI[hourZhiIndex(sn)] };
+  }
+  return out;
 }
 
 
@@ -800,6 +935,16 @@ function bindMe() {
     r.checked = (r.value === (CFG.theme || 'auto'));
     r.addEventListener('change', function () { CFG.theme = r.value; saveCfg(); applyTheme(); });
   });
+  /* 时间基准：真太阳时（默认）/ 当地平太阳时；八字排盘与时值神共用 */
+  $$('input[name=timebase]').forEach(function (r) {
+    r.checked = (r.value === (CFG.timebase || 'true'));
+    r.addEventListener('change', function () { CFG.timebase = r.value; saveCfg(); renderHome(); renderCalendar(); });
+  });
+  var lonI = $('#cfg-lon');
+  if (lonI) {
+    lonI.value = CFG.lon || '';
+    lonI.addEventListener('change', function () { CFG.lon = lonI.value.trim(); saveCfg(); renderHome(); renderCalendar(); });
+  }
   /* 语言选择：跟随系统 / 简体中文 / 繁體中文 */
   $$('input[name=lang]').forEach(function (r) {
     r.addEventListener('change', function () { setLangPref(r.value); });
@@ -885,6 +1030,9 @@ window.__wuriCal = {
   }, { passive: true });
 })();
 
+/* 供 bazi.js 等读取全局设置（时间基准/经度）：八字排盘与时值神共用此时钟基准 */
+window.__wuriGetCfg = function () { return CFG; };
+
 })();
 
 /* ---------------- 浮动按钮管理 ---------------- */
@@ -931,9 +1079,174 @@ function updateFloatingButtons() {
     });
     setInterval(updateFloatingButtons, 500);
   }
+
+  /* ---------- 数据备份/恢复 ---------- */
+  // 需要备份的用户数据键（心得/高亮/书签/八字/六爻/打卡/日记/配置）
+  var BACKUP_KEYS = [
+    'wuri_jing_bookmarks', 'wuri_jing_highlights', 'wuri_jing_notes', 'wuri_jing_recite',
+    'wuri_bazi_history_v3',
+    'ly_history',
+    'wuri_daka_habits', 'wuri_daka_records',
+    'wuri_practice_journal', 'wuri_practice_schedule', 'wuri_zw_history',
+    'wuri_cfg_v1', 'wuri_jing_font', 'wuri_jing_py'
+  ];
+  function initBackup() {
+    function appToast(msg) {
+      var t = document.getElementById('app-toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'app-toast';
+        t.style.cssText = 'position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;z-index:99999;display:none;';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(function() { t.style.display = 'none'; }, 2000);
+    }
+    var emailLink = document.getElementById('contact-email');
+    if (emailLink) emailLink.addEventListener('click', function () {
+      var em = this.getAttribute('data-email');
+      try {
+        if (navigator.clipboard) navigator.clipboard.writeText(em);
+        else {
+          var ta = document.createElement('textarea');
+          ta.value = em; document.body.appendChild(ta); ta.select();
+          document.execCommand('copy'); document.body.removeChild(ta);
+        }
+        appToast('邮箱已复制：' + em);
+      } catch (e) { appToast(em); }
+    });
+    var expBtn = document.getElementById('backup-export');
+    var impBtn = document.getElementById('backup-import-btn');
+    var impInput = document.getElementById('backup-import');
+    var msg = document.getElementById('backup-msg');
+    function setMsg(t) { if (msg) msg.textContent = t; }
+    if (expBtn) expBtn.addEventListener('click', function () {
+      try {
+        var data = { app: 'wuribushangxiang', v: 1, ts: Date.now(), store: {} };
+        BACKUP_KEYS.forEach(function (k) {
+          try {
+            var v = localStorage.getItem(k);
+            if (v !== null) data.store[k] = v;
+          } catch (e) {}
+        });
+        var jsonStr = JSON.stringify(data);
+        var d = new Date();
+        var ds = d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2);
+        var fname = 'wuri-backup-' + ds + '.json';
+        // 优先用原生桥保存到 Download 目录
+        var b = (typeof window.WuBridge !== 'undefined') ? window.WuBridge : null;
+        if (b && typeof b.saveBackupFile === 'function') {
+          var path = '';
+          try { path = b.saveBackupFile(fname, jsonStr); } catch (e) {}
+          if (path) {
+            setMsg('备份已导出到：' + path);
+            return;
+          }
+        }
+        // 降级：浏览器下载
+        var blob = new Blob([jsonStr], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = fname;
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+        setMsg('备份已导出：' + fname);
+      } catch (e) {
+        setMsg('导出失败：' + e.message);
+      }
+    });
+    if (impInput) {
+      impInput.addEventListener('change', function () {
+        var f = impInput.files && impInput.files[0];
+        if (!f) return;
+        var r = new FileReader();
+        r.onload = function () {
+          try {
+            var data = JSON.parse(r.result);
+            if (!data || !data.store) throw new Error('文件格式不对');
+            var n = 0;
+            Object.keys(data.store).forEach(function (k) {
+              try { localStorage.setItem(k, data.store[k]); n++; } catch (e) {}
+            });
+            setMsg('已恢复 ' + n + ' 项数据，正在刷新…');
+            setTimeout(function () { location.reload(); }, 1200);
+          } catch (e) {
+            setMsg('导入失败：' + e.message);
+          }
+          impInput.value = '';
+        };
+        r.readAsText(f);
+      });
+    }
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
+  // 备份功能初始化（DOM 就绪后）
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBackup);
+  } else {
+    initBackup();
+  }
+})();
+
+// 免费版：隐藏 Pro 功能
+(function() {
+  if (!window.IS_FREE_BUILD) return;
+  function hideFree() {
+    // 隐藏八字/六爻/紫微/修行入口
+    ['bazi-entry-card','liuyao-entry-card','ziwei-entry-card','practice-entry-card'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    // 隐藏备份区（找包含"数据备份"标题的 card）
+    document.querySelectorAll('#view-me .card').forEach(function(card) {
+      var title = card.querySelector('.card-title');
+      if (title && title.textContent.indexOf('数据备份') >= 0) {
+        card.style.display = 'none';
+      }
+    });
+    // 隐藏背诵按钮（经文页）
+    var recite = document.getElementById('jing-recite');
+    if (recite) recite.style.display = 'none';
+    // 免费版"我的"页：只留"解锁高级版"，隐藏恢复/兑换/测试
+    document.querySelectorAll('[data-pro-act="restore"]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+    var rb = document.getElementById('redeem-btn');
+    if (rb) rb.style.display = 'none';
+    document.querySelectorAll('[data-pro-testbtn]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+    // 免费版标题改为"免费版"
+    document.querySelectorAll('#view-me .pro-card .card-title [data-i18n="pro_title"]').forEach(function(el) {
+      el.removeAttribute('data-i18n');
+      el.textContent = '免费版';
+    });
+    // 免费版：强制显示经文（覆盖 pro.js 的锁）
+    function forceShowJing() {
+      var jl = document.getElementById('jing-lock');
+      if (jl) jl.style.display = 'none';
+      var jb = document.getElementById('jing-body');
+      if (jb) jb.style.display = '';
+    }
+    forceShowJing();
+    // 多试几次，确保覆盖
+    [500, 1500, 3000].forEach(function(ms) {
+      setTimeout(forceShowJing, ms);
+    });
+    // 强制 Pro 状态为未解锁（忽略本地存储）
+    try { localStorage.removeItem('wuri_pro'); } catch(e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideFree);
+  } else {
+    hideFree();
+  }
+  // 延迟再执行一次（等动态内容）
+  setTimeout(hideFree, 1000);
 })();

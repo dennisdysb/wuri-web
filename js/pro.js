@@ -22,6 +22,7 @@ var WuriPro = (function () {
   }
 
   function isPro() {
+    if (window.IS_FREE_BUILD) return false;
     /*DEMO-ONLY*/ if (window.__wuriProDemo) return true; /*/DEMO-ONLY*/
     try { if (localStorage.getItem('wuri_pro_redeem') === '1') return true; } catch (e) {}
     if (isTestBuild()) {
@@ -166,8 +167,23 @@ var WuriPro = (function () {
     document.querySelectorAll('[data-pro-buybtn]').forEach(function (el) {
       el.style.display = pro ? 'none' : '';
     });
+    // Pro 已激活：隐藏兑换码按钮，显示祝贺语
+    var redeemBtn = document.getElementById('redeem-btn');
+    if (redeemBtn) redeemBtn.style.display = pro ? 'none' : '';
+    var redeemBox = document.getElementById('redeem-box');
+    if (redeemBox && pro) redeemBox.hidden = true;
+    var proCongrats = document.getElementById('pro-congrats');
+    if (!proCongrats) {
+      proCongrats = document.createElement('p');
+      proCongrats.id = 'pro-congrats';
+      proCongrats.style.cssText = 'text-align:center;color:#2d6a4f;font-weight:bold;margin:8px 0;';
+      proCongrats.textContent = '🎉 恭喜，你已是高级版用户';
+      var sec = document.querySelector('#view-me .pro-section');
+      if (sec) sec.insertBefore(proCongrats, sec.firstChild);
+    }
+    if (proCongrats) proCongrats.style.display = pro ? '' : 'none';
     document.querySelectorAll('[data-pro-testbtn]').forEach(function (el) {
-      el.style.display = (!pro && isTestBuild()) ? '' : 'none';
+      el.style.display = (!pro && isTestBuild() && !window.IS_FREE_BUILD) ? '' : 'none';
     });
     var lock = document.getElementById('jing-lock');
     if (lock) lock.style.display = pro ? 'none' : '';
