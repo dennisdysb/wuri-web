@@ -18,7 +18,11 @@ var YearView = (function () {
     document.getElementById('date-jump').hidden = true;
     document.getElementById('year-view').hidden = false;
     render();
-    window.scrollTo(0, 0);
+    // 滚动到年览位置（而不是页面顶部）
+    setTimeout(function () {
+      var yv = document.getElementById('year-view');
+      if (yv) yv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
   function close() {
     yvYear = null;
@@ -31,15 +35,18 @@ var YearView = (function () {
   }
   function isOpen() { return yvYear !== null; }
 
-  /* 当天标记：{wu, an, bd, sd} */
+  /* 当天标记：{wu, an, bd, sd, md[]} */
   function marks(y, m, d) {
     var l = WC.lunarOf(y, m, d);
     var wu = l.getDayGan() === '戊';
+    var md = [];
+    try { if (WC.myDaysOn) md = WC.myDaysOn(l) || []; } catch (e) {}
     return {
       wu: wu,
       an: !wu && WC.ANWU_ZHI.indexOf(l.getDayZhi()) >= 0,
       bd: WC.isBaidouDay(l),
-      sd: !!WC.shendanName(l)
+      sd: !!WC.shendanName(l),
+      md: md
     };
   }
 
@@ -65,7 +72,8 @@ var YearView = (function () {
           var mk = marks(y, m, d);
           var cls = 'yv-day' + (mk.wu ? ' wu' : mk.an ? ' an' : '')
             + ((y === ty && m === tm && d === td) ? ' today' : '');
-          var dots = (mk.bd ? '<i class="yv-bd">★</i>' : '') + (mk.sd ? '<i class="yv-sd"></i>' : '');
+          var dots = (mk.bd ? '<i class="yv-bd">★</i>' : '') + (mk.sd ? '<i class="yv-sd"></i>' : '')
+            + mk.md.map(function (x) { return '<i class="yv-md" style="background:' + x.color + '" title="' + x.name + '"></i>'; }).join('');
           html += '<span class="' + cls + '" data-y="' + y + '" data-m="' + m + '" data-d="' + d + '">' + d + dots + '</span>';
         }
         html += '</div>';
@@ -136,6 +144,13 @@ var YearView = (function () {
           c.fillStyle = gold;
           c.beginPath(); c.arc(cx + 20, cy - 20, 7, 0, 7); c.fill();
         }
+        // 我的日子：彩色小点
+        if (mk.md && mk.md.length) {
+          for (var mi = 0; mi < mk.md.length; mi++) {
+            c.fillStyle = mk.md[mi].color || '#888';
+            c.beginPath(); c.arc(cx - 20 + mi * 14, cy + 22, 6, 0, 7); c.fill();
+          }
+        }
         if (y === ty && m === tm && d === td) {
           c.strokeStyle = teal; c.lineWidth = 3;
           c.beginPath(); c.arc(cx, cy, 30, 0, 7); c.stroke();
@@ -154,6 +169,7 @@ var YearView = (function () {
     lx = dot(lx, function (x, yy) { c.fillStyle = wuRed; c.beginPath(); c.arc(x + 12, yy, 12, 0, 7); c.fill(); }, '明戊日');
     lx = dot(lx, function (x, yy) { c.strokeStyle = wuRed; c.lineWidth = 3; c.beginPath(); c.arc(x + 12, yy, 12, 0, 7); c.stroke(); }, '暗戊日');
     lx = dot(lx, function (x, yy) { c.fillStyle = gold; c.beginPath(); c.arc(x + 12, yy, 8, 0, 7); c.fill(); }, '拜斗/神诞');
+    lx = dot(lx, function (x, yy) { c.fillStyle = '#888'; c.beginPath(); c.arc(x + 12, yy, 8, 0, 7); c.fill(); }, '我的日子');
     var url = cv.toDataURL('image/png');
     var b = window.WuBridge;
     if (b && typeof b.shareImage === 'function') {
@@ -175,7 +191,8 @@ var YearView = (function () {
       + '.mt{text-align:center;font-weight:bold;margin-bottom:6px}'
       + 'table{width:100%;border-collapse:collapse;font-size:12px;text-align:center}'
       + 'td,th{padding:3px}.wu{background:#b3402e;color:#fff;border-radius:50%}.an{border:1px solid #b3402e;border-radius:50%;color:#b3402e}.mk{color:#a8842c}'
-      + '.lg{text-align:center;margin-top:14px;color:#666;font-size:13px}</style></head><body>'
+      + '.lg{text-align:center;margin-top:14px;color:#666;font-size:13px}'
+      + '.mdn{font-size:10px;color:#888}</style></head><body>'
       + '<h1>' + y + '年 · ' + yg + '年戊日年览</h1><h2>戊日不上香</h2><div class="grid">';
     var wk = ['一', '二', '三', '四', '五', '六', '日'];
     for (var m = 1; m <= 12; m++) {
@@ -191,11 +208,12 @@ var YearView = (function () {
         var mk = marks(y, m, d);
         var cls = mk.wu ? 'wu' : mk.an ? 'an' : '';
         var star = (mk.bd || mk.sd) ? '<span class="mk">·</span>' : '';
-        html += '<td><span class="' + cls + '">' + d + '</span>' + star + '</td>';
+        var mdn = (mk.md && mk.md.length) ? '<br><span class="mdn">' + mk.md.map(function (x) { return x.icon || '●'; }).join('') + '</span>' : '';
+        html += '<td><span class="' + cls + '">' + d + '</span>' + star + mdn + '</td>';
       }
       html += '</tr></table></div>';
     }
-    html += '</div><div class="lg">● 明戊日 ○ 暗戊日 · 拜斗/神诞</div></body></html>';
+    html += '</div><div class="lg">● 明戊日 ○ 暗戊日 · 拜斗/神诞，下方图标为我的日子</div></body></html>';
     var b = window.WuBridge;
     if (b && typeof b.printHtml === 'function') {
       try { b.printHtml(html); return; } catch (e) {}
