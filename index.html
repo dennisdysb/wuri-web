@@ -12,6 +12,7 @@
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/meditation.css">
 </head>
 <body>
 <div id="app">
@@ -63,7 +64,7 @@
     <!-- 修行日程（Pro）入口 -->
     <section class="card" id="practice-entry-card">
       <div class="card-title" data-i18n="practice_title">修行打卡</div>
-      <p class="hint" data-i18n="practice_hint">每日打坐内练，早晚功课打卡；坚持就是修行。</p>
+      <p class="hint" data-i18n="practice_hint">每日打坐冥想、内练，早晚功课打卡；坚持就是修行。</p>
       <div class="btn-row">
         <button class="btn primary" id="practice-enter" data-i18n="practice_enter">进入修行打卡</button>
       </div>
@@ -84,6 +85,15 @@
       <p class="hint">摇一摇手机，龟壳落铜钱，六爻成卦，断吉凶。</p>
       <div class="btn-row">
         <button class="btn primary" id="liuyao-enter">开始占卜</button>
+      </div>
+    </section>
+
+    <!-- 紫微斗数（Pro）入口 -->
+    <section class="card" id="ziwei-entry-card">
+      <div class="card-title">紫微斗数</div>
+      <p class="hint">输入出生时间，安星布宫，起紫微命盘。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="ziwei-enter">开始排盘</button>
       </div>
     </section>
     <div class="tab-spacer"></div>
@@ -146,6 +156,7 @@
       <div class="detail-row"><span class="dl" data-i18n="d_jieqi">节气</span><span id="detail-jq"></span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_chongsha">冲煞</span><span id="detail-chong"></span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_zhishen">值神</span><span id="detail-zhishen"></span></div>
+      <details class="detail-note"><summary data-i18n="zs_note_title">值神说明</summary><p class="hint" data-i18n="zs_note"></p></details>
       <div class="yiji"><span class="yi" data-i18n="yi">宜</span><p id="detail-yi"></p></div>
       <div class="yiji"><span class="ji" data-i18n="ji">忌</span><p id="detail-ji"></p></div>
     </section>
@@ -167,7 +178,7 @@
     </div>
     <div id="jing-body">
       <div id="jing-home">
-        <div class="jing-search"><input id="jing-q" data-i18n-ph="jing_search_ph" placeholder="搜索经文…" aria-label="搜索经文"></div>
+        <div class="jing-search"><input id="jing-q" data-i18n-ph="jing_search_ph" placeholder="搜索经文…" aria-label="搜索经文"><button id="jing-q-clear" class="jing-q-clear" hidden aria-label="清除搜索">×</button></div>
         <div class="jing-filter">
       <button class="btn small active" data-jing-filter="all">全部</button>
       <button class="btn small" data-jing-filter="quanzhen">全真</button>
@@ -175,33 +186,40 @@
       <button class="btn small" id="jing-mymarks">我的标记</button>
     </div>
 <div id="jing-list"></div>
+<div id="jing-results" hidden></div>
 <div id="jing-marks" hidden></div>
       </div>
       <div id="jing-reader" hidden>
-        <div class="jing-rhead">
+        <div class="jing-rhead" style="position:sticky;top:0;z-index:100;background:var(--paper);padding:8px 0;">
           <button class="mini-btn" id="jing-back" data-i18n="jing_back">‹ 目录</button>
-          <div class="jing-rtools">
-            <button class="mini-btn tiny" id="jing-pybtn">注音开</button>
-            <button class="mini-btn tiny" id="jing-font-dec">小</button>
-            <button class="mini-btn tiny" id="jing-font-inc">大</button>
-            <button class="mini-btn tiny" id="jing-recite" data-i18n="jing_recite">背诵</button>
+          <div class="jing-rtools" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <button class="mini-btn tiny" id="jing-speak" data-i18n="jing_speak">诵读</button>
-            <button class="mini-btn tiny" id="jing-tts-set">语音设置</button>
+            <select id="jing-voice" class="mini-btn tiny">
+              <option value="male">男声</option>
+              <option value="female">女声</option>
+            </select>
+            <button class="mini-btn tiny" id="jing-download">下载</button>
             <button class="mini-btn tiny" id="jing-stop" data-i18n="jing_stop" hidden>停止</button>
-            <button class="mini-btn tiny" id="jing-foldall">全部展开</button>
+            <button class="mini-btn tiny" id="jing-pybtn">注音</button>
+            <button class="mini-btn tiny" id="jing-font-dec">字小</button>
+            <button class="mini-btn tiny" id="jing-font-inc">字大</button>
+            <button class="mini-btn tiny" id="jing-foldall">展开</button>
+            <button class="mini-btn tiny" id="jing-recite" data-i18n="jing_recite">背诵</button>
+            <button class="mini-btn tiny" id="jing-follow">跟读</button>
             <button class="mini-btn tiny" id="jing-bookmark">书签</button>
           </div>
         </div>
         <h2 id="jing-title" class="jing-book-title"></h2>
+        <div id="jing-subtitle" class="jing-book-subtitle" hidden></div>
         <div id="jing-content" class="jing-content"></div>
-        <!-- 高亮操作浮层 -->
-        <div id="hl-pop" class="hl-pop" hidden>
-          <button id="hl-add">高亮</button>
-        </div>
+        <!-- 高亮操作浮层（内容由 JS 动态生成：4色+取消，或写心得+换色+删除） -->
+        <div id="hl-pop" class="hl-pop" hidden></div>
         <!-- 敲磬悬浮按钮 -->
         <button id="qing-btn" class="qing-fab show" title="敲磬">磬</button>
         <!-- 阅读器浮动返回按钮 -->
         <button id="jing-back-fab" class="jing-back-fab show" title="返回目录">‹</button>
+        <!-- 书签悬浮按钮（仅内丹书） -->
+        <button id="jing-bookmark-fab" class="jing-bookmark-fab" title="加书签">✎</button>
       </div>
 
 
@@ -255,9 +273,9 @@
       <p class="hint" id="schedule-info"></p>
     </section>
 
-    <section class="card">
+    <section class="card" id="ics-subscribe">
       <h2>📅 日历订阅（推荐）</h2>
-      <p class="hint">网页版无法后台推送，订阅日历后由手机系统日历负责提醒，关掉网页、重启手机都照样响。选一种订阅：</p>
+      <p class="hint">网页版无法后台推送，订阅日历后由手机系统日历负责提醒，关掉网页、重启手机都照样响。选一种订阅（单选）：</p>
       <div class="form-row">
         <a class="btn" href="wuri-1day.ics">只提前1天提醒</a>
       </div>
@@ -301,6 +319,58 @@
         <p class="hint" data-i18n="adv_note">进阶提醒时间与戊日提醒相同。</p>
       </details>
     </section>
+    <section class="card" id="mydays-card">
+      <div class="card-title">我的日子 <button class="mini-btn" id="myday-add-btn">＋ 添加</button> <button class="mini-btn" id="myday-export-ics">导出 ICS</button></div>
+      <div id="myday-list"></div>
+      <div id="myday-form" hidden>
+        <div class="myday-row"><span class="myday-label">名称</span><input id="myday-name" class="myday-input" placeholder="如：母亲生日、结婚纪念日" maxlength="20"></div>
+        <div class="myday-row"><span class="myday-label">历法</span>
+          <button class="mini-btn myday-cal on" data-cal="lunar">农历</button>
+          <button class="mini-btn myday-cal" data-cal="solar">公历</button>
+        </div>
+        <div class="myday-row"><span class="myday-label">日期</span>
+          <select id="myday-month" class="myday-input"></select><span>月</span>
+          <select id="myday-day" class="myday-input"></select><span>日</span>
+        </div>
+        <div class="myday-row"><span class="myday-label">颜色</span><span id="myday-colors"></span></div>
+        <div class="myday-row"><span class="myday-label">图标</span><span id="myday-icons"></span></div>
+        <div class="myday-row"><span class="myday-label">提醒</span>
+          <label class="switch"><input type="checkbox" id="myday-remind-on" checked><span></span></label>
+        </div>
+        <div id="myday-timing" >
+          <div class="myday-row"><span class="myday-label">提醒时机</span>
+            <label class="preset"><input type="checkbox" class="myday-kind" value="today" checked> 当天</label>
+            <label class="preset"><input type="checkbox" class="myday-kind" value="day1"> 提前1天</label>
+            <label class="preset"><input type="checkbox" class="myday-kind" value="custom"> 自选</label>
+          </div>
+          <div class="myday-row" id="myday-offset-row" hidden>
+            <span class="myday-label">提前</span>
+            <input type="number" id="myday-offset-num" class="myday-input" min="0" max="30" value="3" style="width:60px"> 天
+          </div>
+          <div class="myday-row"><span class="myday-label">提醒时间</span>
+            <input type="time" id="myday-time" class="myday-input" value="08:00">
+          </div>
+        </div>
+        <div class="myday-row"><button class="btn primary small" id="myday-save">保存</button>
+          <button class="mini-btn" id="myday-cancel">取消</button></div>
+      </div>
+      <p class="hint">添加后会在黄历日历上显示彩色标记，也可以在年览中看到。</p>
+    </section>
+    <section class="card" id="jingrec-card">
+      <div class="card-title">每日经文推送</div>
+      <div class="row-between">
+        <div><div class="row-title">每日推送</div><div class="row-sub">按神诞节日推送今日宜读经文</div></div>
+        <label class="switch"><input type="checkbox" id="jingrec-on"><span></span></label>
+      </div>
+      <div class="row-between" id="jingrec-time-row" hidden>
+        <div><div class="row-title">推送时间</div></div>
+        <input type="time" id="jingrec-time" value="07:00">
+      </div>
+      <div class="row-between" id="jingrec-test-row" hidden>
+        <div><div class="row-title">测试跳转</div><div class="hint">模拟点通知，直接跳今日经文</div></div>
+        <button class="mini-btn" id="jingrec-test-btn">测试跳转</button>
+      </div>
+    </section>
     <section class="card">
       <div class="card-title" data-i18n="perm_title">权限状态</div>
       <div class="detail-row"><span class="dl" data-i18n="perm_notif">通知权限</span><span id="perm-notif" data-i18n="perm_checking">检测中…</span></div>
@@ -312,7 +382,6 @@
       <p class="hint" id="perm-hint" data-i18n="perm_hint">如果提醒不准时，请到手机「设置 → 应用 → 戊日不上香」中允许「通知」与「闹钟和提醒」。应用被省电策略清理后台也可能影响提醒，可将本应用设为「不受电池优化限制」。</p>
     </section>
 
-    <!--TEST-ONLY-->
     <section class="card">
       <div class="card-title" data-i18n="test_title">测试提醒</div>
       <div class="btn-row">
@@ -321,7 +390,6 @@
       <p class="hint" id="test-info"></p>
       <p class="hint" data-i18n="test_hint1">测试用，不影响正式提醒排期。点击后约 15 秒内发出一条测试通知，用于验证通知权限与提醒通道是否正常。</p>
     </section>
-    <!--/TEST-ONLY-->
     <div class="tab-spacer"></div>
   </main>
 
@@ -352,25 +420,10 @@
     </section>
 
     <section class="card" id="ly-result-card" hidden>
-      <div class="card-title">本卦</div>
-      <div class="ly-gua-display">
-        <div class="ly-gua-lines" id="ly-lines"></div>
-        <div class="ly-gua-info">
-          <div class="ly-gua-name" id="ly-gua-name"></div>
-          <div class="ly-gua-ci" id="ly-gua-ci"></div>
-        </div>
-      </div>
-      <div id="ly-biangua" hidden>
-        <div class="card-title">变卦</div>
-        <div class="ly-gua-display">
-          <div class="ly-gua-lines" id="ly-lines-bian"></div>
-          <div class="ly-gua-info">
-            <div class="ly-gua-name" id="ly-gua-name-bian"></div>
-            <div class="ly-gua-ci" id="ly-gua-ci-bian"></div>
-          </div>
-        </div>
-      </div>
       <div class="ly-yao-detail" id="ly-yao-detail"></div>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn primary" id="ly-ai-btn">调用 AI 分析</button>
+      </div>
     </section>
 
     <section class="card">
@@ -378,6 +431,103 @@
         <summary class="card-title" style="cursor:pointer">历史记录 <span id="ly-history-count" style="font-weight:400;font-size:.85rem;color:var(--muted)"></span></summary>
         <div id="ly-history-list"></div>
       </details>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 紫微斗数（Pro） ============ -->
+  <main id="view-ziwei" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('ziwei-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="ziwei-back">‹ 返回</button>
+      <h1 class="brand-title">紫微斗数</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <nav class="bz-tabs">
+      <button data-zwtab="input" class="active">起盘</button>
+      <button data-zwtab="result">命盘</button>
+      <button data-zwtab="history">记录</button>
+    </nav>
+    <section class="card" id="zw-tab-input">
+      <div class="card-title" data-i18n="ziwei_input">出生信息</div>
+      <div class="form-row">
+        <label for="zw-name" data-i18n="ziwei_name">姓名</label>
+        <input type="text" id="zw-name" data-i18n-ph="ziwei_name_ph" placeholder="可选">
+      </div>
+      <div class="form-row">
+        <label data-i18n="ziwei_gender">性别</label>
+        <label class="radio"><input type="radio" name="zw-gender" value="1" checked> <span data-i18n="ziwei_male">男</span></label>
+        <label class="radio"><input type="radio" name="zw-gender" value="0"> <span data-i18n="ziwei_female">女</span></label>
+      </div>
+      <div class="form-row">
+        <label data-i18n="ziwei_calendar">历法</label>
+        <label class="radio"><input type="radio" name="zw-cal" value="solar" checked> <span data-i18n="ziwei_solar">公历</span></label>
+        <label class="radio"><input type="radio" name="zw-cal" value="lunar"> <span data-i18n="ziwei_lunar">农历</span></label>
+      </div>
+      <div class="form-row">
+        <label for="zw-date" data-i18n="ziwei_birth_date">出生日期</label>
+        <input type="date" id="zw-date" min="1900-01-01" max="2100-12-31">
+      </div>
+      <div class="form-row">
+        <label for="zw-time" data-i18n="ziwei_birth_time">出生时间</label>
+        <input type="time" id="zw-time">
+      </div>
+      <p class="hint" data-i18n="ziwei_time_hint">时间不详可留空，则只排三柱（年/月/日）。</p>
+      <div class="form-row">
+        <label class="check"><input type="checkbox" id="zw-true"> <span data-i18n="ziwei_true_solar">真太阳时换算</span></label>
+      </div>
+      <div class="form-row">
+        <label data-i18n="ziwei_birthplace">出生地区</label>
+        <button type="button" class="btn" id="zw-city-btn" style="flex:1;text-align:left">请选择城市</button>
+        <input type="hidden" id="zw-lon" value="116.42">
+        <input type="hidden" id="zw-cityname" value="">
+      </div>
+      <p class="hint" id="zw-city-hint">按城市经度自动换算真太阳时（未含均时差，仅供参考）。</p>
+      <!-- 城市选择器弹窗 -->
+      <div id="zw-city-modal" hidden>
+        <div class="zw-city-box">
+          <div class="zw-city-head">
+            <input type="text" id="zw-city-search" placeholder="搜索城市…">
+            <button class="mini-btn" id="zw-city-close">关闭</button>
+          </div>
+          <div class="zw-city-nav" id="zw-city-nav"></div>
+          <div class="zw-city-list" id="zw-city-list"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="zw-group">分组</label>
+        <select id="zw-group">
+          <option value="">未分组</option>
+          <option value="自己">自己</option>
+          <option value="家人">家人</option>
+          <option value="亲戚">亲戚</option>
+          <option value="朋友">朋友</option>
+          <option value="同学">同学</option>
+          <option value="同事">同事</option>
+          <option value="客户">客户</option>
+          <option value="__custom">+ 自定义…</option>
+        </select>
+        <input type="text" id="zw-group-custom" placeholder="输入自定义分组" style="display:none;flex:1">
+      </div>
+      <div class="form-row">
+        <label class="check"><input type="checkbox" id="zw-save" checked> <span data-i18n="ziwei_save_hist">保存到历史记录</span></label>
+      </div>
+      <p class="hint" data-i18n="ziwei_gender_hint">性别影响大运顺逆。真太阳时按出生地经度换算，仅供参考。</p>
+      <div class="btn-row">
+        <button class="btn primary big" id="zw-go" data-i18n="ziwei_go">起盘</button>
+      </div>
+    </section>
+    
+    <section class="card" id="zw-tab-result" hidden>
+      <div id="zw-chart" class="zw-zoom-wrap"></div>
+      <div id="zw-info"></div>
+      <div class="btn-row" style="margin-top:10px">
+        <button class="btn primary" id="zw-ai-btn">调用 AI 分析</button>
+      </div>
+    </section>
+    <section class="card" id="zw-tab-history" hidden>
+      <div class="card-title">历史记录</div>
+      <div id="zw-history-list"></div>
     </section>
     <div class="tab-spacer"></div>
   </main>
@@ -419,6 +569,13 @@
       <p class="hint" data-i18n="tz_hint">身在海外时，若按国内老黄历对照请选择「北京时间」。</p>
     </section>
     <section class="card">
+      <div class="card-title" data-i18n="me_timebase">时间基准</div>
+      <label class="radio"><input type="radio" name="timebase" value="true" checked> <span data-i18n="tb_true">真太阳时（推荐）</span></label>
+      <label class="radio"><input type="radio" name="timebase" value="local"> <span data-i18n="tb_local">当地平太阳时</span></label>
+      <div class="detail-row"><span class="dl" data-i18n="tb_lon">经度（°）</span><span><input id="cfg-lon" inputmode="decimal" placeholder="如 116.40" style="width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:transparent;color:inherit;" autocomplete="off"></span></div>
+      <p class="hint" data-i18n="tb_hint">真太阳时按经度换算，用于时辰判定（时值神、此刻干支时柱）。不填经度时暂按当地平时计算。</p>
+    </section>
+    <section class="card">
       <div class="card-title" data-i18n="me_theme">外观主题</div>
       <label class="radio"><input type="radio" name="theme" value="auto" checked> <span data-i18n="theme_auto">跟随系统</span></label>
       <label class="radio"><input type="radio" name="theme" value="day"> <span data-i18n="theme_day">白天 · 宣纸</span></label>
@@ -433,7 +590,21 @@
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
       <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.1.0</span></div>
+      <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
+      <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
+      <p class="hint">使用中有问题或建议，欢迎发邮件反馈。</p>
+    </section>
+    <section class="card">
+      <div class="card-title">数据备份</div>
+      <p class="hint">心得、高亮、书签、八字排盘、六爻记录、修行打卡等都保存在本机。正常更新 App 不会丢失，但卸载重装会清空。建议定期导出备份。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="backup-export">导出备份</button>
+        <label class="btn" style="display:inline-block;cursor:pointer;">导入恢复
+          <input type="file" id="backup-import" accept=".json,application/json" style="display:none;">
+        </label>
+      </div>
+      <p class="hint" id="backup-msg"></p>
     </section>
     <section class="card">
       <details>
@@ -445,6 +616,12 @@
           <p data-i18n="priv_p2"></p>
           <p>· <span data-i18n="priv_perm1"></span><br>· <span data-i18n="priv_perm2"></span></p>
           <p data-i18n="priv_p3"></p>
+        </div>
+      </details>
+      <details>
+        <summary data-i18n="disclaimer_title">免责声明</summary>
+        <div class="privacy">
+          <p data-i18n="disclaimer"></p>
         </div>
       </details>
     </section>
@@ -485,6 +662,12 @@
           <button class="mini-btn tiny" data-dur="30">30分钟</button>
           <button class="mini-btn tiny" data-dur="custom">自选</button>
           <input type="number" id="daka-custom-min" class="daka-custom-min" min="1" max="180" placeholder="分钟" hidden>
+        </div>
+        <div class="daka-dur-row daka-bgm-wrap" id="daka-bgm-row">
+          <span class="daka-bgm-label">背景音乐</span>
+          <select id="daka-bgm-select" class="daka-bgm-select" aria-label="选择背景音乐"></select>
+          <button class="mini-btn tiny" id="daka-bgm-toggle" hidden aria-label="背景音乐暂停/继续"></button>
+          <input type="range" id="daka-bgm-vol" class="daka-bgm-vol" min="0" max="100" value="60" hidden title="音量">
         </div>
         <div class="daka-timer-time" id="daka-timer-time">15:00</div>
         <div class="btn-row">
@@ -600,8 +783,19 @@
         </div>
       </div>
       <div class="form-row">
-        <label for="bz-group" data-i18n="bazi_group">分组</label>
-        <input type="text" id="bz-group" data-i18n-ph="bazi_group_ph" placeholder="如：家人（可选）">
+        <label for="bz-group">分组</label>
+        <select id="bz-group">
+          <option value="">未分组</option>
+          <option value="自己">自己</option>
+          <option value="家人">家人</option>
+          <option value="亲戚">亲戚</option>
+          <option value="朋友">朋友</option>
+          <option value="同学">同学</option>
+          <option value="同事">同事</option>
+          <option value="客户">客户</option>
+          <option value="__custom">+ 自定义…</option>
+        </select>
+        <input type="text" id="bz-group-custom" placeholder="输入自定义分组" style="display:none;flex:1">
       </div>
       <div class="form-row">
         <label class="check"><input type="checkbox" id="bz-save" checked> <span data-i18n="bazi_save_hist">保存到历史记录</span></label>
@@ -616,6 +810,9 @@
       <div id="bz-hist-list"></div>
     </section>
     <section class="card" id="bz-tab-result" hidden></section>
+    <div class="btn-row" style="margin:0 14px">
+      <button class="btn primary" id="bz-ai-btn" hidden>调用 AI 分析</button>
+    </div>
     <div class="tab-spacer"></div>
   </div>
 
@@ -626,15 +823,63 @@
       <div class="pay-title" data-i18n="pro_title">高级版</div>
       <div class="pay-sub" data-i18n="pro_pay_sub">一次买断，永久使用</div>
       <ul class="pay-feats">
-        <li data-i18n="pro_feat_jing">经文库：道藏精选、拼音注音、诵读、全文检索</li>
-        <li data-i18n="pro_feat_widget">桌面小组件：每日干支与戊日一目了然</li>
-        <li data-i18n="pro_feat_year">全年总览：一页纵览全年戊日，导出分享</li>
-        <li data-i18n="pro_feat_practice">修行日程：诵经打坐排期，自动校验戊日</li>
-        <li data-i18n="pro_feat_bazi">八字排盘：出生时间一键起盘</li>
+        <li>内丹经文库：黄庭内景经、周易参同契等内丹典籍</li>
+        <li>经文 MP3 诵读：真人诵读，可下载离线听</li>
+        <li>桌面小组件：每日干支与戊日一目了然</li>
+        <li>修行日程：诵经打坐冥想排期，自动校验戊日</li>
+        <li>八字排盘：出生时间一键起盘</li>
+        <li>紫微斗数：紫微命盘排盘</li>
+        <li>六爻占卜：铜钱起卦、装卦断卦</li>
+        <li>数据备份：导出导入，换机不丢失</li>
       </ul>
       <button class="btn primary big" data-pro-act="buy"><span data-i18n="pro_buy">立即解锁</span> · <span data-pro-price>US$4.99</span></button>
       <button class="linklike" data-pro-act="restore" data-i18n="pro_restore">恢复购买</button>
       <p class="hint small" data-i18n="pro_pay_note">通过 Google Play 安全支付。更换设备或重装后，可用「恢复购买」找回高级版。</p>
+    </div>
+  </div>
+
+  <!-- ============ 打坐冥想（沉浸页） ============ -->
+  <div id="meditation-view" hidden>
+    <div class="med-bg-stack" id="med-bg-stack"></div>
+    <div class="med-scrim-top"></div>
+    <div class="med-scrim-bottom"></div>
+    <div class="med-pager" id="med-pager"></div>
+    <header class="med-topbar">
+      <button class="med-back" id="med-back" aria-label="返回">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <h1 class="med-title">打坐冥想</h1>
+      <span class="med-top-sp"></span>
+    </header>
+    <div class="med-center">
+      <div class="med-sound-name" id="med-sound-name">温柔雨声</div>
+      <div class="med-clock" id="med-clock">15:00</div>
+      <div class="med-dots" id="med-dots"></div>
+    </div>
+    <div class="med-controls">
+      <div class="med-dur-row" id="med-dur-row">
+        <button class="med-seg on" data-dur="15">15分钟</button>
+        <button class="med-seg" data-dur="30">30分钟</button>
+        <button class="med-seg" data-dur="custom">自选</button>
+        <input type="number" id="med-custom-min" class="med-custom-min" min="1" max="180" placeholder="分钟" hidden>
+        <button class="med-seg med-custom-go" id="med-custom-go" hidden>开始</button>
+      </div>
+      <div class="med-bell-row">
+        <label class="med-switch"><input type="checkbox" id="med-bell-toggle" checked><span class="med-switch-ui"></span></label>
+        <span class="med-bell-label">间隔磬 · 每5分钟</span>
+      </div>
+      <button class="med-play" id="med-play" aria-label="播放/暂停"></button>
+      <input type="range" id="med-vol" class="med-vol" min="0" max="100" value="70" aria-label="音量">
+    </div>
+    <div class="med-done" id="med-done" hidden>
+      <div class="med-done-card">
+        <div class="med-done-title">冥想完成</div>
+        <div class="med-done-sub" id="med-done-sub"></div>
+        <div class="btn-row">
+          <button class="btn primary" id="med-again">再来一次</button>
+          <button class="btn" id="med-done-back">返回</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -645,14 +890,21 @@
 <script src="js/capacitor.js"></script>
 <script src="js/ln-plugin.js"></script>
 <script src="js/i18n.js"></script>
+<script src="js/zhishen-data.js"></script>
 <script src="js/app.js"></script>
 <script src="js/pro.js"></script>
   <script src="js/liuyao.js"></script>
 <script src="js/yearview.js"></script>
+<script src="js/media-session.js"></script>
 <script src="js/practice.js"></script>
+<script src="js/meditation.js"></script>
 <script src="js/citydata.js"></script>
 <script src="js/bazi.js"></script>
+<script src="js/iztro.min.js"></script>
+<script src="js/ziwei.js"></script>
+<script src="js/ai-analysis.js"></script>
 <script src="jing/index.js"></script>
+<script src="js/t2s.js"></script>
 <script src="js/jingwen.js"></script>
 <script>
 // PWA: 注册 Service Worker（原生壳内跳过，file:// 不支持 SW）
