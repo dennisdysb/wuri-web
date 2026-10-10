@@ -9,6 +9,7 @@
 :root{
   color-scheme:light;
   --paper:#F5F1E5;        /* 宣纸 */
+  --bg:var(--paper);      /* 别名：页面背景 */
   --paper-2:#EEE8D3;      /* 宣纸深 */
   --card:#FCFAF2;         /* 卡面 */
   --ink:#2A251B;          /* 墨 */
@@ -34,12 +35,13 @@
   --shadow:0 1px 2px rgba(74,62,36,.06),0 8px 20px rgba(74,62,36,.06);
   --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
   --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
-  /* 四柱五行配色（日间·宣纸底）：木绿 火红 土黄 金金色 水深蓝 */
-  --wx-mu:#2E7D32; --wx-huo:#C62828; --wx-tu:#8A6D1B; --wx-jin:#93701F; --wx-shui:#1565C0;
+  /* 四柱五行配色（日间·宣纸底）：木绿 火红 土褐 金金色 水深蓝（2026-10-09 用户定：土改褐色） */
+  --wx-mu:#2E7D32; --wx-huo:#C62828; --wx-tu:#7A4E1D; --wx-jin:#B8860B; --wx-shui:#1565C0;
 }
 [data-theme="night"]{
   color-scheme:dark;
   --paper:#060608;        /* 玄黑 */
+  --bg:var(--paper);      /* 别名：页面背景 */
   --paper-2:#0b0b0e;
   --card:#0e0e12;
   --ink:#f0e9d6;          /* 月白 */
@@ -64,7 +66,7 @@
   --on-accent:#060608;
   --shadow:none;
   /* 四柱五行配色（夜间·玄青底） */
-  --wx-mu:#81C784; --wx-huo:#E57373; --wx-tu:#D9B64F; --wx-jin:#D4AF37; --wx-shui:#64B5F6;
+  --wx-mu:#81C784; --wx-huo:#E57373; --wx-tu:#C19A6B; --wx-jin:#E8C547; --wx-shui:#64B5F6;
 }
 /* 黑夜：衬线中文、宽字距标题、去厚重卡片、留白疏朗 */
 [data-theme="night"] body{font-family:var(--serif)}
@@ -292,6 +294,7 @@ body::before{
   min-height:62px;border-radius:12px;padding:5px 2px;cursor:pointer;
   border:1px solid transparent;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:3px;
+  min-width:0;overflow:hidden;
 }
 .day .s{font-family:var(--serif);font-size:1.12rem;line-height:1.35;color:var(--ink);font-variant-numeric:tabular-nums}
 .day .l{font-size:.72rem;color:var(--muted)}
@@ -300,7 +303,7 @@ body::before{
 .day.selected{background:var(--gold-wash);box-shadow:inset 0 0 0 1.5px var(--gold)}
 .day .s.wu{color:var(--cinnabar-deep)}
 [data-theme="night"] .day .s.wu{color:var(--cinnabar)}
-.day .dots{display:flex;gap:5px;justify-content:center;align-items:center;height:8px}
+.day .dots{display:flex;gap:4px;justify-content:center;align-items:center;height:8px;max-width:100%;overflow:hidden}
 .day .wdot{width:6px;height:6px;border-radius:50%;background:var(--cinnabar)}
 .day .bdot{width:5px;height:5px;border-radius:50%;border:1.5px solid var(--gold);opacity:.9}
 .legend{display:flex;gap:20px;justify-content:center;color:var(--muted);font-size:.88rem;margin-top:12px}
@@ -534,6 +537,9 @@ details[open] summary:before{content:"▾ "}
 .yv-day.today.wu{box-shadow:inset 0 0 0 2px var(--teal-deep)}
 .yv-bd{position:absolute;top:0;right:2px;font-size:.6rem;color:var(--gold-deep);font-style:normal}
 .yv-sd{position:absolute;top:2px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--gold-deep)}
+.yv-md{position:absolute;bottom:2px;left:4px;width:6px;height:6px;border-radius:50%;font-style:normal}
+.yv-md + .yv-md{left:12px}
+.yv-md + .yv-md + .yv-md{left:20px}
 
 /* ---------- 经文库（Pro） ---------- */
 .jing-search{margin:4px 0 10px;position:relative}
@@ -558,13 +564,18 @@ details[open] summary:before{content:"▾ "}
 .jing-content{line-height:2.1;color:var(--ink);font-family:var(--serif)}
 .jing-sec-h{font-size:1.08em;margin:22px 0 8px;color:var(--ink);display:flex;align-items:center;gap:10px}
 .jing-para{margin:0 0 12px;text-align:left}
+/* 跟读模式 */
+#jing-content.follow-on .jing-para{cursor:pointer;border-radius:6px;padding:4px 6px;margin:0 -6px 8px;transition:background .2s}
+#jing-content.follow-on .jing-para:hover{background:rgba(200,170,90,.12)}
+#jing-content.follow-on .jing-para.follow-cur{background:rgba(200,170,90,.22);box-shadow:inset 3px 0 0 var(--gold,#c8a95a)}
+#jing-follow.on{background:var(--gold,#c8a95a);color:#fff;border-color:transparent}
 .jing-content ruby rt{font-size:.52em;color:var(--gold-deep);font-family:var(--sans)}
 .jing-content.no-py ruby rt{display:none}
 
 /* ============ 修行日程（Pro） ============ */
 #practice-view{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 40px}
 #practice-view[hidden]{display:none}
-#practice-view .appbar{position:sticky;top:0;z-index:2}
+#practice-view .appbar{position:sticky;top:0;z-index:2;background:var(--paper)}
 .appbar-spacer{flex:1}
 .practice-tabs{display:flex;gap:8px;padding:12px 16px 0}
 .practice-tabs button{flex:1;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-size:1rem;cursor:pointer}
@@ -636,7 +647,9 @@ details[open] summary:before{content:"▾ "}
   src: url('../fonts/jing-serif.ttf') format('truetype');
   font-display: swap;
 }
-#jing-reader { padding-top: max(8px, env(safe-area-inset-top)); }
+#jing-reader { padding-top: 0; }
+/* 阅读器吸顶工具栏：留出状态栏高度，避免按钮被系统栏挡住 */
+#jing-reader .jing-rhead { padding-top: max(28px, env(safe-area-inset-top)) !important; }
 .jing-content {
   font-family: 'JingSerif', 'Songti SC', 'Noto Serif SC', serif;
   line-height: 2.6;
@@ -940,19 +953,19 @@ details[open] summary:before{content:"▾ "}
 .recite-sen.open{border-bottom-style:solid;background:#faf6ea}
 .recite-sen.open .recite-first{font-weight:400;font-size:1em}
 
-/* 阅读器浮动返回按钮（左下） */
+/* 阅读器浮动返回按钮（左下，需盖过音频悬浮条 z-index:10000） */
 .jing-back-fab{position:fixed;left:18px;bottom:90px;width:56px;height:56px;border-radius:50%;
   background:var(--teal-deep);color:#fff;font-size:1.8rem;line-height:1;
   border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
-  z-index:60;display:none}
+  z-index:10001;display:none}
 .jing-back-fab.show{display:block}
 .jing-back-fab:active{transform:scale(.92)}
 
-/* 书签悬浮按钮（仅内丹书阅读时显示） */
+/* 书签悬浮按钮（仅内丹书阅读时显示，层级同返回键） */
 .jing-bookmark-fab{position:fixed;left:18px;bottom:160px;width:56px;height:56px;border-radius:50%;
   background:#b8860b;color:#fff;font-size:1.5rem;line-height:1;
   border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
-  z-index:60;display:none}
+  z-index:10001;display:none}
 .jing-bookmark-fab.show{display:block}
 .jing-bookmark-fab:active{transform:scale(.92)}
 
@@ -1122,7 +1135,8 @@ details[open] summary:before{content:"▾ "}
 .zw-c-dayun{font-size:9px;color:#888;margin:2px 0}
 .view{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:50;overflow-y:auto;padding:0 16px 80px}
 .view[hidden]{display:none}
-#view-liuyao{background:#f5f0e6 !important;}
+#view-liuyao{background:var(--bg);}
+[data-theme="night"] #view-liuyao{background:var(--bg);}
 /* 六爻专业排版：无边框 + 粗爻线 */
 .ly-pro-header,.ly-pro-row{display:flex;align-items:center;padding:8px 0;font-size:0.95rem}
 .ly-pro-header{font-weight:bold;color:var(--ink-2);border-bottom:1px solid var(--line);margin-bottom:4px}
@@ -1194,3 +1208,48 @@ details[open] summary:before{content:"▾ "}
 .lyx sup{color:#c0392b;font-size:10px}
 [data-theme="night"] .lyx-y,[data-theme="night"] .lyx-n{background:#e0e0e0}
 .ly-cat-sel{padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:0.9rem}
+
+/* ---------- 我的日子（黄历自定义纪念日） ---------- */
+#mydays-card .card-title{display:flex;align-items:center;justify-content:space-between}
+#myday-list .myday-item{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)}
+#myday-list .myday-item:last-child{border-bottom:none}
+.myday-dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto}
+.myday-item .myday-icon{font-size:1.2rem}
+.myday-item .myday-info{flex:1}
+.myday-item .myday-nm{font-weight:600}
+.myday-item .myday-dt{font-size:.82rem;color:var(--sub)}
+#myday-form{padding:8px 4px}
+.myday-row{display:flex;align-items:center;gap:8px;margin:10px 0;flex-wrap:wrap}
+.myday-label{width:44px;color:var(--sub);font-size:.9rem;flex:0 0 auto}
+.myday-input{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:1rem}
+.myday-cal.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+#myday-colors .cchip{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:inline-block;margin:2px}
+#myday-colors .cchip.on{border-color:var(--ink)}
+#myday-icons .ichip{font-size:1.4rem;padding:4px 6px;border-radius:8px;cursor:pointer;border:2px solid transparent}
+#myday-icons .ichip.on{border-color:var(--gold);background:var(--card)}
+.mdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:2px;vertical-align:middle}
+.dtag.tag-myday{background:var(--card);border:1px solid var(--line);}
+/* ---------- 每日经文推荐 ---------- */
+.jing-rec-body{display:flex;align-items:center;gap:12px;padding:8px 4px;cursor:pointer}
+.jing-rec-body .rec-icon{font-size:2rem}
+.jing-rec-body .rec-info{flex:1}
+.jing-rec-body .rec-title{font-weight:600;font-size:1.05rem}
+.jing-rec-body .rec-reason{font-size:.85rem;color:var(--sub);margin-top:2px}
+.jing-rec-body .rec-go{color:var(--gold-deep);font-size:1.2rem}
+/* ---------- 内练背景音乐下拉 ---------- */
+.daka-bgm-select{
+  padding:8px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);color:var(--ink);font-size:.95rem;
+  max-width:180px;cursor:pointer;
+}
+
+/* 每日经文推送时间：圆角样式，与提醒时间一致（用户 2026-10-09） */
+#jingrec-time{
+  padding:10px 16px;font-size:1rem;border:1px solid var(--line);border-radius:14px;
+  background:var(--card);color:var(--ink);font-family:var(--sans);
+}
+
+/* 经文章节跳转时，顶部留出按钮栏的距离（用户 2026-10-09） */
+#jing-reader .jing-sec {
+  scroll-margin-top: 120px;
+}
