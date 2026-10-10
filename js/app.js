@@ -75,6 +75,7 @@ function loadCfg() {
     wu: { on: !(c.wu && c.wu.on === false), kinds: wu.kinds, offsetMin: wu.offsetMin, time: (c.wu && c.wu.time) || '17:00' },
     baidou: { on: !!(c.baidou && c.baidou.on) },
     anwu: { on: !!(c.anwu && c.anwu.on) },
+    jingrec: { on: !!(c.jingrec && c.jingrec.on), time: (c.jingrec && c.jingrec.time) || '07:00' },
     advTiming: { kinds: advTiming.kinds, offsetMin: advTiming.offsetMin },
     adv: Object.assign({}, DEFAULTS.adv, (c.adv || {}))
   };
@@ -107,7 +108,10 @@ function gzDay(y, m, d) { var l = lunarOf(y, m, d); return l.getDayGan() + l.get
 function cap() { return window.Capacitor || null; }
 function isNative() {
   var c = cap();
-  return !!(c && c.isNativePlatform && c.isNativePlatform());
+  if (c && c.isNativePlatform && c.isNativePlatform()) return true;
+  // 原生 WebView 版：WuBridge 存在即为原生（用户 2026-10-09：isNative 不认 WuBridge 导致排期不跑）
+  try { if (window.WuBridge) return true; } catch (e) {}
+  return false;
 }
 function isIOS() {
   var c = cap();
@@ -144,6 +148,8 @@ $$('#tabbar button').forEach(function (btn) {
       if (v) v.hidden = true;
     });
     if (btn.getAttribute('data-tab') === 'tab-remind') refreshPermUI();
+    // 切到黄历时刷新日历（我的日子等标记及时显示）
+    if (btn.getAttribute('data-tab') === 'tab-cal') { try { renderCalendar(); } catch (e) {} }
     // 进入经文 tab 时重置回目录页（问题1修复）
     if (btn.getAttribute('data-tab') === 'tab-jing') {
       if (window.JingWen && window.JingWen.resetToCatalog) {
@@ -312,8 +318,10 @@ function renderCalendar() {
       var an = !wu && ANWU_ZHI.indexOf(l.getDayZhi()) >= 0;
       var bd = isBaidouDay(l); // 拜斗日标记（初一十五另有含义时仍保留叠加）
       var sd = shendanName(l); // 神诞日标记（寿桃）
+      var mds = myDaysOn(l); // 我的日子标记（彩色点）
       var ltxt = l.getDay() === 1 ? tx(l.getMonthInChinese()) + '月' : tx(l.getDayInChinese());
-      var dots = '<span class="dots">' + (wu ? '<span class="wdot"></span>' : '') + (an ? '<span class="adot"></span>' : '') + (bd ? '<span class="bdot">★</span>' : '') + (sd ? '<span class="sdot">🍑</span>' : '') + '</span>';
+      var dots = '<span class="dots">' + (wu ? '<span class="wdot"></span>' : '') + (an ? '<span class="adot"></span>' : '') + (bd ? '<span class="bdot">★</span>' : '') + (sd ? '<span class="sdot">🍑</span>' : '')
+        + mds.map(function (x) { return '<span class="mdot" style="background:' + escA(x.color) + '"></span>'; }).join('') + '</span>';
       cell.innerHTML = '<span class="s' + (wu ? ' wu' : an ? ' anwu' : '') + '">' + d + '</span>' +
         '<span class="l">' + ltxt + '</span>' + dots;
       cell.addEventListener('click', function () {
@@ -355,7 +363,16 @@ function renderDetail() {
   if (an) tags.push([t('tag_an'), 'tag-an']);
   if (isBaidouDay(l)) tags.push([t('tag_baidou'), 'tag-bd']);
   var sdn = shendanName(l);
-  if (sdn) tags.push([tx(sdn), 'tag-sd']);
+  if (sdn) {
+    // 同日多神：拆成多个标签，避免单个标签过长溢出
+    sdn.split('、').forEach(function (nm) {
+      nm = nm.trim();
+      if (nm) tags.push([tx(nm), 'tag-sd']);
+    });
+  }
+  myDaysOn(l).forEach(function (x) {
+    tags.push([escA(x.icon) + ' ' + escA(x.name), 'tag-myday']);
+  });
   if (!isLeapM(l) && l.getDay() === 1) tags.push([t('tag_chuyi'), 'tag-lunar']);
   if (!isLeapM(l) && l.getDay() === 15) tags.push([t('tag_shiwu'), 'tag-lunar']);
   $('#detail-tags').innerHTML = tags.map(function (tg) {
@@ -496,29 +513,349 @@ function advTypesOf(l) {
   return out;
 }
 function nidWu(y, m, d, k) { return (y * 10000 + m * 100 + d) * 10 + (k || 0); }
+function nidJingRec(y, m, d) { return (60000000 + y * 10000 + m * 100 + d) * 10; }
+function nidMyDay(id, y, m, d) {
+  // 用日子 id 的 hash + 日期生成唯一 id（避免与 nidWu 冲突，用 65 开头）
+  var h = 0;
+  var s = String(id);
+  for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100000;
+  return (65000000 + h) * 100000 + (y % 100) * 10000 + m * 100 + d;
+}
 function nidBaidou(m, d, k) { return (80000000 + m * 100 + d) * 10 + (k || 0); }
 function nidAnwu(y, m, d, k) { return (70000000 + y * 10000 + m * 100 + d) * 10 + (k || 0); }
 var ADV_BASE = { gengshen: 1, jiazi: 2, chuyishiwu: 3, bajie: 4, sanyuan: 5, wula: 6, shendan: 7 };
 function nidAdv(k, m, d, j) { return (90000000 + ADV_BASE[k] * 2000 + m * 100 + d) * 10 + (j || 0); }
 
-/* ============ 神诞日表（农历，闰月不计） ============ */
+/* ============ 神诞日表（农历，闰月不计；2026-10-08 扩充至61个） ============
+ * 口径：宫观通行说法；多神同日以"、"并列；争议取最通行并标注。
+ * 未收：中岳大帝/三茅真君/萨守坚/葛玄/蓝采和（查无通行日期，不编造） */
 var SHENDAN = {
-  '1-1':'弥勒尊佛圣诞', '1-9':'玉皇大帝圣诞', '1-15':'上元天官圣诞', '1-19':'丘处机圣诞',
-  '2-2':'土地正神圣诞', '2-3':'文昌帝君圣诞', '2-6':'东华帝君圣诞', '2-15':'太上老君圣诞',
-  '3-3':'玄天上帝圣诞', '3-15':'赵公元帅圣诞', '3-23':'天后妈祖圣诞', '3-28':'东岳大帝圣诞',
-  '4-14':'吕洞宾圣诞', '4-18':'碧霞元君圣诞',
-  '5-13':'关圣帝君圣诞', '5-18':'张天师圣诞',
-  '7-7':'魁星圣诞', '7-15':'中元地官圣诞', '7-18':'王母娘娘圣诞', '7-19':'值年太岁圣诞',
-  '8-3':'灶君圣诞', '8-15':'太阴星君圣诞',
-  '9-9':'斗姥元君圣诞',
-  '10-15':'下元水官圣诞',
-  '11-11':'太乙救苦天尊圣诞',
-  '12-8':'王侯腊之辰'
+  '1-1':'天腊之辰', '1-4':'王重阳祖师羽化', '1-5':'五路财神圣诞', '1-6':'清水祖师圣诞',
+  '1-8':'八仙节', '1-9':'玉皇大帝圣诞', '1-13':'关圣帝君成道', '1-15':'上元天官圣诞、临水夫人圣诞',
+  '1-19':'丘处机圣诞',
+  '2-1':'太阳星君圣诞', '2-2':'土地正神圣诞', '2-3':'文昌帝君圣诞', '2-6':'东华帝君圣诞',
+  '2-15':'太上老君圣诞、九天玄女圣诞',
+  '3-3':'玄天上帝圣诞', '3-7':'何仙姑圣诞', '3-15':'赵公元帅圣诞', '3-23':'天后妈祖圣诞',
+  '3-28':'东岳大帝圣诞',
+  '4-4':'文财神比干圣诞', '4-9':'张三丰圣诞', '4-14':'吕洞宾圣诞', '4-15':'汉钟离圣诞',
+  '4-18':'碧霞元君圣诞、紫微大帝圣诞', '4-21':'托塔李天王圣诞',
+  '5-5':'地腊之辰、赵公元帅飞升', '5-13':'关圣帝君圣诞、城隍圣诞（台北霞海城隍庙·各地不一）',
+  '5-18':'张天师圣诞', '5-20':'吕洞宾成道日',
+  '6-24':'雷祖圣诞、二郎神诞日',
+  '7-7':'魁星圣诞、道德腊之辰', '7-10':'铁拐李圣诞', '7-15':'中元地官圣诞',
+  '7-18':'王母娘娘圣诞', '7-19':'值年太岁圣诞', '7-22':'财神节',
+  '8-1':'许真君飞升日', '8-3':'灶君圣诞、北斗星君圣诞', '8-10':'曹国舅圣诞、北岳大帝生辰',
+  '8-15':'太阴星君圣诞',
+  '9-1':'九皇大帝圣诞', '9-2':'九皇大帝圣诞', '9-3':'九皇大帝圣诞', '9-4':'九皇大帝圣诞',
+  '9-5':'九皇大帝圣诞', '9-6':'九皇大帝圣诞', '9-7':'九皇大帝圣诞', '9-8':'九皇大帝圣诞',
+  '9-9':'斗姥元君圣诞、妈祖飞升、玄天上帝飞升、哪吒圣诞、九皇大帝圣诞',
+  '10-1':'民岁腊之辰', '10-10':'张果老圣诞', '10-15':'下元水官圣诞',
+  '11-6':'西岳大帝圣诞', '11-9':'韩湘子圣诞', '11-11':'太乙救苦天尊圣诞',
+  '12-8':'王侯腊之辰', '12-16':'南岳大帝生辰', '12-22':'王重阳圣诞', '12-24':'灶君登天日'
 };
+/* ============ 每日经文推荐 ============
+ * 根据当日神诞/节日推荐相关经文，无对应时轮推通用经。
+ * 映射键为神诞名称中的关键词，值为经文 id（见 jing/index.js）。
+ * 2026-10-08 用户定：推荐卡片可点击，直跳经文阅读页。 */
+/* 按农历日期直配（2026-10-08 用户审定清单；多神同日取首个直配项） */
+var JING_RECOMMEND_BY_DATE = {
+  '1-1':'s10', '1-4':'s13', '1-5':'s15', '1-6':'s10', '1-8':'s10',
+  '1-9':'s27', '1-13':'s10', '1-15':'s03', '1-19':'s12',
+  '2-1':'s26', '2-2':'s10', '2-3':'s07', '2-6':'s26', '2-15':'s07',
+  '3-3':'s05', '3-7':'s26', '3-15':'s15', '3-23':'s28', '3-28':'s09',
+  '4-4':'s15', '4-9':'s18', '4-14':'s20', '4-15':'s19', '4-18':'s04', '4-21':'s10',
+  '5-5':'s10', '5-13':'s10', '5-18':'s01', '5-20':'s20',
+  '6-24':'s29',
+  '7-7':'s07', '7-10':'s26', '7-15':'s03', '7-18':'s26', '7-19':'s04', '7-22':'s15',
+  '8-1':'s10', '8-3':'s04', '8-10':'s26', '8-15':'s26',
+  '9-1':'s04', '9-2':'s04', '9-3':'s04', '9-4':'s04',
+  '9-5':'s04', '9-6':'s04', '9-7':'s04', '9-8':'s04', '9-9':'s04',
+  '10-1':'s10', '10-10':'s26', '10-15':'s03',
+  '11-6':'s09', '11-9':'s26', '11-11':'s09',
+  '12-8':'s10', '12-16':'s09', '12-22':'s13', '12-24':'s10',
+  'dongzhi':'s09', 'xiazhi':'s09' // 冬至元始天尊圣诞、夏至灵宝天尊圣诞
+};
+/* 无神诞对应时的通用经轮推：按（经文,章节）轮推，一天一章 */
+var JING_RECOMMEND_FALLBACK = ['s07', 's26', 's10', 's01', 's02', 's11', 's14'];
+/* 各经章节数（2026-10-09 实测）：多章节的按天轮章 */
+var JING_CHAPTER_COUNT = { s07: 81, s26: 1, s10: 1, s01: 67, s02: 19, s11: 33, s14: 1 };
+function recommendJing(l) {
+  var sdn = shendanName(l);
+  var reason = '日常熏修', sid = null;
+  if (sdn) {
+    // 先按日期直配
+    if (!isLeapM(l)) {
+      var key = l.getMonth() + '-' + l.getDay();
+      if (JING_RECOMMEND_BY_DATE[key]) {
+        sid = JING_RECOMMEND_BY_DATE[key];
+        reason = sdn.split('、')[0];
+      }
+    }
+    // 节气神诞（冬至/夏至）
+    if (!sid) {
+      try {
+        var jq = l.getJieQi();
+        if (jq === '冬至' && JING_RECOMMEND_BY_DATE['dongzhi']) {
+          sid = JING_RECOMMEND_BY_DATE['dongzhi']; reason = '元始天尊圣诞';
+        } else if (jq === '夏至' && JING_RECOMMEND_BY_DATE['xiazhi']) {
+          sid = JING_RECOMMEND_BY_DATE['xiazhi']; reason = '灵宝天尊圣诞';
+        }
+      } catch (e) {}
+    }
+    // 有神诞但无直配：用通用经（取神诞名作 reason）
+    if (!sid) reason = sdn.split('、')[0];
+  }
+  if (!sid) {
+    // 兜底：按日期轮推（一部经内按章节轮，一天一章）
+    var doy = 0;
+    try {
+      var s = l.getSolar();
+      var start = new Date(s.getYear(), 0, 1);
+      var cur = new Date(s.getYear(), s.getMonth() - 1, s.getDay());
+      doy = Math.floor((cur - start) / 86400000);
+    } catch (e) {}
+    // 先选经（7部轮），再在该经内按天轮章节
+    var fSid = JING_RECOMMEND_FALLBACK[doy % JING_RECOMMEND_FALLBACK.length];
+    var chCount = JING_CHAPTER_COUNT[fSid] || 1;
+    // 用 doy 除以 7 的商来轮章节，保证同一部经连续多天推不同章节
+    var secIdx = chCount > 1 ? Math.floor(doy / JING_RECOMMEND_FALLBACK.length) % chCount : 0;
+    return { sid: fSid, reason: reason, secIdx: chCount > 1 ? secIdx : null };
+  }
+  // 神诞日：推整部经文（不指定章节）
+  return { sid: sid, reason: reason, secIdx: null };
+}
+function jingTitleById(sid) {
+  try {
+    var idx = window.JINGWEN_INDEX || [];
+    for (var i = 0; i < idx.length; i++) {
+      if (idx[i].id === sid) return idx[i].title;
+    }
+  } catch (e) {}
+  return sid;
+}
 function shendanName(l) {
   if (isLeapM(l)) return null;
-  return SHENDAN[l.getMonth() + '-' + l.getDay()] || null;
+  var r = SHENDAN[l.getMonth() + '-' + l.getDay()] || null;
+  if (r) return r;
+  /* 节气口径：冬至元始天尊圣诞、夏至灵宝天尊圣诞 */
+  try {
+    var jq = l.getJieQi();
+    if (jq === '冬至') return '元始天尊圣诞';
+    if (jq === '夏至') return '灵宝天尊圣诞';
+  } catch (e) {}
+  return null;
 }
+
+/* ============ 我的日子（用户自定义纪念日，存在本地） ============ */
+var LS_MYDAYS = 'wuri_mydays';
+var MYDAY_COLORS = ['#dc143c', '#e8912d', '#2e8b57', '#4169e1', '#8b5cf6', '#d4a017'];
+var MYDAY_ICONS = ['🎂', '🎉', '🙏', '⭐', '❤️', '🏠', '💑', '🎓', '✈️', '🍑'];
+function getMyDays() {
+  try { return JSON.parse(localStorage.getItem(LS_MYDAYS) || '[]'); } catch (e) { return []; }
+}
+function saveMyDays(a) {
+  try { localStorage.setItem(LS_MYDAYS, JSON.stringify(a)); } catch (e) {}
+}
+/* 导出"我的日子"为 ICS（网页版：手动下载导入日历） */
+function exportMyDaysICS() {
+  try {
+    var days = getMyDays();
+    if (!days.length) { alert('还没有添加自定义日子'); return; }
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//wuri//我的日子//CN',
+      'NAME:我的日子', 'X-WR-CALNAME:我的日子', 'X-WR-TIMEZONE:America/Toronto',
+      'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+    var y0 = new Date().getFullYear();
+    days.forEach(function (x, xi) {
+      for (var y = y0; y < y0 + 4; y++) {
+        var sm, sd;
+        try {
+          if (x.cal === 'lunar') {
+            var s = Lunar.fromYmd(y, x.m, x.d).getSolar();
+            sm = s.getMonth(); sd = s.getDay();
+          } else { sm = x.m; sd = x.d; }
+        } catch (e) { continue; }
+        var dt = y * 10000 + sm * 100 + sd;
+        lines.push('BEGIN:VEVENT');
+        lines.push('UID:myday-' + xi + '-' + y + '@wuribushangxiang');
+        lines.push('DTSTAMP:' + y0 + '0101T000000Z');
+        lines.push('DTSTART;VALUE=DATE:' + dt);
+        // 次日
+        var nd = new Date(y, sm - 1, sd + 1);
+        var ndt = nd.getFullYear() * 10000 + (nd.getMonth() + 1) * 100 + nd.getDate();
+        lines.push('DTEND;VALUE=DATE:' + ndt);
+        lines.push('SUMMARY:' + (x.icon || '') + ' ' + (x.name || '我的日子'));
+        lines.push('DESCRIPTION:' + (x.cal === 'lunar' ? '农历' : '公历') + x.m + '月' + x.d + '日');
+        lines.push('BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY',
+          'DESCRIPTION:明日：' + (x.name || ''), 'END:VALARM');
+        lines.push('BEGIN:VALARM', 'TRIGGER:PT0S', 'ACTION:DISPLAY',
+          'DESCRIPTION:今日：' + (x.name || ''), 'END:VALARM');
+        lines.push('END:VEVENT');
+      }
+    });
+    lines.push('END:VCALENDAR');
+    var blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'wuri-我的日子.ics';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { try { URL.revokeObjectURL(a.href); a.remove(); } catch (e) {} }, 1000);
+  } catch (e) { alert('导出失败'); }
+}
+/* 返回某农历日命中的自定义日子 */
+function myDaysOn(l) {
+  if (isLeapM(l)) return [];
+  var lm = l.getMonth(), ld = l.getDay();
+  var s = l.getSolar();
+  // 注意：s 是农历库的 Solar 对象（非 JS Date）：getMonth() 返回 1-12，getDay() 返回日期
+  var sm = s.getMonth(), sd = s.getDay();
+  return getMyDays().filter(function (x) {
+    return (x.cal === 'lunar' && x.m === lm && x.d === ld) ||
+           (x.cal === 'solar' && x.m === sm && x.d === sd);
+  });
+}
+var _mydayEditId = null, _mydayCal = 'lunar', _mydayColor = MYDAY_COLORS[0], _mydayIcon = MYDAY_ICONS[0];
+function renderMyDayList() {
+  var host = document.querySelector('#myday-list'); if (!host) return;
+  var a = getMyDays();
+  if (!a.length) { host.innerHTML = '<p class="hint">还没有自定义日子，点右上「＋ 添加」。如家人生日、结婚纪念日等。</p>'; return; }
+  host.innerHTML = a.map(function (x) {
+    var r = x.remind || {};
+    var rtxt = '';
+    if (r.on) {
+      var kinds = r.kinds && r.kinds.length ? r.kinds : ['today'];
+      var parts = kinds.map(function (k) {
+        return k === 'today' ? '当天' : k === 'day1' ? '提前1天' : '提前' + (r.customDays || 0) + '天';
+      });
+      rtxt = ' · ⏰' + parts.join('/') + ' ' + (r.time || '08:00');
+    }
+    return '<div class="myday-item" data-id="' + x.id + '">'
+      + '<span class="myday-dot" style="background:' + escA(x.color) + '"></span>'
+      + '<span class="myday-icon">' + escA(x.icon) + '</span>'
+      + '<div class="myday-info"><div class="myday-nm">' + escA(x.name) + '</div>'
+      + '<div class="myday-dt">' + (x.cal === 'lunar' ? '农历' : '公历') + x.m + '月' + x.d + '日' + escA(rtxt) + '</div></div>'
+      + '<button class="mini-btn tiny" data-act="edit">改</button>'
+      + '<button class="mini-btn tiny danger" data-act="del">删</button></div>';
+  }).join('');
+  host.querySelectorAll('.myday-item').forEach(function (el) {
+    var id = el.getAttribute('data-id');
+    el.querySelector('[data-act="edit"]').addEventListener('click', function () { openMyDayForm(id); });
+    el.querySelector('[data-act="del"]').addEventListener('click', function () {
+      if (!confirm('删除这个日子吗？')) return;
+      saveMyDays(getMyDays().filter(function (x) { return String(x.id) !== String(id); }));
+      renderMyDayList(); window.__wuri_rerender();
+    });
+  });
+}
+function fillMyDayDateOpts() {
+  var ms = document.querySelector('#myday-month'), ds = document.querySelector('#myday-day');
+  var mh = '', dh = '';
+  for (var m = 1; m <= 12; m++) mh += '<option value="' + m + '">' + m + '</option>';
+  for (var d = 1; d <= 31; d++) dh += '<option value="' + d + '">' + d + '</option>';
+  ms.innerHTML = mh; ds.innerHTML = dh;
+}
+function openMyDayForm(id) {
+  _mydayEditId = id || null;
+  var x = id ? getMyDays().filter(function (v) { return String(v.id) === String(id); })[0] : null;
+  _mydayCal = x ? x.cal : 'lunar';
+  _mydayColor = x ? x.color : MYDAY_COLORS[0];
+  _mydayIcon = x ? x.icon : MYDAY_ICONS[0];
+  document.querySelector('#myday-name').value = x ? x.name : '';
+  document.querySelectorAll('.myday-cal').forEach(function (b) {
+    b.classList.toggle('on', b.getAttribute('data-cal') === _mydayCal);
+  });
+  document.querySelector('#myday-month').value = x ? x.m : 1;
+  document.querySelector('#myday-day').value = x ? x.d : 1;
+  // 回填提醒设置
+  var r = (x && x.remind) || { on: true, kinds: ['today'], customDays: 3, time: '08:00' };
+  document.querySelector('#myday-remind-on').checked = !!r.on;
+  document.querySelector('#myday-timing').hidden = !r.on;
+  document.querySelectorAll('.myday-kind').forEach(function (cb) {
+    cb.checked = (r.kinds || ['today']).indexOf(cb.value) >= 0;
+  });
+  document.querySelector('#myday-offset-num').value = (r.customDays != null ? r.customDays : 3);
+  document.querySelector('#myday-offset-row').hidden = (r.kinds || []).indexOf('custom') < 0;
+  document.querySelector('#myday-time').value = r.time || '08:00';
+  renderMyDayPickers();
+  document.querySelector('#myday-form').hidden = false;
+  document.querySelector('#myday-add-btn').hidden = true;
+}
+function renderMyDayPickers() {
+  document.querySelector('#myday-colors').innerHTML = MYDAY_COLORS.map(function (c) {
+    return '<span class="cchip' + (c === _mydayColor ? ' on' : '') + '" data-c="' + c + '" style="background:' + c + '"></span>';
+  }).join('');
+  document.querySelector('#myday-icons').innerHTML = MYDAY_ICONS.map(function (ic) {
+    return '<span class="ichip' + (ic === _mydayIcon ? ' on' : '') + '" data-ic="' + ic + '">' + ic + '</span>';
+  }).join('');
+  document.querySelectorAll('#myday-colors .cchip').forEach(function (el) {
+    el.addEventListener('click', function () {
+      _mydayColor = el.getAttribute('data-c'); renderMyDayPickers();
+    });
+  });
+  document.querySelectorAll('#myday-icons .ichip').forEach(function (el) {
+    el.addEventListener('click', function () {
+      _mydayIcon = el.getAttribute('data-ic'); renderMyDayPickers();
+    });
+  });
+}
+function initMyDays() {
+  if (!document.querySelector('#mydays-card')) return;
+  fillMyDayDateOpts();
+  renderMyDayList();
+  document.querySelector('#myday-add-btn').addEventListener('click', function () { openMyDayForm(null); });
+  var expBtn = document.querySelector('#myday-export-ics');
+  if (expBtn) expBtn.addEventListener('click', exportMyDaysICS);
+  document.querySelector('#myday-cancel').addEventListener('click', function () {
+    document.querySelector('#myday-form').hidden = true; document.querySelector('#myday-add-btn').hidden = false;
+  });
+  document.querySelectorAll('.myday-cal').forEach(function (b) {
+    b.addEventListener('click', function () {
+      _mydayCal = b.getAttribute('data-cal');
+      document.querySelectorAll('.myday-cal').forEach(function (x) {
+        x.classList.toggle('on', x === b);
+      });
+    });
+  });
+  document.querySelector('#myday-save').addEventListener('click', function () {
+    var name = (document.querySelector('#myday-name').value || '').trim();
+    if (!name) { alert('请填写名称'); return; }
+    var m = parseInt(document.querySelector('#myday-month').value, 10), d = parseInt(document.querySelector('#myday-day').value, 10);
+    // 提醒设置
+    var remindOn = document.querySelector('#myday-remind-on').checked;
+    var kinds = [];
+    document.querySelectorAll('.myday-kind:checked').forEach(function (cb) { kinds.push(cb.value); });
+    var customDays = Math.max(0, parseInt(document.querySelector('#myday-offset-num').value, 10) || 0);
+    var rtime = document.querySelector('#myday-time').value || '08:00';
+    var remind = { on: remindOn, kinds: kinds.length ? kinds : ['today'], customDays: customDays, time: rtime };
+    var a = getMyDays();
+    if (_mydayEditId) {
+      a.forEach(function (x) {
+        if (String(x.id) === String(_mydayEditId)) {
+          x.name = name; x.cal = _mydayCal; x.m = m; x.d = d; x.color = _mydayColor; x.icon = _mydayIcon; x.remind = remind;
+        }
+      });
+    } else {
+      a.push({ id: Date.now(), name: name, cal: _mydayCal, m: m, d: d, color: _mydayColor, icon: _mydayIcon, remind: remind });
+    }
+    saveMyDays(a);
+    document.querySelector('#myday-form').hidden = true; document.querySelector('#myday-add-btn').hidden = false;
+    renderMyDayList(); window.__wuri_rerender();
+    try { reschedule(); } catch (e) {}
+  });
+  // 提醒开关控制时机区显示
+  document.querySelector('#myday-remind-on').addEventListener('change', function () {
+    document.querySelector('#myday-timing').hidden = !this.checked;
+  });
+  // 自选勾选时显示天数输入
+  document.querySelectorAll('.myday-kind').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      var hasCustom = Array.prototype.some.call(document.querySelectorAll('.myday-kind:checked'), function (x) { return x.value === 'custom'; });
+      document.querySelector('#myday-offset-row').hidden = !hasCustom;
+    });
+  });
+}
+/* 暴露给 IIFE 外调用（如浮动按钮初始化） */
+window.initMyDays = initMyDays;
+
 /* 六十甲子·值年太岁名：见 js/zhishen-data.js 的 TAISUI60
  * （2026-10-08 用户定底本：北京白云观元辰殿《岁君解厄延生法忏》版本） */
 
@@ -683,9 +1020,23 @@ function parseTime(str, fbH, fbM) {
 }
 
 function capLimit() { return isIOS() ? 60 : 80; } // iOS 单应用最多 64 条本地通知，取 60 留余量
-function pushNotif(list, id, title, body, fire) {
-  if (fire.getTime() <= Date.now()) return;
-  list.push({ id: id, title: title, body: body, schedule: { at: fire } });
+/* 推送宽限：过了预定时间 10 分钟内仍推送（立即触发），超过则跳过
+ * 注意：仅用户手动改时间时启用；App 启动自动重排时禁用，避免重复推送 */
+var NOTIF_GRACE_MS = 10 * 60 * 1000;
+var __graceEnabled = true;
+function pushNotif(list, id, title, body, fire, extra) {
+  var ft = fire.getTime(), nowMs = Date.now();
+  if (ft <= nowMs) {
+    if (__graceEnabled && nowMs - ft <= NOTIF_GRACE_MS) {
+      // 宽限期内：改为 5 秒后立即推送
+      fire = new Date(nowMs + 5000);
+    } else {
+      return;
+    }
+  }
+  var n = { id: id, title: title, body: body, schedule: { at: fire } };
+  if (extra) n.extra = extra;
+  list.push(n);
 }
 /* 事件日当天 timeStr 时刻，再提前 offMin 分钟 */
 function fireAt(dd, timeStr, offMin) {
@@ -702,7 +1053,12 @@ function buildNotifications() {
   var todayD = new Date(td.y, td.m - 1, td.d);
   var anwuOn = !!(CFG.anwu && CFG.anwu.on);
   var advOn = Object.keys(CFG.adv).some(function (k) { return CFG.adv[k]; });
-  if (!CFG.wu.on && !CFG.baidou.on && !anwuOn && !advOn) return list;
+  var jingrecOn = !!(CFG.jingrec && CFG.jingrec.on);
+  var mydayRemindOn = false;
+  try {
+    mydayRemindOn = getMyDays().some(function (x) { return x.remind && x.remind.on; });
+  } catch (e) {}
+  if (!CFG.wu.on && !CFG.baidou.on && !anwuOn && !advOn && !jingrecOn && !mydayRemindOn) return list;
   var limit = capLimit();
   var offsWu = offsetsOf(CFG.wu); // 明戊/暗戊/拜斗共用提醒时机（多选）
   var offsAdv = offsetsOf(CFG.advTiming); // 进阶提醒时机（多选）
@@ -710,6 +1066,54 @@ function buildNotifications() {
     var dd = new Date(todayD.getTime()); dd.setDate(dd.getDate() + i);
     var o = ymd(dd);
     var l = lunarOf(o.y, o.m, o.d);
+    /* 每日经文推送（独立推送，不与其他提醒互斥） */
+    if (jingrecOn && list.length < limit) {
+      try {
+        var rec = recommendJing(l);
+        var recTitle = jingTitleById(rec.sid);
+        // 章节信息：日常轮推精确到章，神诞日推整部
+        var chapStr = '';
+        if (rec.secIdx != null) {
+          chapStr = ' · 第' + (rec.secIdx + 1) + '章';
+        }
+        pushNotif(list, nidJingRec(o.y, o.m, o.d),
+          '今日经文推荐',
+          (rec.reason !== '日常熏修' ? rec.reason + ' · ' : '') + recTitle + chapStr,
+          fireAt(dd, CFG.jingrec.time || '07:00', 0),
+          { jingSid: rec.sid, jingSec: rec.secIdx });
+      } catch (e) {}
+    }
+    /* 我的日子提醒：多选时机（当天/提前1天/自选N天） */
+    if (list.length < limit) {
+      try {
+        var mydays = getMyDays();
+        for (var mi = 0; mi < mydays.length; mi++) {
+          var md = mydays[mi];
+          if (!md.remind || !md.remind.on) continue;
+          var kinds = md.remind.kinds && md.remind.kinds.length ? md.remind.kinds : ['today'];
+          var dbs = []; // 去重后的提前天数列表
+          kinds.forEach(function (k) {
+            var db = k === 'today' ? 0 : k === 'day1' ? 1 : Math.max(0, parseInt(md.remind.customDays, 10) || 0);
+            if (dbs.indexOf(db) < 0) dbs.push(db);
+          });
+          dbs.forEach(function (db, di) {
+            if (list.length >= limit) return;
+            // 目标日期 = 今天 + db 天
+            var targetD = new Date(dd.getTime()); targetD.setDate(targetD.getDate() + db);
+            var to = ymd(targetD);
+            var tl = lunarOf(to.y, to.m, to.d);
+            var hits = myDaysOn(tl).filter(function (x) { return String(x.id) === String(md.id); });
+            if (hits.length) {
+              var whenStr = db === 0 ? '今天' : db === 1 ? '明天' : db + '天后';
+              pushNotif(list, nidMyDay(md.id, to.y, to.m, to.d) + di,
+                (md.icon || '📅') + ' ' + md.name,
+                whenStr + '是' + md.name + '（' + (md.cal === 'lunar' ? '农历' : '公历') + md.m + '月' + md.d + '日）',
+                fireAt(dd, md.remind.time || '08:00', 0));
+            }
+          });
+        }
+      } catch (e) {}
+    }
     var wu = l.getDayGan() === '戊';
     var an = !wu && ANWU_ZHI.indexOf(l.getDayZhi()) >= 0;
     var bd = isBaidouDay(l);
@@ -778,13 +1182,157 @@ function buildNotifications() {
       }
     }
   }
+  // 存经文通知的触发时间，供回到前台时判断（用户 2026-10-09：点通知跳转核心需求）
+  try {
+    var jingFires = [];
+    for (var bi = 0; bi < list.length; bi++) {
+      var bn = list[bi];
+      if (bn && bn.title === '今日经文推荐' && bn.schedule && bn.schedule.at) {
+        var atMs = new Date(bn.schedule.at).getTime();
+        if (!isNaN(atMs)) {
+          // 存触发时间和对应的经文/章节（跳转时直接用，不重算）
+          var ex = bn.extra || {};
+          jingFires.push({ at: atMs, sid: ex.jingSid || null, sec: (ex.jingSec != null ? ex.jingSec : null) });
+        }
+      }
+    }
+    localStorage.setItem('wuri_jingrec_fires', JSON.stringify(jingFires));
+  } catch (e) {}
   return list;
 }
 
 var scheduling = false;
+/* ---------- 网页版提醒（无原生桥接时） ---------- */
+/* 用 localStorage 存排期 + setTimeout 定时 + Web Notification 显示。
+   仅页面打开时有效；可靠提醒请用上方 ICS 日历订阅。 */
+var webTimers = [];
+function webClearTimers() {
+  for (var i = 0; i < webTimers.length; i++) { try { clearTimeout(webTimers[i]); } catch (e) {} }
+  webTimers = [];
+}
+function webShowNotification(title, body, extra) {
+  try {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    var n = new Notification(title || '戊日不上香', {
+      body: body || '',
+      icon: './icon-192.png',
+      tag: 'wuri-' + Date.now()
+    });
+    n.onclick = function () {
+      try { window.focus(); } catch (e) {}
+      // 经文推送：点通知跳到对应经文
+      try {
+        if (extra && extra.jingSid && window.openJingFromNotification) {
+          window.openJingFromNotification(extra.jingSid, extra.jingSec || 0);
+        }
+      } catch (e2) {}
+      try { n.close(); } catch (e3) {}
+    };
+  } catch (e) {}
+}
+function webReschedule() {
+  if (scheduling) return;
+  scheduling = true;
+  try {
+    webClearTimers();
+    var list = buildNotifications();
+    var now = Date.now();
+    var count = 0;
+    // 只排未来 48 小时内的；每 30 分钟重新排一次（补漏）
+    for (var i = 0; i < list.length; i++) {
+      (function (nt) {
+        try {
+          var at = nt.schedule && nt.schedule.at ? new Date(nt.schedule.at).getTime() : 0;
+          if (!at || isNaN(at)) return;
+          var delay = at - now;
+          if (delay < 0 || delay > 48 * 3600 * 1000) return;
+          count++;
+          webTimers.push(setTimeout(function () {
+            webShowNotification(nt.title, nt.body, nt.extra);
+          }, delay));
+        } catch (e) {}
+      })(list[i]);
+    }
+    try {
+      localStorage.setItem('wuri_web_sched', JSON.stringify({ at: now, count: count, total: list.length }));
+    } catch (e2) {}
+    var infoEl = $('#schedule-info');
+    if (infoEl) {
+      infoEl.textContent = '网页提醒 ' + count + '/' + list.length + ' 条（需保持页面打开）| 可靠提醒请用上方 ICS 日历订阅';
+    }
+  } catch (e3) {}
+  scheduling = false;
+  // 30 分钟后重新排（处理新增/时间推移）
+  try {
+    webTimers.push(setTimeout(webReschedule, 30 * 60 * 1000));
+  } catch (e4) {}
+}
 function reschedule() {
+  if (scheduling) return;
+  if (!isNative()) { webReschedule(); return; }
+  // 优先走原生 WuBridge（WebView 版），带 jingSid/jingSec 透传（用户 2026-10-09：点通知进经文）
+  var wuBridge = null;
+  try { wuBridge = window.WuBridge || null; } catch (e) {}
+  if (wuBridge && wuBridge.schedule) {
+    try {
+      scheduling = true;
+      var list = buildNotifications();
+      // 转成 WuBridge 格式：{id,title,body,at:ISO,jingSid,jingSec}
+      var bridgeList = [];
+      for (var i = 0; i < list.length; i++) {
+        var n = list[i];
+        var ex = n.extra || {};
+        var atDate = n.schedule && n.schedule.at ? new Date(n.schedule.at) : null;
+        if (!atDate || isNaN(atDate.getTime())) continue;
+        bridgeList.push({
+          id: n.id,
+          title: n.title || '',
+          body: n.body || '',
+          at: atDate.toISOString(),
+          jingSid: ex.jingSid || null,
+          jingSec: (ex.jingSec != null ? ex.jingSec : -1)
+        });
+      }
+      var count = 0;
+      var schedErr = '';
+      try {
+        if (wuBridge.cancelAll) wuBridge.cancelAll();
+        count = wuBridge.schedule(JSON.stringify(bridgeList)) || 0;
+      } catch (e3) { schedErr = String(e3 && e3.message || e3); }
+      scheduling = false;
+      // 诊断：显示实际排期数（用户 2026-10-09）
+      try {
+        var infoEl = $('#schedule-info');
+        if (infoEl) {
+          var msg = '原生排期 ' + count + '/' + bridgeList.length + ' 条';
+          if (schedErr) msg += '（出错:' + schedErr + '）';
+          // 查 BootReceiver 是否跑过
+          try {
+            var bootTime = wuBridge.getBootReceiverTime ? wuBridge.getBootReceiverTime() : 0;
+            if (bootTime > 0) {
+              var bd = new Date(bootTime);
+              msg += ' | 开机恢复:' + bd.getMonth() + 1 + '/' + bd.getDate() + ' ' + bd.getHours() + ':' + String(bd.getMinutes()).padStart(2, '0');
+              // Direct Boot：显示是锁屏阶段还是解锁后恢复的
+              try {
+                var bk = wuBridge.getBootKind ? wuBridge.getBootKind() : '';
+                if (bk === 'locked') msg += '(锁屏)';
+                else if (bk === 'unlocked') msg += '(已解锁)';
+              } catch (e5b) {}
+            } else {
+              msg += ' | 开机恢复:未运行';
+            }
+          } catch (e5) {}
+          infoEl.textContent = msg;
+        }
+        localStorage.setItem('wuri_last_sched', JSON.stringify({ at: Date.now(), count: count, total: bridgeList.length }));
+      } catch (e6) {}
+      return;
+    } catch (e4) { scheduling = false; }
+  }
+  // 回退：Capacitor
   var ln = LN();
-  if (!isNative() || !ln || scheduling) return;
+  if (!ln) return;
   scheduling = true;
   nativePerms().then(function (p) {
     if (p.notif !== 'granted') { scheduling = false; return; }
@@ -800,8 +1348,27 @@ function reschedule() {
 
 function refreshPermUI() {
   if (!isNative()) {
-    $('#perm-notif').textContent = t('perm_device_only');
-    $('#perm-alarm').textContent = t('perm_device_only');
+    // 网页版：显示浏览器通知权限状态
+    try {
+      var np = ('Notification' in window) ? Notification.permission : 'unsupported';
+      $('#perm-notif').textContent = np === 'granted' ? t('perm_allowed')
+        : np === 'denied' ? t('perm_denied')
+        : np === 'unsupported' ? '浏览器不支持'
+        : t('perm_prompt');
+    } catch (e) { $('#perm-notif').textContent = t('perm_device_only'); }
+    $('#perm-alarm').textContent = '网页版无精确闹钟（用 ICS 日历订阅）';
+    var btnNotif = $('#btn-notif');
+    if (btnNotif) {
+      btnNotif.textContent = '申请浏览器通知权限';
+      btnNotif.onclick = function () {
+        try {
+          if (!('Notification' in window)) return;
+          Notification.requestPermission().then(function () { refreshPermUI(); });
+        } catch (e) {}
+      };
+    }
+    var btnAlarm = $('#btn-alarm');
+    if (btnAlarm) btnAlarm.style.display = 'none';
     return;
   }
   nativePerms().then(function (p) {
@@ -853,6 +1420,70 @@ function bindRemind() {
   saw.addEventListener('change', function () { CFG.anwu.on = saw.checked; saveCfg(); reschedule(); });
   var sbd = $('#sw-baidou'); sbd.checked = !!(CFG.baidou && CFG.baidou.on);
   sbd.addEventListener('change', function () { CFG.baidou.on = sbd.checked; saveCfg(); reschedule(); });
+  var sjr = $('#jingrec-on');
+  if (sjr) {
+    sjr.checked = !!(CFG.jingrec && CFG.jingrec.on);
+    var jrtRow = $('#jingrec-time-row');
+    if (jrtRow) jrtRow.hidden = !sjr.checked;
+    var jrtTestRow = $('#jingrec-test-row');
+    if (jrtTestRow) jrtTestRow.hidden = !sjr.checked;
+    sjr.addEventListener('change', function () {
+      CFG.jingrec.on = sjr.checked; saveCfg(); reschedule();
+      if (jrtRow) jrtRow.hidden = !sjr.checked;
+      if (jrtTestRow) jrtTestRow.hidden = !sjr.checked;
+    });
+    // 测试跳转按钮（用户 2026-10-09：验证跳转逻辑本身）
+    var jrtTestBtn = $('#jingrec-test-btn');
+    if (jrtTestBtn) {
+      jrtTestBtn.addEventListener('click', function () {
+        try {
+          // 直接重算（计算已验证正确：41章）
+          var tdNow = ymd(now());
+          var lNow = lunarOf(tdNow.y, tdNow.m, tdNow.d);
+          var recNow = recommendJing(lNow);
+          var useSid = recNow ? recNow.sid : null;
+          var useSec = recNow ? recNow.secIdx : null;
+          if (useSid) {
+            var tabBtn = document.querySelector('[data-tab="tab-jing"]');
+            if (tabBtn) tabBtn.click();
+            (function (sid, sec) {
+              setTimeout(function () {
+                if (window.JingWen && window.JingWen.openReader) {
+                  window.JingWen.openReader(sid);
+                  if (sec != null) {
+                    setTimeout(function () {
+                      // 先展开再滚动（用户 2026-10-09：先展开更精准）
+                      var targetSec = document.querySelector('#jing-reader .jing-sec[data-sec="' + sec + '"]');
+                      if (targetSec) {
+                        var hd = targetSec.querySelector('.jing-sec-hd');
+                        var body = targetSec.querySelector('.jing-sec-body');
+                        // 先展开
+                        if (body && body.hidden) {
+                          if (hd) hd.click();
+                          else body.hidden = false;
+                        }
+                        // 再滚动（等展开动画）
+                        setTimeout(function () {
+                          targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 300);
+                      }
+                    }, 800);
+                  }
+                }
+              }, 500);
+            })(useSid, useSec);
+          }
+        } catch (e) {}
+      });
+    }
+    var jrt = $('#jingrec-time');
+    if (jrt) {
+      jrt.value = (CFG.jingrec && CFG.jingrec.time) || '07:00';
+      jrt.addEventListener('change', function () {
+        CFG.jingrec.time = jrt.value || '07:00'; saveCfg(); reschedule();
+      });
+    }
+  }
   bindKindTiming('wu', CFG.wu); // 明戊/暗戊/拜斗共用提醒时机
   bindKindTiming('adv', CFG.advTiming); // 进阶提醒时机
   var ti = $('#inp-time'); ti.value = CFG.wu.time || '17:00';
@@ -868,11 +1499,28 @@ function bindRemind() {
     setTimeout(refreshPermUI, 1500);
   });
   $('#btn-alarm').addEventListener('click', function () { alert(t('alert_alarm')); });
-  /*TEST-ONLY*/
   $('#btn-test').addEventListener('click', function () {
     var info = $('#test-info');
+    // 网页版：用 Web Notification 发测试提醒
+    if (!isNative()) {
+      try {
+        if (!('Notification' in window)) { info.textContent = '此浏览器不支持通知'; return; }
+        var showTest = function () {
+          webShowNotification('戊日不上香 · 测试提醒', '网页通知通道正常（页面打开时有效）', null);
+          info.textContent = '已发送测试通知，请查看浏览器通知';
+        };
+        if (Notification.permission === 'granted') showTest();
+        else if (Notification.permission !== 'denied') {
+          Notification.requestPermission().then(function (p) {
+            if (p === 'granted') showTest();
+            else info.textContent = '通知权限被拒绝，请在浏览器设置中允许';
+          });
+        } else info.textContent = '通知权限被拒绝，请在浏览器设置中允许';
+      } catch (e) { info.textContent = '发送失败'; }
+      return;
+    }
     var ln = LN();
-    if (!isNative() || !ln) { info.textContent = t('test_not_native'); return; }
+    if (!ln) { info.textContent = t('test_not_native'); return; }
     try {
       // 按当天日子类型生成文案（复用正式提醒文案函数）
       var tt = ymd(now());
@@ -888,10 +1536,16 @@ function bindRemind() {
         .catch(function () { info.textContent = t('test_fail'); });
     } catch (e) { info.textContent = t('test_fail'); }
   });
-  /*/TEST-ONLY*/
   try {
     var last = JSON.parse(localStorage.getItem('wuri_last_sched'));
     if (last) $('#schedule-info').textContent = tf(t('sched_done'), last.count);
+  } catch (e) {}
+  // 启动时自动重排：保证 90 天窗口永远新鲜（用户 2026-10-09 反馈：90天后提醒会停）
+  // 注意：禁用宽限，避免已响过的通知重复推送（用户 2026-10-09 反馈：推送了3遍）
+  try {
+    setTimeout(function () {
+      try { __graceEnabled = false; reschedule(); __graceEnabled = true; } catch (e) { __graceEnabled = true; }
+    }, 3000);
   } catch (e) {}
 }
 
@@ -985,6 +1639,7 @@ window.__wuriCal = {
   ANWU_ZHI: ANWU_ZHI,
   isBaidouDay: isBaidouDay,
   shendanName: shendanName,
+  myDaysOn: myDaysOn,
   renderCalendar: renderCalendar,
   getView: function () { return { y: viewY, m: viewM, sel: sel }; },
   setView: function (y, m, d) { viewY = y; viewM = m; sel = { y: y, m: m, d: d }; }
@@ -996,6 +1651,11 @@ window.__wuriCal = {
   var EDGE = 60; /* 左边缘判定宽度(px)，放宽 */
   document.addEventListener('touchstart', function (e) {
     if (e.touches.length !== 1) { tracking = false; return; }
+    // 打坐冥想全屏页内不触发边缘返回（避免与场景滑动冲突，用户 2026-10-09 反馈：划场景退回首页）
+    try {
+      var tgt = e.target;
+      if (tgt && tgt.closest && tgt.closest('#med-pager')) { tracking = false; return; }
+    } catch (err) {}
     var t = e.touches[0];
     if (t.clientX < EDGE) {
       tracking = true;
@@ -1028,6 +1688,181 @@ window.__wuriCal = {
       }
     }
   }, { passive: true });
+
+  /* 通知点击跳转到经文（放主 IIFE 内，可访问 recommendJing 等函数）
+     用户 2026-10-09 反馈：点每日经文通知不跳转
+     2026-10-09 优化：队列机制，冷启动时事件先存着，等初始化完再处理 */
+  var pendingNotifTap = null;
+  function doNotifTap(ev) {
+    try {
+      var ex = (ev && ev.notification && ev.notification.extra) || {};
+      var sid = ex.jingSid, sec = ex.jingSec;
+      // 备用：extra 丢了就按今天重算（算法确定，重算结果一致）
+      if (!sid && ev && ev.notification && /经文/.test(ev.notification.title || '')) {
+        try {
+          var tdNow = ymd(now());
+          var lNow = lunarOf(tdNow.y, tdNow.m, tdNow.d);
+          var recNow = recommendJing(lNow);
+          sid = recNow.sid; sec = recNow.secIdx;
+        } catch (e2) {}
+      }
+      if (!sid) return false;
+      var tabBtn = document.querySelector('[data-tab="tab-jing"]');
+      if (!tabBtn) return false; // DOM 没好，稍后重试
+      tabBtn.click();
+      setTimeout(function () {
+        if (window.JingWen && window.JingWen.openReader) {
+          window.JingWen.openReader(sid);
+          if (sec != null) {
+            setTimeout(function () {
+              var targetSec = document.querySelector('#jing-reader .jing-sec[data-sec="' + sec + '"]');
+              if (targetSec) {
+                targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                var hd = targetSec.querySelector('.jing-sec-hd');
+                if (hd && targetSec.classList.contains('collapsed')) hd.click();
+              }
+            }, 800);
+          }
+        }
+      }, 500);
+      return true;
+    } catch (e) { return false; }
+  }
+  function flushPendingNotifTap() {
+    if (pendingNotifTap) {
+      var ev = pendingNotifTap;
+      pendingNotifTap = null;
+      if (!doNotifTap(ev)) {
+        // 还没好，放回去下次再试
+        pendingNotifTap = ev;
+      }
+    }
+  }
+  (function regNotifTap() {
+    function handleNotifTap(ev) {
+      // 先存队列，等初始化完统一处理
+      pendingNotifTap = ev;
+      flushPendingNotifTap();
+    }
+    function tryReg() {
+      try {
+        var c = window.Capacitor;
+        var ln = (c && c.Plugins && c.Plugins.LocalNotifications) || null;
+        if (ln && ln.addListener) {
+          ln.addListener('localNotificationActionPerformed', handleNotifTap);
+          return true;
+        }
+      } catch (e) {}
+      return false;
+    }
+    if (!tryReg()) {
+      var tries = 0;
+      var iv = setInterval(function () {
+        if (tryReg() || ++tries > 20) clearInterval(iv);
+      }, 500);
+    }
+    // 初始化完成后（3秒）再冲一次队列，应对冷启动
+    setTimeout(flushPendingNotifTap, 3000);
+    setTimeout(flushPendingNotifTap, 6000);
+
+    /* 备用方案：App 回到前台时，检查是否有经文通知刚响过（不依赖 Capacitor 事件）
+       用户 2026-10-09：点通知不跳转是核心需求 */
+    var lastJingNotifCheck = 0;
+    var handledNotifAts = {}; // 已处理过的通知时间戳，避免重复跳转
+    function checkJingNotifOnResume() {
+      try {
+        var nowMs = Date.now();
+        // 读上次排期的经文通知（带 sid/sec，直接用不重算）
+        var saved = null;
+        try { saved = JSON.parse(localStorage.getItem('wuri_jingrec_fires') || '[]'); } catch (e) {}
+        if (!saved || !saved.length) return;
+        for (var i = 0; i < saved.length; i++) {
+          var item = saved[i];
+          var ft = (item && item.at) ? item.at : item; // 兼容旧格式（纯时间戳）
+          // 跳过已处理过的
+          if (handledNotifAts[ft]) continue;
+          // 通知在过去 10 分钟内响过（放宽窗口，用户可能晚点才点）
+          if (nowMs - ft >= 0 && nowMs - ft <= 600000) {
+            // 直接用存的 sid/sec，不重算（保证和通知一致）
+            var useSid = (item && item.sid) ? item.sid : null;
+            var useSec = (item && item.sec != null) ? item.sec : null;
+            if (!useSid) {
+              // 旧格式没有存，fallback 重算
+              try {
+                var tdNow = ymd(now());
+                var lNow = lunarOf(tdNow.y, tdNow.m, tdNow.d);
+                var recNow = recommendJing(lNow);
+                if (recNow) { useSid = recNow.sid; useSec = recNow.secIdx; }
+              } catch (e2) {}
+            }
+            if (useSid) {
+              var tabBtn = document.querySelector('[data-tab="tab-jing"]');
+              if (tabBtn) tabBtn.click();
+              (function (sid, sec) {
+                setTimeout(function () {
+                  if (window.JingWen && window.JingWen.openReader) {
+                    window.JingWen.openReader(sid);
+                    if (sec != null) {
+                      setTimeout(function () {
+                        var targetSec = document.querySelector('#jing-reader .jing-sec[data-sec="' + sec + '"]');
+                        if (targetSec) targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 800);
+                    }
+                  }
+                }, 500);
+              })(useSid, useSec);
+              handledNotifAts[ft] = true; // 标记已处理，避免重复跳转
+              break; // 只跳一次
+            }
+          }
+        }
+      } catch (e) {}
+    }
+    // 定时轮询已禁用（用户 2026-10-09 反馈：会提前误跳）
+    // 保留事件监听作为补充
+    try {
+      document.addEventListener('resume', checkJingNotifOnResume, false);
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) checkJingNotifOnResume();
+      }, false);
+    } catch (e) {}
+  })();
+
+  /* 原生通知点击跳转入口（MainActivity 调这个）用户 2026-10-09 */
+  var lastNotifNav = { sid: null, sec: null, time: 0 };
+  window.openJingFromNotification = function (sid, sec) {
+    try {
+      if (!sid) return;
+      // 去重：5 秒内相同的跳转只执行一次（原生层会发两次兜底）
+      var nowMs = Date.now();
+      if (lastNotifNav.sid === sid && lastNotifNav.sec === sec && (nowMs - lastNotifNav.time) < 5000) return;
+      lastNotifNav = { sid: sid, sec: sec, time: nowMs };
+      var secNum = (sec != null && sec !== -1) ? sec : null;
+      var tabBtn = document.querySelector('[data-tab="tab-jing"]');
+      if (tabBtn) tabBtn.click();
+      setTimeout(function () {
+        if (window.JingWen && window.JingWen.openReader) {
+          window.JingWen.openReader(sid);
+          if (secNum != null) {
+            setTimeout(function () {
+              var targetSec = document.querySelector('#jing-reader .jing-sec[data-sec="' + secNum + '"]');
+              if (targetSec) {
+                var hd = targetSec.querySelector('.jing-sec-hd');
+                var body = targetSec.querySelector('.jing-sec-body');
+                if (body && body.hidden) {
+                  if (hd) hd.click();
+                  else body.hidden = false;
+                }
+                setTimeout(function () {
+                  targetSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+              }
+            }, 800);
+          }
+        }
+      }, 500);
+    } catch (e) {}
+  };
 })();
 
 /* 供 bazi.js 等读取全局设置（时间基准/经度）：八字排盘与时值神共用此时钟基准 */
@@ -1078,6 +1913,7 @@ function updateFloatingButtons() {
       }
     });
     setInterval(updateFloatingButtons, 500);
+    try { window.initMyDays(); } catch (e) { try { console.error('initMyDays:', e.message); } catch (_) {} }
   }
 
   /* ---------- 数据备份/恢复 ---------- */
