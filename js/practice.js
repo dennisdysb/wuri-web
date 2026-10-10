@@ -1,8 +1,10 @@
 /* 戊日不上香 · 修行打卡（Pro）
- * 打卡项：预设（打坐/内练/早晚功课）+ 自建；计时类记录时长，计次类每日一次。
+ * 打卡项：预设（打坐/内练/早课/晚课）+ 自建；计时类记录时长，计次类每日一次。
  * 连续天数、月历热力图、每项独立提醒时间。
  * 数据存 localStorage：wuri_daka_habits / wuri_daka_records。
  * 旧 wuri_practice_schedule / wuri_practice_journal 数据保留不删（用户可自行清理）。
+ * 2026-10-09：预设「早晚功课」(zaowanke) 拆分为「早课」(zaoke)+「晚课」(wanke)；
+ * 老用户存量迁移：zaowanke 习惯替换为早课/晚课，旧打卡记录保留（仍计入统计）。
  */
 var Practice = (function () {
   'use strict';
@@ -10,9 +12,10 @@ var Practice = (function () {
   var LS_RECORDS = 'wuri_daka_records';
 
   var PRESETS = [
-    { id: 'dazuo', name: '打坐', type: 'timed', icon: '🧘', preset: true, remindTime: '' },
+    { id: 'dazuo', name: '打坐冥想', type: 'timed', icon: '🧘', preset: true, remindTime: '' },
     { id: 'neilian', name: '内练', type: 'timed', icon: '☯', preset: true, remindTime: '' },
-    { id: 'zaowanke', name: '早晚功课', type: 'count', icon: '📿', preset: true, remindTime: '' }
+    { id: 'zaoke', name: '早课', type: 'count', icon: '🌅', preset: true, remindTime: '' },
+    { id: 'wanke', name: '晚课', type: 'count', icon: '🌙', preset: true, remindTime: '' }
   ];
 
   function $(s) { return document.querySelector(s); }
@@ -49,6 +52,23 @@ var Practice = (function () {
       // 预设提醒
       list.forEach(function (h) { scheduleRemind(h); });
     }
+    // 存量迁移：老版本预设名"打坐"→"打坐冥想"
+    var migrated = false;
+    list.forEach(function (h) {
+      if (h.id === 'dazuo' && h.name === '打坐') { h.name = '打坐冥想'; migrated = true; }
+    });
+    // 存量迁移：老预设「早晚功课」(zaowanke) 拆分为「早课」+「晚课」（原位置替换）
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].id === 'zaowanke') {
+        var oldRemind = list[i].remindTime || '';
+        list.splice(i, 1,
+          { id: 'zaoke', name: '早课', type: 'count', icon: '🌅', preset: true, remindTime: oldRemind },
+          { id: 'wanke', name: '晚课', type: 'count', icon: '🌙', preset: true, remindTime: '' });
+        migrated = true;
+        break;
+      }
+    }
+    if (migrated) save(LS_HABITS, list);
     return list;
   }
   function getHabit(id) {
@@ -68,6 +88,22 @@ var Practice = (function () {
       if (recs[i].hid === hid && recs[i].date === t) return recs[i];
     }
     return null;
+  }
+  function todaySecs(hid) {
+    var t = todayStr(), s = 0;
+    var recs = getRecords();
+    for (var i = 0; i < recs.length; i++) {
+      if (recs[i].hid === hid && recs[i].date === t) s += (recs[i].secs || 0);
+    }
+    return s;
+  }
+  function todayCount(hid) {
+    var t = todayStr(), n = 0;
+    var recs = getRecords();
+    for (var i = 0; i < recs.length; i++) {
+      if (recs[i].hid === hid && recs[i].date === t) n++;
+    }
+    return n;
   }
   function addRecord(hid, secs) {
     var recs = getRecords();
@@ -172,7 +208,8 @@ var Practice = (function () {
       var done = !!rec;
       var sub = '';
       if (h.type === 'timed') {
-        sub = done ? '今日已练 ' + fmtDur(rec.secs) : '点击开始打坐';
+        var ts = todaySecs(h.id), tc = todayCount(h.id);
+        sub = done ? '今日已练 ' + fmtDur(ts) + (tc > 1 ? ' · ' + tc + '次' : '') : '点击开始' + h.name;
       } else {
         sub = done ? '今日已打卡 ✓' : '点击打卡';
       }
@@ -186,7 +223,9 @@ var Practice = (function () {
         + '</div>'
         + '<div class="daka-actions">'
         + (done
-          ? '<span class="daka-done-mark">✓</span>'
+          ? (h.type === 'timed'
+            ? '<button class="btn primary small" data-dact="check">再练</button>'
+            : '<span class="daka-done-mark">✓</span>')
           : '<button class="btn primary small" data-dact="check">' + (h.type === 'timed' ? '开始' : '打卡') + '</button>')
         + (h.preset ? '' : '<button class="mini-btn tiny danger" data-dact="del">删</button>')
         + '</div></div>';
@@ -198,7 +237,7 @@ var Practice = (function () {
         e.stopPropagation();
         var h = getHabit(hid);
         if (!h) return;
-        if (h.type === 'timed') openTimer(h);
+        if (h.type === 'timed') openTimed(h);
         else { addRecord(hid, 0); renderAll(); }
       });
       var del = el.querySelector('[data-dact="del"]');
@@ -210,27 +249,61 @@ var Practice = (function () {
         saveHabits(getHabits().filter(function (x) { return x.id !== hid; }));
         renderAll();
       });
-      // 点整行也可打卡（计次类）
+      // 点整行也可打卡（计次类）；计时类点行可再开一局
       el.addEventListener('click', function () {
         var h = getHabit(hid);
-        if (!h || todayRecord(hid)) return;
-        if (h.type === 'count') { addRecord(hid, 0); renderAll(); }
-        else openTimer(h);
+        if (!h) return;
+        if (h.type === 'count') {
+          if (todayRecord(hid)) return;
+          addRecord(hid, 0); renderAll();
+        }
+        else openTimed(h);
       });
     });
+  }
+
+  /* 打坐冥想走沉浸页，其余计时项走老计时窗 */
+  function openTimed(h) {
+    if (h && h.id === 'dazuo' && window.Meditation && typeof window.Meditation.open === 'function') {
+      window.Meditation.open();
+    } else {
+      openTimer(h);
+    }
   }
 
   /* ---------- 倒计时 ---------- */
   var timerHid = null, timerTotal = 15 * 60, timerLeft = 15 * 60, timerInt = 0, timerRunning = false;
   var doneAudio = null;
-  /* 背景音乐（打坐/内练）：v1 用 WebView Audio 循环；正式曲目（用户授权取得后）替换 URL 即可 */
+  /* 背景音乐（内练/早晚功课等老计时窗用）：本地纯自然声，无缝循环 */
   var BGM_LIST = [
-    { id: 'test1', name: '静心曲·测试', url: 'https://dennisdysb.github.io/wuri-web/audio/music/test-calm.mp3' }
+    { id: 'rain',    name: '温柔雨声', url: 'audio/meditation/loop-rain.mp3' },
+    { id: 'thunder', name: '雨·远雷',   url: 'audio/meditation/loop-thunder.mp3' },
+    { id: 'ocean',   name: '海浪',       url: 'audio/meditation/loop-ocean.mp3' },
+    { id: 'forest',  name: '森林鸟鸣', url: 'audio/meditation/loop-forest.mp3' },
+    { id: 'night',   name: '夜晚虫鸣', url: 'audio/meditation/loop-night.mp3' },
+    { id: 'fire',    name: '壁炉火声', url: 'audio/meditation/loop-fire.mp3' },
+    { id: 'creek',   name: '溪流',       url: 'audio/meditation/loop-creek.mp3' },
+    { id: 'wind',    name: '风声',       url: 'audio/meditation/loop-wind.mp3' }
   ];
+  /* 背景音乐按钮按 BGM_LIST 动态渲染（index.html 只留容器） */
+  function renderBgmRow() {
+    var sel = $('#daka-bgm-select');
+    if (!sel) return;
+    var known = (bgmId === '');
+    for (var i = 0; i < BGM_LIST.length; i++) if (BGM_LIST[i].id === bgmId) known = true;
+    if (!known) { bgmId = ''; try { localStorage.setItem('wuri_daka_bgm', ''); } catch (e) {} }
+    // 下拉单选：无 + 8 种自然声（2026-10-08 用户定：一排按钮太乱，收成下拉）
+    var html = '<option value="">无</option>';
+    html += BGM_LIST.map(function (t) {
+      return '<option value="' + t.id + '"' + (bgmId === t.id ? ' selected' : '') + '>' + esc(t.name) + '</option>';
+    }).join('');
+    sel.innerHTML = html;
+    sel.value = bgmId;
+  }
   var bgmAudio = null;
-  var bgmId = '';
+  var bgmId = 'rain';
   var bgmWantPlay = true; /* 用户是否想听（独立暂停键控制） */
-  try { bgmId = localStorage.getItem('wuri_daka_bgm') || ''; } catch (e) {}
+  try { var _bv = localStorage.getItem('wuri_daka_bgm'); bgmId = (_bv === null) ? 'rain' : _bv; } catch (e) {}
   function getBgmAudio() {
     if (!bgmAudio) {
       bgmAudio = new Audio(); bgmAudio.loop = true; bgmAudio.preload = 'auto';
@@ -247,6 +320,16 @@ var Practice = (function () {
       if (a.getAttribute('src') !== t.url) a.src = t.url;
       var p = a.play();
       if (p && p.catch) p.catch(function () {});
+      // 媒体卡片（用户 2026-10-10）
+      try {
+        if (window.WuriMediaSession && t.name) {
+          window.WuriMediaSession.bindAudio(a, {
+            title: '内练 · ' + t.name,
+            artist: '戊日不上香',
+            album: '内练打卡'
+          });
+        }
+      } catch (e2) {}
     } catch (e) {}
   }
   function bgmPause() { try { if (bgmAudio) bgmAudio.pause(); } catch (e) {} }
@@ -255,19 +338,27 @@ var Practice = (function () {
     bgmId = id || '';
     bgmWantPlay = true;
     try { localStorage.setItem('wuri_daka_bgm', bgmId); } catch (e) {}
-    $all('#daka-bgm-row [data-bgm]').forEach(function (b) {
-      b.classList.toggle('on', (b.getAttribute('data-bgm') || '') === bgmId);
-    });
+    var sel = $('#daka-bgm-select');
+    if (sel) sel.value = bgmId;
     bgmUpdateCtrl();
     // 计时进行中切换：直接换曲
     if (timerRunning && timerHid) bgmPlay(bgmId);
     else if (!timerRunning) bgmStop();
   }
-  /* 音乐独立暂停键 + 音量条显隐 */
+  /* 音乐独立暂停键 + 音量条显隐（SVG 图标，主题金色，不用 emoji） */
+  var SVG_BGM_PLAY = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  var SVG_BGM_PAUSE = '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
   function bgmUpdateCtrl() {
     var tgl = $('#daka-bgm-toggle'), vol = $('#daka-bgm-vol');
     var show = !!bgmId;
-    if (tgl) { tgl.hidden = !show; tgl.textContent = isBgmPlaying() ? '⏸' : '♪'; }
+    if (tgl) {
+      tgl.hidden = !show;
+      tgl.innerHTML = isBgmPlaying() ? SVG_BGM_PAUSE : SVG_BGM_PLAY;
+      tgl.style.color = 'var(--gold)';
+      tgl.style.display = show ? '' : '';
+      tgl.style.alignItems = 'center';
+      tgl.style.justifyContent = 'center';
+    }
     if (vol) vol.hidden = !show;
   }
   function isBgmPlaying() { return !!(bgmAudio && !bgmAudio.paused && bgmAudio.src); }
@@ -278,8 +369,17 @@ var Practice = (function () {
     bgmUpdateCtrl();
   }
   function getDoneAudio() {
-    if (!doneAudio) { doneAudio = new Audio('audio/done.wav'); doneAudio.preload = 'auto'; }
+    if (!doneAudio) { doneAudio = new Audio('audio/meditation/bell-ending.mp3'); doneAudio.preload = 'auto'; }
     return doneAudio;
+  }
+  /* 完成铃：49 秒渐入钵声，一次即够（老 done.wav 的三连播不再适用） */
+  function playDone() {
+    try {
+      var a = getDoneAudio();
+      a.currentTime = 0;
+      var p = a.play();
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
   }
   function fmtLeft(secs) {
     var m = Math.floor(secs / 60), s = secs % 60;
@@ -296,10 +396,11 @@ var Practice = (function () {
       b.classList.toggle('on', b.getAttribute('data-dur') === '15');
     });
     $('#daka-custom-min').hidden = true;
-    // 背景音乐选项回显上次选择
-    $all('#daka-bgm-row [data-bgm]').forEach(function (b) {
-      b.classList.toggle('on', (b.getAttribute('data-bgm') || '') === bgmId);
-    });
+    // 背景音乐下拉回显上次选择（2026-10-08 用户定：一排按钮太乱，收成单个下拉）
+    var bgmRow = $('#daka-bgm-row');
+    if (bgmRow) bgmRow.style.display = '';
+    var bgmSel = $('#daka-bgm-select');
+    if (bgmSel) bgmSel.value = bgmId;
     bgmWantPlay = true;
     bgmUpdateCtrl();
     $('#daka-timer-mask').classList.add('show');
@@ -312,20 +413,6 @@ var Practice = (function () {
     if (timerInt) clearInterval(timerInt);
     timerInt = 0; timerRunning = false; timerHid = null;
     bgmStop();
-  }
-  function playDone() {
-    try {
-      var a = getDoneAudio();
-      a.currentTime = 0;
-      a.play();
-      // 连播3声，温柔提醒
-      var n = 0;
-      var iv = setInterval(function () {
-        n++;
-        if (n >= 3) { clearInterval(iv); return; }
-        a.currentTime = 0; a.play();
-      }, 2800);
-    } catch (e) {}
   }
   function bindTimer() {
     // 时长选择
@@ -385,10 +472,9 @@ var Practice = (function () {
         }, 1000);
       }
     });
-    // 背景音乐选择
-    $all('#daka-bgm-row [data-bgm]').forEach(function (b) {
-      b.addEventListener('click', function () { bgmSelect(b.getAttribute('data-bgm') || ''); });
-    });
+    // 背景音乐选择（下拉单选）
+    var bgmSel = $('#daka-bgm-select');
+    if (bgmSel) bgmSel.addEventListener('change', function () { bgmSelect(bgmSel.value || ''); });
     // 音乐独立暂停/继续
     $('#daka-bgm-toggle').addEventListener('click', function () { bgmToggleManual(); });
     // 音量
@@ -487,6 +573,8 @@ var Practice = (function () {
 
   /* ---------- 初始化 ---------- */
   function init() {
+    // 启动时触发习惯迁移（如早晚功课拆分），保证小组件数据也正确
+    try { getHabits(); } catch (e) {}
     var entry = $('#practice-enter');
     if (entry) entry.addEventListener('click', open);
     var back = $('#practice-back');
@@ -505,6 +593,7 @@ var Practice = (function () {
     if (next) next.addEventListener('click', function () {
       calM++; if (calM > 11) { calM = 0; calY++; } renderCal();
     });
+    renderBgmRow();
     bindTimer();
     // 启动时推送一次今日进度给小组件
     setTimeout(pushWidgetPractice, 1500);
@@ -529,7 +618,8 @@ var Practice = (function () {
 return {
     init: init,
     open: open,
-    close: close
+    close: close,
+    addRecord: addRecord /* 打坐冥想沉浸页到点记打卡用 */
   };
 })();
 
