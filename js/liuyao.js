@@ -303,7 +303,7 @@ var LiuYao = (function () {
     } catch (e) {}
   }
 
-  function renderResult() {
+  function renderResult(skipSave) {
     if (lines.length < 6) return;
     var key = guaKey(lines);
     var g = GUA[key];
@@ -492,14 +492,16 @@ var LiuYao = (function () {
     if (zwInput) zwInput.addEventListener('change', function () {
       try { localStorage.setItem('wuri_ly_zhanwen', this.value); } catch (e) {}
     });
-    // 保存历史
-    var bianName = '';
-    if (hasDong) {
-      var bk = guaKey(lines.map(function (l) { return { yao: l.dong ? (1 - l.yao) : l.yao }; }));
-      var bbg = GUA[bk];
-      if (bbg) bianName = bbg[0];
+    // 保存历史（查看历史时跳过，避免重复新增）
+    if (!skipSave) {
+      var bianName = '';
+      if (hasDong) {
+        var bk = guaKey(lines.map(function (l) { return { yao: l.dong ? (1 - l.yao) : l.yao }; }));
+        var bbg = GUA[bk];
+        if (bbg) bianName = bbg[0];
+      }
+      saveHistory(g ? g[0] : '', bianName);
     }
-    saveHistory(g ? g[0] : '', bianName);
     renderHistory();
   }
 
@@ -629,7 +631,7 @@ var LiuYao = (function () {
     // 手机摇一摇
     if (window._lyShakeHandler) return;
     var lastX = 0, lastY = 0, lastZ = 0, lastTime = 0;
-    window._lyShakeHandler = function (e) {
+    var handler = function (e) {
       var acc = e.accelerationIncludingGravity;
       if (!acc) return;
       var now = Date.now();
@@ -641,7 +643,22 @@ var LiuYao = (function () {
       }
       lastX = acc.x; lastY = acc.y; lastZ = acc.z;
     };
-    window.addEventListener('devicemotion', window._lyShakeHandler);
+    window._lyShakeHandler = handler;
+    // iOS 13+ 必须先请求动作权限，且必须在用户手势中调用（2026-10-10）
+    // bindShake 由六爻页面入口点击触发，属于用户手势，满足条件
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      try {
+        DeviceMotionEvent.requestPermission().then(function (state) {
+          if (state === 'granted') {
+            window.addEventListener('devicemotion', handler);
+          } else {
+            window._lyShakeHandler = null; // 拒绝后允许下次重试
+          }
+        }).catch(function () { window._lyShakeHandler = null; });
+      } catch (e) { window._lyShakeHandler = null; }
+    } else {
+      window.addEventListener('devicemotion', handler);
+    }
   }
 
   function renderHistory() {
@@ -673,7 +690,7 @@ var LiuYao = (function () {
         if (!r || !r.lines) return;
         lines = r.lines.map(function (l) { return { yao: l.yao, dong: l.dong, coins: [] }; });
         renderLines();
-        renderResult();
+        renderResult(true);
         document.getElementById('ly-result-card').scrollIntoView({ behavior: 'smooth' });
       });
     });
