@@ -786,6 +786,8 @@ details[open] summary:before{content:"▾ "}
 /* ===== 城市选择器 ===== */
 #bz-city-modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
 #bz-city-modal[hidden]{display:none}
+#zw-city-modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+#zw-city-modal[hidden]{display:none}
 .bz-city-box{background:var(--card);width:100%;max-width:520px;max-height:75vh;border-radius:16px 16px 0 0;display:flex;flex-direction:column;overflow:hidden}
 .bz-city-head{display:flex;gap:8px;padding:12px;border-bottom:1px solid var(--line)}
 .bz-city-head input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:1rem;background:var(--paper);color:var(--ink)}
