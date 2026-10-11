@@ -1,0 +1,88 @@
+/* 戊日不上香 · 打坐冥想沉浸页
+ * 全屏禅房：9 层背景交叉淡入 + Ken Burns 缓推近 + 视差，
+ * 控制层固定不动（毛玻璃 + 鎏金按钮，呼应 App 主题）。
+ */
+#meditation-view{position:fixed;inset:0;z-index:9999;background:#0a0a0c;overflow:hidden}
+#meditation-view[hidden]{display:none}
+
+/* ---------- 背景层（9 层叠放，JS 按滑动进度设 opacity/位移） ---------- */
+.med-bg-stack{position:absolute;inset:0;overflow:hidden;background:#0a0a0c}
+.med-bg{position:absolute;top:-40px;left:-40px;right:-40px;bottom:-40px;opacity:0;will-change:opacity,transform;transition:opacity .45s ease}
+.med-bg img{width:100%;height:100%;object-fit:cover;display:block}
+.med-bg.active img{animation:medKenBurns 20s ease-in-out infinite alternate}
+@keyframes medKenBurns{from{transform:scale(1)}to{transform:scale(1.08)}}
+
+/* ---------- 顶部/底部渐变罩（保证文字可读） ---------- */
+.med-scrim-top{position:absolute;top:0;left:0;right:0;height:30%;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(0,0,0,.5),rgba(0,0,0,0))}
+.med-scrim-bottom{position:absolute;bottom:0;left:0;right:0;height:62%;pointer-events:none;
+  background:linear-gradient(to top,rgba(0,0,0,.8),rgba(0,0,0,0))}
+
+/* ---------- 滑动 pager（透明页，仅驱动背景） ---------- */
+.med-pager{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.med-pager::-webkit-scrollbar{display:none}
+.med-page{flex:0 0 100%;height:100%;scroll-snap-align:center}
+
+/* ---------- 顶栏 ---------- */
+.med-topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;pointer-events:none}
+.med-topbar>*{pointer-events:auto}
+.med-back{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.28);
+  background:rgba(20,20,24,.38);color:#fff;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.med-back:active{transform:scale(.94)}
+.med-title{flex:1;text-align:center;color:#f5f1e6;font-size:1.05rem;letter-spacing:.5em;text-indent:.5em;
+  font-weight:500;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.med-top-sp{width:40px}
+
+/* ---------- 中央：声音名 + 倒计时 + 圆点 ---------- */
+.med-center{position:absolute;top:29%;left:0;right:0;text-align:center;pointer-events:none}
+.med-sound-name{color:rgba(245,241,230,.92);font-size:.95rem;letter-spacing:.35em;text-indent:.35em;
+  transition:opacity .18s ease;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.med-clock{color:#fff;font-size:4.2rem;font-weight:200;font-variant-numeric:tabular-nums;
+  letter-spacing:.06em;margin:10px 0 18px;text-shadow:0 2px 18px rgba(0,0,0,.65);
+  font-family:var(--serif,Georgia,serif)}
+.med-dots{display:flex;justify-content:center;gap:8px;pointer-events:none}
+.med-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.32)}
+.med-dot.on{background:#e8c877;box-shadow:0 0 8px rgba(232,200,119,.8)}
+
+/* ---------- 底部浮动控制层（图片全屏铺满，控件悬浮） ---------- */
+.med-controls{position:absolute;left:0;right:0;bottom:0;
+  padding:18px 22px calc(env(safe-area-inset-bottom,0px) + 20px);
+  display:flex;flex-direction:column;align-items:center;gap:12px}
+.med-dur-row{display:flex;gap:8px;align-items:center}
+.med-seg{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;
+  border-radius:999px;padding:7px 16px;font-size:.85rem;white-space:nowrap;flex:none;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.med-seg.on{background:rgba(255,255,255,.92);border-color:transparent;color:#1a1a1a;font-weight:600}
+.med-custom-min{width:64px;flex:none;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);
+  border-radius:999px;color:#fff;padding:7px 10px;font-size:.85rem;text-align:center;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.med-custom-go{white-space:nowrap;flex:none}
+.med-bell-row{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.92);font-size:.85rem;
+  text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.med-switch{position:relative;display:inline-block;width:44px;height:25px;flex:none}
+.med-switch input{opacity:0;width:0;height:0}
+.med-switch-ui{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.25);transition:.25s;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.med-switch-ui:before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.25s}
+.med-switch input:checked+.med-switch-ui{background:rgba(255,255,255,.9)}
+.med-switch input:checked+.med-switch-ui:before{transform:translateX(19px);background:#1a1a1a}
+.med-play{width:78px;height:78px;border-radius:50%;border:1px solid rgba(255,255,255,.45);color:#1a1a1a;
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 24px rgba(0,0,0,.35)}
+.med-play:active{transform:scale(.96)}
+.med-vol{width:min(64%,260px);accent-color:#fff}
+
+/* ---------- 冥想完成 ---------- */
+.med-done{position:absolute;inset:0;background:rgba(5,5,8,.66);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;z-index:5}
+.med-done[hidden]{display:none}
+.med-done-card{text-align:center;padding:34px 40px}
+.med-done-title{color:#f5f1e6;font-size:1.6rem;letter-spacing:.4em;text-indent:.4em;margin-bottom:10px}
+.med-done-sub{color:rgba(245,241,230,.7);font-size:.9rem;margin-bottom:24px}
+.med-done-card .btn-row{display:flex;gap:12px;justify-content:center}

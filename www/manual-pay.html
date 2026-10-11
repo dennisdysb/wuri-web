@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>戊日 Pro · 国内购买</title>
+<style>
+  :root { --paper:#f7f3e8; --ink:#2b2620; --accent:#8a5a2b; --green:#2d6a4f; --red:#a63d2f; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+         line-height:1.7; padding:0 0 60px; }
+  .wrap { max-width:560px; margin:0 auto; padding:24px 20px; }
+  h1 { text-align:center; font-size:22px; letter-spacing:.2em; margin:8px 0 4px; }
+  .sub { text-align:center; color:#8a7f6a; font-size:13px; margin-bottom:24px; }
+  .card { background:#fffdf6; border:1px solid #e2d9c2; border-radius:12px;
+          padding:20px; margin-bottom:18px; box-shadow:0 2px 8px rgba(90,70,40,.06); }
+  .card h2 { font-size:16px; margin:0 0 12px; letter-spacing:.1em; color:var(--accent); }
+  .price { text-align:center; font-size:34px; color:var(--accent); margin:4px 0 2px; }
+  .price small { font-size:13px; color:#8a7f6a; display:block; letter-spacing:0; }
+  .qr-row { display:flex; gap:12px; margin-top:14px; }
+  .qr-box { flex:1; border:2px dashed #c9b98f; border-radius:10px; background:#fbf7ec;
+            min-height:150px; display:flex; align-items:center; justify-content:center;
+            text-align:center; font-size:13px; color:#8a7f6a; padding:12px; }
+  .qr-box b { display:block; color:var(--ink); font-size:15px; margin-bottom:4px; }
+  .steps { font-size:14px; color:#5c5344; padding-left:1.4em; margin:8px 0 0; }
+  .steps li { margin:6px 0; }
+  label.f { display:block; font-size:14px; margin:14px 0 4px; color:#5c5344; }
+  input[type=text], input[type=email] { width:100%; padding:12px; font-size:16px;
+         border:1px solid #d8cba8; border-radius:10px; background:#fff; color:var(--ink); }
+  .ch-row { display:flex; gap:12px; }
+  .ch { flex:1; border:1px solid #d8cba8; border-radius:10px; padding:12px; text-align:center;
+        font-size:15px; cursor:pointer; background:#fffdf6; }
+  .ch input { margin-right:6px; }
+  .ch.on { border-color:var(--accent); background:#f6efdd; }
+  input[type=file] { width:100%; font-size:14px; color:#5c5344; }
+  .hint { font-size:12px; color:#a89c82; margin-top:4px; }
+  .btn { display:block; width:100%; padding:14px; margin-top:18px; border:none; border-radius:10px;
+         background:var(--accent); color:#fff; font-size:16px; cursor:pointer; letter-spacing:.15em; }
+  .btn:active { opacity:.85; }
+  .btn:disabled { opacity:.5; }
+  .msg { min-height:1.6em; margin-top:10px; font-size:14px; text-align:center; }
+  .msg.ok { color:var(--green); } .msg.err { color:var(--red); }
+  .done { text-align:center; padding:30px 10px; }
+  .done .big { font-size:40px; }
+  .foot { text-align:center; font-size:12px; color:#a89c82; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>戊日 Pro</h1>
+  <div class="sub">国内购买 · 一次购买 永久使用</div>
+
+  <div class="card">
+    <h2>一 · 扫码付款</h2>
+    <div class="price">¥30<small>固定金额 · 微信 / 支付宝均可</small></div>
+    <div class="qr-row">
+      <div class="qr-box"><b>微信收款码</b><img src="qr-wechat.png" alt="微信收款码" style="max-width:100%;border-radius:8px;"></div>
+      <div class="qr-box"><b>支付宝收款码</b><img src="qr-alipay.jpg" alt="支付宝收款码" style="max-width:100%;border-radius:8px;"></div>
+    </div>
+    <p class="hint">※ 请按上方二维码付款 ¥30，付款后填写下方表单。</p>
+  </div>
+
+  <div class="card" id="form-card">
+    <h2>二 · 填写表单</h2>
+    <ul class="steps">
+      <li>付款后<strong>截图保存</strong>付款成功页（含交易单号）</li>
+      <li>填写下面表单并上传截图，提交审核</li>
+      <li>审核通过后，激活码约 <strong>15 分钟内</strong>发到你的邮箱</li>
+      <li>拿到激活码后，到<a href="redeem.html">兑换页</a>兑换解锁</li>
+    </ul>
+
+    <label class="f" for="nickname">微信昵称</label>
+    <input type="text" id="nickname" maxlength="64" placeholder="付款微信的昵称" autocomplete="off">
+
+    <label class="f" for="email">邮箱（接收激活码）</label>
+    <input type="email" id="email" maxlength="254" placeholder="example@mail.com" autocomplete="email">
+
+    <label class="f">付款渠道</label>
+    <div class="ch-row">
+      <label class="ch on" id="ch-wechat"><input type="radio" name="channel" value="wechat" checked>微信支付</label>
+      <label class="ch" id="ch-alipay"><input type="radio" name="channel" value="alipay">支付宝</label>
+    </div>
+
+    <label class="f" for="shot">付款截图</label>
+    <input type="file" id="shot" accept="image/*">
+    <p class="hint">须为付款成功页截图（5MB 以内），需能看清交易单号。</p>
+
+    <button class="btn" id="submit">提交审核</button>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="card done" id="done-card" style="display:none">
+    <div class="big">✅</div>
+    <h2>已提交审核</h2>
+    <p>激活码将在约 15 分钟内发到你的邮箱，请注意查收。<br>拿到后到<a href="redeem.html">兑换页</a>兑换即可解锁 Pro。</p>
+  </div>
+
+  <div class="foot">戊日不上香 · Wuri</div>
+</div>
+
+<script>
+/* 部署时改成 Worker 地址, 例如 https://wuri-stripe-backend.<子域>.workers.dev */
+var API_BASE = '';
+
+document.querySelectorAll('.ch').forEach(function (el) {
+  el.addEventListener('click', function () {
+    document.querySelectorAll('.ch').forEach(function (x) { x.classList.remove('on'); });
+    el.classList.add('on');
+  });
+});
+
+var msgEl = document.getElementById('msg');
+function say(t, ok) {
+  msgEl.textContent = t;
+  msgEl.className = 'msg ' + (ok ? 'ok' : 'err');
+}
+
+document.getElementById('submit').addEventListener('click', function () {
+  var btn = this;
+  var nickname = document.getElementById('nickname').value.trim();
+  var email = document.getElementById('email').value.trim();
+  var channel = document.querySelector('input[name=channel]:checked').value;
+  var file = document.getElementById('shot').files[0];
+
+  if (!nickname) return say('请填写微信昵称');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('邮箱格式不正确');
+  if (!file) return say('请上传付款截图');
+  if (!/^image\//.test(file.type)) return say('截图必须是图片文件');
+  if (file.size > 5 * 1024 * 1024) return say('截图不能超过 5MB');
+
+  btn.disabled = true;
+  say('提交中…', true);
+
+  var fd = new FormData();
+  fd.append('nickname', nickname);
+  fd.append('email', email);
+  fd.append('channel', channel);
+  fd.append('screenshot', file);
+
+  fetch(API_BASE + '/api/manual/submit', { method: 'POST', body: fd })
+    .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+    .then(function (res) {
+      if (res.status === 200 && res.d.ok) {
+        document.getElementById('form-card').style.display = 'none';
+        document.getElementById('done-card').style.display = 'block';
+        window.scrollTo(0, 0);
+      } else {
+        say(res.d.error || '提交失败, 请重试');
+        btn.disabled = false;
+      }
+    })
+    .catch(function () { say('网络错误, 请重试'); btn.disabled = false; });
+});
+</script>
+</body>
+</html>

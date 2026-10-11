@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>付款成功 · 戊日 Pro</title>
+<style>
+  :root { --paper:#f7f3e8; --ink:#2b2620; --accent:#8a5a2b; --green:#2d6a4f; --red:#a63d2f; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+         line-height:1.7; padding:0 0 60px; }
+  .wrap { max-width:560px; margin:0 auto; padding:40px 20px; text-align:center; }
+  .big { font-size:56px; }
+  h1 { font-size:22px; letter-spacing:.15em; margin:12px 0 4px; }
+  .sub { color:#8a7f6a; font-size:14px; margin-bottom:24px; }
+  .card { background:#fffdf6; border:1px solid #e2d9c2; border-radius:12px;
+          padding:24px 20px; margin-bottom:18px; box-shadow:0 2px 8px rgba(90,70,40,.06); }
+  .code-box { font-family:ui-monospace,Menlo,monospace; font-size:24px; letter-spacing:.1em;
+              background:#f3ecd9; border:1px dashed var(--accent); border-radius:10px;
+              padding:18px 10px; margin:12px 0; user-select:all; word-break:break-all; }
+  .btn { display:block; width:100%; padding:14px; margin-top:12px; border:none; border-radius:10px;
+         background:var(--accent); color:#fff; font-size:16px; cursor:pointer; letter-spacing:.15em; }
+  .btn:active { opacity:.85; }
+  .btn.ghost { background:transparent; color:var(--accent); border:1px solid var(--accent); }
+  .msg { min-height:1.6em; margin-top:10px; font-size:14px; }
+  .msg.ok { color:var(--green); } .msg.err { color:var(--red); }
+  .steps { text-align:left; font-size:14px; color:#5c5344; padding-left:1.4em; margin:12px 0 0; }
+  .steps li { margin:8px 0; }
+  .steps b { color:var(--ink); }
+  .warn { background:#fdf3e3; border:1px solid #e8c96a; border-radius:10px; padding:12px 14px;
+          font-size:13px; color:#7a5c1e; margin-top:16px; text-align:left; }
+  .spin { display:inline-block; width:18px; height:18px; border:3px solid #d8cba8;
+          border-top-color:var(--accent); border-radius:50%; animation:sp 1s linear infinite;
+          vertical-align:-3px; margin-right:8px; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  .foot { font-size:12px; color:#a89c82; margin-top:30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="big">✅</div>
+  <h1>付款成功</h1>
+  <div class="sub">感谢支持戊日 Pro</div>
+
+  <div class="card" id="loading-card">
+    <div><span class="spin"></span>正在生成你的激活码…</div>
+    <div class="msg" id="load-msg">通常只需几秒钟</div>
+  </div>
+
+  <div class="card" id="code-card" hidden>
+    <div style="letter-spacing:.15em;color:#8a5a2b;font-size:14px">你的激活码</div>
+    <div class="code-box" id="code-text">—</div>
+    <button class="btn" id="copy-btn">复制激活码</button>
+    <div class="msg" id="copy-msg"></div>
+    <div class="warn">⚠️ 请务必复制保存好这个激活码（截图或记下来）。<br>它是你解锁高级版的唯一凭证，弄丢了需要联系开发者补发。</div>
+  </div>
+
+  <div class="card" id="fail-card" hidden>
+    <div class="msg err" id="fail-msg">没找到这笔订单的激活码。</div>
+    <p style="font-size:14px;color:#5c5344">可能付款还在处理中，请稍等一分钟后<a href="" id="retry-link">刷新重试</a>；<br>如已扣款但一直没有激活码，请联系开发者处理。</p>
+  </div>
+
+  <div class="card" id="guide-card" hidden>
+    <div style="letter-spacing:.15em;color:#8a5a2b;font-size:14px;margin-bottom:4px">兑换说明</div>
+    <ol class="steps">
+      <li><b>复制</b>上面的激活码（已复制的可跳过）</li>
+      <li>打开 <b>兑换页</b>（下面按钮），把激活码粘贴进去</li>
+      <li>点<b>验证</b> → <b>确认兑换</b>，高级版立即解锁</li>
+      <li>解锁后：八字、六爻、紫微、内丹典籍、背诵、小组件全部可用</li>
+    </ol>
+    <button class="btn ghost" id="goto-redeem">去兑换页</button>
+  </div>
+
+  <div class="foot">戊日不上香 · 订单由 Stripe 安全处理</div>
+</div>
+
+<script>
+'use strict';
+/* ====== 配置: 部署后把下面改成你的 Worker 地址 ====== */
+var API_BASE = 'https://pay.shengboyu.ca'; // ← 改这里
+/* ==================================================== */
+
+var $ = function (id) { return document.getElementById(id); };
+function qs(name) {
+  var m = new RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+var sessionId = qs('session_id');
+if (!sessionId) {
+  $('loading-card').hidden = true;
+  $('fail-card').hidden = false;
+  $('fail-msg').textContent = '链接缺少订单信息，请从兑换页重新下单。';
+} else {
+  poll(0);
+}
+
+/* webhook 有几秒延迟, 最多轮询约 40 秒 */
+function poll(n) {
+  fetch(API_BASE + '/api/code?session_id=' + encodeURIComponent(sessionId))
+    .then(function (r) { return r.json().then(function (d) { return { s: r.status, d: d }; }); })
+    .then(function (res) {
+      if (res.s === 200 && res.d.found) { showCode(res.d.code); }
+      else if (n < 12) { setTimeout(function () { poll(n + 1); }, 3000); }
+      else {
+        $('loading-card').hidden = true;
+        $('fail-card').hidden = false;
+      }
+    })
+    .catch(function () {
+      if (n < 12) { setTimeout(function () { poll(n + 1); }, 3000); }
+      else { $('loading-card').hidden = true; $('fail-card').hidden = false; }
+    });
+}
+
+function showCode(code) {
+  $('loading-card').hidden = true;
+  $('code-text').textContent = code;
+  $('code-card').hidden = false;
+  $('guide-card').hidden = false;
+  try { sessionStorage.setItem('wuri_last_code', code); } catch (e) {}
+}
+
+$('copy-btn').addEventListener('click', function () {
+  var code = $('code-text').textContent;
+  var msg = $('copy-msg');
+  function done(ok) {
+    msg.className = 'msg ' + (ok ? 'ok' : 'err');
+    msg.textContent = ok ? '已复制，去兑换页粘贴吧' : '复制失败，请长按激活码手动复制';
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(function () { done(true); }, function () { done(false); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = code; document.body.appendChild(ta); ta.select();
+    try { done(document.execCommand('copy')); } catch (e) { done(false); }
+    document.body.removeChild(ta);
+  }
+});
+
+$('goto-redeem').addEventListener('click', function () { location.href = './redeem.html'; });
+$('retry-link').addEventListener('click', function (e) { e.preventDefault(); location.reload(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>戊日 Pro · 购买与兑换</title>
+<style>
+  :root { --paper:#f7f3e8; --ink:#2b2620; --accent:#8a5a2b; --green:#2d6a4f; --red:#a63d2f; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+         font-family:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+         line-height:1.7; padding:0 0 60px; }
+  .wrap { max-width:560px; margin:0 auto; padding:24px 20px; }
+  h1 { text-align:center; font-size:22px; letter-spacing:.2em; margin:8px 0 4px; }
+  .sub { text-align:center; color:#8a7f6a; font-size:13px; margin-bottom:24px; }
+  .card { background:#fffdf6; border:1px solid #e2d9c2; border-radius:12px;
+          padding:20px; margin-bottom:18px; box-shadow:0 2px 8px rgba(90,70,40,.06); }
+  .card h2 { font-size:16px; margin:0 0 12px; letter-spacing:.1em; color:var(--accent); }
+  .price-row { display:flex; gap:12px; }
+  .price-btn { flex:1; padding:14px 8px; border:1px solid #d8cba8; border-radius:10px;
+               background:#fffdf6; font-size:15px; cursor:pointer; color:var(--ink); }
+  .price-btn small { display:block; color:#8a7f6a; font-size:12px; margin-top:4px; }
+  .price-btn:active { background:#f3ecd9; }
+  input.code { width:100%; padding:14px; font-size:20px; letter-spacing:.12em; text-align:center;
+               border:1px solid #d8cba8; border-radius:10px; background:#fff;
+               font-family:ui-monospace,Menlo,monospace; text-transform:uppercase; }
+  .btn { display:block; width:100%; padding:14px; margin-top:12px; border:none; border-radius:10px;
+         background:var(--accent); color:#fff; font-size:16px; cursor:pointer; letter-spacing:.15em; }
+  .btn:active { opacity:.85; }
+  .btn.ghost { background:transparent; color:var(--accent); border:1px solid var(--accent); }
+  .btn:disabled { opacity:.5; }
+  .msg { min-height:1.6em; margin-top:10px; font-size:14px; text-align:center; }
+  .msg.ok { color:var(--green); } .msg.err { color:var(--red); }
+  .steps { font-size:14px; color:#5c5344; padding-left:1.4em; margin:8px 0 0; }
+  .steps li { margin:6px 0; }
+  .done { text-align:center; padding:30px 10px; }
+  .done .big { font-size:40px; }
+  .foot { text-align:center; font-size:12px; color:#a89c82; margin-top:30px; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>戊日 Pro</h1>
+  <div class="sub">高级版 · 一次购买 永久使用</div>
+
+  <!-- 购买 -->
+  <div class="card" id="buy-card">
+    <h2>一 · 购买</h2>
+    <div class="price-row">
+      <button class="price-btn" id="buy-us">US$4.99<small>美国 / 海外<br>信用卡 · Apple Pay</small></button>
+      <button class="price-btn" id="buy-cn">¥30<small>中国大陆<br>微信支付(审核中) · 银联卡</small></button>
+    </div>
+    <div class="msg" id="buy-msg"></div>
+    <ul class="steps">
+      <li>点击对应地区按钮, 跳到安全付款页完成支付</li>
+      <li>付款成功后页面会显示你的<strong>激活码</strong>, 请复制保存</li>
+      <li>一个激活码可兑换一台设备的高级版</li>
+    </ul>
+  </div>
+
+  <!-- 兑换 -->
+  <div class="card" id="redeem-card">
+    <h2>二 · 兑换激活码</h2>
+    <input class="code" id="code-input" placeholder="WURI-XXXX-XXXX-XXXX"
+           maxlength="19" autocomplete="off" spellcheck="false">
+    <button class="btn" id="verify-btn">验证激活码</button>
+    <div class="msg" id="redeem-msg"></div>
+    <button class="btn ghost" id="confirm-btn" hidden>确认兑换, 解锁高级版</button>
+  </div>
+
+  <!-- 兑换成功 -->
+  <div class="card done" id="done-card" hidden>
+    <div class="big">🎉</div>
+    <h2 style="text-align:center">兑换成功!</h2>
+    <p>高级版已解锁: 八字排盘、六爻占卜、紫微斗数、<br>内丹典籍、背诵、桌面小组件全部可用。</p>
+    <button class="btn" onclick="location.href='./index.html'">返回首页开始使用</button>
+  </div>
+
+  <div class="foot">戊日不上香 · 如有问题请联系开发者<br>付款由 Stripe 安全处理, 本站不保存你的卡号</div>
+</div>
+
+<script>
+'use strict';
+/* ====== 配置: 部署后把下面改成你的 Worker 地址 ====== */
+var API_BASE = 'https://pay.shengboyu.ca'; // ← 改这里
+/* ==================================================== */
+
+var $ = function (id) { return document.getElementById(id); };
+
+function api(path, opts) {
+  return fetch(API_BASE + path, opts).then(function (r) { return r.json(); });
+}
+
+/* ---- 购买 ---- */
+function buy(region) {
+  var msg = $('buy-msg');
+  msg.className = 'msg'; msg.textContent = '正在跳转到安全付款页…';
+  api('/api/create-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ region: region })
+  }).then(function (d) {
+    if (d.url) { location.href = d.url; }
+    else { msg.className = 'msg err'; msg.textContent = '创建订单失败: ' + (d.error || '请稍后重试'); }
+  }).catch(function () {
+    msg.className = 'msg err'; msg.textContent = '网络错误, 请检查连接后重试';
+  });
+}
+$('buy-us').addEventListener('click', function () { buy('us'); });
+$('buy-cn').addEventListener('click', function () { buy('cn'); });
+
+/* ---- 兑换 ---- */
+var verifiedCode = null;
+var input = $('code-input');
+input.addEventListener('input', function () {
+  var v = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 16);
+  var out = v.startsWith('WURI') ? v.slice(4) : v;
+  var grp = [];
+  for (var i = 0; i < out.length; i += 4) grp.push(out.slice(i, i + 4));
+  var body = grp.join('-');
+  input.value = v.startsWith('WURI') || v.length > 0 ? ('WURI-' + body).slice(0, 19) : '';
+  verifiedCode = null; $('confirm-btn').hidden = true;
+});
+
+$('verify-btn').addEventListener('click', function () {
+  var msg = $('redeem-msg');
+  var code = input.value.trim();
+  if (!code) { msg.className = 'msg err'; msg.textContent = '请先输入激活码'; return; }
+  msg.className = 'msg'; msg.textContent = '验证中…';
+  api('/api/redeem?code=' + encodeURIComponent(code)).then(function (d) {
+    if (d.valid) {
+      verifiedCode = code;
+      msg.className = 'msg ok'; msg.textContent = '激活码有效, 请确认兑换';
+      $('confirm-btn').hidden = false;
+    } else {
+      msg.className = 'msg err'; msg.textContent = d.reason || '激活码无效';
+    }
+  }).catch(function () {
+    msg.className = 'msg err'; msg.textContent = '网络错误, 请重试';
+  });
+});
+
+$('confirm-btn').addEventListener('click', function () {
+  var msg = $('redeem-msg');
+  if (!verifiedCode) return;
+  this.disabled = true;
+  msg.className = 'msg'; msg.textContent = '兑换中…';
+  var device = '';
+  try { device = navigator.userAgent.slice(0, 120); } catch (e) {}
+  api('/api/redeem', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: verifiedCode, device: device })
+  }).then(function (d) {
+    if (d.success) {
+      /* 与 wuri-web 的 Pro 系统对接: 写这个 key 即解锁全部 Pro 功能 */
+      try { localStorage.setItem('wuri_pro_redeem', '1'); } catch (e) {}
+      $('redeem-card').hidden = true; $('buy-card').hidden = true;
+      $('done-card').hidden = false;
+      window.scrollTo(0, 0);
+    } else {
+      msg.className = 'msg err'; msg.textContent = d.reason || '兑换失败';
+      $('confirm-btn').disabled = false;
+    }
+  }).catch(function () {
+    msg.className = 'msg err'; msg.textContent = '网络错误, 请重试';
+    $('confirm-btn').disabled = false;
+  });
+});
+
+/* 付款取消回来时的提示 */
+if (/[?&]cancelled=1/.test(location.search)) {
+  var m = $('buy-msg');
+  m.className = 'msg err'; m.textContent = '付款已取消, 可以重新下单';
+}
+</script>
+</body>
+</html>
