@@ -293,7 +293,7 @@
       </div>
       <div class="form-row" id="ics-custom-row" hidden>
         <span>提前</span>
-        <input type="number" id="ics-custom-num" min="1" max="30" value="3" style="width:60px">
+        <input type="number" id="ics-custom-num" min="1" max="30" value="3" class="days-input">
         <span>天</span>
       </div>
       <div class="form-row">
@@ -345,25 +345,6 @@
         <div><div class="row-title" id="jingrec-title">加载中…</div><div class="row-sub" id="jingrec-reason"></div></div>
         <button class="btn primary" id="jingrec-go">去读经</button>
       </div>
-    </section>
-    <section class="card">
-      <div class="card-title" data-i18n="perm_title">权限状态</div>
-      <div class="detail-row"><span class="dl" data-i18n="perm_notif">通知权限</span><span id="perm-notif" data-i18n="perm_checking">检测中…</span></div>
-      <div class="detail-row"><span class="dl" data-i18n="perm_alarm">精确闹钟</span><span id="perm-alarm" data-i18n="perm_checking">检测中…</span></div>
-      <div class="btn-row">
-        <button id="btn-perm" class="btn" data-i18n="btn_perm">申请通知权限</button>
-        <button id="btn-alarm" class="btn" data-i18n="btn_alarm">去开启精确闹钟</button>
-      </div>
-      <p class="hint" id="perm-hint" data-i18n="perm_hint">如果提醒不准时，请到手机「设置 → 应用 → 戊日不上香」中允许「通知」与「闹钟和提醒」。应用被省电策略清理后台也可能影响提醒，可将本应用设为「不受电池优化限制」。</p>
-    </section>
-
-    <section class="card">
-      <div class="card-title" data-i18n="test_title">测试提醒</div>
-      <div class="btn-row">
-        <button id="btn-test" class="btn" data-i18n="test_btn">发送测试提醒</button>
-      </div>
-      <p class="hint" id="test-info"></p>
-      <p class="hint" data-i18n="test_hint1">测试用，不影响正式提醒排期。点击后约 15 秒内发出一条测试通知，用于验证通知权限与提醒通道是否正常。</p>
     </section>
     <div class="tab-spacer"></div>
   </main>
@@ -565,7 +546,7 @@
     </section>
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.1.2 (2026-10-11)</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.1.3 (2026-10-11)</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>

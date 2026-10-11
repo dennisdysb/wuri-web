@@ -1424,7 +1424,7 @@ function bindRemind() {
     var reasonEl = $('#jingrec-reason');
     var goBtn = $('#jingrec-go');
     if (rec && rec.sid) {
-      var jt = (typeof titleOf === 'function') ? titleOf(rec.sid) : rec.sid;
+      var jt = (typeof window.JingTitleOf === 'function') ? window.JingTitleOf(rec.sid) : rec.sid;
       if (titleEl) titleEl.textContent = jt;
       if (reasonEl) reasonEl.textContent = rec.reason || '';
       if (goBtn) {
@@ -1433,8 +1433,7 @@ function bindRemind() {
           if (tabBtn) tabBtn.click();
           setTimeout(function () {
             try {
-              if (typeof openJing === 'function') openJing(rec.sid, rec.secIdx);
-              else if (typeof showJing === 'function') showJing(rec.sid);
+              if (typeof window.JingOpenReader === 'function') window.JingOpenReader(rec.sid);
             } catch (e) {}
           }, 300);
         };

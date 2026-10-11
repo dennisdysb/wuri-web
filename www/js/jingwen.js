@@ -574,7 +574,7 @@ var JingWen = (function () {
     if (jingTimestamps && jingTsSid === sid && jingTsVoice === voice) { if (cb) cb(true); return; }
     loadTimestamps(sid, voice, function () { if (cb) cb(!!jingTimestamps); });
   }
-  var JING_BASE = 'https://dennisdysb.github.io/wuri-web/audio/jing/';
+  var JING_BASE = 'https://dennisdysb.github.io/wuri-web/www/audio/jing/';
   var JING_HAS_AUDIO = ['s01','s02','s03','s04','s05','s07','s09','s15','s10','s12','s13','s14','s16','s17','s26','s27','s28','s29'];
   var JING_NEIDAN = ['s18','s19','s20','s21','s23'];
   function isNeidan(sid) { return JING_NEIDAN.indexOf(sid) >= 0; }
@@ -1350,6 +1350,8 @@ var JingWen = (function () {
     setInterval(updateFab, 500);
     updateFab();
   });
+  // 暴露给外部调用（每日经文推荐等）
+  window.JingOpenReader = openReader;
 })();
 
 /* ---------- 书签·高亮·心得（仅内丹书籍） ---------- */
@@ -1986,6 +1988,8 @@ var JingWen = (function () {
     for (var i = 0; i < idx.length; i++) if (idx[i].id === sid) return idx[i].title;
     return sid;
   }
+  // 暴露给外部调用（每日经文推荐等）
+  window.JingTitleOf = titleOf;
 
   function showMarks(tab) {
     // 守卫：只有用户点了"我的标记"才允许显示，防止 tab 切换时误显示

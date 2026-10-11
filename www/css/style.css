@@ -1260,3 +1260,10 @@ details[open] summary:before{content:"▾ "}
 #jing-reader .jing-sec {
   scroll-margin-top: 120px;
 }
+
+/* 提醒时机：提前天数输入框（用户 2026-10-11：太小不好看） */
+.days-input{
+  width:80px;padding:10px 12px;font-size:1.05rem;text-align:center;
+  border:1px solid var(--line);border-radius:12px;
+  background:var(--card);color:var(--ink);font-family:var(--sans);
+}
