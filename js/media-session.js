@@ -6,7 +6,7 @@
   'use strict';
 
   var APP_NAME = '戊日不上香';
-  var ICON_SRC = 'img/icon-512.png'; // 如果没有会降级
+  var ICON_SRC = 'img/logo.png'; // 2026-10-10：icon-512.png 不存在，改用实际存在的 logo.png
 
   function isSupported() {
     try { return ('mediaSession' in navigator); } catch (e) { return false; }
