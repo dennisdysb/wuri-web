@@ -237,45 +237,37 @@
       <button class="theme-toggle" data-theme-toggle data-i18n-aria="theme_toggle" aria-label="切换主题">◐</button>
     </header>
 
-    <section class="card">
-      <div class="row-between">
-        <div><div class="row-title" data-i18n="remind_wu">明戊日提醒</div><div class="row-sub" data-i18n="remind_wu_sub">戊日不朝真，提前提醒您不上香</div></div>
-        <label class="switch"><input type="checkbox" id="sw-wu"><span></span></label>
+    <section class="card" id="ics-custom">
+      <h2>📅 定制我的日历</h2>
+      <p class="hint">勾选你想要的提醒类型，生成专属 .ics 日历文件，导入到手机系统日历后，关掉网页、重启手机都照样提醒。</p>
+      <div class="timing-label">提醒类型</div>
+      <div class="form-row preset-row" style="flex-wrap:wrap;gap:8px;">
+        <label class="preset"><input type="checkbox" id="ics-ming" checked> <span>明戊日</span></label>
+        <label class="preset"><input type="checkbox" id="ics-anwu"> <span>暗戊日</span></label>
+        <label class="preset"><input type="checkbox" id="ics-baidou"> <span>拜斗日（初一·十五）</span></label>
+        <label class="preset"><input type="checkbox" id="ics-shendan" checked> <span>神诞日</span></label>
+        <label class="preset"><input type="checkbox" id="ics-gengshen"> <span>庚申日</span></label>
+        <label class="preset"><input type="checkbox" id="ics-jiazi"> <span>甲子日</span></label>
+        <label class="preset"><input type="checkbox" id="ics-bajie"> <span>八节</span></label>
+        <label class="preset"><input type="checkbox" id="ics-sanyuan"> <span>三元</span></label>
+        <label class="preset"><input type="checkbox" id="ics-wula"> <span>五腊日</span></label>
       </div>
-      <div class="row-between">
-        <div><div class="row-title" data-i18n="remind_anwu">暗戊日提醒</div><div class="row-sub" data-i18n="remind_anwu_sub">各派做法不一，仅作提示</div></div>
-        <label class="switch"><input type="checkbox" id="sw-anwu"><span></span></label>
-      </div>
-      <div class="row-between">
-        <div><div class="row-title" data-i18n="remind_baidou">拜斗日提醒</div><div class="row-sub" data-i18n="remind_baidou_sub">朔望礼斗、九皇斋期，宜斋戒敬香</div></div>
-        <label class="switch"><input type="checkbox" id="sw-baidou"><span></span></label>
-      </div>
-      <div class="timing-label" data-i18n="remind_timing">提醒时机</div>
+      <div class="timing-label">提醒时机</div>
       <div class="form-row preset-row">
-        <label class="preset"><input type="checkbox" name="wu-kind" value="day1"> <span data-i18n="kind_day1">提前1天</span></label>
-        <label class="preset"><input type="checkbox" name="wu-kind" value="today"> <span data-i18n="kind_today">当天</span></label>
-        <label class="preset"><input type="checkbox" name="wu-kind" value="custom"> <span data-i18n="kind_custom">自选</span></label>
-      </div>
-      <div class="form-row offset-row" id="wu-offset-row" hidden>
-        <span class="offset-label" data-i18n="offset_label">提前</span>
-        <input type="number" id="wu-offset-num" min="0" max="99999" inputmode="numeric" aria-label="提前数量">
-        <select id="wu-offset-unit" aria-label="提前单位">
-          <option value="1" data-i18n="unit_min">分钟</option>
-          <option value="60" data-i18n="unit_hour">小时</option>
-          <option value="1440" data-i18n="unit_day">天</option>
-          <option value="10080" data-i18n="unit_week">周</option>
-        </select>
+        <label class="preset"><input type="radio" name="ics-timing" value="day1"> <span>提前1天</span></label>
+        <label class="preset"><input type="radio" name="ics-timing" value="today"> <span>当天</span></label>
+        <label class="preset"><input type="radio" name="ics-timing" value="both" checked> <span>都要</span></label>
       </div>
       <div class="form-row">
-        <label for="inp-time" data-i18n="remind_time">提醒时间</label>
-        <input type="time" id="inp-time" value="17:00">
+        <button class="btn primary" id="ics-gen-btn">生成我的日历</button>
       </div>
-      <p class="hint" id="schedule-info"></p>
+      <p class="hint" id="ics-gen-info"></p>
+      <p class="hint">iPhone：设置 → 日历 → 添加日历 → 添加订阅日历，粘贴链接；或直接打开下载的 .ics 文件导入。<br>安卓：Google 日历 → 设置 → 添加日历 → 通过网址添加；或打开 .ics 文件导入。</p>
     </section>
 
     <section class="card" id="ics-subscribe">
-      <h2>📅 日历订阅（推荐）</h2>
-      <p class="hint">网页版无法后台推送，订阅日历后由手机系统日历负责提醒，关掉网页、重启手机都照样响。选一种订阅（单选）：</p>
+      <h2>📅 快捷订阅（仅戊日）</h2>
+      <p class="hint">只想要戊日提醒？直接订阅下面三个现成日历（选一种）：</p>
       <div class="form-row">
         <a class="btn" href="wuri-1day.ics">只提前1天提醒</a>
       </div>
@@ -370,25 +362,6 @@
         <div><div class="row-title">测试跳转</div><div class="hint">模拟点通知，直接跳今日经文</div></div>
         <button class="mini-btn" id="jingrec-test-btn">测试跳转</button>
       </div>
-    </section>
-    <section class="card">
-      <div class="card-title" data-i18n="perm_title">权限状态</div>
-      <div class="detail-row"><span class="dl" data-i18n="perm_notif">通知权限</span><span id="perm-notif" data-i18n="perm_checking">检测中…</span></div>
-      <div class="detail-row"><span class="dl" data-i18n="perm_alarm">精确闹钟</span><span id="perm-alarm" data-i18n="perm_checking">检测中…</span></div>
-      <div class="btn-row">
-        <button id="btn-perm" class="btn" data-i18n="btn_perm">申请通知权限</button>
-        <button id="btn-alarm" class="btn" data-i18n="btn_alarm">去开启精确闹钟</button>
-      </div>
-      <p class="hint" id="perm-hint" data-i18n="perm_hint">如果提醒不准时，请到手机「设置 → 应用 → 戊日不上香」中允许「通知」与「闹钟和提醒」。应用被省电策略清理后台也可能影响提醒，可将本应用设为「不受电池优化限制」。</p>
-    </section>
-
-    <section class="card">
-      <div class="card-title" data-i18n="test_title">测试提醒</div>
-      <div class="btn-row">
-        <button id="btn-test" class="btn" data-i18n="test_btn">发送测试提醒</button>
-      </div>
-      <p class="hint" id="test-info"></p>
-      <p class="hint" data-i18n="test_hint1">测试用，不影响正式提醒排期。点击后约 15 秒内发出一条测试通知，用于验证通知权限与提醒通道是否正常。</p>
     </section>
     <div class="tab-spacer"></div>
   </main>
@@ -903,6 +876,7 @@
 <script src="js/iztro.min.js"></script>
 <script src="js/ziwei.js"></script>
 <script src="js/ai-analysis.js"></script>
+<script src="js/ics-generator.js"></script>
 <script src="jing/index.js"></script>
 <script src="js/t2s.js"></script>
 <script src="js/jingwen.js"></script>
