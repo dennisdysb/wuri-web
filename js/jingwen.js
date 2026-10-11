@@ -819,6 +819,17 @@ var JingWen = (function () {
     var src = JING_BASE + filename;
     if (!jingAudio) { jingAudio = new Audio(); }
     jingAudio.src = src;
+    // 跟读点播：从指定位置开始（iOS 网页版修复 2026-10-10）
+    var seekSec = posMs / 1000;
+    if (seekSec > 0) {
+      try { jingAudio.currentTime = seekSec; } catch (e) {}
+      // 部分浏览器在元数据加载前设置 currentTime 会被忽略，加载完成后再设一次
+      var _seekOnce = function () {
+        jingAudio.removeEventListener('loadedmetadata', _seekOnce);
+        try { if (seekSec > 0) jingAudio.currentTime = seekSec; } catch (e2) {}
+      };
+      jingAudio.addEventListener('loadedmetadata', _seekOnce);
+    }
     jingAudio.play().catch(function(e) { alert('播放失败：' + e.message); });
     // 媒体卡片：显示在通知中心之上（用户 2026-10-10）
     try {
@@ -861,7 +872,17 @@ var JingWen = (function () {
     var b = bridge();
     var filename = localAudioFile(sid, voice);
     if (!b || typeof b.downloadFile !== 'function') {
-      alert('当前环境不支持下载');
+      // 网页版：无原生桥，用 <a download> 直接下载（iOS 网页版修复 2026-10-10）
+      try {
+        var a = document.createElement('a');
+        a.href = JING_BASE + filename;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } catch (e) {
+        alert('下载失败：' + e.message);
+      }
       return;
     }
     var bar = ensureProgressBar();
