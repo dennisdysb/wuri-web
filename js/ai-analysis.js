@@ -66,11 +66,13 @@ try {
 if (window.WuBridge && typeof window.WuBridge.copyAndOpenApp === 'function') {
 opened =!!window.WuBridge.copyAndOpenApp(prompt, AI_PKG);
 } else {
+// 网页版（iOS）：复制后在新标签页打开 DeepSeek 网页版（2026-10-10）
 copyText(prompt);
+try { window.open('https://chat.deepseek.com/', '_blank'); opened = true; } catch (e) {}
 }
 } catch (e) { copyText(prompt);}
 if (opened) {
-toast('已复制并打开' + AI_NAME + '，请粘贴发送');
+toast(window.WuBridge ? '已复制并打开' + AI_NAME + '，请粘贴发送' : '排盘已复制，正在打开 DeepSeek 网页版，请粘贴分析');
 } else {
 toast('排盘已复制，请打开' + AI_NAME + '粘贴分析');
 }
