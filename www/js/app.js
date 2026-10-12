@@ -1496,6 +1496,23 @@ function bindMe() {
   $$('input[name=lang]').forEach(function (r) {
     r.addEventListener('change', function () { setLangPref(r.value); });
   });
+  /* 诊断面板（v1.1.9）：显示关键全局函数状态 */
+  try {
+    var diagCard = $('#diag-card');
+    var diagOut = $('#diag-output');
+    if (diagCard && diagOut) {
+      var lines = [];
+      lines.push('WuriMediaSession: ' + (typeof window.WuriMediaSession));
+      lines.push('JingWen: ' + (typeof window.JingWen));
+      lines.push('JingMark: ' + (typeof window.JingMark));
+      lines.push('JingOpenReader: ' + (typeof window.JingOpenReader));
+      lines.push('JingTitleOf: ' + (typeof window.JingTitleOf));
+      lines.push('JingShowMarks: ' + (typeof window.JingShowMarks));
+      lines.push('mediaSession in navigator: ' + ('mediaSession' in navigator));
+      diagOut.textContent = lines.join('\n');
+      diagCard.style.display = 'block';
+    }
+  } catch (e) {}
 }
 
 /* ---------------- 启动 ---------------- */
