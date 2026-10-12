@@ -1224,7 +1224,7 @@ var JingWen = (function () {
         info = getSelOffsets();
         if (!info || !info.length) return;
         var sid0 = window._jingCurrentId;
-        if (!sid0 || !isNeidanBook(sid0)) return;
+        if (!sid0 || !isNeidan(sid0)) return;
         info.forEach(function (it) { it.sid = sid0; });
       }
       pendingHl = info;
@@ -1379,7 +1379,7 @@ var JingWen = (function () {
     updateFab();
   });
   // 暴露给外部调用（每日经文推荐等）
-  window.JingOpenReader = openReader;
+  window.JingOpenReader = (typeof JingWen !== 'undefined' && JingWen.openReader) ? JingWen.openReader : null;
 })();
 
 /* ---------- 书签·高亮·心得（仅内丹书籍） ---------- */
