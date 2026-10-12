@@ -1842,6 +1842,15 @@ var JingWen = (function () {
         if (!reader || reader.hidden) return;
         // 如果正在显示"已存在高亮"的操作菜单，不自动隐藏（等用户点按钮或点空白处）
         if (pendingHlId) return;
+        // 立即缓存选区（不要等防抖，否则用户点高亮按钮时缓存还是空的）
+        try {
+          var earlyInfo = getSelOffsets();
+          var earlySid = window._jingCurrentId;
+          if (earlyInfo && earlyInfo.length && earlySid && isNeidanBook(earlySid)) {
+            earlyInfo.forEach(function (it) { it.sid = earlySid; });
+            cachedSelInfo = earlyInfo;
+          }
+        } catch (e) {}
         if (selDebounce) clearTimeout(selDebounce);
         selDebounce = setTimeout(function () {
           var info = getSelOffsets();
@@ -2285,4 +2294,14 @@ var JingWen = (function () {
       }
     });
   });
+
+  // 全局兜底：供 HTML onclick 直接调用（防止 DOMContentLoaded 绑定失败）
+  window.JingShowMarks = function (tab) {
+    try {
+      window._jingMarksUserRequested = true;
+      showMarks(tab || 'bookmark');
+    } catch (e) {
+      alert('我的标记出错：' + (e && e.message));
+    }
+  };
 })();

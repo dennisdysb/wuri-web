@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v18-20261011-revert';
+const CACHE = 'wuri-v19-20261011-cachefix';
 const ASSETS = [
   './',
   './index.html',
