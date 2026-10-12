@@ -1213,6 +1213,19 @@ var JingWen = (function () {
     if (rcb) rcb.addEventListener('click', toggleRecite);
     var flb = $('#jing-follow');
     if (flb) flb.addEventListener('click', toggleFollow);
+    // 高亮按钮（仅内丹书）：选中文字后点此手动触发高亮弹窗（iOS selectionchange 不可靠）
+    var hlb = $('#jing-highlight-btn');
+    if (hlb) hlb.addEventListener('click', function () {
+      if (!currentIsNeidan()) return;
+      var info = getSelOffsets();
+      if (!info || !info.length) return;
+      var sid = window._jingCurrentId;
+      if (!sid || !isNeidanBook(sid)) return;
+      info.forEach(function (it) { it.sid = sid; });
+      pendingHl = info;
+      pendingHlId = null;
+      showHlPop(0, 0, false);
+    });
     // 跟读模式：点段落从该处开始播
     var jc = $('#jing-content');
     if (jc) jc.addEventListener('click', function (e) {
@@ -1292,6 +1305,16 @@ var JingWen = (function () {
       } catch (e) { isNd = false; }
       var showBm = showReader && curId && isNd;
       bmFab.classList.toggle('show', !!showBm);
+    }
+    // 高亮按钮：仅内丹书阅读时显示（与书签悬浮按钮同逻辑）
+    var hlBtn = document.getElementById('jing-highlight-btn');
+    if (hlBtn) {
+      var curId2 = window._jingCurrentId;
+      var isNd2 = false;
+      try {
+        if (curId2 && window.JingWen && typeof window.JingWen.isNeidan === 'function') isNd2 = window.JingWen.isNeidan(curId2);
+      } catch (e) { isNd2 = false; }
+      hlBtn.hidden = !(showReader && curId2 && isNd2);
     }
   }
   document.addEventListener('DOMContentLoaded', function () {
