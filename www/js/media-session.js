@@ -7,7 +7,7 @@
 
   var APP_NAME = '戊日不上香';
   /* 2026-10-11 fix: artwork 写死绝对 URL，不动态拼（pathname 在根目录/子目录下算出来不一样，404 就不显示图） */
-  var ICON_SRC = 'https://dennisdysb.github.io/wuri-web/www/img/logo.png';
+  var ICON_SRC = 'https://dennisdysb.github.io/wuri-web/www/img/logo-artwork.png';
 
   function isSupported() {
     try { return ('mediaSession' in navigator); } catch (e) { return false; }
