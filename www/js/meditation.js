@@ -311,16 +311,6 @@ var Meditation = (function () {
         try { fb.ambient.load(); } catch (e2) {}
       }
       fb.ambient.volume = volume();
-      // 媒体卡片：先设 metadata（logo 才有机会显示），play() 后再 bindAudio（灵动岛才出）
-      try {
-        if (window.WuriMediaSession && s.name) {
-          window.WuriMediaSession.setMetadata({
-            title: '打坐 · ' + s.name,
-            artist: '戊日不上香',
-            album: '打坐冥想'
-          });
-        }
-      } catch (e0) {}
       try {
         var p = fb.ambient.play();
         if (p && p.catch) p.catch(function () {
@@ -328,6 +318,7 @@ var Meditation = (function () {
           try { var p2 = fb.ambient.play(); if (p2 && p2.catch) p2.catch(function () {}); } catch (e3) {}
         });
       } catch (e) {}
+      // 媒体卡片：iOS 上必须在 play() 后设，否则灵动岛不出（2026-10-11 回滚 v1.1.5 的顺序调整；v1.3.4 试过 play 前 setMetadata 会导致灵动岛消失，已回滚）
       try {
         if (window.WuriMediaSession && s.name) {
           window.WuriMediaSession.bindAudio(fb.ambient, {

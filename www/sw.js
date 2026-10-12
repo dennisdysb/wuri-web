@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v36-20261012-logofix';
+const CACHE = 'wuri-v37-20261012-logo96';
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   './manifest.json',
   './img/logo.png',
   './img/logo-artwork.png',
+  './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
   './css/style.css',

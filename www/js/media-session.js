@@ -7,7 +7,7 @@
 
   var APP_NAME = '戊日不上香';
   /* 2026-10-11 fix: artwork 写死绝对 URL，不动态拼（pathname 在根目录/子目录下算出来不一样，404 就不显示图） */
-  var ICON_SRC = 'https://dennisdysb.github.io/wuri-web/www/img/logo-artwork.png';
+  var ICON_SRC = 'https://dennisdysb.github.io/wuri-web/www/img/logo-96.png';
 
   function isSupported() {
     try { return ('mediaSession' in navigator); } catch (e) { return false; }
@@ -17,11 +17,11 @@
     if (!isSupported()) return;
     try {
       var artwork = [];
-      // 尝试用传入的封面，否则用 App 图标（只写实际尺寸 256x256，iOS 对尺寸不匹配会直接拒掉）
+      // 尝试用传入的封面，否则用 App 图标（只写实际尺寸 96x96，iOS 对尺寸不匹配会直接拒掉）
       if (opts.artwork) {
         artwork = opts.artwork;
       } else {
-        artwork = [{ src: ICON_SRC, sizes: '256x256', type: 'image/png' }];
+        artwork = [{ src: ICON_SRC, sizes: '96x96', type: 'image/png' }];
       }
       navigator.mediaSession.metadata = new MediaMetadata({
         title: opts.title || APP_NAME,
