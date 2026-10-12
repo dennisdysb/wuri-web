@@ -311,7 +311,14 @@ var Meditation = (function () {
         try { fb.ambient.load(); } catch (e2) {}
       }
       fb.ambient.volume = volume();
-      // 媒体卡片：必须在 play() 之前设 metadata（含 artwork），iOS 播放开始后就不再拉图（2026-10-11）
+      try {
+        var p = fb.ambient.play();
+        if (p && p.catch) p.catch(function () {
+          /* iOS 偶发拦截，重试一次 */
+          try { var p2 = fb.ambient.play(); if (p2 && p2.catch) p2.catch(function () {}); } catch (e3) {}
+        });
+      } catch (e) {}
+      // 媒体卡片：iOS 上必须在 play() 后设，否则灵动岛不出（2026-10-11 回滚 v1.1.5 的顺序调整）
       try {
         if (window.WuriMediaSession && s.name) {
           window.WuriMediaSession.bindAudio(fb.ambient, {
@@ -321,13 +328,6 @@ var Meditation = (function () {
           });
         }
       } catch (e2) {}
-      try {
-        var p = fb.ambient.play();
-        if (p && p.catch) p.catch(function () {
-          /* iOS 偶发拦截，重试一次 */
-          try { var p2 = fb.ambient.play(); if (p2 && p2.catch) p2.catch(function () {}); } catch (e3) {}
-        });
-      } catch (e) {}
     } else {
       /* 无声·静室：停掉背景音 */
       try { if (fb.ambient) { fb.ambient.pause(); } } catch (e4) {}
