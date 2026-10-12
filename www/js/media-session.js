@@ -17,17 +17,11 @@
     if (!isSupported()) return;
     try {
       var artwork = [];
-      // 尝试用传入的封面，否则用 App 图标（多尺寸，iOS 挑合适的）
+      // 尝试用传入的封面，否则用 App 图标（只写实际尺寸 256x256，iOS 对尺寸不匹配会直接拒掉）
       if (opts.artwork) {
         artwork = opts.artwork;
       } else {
-        artwork = [
-          { src: ICON_SRC, sizes: '96x96', type: 'image/png' },
-          { src: ICON_SRC, sizes: '128x128', type: 'image/png' },
-          { src: ICON_SRC, sizes: '192x192', type: 'image/png' },
-          { src: ICON_SRC, sizes: '256x256', type: 'image/png' },
-          { src: ICON_SRC, sizes: '512x512', type: 'image/png' }
-        ];
+        artwork = [{ src: ICON_SRC, sizes: '256x256', type: 'image/png' }];
       }
       navigator.mediaSession.metadata = new MediaMetadata({
         title: opts.title || APP_NAME,
