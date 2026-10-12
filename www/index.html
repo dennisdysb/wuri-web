@@ -553,7 +553,7 @@
       <p class="hint">使用中有问题或建议，欢迎发邮件反馈。</p>
     </section>
     <section class="card" id="diag-card" style="display:none;">
-      <div class="card-title">诊断信息（v1.2.4）</div>
+      <div class="card-title">诊断信息（v1.2.5）</div>
       <p class="hint" id="diag-output" style="font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;"></p>
     </section>
     <section class="card">
@@ -847,6 +847,20 @@
 
 <!--TEST-ONLY--><script>window.__wuriTestBuild = true;</script><!--/TEST-ONLY-->
 <!--DEMO-ONLY--><script>window.__wuriProDemo = true;</script><!--/DEMO-ONLY-->
+<script>
+/* 全局错误捕获（v1.2.5 诊断）：记录 JS 加载/执行错误 */
+window.__jsErrors = [];
+window.addEventListener('error', function (e) {
+  var msg = (e.filename || '') + ':' + (e.lineno || 0) + ' ' + (e.message || e.error);
+  window.__jsErrors.push(msg);
+  var out = document.getElementById('diag-output');
+  if (out) {
+    var lines = out.textContent.split('\n');
+    lines.push('JSERROR: ' + msg);
+    out.textContent = lines.join('\n');
+  }
+}, true);
+</script>
 <script src="js/lunar.min.js"></script>
 <script src="js/capacitor.js"></script>
 <script src="js/ln-plugin.js"></script>

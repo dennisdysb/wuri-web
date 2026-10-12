@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v26-20261011-jsbypass';
+const CACHE = 'wuri-v27-20261011-jserr';
 const ASSETS = [
   './',
   './index.html',
