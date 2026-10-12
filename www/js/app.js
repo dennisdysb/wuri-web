@@ -1424,7 +1424,17 @@ function bindRemind() {
     var reasonEl = $('#jingrec-reason');
     var goBtn = $('#jingrec-go');
     if (rec && rec.sid) {
-      var jt = (typeof window.JingTitleOf === 'function') ? window.JingTitleOf(rec.sid) : rec.sid;
+      // 直接查 JINGWEN_INDEX，不依赖 JingTitleOf（v1.2.9 fix：JingTitleOf 可能未定义）
+      var jt = rec.sid;
+      try {
+        if (typeof window.JingTitleOf === 'function') {
+          jt = window.JingTitleOf(rec.sid);
+        } else if (window.JINGWEN_INDEX) {
+          for (var i = 0; i < window.JINGWEN_INDEX.length; i++) {
+            if (window.JINGWEN_INDEX[i].id === rec.sid) { jt = window.JINGWEN_INDEX[i].title; break; }
+          }
+        }
+      } catch (e) {}
       if (titleEl) titleEl.textContent = jt;
       if (reasonEl) reasonEl.textContent = rec.reason || '';
       if (goBtn) {
