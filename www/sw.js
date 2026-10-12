@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v22-20261011-nover';
+const CACHE = 'wuri-v23-20261011-htmlnet';
 const ASSETS = [
   './',
   './index.html',
@@ -74,6 +74,21 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  var url = new URL(e.request.url);
+  var isHtml = url.pathname.endsWith('.html') || url.pathname.endsWith('/');
+  // HTML 用网络优先（避免旧版 HTML 缓存导致 JS 不执行），其他用缓存优先
+  if (isHtml && e.request.method === 'GET') {
+    e.respondWith(
+      fetch(e.request).then(function (res) {
+        if (res.ok && url.origin === location.origin) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+        }
+        return res;
+      }).catch(function () { return caches.match(e.request); })
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
       // 只缓存同源 GET 成功响应
