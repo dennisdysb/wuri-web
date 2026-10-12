@@ -1217,8 +1217,9 @@ var JingWen = (function () {
     // 注意：点按钮时 iOS 会清掉实时选区，所以用 selectionchange 时缓存的选区（2026-10-11）
     var hlb = $('#jing-highlight-btn');
     if (hlb) hlb.addEventListener('click', function () {
-      if (!currentIsNeidan()) return;
+      if (!currentIsNeidan()) { alert('debug: not neidan'); return; }
       var info = cachedSelInfo;
+      alert('debug: cached=' + (info ? info.length : 'null') + ', live=' + (function(){try{var s=window.getSelection();return s?s.toString().length:0;}catch(e){return 'err';}})());
       if (!info || !info.length) {
         // 缓存没有，尝试取实时选区（桌面端）
         info = getSelOffsets();
