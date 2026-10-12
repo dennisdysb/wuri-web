@@ -1214,14 +1214,19 @@ var JingWen = (function () {
     var flb = $('#jing-follow');
     if (flb) flb.addEventListener('click', toggleFollow);
     // 高亮按钮（仅内丹书）：选中文字后点此手动触发高亮弹窗（iOS selectionchange 不可靠）
+    // 注意：点按钮时 iOS 会清掉实时选区，所以用 selectionchange 时缓存的选区（2026-10-11）
     var hlb = $('#jing-highlight-btn');
     if (hlb) hlb.addEventListener('click', function () {
       if (!currentIsNeidan()) return;
-      var info = getSelOffsets();
-      if (!info || !info.length) return;
-      var sid = window._jingCurrentId;
-      if (!sid || !isNeidanBook(sid)) return;
-      info.forEach(function (it) { it.sid = sid; });
+      var info = cachedSelInfo;
+      if (!info || !info.length) {
+        // 缓存没有，尝试取实时选区（桌面端）
+        info = getSelOffsets();
+        if (!info || !info.length) return;
+        var sid0 = window._jingCurrentId;
+        if (!sid0 || !isNeidanBook(sid0)) return;
+        info.forEach(function (it) { it.sid = sid0; });
+      }
       pendingHl = info;
       pendingHlId = null;
       showHlPop(0, 0, false);
@@ -1668,6 +1673,7 @@ var JingWen = (function () {
 
   var pendingHl = null;
   var pendingHlId = null; // 用于已存在高亮的操作（换色/写心得/删除）
+  var cachedSelInfo = null; // 缓存的最后有效选区（iOS 点按钮时会清掉实时选区，2026-10-11）
 
   function showHlPop(x, y, isExisting) {
     var pop = $('#hl-pop');
@@ -1846,6 +1852,7 @@ var JingWen = (function () {
           info.forEach(function (it) { it.sid = sid; });
           pendingHl = info; // 数组
           pendingHlId = null;
+          cachedSelInfo = info; // 缓存，供高亮按钮使用（iOS 点按钮会清选区）
           showHlPop(0, 0, false); // 底部固定，不需要坐标
         }, 800);
       });
@@ -2017,6 +2024,7 @@ var JingWen = (function () {
   function showMarks(tab) {
     // 守卫：只有用户点了"我的标记"才允许显示，防止 tab 切换时误显示
     if (!window._jingMarksUserRequested && !tab) return;
+    try {
     if (tab) activeTab = tab;
     var listEl = $('#jing-list');
     var marksEl = $('#jing-marks');
@@ -2048,6 +2056,10 @@ var JingWen = (function () {
 
     marksEl.innerHTML = html;
     window._refreshMarks = function () { showMarks(); };
+    } catch (e) {
+      var me = $('#jing-marks');
+      if (me) { me.hidden = false; me.innerHTML = '<p class="hint">出错：' + esc(e && e.message) + '</p>'; }
+    }
   }
 
   function renderBookmarks(JM) {
@@ -2139,7 +2151,14 @@ var JingWen = (function () {
 
   document.addEventListener('DOMContentLoaded', function () {
     var btn = $('#jing-mymarks');
-    if (btn) btn.addEventListener('click', function () { window._jingMarksUserRequested = true; showMarks('bookmark'); });
+    if (btn) btn.addEventListener('click', function () {
+      try {
+        window._jingMarksUserRequested = true;
+        showMarks('bookmark');
+      } catch (e) {
+        alert('我的标记出错：' + (e && e.message));
+      }
+    });
 
     document.addEventListener('click', function (e) {
       // 页签切换（只处理标记页内部的书签/高亮/心得，不处理底部主导航）
