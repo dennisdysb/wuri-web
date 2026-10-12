@@ -506,7 +506,6 @@ var Practice = (function () {
     $('#daka-form-wrap').hidden = false;
     $('#df-name').value = '';
     $('#df-type').value = 'count';
-    $('#df-remind-time').value = '';
     window.scrollTo(0, 0);
   }
   function saveForm() {
@@ -517,13 +516,11 @@ var Practice = (function () {
       name: name,
       type: $('#df-type').value,
       icon: '✦',
-      preset: false,
-      remindTime: $('#df-remind-time').value || ''
+      preset: false
     };
     var list = getHabits();
     list.push(h);
     saveHabits(list);
-    scheduleRemind(h);
     $('#daka-form-wrap').hidden = true;
     renderAll();
   }
