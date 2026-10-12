@@ -86,14 +86,18 @@
     <input type="file" id="shot" accept="image/*">
     <p class="hint">须为付款成功页截图（5MB 以内），需能看清交易单号。</p>
 
-    <button class="btn" id="submit">提交审核</button>
+    <label class="f" for="txn_id">交易单号</label>
+    <input type="text" id="txn_id" maxlength="64" placeholder="从付款成功页复制交易单号" autocomplete="off">
+    <p class="hint">支付宝/微信付款成功页上的交易单号，用于防重复提交。</p>
+
+    <button class="btn" id="submit">提交</button>
     <div class="msg" id="msg"></div>
   </div>
 
   <div class="card done" id="done-card" style="display:none">
     <div class="big">✅</div>
-    <h2>已提交审核</h2>
-    <p>激活码将在约 15 分钟内发到你的邮箱，请注意查收。<br>拿到后到<a href="redeem.html">兑换页</a>兑换即可解锁 Pro。</p>
+    <h2>提交成功</h2>
+    <p>激活码已发送到你的邮箱，请注意查收（包括垃圾箱）。<br>拿到后到<a href="redeem.html">兑换页</a>兑换即可解锁 Pro。</p>
   </div>
 
   <div class="foot">戊日不上香 · Wuri</div>
@@ -121,10 +125,12 @@ document.getElementById('submit').addEventListener('click', function () {
   var nickname = document.getElementById('nickname').value.trim();
   var email = document.getElementById('email').value.trim();
   var channel = document.querySelector('input[name=channel]:checked').value;
+  var txnId = document.getElementById('txn_id').value.trim();
   var file = document.getElementById('shot').files[0];
 
   if (!nickname) return say('请填写微信昵称');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('邮箱格式不正确');
+  if (!txnId) return say('请填写交易单号');
   if (!file) return say('请上传付款截图');
   if (!/^image\//.test(file.type)) return say('截图必须是图片文件');
   if (file.size > 5 * 1024 * 1024) return say('截图不能超过 5MB');
@@ -136,6 +142,7 @@ document.getElementById('submit').addEventListener('click', function () {
   fd.append('nickname', nickname);
   fd.append('email', email);
   fd.append('channel', channel);
+  fd.append('txn_id', txnId);
   fd.append('screenshot', file);
 
   fetch(API_BASE + '/api/manual/submit', { method: 'POST', body: fd })

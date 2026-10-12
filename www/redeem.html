@@ -49,7 +49,7 @@
     <h2>一 · 购买</h2>
     <div class="price-row">
       <button class="price-btn" id="buy-us">US$4.99<small>美国 / 海外<br>信用卡 · Apple Pay</small></button>
-      <button class="price-btn" id="buy-cn">¥30<small>中国大陆<br>微信支付(审核中) · 银联卡</small></button>
+      <button class="price-btn" id="buy-cn">¥30<small>中国大陆<br>支付宝 · 微信支付</small></button>
     </div>
     <div class="msg" id="buy-msg"></div>
     <ul class="steps">
@@ -108,7 +108,7 @@ function buy(region) {
   });
 }
 $('buy-us').addEventListener('click', function () { buy('us'); });
-$('buy-cn').addEventListener('click', function () { buy('cn'); });
+$('buy-cn').addEventListener('click', function () { location.href = 'manual-pay.html'; });
 
 /* ---- 兑换 ---- */
 var verifiedCode = null;
