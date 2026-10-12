@@ -1506,66 +1506,6 @@ function bindMe() {
   $$('input[name=lang]').forEach(function (r) {
     r.addEventListener('change', function () { setLangPref(r.value); });
   });
-  /* 诊断面板（v1.1.9）：显示关键全局函数状态 */
-  try {
-    var diagCard = $('#diag-card');
-    var diagOut = $('#diag-output');
-    if (diagCard && diagOut) {
-      var lines = [];
-      lines.push('WuriMediaSession: ' + (typeof window.WuriMediaSession));
-      lines.push('JingWen: ' + (typeof window.JingWen));
-      lines.push('JingMark: ' + (typeof window.JingMark));
-      lines.push('JingOpenReader: ' + (typeof window.JingOpenReader));
-      lines.push('JingTitleOf: ' + (typeof window.JingTitleOf));
-      lines.push('JingShowMarks: ' + (typeof window.JingShowMarks));
-      lines.push('mediaSession in navigator: ' + ('mediaSession' in navigator));
-      diagOut.textContent = lines.join('\n');
-      diagCard.style.display = 'block';
-      // 动态加载关键 JS（v1.2.6）：如果静态 script 标签没执行，动态加载
-      if (typeof window.WuriMediaSession === 'undefined') {
-        lines.push('DYNLOAD: trying media-session.js');
-        diagOut.textContent = lines.join('\n');
-        var s1 = document.createElement('script');
-        s1.src = 'js/media-session.js';
-        s1.onload = function () {
-          lines.push('DYNLOAD media-session.js OK, WuriMediaSession=' + (typeof window.WuriMediaSession));
-          diagOut.textContent = lines.join('\n');
-        };
-        s1.onerror = function () {
-          lines.push('DYNLOAD media-session.js FAILED');
-          diagOut.textContent = lines.join('\n');
-        };
-        document.head.appendChild(s1);
-      }
-      if (typeof window.JingWen === 'undefined') {
-        lines.push('DYNLOAD: trying jingwen.js');
-        diagOut.textContent = lines.join('\n');
-        var s2 = document.createElement('script');
-        s2.src = 'js/jingwen.js';
-        s2.onload = function () {
-          lines.push('DYNLOAD jingwen.js OK, JingWen=' + (typeof window.JingWen));
-          diagOut.textContent = lines.join('\n');
-        };
-        s2.onerror = function () {
-          lines.push('DYNLOAD jingwen.js FAILED');
-          diagOut.textContent = lines.join('\n');
-        };
-        document.head.appendChild(s2);
-      }
-      // fetch 诊断：检查 JS 文件能否拉取
-      ['js/media-session.js', 'js/jingwen.js'].forEach(function (u) {
-        fetch(u, { cache: 'no-store' }).then(function (r) {
-          return r.text().then(function (t) {
-            lines.push('FETCH ' + u + ': ' + r.status + ' len=' + t.length + ' head=' + t.substring(0, 30).replace(/\n/g, ' '));
-            diagOut.textContent = lines.join('\n');
-          });
-        }).catch(function (e) {
-          lines.push('FETCH ' + u + ' ERROR: ' + e.message);
-          diagOut.textContent = lines.join('\n');
-        });
-      });
-    }
-  } catch (e) {}
 }
 
 /* ---------------- 启动 ---------------- */

@@ -552,10 +552,6 @@
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
       <p class="hint">使用中有问题或建议，欢迎发邮件反馈。</p>
     </section>
-    <section class="card" id="diag-card" style="display:none;">
-      <div class="card-title">诊断信息（v1.2.9）</div>
-      <p class="hint" id="diag-output" style="font-family:monospace;font-size:12px;white-space:pre-wrap;word-break:break-all;"></p>
-    </section>
     <section class="card">
       <div class="card-title">数据备份</div>
       <p class="hint">心得、高亮、书签、八字排盘、六爻记录、修行打卡等都保存在本机。正常更新 App 不会丢失，但卸载重装会清空。建议定期导出备份。</p>
@@ -847,41 +843,27 @@
 
 <!--TEST-ONLY--><script>window.__wuriTestBuild = true;</script><!--/TEST-ONLY-->
 <!--DEMO-ONLY--><script>window.__wuriProDemo = true;</script><!--/DEMO-ONLY-->
-<script>
-/* 全局错误捕获（v1.2.5 诊断）：记录 JS 加载/执行错误 */
-window.__jsErrors = [];
-window.addEventListener('error', function (e) {
-  var msg = (e.filename || '') + ':' + (e.lineno || 0) + ' ' + (e.message || e.error);
-  window.__jsErrors.push(msg);
-  var out = document.getElementById('diag-output');
-  if (out) {
-    var lines = out.textContent.split('\n');
-    lines.push('JSERROR: ' + msg);
-    out.textContent = lines.join('\n');
-  }
-}, true);
-</script>
 <script src="js/lunar.min.js"></script>
 <script src="js/capacitor.js"></script>
 <script src="js/ln-plugin.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/zhishen-data.js"></script>
-<script src="js/app.js?v=129"></script>
+<script src="jing/index.js"></script>
+<script src="js/app.js"></script>
 <script src="js/pro.js"></script>
   <script src="js/liuyao.js"></script>
 <script src="js/yearview.js"></script>
-<script src="js/media-session.js?v=129"></script>
+<script src="js/media-session.js"></script>
 <script src="js/practice.js"></script>
-<script src="js/meditation.js?v=129"></script>
+<script src="js/meditation.js"></script>
 <script src="js/citydata.js"></script>
 <script src="js/bazi.js"></script>
 <script src="js/iztro.min.js"></script>
 <script src="js/ziwei.js"></script>
 <script src="js/ai-analysis.js"></script>
 <script src="js/ics-generator.js"></script>
-<script src="jing/index.js"></script>
 <script src="js/t2s.js"></script>
-<script src="js/jingwen.js?v=129"></script>
+<script src="js/jingwen.js"></script>
 <script>
 // PWA: 注册 Service Worker（原生壳内跳过，file:// 不支持 SW）
 if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.WuBridge) {

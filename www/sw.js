@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v31-20261011-titelfix';
+const CACHE = 'wuri-v32-20261011-clean';
 const ASSETS = [
   './',
   './index.html',
