@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v25-20261011-fetchdiag';
+const CACHE = 'wuri-v26-20261011-jsbypass';
 const ASSETS = [
   './',
   './index.html',
@@ -77,8 +77,10 @@ self.addEventListener('fetch', e => {
   var url = new URL(e.request.url);
   var isHtml = url.pathname.endsWith('.html') || url.pathname.endsWith('/');
   var isJs = url.pathname.endsWith('.js');
-  // HTML 和 JS 用网络优先（避免旧版缓存导致功能不执行），其他用缓存优先
-  if ((isHtml || isJs) && e.request.method === 'GET') {
+  // JS 文件：完全不拦截，让浏览器直接请求（SW 缓存 JS 出问题，2026-10-11）
+  if (isJs) return;
+  // HTML 用网络优先（避免旧版 HTML 缓存导致 JS 不执行），其他用缓存优先
+  if (isHtml && e.request.method === 'GET') {
     e.respondWith(
       fetch(e.request).then(function (res) {
         if (res.ok && url.origin === location.origin) {
