@@ -1511,6 +1511,18 @@ function bindMe() {
       lines.push('mediaSession in navigator: ' + ('mediaSession' in navigator));
       diagOut.textContent = lines.join('\n');
       diagCard.style.display = 'block';
+      // fetch 诊断：检查 JS 文件能否拉取
+      ['js/media-session.js', 'js/jingwen.js'].forEach(function (u) {
+        fetch(u, { cache: 'no-store' }).then(function (r) {
+          return r.text().then(function (t) {
+            lines.push('FETCH ' + u + ': ' + r.status + ' len=' + t.length + ' head=' + t.substring(0, 30).replace(/\n/g, ' '));
+            diagOut.textContent = lines.join('\n');
+          });
+        }).catch(function (e) {
+          lines.push('FETCH ' + u + ' ERROR: ' + e.message);
+          diagOut.textContent = lines.join('\n');
+        });
+      });
     }
   } catch (e) {}
 }
