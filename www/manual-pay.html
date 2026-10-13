@@ -64,9 +64,9 @@
   <div class="card" id="form-card">
     <h2>二 · 填写表单</h2>
     <ul class="steps">
-      <li>付款后<strong>截图保存</strong>付款成功页（含交易单号）</li>
-      <li>填写下面表单并上传截图，提交审核</li>
-      <li>审核通过后，激活码约 <strong>15 分钟内</strong>发到你的邮箱</li>
+      <li>付款后<strong>截图保存</strong>账单详情页（能看清金额和交易单号）</li>
+      <li>填写下面表单并上传截图，<strong>交易单号由系统自动识别，不用手填</strong></li>
+      <li>提交后系统自动核对，激活码通常 <strong>几分钟内</strong>发到你的邮箱</li>
       <li>拿到激活码后，到<a href="redeem.html">兑换页</a>兑换解锁</li>
     </ul>
 
@@ -84,11 +84,7 @@
 
     <label class="f" for="shot">付款截图</label>
     <input type="file" id="shot" accept="image/*">
-    <p class="hint">须为付款成功页截图（5MB 以内），需能看清交易单号。</p>
-
-    <label class="f" for="txn_id">交易单号</label>
-    <input type="text" id="txn_id" maxlength="64" placeholder="从付款成功页复制交易单号" autocomplete="off">
-    <p class="hint">支付宝/微信付款成功页上的交易单号，用于防重复提交。</p>
+    <p class="hint">账单详情或付款成功页截图（5MB 以内），需能看清金额与交易单号，系统会自动识别单号。</p>
 
     <button class="btn" id="submit">提交</button>
     <div class="msg" id="msg"></div>
@@ -120,17 +116,41 @@ function say(t, ok) {
   msgEl.className = 'msg ' + (ok ? 'ok' : 'err');
 }
 
+/* 提交前把截图压缩到最长边 1280 的 JPEG: 上传更快, 后端识别也更稳; 失败则用原图 */
+function shrinkImage(file) {
+  return new Promise(function (resolve) {
+    try {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        try {
+          var scale = Math.min(1, 1280 / Math.max(img.width, img.height));
+          if (scale >= 1) { URL.revokeObjectURL(url); return resolve(file); }
+          var cv = document.createElement('canvas');
+          cv.width = Math.round(img.width * scale);
+          cv.height = Math.round(img.height * scale);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          URL.revokeObjectURL(url);
+          cv.toBlob(function (b) {
+            resolve(b ? new File([b], 'shot.jpg', { type: 'image/jpeg' }) : file);
+          }, 'image/jpeg', 0.85);
+        } catch (e) { resolve(file); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    } catch (e) { resolve(file); }
+  });
+}
+
 document.getElementById('submit').addEventListener('click', function () {
   var btn = this;
   var nickname = document.getElementById('nickname').value.trim();
   var email = document.getElementById('email').value.trim();
   var channel = document.querySelector('input[name=channel]:checked').value;
-  var txnId = document.getElementById('txn_id').value.trim();
   var file = document.getElementById('shot').files[0];
 
   if (!nickname) return say('请填写微信昵称');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('邮箱格式不正确');
-  if (!txnId) return say('请填写交易单号');
   if (!file) return say('请上传付款截图');
   if (!/^image\//.test(file.type)) return say('截图必须是图片文件');
   if (file.size > 5 * 1024 * 1024) return say('截图不能超过 5MB');
@@ -138,14 +158,14 @@ document.getElementById('submit').addEventListener('click', function () {
   btn.disabled = true;
   say('提交中…', true);
 
+  shrinkImage(file).then(function (shot) {
   var fd = new FormData();
   fd.append('nickname', nickname);
   fd.append('email', email);
   fd.append('channel', channel);
-  fd.append('txn_id', txnId);
-  fd.append('screenshot', file);
+  fd.append('screenshot', shot);
 
-  fetch(API_BASE + '/api/manual/submit', { method: 'POST', body: fd })
+  return fetch(API_BASE + '/api/manual/submit', { method: 'POST', body: fd })
     .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
     .then(function (res) {
       if (res.status === 200 && res.d.ok) {
@@ -158,6 +178,7 @@ document.getElementById('submit').addEventListener('click', function () {
       }
     })
     .catch(function () { say('网络错误, 请重试'); btn.disabled = false; });
+  });
 });
 </script>
 </body>
