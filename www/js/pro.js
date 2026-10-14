@@ -193,10 +193,11 @@ var WuriPro = (function () {
     document.querySelectorAll('[data-pro-testbtn]').forEach(function (el) {
       el.style.display = (!pro && isTestBuild() && !window.IS_FREE_BUILD) ? '' : 'none';
     });
+    /* 经文库免费开放（2026-10-14）：整页永不上锁，仅内丹书籍由 jingwen.js 在打开时验 Pro */
     var lock = document.getElementById('jing-lock');
-    if (lock) lock.style.display = pro ? 'none' : '';
+    if (lock) lock.style.display = 'none';
     var body = document.getElementById('jing-body');
-    if (body) body.style.display = pro ? '' : 'none';
+    if (body) body.style.display = '';
   }
 
   function testUnlock() {

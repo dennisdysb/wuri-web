@@ -141,6 +141,7 @@ var JingWen = (function () {
       if (f) neidanItems.push(f);
     });
     if (neidanItems.length && !window.IS_FREE_BUILD) {
+      var ndPro = isPro();
       html += '<div class="jing-sec" data-neidan-fold>'
         + '<h3 class="jing-sec-h" data-neidan-toggle>内丹书籍（' + neidanItems.length + '）<span class="jing-go">›</span></h3>'
         + '<div class="jing-neidan-body" hidden>'
@@ -148,6 +149,7 @@ var JingWen = (function () {
           return '<div class="jing-item" data-jing="' + it.id + '">'
             + '<span class="jing-book">丹</span>'
             + '<span class="jing-title">' + esc(it.title) + '</span>'
+            + (ndPro ? '' : '<span class="jing-locktag">高级版</span>')
             + '<span class="jing-go">›</span></div>';
         }).join('')
         + '</div></div>';
@@ -218,6 +220,8 @@ var JingWen = (function () {
   }
 
   function openReader(id, _retry) {
+    /* 内丹书籍为高级版（2026-10-14 用户定）：目录、搜索、每日推荐所有入口都经此函数，未解锁弹付费墙 */
+    if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
     ensureLoaded(id, function () {
       var d = window.JINGWEN && JINGWEN[id];
       if (!d) {
@@ -1264,15 +1268,14 @@ var JingWen = (function () {
     if (fa) fa.addEventListener('click', foldAll);
 
     document.addEventListener('wuri-pro-change', function () {
-      var pro = isPro();
-      $('#jing-lock').hidden = !!pro;
-      $('#jing-body').hidden = !pro;
-      if (pro) renderCatalog();
+      /* 经文库免费开放（2026-10-14）：解锁状态变化时重渲染目录，刷新内丹锁标记 */
+      $('#jing-lock').hidden = true;
+      $('#jing-body').hidden = false;
+      renderCatalog();
     });
-    // 初始锁定态
-    var pro = isPro();
-    $('#jing-lock').hidden = !!pro;
-    $('#jing-body').hidden = !pro;
+    // 经文库免费开放：整页不上锁，仅内丹书籍收费
+    $('#jing-lock').hidden = true;
+    $('#jing-body').hidden = false;
     // 页面重载但后台服务还在播（系统回收 WebView 后回来）：恢复悬浮岛
     restoreFloatPlayer();
   }

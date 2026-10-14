@@ -328,6 +328,12 @@ body::before{
 
 /* ---------- 提醒 ---------- */
 .row-between{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0}
+/* 每日经文推荐：文字区可缩、按钮不缩不折行（2026-10-14 排版修复） */
+#jingrec-card .row-between>div{flex:1;min-width:0}
+#jingrec-go{flex:none;white-space:nowrap}
+/* 我的日子：操作按钮独立一行靠右（2026-10-14 排版修复） */
+.myday-actions{display:flex;gap:10px;justify-content:flex-end;margin-bottom:12px}
+.myday-actions .mini-btn{white-space:nowrap}
 .row-title{font-size:1.08rem;font-weight:600;color:var(--ink)}
 .row-sub{color:var(--muted);font-size:.9rem;margin-top:3px}
 .switch{position:relative;flex:none;width:58px;height:34px}
@@ -552,6 +558,7 @@ details[open] summary:before{content:"▾ "}
 .jing-book{font-family:var(--serif);font-size:1.3rem;color:var(--gold-deep);border:1.5px solid var(--gold);border-radius:8px;width:44px;height:44px;line-height:42px;text-align:center;flex:none}
 .jing-title{flex:1;font-size:1.12rem;color:var(--ink)}
 .jing-go{font-size:1.6rem;color:var(--muted)}
+.jing-locktag{flex:none;font-size:.72rem;color:var(--gold-deep);border:1px solid var(--gold);border-radius:999px;padding:2px 8px;white-space:nowrap}
 .jing-res-count{color:var(--muted);font-size:.9rem;margin:8px 0}
 .jing-res{padding:12px 4px;border-bottom:1px solid var(--line-soft);cursor:pointer}
 .jing-res-t{font-weight:600;color:var(--teal-deep);margin-bottom:4px}

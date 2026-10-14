@@ -165,7 +165,7 @@ var Practice = (function () {
 
   /* ---------- 视图 ---------- */
   function open() {
-    if (!isPro()) { window.WuriPro && WuriPro.requirePro('practice'); return; }
+    /* 修行日程免费开放（2026-10-14 用户定，不再设 Pro 门） */
     $('#practice-view').hidden = false;
     document.body.classList.add('practice-open');
     renderAll();
