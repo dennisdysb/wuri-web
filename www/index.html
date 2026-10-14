@@ -516,6 +516,15 @@
         </div>
         <p class="hint" id="redeem-msg"></p>
       </div>
+      <div class="redeem-box" id="recover-box" hidden>
+        <input type="email" id="recover-email" placeholder="购买时填写的邮箱" autocomplete="email">
+        <div class="btn-row">
+          <button class="btn primary" id="recover-send">发送到邮箱</button>
+          <button class="btn" id="recover-cancel">取消</button>
+        </div>
+        <p class="hint" id="recover-msg"></p>
+        <p class="hint small">换手机或换浏览器后，在这里填购买邮箱：系统会给该邮箱发一个新的激活码（旧码同时作废），点邮件里的「一键兑换」即可在新设备解锁，老设备不受影响。</p>
+      </div>
       <!--TEST-ONLY-->
       <div class="btn-row"><button class="btn" data-pro-act="testunlock" data-pro-testbtn>测试解锁 Pro（测试包专用）</button></div>
       <!--/TEST-ONLY-->
@@ -787,7 +796,7 @@
       </ul>
       <button class="btn primary big" data-pro-act="buy"><span data-i18n="pro_buy">立即解锁</span> · <span data-pro-price>US$4.99</span></button>
       <button class="linklike" data-pro-act="restore" data-i18n="pro_restore">恢复购买</button>
-      <p class="hint small" data-pro-paynote data-i18n="pro_pay_note">通过 Google Play 安全支付。更换设备或重装后，可用「恢复购买」找回高级版。</p>
+      <p class="hint small" data-pro-paynote data-i18n="pro_pay_note">付款后，激活码会发到你付款时填写的邮箱。换设备时，在「我的」里用「找回激活码」凭购买邮箱重新领取。</p>
     </div>
   </div>
 

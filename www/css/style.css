@@ -1271,6 +1271,9 @@ details[open] summary:before{content:"▾ "}
   scroll-margin-top: 120px;
 }
 
+/* 提醒时机「提前 N 天」一行紧凑排列（2026-10-14：原来三段被拉满整行） */
+#ics-custom-row{display:flex;align-items:center;justify-content:flex-start;gap:10px}
+#ics-custom-row[hidden]{display:none}
 /* 提醒时机：提前天数输入框（用户 2026-10-11：太小不好看） */
 .days-input{
   width:80px;padding:10px 12px;font-size:1.05rem;text-align:center;

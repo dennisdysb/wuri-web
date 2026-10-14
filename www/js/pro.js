@@ -124,8 +124,49 @@ var WuriPro = (function () {
   }
   function restore() {
     var b = billing();
-    if (!b) { toast(t('pro_no_billing')); return; }
+    if (!b) {
+      /* 网页版没有商店内购: 「恢复购买」改为「找回激活码」——凭购买邮箱补发新码 */
+      hidePaywall();
+      var meTab = document.querySelector('[data-tab="tab-me"]');
+      if (meTab) meTab.click();
+      var box = document.getElementById('recover-box');
+      if (box) {
+        box.hidden = false;
+        var em = document.getElementById('recover-email');
+        if (em) em.focus();
+        try { box.scrollIntoView({ block: 'center' }); } catch (e) {}
+      }
+      return;
+    }
     try { b.billingRestore(); toast(t('pro_restoring')); } catch (e) {}
+  }
+
+  /* 找回激活码面板绑定（网页版） */
+  function bindRecover() {
+    var box = document.getElementById('recover-box');
+    if (!box) return;
+    var email = document.getElementById('recover-email');
+    var msg = document.getElementById('recover-msg');
+    var cancel = document.getElementById('recover-cancel');
+    if (cancel) cancel.addEventListener('click', function () { box.hidden = true; });
+    var send = document.getElementById('recover-send');
+    if (send) send.addEventListener('click', function () {
+      var v = email ? email.value.trim() : '';
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) {
+        if (msg) { msg.textContent = '请填写正确的邮箱'; msg.className = 'err'; }
+        return;
+      }
+      if (msg) { msg.textContent = '提交中…'; msg.className = ''; }
+      fetch('https://pay.shengboyu.ca/api/recover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: v })
+      }).then(function (r) { return r.json(); }).then(function () {
+        if (msg) { msg.textContent = '已提交：如果这个邮箱购买过，新的激活码马上发到该邮箱，请查收（含垃圾箱）。'; msg.className = 'ok'; }
+      }).catch(function () {
+        if (msg) { msg.textContent = '网络错误，请稍后重试'; msg.className = 'err'; }
+      });
+    });
   }
 
   /* ---------- Pro 卡片 / 付费墙 UI 刷新 ---------- */
@@ -200,6 +241,15 @@ var WuriPro = (function () {
     document.querySelectorAll('[data-pro-buybtn]').forEach(function (el) {
       el.style.display = pro ? 'none' : '';
     });
+    /* 网页版: 「恢复购买」实为找回激活码; 已解锁则隐藏 */
+    if (!billing()) {
+      document.querySelectorAll('[data-pro-act="restore"]').forEach(function (el) {
+        el.textContent = '找回激活码';
+        el.style.display = pro ? 'none' : '';
+      });
+      var rbox = document.getElementById('recover-box');
+      if (rbox && pro) rbox.hidden = true;
+    }
     // Pro 已激活：隐藏兑换码按钮，显示祝贺语
     var redeemBtn = document.getElementById('redeem-btn');
     if (redeemBtn) redeemBtn.style.display = pro ? 'none' : '';
@@ -255,7 +305,8 @@ var WuriPro = (function () {
     connect: connect,
     refreshProUI: refreshProUI,
     requirePro: function (from) { if (isPro()) return true; showPaywall(from); return false; },
-    bindRedeem: bindRedeem
+    bindRedeem: bindRedeem,
+    bindRecover: bindRecover
   };
 })();
 
@@ -263,6 +314,7 @@ var WuriPro = (function () {
 document.addEventListener('DOMContentLoaded', function () {
   try {
     WuriPro.bindRedeem();
+    WuriPro.bindRecover();
     WuriPro.refreshProUI();
     if (window.WuBridgeBilling) WuriPro.connect();
   } catch (e) {}
