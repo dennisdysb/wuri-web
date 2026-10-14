@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v46-20261014-verdisp';
+const CACHE = 'wuri-v47-20261014-bindemail';
 const ASSETS = [
   './',
   './index.html',

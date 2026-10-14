@@ -199,7 +199,7 @@ var WuriPro = (function () {
         fetch('https://pay.shengboyu.ca/api/redeem', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: wuri, device: navigator.userAgent.slice(0, 120) })
+          body: JSON.stringify({ code: wuri, device: navigator.userAgent.slice(0, 120), email: (function () { var e = document.getElementById('redeem-email'); return e ? e.value.trim() : ''; })() })
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.success) {
             try { localStorage.setItem('wuri_pro_redeem', '1'); } catch (e) {}

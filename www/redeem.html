@@ -64,6 +64,8 @@
     <h2>二 · 兑换激活码</h2>
     <input class="code" id="code-input" placeholder="WURI-XXXX-XXXX-XXXX"
            maxlength="19" autocomplete="off" spellcheck="false">
+    <input class="code" id="email-input" type="email" placeholder="选填：绑定邮箱（换设备时凭邮箱找回）"
+           autocomplete="email" spellcheck="false" style="margin-top:10px;font-size:15px;letter-spacing:0;">
     <button class="btn" id="verify-btn">验证激活码</button>
     <div class="msg" id="redeem-msg"></div>
     <button class="btn ghost" id="confirm-btn" hidden>确认兑换, 解锁高级版</button>
@@ -151,7 +153,7 @@ $('confirm-btn').addEventListener('click', function () {
   api('/api/redeem', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: verifiedCode, device: device })
+    body: JSON.stringify({ code: verifiedCode, device: device, email: ($('email-input').value || '').trim() })
   }).then(function (d) {
     if (d.success) {
       /* 与 wuri-web 的 Pro 系统对接: 写这个 key 即解锁全部 Pro 功能 */
