@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v44-20261014-recover';
+const CACHE = 'wuri-v45-20261014-jingrecstack';
 const ASSETS = [
   './',
   './index.html',

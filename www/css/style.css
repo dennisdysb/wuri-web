@@ -328,9 +328,10 @@ body::before{
 
 /* ---------- 提醒 ---------- */
 .row-between{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0}
-/* 每日经文推荐：文字区可缩、按钮不缩不折行（2026-10-14 排版修复） */
+/* 每日经文推荐：标题整行、按钮移到文字下方靠右（2026-10-14 长经名不再被按钮挤成孤字换行） */
+#jingrec-card .row-between{flex-direction:column;align-items:stretch;gap:10px}
 #jingrec-card .row-between>div{flex:1;min-width:0}
-#jingrec-go{flex:none;white-space:nowrap;padding:9px 16px;font-size:.95rem;border-radius:999px}
+#jingrec-go{flex:none;white-space:nowrap;padding:9px 16px;font-size:.95rem;border-radius:999px;align-self:flex-end}
 /* 卡片紧凑头：标题左、按钮同行靠右（2026-10-14 我的日子） */
 .card-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .card-head-t{font-family:var(--serif);color:var(--ink-2);font-size:1.02rem;letter-spacing:.28em;font-weight:700;flex:none;white-space:nowrap}
