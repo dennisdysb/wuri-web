@@ -23,7 +23,6 @@ var WuriPro = (function () {
 
   function isPro() {
     if (window.IS_FREE_BUILD) return false;
-    /*DEMO-ONLY*/ if (window.__wuriProDemo) return true; /*/DEMO-ONLY*/
     try { if (localStorage.getItem('wuri_pro_redeem') === '1') return true; } catch (e) {}
     if (isTestBuild()) {
       try { if (localStorage.getItem(TEST_KEY) === '1') return true; } catch (e) {}
