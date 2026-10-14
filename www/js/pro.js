@@ -149,6 +149,31 @@ var WuriPro = (function () {
         if (msg) { msg.textContent = '请输入兑换码'; msg.className = 'err'; }
         return;
       }
+      /* WURI 激活码 (后端发放): 规整后走服务器兑换; 横线/空格/小写都认 */
+      var clean = code.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      var body = clean.indexOf('WURI') === 0 ? clean.slice(4) : clean;
+      if (body.length === 12) {
+        var wuri = 'WURI-' + body.slice(0, 4) + '-' + body.slice(4, 8) + '-' + body.slice(8, 12);
+        if (msg) { msg.textContent = '验证中…'; msg.className = ''; }
+        fetch('https://pay.shengboyu.ca/api/redeem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: wuri, device: navigator.userAgent.slice(0, 120) })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d && d.success) {
+            try { localStorage.setItem('wuri_pro_redeem', '1'); } catch (e) {}
+            refreshProUI();
+            if (msg) { msg.textContent = '兑换成功！高级版已解锁'; msg.className = 'ok'; }
+            if (input) input.value = '';
+            setTimeout(function () { box.hidden = true; }, 1500);
+          } else {
+            if (msg) { msg.textContent = (d && d.reason) || '兑换码无效，请检查后重试'; msg.className = 'err'; }
+          }
+        }).catch(function () {
+          if (msg) { msg.textContent = '网络错误，请稍后重试'; msg.className = 'err'; }
+        });
+        return;
+      }
       if (redeemPro(code)) {
         if (msg) { msg.textContent = '兑换成功！高级版已解锁'; msg.className = 'ok'; }
         if (input) input.value = '';
@@ -157,9 +182,9 @@ var WuriPro = (function () {
         if (msg) { msg.textContent = '兑换码无效，请检查后重试'; msg.className = 'err'; }
       }
     });
-    /* 输入时自动大写 */
+    /* 输入规整: 大写, 只留字母数字与横线 (粘贴整串不截断) */
     if (input) input.addEventListener('input', function () {
-      var v = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
+      var v = input.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').substring(0, 24);
       if (input.value !== v) input.value = v;
     });
   }

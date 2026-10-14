@@ -169,6 +169,19 @@ $('confirm-btn').addEventListener('click', function () {
   });
 });
 
+/* 邮件一键兑换: ?code= 自动填入 -> 自动验证 -> 自动确认兑换 */
+(function () {
+  var q = new URLSearchParams(location.search).get('code');
+  if (!q) return;
+  input.value = q;
+  input.dispatchEvent(new Event('input'));
+  $('verify-btn').click();
+  var iv = setInterval(function () {
+    if (verifiedCode) { clearInterval(iv); $('confirm-btn').click(); }
+  }, 300);
+  setTimeout(function () { clearInterval(iv); }, 10000);
+})();
+
 /* 付款取消回来时的提示 */
 if (/[?&]cancelled=1/.test(location.search)) {
   var m = $('buy-msg');
