@@ -35,7 +35,7 @@ while IFS= read -r f; do
   case "$f" in
     *.mp3)
       echo "转码超限音频（镜像专用 64kbps 单声道）：${f#$STAGE/}"
-      ffmpeg -y -v error -i "$f" -ac 1 -b:a 64k "$f.min.mp3" && mv "$f.min.mp3" "$f"
+      ffmpeg -nostdin -y -v error -i "$f" -ac 1 -b:a 64k "$f.min.mp3" < /dev/null && mv "$f.min.mp3" "$f"
       ;;
     *)
       echo "文件超过 25 MiB 且不是 mp3，Pages 无法托管：$f" >&2; exit 1
