@@ -62,6 +62,15 @@
       <div id="zhishen-line" class="zhishen"></div>
     </section>
 
+    <!-- 神祇图鉴（免费）入口 -->
+    <section class="card" id="deities-entry-card">
+      <div class="card-title">神祇图鉴</div>
+      <p class="hint">三十七位道教尊神：神诞、道场、职掌、生平事迹与造像特征，免费恭览。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="deities-enter">进入图鉴</button>
+      </div>
+    </section>
+
     <!-- 修行日程（Pro）入口 -->
     <section class="card" id="practice-entry-card">
       <div class="card-title" data-i18n="practice_title">修行打卡</div>
@@ -555,7 +564,7 @@
     </section>
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.3.9（10） (2026-10-17)</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.3.9（11） (2026-10-18)</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
@@ -602,6 +611,54 @@
     <button data-tab="tab-remind"><span class="ti">鈴</span><span data-i18n="tab_remind">提醒</span></button>
     <button data-tab="tab-me"><span class="ti">吾</span><span data-i18n="tab_me">我的</span></button>
   </nav>
+
+  <!-- ============ 神祇图鉴（免费） ============ -->
+  <main id="view-deities" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('deities-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="deities-back">‹ 返回</button>
+      <h1 class="brand-title">神祇图鉴</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div id="deities-groups"></div>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 神祇详情（免费） ============ -->
+  <main id="view-deity-detail" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('deity-detail-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="deity-detail-back">‹ 返回</button>
+      <h1 class="brand-title">神祇图鉴</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div class="deity-detail-wrap">
+      <img id="deity-detail-img" class="deity-detail-img" alt="">
+      <h2 id="deity-detail-name" class="deity-detail-name"></h2>
+      <p id="deity-detail-title" class="deity-detail-title"></p>
+      <section class="card deity-sec">
+        <div class="card-title">神诞</div>
+        <p id="deity-f-birthday"></p>
+      </section>
+      <section class="card deity-sec">
+        <div class="card-title">道场</div>
+        <p id="deity-f-temple"></p>
+      </section>
+      <section class="card deity-sec">
+        <div class="card-title">职掌</div>
+        <p id="deity-f-domain"></p>
+      </section>
+      <section class="card deity-sec">
+        <div class="card-title">生平 · 事迹</div>
+        <p id="deity-f-intro"></p>
+      </section>
+      <section class="card deity-sec">
+        <div class="card-title">形象特征</div>
+        <p id="deity-f-appearance"></p>
+      </section>
+    </div>
+    <div class="tab-spacer"></div>
+  </main>
 
   <!-- ============ 修行打卡（Pro） ============ -->
   <div id="practice-view" hidden>
@@ -866,6 +923,8 @@
 <script src="js/ics-generator.js"></script>
 <script src="js/t2s.js"></script>
 <script src="js/jingwen.js"></script>
+<script src="js/deities-data.js"></script>
+<script src="js/deities.js"></script>
 <script>
 // PWA: 注册 Service Worker（原生壳内跳过，file:// 不支持 SW）
 if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.WuBridge) {

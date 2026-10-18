@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v50-20261017-verdisp10';
+const CACHE = 'wuri-v51-20261018-deities';
 const ASSETS = [
   './',
   './index.html',
@@ -21,6 +21,8 @@ const ASSETS = [
   './js/bazi.js',
   './js/capacitor.js',
   './js/citydata.js',
+  './js/deities-data.js',
+  './js/deities.js',
   './js/i18n.js',
   './js/iztro.min.js',
   './js/jingwen.js',
