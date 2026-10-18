@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v51-20261018-deities';
+const CACHE = 'wuri-v52-20261018-deities-fix';
 const ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,8 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css',
-  './css/meditation.css',
+  './css/style.css?v=52',
+  './css/meditation.css?v=52',
   './icon-192.png',
   './icon-512.png',
   './js/ai-analysis.js',
@@ -80,13 +80,16 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   var url = new URL(e.request.url);
   var isHtml = url.pathname.endsWith('.html') || url.pathname.endsWith('/');
+  var isCss = url.pathname.endsWith('.css');
   var isJs = url.pathname.endsWith('.js');
   // JS 文件：完全不拦截，让浏览器直接请求（SW 缓存 JS 出问题，2026-10-11）
   if (isJs) return;
-  // HTML 用网络优先（避免旧版 HTML 缓存导致 JS 不执行），其他用缓存优先
-  if (isHtml && e.request.method === 'GET') {
+  // HTML 与 CSS 用网络优先＋强制校验（no-cache）：CSS 若走 cache-first，更新后首次打开
+  // 会被旧 SW 从旧缓存发出旧样式，与新 HTML/JS 混杂（2026-10-18 图鉴布局事故）；
+  // 网络优先保证 HTML 与 CSS 同批更新，失败才回落缓存（离线可用）。
+  if ((isHtml || isCss) && e.request.method === 'GET') {
     e.respondWith(
-      fetch(e.request).then(function (res) {
+      fetch(e.request, { cache: 'no-cache' }).then(function (res) {
         if (res.ok && url.origin === location.origin) {
           var copy = res.clone();
           caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
