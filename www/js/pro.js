@@ -276,6 +276,7 @@ var WuriPro = (function () {
   }
 
   function testUnlock() {
+    if (!isTestBuild()) return;
     try { localStorage.setItem(TEST_KEY, '1'); } catch (e) {}
     refreshProUI();
     toast(t('pro_test_unlocked'));
@@ -289,7 +290,7 @@ var WuriPro = (function () {
     if (act === 'buy') buy();
     else if (act === 'restore') restore();
     else if (act === 'close') hidePaywall();
-    else if (act === 'testunlock') testUnlock();
+    else if (act === 'testunlock') { if (isTestBuild()) testUnlock(); }
     else if (act === 'paywall') showPaywall(el.getAttribute('data-pro-from') || '');
   });
 
