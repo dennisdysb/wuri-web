@@ -4,7 +4,7 @@
  "generatedAt": "2026-10-19",
  "sections": {
   "deities": {
-   "version": 1,
+   "version": 2,
    "file": "deities.json",
    "count": 74
   },
