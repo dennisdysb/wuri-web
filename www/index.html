@@ -12,8 +12,8 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=57">
-<link rel="stylesheet" href="css/meditation.css?v=57">
+<link rel="stylesheet" href="css/style.css?v=58">
+<link rel="stylesheet" href="css/meditation.css?v=58">
 </head>
 <body>
 <div id="app">
@@ -564,7 +564,7 @@
     </section>
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.3.9（17） (2026-10-19)</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.3.9（18） (2026-10-19)</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
@@ -631,12 +631,17 @@
       <button class="mini-btn" id="deity-detail-back">‹ 返回</button>
       <h1 class="brand-title">神祇图鉴</h1>
       <span class="appbar-spacer"></span>
+      <span id="deity-detail-pos" class="deity-detail-pos"></span>
     </header>
     <div class="deity-detail-wrap">
-      <img id="deity-detail-img" class="deity-detail-img" alt="">
+      <div class="deity-img-box">
+        <img id="deity-detail-img" class="deity-detail-img" alt="">
+        <button class="deity-nav-arrow prev" id="deity-nav-prev" aria-label="上一位">‹</button>
+        <button class="deity-nav-arrow next" id="deity-nav-next" aria-label="下一位">›</button>
+      </div>
+      <p id="deity-swipe-hint" class="deity-swipe-hint" hidden>左右滑动可切换神祇</p>
       <h2 id="deity-detail-name" class="deity-detail-name"></h2>
       <p id="deity-detail-title" class="deity-detail-title"></p>
-      <p id="deity-detail-pos" class="deity-detail-pos"></p>
       <section class="card deity-sec">
         <div class="card-title">神诞</div>
         <p id="deity-f-birthday"></p>

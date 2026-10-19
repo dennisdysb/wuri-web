@@ -41,12 +41,25 @@
     name: document.getElementById('deity-detail-name'),
     title: document.getElementById('deity-detail-title'),
     pos: document.getElementById('deity-detail-pos'),
+    navPrev: document.getElementById('deity-nav-prev'),
+    navNext: document.getElementById('deity-nav-next'),
+    hint: document.getElementById('deity-swipe-hint'),
     birthday: document.getElementById('deity-f-birthday'),
     temple: document.getElementById('deity-f-temple'),
     domain: document.getElementById('deity-f-domain'),
     intro: document.getElementById('deity-f-intro'),
     appearance: document.getElementById('deity-f-appearance')
   };
+
+  /* ---------- 滑动提示（滑过/点箭头后永久不再显示） ---------- */
+  var HINT_KEY = 'wuri_deity_swipe_hint_seen';
+  function hintSeen() {
+    try { return !!localStorage.getItem(HINT_KEY); } catch (e) { return true; }
+  }
+  function markHintSeen() {
+    try { localStorage.setItem(HINT_KEY, '1'); } catch (e) {}
+    if (F.hint) F.hint.hidden = true;
+  }
 
   function openDetail(id) {
     var d = byId[id];
@@ -62,6 +75,9 @@
     F.appearance.textContent = d.appearance;
     curIdx = order.indexOf(id);
     if (F.pos) F.pos.textContent = '第 ' + (curIdx + 1) + ' / ' + total + ' 位';
+    if (F.navPrev) F.navPrev.disabled = curIdx <= 0;
+    if (F.navNext) F.navNext.disabled = curIdx >= total - 1;
+    if (F.hint) F.hint.hidden = hintSeen();
     var wrap = detailView.querySelector('.deity-detail-wrap');
     if (wrap) wrap.classList.remove('slide-next', 'slide-prev');
     detailView.hidden = false;
@@ -102,9 +118,14 @@
     var dy = t.clientY - tsY;
     /* 阈值 50px，且横向须明显大于纵向，避免竖滚误触 */
     if (Math.abs(dx) >= 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      markHintSeen();
       if (dx < 0) goTo(curIdx + 1, 1); else goTo(curIdx - 1, -1);
     }
   }, { passive: true });
+
+  /* ---------- 两侧箭头（与滑动同效） ---------- */
+  if (F.navPrev) F.navPrev.addEventListener('click', function () { markHintSeen(); goTo(curIdx - 1, -1); });
+  if (F.navNext) F.navNext.addEventListener('click', function () { markHintSeen(); goTo(curIdx + 1, 1); });
 
   document.addEventListener('keydown', function (e) {
     if (detailView.hidden) return;
