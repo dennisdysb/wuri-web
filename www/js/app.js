@@ -297,8 +297,18 @@ var viewY, viewM, sel;
   var t = ymd(now()); viewY = t.y; viewM = t.m; sel = { y: t.y, m: t.m, d: t.d };
 })();
 function renderCalendar() {
+  /* 标题三行式（2026-10-19 用户拍板「全写跨度」）：大字=当月最后一天的农历年；
+   * 中字=本月公历 1 日→末日的农历跨度（起止各带月日，闰月自带闰字）；
+   * 跨春节（起止不同农历年）时止侧补年号，年月日齐全，不再单月误导。 */
   var lunar0 = lunarOf(viewY, viewM, 1);
-  $('#cal-title').innerHTML = '<span class="cal-tl">' + tx(lunar0.getYearInChinese()) + '年' + tx(lunar0.getMonthInChinese()) + '月</span>' +
+  var lunarE = lunarOf(viewY, viewM, new Date(viewY, viewM, 0).getDate());
+  var spanA = tx(lunar0.getMonthInChinese()) + '月' + tx(lunar0.getDayInChinese());
+  var spanB = tx(lunarE.getMonthInChinese()) + '月' + tx(lunarE.getDayInChinese());
+  if (lunar0.getYear() !== lunarE.getYear()) {
+    spanB = tx(lunarE.getYearInChinese()) + '年' + spanB;
+  }
+  $('#cal-title').innerHTML = '<span class="cal-tl">' + tx(lunarE.getYearInChinese()) + '年</span>' +
+    '<span class="cal-tm">农历' + spanA + ' — ' + spanB + '</span>' +
     '<span class="cal-ts">' + viewY + '年' + viewM + '月</span>';
   var grid = $('#cal-grid'); grid.innerHTML = '';
   var first = new Date(viewY, viewM - 1, 1).getDay(); // 0=周日

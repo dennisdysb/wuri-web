@@ -467,6 +467,7 @@ details[open] summary:before{content:"▾ "}
 .cal-head{gap:8px}
 .cal-title{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;line-height:1.42}
 .cal-tl{font-family:var(--serif);font-size:1.18rem;font-weight:700;color:var(--ink);letter-spacing:.06em}
+.cal-tm{font-family:var(--serif);font-size:.99rem;font-weight:600;color:var(--gold-deep);letter-spacing:.04em;text-align:center}
 .cal-ts{font-size:.88rem;color:var(--muted);letter-spacing:.12em}
 
 /* 黄历 · 拜斗日星星（替代圆点） */

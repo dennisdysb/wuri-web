@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v60-20261019-contentfeed';
+const CACHE = 'wuri-v61-20261019-caltitle';
 const ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,8 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=59',
-  './css/meditation.css?v=59',
+  './css/style.css?v=61',
+  './css/meditation.css?v=61',
   './icon-192.png',
   './icon-512.png',
   './js/ai-analysis.js',
