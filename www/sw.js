@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v59-20261019-deityorder';
+const CACHE = 'wuri-v60-20261019-contentfeed';
 const ASSETS = [
   './',
   './index.html',
@@ -84,6 +84,25 @@ self.addEventListener('fetch', e => {
   var isJs = url.pathname.endsWith('.js');
   // JS 文件：完全不拦截，让浏览器直接请求（SW 缓存 JS 出问题，2026-10-11）
   if (isJs) return;
+  // 远程内容数据源（content/*.json）：网络优先＋no-store，保证内容更新即时生效；
+  // 网络失败才回落缓存里的上一版 JSON，绝不回落 index.html（2026-10-19 内容通道上线）
+  var isFeedJson = url.pathname.indexOf('/content/') !== -1 && url.pathname.endsWith('.json');
+  if (isFeedJson && e.request.method === 'GET') {
+    e.respondWith(
+      fetch(e.request, { cache: 'no-store' }).then(function (res) {
+        if (res.ok && url.origin === location.origin) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+        }
+        return res;
+      }).catch(function () {
+        return caches.match(e.request).then(function (hit) {
+          return hit || new Response('{"error":"feed unavailable"}', { status: 504, headers: { 'Content-Type': 'application/json' } });
+        });
+      })
+    );
+    return;
+  }
   // HTML 与 CSS 用网络优先＋强制校验（no-cache）：CSS 若走 cache-first，更新后首次打开
   // 会被旧 SW 从旧缓存发出旧样式，与新 HTML/JS 混杂（2026-10-18 图鉴布局事故）；
   // 网络优先保证 HTML 与 CSS 同批更新，失败才回落缓存（离线可用）。

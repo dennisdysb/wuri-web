@@ -93,10 +93,22 @@ var JingWen = (function () {
       return;
     }
     loaded[id] = 'loading';
+    var feedBase = window.WURI_JING_BASE || null;
     var sc = document.createElement('script');
-    sc.src = 'jing/' + id + '.js';
+    sc.src = (feedBase || 'jing/') + id + '.js';
     sc.onload = function () { loaded[id] = 'done'; cb && cb(); };
-    sc.onerror = function () { loaded[id] = 'error'; cb && cb(); };
+    sc.onerror = function () {
+      /* 远程数据源的经文文件拉不到：回落包内 jing/ 再试一次，仍失败才报错 */
+      if (feedBase && feedBase !== 'jing/') {
+        var sc2 = document.createElement('script');
+        sc2.src = 'jing/' + id + '.js';
+        sc2.onload = function () { loaded[id] = 'done'; cb && cb(); };
+        sc2.onerror = function () { loaded[id] = 'error'; cb && cb(); };
+        document.head.appendChild(sc2);
+        return;
+      }
+      loaded[id] = 'error'; cb && cb();
+    };
     // 保险：10秒还没 onload/onerror，强制重置
     setTimeout(function () {
       if (loaded[id] === 'loading') loaded[id] = null;

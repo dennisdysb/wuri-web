@@ -3,37 +3,54 @@
   var DATA = window.DEITIES_DATA;
   if (!DATA) return;
   var byId = {};
-  DATA.deities.forEach(function (d) { byId[d.id] = d; });
+  var order = [];
+  var total = 0;
+  var curIdx = -1;
 
   var listView = document.getElementById('view-deities');
   var detailView = document.getElementById('view-deity-detail');
   var groupsEl = document.getElementById('deities-groups');
   if (!listView || !detailView || !groupsEl) return;
 
-  /* ---------- 顺序（与列表渲染一致：按分组先后） ---------- */
-  var order = [];
-  DATA.groups.forEach(function (g) {
-    g.ids.forEach(function (id) { if (byId[id]) order.push(id); });
-  });
-  var total = order.length;
-  var curIdx = -1;
-
-  /* ---------- 列表渲染（一次） ---------- */
-  var html = '';
-  DATA.groups.forEach(function (g) {
-    html += '<h2 class="deity-group-title">' + g.name + '</h2><div class="deity-grid">';
-    g.ids.forEach(function (id) {
-      var d = byId[id];
-      if (!d) return;
-      html += '<button class="deity-card" data-deity="' + d.id + '">' +
-        '<img loading="lazy" src="img/deities/thumbs/' + d.image + '" alt="' + d.name + '">' +
-        '<span class="deity-card-name">' + d.name + '</span>' +
-        '<span class="deity-card-title">' + d.title + '</span>' +
-        '</button>';
+  /* ---------- 索引 + 列表渲染（远程数据源到达时可重跑） ---------- */
+  function renderList() {
+    byId = {};
+    DATA.deities.forEach(function (d) { byId[d.id] = d; });
+    /* 顺序（与列表渲染一致：按分组先后） */
+    order = [];
+    DATA.groups.forEach(function (g) {
+      g.ids.forEach(function (id) { if (byId[id]) order.push(id); });
     });
-    html += '</div>';
-  });
-  groupsEl.innerHTML = html;
+    total = order.length;
+    var html = '';
+    DATA.groups.forEach(function (g) {
+      html += '<h2 class="deity-group-title">' + g.name + '</h2><div class="deity-grid">';
+      g.ids.forEach(function (id) {
+        var d = byId[id];
+        if (!d) return;
+        html += '<button class="deity-card" data-deity="' + d.id + '">' +
+          '<img loading="lazy" src="img/deities/thumbs/' + d.image + '" alt="' + d.name + '">' +
+          '<span class="deity-card-name">' + d.name + '</span>' +
+          '<span class="deity-card-title">' + d.title + '</span>' +
+          '</button>';
+      });
+      html += '</div>';
+    });
+    groupsEl.innerHTML = html;
+  }
+  renderList();
+
+  /* 远程内容数据源入口（js/content-feed.js 调用）：换数据后重渲列表，
+   * 详情正打开着则按当前位次刷新内容。数据不合规格时保持包内数据不动。 */
+  window.__wuri_applyDeities = function (newData) {
+    if (!newData || !Array.isArray(newData.groups) || !Array.isArray(newData.deities) || !newData.deities.length) return;
+    var openId = (curIdx >= 0 && order[curIdx]) ? order[curIdx] : null;
+    DATA = newData;
+    window.DEITIES_DATA = newData;
+    renderList();
+    if (openId && byId[openId] && detailView && !detailView.hidden) openDetail(openId);
+    else if (curIdx >= total) curIdx = total - 1;
+  };
 
   /* ---------- 详情 ---------- */
   var F = {

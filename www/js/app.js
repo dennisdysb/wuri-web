@@ -553,6 +553,14 @@ var SHENDAN = {
   '11-6':'西岳大帝圣诞', '11-9':'韩湘子圣诞', '11-11':'太乙救苦天尊圣诞',
   '12-8':'王侯腊之辰', '12-16':'南岳大帝生辰', '12-22':'王重阳圣诞', '12-24':'灶君登天日'
 };
+/* 远程内容数据源入口（js/content-feed.js 调用）：换表后重渲首页与日历。
+ * SHENDAN 在本 IIFE 作用域内，外部赋值 window.SHENDAN 不生效，必须走此钩子。 */
+window.__wuri_applyFestivals = function (table) {
+  if (!table || typeof table !== 'object' || !Object.keys(table).length) return;
+  SHENDAN = table;
+  window.SHENDAN = table; /* 镜像当前生效表，供外部探针/调试读取 */
+  try { renderHome(); renderCalendar(); } catch (e) {}
+};
 /* ============ 每日经文推荐 ============
  * 根据当日神诞/节日推荐相关经文，无对应时轮推通用经。
  * 映射键为神诞名称中的关键词，值为经文 id（见 jing/index.js）。
