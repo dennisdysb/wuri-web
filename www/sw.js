@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v56-20261018-deities74';
+const CACHE = 'wuri-v57-20261019-deityswipe';
 const ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,8 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=56',
-  './css/meditation.css?v=56',
+  './css/style.css?v=57',
+  './css/meditation.css?v=57',
   './icon-192.png',
   './icon-512.png',
   './js/ai-analysis.js',
