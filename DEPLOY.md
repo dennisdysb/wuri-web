@@ -41,3 +41,23 @@
 
 脚本从环境变量 `CLOUDFLARE_API_TOKEN` 或 `~/.config/cloudflare/api_token` 读
 token（文件在本机、权限 600），脚本与仓库里不存任何 token 值。
+
+## 内容远程数据源（content feed，2026-10-19 上线，v1.3.9 (20)）
+
+图鉴 / 经文库 / 神诞节日表三块内容走 `www/content/` 下的版本化数据通道，
+网页版打开时拉取覆盖包内数据，改内容不必再发版：
+
+- `content/manifest.json`：总清单，各分段版本号以此为准。
+- `content/deities.json`：图鉴全量（分组＋74 位，图片仍引用 `img/deities/`）。
+- `content/scriptures.json`：经文库索引＋`filesBase`；经文正文副本在 `content/jing/sXX.js`。
+- `content/festivals.json`：神诞/节日表（农历「月-日」→ 名称）。
+- 加载器 `js/content-feed.js`：拉取→校验→应用；上次成功数据存 localStorage 断网可用；
+  任何失败静默回落包内数据（`js/deities-data.js`、`jing/`、`app.js` 内 SHENDAN 表），页面不会空白。
+- SW 对 `content/*.json` 网络优先＋no-store，回落缓存上一版。
+
+**更新内容的做法**：只改 `www/content/` 下对应文件，并同步把该分段的 `version`
+在分段文件与 `manifest.json` 两处一起 +1，commit push 后 GitHub 线即时生效；
+再跑一次 `./deploy-cf.sh` 同步国内镜像。包内同版数据是兜底基线，大改内容时
+应在下一次发版时用 `build-feed` 脚本从包内源重新生成 feed 对齐（脚本在
+`~/workspace/.jarvis/idea-executions/5be7c284-adc0-4f12-b3a5-94ee5ed77879/scratch/build-feed.js`，
+图鉴源头仍是 `~/workspace/wuri-ios-reposition/deities/deities.json` 定版流程）。
