@@ -463,14 +463,15 @@ details[open] summary:before{content:"▾ "}
   flex:0 1 34px;min-width:14px;
 }
 
-/* 黄历 · 月份标题两行居中 */
+/* 黄历 · 月份标题四行居中（干支年/值年太岁/农历跨度/公历年，标题列 flex:1 不与箭头抢宽） */
 .cal-head{gap:8px}
 .cal-title{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;line-height:1.42}
-.cal-tl{font-family:var(--serif);font-size:1.18rem;font-weight:700;color:var(--ink);letter-spacing:.06em}
-.cal-tl-row{display:flex;align-items:baseline;justify-content:center;white-space:nowrap}
-.cal-tt{font-family:var(--serif);font-size:.9rem;font-weight:600;color:var(--gold-deep);letter-spacing:.03em;margin-left:5px;white-space:nowrap}
+.cal-tl{font-family:var(--serif);font-size:1.18rem;font-weight:700;color:var(--ink);letter-spacing:.06em;white-space:nowrap}
+.cal-tt{font-family:var(--serif);font-size:.9rem;font-weight:600;color:var(--gold-deep);letter-spacing:.03em;white-space:nowrap}
 .cal-tm{font-family:var(--serif);font-size:.99rem;font-weight:600;color:var(--gold-deep);letter-spacing:.04em;text-align:center;white-space:nowrap}
 .cal-tm-long{font-size:.76rem;letter-spacing:.02em}
+/* 窄屏（≤374px）：跨年长跨度（18 字）在箭头之间放不下，再降一档保单行不压箭头 */
+@media (max-width:374px){.cal-tm-long{font-size:.65rem;letter-spacing:0}}
 .cal-ts{font-size:.88rem;color:var(--muted);letter-spacing:.12em}
 
 /* 黄历 · 拜斗日星星（替代圆点） */

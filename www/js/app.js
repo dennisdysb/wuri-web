@@ -297,20 +297,22 @@ var viewY, viewM, sel;
   var t = ymd(now()); viewY = t.y; viewM = t.m; sel = { y: t.y, m: t.m, d: t.d };
 })();
 function renderCalendar() {
-  /* 标题三行式（2026-10-19 第五轮「全写跨度」＋第六轮大字行改干支太岁）：
-   * 第一行：大字干支年＋中字「· 值年太岁X大将军」同行——干支与太岁名取
-   * 当月最后一天、走 yearGodOf（立春年界、TAISUI60 同源），与首页太岁行
-   * 同一口径、随所显示月份走，不硬编码年份；
-   * 第二行：本月公历 1 日→末日的农历跨度（起止各带月日，闰月自带闰字；
+  /* 标题四行式（2026-10-19 第五轮「全写跨度」＋第六轮大字行改干支太岁
+   * ＋第七轮太岁单独成行）：标题块自己成列、四行居中竖排，不与翻月箭头抢宽。
+   * 第一行：大字干支年——干支与太岁名取当月最后一天、走 yearGodOf
+   * （立春年界、TAISUI60 同源），与首页太岁行同一口径、随所显示月份走，
+   * 不硬编码年份；
+   * 第二行：中字「值年太岁X大将军」单独一行（无前导间隔号）；
+   * 第三行：本月公历 1 日→末日的农历跨度（起止各带月日，闰月自带闰字；
    * 跨春节时止侧补年号）；跨度整行 nowrap，跨年长串自动降字号保单行；
-   * 第三行：公历年/月（阿拉伯数字）。 */
+   * 第四行：公历年/月（阿拉伯数字）。 */
   var lunar0 = lunarOf(viewY, viewM, 1);
   var lastDate = new Date(viewY, viewM, 0);
   var lunarE = lunarOf(viewY, viewM, lastDate.getDate());
   var ygE = yearGodOf(lastDate);
   var tsParts = tf(t('taisui_line'), tx(ygE.ganzhi), tx(ygE.name)).split('·');
   var tlBig = tsParts[0].replace(/\s+$/, '');
-  var tlFollow = tsParts.length > 1 ? '·' + tsParts.slice(1).join('·').replace(/^\s+/, '') : '';
+  var tlTai = tsParts.length > 1 ? tsParts.slice(1).join('·').replace(/^\s+/, '').replace(/\s+$/, '') : '';
   var spanA = tx(lunar0.getMonthInChinese()) + '月' + tx(lunar0.getDayInChinese());
   var spanB = tx(lunarE.getMonthInChinese()) + '月' + tx(lunarE.getDayInChinese());
   var spanLong = false;
@@ -318,8 +320,8 @@ function renderCalendar() {
     spanB = tx(lunarE.getYearInChinese()) + '年' + spanB;
     spanLong = true;
   }
-  $('#cal-title').innerHTML = '<span class="cal-tl-row"><span class="cal-tl">' + tlBig + '</span>' +
-    (tlFollow ? '<span class="cal-tt">' + tlFollow + '</span>' : '') + '</span>' +
+  $('#cal-title').innerHTML = '<span class="cal-tl">' + tlBig + '</span>' +
+    (tlTai ? '<span class="cal-tt">' + tlTai + '</span>' : '') +
     '<span class="cal-tm' + (spanLong ? ' cal-tm-long' : '') + '">农历' + spanA + ' — ' + spanB + '</span>' +
     '<span class="cal-ts">' + viewY + '年' + viewM + '月</span>';
   var grid = $('#cal-grid'); grid.innerHTML = '';

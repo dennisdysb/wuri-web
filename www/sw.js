@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v62-20261019-ganzhi';
+const CACHE = 'wuri-v63-20261019-title4';
 const ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,8 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=62',
-  './css/meditation.css?v=62',
+  './css/style.css?v=63',
+  './css/meditation.css?v=63',
   './icon-192.png',
   './icon-512.png',
   './js/ai-analysis.js',
