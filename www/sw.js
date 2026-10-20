@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v63-20261019-title4';
+const CACHE = 'wuri-v64-20261019-fixes';
 const ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,8 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=63',
-  './css/meditation.css?v=63',
+  './css/style.css?v=64',
+  './css/meditation.css?v=64',
   './icon-192.png',
   './icon-512.png',
   './js/ai-analysis.js',
@@ -118,14 +118,23 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
+  // 分段请求（音频 Range 拖动/续播）不拦截，交给浏览器直连：
+  // 以前把 206 半截音频当完整响应缓存下来，会让环境音永远播不出（2026-10-19 冥想无声修）
+  if (e.request.headers.get('range')) return;
+  var isAudio = /\.(mp3|m4a|aac|wav|ogg)$/i.test(url.pathname);
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
-      // 只缓存同源 GET 成功响应
-      if (e.request.method === 'GET' && res.ok && new URL(e.request.url).origin === location.origin) {
+      // 只缓存同源 GET 的完整 200 响应；音频不进运行时缓存（体积大且怕截断污染）
+      if (e.request.method === 'GET' && res.status === 200 && !isAudio && new URL(e.request.url).origin === location.origin) {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));
       }
       return res;
-    }).catch(() => caches.match('./index.html')))
+    }).catch(() => {
+      // 失败兜底只给页面导航回首页；图片/音频等资源失败就如实失败，
+      // 避免把 HTML 当图片发出去、显示成破图（2026-10-19 冥想背景破图修）
+      if (e.request.mode === 'navigate') return caches.match('./index.html');
+      return new Response('', { status: 504, statusText: 'offline' });
+    }))
   );
 });

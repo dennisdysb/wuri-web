@@ -1025,7 +1025,7 @@ details[open] summary:before{content:"▾ "}
 .jing-bookmark-fab:active{transform:scale(.92)}
 
 /* 置顶按钮用不同位置避免重叠 */
-.jing-back-fab.to-top{left:auto;right:18px;font-size:1.4rem}
+.jing-back-fab.to-top{left:auto;right:18px;font-size:1.4rem;bottom:118px}
 
 /* ============================================================
    大屏幕网页版 · 自适应布局（iPad / 桌面）
@@ -1275,7 +1275,7 @@ details[open] summary:before{content:"▾ "}
 .myday-item .myday-dt{font-size:.82rem;color:var(--sub)}
 #myday-form{padding:8px 4px}
 .myday-row{display:flex;align-items:center;gap:8px;margin:10px 0;flex-wrap:wrap}
-.myday-label{width:44px;color:var(--sub);font-size:.9rem;flex:0 0 auto}
+.myday-label{width:64px;color:var(--sub);font-size:.9rem;flex:0 0 auto;white-space:nowrap}
 .myday-input{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:1rem}
 .myday-cal.on{background:var(--gold);color:#fff;border-color:var(--gold)}
 #myday-colors .cchip{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:inline-block;margin:2px}

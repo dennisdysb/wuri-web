@@ -72,6 +72,10 @@ var Meditation = (function () {
         img.src = SOUNDS[idx].img;
         img.alt = '';
         img.draggable = false;
+        /* 载入失败（弱网/缓存异常）时换参重试一次，避免背景图永久破图（2026-10-19 修） */
+        img.addEventListener('error', function () {
+          if (!img.dataset.rt) { img.dataset.rt = '1'; img.src = SOUNDS[idx].img + '?r=1'; }
+        });
         bg.appendChild(img);
         stack.appendChild(bg);
         bgEls.push(bg);
@@ -300,6 +304,13 @@ var Meditation = (function () {
       if (!fb.ambient) {
         fb.ambient = new Audio();
         fb.ambient.loop = true;
+        /* 音频载入出错时重新 load 一次（同一 src 只重试一次），防瞬时失败变永久无声（2026-10-19 修） */
+        fb.ambient.addEventListener('error', function () {
+          if (!fb.ambient.src || fb.retriedFor === fb.ambient.src) return;
+          fb.retriedFor = fb.ambient.src;
+          try { fb.ambient.load(); } catch (err) {}
+          try { var pr = fb.ambient.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (err2) {}
+        });
       } else {
         try { fb.ambient.pause(); } catch (e0) {}
       }

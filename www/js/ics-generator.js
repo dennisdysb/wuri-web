@@ -30,19 +30,25 @@ function esc(s) {
   return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 }
 
-/* 生成单个 VEVENT */
-function vevent(date, summary, desc, timings) {
-  /* timings: array like ['day1', 'today', 'custom:3'] */
+/* 生成单个 VEVENT（带具体时刻的定时事件，时长 30 分钟；
+ * rt = {h, m} 提醒时间，默认 08:00。提醒以事件开始时刻为基准：
+ * day1=前一天同刻、today=当时、custom:N=N 天前同刻。
+ * 2026-10-19 用户要求：不再生成全天事件，提醒可选几点。 */
+function vevent(date, summary, desc, timings, rt) {
+  var hh = rt ? rt.h : 8, mm = rt ? rt.m : 0;
   var dt = fmtDate(date);
   var uid = 'wuri-' + dt + '-' + Math.random().toString(36).slice(2, 8) + '@wuribushangxiang';
   var stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  var startD = new Date(date.getFullYear(), date.getMonth(), date.getDate(), hh, mm, 0);
+  var endD = new Date(startD.getTime() + 30 * 60000);
+  function fmtDT(d) {
+    return fmtDate(d) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+  }
   var out = 'BEGIN:VEVENT\n';
   out += 'UID:' + uid + '\n';
   out += 'DTSTAMP:' + stamp + '\n';
-  out += 'DTSTART;VALUE=DATE:' + dt + '\n';
-  /* 次日 */
-  var next = new Date(date.getTime() + 86400000);
-  out += 'DTEND;VALUE=DATE:' + fmtDate(next) + '\n';
+  out += 'DTSTART:' + fmtDT(startD) + '\n';
+  out += 'DTEND:' + fmtDT(endD) + '\n';
   out += 'SUMMARY:' + esc(summary) + '\n';
   out += 'DESCRIPTION:' + esc(desc) + '\n';
   if (!timings) timings = ['today'];
@@ -59,6 +65,18 @@ function vevent(date, summary, desc, timings) {
   }
   out += 'END:VEVENT\n';
   return out;
+}
+
+/* 解析 'HH:MM' 提醒时间为 {h, m}，非法时回落 08:00 */
+function parseRemindTime(s) {
+  var rt = { h: 8, m: 0 };
+  if (s) {
+    var p = String(s).split(':');
+    var ph = parseInt(p[0], 10), pm = parseInt(p[1], 10);
+    if (!isNaN(ph) && ph >= 0 && ph <= 23) rt.h = ph;
+    if (!isNaN(pm) && pm >= 0 && pm <= 59) rt.m = pm;
+  }
+  return rt;
 }
 
 /* 主生成函数 */
@@ -149,8 +167,9 @@ function generateICS(opts) {
       if (jq === '夏至') events.push(['灵宝天尊圣诞', '夏至，灵宝天尊圣诞。']);
     }
 
+    var remindRT = parseRemindTime(opts.remindTime);
     for (var i = 0; i < events.length; i++) {
-      ics += vevent(d, events[i][0], events[i][1], opts.timings);
+      ics += vevent(d, events[i][0], events[i][1], opts.timings, remindRT);
       count++;
     }
   }
@@ -203,7 +222,8 @@ function init() {
       bajie: !!(document.getElementById('ics-bajie') || {}).checked,
       sanyuan: !!(document.getElementById('ics-sanyuan') || {}).checked,
       wula: !!(document.getElementById('ics-wula') || {}).checked,
-      timings: timings
+      timings: timings,
+      remindTime: (document.getElementById('ics-remind-time') || {}).value || '08:00'
     };
     var anyType = opts.ming || opts.anwu || opts.baidou || opts.chuyishiwu || opts.shendan || opts.gengshen || opts.jiazi || opts.bajie || opts.sanyuan || opts.wula;
     if (!anyType) { alert('请至少勾选一种提醒类型'); return; }

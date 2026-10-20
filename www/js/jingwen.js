@@ -849,7 +849,13 @@ var JingWen = (function () {
     /* 媒体卡片：先设 metadata 再 play，iOS 才能显示 logo（2026-10-11） */
     try {
       if (window.WuriMediaSession) {
-        var jt = (typeof titleOf === 'function') ? titleOf(sid) : sid;
+        /* titleOf 在另一个 IIFE 里，本作用域取不到（typeof 恒 false → 以前一直回落成编号 s02）。
+         * 改走它暴露的全局入口 window.JingTitleOf（2026-10-19 修） */
+        var jt = sid;
+        try {
+          if (typeof window.JingTitleOf === 'function') jt = window.JingTitleOf(sid);
+          else if (typeof titleOf === 'function') jt = titleOf(sid);
+        } catch (e3) {}
         window.WuriMediaSession.bindAudio(jingAudio, {
           title: jt,
           artist: '戊日不上香 · 经文诵读',

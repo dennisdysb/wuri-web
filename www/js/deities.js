@@ -12,6 +12,15 @@
   var groupsEl = document.getElementById('deities-groups');
   if (!listView || !detailView || !groupsEl) return;
 
+  /* 中文数字（首页卡片「X位道教尊神」的数量随图鉴数据动态更新） */
+  function cnNum(n) {
+    var D = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+    if (n < 10) return D[n];
+    if (n < 100) { var t = Math.floor(n / 10), o = n % 10; return (t === 1 ? '' : D[t]) + '十' + (o ? D[o] : ''); }
+    if (n < 1000) { var h = Math.floor(n / 100), r = n % 100; return D[h] + '百' + (r ? (r < 10 ? '零' + D[r] : cnNum(r)) : ''); }
+    return String(n);
+  }
+
   /* ---------- 索引 + 列表渲染（远程数据源到达时可重跑） ---------- */
   function renderList() {
     byId = {};
@@ -22,6 +31,8 @@
       g.ids.forEach(function (id) { if (byId[id]) order.push(id); });
     });
     total = order.length;
+    var dcEl = document.getElementById('deities-count-cn');
+    if (dcEl) dcEl.textContent = cnNum(total);
     var html = '';
     DATA.groups.forEach(function (g) {
       html += '<h2 class="deity-group-title">' + g.name + '</h2><div class="deity-grid">';
