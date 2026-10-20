@@ -351,6 +351,9 @@ body::before{
   background:var(--paper);color:var(--ink);border:1px solid var(--line);
   border-radius:10px;padding:10px 14px;font-size:1.04rem;font-family:var(--sans);
 }
+/* 提醒时间行：左对齐＋固定间距，标签不折行（(24) 初版被 space-between 挤折行，(25) 修） */
+.ics-time-row{justify-content:flex-start;gap:14px}
+.ics-time-label{flex:0 0 auto;white-space:nowrap}
 /* 当天早上 / 提前1天早上 快捷选项 */
 .preset-row{justify-content:flex-start;gap:20px}
 .preset{display:flex;align-items:center;gap:8px;font-size:1rem;cursor:pointer;color:var(--ink)}

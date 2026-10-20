@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v64-20261019-fixes';
+const CACHE = 'wuri-v65-20261019-timerow';
 const ASSETS = [
   './',
   './index.html',
@@ -12,8 +12,8 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=64',
-  './css/meditation.css?v=64',
+  './css/style.css?v=65',
+  './css/meditation.css?v=65',
   './icon-192.png',
   './icon-512.png',
   './js/ai-analysis.js',
