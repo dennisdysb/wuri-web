@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v65-20261019-timerow';
+const CACHE = 'wuri-v66-20261019-jing3';
 const ASSETS = [
   './',
   './index.html',
@@ -12,7 +12,7 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=65',
+  './css/style.css?v=66',
   './css/meditation.css?v=65',
   './icon-192.png',
   './icon-512.png',
@@ -62,7 +62,10 @@ const ASSETS = [
   './jing/s26.js',
   './jing/s27.js',
   './jing/s28.js',
-  './jing/s29.js'
+  './jing/s29.js',
+  './jing/s30.js',
+  './jing/s31.js',
+  './jing/s32.js'
 ];
 
 self.addEventListener('install', e => {

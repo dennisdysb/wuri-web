@@ -1,6 +1,6 @@
 {
  "section": "scriptures",
- "version": 1,
+ "version": 2,
  "updated": "2026-10-19",
  "filesBase": "content/jing/",
  "index": [
@@ -51,6 +51,18 @@
   {
    "id": "s09",
    "title": "灵宝无量度人上品妙经"
+  },
+  {
+   "id": "s30",
+   "title": "太上洞玄灵宝救苦妙经"
+  },
+  {
+   "id": "s31",
+   "title": "元始天尊说生天得道经"
+  },
+  {
+   "id": "s32",
+   "title": "太上三生解冤妙经"
   },
   {
    "id": "s15",

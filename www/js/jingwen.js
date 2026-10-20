@@ -6,7 +6,7 @@ var JingWen = (function () {
   'use strict';
   /* 三派排序（用户指定顺序） */
   var JING_ORDER = {
-    all: ['s02','s01','s12','s13','s14','s10','s07','s11','s03','s04','s05','s09','s15','s16','s17','s26','s27','s29','s28'],
+    all: ['s02','s01','s12','s13','s14','s10','s07','s11','s03','s04','s05','s09','s30','s31','s32','s15','s16','s17','s26','s27','s29','s28'],
     quanzhen: ['s02','s12','s13','s10','s07','s11','s03','s04'],
     zhengyi: ['s01','s14','s10','s07','s11','s03','s04','s05','s09','s15','s16','s17']
   };
@@ -591,7 +591,7 @@ var JingWen = (function () {
     loadTimestamps(sid, voice, function () { if (cb) cb(!!jingTimestamps); });
   }
   var JING_BASE = 'https://dennisdysb.github.io/wuri-web/www/audio/jing/';
-  var JING_HAS_AUDIO = ['s01','s02','s03','s04','s05','s07','s09','s15','s10','s12','s13','s14','s16','s17','s26','s27','s28','s29'];
+  var JING_HAS_AUDIO = ['s01','s02','s03','s04','s05','s07','s09','s15','s10','s12','s13','s14','s16','s17','s26','s27','s28','s29','s30','s31','s32'];
   var JING_NEIDAN = ['s18','s19','s20','s21','s23'];
   function isNeidan(sid) { return JING_NEIDAN.indexOf(sid) >= 0; }
   function hasAudio(sid) { return JING_HAS_AUDIO.indexOf(sid) >= 0; }
