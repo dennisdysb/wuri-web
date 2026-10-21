@@ -351,6 +351,9 @@ body::before{
   background:var(--paper);color:var(--ink);border:1px solid var(--line);
   border-radius:10px;padding:10px 14px;font-size:1.04rem;font-family:var(--sans);
 }
+/* 时间字段防截断：部分安卓 WebView 给 type=time 的固有宽度只够小时段，
+   分钟会被选择器图标挤出框外（2026-10-21 vivo 真机实锤）——给足最小宽度且不许 flex 压缩 */
+.form-row input[type=time]{flex:none;min-width:9.5em}
 /* 提醒时间行：左对齐＋固定间距，标签不折行（(24) 初版被 space-between 挤折行，(25) 修） */
 .ics-time-row{justify-content:flex-start;gap:14px}
 .ics-time-label{flex:0 0 auto;white-space:nowrap}
