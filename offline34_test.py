@@ -147,7 +147,8 @@ class Bridge:
             try:
                 fd, bodyf = tempfile.mkstemp(prefix="brg-b-"); os.close(fd)
                 fd, hdrf = tempfile.mkstemp(prefix="brg-h-"); os.close(fd)
-                args = ["curl", "-sS", "--max-time", "110", "-o", bodyf, "-D", hdrf]
+                args = ["curl", "-sS", "--max-time", "110", "-o", bodyf, "-D", hdrf,
+                        "-H", "Cache-Control: no-cache", "-H", "Pragma: no-cache"]
                 if method == "HEAD":
                     args.append("--head")
                 elif method != "GET":
