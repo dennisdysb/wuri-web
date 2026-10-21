@@ -891,6 +891,8 @@ var JingWen = (function () {
     return bar;
   }
   function downloadJingAudio(sid, voice) {
+    /* 离线下载属高级版功能：未激活弹付费墙、不发起下载（在线播放仍免费） */
+    if (!isPro()) { window.WuriPro && WuriPro.requirePro('jingwen'); return; }
     var b = bridge();
     var filename = localAudioFile(sid, voice);
     if (!b || typeof b.downloadFile !== 'function') {
