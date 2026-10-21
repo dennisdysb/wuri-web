@@ -281,6 +281,33 @@
     });
   }
 
+  /* 预取后把 feed 三段数据同步种进 content-feed 的 localStorage 缓存：
+   * 否则全新用户首次打开时目录只按包内 27 部渲染（jingwen init 早于 feed 拉取），
+   * 新经（s33–s36）在目录里不出现、离线更点不开；种下后本次会话立即重渲目录、
+   * 下次离线打开也按 31 部渲染（2026-10-21 (34) 线上验证发现的衔接缺口） */
+  function seedFeedCache() {
+    var files = { deities: 'content/deities.json', scriptures: 'content/scriptures.json', festivals: 'content/festivals.json' };
+    var out = {};
+    var chain = Promise.resolve();
+    Object.keys(files).forEach(function (name) {
+      chain = chain.then(function () {
+        return fetch(relUrl(files[name])).then(function (r) {
+          return r.ok ? r.json() : null;
+        }).then(function (j) { if (j) out[name] = j; }).catch(function () {});
+      });
+    });
+    return chain.then(function () {
+      if (out.deities && out.scriptures && out.festivals) {
+        try { localStorage.setItem('wuri_feed_cache_v1', JSON.stringify(out)); } catch (e) {}
+        if (Array.isArray(out.scriptures.index)) window.JINGWEN_INDEX = out.scriptures.index;
+        if (typeof out.scriptures.filesBase === 'string' && out.scriptures.filesBase) {
+          window.WURI_JING_BASE = out.scriptures.filesBase;
+        }
+        try { document.dispatchEvent(new Event('wuri-pro-change')); } catch (e) {}
+      }
+    });
+  }
+
   function prefetchAll(audioKeys) {
     var cache;
     return caches.open(CACHE_NAME).then(function (c) {
@@ -355,7 +382,7 @@
       });
       return chain.then(function () {
         if (abortFlag) return;
-        return prefetchAll(keys).then(function () {
+        return prefetchAll(keys).then(function () { return seedFeedCache(); }).then(function () {
           saveState({ v: 1, tier: tier, status: failed.length ? 'partial' : 'done', failedKeys: failed, ts: Date.now() });
           paintDone(failed.length);
           refreshStats();
