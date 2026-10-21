@@ -1,6 +1,6 @@
 {
  "section": "scriptures",
- "version": 5,
+ "version": 6,
  "updated": "2026-10-21",
  "filesBase": "content/jing/",
  "index": [
@@ -128,6 +128,14 @@
    "id": "s28",
    "title": "临水夫人宝诰",
    "cat": "诰"
+  },
+  {
+   "id": "s37",
+   "title": "冲虚真经"
+  },
+  {
+   "id": "s38",
+   "title": "通玄真经"
   }
  ]
 }
