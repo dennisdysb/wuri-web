@@ -863,7 +863,11 @@ var JingWen = (function () {
         });
       }
     } catch (e2) {}
-    jingAudio.play().catch(function(e) { alert('播放失败：' + e.message); });
+    jingAudio.play().catch(function(e) {
+      /* 断网且该音频未离线下载时给明确话术，别只报一句播放失败（2026-10-21 离线下载） */
+      if (!navigator.onLine) alert('无网络：这部经文的音频还没有离线下载。请联网后播放，或到「我的 → 离线音频」先一键下载。');
+      else alert('播放失败：' + e.message);
+    });
     document.getElementById('jing-speak').hidden = true;
     document.getElementById('jing-stop').hidden = false;
   }

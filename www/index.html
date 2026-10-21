@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=73">
+<link rel="stylesheet" href="css/style.css?v=74">
 <link rel="stylesheet" href="css/meditation.css?v=65">
 </head>
 <body>
@@ -569,7 +569,7 @@
     </section>
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.3.9（33） (2026-10-21)</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.3.9（34） (2026-10-21)</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
@@ -585,6 +585,17 @@
         </label>
       </div>
       <p class="hint" id="backup-msg"></p>
+    </section>
+    <section class="card">
+      <div class="card-title">离线音频</div>
+      <p class="hint">把经文诵读音频一次下载到本机，断网、飞行模式也能听。下载在后台进行，不影响使用；中途关掉页面，下次打开会自动接着下。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="offline-dl-btn">一键下载所有音频</button>
+        <button class="btn" id="offline-del-btn">删除离线内容</button>
+        <button class="btn" id="offline-resume-btn" hidden>继续下载</button>
+      </div>
+      <p class="hint" id="offline-status">尚未下载离线音频。</p>
+      <p class="hint" id="offline-failed" hidden></p>
     </section>
     <section class="card">
       <details>
@@ -865,6 +876,20 @@
     </div>
   </div>
 
+  <!-- ============ 离线音频：选声线 ============ -->
+  <div id="offline-modal" class="modal">
+    <div class="modal-card">
+      <button class="modal-close" id="offline-close" aria-label="关闭">×</button>
+      <div class="pay-title">一键下载所有音频</div>
+      <div class="pay-sub">把经文诵读音频下载到本机，断网也能听。建议连 Wi-Fi 下载。</div>
+      <label class="radio"><input type="radio" name="offline-tier" value="female"> 女声诵读 · <span data-tier-size="female">计算大小中…</span></label>
+      <label class="radio"><input type="radio" name="offline-tier" value="male"> 男声诵读 · <span data-tier-size="male">计算大小中…</span></label>
+      <label class="radio"><input type="radio" name="offline-tier" value="both"> 双声全下 · <span data-tier-size="both">计算大小中…</span></label>
+      <p class="hint">还会顺带缓存全部经文正文与神祇图鉴，离线可读可看。确认后弹窗关闭、后台下载，界面上会有半透明进度条陪着你。</p>
+      <button class="btn primary big" id="offline-start">开始下载</button>
+    </div>
+  </div>
+
   <!-- ============ 打坐冥想（沉浸页） ============ -->
   <div id="meditation-view" hidden>
     <div class="med-bg-stack" id="med-bg-stack"></div>
@@ -935,6 +960,7 @@
 <script src="js/deities-data.js"></script>
 <script src="js/deities.js"></script>
 <script src="js/content-feed.js"></script>
+<script src="js/offline-download.js"></script>
 <script>
 // PWA: 注册 Service Worker（原生壳内跳过，file:// 不支持 SW）
 if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.WuBridge) {

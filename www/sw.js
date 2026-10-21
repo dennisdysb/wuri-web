@@ -1,5 +1,8 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v73-20261021-jingbatch1';
+const CACHE = 'wuri-v74-20261021-offlinedl';
+/* 离线下载专用缓存（一键下载的音频/正文/图鉴）：版本更新时绝不清除，
+ * 否则用户下好的几百 MB 音频会在每次发版后被 activate 误删（2026-10-21） */
+const OFFLINE_CACHE = 'wuri-offline-v1';
 const ASSETS = [
   './',
   './index.html',
@@ -12,7 +15,7 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=73',
+  './css/style.css?v=74',
   './css/meditation.css?v=65',
   './icon-192.png',
   './icon-512.png',
@@ -26,6 +29,7 @@ const ASSETS = [
   './js/i18n.js',
   './js/iztro.min.js',
   './js/jingwen.js',
+  './js/offline-download.js',
   './js/liuyao.js',
   './js/ln-plugin.js',
   './js/lunar.min.js',
@@ -75,7 +79,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE && k !== OFFLINE_CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -85,6 +89,17 @@ self.addEventListener('fetch', e => {
   var isHtml = url.pathname.endsWith('.html') || url.pathname.endsWith('/');
   var isCss = url.pathname.endsWith('.css');
   var isJs = url.pathname.endsWith('.js');
+  // 经文正文数据文件（content/jing/*.js 与包内 jing/*.js）：仅当离线缓存命中时由 SW 出，
+  // 未命中不拦截、照旧直连网络（保持「JS 不缓存」的既有口径，2026-10-21 离线下载）
+  var isJingText = /\/(content\/jing|jing)\/s\d+\.js$/.test(url.pathname);
+  if (isJingText && e.request.method === 'GET') {
+    e.respondWith(
+      caches.open(OFFLINE_CACHE).then(function (c) { return c.match(e.request); })
+        .then(function (hit) { return hit || fetch(e.request); })
+        .catch(function () { return new Response('', { status: 504, statusText: 'offline' }); })
+    );
+    return;
+  }
   // JS 文件：完全不拦截，让浏览器直接请求（SW 缓存 JS 出问题，2026-10-11）
   if (isJs) return;
   // 远程内容数据源（content/*.json）：网络优先＋no-store，保证内容更新即时生效；
@@ -118,6 +133,46 @@ self.addEventListener('fetch', e => {
         }
         return res;
       }).catch(function () { return caches.match(e.request); })
+    );
+    return;
+  }
+  // 经文诵读音频：离线缓存命中则本地出（Range 请求按缓存切片回 206，拖动/跟读定位可用）；
+  // 未命中照常直连网络流播且不落缓存（与现行口径一致，2026-10-21 离线下载）
+  var isJingAudio = /\/audio\/jing\/s\d+_(female|male)\.mp3$/.test(url.pathname);
+  if (isJingAudio && (e.request.method === 'GET' || e.request.method === 'HEAD')) {
+    e.respondWith(
+      caches.open(OFFLINE_CACHE).then(function (c) { return c.match(e.request.url); })
+        .then(function (hit) {
+          if (!hit) return fetch(e.request);
+          if (e.request.method === 'HEAD') {
+            return new Response(null, { status: 200, headers: {
+              'Content-Type': 'audio/mpeg', 'Accept-Ranges': 'bytes',
+              'Content-Length': hit.headers.get('content-length') || '0' } });
+          }
+          var range = e.request.headers.get('range');
+          if (!range) return hit;
+          return hit.blob().then(function (blob) {
+            var m = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+            if (!m) return new Response(blob, { headers: { 'Content-Type': 'audio/mpeg' } });
+            var total = blob.size, start, end;
+            if (m[1] === '') {
+              var n = parseInt(m[2], 10) || 0;
+              start = Math.max(0, total - n); end = total - 1;
+            } else {
+              start = parseInt(m[1], 10);
+              end = m[2] === '' ? total - 1 : Math.min(parseInt(m[2], 10), total - 1);
+            }
+            if (start > end || start >= total) {
+              return new Response('', { status: 416, headers: { 'Content-Range': 'bytes */' + total } });
+            }
+            var part = blob.slice(start, end + 1);
+            return new Response(part, { status: 206, headers: {
+              'Content-Type': 'audio/mpeg', 'Content-Length': String(part.size),
+              'Content-Range': 'bytes ' + start + '-' + end + '/' + total,
+              'Accept-Ranges': 'bytes' } });
+          });
+        })
+        .catch(function () { return new Response('', { status: 504, statusText: 'offline' }); })
     );
     return;
   }
