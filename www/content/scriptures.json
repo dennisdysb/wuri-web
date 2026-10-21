@@ -1,6 +1,6 @@
 {
  "section": "scriptures",
- "version": 4,
+ "version": 5,
  "updated": "2026-10-21",
  "filesBase": "content/jing/",
  "index": [
@@ -71,6 +71,14 @@
   {
    "id": "s34",
    "title": "洞灵真经"
+  },
+  {
+   "id": "s35",
+   "title": "太平经圣君秘旨"
+  },
+  {
+   "id": "s36",
+   "title": "高上玉皇本行集经"
   },
   {
    "id": "s15",

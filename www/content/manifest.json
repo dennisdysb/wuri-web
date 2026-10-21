@@ -9,9 +9,9 @@
    "count": 74
   },
   "scriptures": {
-   "version": 4,
+   "version": 5,
    "file": "scriptures.json",
-   "count": 29
+   "count": 31
   },
   "festivals": {
    "version": 1,
