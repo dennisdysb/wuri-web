@@ -28,7 +28,7 @@ MEASURE = """(() => {
   return { w: Math.round(r.width), sw: inp.scrollWidth, cw: inp.clientWidth,
            val: inp.value, labH: Math.round(lr.height), labFs: parseFloat(getComputedStyle(lab).fontSize),
            docSW: document.documentElement.scrollWidth, iw: window.innerWidth,
-           card: {x: Math.max(0, cr.x), y: Math.max(0, cr.y), w: Math.round(cr.width), h: Math.round(cr.height)} };
+           card: {x: Math.max(0, cr.x), y: Math.max(0, cr.y + window.scrollY), w: Math.round(cr.width), h: Math.round(cr.height)} };
 })()"""
 
 def run(b, base, tag):
