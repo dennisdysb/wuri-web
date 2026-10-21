@@ -249,7 +249,9 @@ var JingWen = (function () {
       $('#jing-home').hidden = true;
       $('#jing-reader').hidden = false;
       updateAudioButtons();
-      
+      // 切到无音频经时若跟读开着，自动退出跟读态（避免高亮映射残留到新经）
+      if (followMode && !hasAudio(id)) toggleFollow();
+
       $('#jing-title').textContent = txScript(d.title);
       // 传本标注（如宝诰的"闾山三奶派传本、非道藏所载"）：有才显示
       var jsub = $('#jing-subtitle');
@@ -596,6 +598,9 @@ var JingWen = (function () {
   function isNeidan(sid) { return JING_NEIDAN.indexOf(sid) >= 0; }
   function hasAudio(sid) { return JING_HAS_AUDIO.indexOf(sid) >= 0; }
   function updateAudioButtons() {
+    // 跟读依赖分段朗读时间戳：无音频的经（如内丹诸经）隐藏跟读按钮
+    var flEl = document.getElementById('jing-follow');
+    if (flEl) flEl.style.display = hasAudio(currentId) ? '' : 'none';
     var isFree = window.IS_FREE_BUILD;
     if (isFree) {
       // 免费版：只显示系统诵读相关，隐藏 MP3 专用
