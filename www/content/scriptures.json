@@ -1,7 +1,7 @@
 {
  "section": "scriptures",
- "version": 2,
- "updated": "2026-10-19",
+ "version": 3,
+ "updated": "2026-10-21",
  "filesBase": "content/jing/",
  "index": [
   {
@@ -63,6 +63,14 @@
   {
    "id": "s32",
    "title": "太上三生解冤妙经"
+  },
+  {
+   "id": "s33",
+   "title": "黄帝阴符经"
+  },
+  {
+   "id": "s34",
+   "title": "洞灵真经"
   },
   {
    "id": "s15",

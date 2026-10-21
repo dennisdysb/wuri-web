@@ -1,7 +1,7 @@
 {
  "feed": "wuri-content",
  "feedVersion": 1,
- "generatedAt": "2026-10-19",
+ "generatedAt": "2026-10-21",
  "sections": {
   "deities": {
    "version": 2,
@@ -9,9 +9,9 @@
    "count": 74
   },
   "scriptures": {
-   "version": 2,
+   "version": 3,
    "file": "scriptures.json",
-   "count": 27
+   "count": 29
   },
   "festivals": {
    "version": 1,
