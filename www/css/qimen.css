@@ -149,9 +149,8 @@
     radial-gradient(920px 620px at 22% 12%, rgba(78, 140, 121, .10), transparent 62%),
     radial-gradient(780px 540px at 78% 82%, rgba(107, 90, 30, .16), transparent 64%),
     radial-gradient(1100px 760px at 50% 42%, rgba(26, 34, 51, .55), transparent 70%);
-  animation: washDrift 62s ease-in-out infinite alternate;
-}@keyframes washDrift {from { transform: translate3d(-1.2%, -1%, 0) scale(1.02); }to { transform: translate3d(1.2%, 1.4%, 0) scale(1.06); }
-}.qm-scope.no-sky #qm-sky { display: none; }.qm-scope.no-sky .sky-wash { animation: none; }.qm-scope .bg-wei {
+  /* 光晕静态呈现（2026-10-22 动效下线：washDrift 漂移已移除） */
+}.qm-scope.no-sky #qm-sky { display: none; }.qm-scope .bg-wei {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -640,7 +639,7 @@
     background: transparent;
     color: var(--gold);
   }.qm-scope .tabpage { padding: 14px 14px 40px; }.qm-scope #qm-grid { gap: 6px; }.qm-scope .cell { min-height: 118px; border-radius: var(--r-sm); }.qm-scope .cell .gan-tian { font-size: 24px; }.qm-scope .cell .gan-tian.multi { font-size: 17px; }.qm-scope .cell .star { font-size: 14px; }.qm-scope .cell .door { font-size: 14px; padding: 1px 9px; }.qm-scope .cell .zhu { font-size: 10.5px; }.qm-scope .cell .god { font-size: 11px; }.qm-scope .cell .bagua { font-size: 10px; top: 6px; right: 7px; }.qm-scope .badge { font-size: 10px; top: 6px; left: 7px; }.qm-scope .badge.zu { top: 25px; }.qm-scope .badge.po { top: 44px; }.qm-scope .plate { padding: 20px 10px 32px; }
-}.qm-scope[data-motion="off"] .sky-wash, .qm-scope.lite .sky-wash { animation: none; }.qm-scope.lite #qm-sky { display: none; }.qm-scope.lite .cell::before { display: none; }.qm-scope.lite .plate-inner { transform: rotateX(var(--tilt)); }.qm-scope.lite #qm-modal .sheet { animation: none; }@media (prefers-reduced-motion: reduce) {.qm-scope *, .qm-scope *::before, .qm-scope *::after {
+}.qm-scope.lite #qm-sky { display: none; }.qm-scope.lite .cell::before { display: none; }.qm-scope.lite .plate-inner { transform: rotateX(var(--tilt)); }.qm-scope.lite #qm-modal .sheet { animation: none; }@media (prefers-reduced-motion: reduce) {.qm-scope *, .qm-scope *::before, .qm-scope *::after {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
@@ -788,15 +787,8 @@
   .qm-scope #qm-sizhu .sz-p { flex: 0 0 38%; text-align: center; }
   .qm-scope #qm-sizhu .sz-dot { display: none; }
 }
-/* 5) 宫格入场动画：逐格错峰浮现，仅 transform/opacity，不改布局；
- *    动效关（data-motion=off）/lite/系统减动效时静止。 */
-@keyframes qmCellIn {
-  from { opacity: 0; transform: translateZ(var(--z, 0px)) translateY(14px) scale(.97); }
-  to { opacity: 1; transform: translateZ(var(--z, 0px)) translateY(0) scale(1); }
-}
-.qm-scope .plate.play .cell { animation: qmCellIn .55s cubic-bezier(.22, .7, .3, 1) both; animation-delay: calc(var(--i, 0) * 45ms); }
-.qm-scope[data-motion="off"] .plate.play .cell,
-.qm-scope.lite .plate.play .cell { animation: none; }
+/* 5) 宫格入场动画已下线（2026-10-22 用户决定动效整体移除）：盘面静态呈现，
+ *    qmCellIn 关键帧与 .plate.play 规则、app.js 的 playPlateEntrance 一并删除。 */
 /* 6) 盘面下方卡片设计感（简报/格局/因素，双主题）：纸面渐变、金字标题、发丝分隔 */
 .qm-scope .b-item, .qm-scope .gbox, .qm-scope .fbox { border-radius: var(--r-md); padding: 14px 16px; }
 .qm-scope .b-item h4, .qm-scope .gbox h4, .qm-scope .fbox h4 { font-size: 15.5px; padding-bottom: 7px; margin-bottom: 9px; border-bottom: 1px dashed var(--line); }
@@ -853,17 +845,20 @@
  *    （render3d 同步不绘制），光晕淡化到近不可见；夜间星空与光晕不动。 */
 :root:not([data-theme="night"]) .qm-scope #qm-sky { display: none; }
 :root:not([data-theme="night"]) .qm-scope .sky-wash { opacity: .25; }
-/* 4) 底部页签栏精修：六项（问事/盘面/流派对照/学习中心/关于方法/动效）
- *    等宽均分、间距统一，消除「问事后空档偏大」的参差感；选中金下划线口径不变。 */
-.qm-scope nav { gap: 4px; }
-.qm-scope nav .tabbtn { flex: 1 1 0; text-align: center; }
-.qm-scope nav .linkbtn { flex: 1 1 0; margin-left: 0; text-align: center; }
+/* 4) 底部页签栏：五项真等距（2026-10-22 根治，动效项已随动效下线移除）。
+ *    根因实测（360/390/412/432 四档）：旧 flex 等分下按钮框已严格等宽（412 档 65.0px×6、
+ *    框间隙恒 2px、中心步距恒 67px），但「文字间隙」严重不均——问事/盘面标签文字仅 28.9px、
+ *    四字标签 50.9px，居中后文字间隙 = 列宽 − 两侧文字半宽和，412 档实测
+ *    问事→盘面 38.2px、四字标签之间仅 16.1px（2.4 倍），即用户所见「问事后空档偏大」。
+ *    本版：grid 五等分列＋每项标签逐字两端分布（.qm-tl 定宽 4.3em、space-between），
+ *    五个标签文字宽度被拉成一致，框等宽、文字间隙也等宽。选中金下划线口径不变。 */
+.qm-scope nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
+.qm-scope nav .tabbtn { text-align: center; letter-spacing: 0; }
+.qm-scope .qm-tl { display: flex; justify-content: space-between; width: 4.3em; margin: 0 auto; letter-spacing: 0; }
+.qm-scope .qm-tl i { font-style: normal; }
 @media (max-width: 720px) {
   .qm-scope nav {
-    justify-content: space-between;
-    gap: 2px;
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
   }
-  .qm-scope nav .tabbtn { padding: 10px 0; letter-spacing: .06em; }
-  .qm-scope nav .linkbtn { padding: 10px 0; letter-spacing: .06em; margin-left: 0; }
+  .qm-scope nav .tabbtn { padding: 10px 0; }
 }

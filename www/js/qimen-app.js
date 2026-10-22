@@ -71,7 +71,7 @@
     });
     $$(".tabpage").forEach(p => p.classList.toggle("on", p.id === "qm-tab-" + t));
     if (t === "vs") renderCompare();
-    if (t === "pan") requestAnimationFrame(() => { paintGrid(); playPlateEntrance(); });
+    if (t === "pan") requestAnimationFrame(() => { paintGrid(); });
     const vw3 = document.getElementById("view-qimen"); if (vw3) vw3.scrollTop = 0;
   }
   $$(".tabbtn").forEach(b => {
@@ -378,16 +378,6 @@
   /* ---------- 盘面：增量渲染（v3.2 核心改动） ---------- */
   const CELL_ORDER = [4, 9, 2, 3, 5, 7, 8, 1, 6];
 
-  // 宫格入场：给 .plate 重挂 .play 类触发逐格错峰浮现（动画本体在 qimen.css，
-  // 动效关/lite 时 CSS 侧 animation:none，此处重挂无副作用）
-  function playPlateEntrance() {
-    const plate = $(".plate");
-    if (!plate) return;
-    plate.classList.remove("play");
-    void plate.offsetWidth;
-    plate.classList.add("play");
-  }
-
   function mountGrid() {
     const grid = $("#qm-grid");
     if (grid.dataset.mounted) return;
@@ -441,7 +431,6 @@
                  c.zhiShi.door, c.zhiShi.palace, FACTORS.length, (c.tags || []).join(",")].join("|");
     if (!force && sig === lastSig) return;
     lastSig = sig;
-    playPlateEntrance();
 
     Array.from(grid.children).forEach(el => {
       const p = +el.dataset.p;

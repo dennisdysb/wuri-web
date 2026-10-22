@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""二轮+三轮真机反馈修复验证：390x844 双主题，动画客观证据。
-三轮新预期：四柱一行（非 2+2）、白天星点=0、时辰三钮同行等宽、底部页签六项均分。"""
+"""二轮+三轮真机反馈修复验证：390x844 双主题。
+三轮预期：四柱一行（非 2+2）、白天星点=0、时辰三钮同行等宽。
+v1.4.0 列车新预期（2026-10-22）：动效整体下线（光晕/轻摆/入场全静态、动效开关已删）、
+底部页签五项真等距（grid 等分列＋标签等宽，360/390/412/432 四档量框宽/文字间隙/中心步距）。"""
 import importlib.util, json, os, subprocess, sys, time, urllib.request
 
 spec = importlib.util.spec_from_file_location("smoke", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
@@ -102,13 +104,15 @@ def main():
                 return { top: Math.round(r.top), w: +r.width.toFixed(1) }; }); })()""")
             check(f"[{theme}] 时辰三钮同行", len({b["top"] for b in btns}) == 1, btns)
             check(f"[{theme}] 时辰三钮等宽", max(b["w"] for b in btns) - min(b["w"] for b in btns) <= 2, btns)
-            # --- 三轮第4项：底部页签六项均分（宽度一致、间距均匀） ---
-            navm = ev("""(() => { const items = [...document.querySelectorAll('#qm-root nav .tabbtn, #qm-root nav .linkbtn')];
+            # --- 底部页签五项等距（框宽一致、文字间隙一致） ---
+            navm = ev("""(() => { const items = [...document.querySelectorAll('#qm-root nav .tabbtn')];
               const rs = items.map(el => el.getBoundingClientRect());
+              const ts = items.map(el => el.querySelector('.qm-tl').getBoundingClientRect());
               const gaps = []; for (let i = 1; i < rs.length; i++) gaps.push(+(rs[i].left - rs[i-1].right).toFixed(1));
-              return { ws: rs.map(r => +r.width.toFixed(1)), gaps }; })()""")
-            check(f"[{theme}] 页签六项等宽", max(navm["ws"]) - min(navm["ws"]) <= 2, navm)
-            check(f"[{theme}] 页签间距均匀", max(navm["gaps"]) - min(navm["gaps"]) <= 2, navm)
+              const tgaps = []; for (let i = 1; i < ts.length; i++) tgaps.push(+(ts[i].left - ts[i-1].right).toFixed(1));
+              return { ws: rs.map(r => +r.width.toFixed(1)), gaps, tws: ts.map(r => +r.width.toFixed(1)), tgaps }; })()""")
+            check(f"[{theme}] 页签五项等宽", len(navm["ws"]) == 5 and max(navm["ws"]) - min(navm["ws"]) <= 1, navm)
+            check(f"[{theme}] 页签文字间隙均匀", max(navm["tgaps"]) - min(navm["tgaps"]) <= 2, navm)
             # --- 第1/6项间距 ---
             gap = ev("""(() => { const brief = document.getElementById('qm-brief');
               const view = document.getElementById('view-qimen');
@@ -118,17 +122,17 @@ def main():
             shot(f"{theme}-02-pan-top", "document.getElementById('view-qimen').scrollTop = 0")
             shot(f"{theme}-03-grid", "document.querySelector('#qm-root .plate').scrollIntoView({block:'start'})")
             shot(f"{theme}-04-brief", "document.getElementById('qm-brief').scrollIntoView({block:'start'})")
-            # --- 第4项动画证据 ---
+            # --- 动效下线证据：光晕无漂移、盘面无轻摆（静态） ---
+            wname = ev("getComputedStyle(document.querySelector('#qm-root .sky-wash')).animationName")
             w1 = ev("getComputedStyle(document.querySelector('#qm-root .sky-wash')).transform")
             time.sleep(2.4)
             w2 = ev("getComputedStyle(document.querySelector('#qm-root .sky-wash')).transform")
-            check(f"[{theme}] 光晕漂移在动", w1 != w2, f"{w1[:38]} -> {w2[:38]}")
-            # 闲置轻摆：采样 --ry（需闲置 >2.6s，前面已等待足够）
+            check(f"[{theme}] 光晕静态（无漂移）", wname == "none" and w1 == w2, f"anim={wname} {w1[:30]} -> {w2[:30]}")
             rys = []
             for _ in range(3):
                 rys.append(ev("document.querySelector('#qm-root .plate').style.getPropertyValue('--ry')"))
                 time.sleep(1.1)
-            check(f"[{theme}] 盘面闲置轻摆在动", len(set(rys)) >= 2, rys)
+            check(f"[{theme}] 盘面静态（无闲置轻摆）", len(set(rys)) == 1, rys)
             # 星层像素：双主题各自星色像素存在
             starpx = ev("""(() => { const cv = document.getElementById('qm-sky');
               const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
@@ -143,7 +147,7 @@ def main():
                 check(f"[{theme}] 白天星点=0（不绘制）", starpx["nz"] == 0 and starpx["warm"] == 0 and starpx["cream"] == 0, starpx)
             else:
                 check(f"[{theme}] 夜间星点可见（奶油色）", starpx["cream"] > 20 and starpx["warm"] == 0, starpx)
-            # 入场动画：页内 50ms 采样末格 opacity（避开 CDP 往返延迟）
+            # 入场动画已下线：重排后末格 opacity 恒 1、无动画名
             ev("""window.__ops = []; clearInterval(window.__iv);
               window.__iv = setInterval(() => { const c = document.querySelector('#qm-grid .cell[data-p="6"]');
                 if (c) window.__ops.push(+getComputedStyle(c).opacity);
@@ -152,24 +156,38 @@ def main():
             time.sleep(2.2)
             ops = ev("window.__ops")
             aname = ev("getComputedStyle(document.querySelector('#qm-grid .cell[data-p=\"6\"]')).animationName")
-            check(f"[{theme}] 宫格入场动画（opacity 渐入）",
-                  aname == "qmCellIn" and any(o < 0.98 for o in ops[:16]) and ops[-1] == 1,
+            check(f"[{theme}] 无宫格入场动画（静态）",
+                  aname == "none" and bool(ops) and all(o == 1 for o in ops),
                   f"anim={aname} ops={[round(o,2) for o in ops[:14]]}")
             shot(f"{theme}-05-vs", "document.querySelector('#qm-root .tabbtn[data-t=\"vs\"]').click()")
             time.sleep(0.4)
             ev("document.querySelector('#qm-root .tabbtn[data-t=\"pan\"]').click(); 'ok'"); time.sleep(0.6)
 
-        # --- 动效关：确实静止 ---
-        ev("document.documentElement.setAttribute('data-theme','night'); 'ok'"); time.sleep(0.5)
-        ev("document.getElementById('qm-btnLite').click(); 'ok'"); time.sleep(0.3)
-        off = ev("""(() => ({ motion: document.getElementById('qm-root').getAttribute('data-motion'),
-          wash: getComputedStyle(document.querySelector('#qm-root .sky-wash')).animationName,
-          ry: document.querySelector('#qm-root .plate').style.getPropertyValue('--ry') }))()""")
-        time.sleep(1.6)
-        off2 = ev("document.querySelector('#qm-root .plate').style.getPropertyValue('--ry')")
-        check("[关] 动效关状态", off["motion"] == "off" and off["wash"] == "none", off)
-        check("[关] 轻摆停止", off["ry"] == off2, (off["ry"], off2))
-        ev("document.getElementById('qm-btnLite').click(); 'ok'"); time.sleep(0.3)
+        # --- 动效开关已移除 + 页签五项多宽度等距（360/390/412/432） ---
+        ev("document.documentElement.setAttribute('data-theme','day'); 'ok'"); time.sleep(0.5)
+        gone = ev("document.getElementById('qm-btnLite') === null && document.querySelectorAll('#qm-root nav .tabbtn').length === 5")
+        check("动效开关已移除、页签剩五项", gone is True, gone)
+        NAVM = """(() => { const items = [...document.querySelectorAll('#qm-root nav .tabbtn')];
+          const rs = items.map(el => el.getBoundingClientRect());
+          const ts = items.map(el => el.querySelector('.qm-tl').getBoundingClientRect());
+          const tgaps = []; for (let i = 1; i < ts.length; i++) tgaps.push(+(ts[i].left - ts[i-1].right).toFixed(1));
+          const centers = rs.map(r => +(r.left + r.width / 2).toFixed(1));
+          const csteps = []; for (let i = 1; i < centers.length; i++) csteps.push(+(centers[i] - centers[i-1]).toFixed(1));
+          return { ws: rs.map(r => +r.width.toFixed(1)), tws: ts.map(r => +r.width.toFixed(1)), tgaps, csteps }; })()"""
+        for wdt in (360, 390, 412, 432):
+            cdp.call("Emulation.setDeviceMetricsOverride",
+                     {"width": wdt, "height": 844, "deviceScaleFactor": 2, "mobile": True})
+            time.sleep(0.5)
+            nm = ev(NAVM)
+            check(f"[{wdt}] 页签框等宽", max(nm["ws"]) - min(nm["ws"]) <= 1, nm["ws"])
+            check(f"[{wdt}] 标签等宽", max(nm["tws"]) - min(nm["tws"]) <= 1, nm["tws"])
+            check(f"[{wdt}] 文字间隙均匀", max(nm["tgaps"]) - min(nm["tgaps"]) <= 2, nm["tgaps"])
+            check(f"[{wdt}] 中心步距均匀", max(nm["csteps"]) - min(nm["csteps"]) <= 1.5, nm["csteps"])
+            if wdt in (360, 412):
+                shot(f"day-nav-{wdt}", "document.getElementById('view-qimen').scrollTop = 0")
+        cdp.call("Emulation.setDeviceMetricsOverride",
+                 {"width": 390, "height": 844, "deviceScaleFactor": 2, "mobile": True})
+        time.sleep(0.4)
 
         # --- 第6项：其他三视图页脚间距基线（强制显示测流式间距，与滚动无关） ---
         for vid in ("bazi-view", "view-ziwei", "view-liuyao"):
