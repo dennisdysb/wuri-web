@@ -371,6 +371,27 @@
       <div class="ly-question">
         <input type="text" id="ly-question-input" placeholder="心中默念所问之事（可不填）" maxlength="50">
       </div>
+      <div class="ly-topic-row">
+        <label for="ly-topic-sel">所问之事</label>
+        <select id="ly-topic-sel" class="ly-topic-sel">
+          <option value="">不选（通用判读）</option>
+          <option value="cai">求财</option>
+          <option value="shi">事业工作</option>
+          <option value="hun">婚恋感情</option>
+          <option value="jian">健康疾病</option>
+          <option value="xing">出行</option>
+          <option value="kao">考试</option>
+          <option value="shiwu">失物</option>
+          <option value="qi">其他</option>
+        </select>
+        <span id="ly-gender-wrap" hidden>
+          <select id="ly-gender-sel" class="ly-topic-sel" aria-label="问卦人性别">
+            <option value="m">男问</option>
+            <option value="f">女问</option>
+          </select>
+        </span>
+      </div>
+      <p class="hint ly-topic-hint">选了事类，排盘后会在卦象下方按该事类取用神做结构判读；不选则只给通用结构。</p>
       <div class="ly-mode-row">
         <div class="ly-mode-toggle">
           <button type="button" class="ly-mode-btn on" id="ly-mode-shake">摇卦</button>
@@ -855,6 +876,7 @@
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint">奇门遁甲排盘功能基于开源项目「掌上乾坤 · 奇门遁甲助手」（作者 qzp001，依 MIT 许可证使用），特此鸣谢。</p>
       <p class="hint">六爻装卦（纳甲、世应）参照开源项目「liuyao-tool」（作者 1eakkkk，依 MIT 许可证使用）校订，特此鸣谢。</p>
+      <p class="hint">六爻「卦象判读」（用神、旺衰、世应、动爻与格局的结构判读）规则宗《增删卜易》《卜筮正宗》，由本站自写实现。</p>
       <p class="hint">部分经文诵读音频由温哥华清玄道长提供，特此鸣谢。</p>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
       <p class="hint">使用中有问题或建议，欢迎发邮件反馈。</p>
