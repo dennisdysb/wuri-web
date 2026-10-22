@@ -762,3 +762,62 @@
  * 均由 style.css 按 data-theme 变量着色），此处不再做深色强制覆盖。 */
 .qm-scope { position: relative; background: transparent; }
 .qm-scope nav .linkbtn { margin-left: auto; align-self: center; }
+
+/* ===== 二轮真机反馈修复（2026-10-22，亮主题真机实测六项） =====
+ * 1) 类名撞车复位：全站 style.css 的日历宜忌印章用了全局 .yi/.ji 类
+ *    （width/height/line-height 均为 1.85rem），与奇门徽章 class「yi」、
+ *    吉门 class「ji」同名泄漏——徽章被撑成 29.6px 方块压住八神名，
+ *    吉门药丸被限宽 29.6px 导致「门」字折行掉出格外。此处在奇门作用域内复位，
+ *    不动共享的日历样式。 */
+.qm-scope .cell .badge { width: auto; height: auto; box-shadow: none; }
+.qm-scope .cell .door { width: auto; height: auto; line-height: 1.5; box-shadow: none; }
+/* 2) 页脚死白收口：tabpage 底衬 40/60px + scope 底衬 64px 合计约 104px 死白，
+ *    与全站卡片间距对齐（免责卡自身的 margin-top 14px 保留）。 */
+.qm-scope .tabpage { padding-bottom: 28px; }
+@media (max-width: 720px) {
+  .qm-scope { padding-bottom: 0; }
+  .qm-scope .tabpage { padding-bottom: 10px; }
+}
+/* 3) 问事分类卡：标题与副标题居中（第 7 项） */
+.qm-scope .wen-item { text-align: center; }
+/* 4) 四柱大字行：分段弹性排布——宽屏一行，窄屏 2+2 均衡两行，不再 3+1 孤行 */
+.qm-scope #qm-sizhu { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; column-gap: 10px; row-gap: 0; }
+.qm-scope #qm-sizhu .sz-p { white-space: nowrap; }
+.qm-scope #qm-sizhu .sz-dot { color: var(--gold-dim); }
+@media (max-width: 720px) {
+  .qm-scope #qm-sizhu .sz-p { flex: 0 0 38%; text-align: center; }
+  .qm-scope #qm-sizhu .sz-dot { display: none; }
+}
+/* 5) 宫格入场动画：逐格错峰浮现，仅 transform/opacity，不改布局；
+ *    动效关（data-motion=off）/lite/系统减动效时静止。 */
+@keyframes qmCellIn {
+  from { opacity: 0; transform: translateZ(var(--z, 0px)) translateY(14px) scale(.97); }
+  to { opacity: 1; transform: translateZ(var(--z, 0px)) translateY(0) scale(1); }
+}
+.qm-scope .plate.play .cell { animation: qmCellIn .55s cubic-bezier(.22, .7, .3, 1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+.qm-scope[data-motion="off"] .plate.play .cell,
+.qm-scope.lite .plate.play .cell { animation: none; }
+/* 6) 盘面下方卡片设计感（简报/格局/因素，双主题）：纸面渐变、金字标题、发丝分隔 */
+.qm-scope .b-item, .qm-scope .gbox, .qm-scope .fbox { border-radius: var(--r-md); padding: 14px 16px; }
+.qm-scope .b-item h4, .qm-scope .gbox h4, .qm-scope .fbox h4 { font-size: 15.5px; padding-bottom: 7px; margin-bottom: 9px; border-bottom: 1px dashed var(--line); }
+.qm-scope .frow { border-bottom: 1px dashed var(--line); padding: 6px 0; }
+.qm-scope .frow:last-child { border-bottom: none; }
+:root:not([data-theme="night"]) .qm-scope .b-item,
+:root:not([data-theme="night"]) .qm-scope .gbox,
+:root:not([data-theme="night"]) .qm-scope .fbox {
+  background: linear-gradient(180deg, #FFFDF6 0%, #FAF3E0 100%);
+  border: 1px solid rgba(146, 118, 64, .42);
+  box-shadow: 0 1px 3px rgba(96, 74, 28, .12), inset 0 1px 0 rgba(255, 255, 255, .75);
+}
+:root:not([data-theme="night"]) .qm-scope .b-item h4,
+:root:not([data-theme="night"]) .qm-scope .gbox h4,
+:root:not([data-theme="night"]) .qm-scope .fbox h4 { color: #8C6D1F; border-bottom-color: rgba(146, 118, 64, .32); }
+[data-theme="night"] .qm-scope .b-item,
+[data-theme="night"] .qm-scope .gbox,
+[data-theme="night"] .qm-scope .fbox {
+  background: linear-gradient(180deg, rgba(43, 52, 74, .88), rgba(23, 28, 41, .92));
+  border: 1px solid rgba(168, 144, 58, .36);
+  box-shadow: 0 12px 26px -18px rgba(0, 0, 0, .8), inset 0 1px 0 rgba(242, 220, 150, .09);
+}
+/* 亮主题星穹光晕略增存在感（夜间不动） */
+:root:not([data-theme="night"]) .qm-scope .sky-wash { opacity: .68; }

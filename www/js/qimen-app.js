@@ -71,7 +71,7 @@
     });
     $$(".tabpage").forEach(p => p.classList.toggle("on", p.id === "qm-tab-" + t));
     if (t === "vs") renderCompare();
-    if (t === "pan") requestAnimationFrame(() => paintGrid());
+    if (t === "pan") requestAnimationFrame(() => { paintGrid(); playPlateEntrance(); });
     const vw3 = document.getElementById("view-qimen"); if (vw3) vw3.scrollTop = 0;
   }
   $$(".tabbtn").forEach(b => {
@@ -378,12 +378,22 @@
   /* ---------- 盘面：增量渲染（v3.2 核心改动） ---------- */
   const CELL_ORDER = [4, 9, 2, 3, 5, 7, 8, 1, 6];
 
+  // 宫格入场：给 .plate 重挂 .play 类触发逐格错峰浮现（动画本体在 qimen.css，
+  // 动效关/lite 时 CSS 侧 animation:none，此处重挂无副作用）
+  function playPlateEntrance() {
+    const plate = $(".plate");
+    if (!plate) return;
+    plate.classList.remove("play");
+    void plate.offsetWidth;
+    plate.classList.add("play");
+  }
+
   function mountGrid() {
     const grid = $("#qm-grid");
     if (grid.dataset.mounted) return;
-    grid.innerHTML = CELL_ORDER.map(p => {
+    grid.innerHTML = CELL_ORDER.map((p, idx) => {
       const isC = p === 5;
-      return `<div class="cell${isC ? " center" : ""}" data-p="${p}"
+      return `<div class="cell${isC ? " center" : ""}" style="--i:${idx}" data-p="${p}"
         ${isC ? 'aria-hidden="true"' : 'tabindex="0" role="button" aria-label="' + escapeHtml(Q.PAL_NAME[p] || "") + '，按回车看详解"'}>
         <div class="cell-face">
           <span class="badge b0" aria-hidden="true"></span>
@@ -431,6 +441,7 @@
                  c.zhiShi.door, c.zhiShi.palace, FACTORS.length, (c.tags || []).join(",")].join("|");
     if (!force && sig === lastSig) return;
     lastSig = sig;
+    playPlateEntrance();
 
     Array.from(grid.children).forEach(el => {
       const p = +el.dataset.p;
@@ -492,7 +503,8 @@
 
   function renderPan() {
     const c = CHART, tone = toneOfChart(), m = c.metadata;
-    $("#qm-sizhu").textContent = `${c.siZhu.year}年 · ${c.siZhu.month}月 · ${c.siZhu.day}日 · ${c.siZhu.hour}时`;
+    $("#qm-sizhu").innerHTML = [c.siZhu.year + "年", c.siZhu.month + "月", c.siZhu.day + "日", c.siZhu.hour + "时"]
+      .map((s, i) => (i ? '<span class="sz-dot">·</span>' : "") + '<span class="sz-p">' + s + "</span>").join("");
     $("#qm-metaPlain").innerHTML =
       `这一盘整体基调：<b class="${tone.cls === "good" ? "red" : tone.cls === "bad" ? "blue" : "mid"}">${tone.word}</b>。${tone.line}<br>` +
       `<span class="dim">盘面由 <b>${c.zhiFu.star}</b> 主事、<b>${c.zhiShi.door}</b> 把门。想深入可以点九宫格任意一格看详解，或展开下面的专业信息。</span>`;

@@ -91,6 +91,11 @@
     var mx = 0, my = 0;
 
     function build() {
+      /* 星色随主题取色：夜间奶油白；亮主题暖灰金
+         （原作写死奶油色，在宣纸底上几乎不可见——亮主题「动画没了」的主因之一） */
+      var dayInk = document.documentElement.getAttribute("data-theme") !== "night";
+      var ink = dayInk ? "146,120,70" : "232,226,208";
+      var inkMul = dayInk ? 0.85 : 1;
       W = Math.max(1, window.innerWidth);
       H = Math.max(1, window.innerHeight);
       cv.width = Math.floor(W * dpr);
@@ -112,14 +117,14 @@
         var a = [0.22, 0.4, 0.62][Math.floor(Math.random() * 3)];
         lc.beginPath();
         lc.arc(x, y, r, 0, Math.PI * 2);
-        lc.fillStyle = "rgba(232,226,208," + a + ")";
+        lc.fillStyle = "rgba(" + ink + "," + (a * inkMul).toFixed(3) + ")";
         lc.fill();
       }
       /* 少量暖色星，呼应鎏金 */
       for (var j = 0; j < Math.round(count / 12); j++) {
         lc.beginPath();
         lc.arc(Math.random() * W, Math.pow(Math.random(), 0.7) * H, 1.1, 0, Math.PI * 2);
-        lc.fillStyle = "rgba(242,220,150,.55)";
+        lc.fillStyle = dayInk ? "rgba(176,141,60,.6)" : "rgba(242,220,150,.55)";
         lc.fill();
       }
       paint();
@@ -146,6 +151,12 @@
     }
 
     build();
+
+    /* 主题切换时按新主题星色重建星层 */
+    if (window.MutationObserver) {
+      new MutationObserver(function () { build(); })
+        .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    }
   }
 
   /* ---------- 九宫 3D：鼠标微倾（激进档） ---------- */
@@ -172,6 +183,7 @@
       var px = (e.clientX - r.left) / r.width - 0.5;
       var py = (e.clientY - r.top) / r.height - 0.5;
       /* 激进：横向 ±6°，纵向 +5°（19°→24°） */
+      plate._qmPtrAt = performance.now();
       tryy = px * 12;
       trx = base + py * 10;
       if (trx > 24) trx = 24;
@@ -187,6 +199,31 @@
       trx = base;
       FX.add(step);
     }, { passive: true });
+  }
+
+  /* ---------- 九宫闲置轻摆：触屏无鼠标驱动，原作的倾斜/视差在手机上永不触发，
+   * 盘面完全静止。此处在指针闲置 2.6s 后以同一套 --rx/--ry 变量做小幅正弦轻摆，
+   * 幅度渐入；指针一动即让位（_qmPtrAt 时间戳）；动效关/lite/减动效时不启动。
+   * 仍走 FX 调度器，只写 transform 变量，不改布局。 ---------- */
+  function initIdleSway() {
+    if (NO3D || !CAP.css3d || PREFERS_REDUCE) return;
+    var root = qmRoot();
+    var plate = root.querySelector(".plate");
+    if (!plate) return;
+    function sway(t) {
+      if (root.classList.contains("lite") || root.getAttribute("data-motion") === "off") return;
+      if (plate.getClientRects().length) {
+        var idleFor = t - (plate._qmPtrAt || 0);
+        if (idleFor > 2600) {
+          var ramp = Math.min(1, (idleFor - 2600) / 1800);
+          var base = parseFloat(getComputedStyle(root).getPropertyValue("--tilt")) || 19;
+          plate.style.setProperty("--ry", (Math.sin(t / 2400) * 2.3 * ramp).toFixed(2) + "deg");
+          plate.style.setProperty("--rx", (base + Math.sin(t / 3100) * 1.0 * ramp).toFixed(2) + "deg");
+        }
+      }
+      FX.add(sway);
+    }
+    FX.add(sway);
   }
 
   /* ---------- 弹窗焦点管理 ---------- */
@@ -210,6 +247,7 @@
     if (!CAP.css3d || NO3D) qmRoot().classList.add("no-3d");
     initStars();
     initTilt();
+    initIdleSway();
 
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) FX.stop();
