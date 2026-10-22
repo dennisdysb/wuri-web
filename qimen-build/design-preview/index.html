@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>设计稿 · 首页三块＋术数子页四块（待批准）</title>
+<script>
+  /* 预览专用：?theme=day|night 切换主题（与主站同一 data-theme 口径） */
+  (function () {
+    var t = new URLSearchParams(location.search).get('theme');
+    document.documentElement.setAttribute('data-theme', t === 'night' ? 'night' : 'day');
+  })();
+</script>
+<link rel="stylesheet" href="../../www/css/style.css?v=83">
+<style>
+/* ================================================================
+   预览脚手架（不进生产）：稿面标注与双屏排布
+   ================================================================ */
+body { background: #d9d2bf; }
+.pv-label { max-width: 560px; margin: 26px auto 8px; padding: 0 4px;
+  font-family: var(--sans); font-size: .8rem; letter-spacing: .14em; color: #6d6450; }
+.pv-screen { position: relative; max-width: 560px; margin: 0 auto 10px;
+  background: var(--bg); box-shadow: 0 10px 40px rgba(50, 40, 15, .25); overflow: hidden; }
+.pv-main { padding: 0 16px; }
+.pv-ph { border: 1.5px dashed var(--faint); border-radius: 14px; margin: 14px 0;
+  padding: 26px 18px; text-align: center; color: var(--muted);
+  font-size: .9rem; letter-spacing: .22em; background: color-mix(in srgb, var(--paper-2) 45%, transparent); }
+.pv-tabbar { position: absolute; left: 0; right: 0; bottom: 0; display: flex;
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  border-top: 1px solid var(--line); padding: 8px 0 10px; backdrop-filter: blur(10px); }
+.pv-tabbar button { flex: 1; background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  color: var(--muted); font-size: .78rem; font-family: var(--sans); }
+.pv-tabbar button .ti { font-family: var(--serif); font-size: 1.32rem; line-height: 1.2; }
+.pv-tabbar button.active { color: var(--teal-deep); font-weight: 700; }
+[data-theme="night"] .pv-tabbar button.active { color: var(--teal); }
+.pv-bottom-pad { height: 84px; }
+
+/* ================================================================
+   ★ 候选设计 CSS（批准后整段移入 www/css/style.css）
+   首页三块＋术数子页四块 · 同一设计家族
+   —— 整卡即按钮：卡面无任何按钮形元素，:active 压暗＋微缩＋金描边
+   ================================================================ */
+.home-block {
+  position: relative;
+  padding: 24px 22px 22px; overflow: hidden; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(180deg, var(--gold-wash) 0%, var(--card) 58%);
+  transition: transform .13s ease, border-color .13s ease, box-shadow .13s ease;
+}
+.home-block .card-title { font-size: 1.16rem; letter-spacing: .32em; margin-bottom: 10px; }
+.home-block .hint { margin-top: 0; font-size: .92rem; }
+.home-block:active {
+  transform: scale(.982); border-color: var(--gold);
+  box-shadow: 0 1px 2px rgba(74, 62, 36, .10), 0 6px 14px rgba(74, 62, 36, .12);
+}
+/* 修行块：文末朱印＋今日小签（戊日带朱点） */
+.hb-seal {
+  position: absolute; right: 20px; bottom: 18px; width: 37px; height: 37px;
+  border-radius: 8px; background: var(--seal); color: #FCFAF2;
+  font-family: var(--serif); font-size: 1.08rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transform: rotate(-4deg); box-shadow: 0 2px 7px rgba(120, 30, 20, .28);
+}
+.hb-today {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 15px;
+  padding: 5px 13px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--card); font-size: .82rem; color: var(--ink-2); letter-spacing: .06em;
+}
+.hb-today .wu-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cinnabar); flex: none; }
+/* 术数块：四术朱文小印签 */
+.hb-chips { display: flex; gap: 12px; margin-top: 17px; }
+.hb-chip {
+  width: 46px; height: 46px; border: 1.5px solid var(--seal); border-radius: 9px;
+  background: var(--cinnabar-wash); color: var(--seal);
+  font-family: var(--serif); font-weight: 700; font-size: .88rem; line-height: 1.3;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+}
+[data-theme="night"] .hb-chip { color: #e0876f; border-color: #b4503c; }
+/* 图鉴块：圆光点阵（74 点＝74 位尊神） */
+.hb-dots { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 17px; max-width: 350px; }
+.hb-dots i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--gold); flex: none; }
+/* 子页四块：左 CSS 意象锚点（64px 区）＋右标题一句话 */
+.tool-block { display: flex; align-items: center; gap: 18px; padding: 22px; min-height: 112px; }
+.tb-motif {
+  flex: 0 0 64px; width: 64px; height: 64px;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle, var(--gold-wash) 0%, transparent 72%);
+}
+.tb-text { flex: 1; min-width: 0; }
+.tb-text .card-title { margin-bottom: 8px; }
+/* 八字意象：四根干支柱 */
+.m-bazi { gap: 7px; }
+.m-bazi i { width: 6px; height: 42px; border-radius: 3px;
+  background: linear-gradient(180deg, var(--gold), var(--gold-deep)); }
+/* 紫微意象：十二宫 4×4 宫格（中宫 2×2 合并） */
+.m-ziwei { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr);
+  width: 46px; height: 46px; border: 1.5px solid var(--gold); background: none; }
+.m-ziwei i { box-shadow: inset -1px -1px 0 color-mix(in srgb, var(--gold) 55%, transparent); }
+.m-ziwei .core { grid-area: 2 / 2 / 4 / 4;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent); }
+/* 六爻意象：六根爻线（阳整阴断） */
+.m-liuyao { flex-direction: column; gap: 5px; }
+.m-liuyao .yao { display: flex; gap: 6px; width: 40px; height: 5px; }
+.m-liuyao .yao i { flex: 1; border-radius: 2.5px; background: var(--gold-deep); }
+/* 奇门意象：九宫格＋中宫一点 */
+.m-qimen { position: relative; width: 46px; height: 46px; border: 1.5px solid var(--gold);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--gold) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--gold) 55%, transparent) 1px, transparent 1px);
+  background-size: 33.333% 33.333%; }
+.m-qimen::after { content: ""; position: absolute; left: 50%; top: 50%;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--cinnabar);
+  transform: translate(-50%, -50%); }
+</style>
+</head>
+<body>
+
+<!-- ================= 稿一 · 首页 ================= -->
+<p class="pv-label">设计稿 1／2 · 首页（顺序：今日信息区 → 修行日程 → 术数排盘 → 神祇图鉴）</p>
+<div class="pv-screen" id="screen-home">
+  <div class="pv-main">
+    <header class="appbar brand">
+      <img class="brand-logo" src="../../www/img/logo.png" alt="戊日不上香">
+      <h1 class="brand-title">戊日不上香</h1>
+      <button class="theme-toggle" aria-label="切换主题">◐</button>
+    </header>
+    <p class="date-line">2026年10月22日 星期四<span class="dl-lunar">农历九月初三</span></p>
+
+    <div class="pv-ph">今日状态 · 时钟四柱 · 四值神<br>（保持现状 · 不在本稿范围）</div>
+
+    <!-- ① 修行日程 -->
+    <section class="card home-block">
+      <div class="card-title">修行日程</div>
+      <p class="hint">诵经打坐冥想排期，自动校验戊日；记录每日修行。</p>
+      <span class="hb-today"><span class="wu-dot"></span>今日 · 农历九月初三 · 戊日</span>
+      <span class="hb-seal">修</span>
+    </section>
+
+    <!-- ② 术数排盘 -->
+    <section class="card home-block">
+      <div class="card-title">术数排盘</div>
+      <p class="hint">四术合参，各问所长：命盘看一生，卦局问当下。</p>
+      <div class="hb-chips">
+        <span class="hb-chip">八<br>字</span>
+        <span class="hb-chip">紫<br>微</span>
+        <span class="hb-chip">六<br>爻</span>
+        <span class="hb-chip">奇<br>门</span>
+      </div>
+    </section>
+
+    <!-- ③ 神祇图鉴 -->
+    <section class="card home-block">
+      <div class="card-title">神祇图鉴</div>
+      <p class="hint">七十四位道教尊神：神诞、道场、职掌、生平事迹与造像特征，免费恭览。</p>
+      <div class="hb-dots" id="pv-dots" aria-hidden="true"></div>
+    </section>
+
+    <div class="pv-bottom-pad"></div>
+  </div>
+  <nav class="pv-tabbar">
+    <button class="active"><span class="ti">☯︎</span><span>首页</span></button>
+    <button><span class="ti">曆</span><span>黄历</span></button>
+    <button><span class="ti">經</span><span>经文</span></button>
+    <button><span class="ti">鈴</span><span>提醒</span></button>
+    <button><span class="ti">吾</span><span>我的</span></button>
+  </nav>
+</div>
+
+<!-- ================= 稿二 · 术数排盘子页 ================= -->
+<p class="pv-label">设计稿 2／2 · 术数排盘子页（四块全幅纵排，不分组）</p>
+<div class="pv-screen" id="screen-sub">
+  <header class="appbar brand">
+    <button class="mini-btn">‹ 返回</button>
+    <h1 class="brand-title">术数排盘</h1>
+    <span class="appbar-spacer"></span>
+  </header>
+  <div class="pv-main">
+    <!-- 八字 -->
+    <section class="card home-block tool-block">
+      <div class="tb-motif m-bazi" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="tb-text">
+        <div class="card-title">八字排盘</div>
+        <p class="hint">看一生格局与大运流年</p>
+      </div>
+    </section>
+    <!-- 紫微 -->
+    <section class="card home-block tool-block">
+      <div class="tb-motif" aria-hidden="true">
+        <div class="m-ziwei"><i></i><i></i><i></i><i></i><i></i><i></i><span class="core"></span><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="tb-text">
+        <div class="card-title">紫微斗数</div>
+        <p class="hint">十二宫星盘，看命宫与运限</p>
+      </div>
+    </section>
+    <!-- 六爻 -->
+    <section class="card home-block tool-block">
+      <div class="tb-motif m-liuyao" aria-hidden="true">
+        <span class="yao"><i></i></span>
+        <span class="yao"><i></i><i></i></span>
+        <span class="yao"><i></i></span>
+        <span class="yao"><i></i></span>
+        <span class="yao"><i></i><i></i></span>
+        <span class="yao"><i></i></span>
+      </div>
+      <div class="tb-text">
+        <div class="card-title">六爻占卜</div>
+        <p class="hint">摇一卦，专问一件事</p>
+      </div>
+    </section>
+    <!-- 奇门 -->
+    <section class="card home-block tool-block">
+      <div class="tb-motif" aria-hidden="true"><div class="m-qimen"></div></div>
+      <div class="tb-text">
+        <div class="card-title">奇门遁甲</div>
+        <p class="hint">问当下抉择，九宫看方位</p>
+      </div>
+    </section>
+    <div class="tab-spacer"></div>
+  </div>
+  <button class="jing-back-fab show" style="position:absolute" title="返回">‹</button>
+</div>
+
+<script>
+  /* 图鉴圆光点阵：74 点 */
+  (function () {
+    var box = document.getElementById('pv-dots');
+    if (!box) return;
+    var s = '';
+    for (var i = 0; i < 74; i++) s += '<i></i>';
+    box.innerHTML = s;
+  })();
+</script>
+</body>
+</html>
