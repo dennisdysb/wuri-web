@@ -125,6 +125,128 @@ var Bazi = (function () {
   var selDayunIdx = 0;     // 选中的大运序号
   var privacyOn = false;   // 隐私模式
 
+  /* 晚子时流派（EightChar.setSect）：流派1＝23 时换日（晚子时归次日）；流派2＝0 时换日（晚子时归当日）。
+   * 实测：lunar-javascript 1.7.7 在从未调用 setSect 时的行为等价于流派2（1990-01-01 23:30 → 日柱丙寅，与 setSect(2) 一致；
+   * setSect(1) 则为丁卯）。故默认值锁定流派2，保持升级前现状不变，开关仅供用户自选。*/
+  var curSect = 2;
+  try { var _sectSaved = +localStorage.getItem('wuri_bazi_sect'); if (_sectSaved === 1 || _sectSaved === 2) curSect = _sectSaved; } catch (e) {}
+
+  var GAN_ORDER = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+
+  /* ---------- 五行力量统计 ----------
+   * 口径（自定，界面注明「供参考」）：天干每字 1.0；地支藏干按本气 1.0 / 中气 0.5 / 余气 0.3
+   * （藏干数组顺序即本→中→余）；各干按其五行归集，合计后换算百分比。无时柱时只计三柱。 */
+  function wxPower(cols) {
+    var score = { '木': 0, '火': 0, '土': 0, '金': 0, '水': 0 };
+    var W = [1.0, 0.5, 0.3];
+    cols.forEach(function (c) {
+      if (!c) return;
+      if (GAN_WX[c.gan]) score[GAN_WX[c.gan]] += 1.0;
+      (c.hide || []).forEach(function (g, i) { if (GAN_WX[g]) score[GAN_WX[g]] += (W[i] || 0.3); });
+    });
+    var total = 0, k;
+    for (k in score) total += score[k];
+    return { score: score, total: total };
+  }
+
+  /* ---------- 袁天罡称骨（民俗附加） ----------
+   * 权重单位为「钱」（整数计，避免浮点误差）；年重按干支、月/日按农历、时重按时支。
+   * 数据来源：通行袁天罡称骨表，经三处公开版本逐项交叉核对（水墨先生称骨全表、
+   * CSDN 称骨算命表、每日头条称骨歌全文）；年重 60 甲子三源一致，仅癸亥一格有
+   * 6 钱 / 7 钱异文，取两部全表一致的 6 钱；歌诀 51 首（2.1–7.1 两）按通行本录入，
+   * 个别字有异文（4.4「便不忧」、6.4「坐高堂」取通行字）。
+   * 口径：年柱用农历年（春节界，非八字立春界）；闰月上半月（≤15 日）按本月、
+   * 下半月按下月（民间通行口径）。称骨为民俗附加内容，仅供参考。 */
+  var CG_YEAR = { '甲子': 12, '乙丑': 9, '丙寅': 6, '丁卯': 7, '戊辰': 12, '己巳': 5, '庚午': 9, '辛未': 8, '壬申': 7, '癸酉': 8, '甲戌': 15, '乙亥': 9, '丙子': 16, '丁丑': 8, '戊寅': 8, '己卯': 19, '庚辰': 12, '辛巳': 6, '壬午': 8, '癸未': 7, '甲申': 5, '乙酉': 15, '丙戌': 6, '丁亥': 16, '戊子': 15, '己丑': 7, '庚寅': 9, '辛卯': 12, '壬辰': 10, '癸巳': 7, '甲午': 15, '乙未': 6, '丙申': 5, '丁酉': 14, '戊戌': 14, '己亥': 9, '庚子': 7, '辛丑': 7, '壬寅': 9, '癸卯': 12, '甲辰': 8, '乙巳': 7, '丙午': 13, '丁未': 5, '戊申': 14, '己酉': 5, '庚戌': 9, '辛亥': 17, '壬子': 5, '癸丑': 7, '甲寅': 12, '乙卯': 8, '丙辰': 8, '丁巳': 6, '戊午': 19, '己未': 6, '庚申': 8, '辛酉': 16, '壬戌': 10, '癸亥': 6 };
+  var CG_MONTH = [6, 7, 18, 9, 5, 16, 9, 15, 18, 8, 9, 5];
+  var CG_DAY = [5, 10, 8, 15, 16, 15, 8, 16, 8, 16, 9, 17, 8, 17, 10, 8, 9, 18, 5, 15, 10, 9, 8, 9, 15, 18, 7, 8, 16, 6];
+  var CG_HOUR = { '子': 16, '丑': 6, '寅': 7, '卯': 10, '辰': 9, '巳': 16, '午': 10, '未': 8, '申': 8, '酉': 9, '戌': 6, '亥': 6 };
+  var CG_SONG = {
+    21: '短命非业谓大空，平生灾难事重重；凶祸频临陷逆境，终世困苦事不成。',
+    22: '身寒骨冷苦伶仃，此命推来行乞人；劳劳碌碌无度日，终年打拱过平生。',
+    23: '此命推来骨格轻，求谋作事事难成；妻儿兄弟应难许，别处他乡作散人。',
+    24: '此命推来福禄无，门庭困苦总难荣；六亲骨肉皆无靠，流浪他乡作老翁。',
+    25: '此命推来祖业微，门庭营度似稀奇；六亲骨肉如冰炭，一世勤劳自把持。',
+    26: '平生衣禄苦中求，独自营谋事不休；离祖出门宜早计，晚来衣禄自无休。',
+    27: '一生作事少商量，难靠祖宗作主张；独马单枪空做去，早年晚岁总无长。',
+    28: '一生行事似飘蓬，祖宗产业在梦中；若不过房改名姓，也当移徒二三通。',
+    29: '初年运限未曾亨，纵有功名在后成；须过四旬才可立，移居改姓始为良。',
+    30: '劳劳碌碌苦中求，东奔西走何日休；若使终身勤与俭，老来稍可免忧愁。',
+    31: '忙忙碌碌苦中求，何日云开见日头；难得祖基家可立，中年衣食渐无忧。',
+    32: '初年运蹇事难谋，渐有财源如水流；到得中年衣食旺，那时名利一齐收。',
+    33: '早年做事事难成，百年勤劳枉费心；半世自如流水去，后来运到始得金。',
+    34: '此命福气果如何，僧道门中衣禄多；离祖出家方为妙，朝晚拜佛念弥陀。',
+    35: '生平福量不周全，祖业根基觉少传；营事生涯宜守旧，时来衣食胜从前。',
+    36: '不须劳碌过平生，独自成家福不轻；早有福星常照命，任君行去百般成。',
+    37: '此命般般事不成，弟兄少力自孤行；虽然祖业须微有，来得明时去不明。',
+    38: '一身骨肉最清高，早入簧门姓氏标；待到年将三十六，蓝衫脱去换红袍。',
+    39: '此命终身运不通，劳劳作事尽皆空；苦心竭力成家计，到得那时在梦中。',
+    40: '平生衣禄是绵长，件件心中自主张；前面风霜多受过，后来必定享安康。',
+    41: '此命推来自不同，为人能干异凡庸；中年还有逍遥福，不比前时运来通。',
+    42: '得宽怀处且宽怀，何用双眉皱不开；若使中年命运济，那时名利一起来。',
+    43: '为人心性最聪明，作事轩昂近贵人；衣禄一生天注定，不须劳碌是丰亨。',
+    44: '万事由天莫苦求，须知福禄赖人修；当年财帛难如意，晚景欣然便不忧。',
+    45: '名利推求竟若何，前番辛苦后奔波；命中难养男和女，骨肉扶持也不多。',
+    46: '东西南北尽皆通，出姓移居更觉隆；衣禄无穷无数定，中年晚景一般同。',
+    47: '此命推求旺末年，妻荣子贵自怡然；平生原有滔滔福，可卜财源若水泉。',
+    48: '初年运道未曾通，几许蹉跎命亦穷；兄弟六亲无依靠，一生事业晚来整。',
+    49: '此命推来福不轻，自成自立显门庭；从来富贵人钦敬，使婢差奴过一生。',
+    50: '为利为名终日劳，中年福禄也多遭；老来自有财星照，不比前番目下高。',
+    51: '一世荣华事事通，不须劳碌自亨通；兄弟叔侄皆如意，家业成时福禄宏。',
+    52: '一世亨通事事能，不须劳苦自然宁；宗族有光欣喜甚，家产丰盈自称心。',
+    53: '此格推来福泽宏，兴家立业在其中；一生衣食安排定，却是人间一福翁。',
+    54: '此格详采福泽宏，诗书满腹看功成；丰衣足食多安稳，正是人间有福人。',
+    55: '策马扬鞭争名利，少年作事费筹论；一朝福禄源源至，富贵荣华显六亲。',
+    56: '此格推来礼义通，一身福禄用无穷；甜酸苦辣皆尝过，滚滚财源盈而丰。',
+    57: '福禄丰盈万事全，一身荣耀乐天年；名扬威震人争羡，此世逍遥宛似仙。',
+    58: '平生衣食自然来，名利双全富贵偕；金榜题名登甲第，紫袍玉带走金阶。',
+    59: '细推此格秀而清，必定才高学业成；甲第之中应有分，扬鞭走马显威荣。',
+    60: '一朝金榜快题名，显祖荣宗大器成；衣禄定然无欠缺，田园财帛更丰盈。',
+    61: '不作朝中金榜客，定为世上大财翁；聪明天付经书熟，名显高褂自是荣。',
+    62: '此命生来福不穷，读书必定显亲宗；紫衣玉带为卿相，富贵荣华孰与同。',
+    63: '命主为官福禄长，得来富贵实非常；名题雁塔传金榜，大显门庭天下扬。',
+    64: '此格威权不可当，紫袍金带坐高堂；荣华富贵谁能及，万古留名姓氏扬。',
+    65: '细推此命福非轻，富贵荣华孰与争；定国安邦人极品，威声显赫震寰瀛。',
+    66: '此格人间一福人，堆金积玉满堂春；从来富贵有天定，金榜题名更显亲。',
+    67: '此命生来福自宏，田园家业最高隆；平生衣禄盈丰足，一路荣华万事通。',
+    68: '富贵由天莫苦求，万事家计不须谋；十年不比前番事，祖业根基千古留。',
+    69: '君是人间福禄星，一生富贵众人钦；总然衣禄由天定，安享荣华过一生。',
+    70: '此命推来福不轻，何须愁虑苦劳心；荣华富贵已天定，正笏垂绅拜紫宸。',
+    71: '此命生成大不同，公侯卿相在其中；一生自有逍遥福，富贵荣华极品隆。'
+  };
+  function fmtQian(q) {
+    var l = Math.floor(q / 10), r = q % 10;
+    return (l ? l + '两' : '') + (r ? r + '钱' : (l ? '' : '0钱'));
+  }
+  function chenggu(data) {
+    var lunar = data.lunar;
+    // 年干支按农历年（春节界）：由农历年数推甲子序
+    var ly = Math.abs(lunar.getYear());
+    var yi = (((ly - 4) % 60) + 60) % 60;
+    var yearGz = GAN_ORDER[yi % 10] + ZHI_ORDER[yi % 12];
+    var yw = CG_YEAR[yearGz];
+    if (!yw) return null;
+    var lm = lunar.getMonth(), ld = lunar.getDay();
+    var month = Math.abs(lm);
+    if (lm < 0 && ld > 15) { month += 1; if (month > 12) month = 1; } // 闰月下半月按下月
+    var parts = [
+      { label: '年（' + yearGz + '）', w: yw },
+      { label: '月（' + month + '月）', w: CG_MONTH[month - 1] },
+      { label: '日（' + ld + '日）', w: CG_DAY[ld - 1] }
+    ];
+    var total = yw + CG_MONTH[month - 1] + CG_DAY[ld - 1];
+    var noTime = !data.hasTime;
+    if (!noTime) {
+      var hw = CG_HOUR[data.ec.getTimeZhi()];
+      if (!hw) return null;
+      parts.push({ label: '时（' + data.ec.getTimeZhi() + '时）', w: hw });
+      total += hw;
+    }
+    var song = CG_SONG[total];
+    if (!song) return null;
+    return { parts: parts, total: total, song: song, noTime: noTime };
+  }
+
   function open() {
     if (!isPro()) { window.WuriPro && WuriPro.requirePro('bazi'); return; }
     $('#bazi-view').hidden = false;
@@ -177,6 +299,8 @@ var Bazi = (function () {
       var _bl = $('#bz-lon');
       if (_bl && !_bl.value && _gc.lon) _bl.value = _gc.lon;
     } catch (e) {}
+    /* 晚子时流派单选回填（保存值/默认流派2） */
+    $all('input[name="bz-sect"]').forEach(function (r) { r.checked = (+r.value === curSect); });
   }
 
   function trueSolar(y, m, d, h, mi, lon) {
@@ -204,10 +328,12 @@ var Bazi = (function () {
       solar = window.Solar.fromYmd(y, m, d);
     }
     var lunar = solar.getLunar();
+    var ec = lunar.getEightChar();
+    try { ec.setSect(curSect); } catch (e) {} // 晚子时流派（默认流派2＝升级前现状）
     return {
       name: p.name, gender: p.gender, cal: p.cal, dateStr: p.dateStr,
       hasTime: p.hasTime, tsInfo: tsInfo, group: p.group, cityName: p.cityName,
-      ec: lunar.getEightChar(), lunar: lunar,
+      ec: ec, lunar: lunar,
       y: solar.getYear(), m: solar.getMonth(), d: solar.getDay()
     };
   }
@@ -225,6 +351,8 @@ var Bazi = (function () {
     var c = document.querySelector('input[name="bz-cal"]:checked');
     var cal = c ? c.value : 'solar';
     var useTrue = $('#bz-true').checked;
+    var sEl = document.querySelector('input[name="bz-sect"]:checked');
+    if (sEl) { curSect = +sEl.value; try { localStorage.setItem('wuri_bazi_sect', String(curSect)); } catch (e) {} }
     // 城市（任务9会换成分级选择器，先保留简单版）
     var lon = parseFloat($('#bz-lon') ? $('#bz-lon').value : '116.42');
     var cityName = $('#bz-cityname') ? $('#bz-cityname').value : '';
@@ -392,6 +520,35 @@ var Bazi = (function () {
       } catch (e) {}
     }
 
+    // 命宫 / 身宫 / 胎元（引擎现成）
+    try {
+      html += '<div class="bz-yun-info">命宫 ' + esc(ec.getMingGong()) + ' · 身宫 ' + esc(ec.getShenGong()) + ' · 胎元 ' + esc(ec.getTaiYuan()) + '</div>';
+    } catch (e) {}
+
+    // 五行力量（口径见 wxPower 注释）
+    var wp = wxPower(cols);
+    html += '<div class="bz-sec-t">五行力量 <span class="muted">（天干 1.0、藏干本气 1.0 / 中气 0.5 / 余气 0.3，供参考）</span></div><div class="bz-wxp">';
+    ['木', '火', '土', '金', '水'].forEach(function (wx) {
+      var pct = wp.total ? Math.round(wp.score[wx] / wp.total * 100) : 0;
+      html += '<div class="bz-wxp-row"><span class="bz-wxp-name" style="color:' + WX_COLOR[wx] + '">' + wx + '</span>'
+        + '<span class="bz-wxp-bar"><i style="width:' + pct + '%;background:' + WX_COLOR[wx] + '"></i></span>'
+        + '<span class="bz-wxp-pct">' + pct + '%</span></div>';
+    });
+    html += '</div>';
+
+    // 称骨（民俗附加）
+    try {
+      var cg = chenggu(data);
+      if (cg) {
+        html += '<div class="bz-sec-t">称骨 <span class="muted">（袁天罡称骨，民俗附加，仅供参考）</span></div><div class="bz-chenggu">'
+          + '<div class="bz-cg-parts">' + cg.parts.map(function (pt) {
+              return '<span class="bz-cg-part">' + esc(pt.label) + ' ' + fmtQian(pt.w) + '</span>';
+            }).join('') + '</div>'
+          + '<div class="bz-cg-total">总骨重 ' + fmtQian(cg.total) + (cg.noTime ? ' <span class="muted">（未计入时重：出生时间不详）</span>' : '') + '</div>'
+          + '<div class="bz-cg-song">' + esc(cg.song) + '</div></div>';
+      }
+    } catch (e) {}
+
     // 大运选择器
     html += '<div class="bz-sec-t">大运 <span class="muted">（点击切换）</span></div>';
     html += '<div class="bz-hscroll"><table class="bz-htable"><tr id="bz-dayun-row">';
@@ -410,6 +567,8 @@ var Bazi = (function () {
     html += '<div class="bz-sec-t">流年</div><div class="bz-hscroll"><table class="bz-htable"><tr id="bz-liunian-row"></tr></table></div>';
     // 流月
     html += '<div class="bz-sec-t">流月 <span class="muted" id="bz-liuyue-year"></span></div><div class="bz-hscroll"><table class="bz-htable"><tr id="bz-liuyue-row"></tr></table></div>';
+    // 流日
+    html += '<div class="bz-sec-t">流日 <span class="muted" id="bz-liuri-title">（点上方流月查看）</span></div><div class="bz-hscroll"><table class="bz-htable"><tr id="bz-liuri-row"></tr></table></div>';
 
     html += '<p class="hint bz-disclaimer">以上为传统历法推算，仅供参考，不作命理解读。</p>';
 
@@ -495,26 +654,97 @@ var Bazi = (function () {
     } catch (e) {}
   }
 
+  /* 流月/流日：分段起止用引擎节气表取准确日期（旧版用粗略节气日近似）。
+   * 流年 yy 的 12 段自立春(yy)起：立春…大雪取 yy 年节气表，小寒取 yy+1 年表；
+   * 末段止于次年立春前一日。取不到节气表时回落旧近似日。 */
+  function jqDate(yy, name, ofNextYear) {
+    try {
+      var t = window.Solar.fromYmd(ofNextYear ? yy + 1 : yy, 6, 30).getLunar().getJieQiTable();
+      var s = t[name];
+      if (s) return { y: s.getYear(), m: s.getMonth(), d: s.getDay() };
+    } catch (e) {}
+    return null;
+  }
+  function dAdd(o, n) { var t = new Date(o.y, o.m - 1, o.d + n); return { y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate() }; }
+  function dKey(o) { return o.y * 10000 + o.m * 100 + o.d; }
+
   function updateLiuyue(yy) {
     if (!yy) return;
     var yl = $('#bz-liuyue-year');
     if (yl) yl.textContent = '（' + yy + '年）';
-    var html = '';
     var jieqi = ['立春', '惊蛰', '清明', '立夏', '芒种', '小暑', '立秋', '白露', '寒露', '立冬', '大雪', '小寒'];
+    var approxM = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1];
+    var approxD = [4, 6, 6, 6, 6, 7, 8, 8, 9, 8, 7, 6];
+    var starts = [];
+    for (var i = 0; i < 12; i++) {
+      var st = jqDate(yy, jieqi[i], i === 11);
+      if (!st) { var am = approxM[i]; st = { y: am === 1 ? yy + 1 : yy, m: am, d: approxD[i] }; }
+      starts.push(st);
+    }
+    var lichunNext = jqDate(yy, '立春', true) || dAdd(starts[11], 30);
+    var today = new Date();
+    var todayO = { y: today.getFullYear(), m: today.getMonth() + 1, d: today.getDate() };
+    var html = '', defIdx = 0;
     for (var mi = 0; mi < 12; mi++) {
-      // 用节气日取月柱
-      var md = [4, 6, 6, 6, 6, 7, 8, 8, 9, 8, 7, 6][mi]; // 粗略节气日
-      var mm = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1][mi];
-      var yyy = mm === 1 ? yy + 1 : yy;
+      var end = mi < 11 ? dAdd(starts[mi + 1], -1) : dAdd(lichunNext, -1);
+      if (dKey(todayO) >= dKey(starts[mi]) && dKey(todayO) <= dKey(end)) defIdx = mi;
+      var mid = dAdd(starts[mi], 2); // 段内取日读月柱（避开节气交接时刻）
+      var mg = '', mzh = '';
       try {
-        var lz = window.Solar.fromYmd(yyy, mm, md).getLunar();
-        var mg = lz.getMonthGan(), mzh = lz.getMonthZhi();
-        html += '<td><div class="bz-hage">' + jieqi[mi] + '</div>'
-          + '<div class="bz-hgz">' + wxSpan(mg, GAN_WX[mg]) + wxSpan(mzh, ZHI_WX[mzh]) + '</div></td>';
+        var lz = window.Solar.fromYmd(mid.y, mid.m, mid.d).getLunar();
+        mg = lz.getMonthGan(); mzh = lz.getMonthZhi();
       } catch (e) {}
+      html += '<td class="bz-ly-cell bz-lym-cell" data-mi="' + mi + '"'
+        + ' data-s="' + starts[mi].y + '-' + starts[mi].m + '-' + starts[mi].d + '"'
+        + ' data-e="' + end.y + '-' + end.m + '-' + end.d + '"'
+        + ' data-label="' + jieqi[mi] + '月 ' + mg + mzh + '">'
+        + '<div class="bz-hage">' + jieqi[mi] + '</div>'
+        + '<div class="bz-hgz">' + wxSpan(mg, GAN_WX[mg]) + wxSpan(mzh, ZHI_WX[mzh]) + '</div></td>';
     }
     var lr = $('#bz-liuyue-row');
-    if (lr) lr.innerHTML = html;
+    if (lr) {
+      lr.innerHTML = html;
+      $all('.bz-lym-cell').forEach(function (cell) {
+        cell.addEventListener('click', function () { selectLiuyueCell(cell); });
+      });
+      var def = lr.querySelector('[data-mi="' + defIdx + '"]');
+      if (def) selectLiuyueCell(def);
+    }
+  }
+
+  function selectLiuyueCell(cell) {
+    $all('.bz-lym-cell').forEach(function (c) { c.classList.remove('sel'); });
+    cell.classList.add('sel');
+    var sp = cell.getAttribute('data-s').split('-'), ep = cell.getAttribute('data-e').split('-');
+    renderLiuri(
+      { y: +sp[0], m: +sp[1], d: +sp[2] },
+      { y: +ep[0], m: +ep[1], d: +ep[2] },
+      cell.getAttribute('data-label')
+    );
+  }
+
+  function renderLiuri(start, end, label) {
+    var title = $('#bz-liuri-title');
+    if (title) title.textContent = '（' + label + '）';
+    var row = $('#bz-liuri-row');
+    if (!row) return;
+    var today = new Date();
+    var tk = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+    var html = '', cur = start, guard = 0;
+    while (dKey(cur) <= dKey(end) && guard < 40) {
+      guard++;
+      var dg = '', dz = '';
+      try {
+        var lz = window.Solar.fromYmd(cur.y, cur.m, cur.d).getLunar();
+        dg = lz.getDayGan(); dz = lz.getDayZhi();
+      } catch (e) {}
+      var isToday = dKey(cur) === tk;
+      html += '<td class="bz-ly-cell' + (isToday ? ' sel' : '') + '">'
+        + '<div class="bz-hage">' + cur.m + '/' + cur.d + (isToday ? ' · 今' : '') + '</div>'
+        + '<div class="bz-hgz">' + wxSpan(dg, GAN_WX[dg]) + wxSpan(dz, ZHI_WX[dz]) + '</div></td>';
+      cur = dAdd(cur, 1);
+    }
+    row.innerHTML = html;
   }
 
   function renderHistory() {

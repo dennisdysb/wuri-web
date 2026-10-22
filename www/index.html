@@ -1012,6 +1012,12 @@
         <label class="check"><input type="checkbox" id="bz-true"> <span data-i18n="bazi_true_solar">真太阳时换算</span></label>
       </div>
       <div class="form-row">
+        <label>晚子时</label>
+        <label class="radio"><input type="radio" name="bz-sect" value="2" checked> <span>流派二 · 0时换日</span></label>
+        <label class="radio"><input type="radio" name="bz-sect" value="1"> <span>流派一 · 23时换日</span></label>
+      </div>
+      <p class="hint">晚子时（23:00–24:00）日柱归属：流派二归当日（默认，与此前一致），流派一归次日；仅影响 23 时后出生者。</p>
+      <div class="form-row">
         <label data-i18n="bazi_birthplace">出生地区</label>
         <button type="button" class="btn" id="bz-city-btn" style="flex:1;text-align:left">请选择城市</button>
         <input type="hidden" id="bz-lon" value="116.42">
