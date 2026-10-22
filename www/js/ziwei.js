@@ -366,12 +366,13 @@ function doCalcReal(dateStr, timeIdx, gender, fromHist, extra) {
       try { txt += '命主：' + (astro.soul || '') + '｜身主：' + (astro.body || '') + '\n'; } catch (e) {}
       var byName = {};
       astro.palaces.forEach(function (p) { byName[p.name] = p; });
+      var dispName = function (n) { return n === '仆役' ? '交友' : n; }; // 引擎宫名→本站口径（仅文本展示）
       var mingP = byName['命宫'];
       var shenP = null;
       astro.palaces.forEach(function (p) { if (p.isBodyPalace) shenP = p; });
       if (mingP) txt += '命宫：' + mingP.name + '（' + mingP.heavenlyStem + mingP.earthlyBranch + '）'
         + (mingP.majorStars.length ? '，主星 ' + mingP.majorStars.map(starFmt).join('、') : '（空宫）') + '\n';
-      if (shenP) txt += '身宫：落在' + shenP.name + '（' + shenP.heavenlyStem + shenP.earthlyBranch + '）\n';
+      if (shenP) txt += '身宫：落在' + dispName(shenP.name) + '（' + shenP.heavenlyStem + shenP.earthlyBranch + '）\n';
       txt += '\n【十二宫】\n';
       PALACE_NAMES.forEach(function (nm) {
         // iztro v2.6.3 宫名为「仆役」，本站口径称「交友」——别名兜底，防整宫漏喂（旧版曾漏此宫）
@@ -393,7 +394,7 @@ function doCalcReal(dateStr, timeIdx, gender, fromHist, extra) {
           var sfLine = function (label, it) {
             if (!it) return '';
             var pp = astro.palaces[it.index]; if (!pp) return '';
-            return label + ' ' + pp.name + '（' + pp.heavenlyStem + pp.earthlyBranch + '）：'
+            return label + ' ' + dispName(pp.name) + '（' + pp.heavenlyStem + pp.earthlyBranch + '）：'
               + (pp.majorStars.length ? pp.majorStars.map(starFmt).join('、') : '（无主星）');
           };
           txt += '\n【命宫三方四正】\n'
@@ -410,7 +411,7 @@ function doCalcReal(dateStr, timeIdx, gender, fromHist, extra) {
         var huaTxt = function (it) {
           return (it.mutagen || []).map(function (sn, i) { return sn + '化' + HUA_NAMES[i]; }).join('、');
         };
-        var hp = function (it) { var pp = astro.palaces[it.index]; return pp ? pp.name : ''; };
+        var hp = function (it) { var pp = astro.palaces[it.index]; return pp ? dispName(pp.name) : ''; };
         txt += '\n【当前运限】（按虚岁 ' + xuSui + ' 岁、' + todayStr + ' 计）\n';
         if (h && h.decadal) txt += '当前大限：落 ' + hp(h.decadal) + '（' + h.decadal.heavenlyStem + h.decadal.earthlyBranch + '）'
           + (h.decadal.mutagen && h.decadal.mutagen.length ? '，大限四化：' + huaTxt(h.decadal) : '') + '\n';
