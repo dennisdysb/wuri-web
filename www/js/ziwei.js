@@ -353,18 +353,70 @@ function doCalcReal(dateStr, timeIdx, gender, fromHist, extra) {
     var horoBox = $('#zw-horo'); if (horoBox) horoBox.hidden = false;
     renderChart();
     renderInfoLine();
-    // 保存文字版供 AI 分析（宫名以引擎 p.name 为准，按命宫→父母序）
+    // 保存文字版供 AI 分析（2026-10-22 结构化补强：宫名以引擎 p.name 为准、按命宫→父母序；
+    // 补命主身主/身宫标注、星曜亮度与四化、每宫大限年龄段、命宫三方四正、当前大限与流年）
     try {
-      var txt = '紫微斗数命盘\n公历：' + dateStr + ' ' + ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][+timeIdx] + '时 ' + gender
-        + '\n五行局：' + astro.fiveElementsClass + '\n';
+      var timeNames = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+      var starFmt = function (s) {
+        return s.name + (s.brightness ? '[' + s.brightness + ']' : '') + (s.mutagen ? '(化' + s.mutagen + ')' : '');
+      };
+      var txt = '紫微斗数命盘\n';
+      txt += '出生：' + (cal === 'lunar' ? '农历' : '公历') + ' ' + dateStr + ' ' + timeNames[+timeIdx] + '时 ' + gender + '\n';
+      txt += '五行局：' + astro.fiveElementsClass + '\n';
+      try { txt += '命主：' + (astro.soul || '') + '｜身主：' + (astro.body || '') + '\n'; } catch (e) {}
       var byName = {};
       astro.palaces.forEach(function (p) { byName[p.name] = p; });
+      var mingP = byName['命宫'];
+      var shenP = null;
+      astro.palaces.forEach(function (p) { if (p.isBodyPalace) shenP = p; });
+      if (mingP) txt += '命宫：' + mingP.name + '（' + mingP.heavenlyStem + mingP.earthlyBranch + '）'
+        + (mingP.majorStars.length ? '，主星 ' + mingP.majorStars.map(starFmt).join('、') : '（空宫）') + '\n';
+      if (shenP) txt += '身宫：落在' + shenP.name + '（' + shenP.heavenlyStem + shenP.earthlyBranch + '）\n';
+      txt += '\n【十二宫】\n';
       PALACE_NAMES.forEach(function (nm) {
-        var p = byName[nm]; if (!p) return;
-        txt += nm + '(' + p.heavenlyStem + p.earthlyBranch + ')：'
-          + p.majorStars.map(function (s) { return s.name + (s.mutagen ? '(化' + s.mutagen + ')' : ''); }).join('、')
-          + (p.minorStars.length ? '；' + p.minorStars.map(function (s) { return s.name + (s.mutagen ? '(化' + s.mutagen + ')' : ''); }).join('、') : '') + '\n';
+        // iztro v2.6.3 宫名为「仆役」，本站口径称「交友」——别名兜底，防整宫漏喂（旧版曾漏此宫）
+        var p = byName[nm] || (nm === '交友' ? byName['仆役'] : null);
+        if (!p) return;
+        var dx = (p.decadal && p.decadal.range) ? '｜大限 ' + p.decadal.range[0] + '~' + p.decadal.range[1] + '岁' : '';
+        txt += nm + '(' + p.heavenlyStem + p.earthlyBranch + (p.isBodyPalace ? '·身宫' : '') + dx + ')：'
+          + (p.majorStars.length ? p.majorStars.map(starFmt).join('、') : '（无主星）')
+          + (p.minorStars.length ? '；辅星 ' + p.minorStars.map(starFmt).join('、') : '');
+        try {
+          if (p.adjectiveStars && p.adjectiveStars.length) txt += '；杂耀 ' + p.adjectiveStars.map(function (s) { return s.name; }).join('、');
+        } catch (e) {}
+        txt += '\n';
       });
+      // 命宫三方四正（引擎 surroundedPalaces 口径）
+      try {
+        if (mingP) {
+          var sp = astro.surroundedPalaces(mingP.index);
+          var sfLine = function (label, it) {
+            if (!it) return '';
+            var pp = astro.palaces[it.index]; if (!pp) return '';
+            return label + ' ' + pp.name + '（' + pp.heavenlyStem + pp.earthlyBranch + '）：'
+              + (pp.majorStars.length ? pp.majorStars.map(starFmt).join('、') : '（无主星）');
+          };
+          txt += '\n【命宫三方四正】\n'
+            + sfLine('对宫', sp.opposite) + '\n'
+            + sfLine('财帛位', sp.wealth) + '\n'
+            + sfLine('官禄位', sp.career) + '\n';
+        }
+      } catch (e) {}
+      // 当前大限与流年（以今天计，与盘面运限同源 horoscope）
+      try {
+        var birthY = parseInt(dateStr.split('-')[0], 10);
+        var xuSui = new Date().getFullYear() - birthY + 1;
+        var h = astro.horoscope(todayStr, 6);
+        var huaTxt = function (it) {
+          return (it.mutagen || []).map(function (sn, i) { return sn + '化' + HUA_NAMES[i]; }).join('、');
+        };
+        var hp = function (it) { var pp = astro.palaces[it.index]; return pp ? pp.name : ''; };
+        txt += '\n【当前运限】（按虚岁 ' + xuSui + ' 岁、' + todayStr + ' 计）\n';
+        if (h && h.decadal) txt += '当前大限：落 ' + hp(h.decadal) + '（' + h.decadal.heavenlyStem + h.decadal.earthlyBranch + '）'
+          + (h.decadal.mutagen && h.decadal.mutagen.length ? '，大限四化：' + huaTxt(h.decadal) : '') + '\n';
+        if (h && h.yearly) txt += '今年流年：落 ' + hp(h.yearly) + '（' + h.yearly.heavenlyStem + h.yearly.earthlyBranch + '）'
+          + (h.yearly.mutagen && h.yearly.mutagen.length ? '，流年四化：' + huaTxt(h.yearly) : '') + '\n';
+      } catch (e) {}
       window.__wuriChartText = window.__wuriChartText || {};
       window.__wuriChartText.ziwei = txt;
     } catch (e) {}

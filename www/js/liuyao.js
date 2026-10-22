@@ -736,21 +736,106 @@ var LiuYao = (function () {
     var gong = getGong(key);
     var zhanwen = '';
     try { zhanwen = localStorage.getItem('wuri_ly_zhanwen') || ''; } catch (e) {}
+    var cat = '综合';
+    try { cat = localStorage.getItem('wuri_ly_cat') || '综合'; } catch (e) {}
+    /* 分类→参考用神（通行取法，仅作提示，断卦时仍须结合所问事由确认） */
+    var CAT_YONGSHEN = {
+      '综合': '请断卦时按所问事由自取用神，并说明取用理由',
+      '感情': '男问以妻财为用、女问以官鬼为用，并看世应关系',
+      '事业': '官鬼为用（工作、职位、上级），兼看父母（文书、合同）',
+      '财运': '妻财为用，子孙为财源，兄弟为劫财',
+      '健康': '官鬼为病症、子孙为医药，世爻为自身',
+      '学业': '父母为用（成绩、文书），兼看官鬼（名次、录取）',
+      '出行': '世爻为自身、应爻为目的地与同行人，兼看父母（行程、票据）',
+      '其他': '请断卦时按所问事由自取用神，并说明取用理由'
+    };
     var nowQ = new Date();
     var qTime = nowQ.getFullYear() + '年' + (nowQ.getMonth()+1) + '月' + nowQ.getDate() + '日 '
       + nowQ.getHours() + '时' + nowQ.getMinutes() + '分' + nowQ.getSeconds() + '秒';
-    var txt = '所问事由：' + (zhanwen || '未填写') + '\n起卦时间：' + qTime + '\n';
-    txt += '本卦：' + (g ? g[0] : '?') + '（' + gong.name + '宫）\n';
+    var txt = '所问事由：' + (zhanwen || '未填写') + '\n';
+    txt += '占问分类：' + cat + '\n';
+    txt += '参考用神：' + (CAT_YONGSHEN[cat] || CAT_YONGSHEN['综合']) + '\n';
+    txt += '起卦时间：' + qTime + '\n';
+    // 起卦四柱与月建日辰旬空（与盘面同一 lunar 口径）
+    var dayGz = '', dayGan = '甲', monthZhi = '', xk = '';
+    try {
+      if (window.Lunar) {
+        var lq = window.Lunar.fromDate(nowQ);
+        dayGz = lq.getDayGan() + lq.getDayZhi();
+        dayGan = lq.getDayGan();
+        monthZhi = lq.getMonthZhi();
+        xk = xunkong(dayGz);
+        txt += '起卦四柱：年 ' + lq.getYearGan() + lq.getYearZhi() + '｜月 ' + lq.getMonthGan() + lq.getMonthZhi()
+          + '｜日 ' + dayGz + '｜时 ' + lq.getTimeGan() + lq.getTimeZhi() + '\n';
+        txt += '月建：' + monthZhi + '｜日辰：' + dayGz + '｜旬空：' + (xk || '无') + '\n';
+        try { txt += '农历：' + lq.getYearInChinese() + '年' + lq.getMonthInChinese() + '月' + lq.getDayInChinese() + '\n'; } catch (e) {}
+      }
+    } catch (e) {}
+    txt += '\n本卦：' + (g ? g[0] : '?') + '（' + gong.name + '宫，宫五行 ' + gong.wx + '）\n';
+    if (g && g[1]) txt += '卦辞：' + g[1] + '\n';
     var names = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
     var nj = najia(key);
     var sy = getShiYing(key);
+    var beasts = [];
+    try { beasts = liushou(dayGan) || []; } catch (e) {}
+    // 伏神（与盘面同一算法：本宫首卦中缺的六亲）
+    var fuShen = ['', '', '', '', '', ''];
+    try {
+      var pureKey = null;
+      for (var bi = 0; bi < BAGONG.length; bi++) {
+        if (BAGONG[bi][0] === gong.name) { pureKey = BAGONG[bi][2][0]; break; }
+      }
+      if (pureKey) {
+        var pureNj = najia(pureKey);
+        var curQin = {};
+        for (var ci = 0; ci < 6; ci++) curQin[liuqin(gong.wx, ZHI_WX[nj[ci].zhi])] = 1;
+        for (var fi = 0; fi < 6; fi++) {
+          var fq = liuqin(gong.wx, ZHI_WX[pureNj[fi].zhi]);
+          if (!curQin[fq]) fuShen[fi] = fq + pureNj[fi].gan + pureNj[fi].zhi;
+        }
+      }
+    } catch (e) {}
+    txt += '【本卦六爻】（自初爻至上爻）\n';
     for (var i = 0; i < 6; i++) {
       var l = lines[i];
-      txt += names[i] + '：' + nj[i].gan + nj[i].zhi + ' ' + liuqin(gong.wx, ZHI_WX[nj[i].zhi])
-        + ' ' + (l.yao === 1 ? '阳' : '阴') + (l.dong ? ' 动' : '')
-        + (i === sy.shi ? ' 世' : '') + (i === sy.ying ? ' 应' : '') + '\n';
+      var isKong = xk && xk.indexOf(nj[i].zhi) >= 0;
+      txt += names[i] + '：' + (beasts[i] ? beasts[i] + ' ' : '')
+        + liuqin(gong.wx, ZHI_WX[nj[i].zhi]) + ' ' + nj[i].gan + nj[i].zhi + '（' + ZHI_WX[nj[i].zhi] + '）'
+        + ' ' + (l.yao === 1 ? '阳爻' : '阴爻')
+        + (l.dong ? (l.yao === 1 ? ' 动（老阳，变阴）' : ' 动（老阴，变阳）') : '')
+        + (i === sy.shi ? '【世】' : '') + (i === sy.ying ? '【应】' : '')
+        + (isKong ? '【旬空】' : '')
+        + (fuShen[i] ? '｜伏神 ' + fuShen[i] + ' 伏于此爻之下' : '')
+        + '\n';
     }
-    if (g) txt += '卦辞：' + g[1] + '\n';
+    // 变卦（有动爻才有）
+    var hasDong = lines.some(function (x) { return x.dong; });
+    if (hasDong) {
+      var bianLines = lines.map(function (x) { return { yao: x.dong ? (1 - x.yao) : x.yao }; });
+      var bianKey = guaKey(bianLines);
+      var bianG = GUA[bianKey];
+      var bianGong = getGong(bianKey);
+      var bianNj = najia(bianKey);
+      var bianSy = getShiYing(bianKey);
+      var dongIdx = [];
+      lines.forEach(function (x, di) { if (x.dong) dongIdx.push(names[di]); });
+      txt += '\n变卦：' + (bianG ? bianG[0] : '?') + '（' + bianGong.name + '宫）｜动爻：' + dongIdx.join('、') + '\n';
+      if (bianG && bianG[1]) txt += '变卦卦辞：' + bianG[1] + '\n';
+      txt += '【变卦六爻】（六亲按变卦宫五行取）\n';
+      for (var j = 0; j < 6; j++) {
+        txt += names[j] + '：' + liuqin(bianGong.wx, ZHI_WX[bianNj[j].zhi]) + ' ' + bianNj[j].gan + bianNj[j].zhi + '（' + ZHI_WX[bianNj[j].zhi] + '）'
+          + ' ' + (bianLines[j].yao === 1 ? '阳爻' : '阴爻')
+          + (j === bianSy.shi ? '【世】' : '') + (j === bianSy.ying ? '【应】' : '')
+          + (lines[j].dong ? '（由本卦' + names[j] + '变来）' : '')
+          + '\n';
+      }
+    } else {
+      txt += '\n变卦：无动爻，静卦（无变卦）\n';
+    }
+    try {
+      var hg = GUA[huGua(key)], cg2 = GUA[cuoGua(key)], zg = GUA[zongGua(key)];
+      txt += '互卦：' + (hg ? hg[0] : '?') + '｜错卦：' + (cg2 ? cg2[0] : '?') + '｜综卦：' + (zg ? zg[0] : '?') + '\n';
+    } catch (e) {}
     window.__wuriChartText = window.__wuriChartText || {};
     window.__wuriChartText.liuyao = txt;
   }

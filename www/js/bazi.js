@@ -270,13 +270,131 @@ var Bazi = (function () {
     if (which === 'input') initInputDefaults();
   }
 
+  /* 地支藏干（本气→中气→余气顺序，通行表；与引擎 HideGan 口径一致，供大运/流年地支取十神用） */
+  var ZHI_HIDE = {
+    '子': ['癸'], '丑': ['己', '癸', '辛'], '寅': ['甲', '丙', '戊'], '卯': ['乙'],
+    '辰': ['戊', '乙', '癸'], '巳': ['丙', '庚', '戊'], '午': ['丁', '己'], '未': ['己', '丁', '乙'],
+    '申': ['庚', '壬', '戊'], '酉': ['辛'], '戌': ['戊', '辛', '丁'], '亥': ['壬', '甲']
+  };
+  var SHENG_NEXT = { '木': '火', '火': '土', '土': '金', '金': '水', '水': '木' };
+  var KE_NEXT = { '木': '土', '火': '金', '土': '水', '金': '木', '水': '火' };
+  /* 任意天干对日主的十神（标准生克＋阴阳同异口径；与引擎 ShiShenGan/ShiShenZhi 对照验证过） */
+  function shishenOf(dayGan, gan) {
+    var di = GAN_ORDER.indexOf(dayGan), gi = GAN_ORDER.indexOf(gan);
+    if (di < 0 || gi < 0) return '';
+    var dw = GAN_WX[dayGan], gw = GAN_WX[gan];
+    var same = (di % 2) === (gi % 2);
+    if (gw === dw) return same ? '比肩' : '劫财';
+    if (SHENG_NEXT[dw] === gw) return same ? '食神' : '伤官';
+    if (KE_NEXT[dw] === gw) return same ? '偏财' : '正财';
+    if (KE_NEXT[gw] === dw) return same ? '七杀' : '正官';
+    if (SHENG_NEXT[gw] === dw) return same ? '偏印' : '正印';
+    return '';
+  }
+
+  /* AI 分析数据段（2026-10-22 改结构化拼装，替代旧 innerText 抓取截 3000 字：
+   * 四柱/十神/藏干/纳音/空亡/神煞、五行力量、命宫身宫胎元、大运全表＋当前大运与今年流年，
+   * 全部自 curData 与引擎 API 取，与盘面同源；异常时回落旧抓取法，保证按钮可用。 */
   function buildChartText() {
     try {
-      var host = $('#bz-tab-result');
-      var txt = host ? host.innerText.slice(0, 3000) : '';
+      if (!curData) return;
+      var data = curData, ec = data.ec;
+      var dayGan = ec.getDayGan(), yearZhi = ec.getYearZhi();
+      var L = [];
+      L.push('【基本信息】');
+      L.push('性别：' + (data.gender === 1 ? '男（乾造）' : '女（坤造）'));
+      L.push('出生：' + (data.cal === 'lunar' ? '农历' : '公历') + ' ' + data.dateStr + (data.hasTime ? '' : '（未填出生时间，无时柱）'));
+      try {
+        L.push('对应农历：' + data.lunar.getYearInChinese() + '年' + data.lunar.getMonthInChinese() + '月' + data.lunar.getDayInChinese()
+          + '（生肖' + data.lunar.getYearShengXiao() + '）');
+      } catch (e) {}
+      if (data.tsInfo) L.push('已按真太阳时校正（经度差 ' + (data.tsInfo.off >= 0 ? '+' : '') + data.tsInfo.off + ' 分钟，未含均时差），四柱以校正后时间排定。');
+      L.push('晚子时流派：流派' + curSect + (curSect === 1 ? '（23 时换日）' : '（0 时换日）'));
+      // 四柱（与 renderResult 同一套引擎取值）
+      var pillars = [
+        { k: 'year', label: '年柱' }, { k: 'month', label: '月柱' },
+        { k: 'day', label: '日柱' }, { k: 'time', label: '时柱' }
+      ];
+      var cols = pillars.map(function (p) {
+        if (p.k === 'time' && !data.hasTime) return null;
+        var cap = p.k.charAt(0).toUpperCase() + p.k.slice(1);
+        var col = { label: p.label };
+        try {
+          col.gan = ec['get' + cap + 'Gan']();
+          col.zhi = ec['get' + cap + 'Zhi']();
+          col.ssGan = ec['get' + cap + 'ShiShenGan']();
+          col.hide = ec['get' + cap + 'HideGan']() || [];
+          col.ssZhi = ec['get' + cap + 'ShiShenZhi']() || [];
+          col.nayin = ec['get' + cap + 'NaYin']();
+          col.dishi = ec['get' + cap + 'DiShi']();
+          col.xunkong = ec['get' + cap + 'XunKong']();
+          col.shensha = shensha(dayGan, yearZhi, col.zhi, ec.getMonthZhi(), ec.getDayZhi(), col.gan + col.zhi, col.gan);
+        } catch (e) { return null; }
+        return col;
+      });
+      L.push('');
+      L.push('【四柱】日主（日干）：' + dayGan + '（' + GAN_WX[dayGan] + '）');
+      cols.forEach(function (c) {
+        if (!c) return;
+        var hideTxt = c.hide.map(function (g, i) { return g + '（' + (c.ssZhi[i] || shishenOf(dayGan, g)) + '）'; }).join('、');
+        L.push(c.label + ' ' + c.gan + c.zhi
+          + '：天干十神 ' + (c.label === '日柱' ? '日主' : (c.ssGan || shishenOf(dayGan, c.gan)))
+          + '｜藏干 ' + (hideTxt || '无')
+          + '｜星运 ' + (c.dishi || '')
+          + '｜纳音 ' + (c.nayin || '')
+          + '｜空亡 ' + (c.xunkong || '')
+          + (c.shensha ? '｜神煞 ' + c.shensha : ''));
+      });
+      // 五行力量（与盘面同一 wxPower 口径）
+      try {
+        var wp = wxPower(cols);
+        var wpTxt = ['木', '火', '土', '金', '水'].map(function (wx) {
+          return wx + ' ' + (wp.total ? Math.round(wp.score[wx] / wp.total * 100) : 0) + '%';
+        }).join('、');
+        L.push('');
+        L.push('【五行力量】' + wpTxt + '（统计口径：天干 1.0、藏干本气 1.0/中气 0.5/余气 0.3，供参考）');
+      } catch (e) {}
+      try {
+        L.push('【命宫·身宫·胎元】命宫 ' + ec.getMingGong() + '｜身宫 ' + ec.getShenGong() + '｜胎元 ' + ec.getTaiYuan());
+      } catch (e) {}
+      // 大运全表＋当前大运＋今年流年
+      try {
+        var yun = ec.getYun(data.gender);
+        var dys = yun.getDaYun(10);
+        var curYear = new Date().getFullYear();
+        L.push('');
+        L.push('【大运】出生后 ' + yun.getStartYear() + ' 年 ' + yun.getStartMonth() + ' 月 ' + yun.getStartDay() + ' 天起运，' + (yun.isForward() ? '顺行' : '逆行'));
+        for (var i = 1; i < dys.length && i <= 8; i++) {
+          var dy = dys[i], gz = '';
+          try { gz = dy.getGanZhi(); } catch (e) {}
+          if (!gz) continue;
+          var dGan = gz.charAt(0), dZhi = gz.charAt(1);
+          var isCur = false;
+          try { isCur = curYear >= dy.getStartYear() && curYear <= dy.getEndYear(); } catch (e) {}
+          var hide = ZHI_HIDE[dZhi] || [];
+          L.push('第' + i + '步 ' + gz + '（' + dy.getStartAge() + '~' + dy.getEndAge() + '岁，' + dy.getStartYear() + '~' + dy.getEndYear() + '年）'
+            + '：天干 ' + shishenOf(dayGan, dGan)
+            + (hide.length ? '｜地支本气 ' + hide[0] + '（' + shishenOf(dayGan, hide[0]) + '）' : '')
+            + (isCur ? ' ← 当前大运' : ''));
+        }
+        try {
+          var lz = window.Solar.fromYmd(curYear, 6, 15).getLunar();
+          var lg = lz.getYearGan(), lzh = lz.getYearZhi();
+          var lHide = ZHI_HIDE[lzh] || [];
+          L.push('【今年流年】' + curYear + ' 年 ' + lg + lzh + '：天干 ' + shishenOf(dayGan, lg)
+            + (lHide.length ? '｜地支本气 ' + lHide[0] + '（' + shishenOf(dayGan, lHide[0]) + '）' : ''));
+        } catch (e) {}
+      } catch (e) {}
       window.__wuriChartText = window.__wuriChartText || {};
-      window.__wuriChartText.bazi = '八字排盘\n' + txt;
-    } catch (e) {}
+      window.__wuriChartText.bazi = L.join('\n');
+    } catch (e) {
+      try {
+        var host = $('#bz-tab-result');
+        var txt = host ? host.innerText.slice(0, 3000) : '';
+        window.__wuriChartText = window.__wuriChartText || {};
+        window.__wuriChartText.bazi = '八字排盘\n' + txt;
+      } catch (e2) {}
+    }
   }
 
   function loadHist() {
