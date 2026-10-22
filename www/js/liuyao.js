@@ -2,6 +2,9 @@
  * 三枚铜钱摇六次，自下而上成卦
  * 字为阴（--），花为阳（—）
  * 三花=老阳○（动），三字=老阴×（动）
+ * 装卦核心（纳甲全表、八宫世应）参照开源项目 liuyao-tool
+ * （作者 1eakkkk，MIT License，https://github.com/1eakkkk/liuyao-tool）
+ * 并以 bopo/najia 的独立实现交叉校验，2026-10-22 校订。
  */
 var LiuYao = (function () {
   'use strict';
@@ -102,11 +105,15 @@ var LiuYao = (function () {
     }
     return ret;
   })();
-  // 纳干：[内卦干, 外卦干]，按上卦(外)下卦(内)的八卦
+  // 纳干：[外卦干, 内卦干]，key 为经卦三爻自下而上的二进制（与 GUA key 同序，不可反转）
+  // 乾内甲外壬、坤内乙外癸、震庚、巽辛、坎戊、离己、艮丙、兑丁
   var NA_GAN = { '111': ['壬', '甲'], '000': ['癸', '乙'], '100': ['庚', '庚'], '011': ['辛', '辛'], '010': ['戊', '戊'], '101': ['己', '己'], '001': ['丙', '丙'], '110': ['丁', '丁'] };
-  // 纳支：内卦起支，外卦起支；阳顺阴逆
-  // 下卦(内)：乾甲子 震甲子 巽丑 坎寅 艮辰 兑巳 离卯 坤未
-  var NA_ZHI_NEI = { '111': '子', '100': '子', '011': '丑', '010': '寅', '001': '辰', '110': '巳', '101': '卯', '000': '未' };
+  // 纳支起支：[内卦起支, 外卦起支]（京房纳甲正表，内外必须分开起）
+  // 内：乾子 坤未 震子 巽丑 坎寅 离卯 艮辰 兑巳
+  // 外：乾午 坤丑 震午 巽未 坎申 离酉 艮戌 兑亥
+  var NA_ZHI_START = { '111': ['子', '午'], '000': ['未', '丑'], '100': ['子', '午'], '011': ['丑', '未'], '010': ['寅', '申'], '101': ['卯', '酉'], '001': ['辰', '戌'], '110': ['巳', '亥'] };
+  // 阳卦（乾震坎艮）纳支顺行，阴卦（巽离坤兑）逆行
+  var YANG_GUA = { '111': 1, '100': 1, '010': 1, '001': 1 };
   var ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
   var ZHI_WX = { '子': '水', '丑': '土', '寅': '木', '卯': '木', '辰': '土', '巳': '火', '午': '火', '未': '土', '申': '金', '酉': '金', '戌': '土', '亥': '水' };
   function zhiIdx(z) { return ZHI.indexOf(z); }
@@ -128,20 +135,18 @@ var LiuYao = (function () {
     for (var i = 0; i < 6; i++) r.push(beasts[(start + i) % 6]);
     return r;
   }
-  // 世应：返回世爻索引(0-5, 0为初爻)
-  var SHI_YING = {
-    '111111': 5, '000000': 5, // 乾坤为六世
-    '111110': 0, '000001': 0, // 天风姤/地雷复为一世
-    '111010': 1, '000010': 1, // 天山遁/地泽临为二世
-    '111011': 2, '000011': 2, // 天地否/地天泰为三世
-    '101011': 3, '010100': 3, // 风地观/水山蹇为四世
-    '011011': 4, '100010': 4  // 泽山咸/山水蒙为五世
-    // 游魂/归魂另算，简化：不在表中的按一世处理
-  };
+  // 世应：由八宫序位生成——[本宫, 一世, 二世, 三世, 四世, 五世, 游魂, 归魂]
+  // 对应世爻位（1-6，自下而上）为 [6, 1, 2, 3, 4, 5, 4, 3]，应爻恒在世爻对面（隔两位）
+  var SHI_BY_POS = [6, 1, 2, 3, 4, 5, 4, 3];
   function getShiYing(guaKey) {
-    var shi = SHI_YING[guaKey];
-    if (shi === undefined) shi = 0;
-    return { shi: shi, ying: (shi + 3) % 6 };
+    for (var i = 0; i < BAGONG.length; i++) {
+      var pos = BAGONG[i][2].indexOf(guaKey);
+      if (pos >= 0) {
+        var shi = SHI_BY_POS[pos] - 1;
+        return { shi: shi, ying: (shi + 3) % 6 };
+      }
+    }
+    return { shi: 0, ying: 3 };
   }
   function getGong(guaKey) {
     for (var i = 0; i < BAGONG.length; i++) {
@@ -149,33 +154,24 @@ var LiuYao = (function () {
     }
     return { name: '?', wx: '?' };
   }
-  // 纳甲装卦：返回每爻 {gan, zhi}
+  // 纳甲装卦：返回每爻 {gan, zhi}（自下而上）
+  // guaKey 为 6 位、下爻在前；经卦 key 直接取前/后 3 位（自下而上），严禁反转——
+  // 反转会把巽(011)认成兑、震(100)认成艮（2026-10-22 已修复的历史错误）
   function najia(guaKey) {
-    // guaKey: 6位，下爻在前。如 '111111' 为乾
-    var lower = guaKey.slice(0, 3).split('').reverse().join(''); // 下卦，上爻在前
-    var upper = guaKey.slice(3, 6).split('').reverse().join(''); // 上卦
-    // 注意：GUA的key是"下爻在前"，如乾'111111'，前3位是下卦(111)，后3位是上卦(111)
-    // 但NA_GAN的key是"上爻在前"的3位二进制，如乾卦111
-    var lowerKey = guaKey.slice(0, 3).split('').reverse().join('');
-    var upperKey = guaKey.slice(3, 6).split('').reverse().join('');
-    var ganNei = NA_GAN[lowerKey][1], ganWai = NA_GAN[upperKey][0];
-    var zhiNeiStart = NA_ZHI_NEI[lowerKey], zhiWaiStart = NA_ZHI_NEI[upperKey];
-    // 判断阴阳：下卦
-    var lowerYang = (guaKey[0] === '1' && guaKey[1] === '1' && guaKey[2] === '1') || (lowerKey === '111' || lowerKey === '100' || lowerKey === '010' || lowerKey === '001');
-    // 简化：阳卦顺行，阴卦逆行。乾震坎艮为阳，巽离坤兑为阴
-    var yangGua = { '111': 1, '100': 1, '010': 1, '001': 1 };
-    var neiYang = !!yangGua[lowerKey], waiYang = !!yangGua[upperKey];
+    var lowerKey = guaKey.slice(0, 3);
+    var upperKey = guaKey.slice(3, 6);
     var res = [];
-    var zi = zhiIdx(zhiNeiStart);
+    var zi = zhiIdx(NA_ZHI_START[lowerKey][0]);
+    var neiYang = !!YANG_GUA[lowerKey];
     for (var i = 0; i < 3; i++) {
-      // 内卦初二三爻：隔位跳（子→寅→辰...阳顺；子→戌→申...阴逆）
-      var z = ZHI[(zi + (neiYang ? i * 2 : -i * 2) + 24) % 12];
-      res.push({ gan: ganNei, zhi: z });
+      // 内卦初二三爻：隔位跳（阳顺 子→寅→辰；阴逆 未→巳→卯）
+      res.push({ gan: NA_GAN[lowerKey][1], zhi: ZHI[(zi + (neiYang ? i * 2 : -i * 2) + 24) % 12] });
     }
-    zi = zhiIdx(zhiWaiStart);
+    zi = zhiIdx(NA_ZHI_START[upperKey][1]);
+    var waiYang = !!YANG_GUA[upperKey];
     for (var j = 0; j < 3; j++) {
-      var z2 = ZHI[(zi + (waiYang ? j * 2 : -j * 2) + 24) % 12];
-      res.push({ gan: ganWai, zhi: z2 });
+      // 外卦四五上爻：自外卦起支另起（乾外午、坤外丑……），不可与内卦同起点
+      res.push({ gan: NA_GAN[upperKey][0], zhi: ZHI[(zi + (waiYang ? j * 2 : -j * 2) + 24) % 12] });
     }
     return res;
   }
