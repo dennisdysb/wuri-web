@@ -143,7 +143,7 @@ $$('#tabbar button').forEach(function (btn) {
     target.classList.add('active');
     target.style.display = 'block';
     // 切换标签时隐藏六爻/八字/紫微等独立视图，防止内容泄漏
-    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail'].forEach(function (vid) {
+    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer'].forEach(function (vid) {
       var v = document.getElementById(vid);
       if (v) v.hidden = true;
     });
@@ -2020,4 +2020,21 @@ function updateFloatingButtons() {
   }
   // 延迟再执行一次（等动态内容）
   setTimeout(hideFree, 1000);
+})();
+
+/* ---------- 使用说明与免责声明页（我的 → 关于 → 使用说明与免责声明） ---------- */
+(function () {
+  var view = document.getElementById('view-disclaimer');
+  if (!view) return;
+  var openBtn = document.getElementById('disclaimer-open');
+  if (openBtn) openBtn.addEventListener('click', function () {
+    view.hidden = false;
+    view.scrollTop = 0;
+    if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
+  });
+  var back = document.getElementById('disclaimer-back');
+  if (back) back.addEventListener('click', function () {
+    view.hidden = true;
+    if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
+  });
 })();

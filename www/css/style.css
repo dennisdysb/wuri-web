@@ -396,6 +396,19 @@ details[open] summary:before{content:"▾ "}
 .adv-list .row-between{border-top:1px solid var(--line-soft)}
 .privacy p{margin:9px 0;font-size:.97rem;color:var(--ink-2)}
 
+/* ---------- 使用说明与免责（全站统一声明页 + 各工具页脚简版） ---------- */
+.disc-list{margin:4px 0 2px;padding-left:1.35em;line-height:1.9;color:var(--ink-2);font-size:.97rem}
+.disc-list li{margin:2px 0}
+.disc-group details{border-top:1px solid var(--line-soft);padding:4px 0}
+.disc-group .card-title + details{border-top:none}
+.disc-group details p{margin:2px 0 10px;color:var(--ink-2);line-height:1.75;font-size:.96rem}
+details.disc-foot p{margin-top:9px;color:var(--ink-2);line-height:1.75;font-size:.96rem}
+details.disc-foot .disc-list{margin-top:9px}
+details.disc-foot .hint{margin-top:9px}
+/* 声明页顶栏：标题较长，改回流内排版避免与返回键重叠（.appbar.brand 默认绝对居中仅适合短标题） */
+#view-disclaimer .appbar{position:sticky;top:0;z-index:20;background:var(--paper)}
+#view-disclaimer .appbar.brand .brand-title{position:static;transform:none;flex:1;font-size:1.12rem;letter-spacing:.12em}
+
 /* ---------- 我的 ---------- */
 .radio{display:block;padding:11px 0;font-size:1.04rem;cursor:pointer;color:var(--ink)}
 .radio input{width:20px;height:20px;accent-color:var(--teal-deep);margin-right:10px;vertical-align:-3px}

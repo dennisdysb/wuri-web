@@ -414,6 +414,21 @@
         <div id="ly-history-list"></div>
       </details>
     </section>
+    <section class="card">
+      <details class="disc-foot">
+        <summary class="card-title" style="cursor:pointer">使用说明与免责</summary>
+        <p>本应用的排盘功能（八字、紫微、六爻、奇门）定位为传统文化学习与研究工具，排盘与占断结论仅供文化参考，不具备科学预测效力。</p>
+        <ul class="disc-list">
+          <li>不提供「化解、改命、消灾、驱邪」类服务</li>
+          <li>不输出疾病诊断、用药或治疗建议，身体不适请就医</li>
+          <li>不输出具体的投资买卖、择时操作建议</li>
+          <li>不预测胎儿性别</li>
+          <li>不展示「大师」「传人」「执业资格」等头衔</li>
+          <li>不宣称可以改变既定事实或替代专业判断</li>
+        </ul>
+        <p class="hint">完整声明见：我的 → 关于 → 使用说明与免责声明</p>
+      </details>
+    </section>
     <div class="tab-spacer"></div>
   </main>
 
@@ -521,6 +536,21 @@
     <section class="card" id="zw-tab-history" hidden>
       <div class="card-title">历史记录</div>
       <div id="zw-history-list"></div>
+    </section>
+    <section class="card">
+      <details class="disc-foot">
+        <summary class="card-title" style="cursor:pointer">使用说明与免责</summary>
+        <p>本应用的排盘功能（八字、紫微、六爻、奇门）定位为传统文化学习与研究工具，排盘与占断结论仅供文化参考，不具备科学预测效力。</p>
+        <ul class="disc-list">
+          <li>不提供「化解、改命、消灾、驱邪」类服务</li>
+          <li>不输出疾病诊断、用药或治疗建议，身体不适请就医</li>
+          <li>不输出具体的投资买卖、择时操作建议</li>
+          <li>不预测胎儿性别</li>
+          <li>不展示「大师」「传人」「执业资格」等头衔</li>
+          <li>不宣称可以改变既定事实或替代专业判断</li>
+        </ul>
+        <p class="hint">完整声明见：我的 → 关于 → 使用说明与免责声明</p>
+      </details>
     </section>
     <div class="tab-spacer"></div>
   </main>
@@ -684,29 +714,42 @@
     <p style="margin-top:8px"><b>可自查</b>：仓库 <code>docs/algorithm-sources.md</code> 列出全部口径分歧与逐宫期望表；
     <code>test/print_chart.js</code> 可打印任意时刻的逐宫盘面供独立复算。</p>
 
-    <h3 style="font-family:var(--kai);color:var(--gold);letter-spacing:3px;margin:20px 0 10px">本工具明确不做的事</h3>
-    <ul id="qm-noUseList" class="nouse"></ul>
-
-    <h3 style="font-family:var(--kai);color:var(--gold);letter-spacing:3px;margin:20px 0 10px">免责与合规说明</h3>
-    <ol id="qm-disList" class="nouse"></ol>
-    <p class="dis" id="qm-privacyNote"></p>
-    <p class="dis" id="qm-ageNote"></p>
-    <p class="dis" id="qm-notEvidence"></p>
-
-    <h3 style="font-family:var(--kai);color:var(--gold);letter-spacing:3px;margin:20px 0 10px">依据的法规</h3>
+    <h3 style="font-family:var(--kai);color:var(--gold);letter-spacing:3px;margin:20px 0 10px">使用说明与免责</h3>
+    <p>本功能与八字、紫微、六爻等排盘功能一样，定位为<b>传统文化学习与研究</b>工具：奇门遁甲属传统术数文化，
+    主流科学视角认为其理论无法被证实或证伪；占断结论仅供文化参考，不具备科学预测效力，
+    请勿作为医疗、投资、法律及其他重大决策的依据。</p>
     <ul class="nouse">
-      <li>《互联网信息服务管理办法》：不得制作、复制、发布、传播含有宣扬邪教和<b>封建迷信</b>等内容的信息。</li>
-      <li>《宗教教职人员网络行为规范》第十一条：不得通过网络宣扬异端邪教、附佛外道，或从事<b>打卦、占卜、算命</b>等封建迷信活动。</li>
-      <li>因此本工具定位为<b>传统文化学习与研究</b>工具，不提供任何「化解 / 改运 / 消灾」类服务，输出经禁用词扫描后以中性表述呈现。</li>
+      <li>不提供「化解、改命、消灾、驱邪」类服务</li>
+      <li>不输出疾病诊断、用药或治疗建议，身体不适请就医</li>
+      <li>不输出具体的投资买卖、择时操作建议</li>
+      <li>不预测胎儿性别</li>
+      <li>不展示「大师」「传人」「执业资格」等头衔</li>
+      <li>不宣称可以改变既定事实或替代专业判断</li>
     </ul>
-
-    <p style="margin-top:16px" class="dis">本工具用于传统文化学习与研究。奇门遁甲属传统术数文化，
-    主流科学视角认为其理论无法被证实或证伪；占断结论仅供参考，请勿作为医疗、投资、法律及其他重大决策的依据。相信科学，理性生活。</p>
+    <p style="margin-top:12px" class="dis">完整声明（定位、不做的事、免责、隐私与计算方式、使用提示、依据说明）见全站统一声明：
+    <b>我的 → 关于 → 使用说明与免责声明</b>。本应用依据《互联网信息服务管理办法》《宗教教职人员网络行为规范》等规定，
+    将占卜类功能定位为传统文化学习与研究，不提供任何「化解 / 改运 / 消灾」类服务。相信科学，理性生活。</p>
   </section>
 
 <div id="qm-modal"><div class="sheet"></div></div>
 <div id="qm-toast"></div>
     </div>
+    <section class="card">
+      <details class="disc-foot">
+        <summary class="card-title" style="cursor:pointer">使用说明与免责</summary>
+        <p>本应用的排盘功能（八字、紫微、六爻、奇门）定位为传统文化学习与研究工具，排盘与占断结论仅供文化参考，不具备科学预测效力。</p>
+        <ul class="disc-list">
+          <li>不提供「化解、改命、消灾、驱邪」类服务</li>
+          <li>不输出疾病诊断、用药或治疗建议，身体不适请就医</li>
+          <li>不输出具体的投资买卖、择时操作建议</li>
+          <li>不预测胎儿性别</li>
+          <li>不展示「大师」「传人」「执业资格」等头衔</li>
+          <li>不宣称可以改变既定事实或替代专业判断</li>
+        </ul>
+        <p class="hint">完整声明见：我的 → 关于 → 使用说明与免责声明</p>
+      </details>
+    </section>
+    <div class="tab-spacer"></div>
   </main>
 
   <!-- ============ 我的 ============ -->
@@ -781,6 +824,7 @@
       <p class="hint">六爻装卦（纳甲、世应）参照开源项目「liuyao-tool」（作者 1eakkkk，依 MIT 许可证使用）校订，特此鸣谢。</p>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
       <p class="hint">使用中有问题或建议，欢迎发邮件反馈。</p>
+      <div class="btn-row"><button class="btn" id="disclaimer-open">使用说明与免责声明</button></div>
     </section>
     <section class="card">
       <div class="card-title">数据备份</div>
@@ -834,6 +878,88 @@
     <button data-tab="tab-remind"><span class="ti">鈴</span><span data-i18n="tab_remind">提醒</span></button>
     <button data-tab="tab-me"><span class="ti">吾</span><span data-i18n="tab_me">我的</span></button>
   </nav>
+
+  <!-- ============ 使用说明与免责声明（全站统一正本） ============ -->
+  <main id="view-disclaimer" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('disclaimer-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="disclaimer-back">‹ 返回</button>
+      <h1 class="brand-title">使用说明与免责声明</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card">
+      <div class="card-title">定位与用途</div>
+      <div class="privacy">
+        <p>「戊日不上香」是一款道教日历与修行辅助应用。其中的八字排盘、紫微斗数、六爻占卜、奇门遁甲等排盘功能，定位为<b>传统文化学习与研究工具</b>，不是预测工具。相关术数属传统文化内容，主流科学视角认为其理论无法被证实或证伪，排盘与占断结论不具备科学预测效力，仅供文化学习与参考。</p>
+        <p>各家流派口径分歧是真实存在的，同一时刻不同口径可能给出不同盘面；本应用对有分歧之处并陈异说、不代为择一，也不宣称任何一种口径为权威标准。</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">本应用不做的事</div>
+      <ul class="disc-list">
+        <li>不提供「化解、改命、消灾、驱邪」类服务，也不引导任何付费化解</li>
+        <li>不输出疾病诊断、用药或治疗建议（健康类内容仅作文化参考）</li>
+        <li>不输出具体的投资买卖、择时或资产配置建议（财运类内容仅作文化参考）</li>
+        <li>不预测胎儿性别，不提供任何涉及非医学需要性别鉴定的内容</li>
+        <li>不展示「大师」「传人」「执业资格」等头衔，不背书任何机构与个人</li>
+        <li>不宣称可以改变既定事实或替代专业判断</li>
+        <li>不提供「化解」「改运」类付费服务或商品</li>
+      </ul>
+    </section>
+
+    <section class="card disc-group">
+      <div class="card-title">免责说明</div>
+      <details>
+        <summary>医疗</summary>
+        <p>排盘与占断内容不构成疾病诊断、用药或治疗建议。身体不适请及时就医，勿以占断代替诊治。</p>
+      </details>
+      <details>
+        <summary>投资</summary>
+        <p>排盘与占断内容不构成具体的投资买卖、择时或资产配置建议。据此操作，风险自负。</p>
+      </details>
+      <details>
+        <summary>法律</summary>
+        <p>排盘与占断内容不构成法律意见；本应用的输出不作为司法证据，亦不得用于任何形式的诈骗或误导。</p>
+      </details>
+      <details>
+        <summary>心理</summary>
+        <p>排盘与占断内容不构成心理评估或治疗建议。情绪困扰请寻求专业心理帮助。</p>
+      </details>
+      <details>
+        <summary>婚恋与他人事务</summary>
+        <p>排盘与占断内容不构成对他人婚恋状态或命运的判断依据，请勿据此干涉他人生活。</p>
+      </details>
+      <details>
+        <summary>应期与结果</summary>
+        <p>若某功能涉及应期推断，给出的是可能的时间范围（候选窗口），而非「某日必然成功」的保证；任何排盘与占断结论均不保证结果。</p>
+      </details>
+    </section>
+
+    <section class="card">
+      <div class="card-title">隐私与计算方式</div>
+      <div class="privacy">
+        <p>全部排盘计算均在你的设备本地完成。排盘时输入的出生时间、地点、所问之事以及排盘记录，只保存在本机本地存储中，不会自动上传到任何服务器。只有当你主动使用需要联网的功能（例如内容更新，或点击「AI 分析」等联网功能）时，相关内容才会按该功能的说明发送。</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">使用提示</div>
+      <div class="privacy">
+        <p>未成年人请在监护人陪同下阅读本应用的排盘类内容，并以自然科学与常识作为判断依据。占断结论仅供参考，请勿作为医疗、投资、法律及其他重大决策的依据。相信科学，理性生活。</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">依据与定位说明</div>
+      <div class="privacy">
+        <p>《互联网信息服务管理办法》规定，不得制作、复制、发布、传播含有宣扬邪教和封建迷信等内容的信息；《宗教教职人员网络行为规范》第十一条规定，不得通过网络从事打卦、占卜、算命等封建迷信活动。</p>
+        <p>据此，本应用将八字、紫微、六爻、奇门等功能明确定位为传统文化学习与研究，输出以中性表述呈现，不提供任何「化解 / 改运 / 消灾」类服务。</p>
+      </div>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
 
   <!-- ============ 神祇图鉴（免费） ============ -->
   <main id="view-deities" class="view" hidden>
@@ -1066,6 +1192,21 @@
     <div class="btn-row" style="margin:0 14px">
       <button class="btn primary" id="bz-ai-btn" hidden>调用 AI 分析</button>
     </div>
+    <section class="card">
+      <details class="disc-foot">
+        <summary class="card-title" style="cursor:pointer">使用说明与免责</summary>
+        <p>本应用的排盘功能（八字、紫微、六爻、奇门）定位为传统文化学习与研究工具，排盘与占断结论仅供文化参考，不具备科学预测效力。</p>
+        <ul class="disc-list">
+          <li>不提供「化解、改命、消灾、驱邪」类服务</li>
+          <li>不输出疾病诊断、用药或治疗建议，身体不适请就医</li>
+          <li>不输出具体的投资买卖、择时操作建议</li>
+          <li>不预测胎儿性别</li>
+          <li>不展示「大师」「传人」「执业资格」等头衔</li>
+          <li>不宣称可以改变既定事实或替代专业判断</li>
+        </ul>
+        <p class="hint">完整声明见：我的 → 关于 → 使用说明与免责声明</p>
+      </details>
+    </section>
     <div class="tab-spacer"></div>
   </div>
 

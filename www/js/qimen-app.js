@@ -810,12 +810,10 @@
   });
   $("#qm-dictSearch").dispatchEvent(new Event("input"));
 
-  /* ---------- 合规区块 ---------- */
-  $("#qm-noUseList").innerHTML = D.NO_USE.map(x => `<li>${x}</li>`).join("");
-  $("#qm-disList").innerHTML = D.DISCLAIMER_ITEMS.map(x => `<li>${x}</li>`).join("");
-  $("#qm-privacyNote").textContent = D.PRIVACY_NOTE;
-  $("#qm-ageNote").textContent = D.AGE_NOTE;
-  $("#qm-notEvidence").textContent = D.NOT_EVIDENCE;
+  /* ---------- 合规区块 ----------
+   * 2026-10-22 戊日改版：免责内容收敛为全站统一声明（我的 → 关于 → 使用说明与免责声明），
+   * 本页「关于方法」只留精简版＋指引（静态 HTML），不再由 JS 注入全文，避免两份声明漂移。
+   * D.NO_USE / D.DISCLAIMER_ITEMS 等数据保留在 qimen-data.js 中备用。 */
 
   /* ---------- 启动 ---------- */
   mountGrid();
