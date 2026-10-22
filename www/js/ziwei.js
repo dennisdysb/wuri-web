@@ -415,8 +415,10 @@ function doCalcReal(dateStr, timeIdx, gender, fromHist, extra) {
         txt += '\n【当前运限】（按虚岁 ' + xuSui + ' 岁、' + todayStr + ' 计）\n';
         if (h && h.decadal) txt += '当前大限：落 ' + hp(h.decadal) + '（' + h.decadal.heavenlyStem + h.decadal.earthlyBranch + '）'
           + (h.decadal.mutagen && h.decadal.mutagen.length ? '，大限四化：' + huaTxt(h.decadal) : '') + '\n';
-        if (h && h.yearly) txt += '今年流年：落 ' + hp(h.yearly) + '（' + h.yearly.heavenlyStem + h.yearly.earthlyBranch + '）'
-          + (h.yearly.mutagen && h.yearly.mutagen.length ? '，流年四化：' + huaTxt(h.yearly) : '') + '\n';
+        if (h && h.yearly) { var yn = hp(h.yearly); if (yn && yn.charAt(yn.length - 1) !== '宫') yn += '宫';
+          /* 流年落点写「宫名（地支位）」：不写流年干支，免得与宫位自带干支（如交友宫庚午）看混 */
+          txt += '今年流年：落 ' + yn + '（' + h.yearly.earthlyBranch + '位）'
+          + (h.yearly.mutagen && h.yearly.mutagen.length ? '，流年四化：' + huaTxt(h.yearly) : '') + '\n'; }
       } catch (e) {}
       window.__wuriChartText = window.__wuriChartText || {};
       window.__wuriChartText.ziwei = txt;
