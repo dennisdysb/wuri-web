@@ -63,58 +63,42 @@
       <div id="zhishen-line" class="zhishen"></div>
     </section>
 
+    <!-- 修行日程入口（v1.4.0 封版批：整卡图卡·整卡即按钮，旧 enter 钮隐藏保留、整卡点击转发） -->
+    <section class="hero2" id="practice-entry-card">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <span class="h2-seal" aria-hidden="true">修</span>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="practice_title">修行日程</div>
+        <p class="h2-sub" data-i18n="practice_hint">诵经打坐冥想排期，自动校验戊日；记录每日修行。</p>
+        <span class="h2-pill"><span class="gold-dot"></span><span id="home-today-pill"></span></span>
+      </div>
+      <button class="btn primary hero-enter" id="practice-enter" data-i18n="practice_enter" hidden>进入修行日程</button>
+    </section>
+
+    <!-- 术数排盘入口（四术合一 → #view-shushu 子页） -->
+    <section class="hero2" id="shushu-entry-card">
+      <div class="h2-bg h2-bg-compass" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title">术数排盘</div>
+        <p class="h2-sub">四术合参，各问所长：命盘看一生，卦局问当下。</p>
+        <div class="h2-segs" aria-hidden="true">
+          <span class="h2-seg">八字</span>
+          <span class="h2-seg">紫微</span>
+          <span class="h2-seg">六爻</span>
+          <span class="h2-seg">奇门</span>
+        </div>
+      </div>
+    </section>
+
     <!-- 神祇图鉴（免费）入口 -->
-    <section class="card" id="deities-entry-card">
-      <div class="card-title">神祇图鉴</div>
-      <p class="hint"><span id="deities-count-cn">七十四</span>位道教尊神：神诞、道场、职掌、生平事迹与造像特征，免费恭览。</p>
-      <div class="btn-row">
-        <button class="btn primary" id="deities-enter">进入图鉴</button>
+    <section class="hero2 h2-deity" id="deities-entry-card">
+      <div class="h2-bg h2-bg-deity" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title">神祇图鉴</div>
+        <p class="h2-sub">道教尊神：神诞、道场、职掌、生平事迹与造像特征，免费恭览。</p>
+        <div class="h2-gold"><span><span id="deities-count-cn">七十四</span>位尊神</span></div>
       </div>
-    </section>
-
-    <!-- 修行日程（Pro）入口 -->
-    <section class="card" id="practice-entry-card">
-      <div class="card-title" data-i18n="practice_title">修行打卡</div>
-      <p class="hint" data-i18n="practice_hint">每日打坐冥想、内练，早晚功课打卡；坚持就是修行。</p>
-      <div class="btn-row">
-        <button class="btn primary" id="practice-enter" data-i18n="practice_enter">进入修行打卡</button>
-      </div>
-    </section>
-
-    <!-- 八字排盘（Pro）入口 -->
-    <section class="card" id="bazi-entry-card">
-      <div class="card-title" data-i18n="bazi_title">八字排盘</div>
-      <p class="hint" data-i18n="bazi_hint">输入出生时间，一键起四柱八字、大运。</p>
-      <div class="btn-row">
-        <button class="btn primary" id="bazi-enter" data-i18n="bazi_enter">开始排盘</button>
-      </div>
-    </section>
-
-    <!-- 六爻占卜（Pro）入口 -->
-    <section class="card" id="liuyao-entry-card">
-      <div class="card-title">六爻占卜</div>
-      <p class="hint">摇一摇手机，龟壳落铜钱，六爻成卦，断吉凶。</p>
-      <div class="btn-row">
-        <button class="btn primary" id="liuyao-enter">开始占卜</button>
-      </div>
-    </section>
-
-    <!-- 紫微斗数（Pro）入口 -->
-    <section class="card" id="ziwei-entry-card">
-      <div class="card-title">紫微斗数</div>
-      <p class="hint">输入出生时间，安星布宫，起紫微命盘。</p>
-      <div class="btn-row">
-        <button class="btn primary" id="ziwei-enter">开始排盘</button>
-      </div>
-    </section>
-
-    <!-- 奇门遁甲（Pro）入口 -->
-    <section class="card" id="qimen-entry-card">
-      <div class="card-title">奇门遁甲</div>
-      <p class="hint">问事起局，时家奇门排盘，九宫格局一览。</p>
-      <div class="btn-row">
-        <button class="btn primary" id="qimen-enter">开始排盘</button>
-      </div>
+      <button class="btn primary hero-enter" id="deities-enter" hidden>进入图鉴</button>
     </section>
     <div class="tab-spacer"></div>
   </main>
@@ -969,6 +953,53 @@
         <p>《互联网信息服务管理办法》规定，不得制作、复制、发布、传播含有宣扬邪教和封建迷信等内容的信息；《宗教教职人员网络行为规范》第十一条规定，不得通过网络从事打卦、占卜、算命等封建迷信活动。</p>
         <p>据此，本应用将八字、紫微、六爻、奇门等功能明确定位为传统文化学习与研究，输出以中性表述呈现，不提供任何「化解 / 改运 / 消灾」类服务。</p>
       </div>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 术数排盘（子页：四术入口，整卡即按钮） ============ -->
+  <main id="view-shushu" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('shushu-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="shushu-back">‹ 返回</button>
+      <h1 class="brand-title">术数排盘</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="hero2 mini" id="ss-bazi">
+      <div class="h2-bg h2-bg-bazi" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="bazi_title">八字排盘</div>
+        <p class="h2-sub" data-i18n="bazi_hint">看一生格局与大运流年</p>
+      </div>
+      <button class="btn primary hero-enter" id="bazi-enter" data-i18n="bazi_enter" hidden>开始排盘</button>
+    </section>
+
+    <section class="hero2 mini" id="ss-ziwei">
+      <div class="h2-bg h2-bg-ziwei" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title">紫微斗数</div>
+        <p class="h2-sub">十二宫星盘，看命宫与运限</p>
+      </div>
+      <button class="btn primary hero-enter" id="ziwei-enter" hidden>开始排盘</button>
+    </section>
+
+    <section class="hero2 mini" id="ss-liuyao">
+      <div class="h2-bg h2-bg-liuyao" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title">六爻占卜</div>
+        <p class="h2-sub">摇一卦，专问一件事</p>
+      </div>
+      <button class="btn primary hero-enter" id="liuyao-enter" hidden>开始占卜</button>
+    </section>
+
+    <section class="hero2 mini" id="ss-qimen">
+      <div class="h2-bg h2-bg-qimen" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title">奇门遁甲</div>
+        <p class="h2-sub">问当下抉择，九宫看方位</p>
+      </div>
+      <button class="btn primary hero-enter" id="qimen-enter" hidden>开始排盘</button>
     </section>
     <div class="tab-spacer"></div>
   </main>

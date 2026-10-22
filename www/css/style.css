@@ -1407,3 +1407,118 @@ details.disc-foot .hint{margin-top:9px}
 /* 例外：提醒时间框与天数框共用 .days-input，但 80px 固定宽装不下 HH:MM＋选择器图标，
    分钟会被截在框外（2026-10-21 用户 vivo 真机截图实锤）——时间框按内容给足宽度 */
 .days-input[type=time]{width:auto;min-width:9.5em}
+
+/* ================================================================
+   首页三块＋术数子页（v1.4.0 封版批 · 设计定稿五）：整幅图打底＋墨罩
+   ＋大字宽距宋＋毛玻璃胶囊；整卡即按钮（旧 enter 钮隐藏保留、整卡
+   点击转发）。双主题各自原生图：夜间=生成原图＋墨罩白字；日间=
+   重调色纸色版（色度回添 .55、小字深墨加粗＋羽化纸色光晕托字）。
+   ================================================================ */
+.hero2 {
+  position: relative; overflow: hidden; border: none; border-radius: 14px;
+  min-height: 302px; margin: 0 0 14px; cursor: pointer; background: #0a0c10;
+  -webkit-tap-highlight-color: transparent;
+  transition: filter .15s ease;
+}
+.hero2:active { filter: brightness(1.09); }
+.hero2 .h2-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.hero2 .h2-bg::after { content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(8,10,14,.34), rgba(8,10,14,.47) 48%, rgba(8,10,14,.79)); }
+.hero2 .h2-in { position: relative; z-index: 1; min-height: 302px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 32px 22px; }
+.hero2 .h2-title { color: #fff; font-family: var(--serif); font-weight: 700;
+  font-size: 2.3rem; letter-spacing: .42em; text-indent: .42em; line-height: 1.2;
+  text-shadow: 0 2px 18px rgba(0,0,0,.55); }
+.hero2 .h2-sub { color: rgba(255,255,255,.88); font-size: .9rem; line-height: 1.8;
+  margin-top: 13px; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+.hero2 .h2-pill { display: inline-flex; align-items: center; gap: 8px; margin-top: 21px;
+  padding: 7px 16px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px;
+  background: rgba(255,255,255,.14); color: #fff; font-size: .83rem; letter-spacing: .08em;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+.hero2 .h2-pill .gold-dot { width: 7px; height: 7px; border-radius: 50%; flex: none;
+  background: #e8c877; box-shadow: 0 0 8px rgba(232,200,119,.8); }
+.hero2 .h2-segs { display: flex; gap: 8px; margin-top: 21px; flex-wrap: wrap; justify-content: center; }
+.hero2 .h2-seg { padding: 7px 15px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px;
+  background: rgba(255,255,255,.14); color: #fff; font-size: .86rem; letter-spacing: .18em; text-indent: .18em;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+.hero2 .h2-gold { display: flex; align-items: center; gap: 14px; margin-top: 21px;
+  color: #e8c877; font-size: .8rem; letter-spacing: .5em; text-indent: .5em;
+  text-shadow: 0 1px 8px rgba(0,0,0,.65); }
+.hero2 .h2-gold::before, .hero2 .h2-gold::after { content: ''; width: 27px; height: 1px; flex: none; }
+.hero2 .h2-gold::before { background: linear-gradient(to right, transparent, rgba(232,200,119,.85)); }
+.hero2 .h2-gold::after { background: linear-gradient(to left, transparent, rgba(232,200,119,.85)); }
+.hero2 .h2-seal { position: absolute; top: 15px; right: 15px; z-index: 2;
+  width: 34px; height: 34px; border-radius: 8px; background: rgba(164,44,32,.93);
+  color: #FCFAF2; font-family: var(--serif); font-size: 1.02rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transform: rotate(-4deg); box-shadow: 0 2px 10px rgba(0,0,0,.4); }
+/* 底图分工（夜间原图；图鉴沿用造像本体） */
+.hero2 .h2-bg-practice { background-image: url('../img/heroes/practice.webp'); }
+.hero2 .h2-bg-compass  { background-image: url('../img/heroes/compass.webp'); }
+.hero2 .h2-bg-deity    { background-image: url('../img/deities/daode.webp'); }
+.hero2 .h2-bg-bazi     { background-image: url('../img/heroes/bazi.webp'); }
+.hero2 .h2-bg-ziwei    { background-image: url('../img/heroes/ziwei.webp'); }
+.hero2 .h2-bg-liuyao   { background-image: url('../img/heroes/liuyao.webp'); }
+.hero2 .h2-bg-qimen    { background-image: url('../img/heroes/qimen.webp'); }
+/* 取景：(0,2,0) 书写压过 center。打坐人物在中下，取景下移。 */
+.hero2 .h2-bg-practice { background-position: center 66%; }
+.hero2 .h2-bg-deity    { background-position: center 20%; }
+.hero2 .h2-bg-liuyao   { background-position: center 82%; }
+.hero2.mini { min-height: 176px; }
+.hero2.mini .h2-in { min-height: 176px; padding: 24px 20px; }
+.hero2.mini .h2-title { font-size: 1.62rem; letter-spacing: .4em; text-indent: .4em; }
+.hero2.mini .h2-sub { margin-top: 9px; font-size: .86rem; }
+/* 旧 enter 钮隐藏保留（模块接线与冒烟口径不变），整卡点击转发 */
+.hero2 .hero-enter { display: none; }
+
+/* ---------- 日间：纸色版底图＋小字可读 ---------- */
+[data-theme="day"] .hero2 { background: var(--paper-2); }
+[data-theme="day"] .hero2:active { filter: brightness(1.03); }
+/* 副文改墨主色＋字重 500；标题/副文/胶囊各垫一层局部纸色光晕
+   （元素自身尺寸微扩＋blur 羽化，只托文字行、边缘全化、无可见边界） */
+[data-theme="day"] .hero2 .h2-title, [data-theme="day"] .hero2 .h2-sub,
+[data-theme="day"] .hero2 .h2-pill, [data-theme="day"] .hero2 .h2-seg, [data-theme="day"] .hero2 .h2-gold {
+  isolation: isolate; }
+[data-theme="day"] .hero2 .h2-title::before, [data-theme="day"] .hero2 .h2-sub::before { content: '';
+  position: absolute; z-index: -1; border-radius: 50%; filter: blur(13px); }
+[data-theme="day"] .hero2 .h2-title { position: relative; color: var(--ink);
+  text-shadow: 0 1px 0 rgba(245,241,229,.75), 0 0 14px rgba(245,241,229,.5); }
+[data-theme="day"] .hero2 .h2-sub { position: relative; color: rgba(42,37,27,.82);
+  font-weight: 500; text-shadow: 0 0 6px rgba(245,241,229,.45); }
+[data-theme="day"] .hero2 .h2-title::before { inset: -30% -7%; background: rgba(245,241,229,.13); }
+[data-theme="day"] .hero2 .h2-sub::before { inset: -55% -6%; background: rgba(245,241,229,.34); }
+/* 金字行：其 ::before/::after 是金线本身，光晕走内层 span */
+[data-theme="day"] .hero2 .h2-gold > span { position: relative; isolation: isolate; }
+[data-theme="day"] .hero2 .h2-gold > span::before { content: ''; position: absolute; z-index: -1;
+  inset: -70% -22%; border-radius: 50%; filter: blur(13px);
+  background: rgba(245,241,229,.22); }
+/* 图鉴块底图最亮且纹理最花（造像圆光＋云纹），副文单独深一档、光晕与整卡纸晕都略强 */
+[data-theme="day"] .hero2.h2-deity .h2-sub { color: rgba(42,37,27,.88); }
+[data-theme="day"] .hero2.h2-deity .h2-sub::before { background: rgba(245,241,229,.44); }
+[data-theme="day"] .hero2.h2-deity .h2-in {
+  background: radial-gradient(ellipse 84% 68% at 50% 46%, rgba(245,241,229,.30), rgba(245,241,229,0) 74%); }
+[data-theme="day"] .hero2 .h2-pill, [data-theme="day"] .hero2 .h2-seg {
+  background: rgba(245,241,229,.68); border-color: rgba(42,37,27,.30);
+  color: var(--ink); font-weight: 500; text-shadow: none;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+[data-theme="day"] .hero2 .h2-pill .gold-dot { background: #e8c877;
+  box-shadow: 0 0 8px rgba(232,200,119,.8), 0 0 0 1px rgba(156,124,46,.45); }
+[data-theme="day"] .hero2 .h2-gold > span { color: #84631F; text-shadow: 0 0 5px rgba(245,241,229,.4); }
+[data-theme="day"] .hero2 .h2-gold::before { background: linear-gradient(to right, transparent, rgba(150,118,42,.8)); }
+[data-theme="day"] .hero2 .h2-gold::after  { background: linear-gradient(to left,  transparent, rgba(150,118,42,.8)); }
+[data-theme="day"] .hero2 .h2-seal { box-shadow: 0 2px 10px rgba(60,40,10,.28); }
+
+[data-theme="day"] .hero2 .h2-bg-practice { background-image: url('../img/heroes/day/practice.webp'); }
+[data-theme="day"] .hero2 .h2-bg-compass  { background-image: url('../img/heroes/day/compass.webp'); }
+[data-theme="day"] .hero2 .h2-bg-deity    { background-image: url('../img/heroes/day/deity.webp'); }
+[data-theme="day"] .hero2 .h2-bg-bazi     { background-image: url('../img/heroes/day/bazi.webp'); }
+[data-theme="day"] .hero2 .h2-bg-ziwei    { background-image: url('../img/heroes/day/ziwei.webp'); }
+[data-theme="day"] .hero2 .h2-bg-liuyao   { background-image: url('../img/heroes/day/liuyao.webp'); }
+[data-theme="day"] .hero2 .h2-bg-qimen    { background-image: url('../img/heroes/day/qimen.webp'); }
+[data-theme="day"] .hero2 .h2-bg::after {
+  background: linear-gradient(180deg, rgba(245,241,229,.10), rgba(245,241,229,.16) 55%, rgba(245,241,229,.26)); }
+[data-theme="day"] .hero2 .h2-in {
+  background: radial-gradient(ellipse 78% 62% at 50% 46%, rgba(245,241,229,.14), rgba(245,241,229,0) 72%); }

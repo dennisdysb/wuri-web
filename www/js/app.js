@@ -216,6 +216,10 @@ function renderHome() {
     td.y + '年' + td.m + '月' + td.d + '日 星期' + WEEK[new Date(td.y, td.m - 1, td.d).getDay()] +
     '<span class="dl-lunar">' + t('d_lunar') + tx(lunar.getMonthInChinese()) + '月' + tx(lunar.getDayInChinese()) + '</span>';
 
+  /* 修行图卡「今日」签：与上方日期行同口径（农历月日＋戊日标记） */
+  var todayPill = $('#home-today-pill');
+  if (todayPill) todayPill.textContent = '今日 · ' + t('d_lunar') + tx(lunar.getMonthInChinese()) + '月' + tx(lunar.getDayInChinese()) + (wu ? ' · 戊日' : '');
+
   var card = $('#status-card');
   if (wu) {
     card.className = 'card status wu';
@@ -1539,6 +1543,30 @@ function bindMe() {
     r.addEventListener('change', function () { setLangPref(r.value); });
   });
 }
+
+/* ---------------- 首页三块＋术数子页（v1.4.0 封版批） ----------------
+   整卡即按钮：卡面无按钮形元素，点击整卡转发到隐藏保留的模块 enter 钮，
+   各模块原接线（含 Pro 门）与冒烟入口路径不变。从子页进工具前先合上子页，
+   工具返回即回首页（与旧行为一致）。 */
+(function () {
+  function fwd(cardId, btnId, before) {
+    var c = document.getElementById(cardId), b = document.getElementById(btnId);
+    if (!c || !b) return;
+    c.addEventListener('click', function () { if (before) before(); b.click(); });
+  }
+  fwd('practice-entry-card', 'practice-enter');
+  fwd('deities-entry-card', 'deities-enter');
+  var shushu = document.getElementById('view-shushu');
+  var ssCard = document.getElementById('shushu-entry-card');
+  if (ssCard && shushu) ssCard.addEventListener('click', function () { shushu.hidden = false; window.scrollTo(0, 0); });
+  var ssBack = document.getElementById('shushu-back');
+  if (ssBack && shushu) ssBack.addEventListener('click', function () { shushu.hidden = true; });
+  function closeShushu() { if (shushu) shushu.hidden = true; }
+  fwd('ss-bazi', 'bazi-enter', closeShushu);
+  fwd('ss-ziwei', 'ziwei-enter', closeShushu);
+  fwd('ss-liuyao', 'liuyao-enter', closeShushu);
+  fwd('ss-qimen', 'qimen-enter', closeShushu);
+})();
 
 /* ---------------- 启动 ---------------- */
 applyTheme();

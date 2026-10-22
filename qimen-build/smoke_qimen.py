@@ -61,11 +61,21 @@ def main():
                 f.write(base64.b64decode(r["data"]))
             print("  截图:", name)
 
-        # —— 入口卡可见 ——
-        r = ev("""(() => { const b = document.getElementById('qimen-enter');
-          const rc = b.getBoundingClientRect();
-          return { w: rc.width, h: rc.height, vis: rc.width > 0 && getComputedStyle(b).visibility !== 'hidden' }; })()""")
-        check("首页奇门入口卡可见", r["vis"], r)
+        # —— 入口卡可见（v1.4.0 封版批新路径：首页「术数排盘」卡 → 子页奇门块；
+        #    旧 enter 钮按设计隐藏保留，下方付费墙/开盘仍以程序化 click 直达） ——
+        r = ev("""(() => { const c = document.getElementById('shushu-entry-card');
+          const rc = c.getBoundingClientRect();
+          return { w: rc.width, h: rc.height, vis: rc.width > 0 && rc.height > 0 }; })()""")
+        check("首页术数排盘入口卡可见", r["vis"], r)
+        ev("document.getElementById('shushu-entry-card').click(); 'ok'")
+        time.sleep(0.5)
+        r = ev("""(() => { const c = document.getElementById('ss-qimen');
+          const rc = c.getBoundingClientRect();
+          return { open: !document.getElementById('view-shushu').hidden,
+                   vis: rc.width > 0 && rc.height > 0 }; })()""")
+        check("术数子页内奇门块可见", r["open"] and r["vis"], r)
+        ev("document.getElementById('shushu-back').click(); 'ok'")
+        time.sleep(0.3)
 
         # —— 未激活点入口 → 付费墙 ——
         ev("localStorage.removeItem('wuri_pro_redeem'); document.getElementById('qimen-enter').click(); 'ok'")
@@ -162,8 +172,8 @@ def main():
         check("回归-图鉴网格", ok is True, ok)
         ev("document.querySelector('[data-tab=\"tab-me\"]').click(); 'ok'"); time.sleep(0.8)
         r = ev("""(() => { const t = document.body.textContent;
-          return { ver: t.includes('v1.3.9（38）'), ack: t.includes('掌上乾坤') }; })()""")
-        check("我的页版本 (38) 与鸣谢行", r["ver"] and r["ack"], r)
+          return { ver: t.includes('戊日不上香 v'), ack: t.includes('掌上乾坤') }; })()""")
+        check("我的页版本号与鸣谢行", r["ver"] and r["ack"], r)
         shot("06-me-ack.png")
 
         errs = page_errors()
