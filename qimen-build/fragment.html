@@ -1,0 +1,173 @@
+<canvas id="qm-sky" aria-hidden="true"></canvas>
+<div class="sky-wash" aria-hidden="true"></div>
+<svg class="bg-wei" viewBox="0 0 720 720" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#D4AF37" stroke-width="1">
+    <path d="M660,360 L572,572 L360,660 L148,572 L60,360 L148,148 L360,60 L572,148"/>
+    <path d="M360,240 L480,360 L360,480 L240,360 Z"/>
+    <path d="M660,360 L480,360 M60,360 L240,360 M360,60 L360,240 M360,480 L360,660"/>
+  </g>
+  <g fill="#F2DC96">
+    <circle cx="660" cy="360" r="3"/><circle cx="572" cy="572" r="3"/>
+    <circle cx="360" cy="660" r="3"/><circle cx="148" cy="572" r="3"/>
+    <circle cx="60" cy="360" r="3"/><circle cx="148" cy="148" r="3"/>
+    <circle cx="360" cy="60" r="3"/><circle cx="572" cy="148" r="3"/>
+    <circle cx="360" cy="240" r="2"/><circle cx="480" cy="360" r="2"/>
+    <circle cx="360" cy="480" r="2"/><circle cx="240" cy="360" r="2"/>
+  </g>
+</svg>
+<nav>
+  <button class="tabbtn on" data-t="wen">问 事</button>
+  <button class="tabbtn" data-t="pan">盘 面</button>
+  <button class="tabbtn" data-t="vs">流派对照</button>
+  <button class="tabbtn" data-t="xue">学习中心</button>
+  <button class="tabbtn" data-t="gy">关于方法</button>
+  <button id="qm-btnLite" class="linkbtn" aria-pressed="false" title="关闭星空与光效，降低耗电">动效：开</button>
+</nav>
+
+  <section class="tabpage on" id="qm-tab-wen">
+    <h2 class="wen-title">今天想问什么事？</h2>
+    <p class="dim">选一个事项，系统以此刻的时间自动起一局奇门盘，用人话告诉你结论——不用懂任何术语。想换时间或换流派算法，去「盘 面」页调整。</p>
+    <div id="qm-wenGrid"></div>
+    <div id="qm-wenResult"><p class="dim empty">👆 选一个事项开始</p></div>
+  </section>
+
+  <section class="tabpage" id="qm-tab-pan">
+    <div class="controls">
+      <input type="datetime-local" id="qm-dt">
+      <button class="act main" id="qm-btnCast">起 盘</button>
+      <button class="act" id="qm-btnNow">此刻</button>
+      <button class="act" id="qm-btnPrev">← 前一时辰</button>
+      <button class="act" id="qm-btnNext">后一时辰 →</button>
+    </div>
+
+    <div class="kjbox">
+      <div class="kj-head">
+        <h4>口径面板 · 六项自陈</h4>
+        <p class="dim">奇门没有公认标准。同一时刻，口径不同则盘面不同——这正是「问三个师傅三个答案」的技术原因。本工具<b>不替你选边</b>，只把选择权交给你，并随盘面导出元数据。</p>
+        <button class="linkbtn" id="qm-kjToggle">收起口径面板 ▴</button>
+      </div>
+      <div id="qm-kjBody">
+        <div class="kj-grid">
+          <label class="fld">定局法
+            <select id="qm-selDingju">
+              <option value="chabu">拆补法（最常用）</option>
+              <option value="zhirun">置闰法（古法）</option>
+              <option value="maoshan">茅山法（最简）</option>
+              <option value="yinpan">阴盘奇门（太阴历起局）</option>
+            </select>
+          </label>
+          <label class="fld">盘法
+            <select id="qm-selPan">
+              <option value="zhuan">转盘奇门（最通行）</option>
+              <option value="fei_tiaojian">飞盘·九宫跳涧（民间，无典籍依据）</option>
+              <option value="fei_guaqi">飞盘·卦气飞越（《奇门法窍》）</option>
+            </select>
+          </label>
+          <label class="fld">子时换日派
+            <select id="qm-selZishi">
+              <option value="zichu">子初派（23:00 换日·默认）</option>
+              <option value="zizheng">子正派（00:00 换日）</option>
+              <option value="earlylate">早/晚子时三分（夜子时不换日）</option>
+            </select>
+          </label>
+          <label class="fld">中五宫寄宫
+            <select id="qm-selJigong">
+              <option value="kun2">寄坤二宫（最通行）</option>
+              <option value="fei">飞盘不寄</option>
+            </select>
+          </label>
+                  </div>
+        <div id="qm-kjNow" class="kj-now dim"></div>
+        <div id="qm-solarInfo" class="kj-now dim"></div>
+      </div>
+    </div>
+
+    <div id="qm-sizhu"></div>
+    <div id="qm-errBox"></div>
+    <div id="qm-meta">
+      <div id="qm-metaPlain"></div>
+      <div id="qm-metaPro" style="display:none"></div>
+      <button id="qm-metaToggle" class="linkbtn">显示专业信息 ▸</button>
+    </div>
+    <div id="qm-warnBox"></div>
+    <div id="qm-tags"></div>
+    <div class="plate">
+      <div class="plate-inner">
+        <div id="qm-grid"></div>
+      </div>
+    </div>
+    <p class="dim" style="margin-bottom:8px">宫格左上角的小徽章：<b class="red">宜</b>=顺 / <b class="mid">平</b>=中 / <b class="blue">慎</b>=要小心 / <b class="blue">阻</b>=力量被打折。点击任一格看详解，键盘可用 Tab 聚焦、回车打开。</p>
+
+    <div id="qm-gejuBox"></div>
+    <div id="qm-factorBox"></div>
+
+    <div id="qm-brief"></div>
+  </section>
+
+  <section class="tabpage" id="qm-tab-vs">
+    <h2 class="wen-title">同一时刻 · 九种口径对照</h2>
+    <p class="dim">本工具最特别的一页：把同一时刻交给不同口径去算，看看它们<b>差在哪里</b>。
+    v3 起不再并排铺六张图，而是直接给出<b>差异摘要</b>——你关心的是「哪里不一样」，不是「看六遍」。</p>
+    <div class="controls">
+      <label class="fld">对照维度
+        <select id="qm-vsDim">
+          <option value="core">核心六项（定局×盘法×子时×寄宫）</option>
+          <option value="pan">只看盘法（转盘 / 飞盘两种）</option>
+          <option value="dingju">只看定局法（拆补 / 置闰 / 茅山）</option>
+          <option value="solar">时间口径（北京时 / 真太阳时）</option>
+        </select>
+      </label>
+      <button class="act" id="qm-btnVs">重新对照</button>
+    </div>
+    <div id="qm-vsBox"></div>
+  </section>
+
+  <section class="tabpage" id="qm-tab-xue">
+    <div class="controls"><input id="qm-dictSearch" placeholder="搜术语，如：门迫 / 空亡 / 用神 / 置闰 / 飞盘 / 子时 / 寄宫…"></div>
+    <div id="qm-dictList"></div>
+    <div id="qm-xueContent"></div>
+  </section>
+
+  <section class="tabpage" id="qm-tab-gy">
+    <h3 style="font-family:var(--kai);color:var(--gold);letter-spacing:3px;margin-bottom:10px">排盘方法</h3>
+    <p><b>默认口径</b>：时家奇门 · 转盘法 · 拆补法 · 子初派 · 寄坤二 · 定气历 · 真太阳时随戊日全站时间基准设置。
+    七项均可在「盘面」页口径面板切换，本工具<b>不代为在异说之间择一</b>。</p>
+    <p style="margin-top:8px"><b>阴盘奇门</b>：本工具除阳盘三派（拆补/置闰/茅山）外，另支持「阴盘奇门」——
+    按太阴历（月亮周期）起局，以年支序数+农历月数+农历日数+时支序数之和除九取余定局，不拆补、不置闰、不分节气三元。
+    属近代流行排法，非古籍古法。</p>
+    <p style="margin-top:8px"><b>历法</b>：干支与节气取自与戊日全站一致的历法库（lunar-javascript），交节时刻为精确值；
+    恰逢交节前后一小时内会主动提示；按《阴阳遁局数表》起局；
+    地盘布三奇六仪，值符随时干布九星，值使随时辰飞八门，八神随值符排布。</p>
+    <p style="margin-top:8px"><b>真太阳时</b>：随戊日全站时间基准设置（「我的 → 设置」）换算——按经度与基准经线之差、每度 4 分钟，不计均时差。
+    校正后若跨时辰或跨日会明确提示。</p>
+    <p style="margin-top:8px"><b>每条判定带出处</b>：格局与不利因素均标注书名与说法来源；
+    凡各家分歧的（如青龙返首有戊加丙/丙加戊两派），<b>并陈异说、不代为择一</b>。
+    引文语料若缺失或未挂载判定，会在测试中<b>显式列出</b>而非静默通过。</p>
+    <p style="margin-top:8px"><b>流派分歧是真实存在的</b>：拆补 vs 置闰实测 <b>45.6%</b> 的时刻局数不同，
+    拆补 vs 茅山 <b>73.9%</b>，转盘 vs 飞盘星门神落宫 <b>100%</b> 不同。
+    奇门至今<b>没有公认的权威标准或官方认证</b>，本工具把这些差异摆到台面上让你自己看。</p>
+    <p style="margin-top:8px"><b>可自查</b>：仓库 <code>docs/algorithm-sources.md</code> 列出全部口径分歧与逐宫期望表；
+    <code>test/print_chart.js</code> 可打印任意时刻的逐宫盘面供独立复算。</p>
+
+    <h3 style="font-family:var(--kai);color:var(--gold);letter-spacing:3px;margin:20px 0 10px">本工具明确不做的事</h3>
+    <ul id="qm-noUseList" class="nouse"></ul>
+
+    <h3 style="font-family:var(--kai);color:var(--gold);letter-spacing:3px;margin:20px 0 10px">免责与合规说明</h3>
+    <ol id="qm-disList" class="nouse"></ol>
+    <p class="dis" id="qm-privacyNote"></p>
+    <p class="dis" id="qm-ageNote"></p>
+    <p class="dis" id="qm-notEvidence"></p>
+
+    <h3 style="font-family:var(--kai);color:var(--gold);letter-spacing:3px;margin:20px 0 10px">依据的法规</h3>
+    <ul class="nouse">
+      <li>《互联网信息服务管理办法》：不得制作、复制、发布、传播含有宣扬邪教和<b>封建迷信</b>等内容的信息。</li>
+      <li>《宗教教职人员网络行为规范》第十一条：不得通过网络宣扬异端邪教、附佛外道，或从事<b>打卦、占卜、算命</b>等封建迷信活动。</li>
+      <li>因此本工具定位为<b>传统文化学习与研究</b>工具，不提供任何「化解 / 改运 / 消灾」类服务，输出经禁用词扫描后以中性表述呈现。</li>
+    </ul>
+
+    <p style="margin-top:16px" class="dis">本工具用于传统文化学习与研究。奇门遁甲属传统术数文化，
+    主流科学视角认为其理论无法被证实或证伪；占断结论仅供参考，请勿作为医疗、投资、法律及其他重大决策的依据。相信科学，理性生活。</p>
+  </section>
+
+<div id="qm-modal"><div class="sheet"></div></div>
+<div id="qm-toast"></div>
