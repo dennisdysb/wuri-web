@@ -1292,27 +1292,49 @@ details.disc-foot .hint{margin-top:9px}
 .lyb sup{color:#c0392b;font-size:9px}
 [data-theme="night"] .lyb-y,[data-theme="night"] .lyb-n{background:#ddd}
 /* === 六爻像素级（照专业盘实测）=== */
-.lyx{width:100%;border-collapse:collapse;font-size:12px;line-height:1.8}
-.lyx th,.lyx td{border:none;padding:4px 4px;vertical-align:middle}
-.lyx th:first-child,.lyx td.lyx-shen{white-space:nowrap;padding-right:12px}
-.lyx td:nth-child(2),.lyx td:nth-child(3){white-space:nowrap}
-.lyx .lyx-info{display:inline-block;min-width:4.2em;vertical-align:middle}
+.lyx{width:100%;max-width:100%;border-collapse:collapse;font-size:12px;line-height:1.8}
+.lyx th,.lyx td{border:none;padding:4px 3px;vertical-align:middle}
+.lyx th:first-child,.lyx td.lyx-shen{white-space:nowrap;padding-right:8px}
+/* 单元格 flex 排版（2026-10-22 溢出根治）：六亲干支/动标记/世应定宽，爻条弹性伸缩吸收全部宽度差。
+   旧版为 nowrap + 固定宽爻条，三列 min-content 合计 331px > 卡片内容宽 316px（390px 视口实测），
+   表格无法收缩必然溢出；且爻条宽度有两段重复定义（32px 被后段 38px 静默覆盖，v1.1.2 整包导入时带入）。 */
+.lyx-flex{display:flex;align-items:center;gap:4px;min-width:0}
+.lyx .lyx-info{flex:0 0 auto;min-width:4.2em}
 .lyx .lyx-info sup{font-size:9px;color:#c0392b;vertical-align:super;line-height:1;margin-left:1px}
-.lyx-y,.lyx-n{display:inline-block;height:6px;background:#2c2c2c;border-radius:2px;vertical-align:middle}
-.lyx-y{width:32px}
-.lyx-n{width:14px}
-.lyx-n + .lyx-n{margin-left:5px}
+.lyx-bar{flex:1 1 auto;display:flex;align-items:center;gap:4px;min-width:16px}
+.lyx-y,.lyx-n{display:block;flex:1 1 auto;height:7px;background:#2c2c2c;border-radius:2px}
 .lyx th{color:var(--ink-2);font-weight:600;font-size:14px;text-align:left}
 .lyx th:first-child,.lyx td.lyx-shen{width:5.5em;text-align:left}
 .lyx td:nth-child(2),.lyx td:nth-child(3){width:auto;text-align:left}
 .lyx-mv{background:rgba(180,40,40,0.06)}
-.lyx-y,.lyx-n{display:inline-block;height:7px;background:#2c2c2c;border-radius:2px;vertical-align:middle}
-.lyx-y{width:38px}
-.lyx-n{width:17px}
-.lyx-n + .lyx-n{margin-left:6px}
-.lyx-d{color:#c0392b;font-weight:700;margin-left:3px;font-size:15px}
+.lyx-d{color:#c0392b;font-weight:700;font-size:15px;flex:0 0 auto}
+.lyx .lyx-sy{flex:0 0 auto}
 .lyx sup{color:#c0392b;font-size:10px}
 [data-theme="night"] .lyx-y,[data-theme="night"] .lyx-n{background:#e0e0e0}
+/* 六爻手动录入（2026-10-22 新功能）：模式分段切换 / 共用起卦时间 / 逐爻录入 */
+/* .ly-stage/.btn-row 是 author 层 display:flex，会盖过 hidden 属性，须显式守卫 */
+#ly-stage[hidden],#ly-shake-btns[hidden],#ly-manual[hidden]{display:none!important}
+.ly-mode-row{display:flex;justify-content:center;margin-bottom:10px}
+.ly-mode-toggle{display:inline-flex;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:4px}
+.ly-mode-btn{border:none;background:transparent;color:var(--ink-2);font-size:.95rem;padding:7px 22px;border-radius:999px;cursor:pointer}
+.ly-mode-btn.on{background:var(--gold);color:#fff;font-weight:700}
+.ly-time-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.ly-time-row label{color:var(--ink-2);font-size:.92rem}
+.ly-time-row input{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:.95rem;min-width:0}
+.ly-m-title{font-size:1.05rem;font-weight:700;color:var(--ink);text-align:center;margin:6px 0 4px}
+.ly-m-preview{display:flex;justify-content:center;margin:10px 0 14px}
+#ly-lines{display:flex;flex-direction:column;gap:10px;align-items:center}
+#ly-lines .ly-line{cursor:pointer}
+#ly-lines .ly-line.editing .ly-bar{outline:2px solid var(--gold);outline-offset:2px}
+.ly-m-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.ly-m-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;color:var(--ink)}
+.ly-m-btn:active{border-color:var(--gold);background:var(--gold-wash)}
+.ly-m-coins{display:flex;gap:4px}
+.ly-m-coins img{width:34px;height:34px;border-radius:50%}
+.ly-m-res{font-size:1rem;font-weight:700}
+.ly-m-sub{font-size:.8rem;color:var(--muted)}
+.ly-m-actions{justify-content:center}
+.ly-history-src{display:inline-block;font-size:.72rem;color:var(--gold-deep,#8a6d1f);border:1px solid currentColor;border-radius:4px;padding:0 4px;margin-left:6px;vertical-align:1px}
 .ly-cat-sel{padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:0.9rem}
 
 /* ---------- 我的日子（黄历自定义纪念日） ---------- */

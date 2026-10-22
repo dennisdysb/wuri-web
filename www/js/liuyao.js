@@ -203,6 +203,22 @@ var LiuYao = (function () {
 
   var lines = [];  // 已摇出的爻，自下而上：{yao: 0/1, dong: bool, coins: [h,h,h]}
   var shaking = false;
+  var castTime = null;   // 起卦时间（时间字段指定，null=此刻）；摇卦/手动共用，装卦/历史/AI 文本同一口径
+  var lyMode = 'shake';  // 'shake' | 'manual'
+  var mEditIdx = 0;      // 手动录入当前编辑的爻位（自下而上 0-5；等于 lines.length 表示追加下一爻）
+  function effNow() { return castTime ? new Date(castTime.getTime()) : new Date(); }
+  /* 铜钱→爻的唯一口径（摇卦与手动录入共用此函数，保证两路产出一致）。
+     coins 取值：0=字(阴), 1=花(阳)；按阳值之和定爻：
+     3→老阳(阳·动) 0→老阴(阴·动) 2→少阳(阳·静) 1→少阴(阴·静) */
+  function coinResult(coins) {
+    var yang = coins[0] + coins[1] + coins[2];
+    var yao, dong = false;
+    if (yang === 3) { yao = 1; dong = true; }       // 老阳 ○
+    else if (yang === 0) { yao = 0; dong = true; }  // 老阴 ×
+    else if (yang === 2) { yao = 1; }               // 少阳 —
+    else { yao = 0; }                              // 少阴 --
+    return { yao: yao, dong: dong, coins: coins };
+  }
 
   function $(id) { return document.getElementById(id); }
 
@@ -222,13 +238,7 @@ var LiuYao = (function () {
     for (var i = 0; i < 3; i++) {
       coins.push(randBit());  // 0=字(阴), 1=花(阳)
     }
-    var yang = coins[0] + coins[1] + coins[2];
-    var yao, dong = false;
-    if (yang === 3) { yao = 1; dong = true; }       // 老阳 ○
-    else if (yang === 0) { yao = 0; dong = true; }  // 老阴 ×
-    else if (yang === 2) { yao = 1; dong = false; } // 少阳 —
-    else { yao = 0; dong = false; }                // 少阴 --
-    return { yao: yao, dong: dong, coins: coins };
+    return coinResult(coins);
   }
 
   function guaKey(ls) {
@@ -278,7 +288,8 @@ var LiuYao = (function () {
     try {
       var q = $('ly-question-input');
       var rec = {
-        time: new Date().toISOString(),
+        time: effNow().toISOString(),
+        src: lyMode,
         question: q ? q.value.trim() : '',
         gua: guaName,
         bian: bianName || '',
@@ -308,7 +319,7 @@ var LiuYao = (function () {
     try {
       var zhanwen = '';
       try { zhanwen = localStorage.getItem('wuri_ly_zhanwen') || ''; } catch (e) {}
-      var now = new Date();
+      var now = effNow();
       var weekStr = '日一二三四五六'[now.getDay()];
       var timeStr = '公历:' + now.getFullYear() + '年' + (now.getMonth()+1) + '月' + now.getDate() + '日 '
         + now.getHours() + '时' + now.getMinutes() + '分 <nobr>星期' + weekStr + '</nobr>';
@@ -364,7 +375,7 @@ var LiuYao = (function () {
     var dayGz = '', dayGan = '甲';
     try {
       if (window.Lunar) {
-        var now = new Date();
+        var now = effNow();
         var l = window.Lunar.fromDate(now);
         dayGz = l.getDayGan() + l.getDayZhi();
         dayGan = l.getDayGan();
@@ -377,7 +388,7 @@ var LiuYao = (function () {
     var sizhuHtml = '';
     try {
       if (window.Lunar) {
-        var now = new Date();
+        var now = effNow();
         var l = window.Lunar.fromDate(now);
         sizhu = [l.getYearGan() + l.getYearZhi(), l.getMonthGan() + l.getMonthZhi(), l.getDayGan() + l.getDayZhi(), l.getTimeGan() + l.getTimeZhi()];
         var wxC = {'金':'#b8860b','木':'#2e8b57','水':'#4169e1','火':'#dc143c','土':'#8b6914'};
@@ -419,7 +430,7 @@ var LiuYao = (function () {
     var szSpans = ['', '', '', '', ''];
     try {
       if (window.Lunar) {
-        var now2 = new Date();
+        var now2 = effNow();
         var l2 = window.Lunar.fromDate(now2);
         var gzs = [l2.getYearGan()+l2.getYearZhi(), l2.getMonthGan()+l2.getMonthZhi(), l2.getDayGan()+l2.getDayZhi(), l2.getTimeGan()+l2.getTimeZhi()];
         var wxC2 = {'金':'#b8860b','木':'#2e8b57','水':'#4169e1','火':'#dc143c','土':'#8b6914'};
@@ -476,8 +487,10 @@ var LiuYao = (function () {
       }
       html += '<tr' + (l.dong ? ' class="lyx-mv"' : '') + '>'
         + '<td class="lyx-shen">' + shenFu + '</td>'
-        + '<td><span class="lyx-info">' + info + '</span>' + bar + dong + syMark + '</td>'
-        + '<td><span class="lyx-info">' + bInfo + '</span>' + bBar + bSY + '</td></tr>';
+        + '<td><span class="lyx-flex"><span class="lyx-info">' + info + '</span><span class="lyx-bar">' + bar + '</span>' + dong
+        + (syMark ? '<span class="lyx-sy">' + syMark.trim() + '</span>' : '') + '</span></td>'
+        + '<td><span class="lyx-flex"><span class="lyx-info">' + bInfo + '</span><span class="lyx-bar">' + bBar + '</span>'
+        + (bSY ? '<span class="lyx-sy">' + bSY.trim() + '</span>' : '') + '</span></td></tr>';
     }
     html += '</table>';
     // 互卦/错卦/综卦
@@ -502,6 +515,7 @@ var LiuYao = (function () {
   }
 
   function shakeOne() {
+    if (lyMode === 'manual') return;
     if (shaking || lines.length >= 6) return;
     shaking = true;
     var tortoise = $('ly-tortoise');
@@ -537,6 +551,7 @@ var LiuYao = (function () {
 
   /* 一键出六爻：摇一次龟壳，直接显示完整卦 */
   function shakeAllAtOnce() {
+    if (lyMode === 'manual') return;
     if (shaking) return;
     shaking = true;
     lines = [];
@@ -587,13 +602,106 @@ var LiuYao = (function () {
     next();
   }
 
+  /* ---------- 起卦时间字段（摇卦/手动共用） ---------- */
+  function fmtLocal(d) {
+    function p(n) { return String(n).padStart(2, '0'); }
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function setCastTime(d, syncInput) {
+    castTime = d || null;
+    if (syncInput) { var inp = $('ly-dt'); if (inp) inp.value = d ? fmtLocal(d) : ''; }
+  }
+
+  /* ---------- 手动录入 ---------- */
+  var M_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
+  function setMode(m) {
+    lyMode = m;
+    var bS = $('ly-mode-shake'), bM = $('ly-mode-manual');
+    if (bS) bS.classList.toggle('on', m === 'shake');
+    if (bM) bM.classList.toggle('on', m === 'manual');
+    var stage = $('ly-stage'), btns = $('ly-shake-btns'), man = $('ly-manual');
+    if (stage) stage.hidden = (m === 'manual');
+    if (btns) btns.hidden = (m === 'manual');
+    if (man) man.hidden = (m === 'shake');
+    if (m === 'manual') { renderLines(); bindPreviewClicks(); updateManualUI(); }
+    else {
+      var st = $('ly-status');
+      if (st && !lines.length) st.textContent = '摇一摇手机，或点下方按钮开始';
+    }
+  }
+  function updateManualUI() {
+    var t = $('ly-m-title');
+    if (t) {
+      if (mEditIdx < lines.length) t.textContent = '重选第 ' + (mEditIdx + 1) + ' 爻（共 6 爻）· ' + M_NAMES[mEditIdx];
+      else if (lines.length < 6) t.textContent = '第 ' + (lines.length + 1) + ' 爻（共 6 爻）· ' + M_NAMES[lines.length];
+      else t.textContent = '六爻已录满（共 6 爻）· 点下方爻象可重选';
+    }
+    var cast = $('ly-m-cast'); if (cast) cast.disabled = lines.length < 6;
+    var back = $('ly-m-back'); if (back) back.disabled = !lines.length;
+    var st = $('ly-status');
+    if (st && lyMode === 'manual') st.textContent = lines.length >= 6 ? '六爻已成！点「生成卦象」排盘' : ('已录 ' + lines.length + ' / 6 爻');
+    var box = $('ly-lines');
+    if (box) {
+      var filled = box.querySelectorAll('.ly-line:not(.empty)');
+      filled.forEach(function (el, di) {
+        el.classList.toggle('editing', (lines.length - 1 - di) === mEditIdx);
+      });
+    }
+  }
+  function bindPreviewClicks() {
+    var box = $('ly-lines');
+    if (!box) return;
+    box.querySelectorAll('.ly-line:not(.empty)').forEach(function (el, di) {
+      el.addEventListener('click', function () {
+        mEditIdx = lines.length - 1 - di;
+        updateManualUI();
+      });
+    });
+  }
+  function manualPick(coins) {
+    if (shaking) return;
+    var entry = coinResult(coins.slice());
+    if (mEditIdx < lines.length) lines[mEditIdx] = entry;
+    else if (lines.length < 6) lines.push(entry);
+    else return;
+    mEditIdx = lines.length;
+    renderLines();
+    bindPreviewClicks();
+    updateManualUI();
+  }
+  function manualBack() {
+    if (!lines.length) return;
+    lines.pop();
+    mEditIdx = lines.length;
+    $('ly-result-card').hidden = true;
+    renderLines();
+    bindPreviewClicks();
+    updateManualUI();
+  }
+  function manualClear() {
+    lines = [];
+    mEditIdx = 0;
+    $('ly-result-card').hidden = true;
+    renderLines();
+    bindPreviewClicks();
+    updateManualUI();
+  }
+  function manualCast() {
+    if (lines.length < 6) return;
+    renderResult(false);
+    var rc = $('ly-result-card');
+    if (rc) rc.scrollIntoView({ behavior: 'smooth' });
+  }
+
   function reset() {
     lines = [];
     shaking = false;
+    mEditIdx = 0;
     $('ly-coins').innerHTML = '';
     $('ly-result-card').hidden = true;
     $('ly-status').textContent = '摇一摇手机，或点下方按钮开始';
     renderLines();
+    if (lyMode === 'manual') { bindPreviewClicks(); updateManualUI(); }
   }
 
   function open() {
@@ -608,7 +716,9 @@ var LiuYao = (function () {
     });
     // 隐藏tab
     document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+    setCastTime(new Date(), true);
     reset();
+    setMode('shake');
     renderHistory();
     bindShake();
   }
@@ -675,7 +785,7 @@ var LiuYao = (function () {
         String(d.getDate()).padStart(2, '0') + ' ' +
         String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       html += '<div class="ly-history-item" data-idx="' + i + '"><div class="ly-history-top"><span class="ly-history-gua">' +
-        r.gua + '卦' + (r.bian ? ' → ' + r.bian + '卦' : '') + '</span><span class="ly-history-time">' + ds + '</span></div>' +
+        r.gua + '卦' + (r.bian ? ' → ' + r.bian + '卦' : '') + (r.src === 'manual' ? '<span class="ly-history-src">手动录入</span>' : '') + '</span><span class="ly-history-time">' + ds + '</span></div>' +
         (r.question ? '<div class="ly-history-q">' + r.question.replace(/</g, '&lt;') + '</div>' : '') + '</div>';
     });
     box.innerHTML = html;
@@ -685,6 +795,9 @@ var LiuYao = (function () {
         var r = h[parseInt(el.getAttribute('data-idx'), 10)];
         if (!r || !r.lines) return;
         lines = r.lines.map(function (l) { return { yao: l.yao, dong: l.dong, coins: [] }; });
+        /* 手动记录按其所填时间回放，保证与原盘一致；旧/摇卦记录维持原口径（当前时间） */
+        if (r.src === 'manual' && r.time) setCastTime(new Date(r.time), true);
+        else setCastTime(null, true);
         renderLines();
         renderResult(true);
         document.getElementById('ly-result-card').scrollIntoView({ behavior: 'smooth' });
@@ -704,6 +817,25 @@ var LiuYao = (function () {
     if (all) all.addEventListener('click', shakeAllAtOnce);
     var rs = $('ly-reset');
     if (rs) rs.addEventListener('click', reset);
+    /* 模式切换 / 起卦时间 / 手动录入（2026-10-22 新功能） */
+    var mS = $('ly-mode-shake'), mM = $('ly-mode-manual');
+    if (mS) mS.addEventListener('click', function () { setMode('shake'); });
+    if (mM) mM.addEventListener('click', function () { setMode('manual'); });
+    var dt = $('ly-dt');
+    if (dt) dt.addEventListener('change', function () {
+      castTime = this.value ? new Date(this.value) : null;
+    });
+    var dtn = $('ly-dt-now');
+    if (dtn) dtn.addEventListener('click', function () { setCastTime(new Date(), true); });
+    document.querySelectorAll('.ly-m-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var coins = b.getAttribute('data-coins').split(',').map(function (x) { return parseInt(x, 10); });
+        manualPick(coins);
+      });
+    });
+    var mBack = $('ly-m-back'); if (mBack) mBack.addEventListener('click', manualBack);
+    var mClear = $('ly-m-clear'); if (mClear) mClear.addEventListener('click', manualClear);
+    var mCast = $('ly-m-cast'); if (mCast) mCast.addEventListener('click', manualCast);
     /* iOS 摇一摇权限按钮：必须在用户直接点击中申请（2026-10-10 fix #5） */
     var mp = $('ly-motion-perm');
     if (mp) {
@@ -749,7 +881,7 @@ var LiuYao = (function () {
       '出行': '世爻为自身、应爻为目的地与同行人，兼看父母（行程、票据）',
       '其他': '请断卦时按所问事由自取用神，并说明取用理由'
     };
-    var nowQ = new Date();
+    var nowQ = effNow();
     var qTime = nowQ.getFullYear() + '年' + (nowQ.getMonth()+1) + '月' + nowQ.getDate() + '日 '
       + nowQ.getHours() + '时' + nowQ.getMinutes() + '分' + nowQ.getSeconds() + '秒';
     var txt = '所问事由：' + (zhanwen || '未填写') + '\n';

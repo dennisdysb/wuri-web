@@ -387,14 +387,53 @@
       <div class="ly-question">
         <input type="text" id="ly-question-input" placeholder="心中默念所问之事（可不填）" maxlength="50">
       </div>
-      <div class="ly-stage">
+      <div class="ly-mode-row">
+        <div class="ly-mode-toggle">
+          <button type="button" class="ly-mode-btn on" id="ly-mode-shake">摇卦</button>
+          <button type="button" class="ly-mode-btn" id="ly-mode-manual">手动录入</button>
+        </div>
+      </div>
+      <div class="ly-time-row">
+        <label for="ly-dt">起卦时间</label>
+        <input type="datetime-local" id="ly-dt">
+        <button type="button" class="btn small" id="ly-dt-now">此刻</button>
+      </div>
+      <div class="ly-stage" id="ly-stage">
         <div class="ly-tortoise-wrap">
           <img class="ly-tortoise" id="ly-tortoise" src="img/liuyao/tortoise-shell.png" alt="龟壳">
         </div>
         <div class="ly-coins" id="ly-coins"></div>
       </div>
+      <div id="ly-manual" hidden>
+        <div class="ly-m-title" id="ly-m-title">第 1 爻（共 6 爻）· 初爻</div>
+        <div class="ly-m-preview"><div id="ly-lines"></div></div>
+        <div class="ly-m-btns">
+          <button type="button" class="ly-m-btn" data-coins="1,1,1">
+            <span class="ly-m-coins"><img src="img/liuyao/coin-back.png" alt="花"><img src="img/liuyao/coin-back.png" alt="花"><img src="img/liuyao/coin-back.png" alt="花"></span>
+            <span class="ly-m-res">老阳 · 动 ○</span><span class="ly-m-sub">三枚皆花</span>
+          </button>
+          <button type="button" class="ly-m-btn" data-coins="0,0,0">
+            <span class="ly-m-coins"><img src="img/liuyao/coin.png" alt="字"><img src="img/liuyao/coin.png" alt="字"><img src="img/liuyao/coin.png" alt="字"></span>
+            <span class="ly-m-res">老阴 · 动 ×</span><span class="ly-m-sub">三枚皆字</span>
+          </button>
+          <button type="button" class="ly-m-btn" data-coins="1,1,0">
+            <span class="ly-m-coins"><img src="img/liuyao/coin-back.png" alt="花"><img src="img/liuyao/coin-back.png" alt="花"><img src="img/liuyao/coin.png" alt="字"></span>
+            <span class="ly-m-res">少阳 · 静</span><span class="ly-m-sub">两花一字</span>
+          </button>
+          <button type="button" class="ly-m-btn" data-coins="1,0,0">
+            <span class="ly-m-coins"><img src="img/liuyao/coin-back.png" alt="花"><img src="img/liuyao/coin.png" alt="字"><img src="img/liuyao/coin.png" alt="字"></span>
+            <span class="ly-m-res">少阴 · 静</span><span class="ly-m-sub">一花两字</span>
+          </button>
+        </div>
+        <div class="btn-row ly-m-actions">
+          <button type="button" class="btn" id="ly-m-back">退回上一爻</button>
+          <button type="button" class="btn" id="ly-m-clear">清空重来</button>
+          <button type="button" class="btn primary" id="ly-m-cast" disabled>生成卦象</button>
+        </div>
+        <p class="hint">自下而上逐爻录入（初爻在最下）；点已录的爻象可重选该爻。装卦按上方所填时间计算。</p>
+      </div>
       <div class="ly-status" id="ly-status">摇一摇手机，或点下方按钮开始</div>
-      <div class="btn-row ly-btns">
+      <div class="btn-row ly-btns" id="ly-shake-btns">
         <button class="btn primary" id="ly-shake-all">一键出六爻</button>
         <button class="btn" id="ly-reset">重摇</button>
         <button class="btn" id="ly-motion-perm" hidden>启用摇一摇</button>
