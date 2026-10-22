@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""二轮真机反馈修复验证：六项 + 第7项，390x844 双主题，动画客观证据。"""
+"""二轮+三轮真机反馈修复验证：390x844 双主题，动画客观证据。
+三轮新预期：四柱一行（非 2+2）、白天星点=0、时辰三钮同行等宽、底部页签六项均分。"""
 import importlib.util, json, os, subprocess, sys, time, urllib.request
 
 spec = importlib.util.spec_from_file_location("smoke", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
@@ -87,11 +88,27 @@ def main():
               return out; })()""")
             bad = [g for g in geo if g["p"] != "5" and (g["rects"] != 1 or g["doorBottomGap"] < 0 or g["badgeW"] > 27 or g["badgeH"] > 23 or g["overlap"] > 0)]
             check(f"[{theme}] 九宫文字不溢出/徽章不压字", not bad, json.dumps(bad, ensure_ascii=False))
-            # --- 第5项四柱 2+2 ---
+            # --- 三轮第2项：四柱改回一行（用户否决 2+2） ---
             rows = ev("""(() => { const ps = [...document.querySelectorAll('#qm-sizhu .sz-p')];
               const ys = {}; ps.forEach(p => { const y = Math.round(p.getBoundingClientRect().top); ys[y] = (ys[y]||0)+1; });
-              return Object.values(ys); })()""")
-            check(f"[{theme}] 四柱 2+2 两行", rows == [2, 2], rows)
+              const sz = document.getElementById('qm-sizhu');
+              return { rows: Object.values(ys), fs: parseFloat(getComputedStyle(sz).fontSize),
+                       sw: sz.scrollWidth, cw: sz.clientWidth }; })()""")
+            check(f"[{theme}] 四柱一行四段", rows["rows"] == [4], rows)
+            check(f"[{theme}] 四柱字号≥16且不溢出", rows["fs"] >= 16 and rows["sw"] <= rows["cw"] + 1, rows)
+            # --- 三轮第1项：时辰三钮同行等宽 ---
+            btns = ev("""(() => { const ids = ['qm-btnNow','qm-btnPrev','qm-btnNext'];
+              return ids.map(id => { const r = document.getElementById(id).getBoundingClientRect();
+                return { top: Math.round(r.top), w: +r.width.toFixed(1) }; }); })()""")
+            check(f"[{theme}] 时辰三钮同行", len({b["top"] for b in btns}) == 1, btns)
+            check(f"[{theme}] 时辰三钮等宽", max(b["w"] for b in btns) - min(b["w"] for b in btns) <= 2, btns)
+            # --- 三轮第4项：底部页签六项均分（宽度一致、间距均匀） ---
+            navm = ev("""(() => { const items = [...document.querySelectorAll('#qm-root nav .tabbtn, #qm-root nav .linkbtn')];
+              const rs = items.map(el => el.getBoundingClientRect());
+              const gaps = []; for (let i = 1; i < rs.length; i++) gaps.push(+(rs[i].left - rs[i-1].right).toFixed(1));
+              return { ws: rs.map(r => +r.width.toFixed(1)), gaps }; })()""")
+            check(f"[{theme}] 页签六项等宽", max(navm["ws"]) - min(navm["ws"]) <= 2, navm)
+            check(f"[{theme}] 页签间距均匀", max(navm["gaps"]) - min(navm["gaps"]) <= 2, navm)
             # --- 第1/6项间距 ---
             gap = ev("""(() => { const brief = document.getElementById('qm-brief');
               const view = document.getElementById('view-qimen');
@@ -114,7 +131,7 @@ def main():
             check(f"[{theme}] 盘面闲置轻摆在动", len(set(rys)) >= 2, rys)
             # 星层像素：双主题各自星色像素存在
             starpx = ev("""(() => { const cv = document.getElementById('qm-sky');
-              const d = cv.getContext('2d').getImageData(0, 0, cv.width, Math.min(cv.height, 300)).data;
+              const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
               let nz = 0, warm = 0, cream = 0;
               for (let i = 0; i < d.length; i += 4 * 7) {
                 const r = d[i], g = d[i+1], b = d[i+2], a = d[i+3];
@@ -122,7 +139,8 @@ def main():
                              if (Math.abs(r-232)<14 && Math.abs(g-226)<14 && Math.abs(b-208)<14) cream++; } }
               return { nz, warm, cream }; })()""")
             if theme == "day":
-                check(f"[{theme}] 亮主题星点可见（暖灰金）", starpx["warm"] > 20 and starpx["cream"] == 0, starpx)
+                # 三轮第3项新预期：白天不绘制星点（像屏幕落灰）——画布全透明
+                check(f"[{theme}] 白天星点=0（不绘制）", starpx["nz"] == 0 and starpx["warm"] == 0 and starpx["cream"] == 0, starpx)
             else:
                 check(f"[{theme}] 夜间星点可见（奶油色）", starpx["cream"] > 20 and starpx["warm"] == 0, starpx)
             # 入场动画：页内 50ms 采样末格 opacity（避开 CDP 往返延迟）

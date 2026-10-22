@@ -91,11 +91,11 @@
     var mx = 0, my = 0;
 
     function build() {
-      /* 星色随主题取色：夜间奶油白；亮主题暖灰金
-         （原作写死奶油色，在宣纸底上几乎不可见——亮主题「动画没了」的主因之一） */
+      /* 星层仅夜间绘制：白天宣纸底上的星点像屏幕落灰（三轮真机反馈），
+         day 下清空画布不生成星点（CSS 亦同步隐藏 #qm-sky）；夜间奶油白星色不变。 */
       var dayInk = document.documentElement.getAttribute("data-theme") !== "night";
-      var ink = dayInk ? "146,120,70" : "232,226,208";
-      var inkMul = dayInk ? 0.85 : 1;
+      var ink = "232,226,208";
+      var inkMul = 1;
       W = Math.max(1, window.innerWidth);
       H = Math.max(1, window.innerHeight);
       cv.width = Math.floor(W * dpr);
@@ -109,8 +109,8 @@
       lc.setTransform(dpr, 0, 0, dpr, 0, 0);
       lc.clearRect(0, 0, W, H);
 
-      /* 星点分布：偏上密、偏下疏，避免压住盘面文字 */
-      for (var i = 0; i < count; i++) {
+      /* 星点分布：偏上密、偏下疏，避免压住盘面文字（白天不绘制，直接跳过） */
+      for (var i = 0; !dayInk && i < count; i++) {
         var x = Math.random() * W;
         var y = Math.pow(Math.random(), 0.72) * H;
         var r = [0.45, 0.7, 1.0, 1.5][Math.floor(Math.random() * 4)];
@@ -120,11 +120,11 @@
         lc.fillStyle = "rgba(" + ink + "," + (a * inkMul).toFixed(3) + ")";
         lc.fill();
       }
-      /* 少量暖色星，呼应鎏金 */
-      for (var j = 0; j < Math.round(count / 12); j++) {
+      /* 少量暖色星，呼应鎏金（白天同样不绘制） */
+      for (var j = 0; !dayInk && j < Math.round(count / 12); j++) {
         lc.beginPath();
         lc.arc(Math.random() * W, Math.pow(Math.random(), 0.7) * H, 1.1, 0, Math.PI * 2);
-        lc.fillStyle = dayInk ? "rgba(176,141,60,.6)" : "rgba(242,220,150,.55)";
+        lc.fillStyle = "rgba(242,220,150,.55)";
         lc.fill();
       }
       paint();

@@ -821,3 +821,49 @@
 }
 /* 亮主题星穹光晕略增存在感（夜间不动） */
 :root:not([data-theme="night"]) .qm-scope .sky-wash { opacity: .68; }
+
+/* ===== 三轮真机反馈修复（2026-10-22，(41) 上线后真机四项） =====
+ * 1) 时辰导航三钮同行：窄屏下「此刻/←前一时辰/后一时辰→」各占一行 1/3 等宽，
+ *    强制同行不换行；宽屏恢复自然宽度与日期/起盘同排。 */
+@media (max-width: 720px) {
+  .qm-scope .controls #qm-btnNow,
+  .qm-scope .controls #qm-btnPrev,
+  .qm-scope .controls #qm-btnNext {
+    flex: 1 1 calc(33.333% - 6px);
+    white-space: nowrap;
+    padding-left: 4px; padding-right: 4px;
+    letter-spacing: .5px;
+  }
+  /* 日期框须与「起盘」同行：其固有宽度（约 250px）原本独占一行，
+     把起盘挤进导航行、再把后一时辰挤到第三行——定 basis 后首行 dt+起盘、次行三钮均分 */
+  .qm-scope .controls #qm-dt { flex: 1 1 190px; min-width: 0; }
+}
+/* 2) 四柱改回一行（用户否决二轮 2+2）：不换行、字号随视口自适应缩放，
+ *    下限 16px 保可读、上限 20px 同原大字；390px 实测一行完整装下。 */
+.qm-scope #qm-sizhu {
+  flex-wrap: nowrap;
+  column-gap: .3em;
+  white-space: nowrap;
+  font-size: clamp(16px, 5.3vw, 20px);
+  letter-spacing: 1px;
+}
+.qm-scope #qm-sizhu .sz-p { flex: 0 0 auto; text-align: center; }
+.qm-scope #qm-sizhu .sz-dot { display: inline; }
+/* 3) 白天主题去掉背景星点：宣纸底上星点像屏幕落灰——day 下星层画布不显示
+ *    （render3d 同步不绘制），光晕淡化到近不可见；夜间星空与光晕不动。 */
+:root:not([data-theme="night"]) .qm-scope #qm-sky { display: none; }
+:root:not([data-theme="night"]) .qm-scope .sky-wash { opacity: .25; }
+/* 4) 底部页签栏精修：六项（问事/盘面/流派对照/学习中心/关于方法/动效）
+ *    等宽均分、间距统一，消除「问事后空档偏大」的参差感；选中金下划线口径不变。 */
+.qm-scope nav { gap: 4px; }
+.qm-scope nav .tabbtn { flex: 1 1 0; text-align: center; }
+.qm-scope nav .linkbtn { flex: 1 1 0; margin-left: 0; text-align: center; }
+@media (max-width: 720px) {
+  .qm-scope nav {
+    justify-content: space-between;
+    gap: 2px;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .qm-scope nav .tabbtn { padding: 10px 0; letter-spacing: .06em; }
+  .qm-scope nav .linkbtn { padding: 10px 0; letter-spacing: .06em; margin-left: 0; }
+}
