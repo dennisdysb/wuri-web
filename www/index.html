@@ -493,6 +493,17 @@
     <section class="card" id="zw-tab-result" hidden>
       <div id="zw-chart" class="zw-zoom-wrap"></div>
       <div id="zw-info"></div>
+      <div id="zw-horo" class="zw-horo" hidden>
+        <div class="zw-horo-row">
+          <span class="zw-horo-t">运限</span>
+          <input type="date" id="zw-horo-date" min="1900-01-01" max="2100-12-31">
+          <div class="zw-layer-btns">
+            <button data-zw-layer="origin" class="active">本命</button><button data-zw-layer="decadal">大限</button><button data-zw-layer="yearly">流年</button><button data-zw-layer="monthly">流月</button><button data-zw-layer="daily">流日</button>
+          </div>
+        </div>
+        <div id="zw-horo-info" class="zw-horo-info"></div>
+        <div id="zw-pal-info" class="zw-pal-info"></div>
+      </div>
       <div class="btn-row" style="margin-top:10px">
         <button class="btn primary" id="zw-ai-btn">调用 AI 分析</button>
       </div>
