@@ -191,6 +191,331 @@ var LiuYao = (function () {
     for (var k in xunMap) { if (xunZhi === k) return xunMap[k]; }
     return '';
   }
+  /* ================= 断卦层：事类、用神与结构判读引擎 =================
+   * 规则宗《增删卜易》《卜筮正宗》通行口径，按本站《二期断卦层蓝本》的
+   * 六步框架（定用神→旺衰→世应→动爻作用→特殊格局）自写实现；
+   * 校验思路参考 fortune-liuyao-skill（Apache-2.0）的黄金卦例回归法，
+   * 未复制其代码与文案。装卦数据全部取自上方既有核心
+   * （najia / getShiYing / getGong / liuqin / liushou），本层不另算盘。
+   * 红线：只输出结构与状态（用神是谁、旺衰如何、生克方向、动变名目），
+   * 不下吉凶成败断语，不给具体行动指令（与全站免责正本一致）。 */
+  var LY_TOPICS = [
+    { k: '', label: '不选' }, { k: 'cai', label: '求财' }, { k: 'shi', label: '事业' },
+    { k: 'hun', label: '婚恋' }, { k: 'jian', label: '健康' }, { k: 'xing', label: '出行' },
+    { k: 'kao', label: '考试' }, { k: 'shiwu', label: '失物' }, { k: 'qi', label: '其他' }
+  ];
+  function topicLabel(k) {
+    for (var i = 0; i < LY_TOPICS.length; i++) if (LY_TOPICS[i].k === k) return LY_TOPICS[i].label;
+    return '不选';
+  }
+  var lyTopic = { cat: '', gender: 'm' };
+  function loadTopic() {
+    try {
+      var t = JSON.parse(localStorage.getItem('wuri_ly_topic') || 'null');
+      if (t && typeof t.cat === 'string') {
+        lyTopic = { cat: t.cat, gender: t.gender === 'f' ? 'f' : 'm' };
+        return;
+      }
+      /* 迁移旧版归档分类（中文标签） */
+      var old = localStorage.getItem('wuri_ly_cat') || '';
+      var map = { '综合': '', '感情': 'hun', '事业': 'shi', '财运': 'cai', '健康': 'jian', '学业': 'kao', '出行': 'xing', '失物': 'shiwu', '其他': 'qi' };
+      if (Object.prototype.hasOwnProperty.call(map, old)) lyTopic.cat = map[old];
+    } catch (e) {}
+  }
+  function saveTopic() {
+    try {
+      localStorage.setItem('wuri_ly_topic', JSON.stringify(lyTopic));
+      localStorage.setItem('wuri_ly_cat', topicLabel(lyTopic.cat));
+    } catch (e) {}
+  }
+  loadTopic();
+
+  var DG_SHENG = { '木': '火', '火': '土', '土': '金', '金': '水', '水': '木' };
+  var DG_KE = { '木': '土', '土': '水', '水': '火', '火': '金', '金': '木' };
+  var DG_CHONG = { '子': '午', '午': '子', '丑': '未', '未': '丑', '寅': '申', '申': '寅', '卯': '酉', '酉': '卯', '辰': '戌', '戌': '辰', '巳': '亥', '亥': '巳' };
+  var DG_HE = { '子': '丑', '丑': '子', '寅': '亥', '亥': '寅', '卯': '戌', '戌': '卯', '辰': '酉', '酉': '辰', '巳': '申', '申': '巳', '午': '未', '未': '午' };
+  /* 进神：同五行地支顺进（亥→子、寅→卯、巳→午、申→酉；土序 辰→未→戌→丑→辰） */
+  var DG_JIN = { '亥': '子', '寅': '卯', '巳': '午', '申': '酉', '辰': '未', '未': '戌', '戌': '丑', '丑': '辰' };
+  var DG_TUI = {};
+  for (var djk in DG_JIN) DG_TUI[DG_JIN[djk]] = djk;
+  /* a 对 b 的关系（站在 a 看 b）：生=a生b，克=a克b，被生=b生a，被克=b克a */
+  function dgRel(aWx, bWx) {
+    if (aWx === bWx) return '比和';
+    if (DG_SHENG[aWx] === bWx) return '生';
+    if (DG_KE[aWx] === bWx) return '克';
+    if (DG_SHENG[bWx] === aWx) return '被生';
+    return '被克';
+  }
+  var DG_BEAST_NOTE = { '青龙': '喜庆、正大', '朱雀': '口舌、文书', '勾陈': '迟滞、牵绊', '螣蛇': '虚惊、缠绕', '白虎': '刚硬、伤损', '玄武': '隐秘、暧昧' };
+  var DG_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
+
+  /* 伏神（与盘面同一算法：本宫首卦中、本卦所缺六亲对应的爻位） */
+  function computeFu(key, gong, nj) {
+    var out = [];
+    try {
+      var pureKey = null;
+      for (var bi = 0; bi < BAGONG.length; bi++) {
+        if (BAGONG[bi][0] === gong.name) { pureKey = BAGONG[bi][2][0]; break; }
+      }
+      if (!pureKey) return out;
+      var pureNj = najia(pureKey);
+      var curQin = {};
+      for (var ci = 0; ci < 6; ci++) curQin[liuqin(gong.wx, ZHI_WX[nj[ci].zhi])] = 1;
+      for (var fi = 0; fi < 6; fi++) {
+        var fq = liuqin(gong.wx, ZHI_WX[pureNj[fi].zhi]);
+        if (!curQin[fq]) out.push({ pos: fi, qin: fq, gan: pureNj[fi].gan, zhi: pureNj[fi].zhi, wx: ZHI_WX[pureNj[fi].zhi] });
+      }
+    } catch (e) {}
+    return out;
+  }
+
+  /* 单爻旺衰：以月建、日辰对该爻地支的生克冲合定力量，
+     旬空、月破等特殊状态只入 tags 单独标注、不与旺衰混算（蓝本第 2 步） */
+  function dgWangShuai(zhi, monthZhi, dayGz) {
+    var wx = ZHI_WX[zhi];
+    var tags = [], score = 0;
+    if (monthZhi) {
+      var mwx = ZHI_WX[monthZhi];
+      if (monthZhi === zhi) { tags.push('临月建'); score += 2; }
+      else if (DG_CHONG[monthZhi] === zhi) { tags.push('月破（逢月建冲破）'); score -= 2; }
+      else {
+        var mr = dgRel(mwx, wx);
+        if (mr === '生') { tags.push('得月建生扶'); score += 1; }
+        else if (mr === '克') { tags.push('受月建克制'); score -= 1; }
+        else if (mr === '被克') { tags.push('克月建（无力）'); score -= 1; }
+        else if (mr === '被生') { tags.push('泄气于月建'); }
+      }
+    }
+    var dayZhi = dayGz ? dayGz[1] : '';
+    if (dayZhi) {
+      var dwx = ZHI_WX[dayZhi];
+      if (dayZhi === zhi) { tags.push('临日辰'); score += 2; }
+      else if (DG_CHONG[dayZhi] === zhi) { tags.push('逢日辰冲'); }
+      else {
+        var dr = dgRel(dwx, wx);
+        if (dr === '生') { tags.push('得日辰生扶'); score += 1; }
+        else if (dr === '克') { tags.push('受日辰克制'); score -= 1; }
+      }
+    }
+    var level = score >= 2 ? '旺相有力' : (score === 1 ? '有气偏旺' : (score === 0 ? '力量平和（临界）' : (score === -1 ? '偏弱' : '休囚无力')));
+    return { level: level, tags: tags, score: score };
+  }
+  /* 静爻逢日冲：旺相者暗动、休囚者日破；动爻逢日冲为冲动/冲散之象 */
+  function dgDayClash(zhi, dong, wsScore, dayGz) {
+    var dayZhi = dayGz ? dayGz[1] : '';
+    if (!dayZhi || DG_CHONG[dayZhi] !== zhi) return '';
+    if (dong) return '动而逢日冲，有被冲动或冲散之象';
+    return wsScore >= 1 ? '静而逢日冲、本身旺相，为暗动（表面安静、暗中起作用）' : '静而逢日冲、本身休囚，为日破（被日辰冲破）';
+  }
+
+  /* 事类→用神配置（通行取法） */
+  function topicYong(topic, gender) {
+    switch (topic) {
+      case 'cai': return { mains: [{ qin: '妻财', role: '用神' }], note: '求财以妻财为用神（所求之财），另参子孙（财源）与兄弟（劫财之象）的状态。' };
+      case 'shi': return { mains: [{ qin: '官鬼', role: '用神' }], note: '事业以官鬼为用神（工作、职位、上级），另参父母（文书、合同）。' };
+      case 'hun': return gender === 'f'
+        ? { mains: [{ qin: '官鬼', role: '用神' }], note: '婚恋女问以官鬼为用神（所问的男方），并重看世应关系。' }
+        : { mains: [{ qin: '妻财', role: '用神' }], note: '婚恋男问以妻财为用神（所问的女方），并重看世应关系。' };
+      case 'jian': return { mains: [{ qin: '官鬼', role: '病症' }, { qin: '子孙', role: '医药' }], note: '健康双看：官鬼代表病症、子孙代表医药，世爻为自身。此处只描述卦象结构，不作任何医疗判断，身体不适请就医。' };
+      case 'kao': return { mains: [{ qin: '父母', role: '用神' }, { qin: '官鬼', role: '名次' }], note: '考试以父母为用神（文书、成绩），官鬼主名次与录取，一并参看。' };
+      case 'shiwu': return { mains: [{ qin: '妻财', role: '用神' }], note: '失物以妻财为用神（财物类）；若所失为文书、证件，则以父母爻参看。' };
+      case 'xing': return { mains: [], shiMain: true, note: '出行以世爻为自身用神，应爻为目的地与同行人，另参父母（行程、票据）。' };
+      default: return { mains: [], note: '' };
+    }
+  }
+
+  /* 结构判读引擎：入参为爻象数组与历法信息，输出分段结论（纯文本行）。
+     判读卡与 AI 文本共用此函数，保证两处口径一致。 */
+  function computeDuan(linesArr, info, topic, gender) {
+    var key = guaKey(linesArr);
+    var gong = getGong(key);
+    var sy = getShiYing(key);
+    var nj = najia(key);
+    var monthZhi = info.monthZhi || '', dayGz = info.dayGz || '', xk = info.xk || '';
+    var beasts = [];
+    try { beasts = liushou(info.dayGan || '甲') || []; } catch (e) {}
+    var hasDong = linesArr.some(function (l) { return l.dong; });
+    var bianNj = null, bianKey = null;
+    if (hasDong) {
+      bianKey = guaKey(linesArr.map(function (l) { return { yao: l.dong ? (1 - l.yao) : l.yao }; }));
+      bianNj = najia(bianKey);
+    }
+    var Y = [];
+    for (var i = 0; i < 6; i++) {
+      Y.push({
+        i: i, name: DG_NAMES[i], gan: nj[i].gan, zhi: nj[i].zhi, wx: ZHI_WX[nj[i].zhi],
+        qin: liuqin(gong.wx, ZHI_WX[nj[i].zhi]), dong: !!linesArr[i].dong,
+        kong: !!(xk && xk.indexOf(nj[i].zhi) >= 0),
+        bianZhi: bianNj ? bianNj[i].zhi : '', bianWx: bianNj ? ZHI_WX[bianNj[i].zhi] : ''
+      });
+    }
+    function desc(y) { return y.name + ' ' + y.qin + y.gan + y.zhi + '（' + y.wx + '）'; }
+    function wsText(y) {
+      var ws = dgWangShuai(y.zhi, monthZhi, dayGz);
+      var s = ws.level + (ws.tags.length ? '（' + ws.tags.join('、') + '）' : '');
+      if (y.kong) s += '；逢旬空（空亡：暂时落空，待出空、填实之时再论）';
+      return { text: s, score: ws.score };
+    }
+    var rows = [];
+
+    /* ---- 第 1 步：定用神 ---- */
+    var ty = topicYong(topic, gender);
+    var yongIdx = [];
+    var yItems = [];
+    if (!topic) {
+      yItems.push('未选择所问之事：不取用神，以下只给出世应、动爻与格局的通用结构判读。');
+    } else {
+      yItems.push('事类：' + topicLabel(topic) + (topic === 'hun' ? '（' + (gender === 'f' ? '女问' : '男问') + '）' : '') + '。' + ty.note);
+      if (ty.shiMain) {
+        yongIdx.push(sy.shi);
+        yItems.push('用神（世爻自身）：' + desc(Y[sy.shi]) + (Y[sy.shi].dong ? '，且为动爻' : ''));
+      }
+      var fuList = null;
+      ty.mains.forEach(function (m) {
+        var found = Y.filter(function (y) { return y.qin === m.qin; });
+        if (found.length) {
+          if (found.length > 1) yItems.push(m.role + '「' + m.qin + '」多现（共 ' + found.length + ' 处）：以发动者为主看，无发动者以先列者为主，其余参看。');
+          found.forEach(function (y) {
+            yongIdx.push(y.i);
+            yItems.push(m.role + '：' + desc(y) + (y.dong ? '（发动）' : '')
+              + (beasts[y.i] && DG_BEAST_NOTE[beasts[y.i]] ? '，临' + beasts[y.i] + '（六神定性：' + DG_BEAST_NOTE[beasts[y.i]] + '，仅作辅助参考）' : ''));
+          });
+        } else {
+          if (!fuList) fuList = computeFu(key, gong, nj);
+          var fus = fuList.filter(function (f) { return f.qin === m.qin; });
+          if (fus.length) {
+            var f0 = fus[0];
+            var fei = Y[f0.pos];
+            var fr = dgRel(fei.wx, f0.wx);
+            var frTxt = fr === '生' ? '飞神生伏神：伏神得生扶，较易透出起作用'
+              : fr === '克' ? '飞神克伏神：伏神受压制，难以透出'
+              : fr === '被生' ? '伏神生飞神：伏神泄气外出' : fr === '被克' ? '伏神克飞神' : '飞伏比和';
+            var fws = dgWangShuai(f0.zhi, monthZhi, dayGz);
+            yItems.push(m.role + '「' + m.qin + '」不上卦，伏于' + DG_NAMES[f0.pos] + '（' + desc(fei) + '）之下，伏神为 ' + f0.qin + f0.gan + f0.zhi + '（' + f0.wx + '）。'
+              + frTxt + '；伏神自身旺衰：' + fws.level + (fws.tags.length ? '（' + fws.tags.join('、') + '）' : '') + '。');
+          } else {
+            yItems.push(m.role + '「' + m.qin + '」不上卦，伏神中亦无：本卦不见此六亲。');
+          }
+        }
+      });
+    }
+    rows.push({ label: '用神', items: yItems });
+
+    /* ---- 第 2 步：用神旺衰（无用神时看世爻） ---- */
+    var wItems = [];
+    var wTargets = yongIdx.length ? yongIdx : [sy.shi];
+    var seenW = {};
+    wTargets.forEach(function (ix) {
+      if (seenW[ix]) return; seenW[ix] = 1;
+      var y = Y[ix];
+      var w = wsText(y);
+      wItems.push((yongIdx.length ? '' : '（世爻）') + desc(y) + '：' + w.text + '。');
+    });
+    if (monthZhi || dayGz) wItems.push('旺衰以月建（' + (monthZhi || '?') + '月）与日辰（' + (dayGz || '?') + '）为衡量根基。');
+    rows.push({ label: '旺衰', items: wItems });
+
+    /* ---- 第 3 步：世应关系 ---- */
+    var sY = Y[sy.shi], yY = Y[sy.ying];
+    var sr = dgRel(sY.wx, yY.wx);
+    var srTxt = sr === '比和' ? '世应比和：世、应五行相同（同为' + sY.wx + '），主双方相当、关系平稳'
+      : sr === '被生' ? '应生世：应爻生世爻，对方或所问环境对世爻有生扶之象'
+      : sr === '生' ? '世生应：世爻生应爻，世爻一方多有付出与耗泄'
+      : sr === '克' ? '世克应：世爻克应爻，世爻对所问一方有制约之象'
+      : '应克世：应爻克世爻，世爻受对方或环境制约之象';
+    var sItems = ['世爻＝问卦人自身：' + desc(sY) + '；应爻＝对方或所问之事的承载方：' + desc(yY) + '。', srTxt + '。'];
+    if (DG_HE[sY.zhi] === yY.zhi) sItems.push('世应地支相合（' + sY.zhi + yY.zhi + '合）：彼此牵连较深。');
+    rows.push({ label: '世应', items: sItems });
+
+    /* ---- 第 4 步：动爻作用链 ---- */
+    var dItems = [];
+    var dongList = Y.filter(function (y) { return y.dong; });
+    if (!dongList.length) {
+      dItems.push('静卦：六爻安静，无动爻、无变卦，变化因素少，专看用神旺衰与世应关系即可。');
+    } else {
+      var actTargets = [];
+      var seenA = {};
+      yongIdx.concat([sy.shi]).forEach(function (ix) { if (!seenA[ix]) { seenA[ix] = 1; actTargets.push(ix); } });
+      dongList.forEach(function (d) {
+        var parts = [desc(d) + '发动'];
+        actTargets.forEach(function (tix) {
+          var t = Y[tix];
+          var role = tix === d.i ? '' : (yongIdx.indexOf(tix) >= 0 && tix !== sy.shi ? '用神' : (tix === sy.shi ? '世爻' : '用神'));
+          if (tix === d.i) { parts.push('此爻即' + (yongIdx.indexOf(tix) >= 0 ? '用神' : '世爻') + '，自身发动'); return; }
+          var r = dgRel(d.wx, t.wx);
+          var rt = r === '生' ? '生' + role : r === '克' ? '克' + role : r === '被生' ? '受' + role + '生（' + role + '泄气于此）' : r === '被克' ? '为' + role + '所克' : '与' + role + '比和';
+          parts.push(rt);
+        });
+        /* 动化：回头生克 / 化进退（先核对两端五行与地支再下名目） */
+        if (d.bianZhi) {
+          if (DG_JIN[d.zhi] === d.bianZhi) parts.push('化进神（' + d.zhi + '→' + d.bianZhi + '，同为' + d.wx + '、地支顺进）：传统读法为此爻之气向前递进');
+          else if (DG_TUI[d.zhi] === d.bianZhi) parts.push('化退神（' + d.zhi + '→' + d.bianZhi + '，同为' + d.wx + '、地支逆退）：传统读法为此爻之气向后退却');
+          else if (DG_SHENG[d.bianWx] === d.wx) parts.push('回头生（变爻' + d.bianZhi + d.bianWx + '生本爻）：传统读法为动爻得变爻回头生扶');
+          else if (DG_KE[d.bianWx] === d.wx) parts.push('回头克（变爻' + d.bianZhi + d.bianWx + '克本爻）：传统读法为动爻受变爻回头克制');
+          else if (DG_SHENG[d.wx] === d.bianWx) parts.push('本爻生变爻（' + d.zhi + d.wx + '→' + d.bianZhi + d.bianWx + '）：泄气化出');
+          else if (d.bianWx === d.wx) parts.push('化出同五行（' + d.bianZhi + '，非进非退）');
+        }
+        dItems.push(parts.join('；') + '。');
+      });
+    }
+    rows.push({ label: '动爻', items: dItems });
+
+    /* ---- 第 5 步：特殊格局（反吟/伏吟/暗动/日破） ---- */
+    var gItems = [];
+    dongList.forEach(function (d) {
+      if (!d.bianZhi) return;
+      if (d.bianZhi === d.zhi) gItems.push(d.name + '伏吟：动而变支与本支相同（同为' + d.zhi + '，属' + (d.i < 3 ? '内卦' : '外卦') + '伏吟），传统读法为停滞、反复之象。');
+      else if (DG_CHONG[d.zhi] === d.bianZhi) gItems.push(d.name + '反吟：变支' + d.bianZhi + '冲本支' + d.zhi + '，传统读法为反复、冲撞之象。');
+    });
+    var clashSeen = {};
+    yongIdx.concat([sy.shi]).forEach(function (ix) {
+      if (clashSeen[ix]) return; clashSeen[ix] = 1;
+      var y = Y[ix];
+      var ws = dgWangShuai(y.zhi, monthZhi, dayGz);
+      var c = dgDayClash(y.zhi, y.dong, ws.score, dayGz);
+      if (c) gItems.push(desc(y) + '：' + c + '。');
+    });
+    if (!gItems.length) gItems.push('未见反吟、伏吟；用神与世爻亦未逢日辰冲（无暗动、日破）。');
+    rows.push({ label: '格局', items: gItems });
+
+    return { rows: rows, topic: topic, topicLabel: topicLabel(topic), yongIdx: yongIdx };
+  }
+  function dgEsc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function duanCardHtml(dg) {
+    var h = '<div class="ly-duan" id="ly-duan"><div class="ly-duan-title">卦象判读</div>';
+    dg.rows.forEach(function (r) {
+      h += '<div class="ly-duan-row"><span class="ly-duan-label">' + dgEsc(r.label) + '</span><div class="ly-duan-body">'
+        + r.items.map(function (it) { return '<div>' + dgEsc(it) + '</div>'; }).join('') + '</div></div>';
+    });
+    h += '<div class="ly-duan-foot">以上为卦象结构判读，供文化研究参考，不作吉凶断语。</div></div>';
+    return h;
+  }
+  /* 对外（含回归测试）：给定爻象、日期、事类直接算判读 */
+  function duanFor(linesArr, date, topic, gender) {
+    var info = { monthZhi: '', dayGz: '', dayGan: '甲', xk: '' };
+    try {
+      if (window.Lunar) {
+        var l = window.Lunar.fromDate(date);
+        info.monthZhi = l.getMonthZhi();
+        info.dayGz = l.getDayGan() + l.getDayZhi();
+        info.dayGan = l.getDayGan();
+        info.xk = xunkong(info.dayGz);
+      }
+    } catch (e) {}
+    return computeDuan(linesArr, info, topic || '', gender || 'm');
+  }
+  function syncTopicUI() {
+    var ts = $('ly-topic-sel'); if (ts) ts.value = lyTopic.cat;
+    var gs = $('ly-gender-sel'); if (gs) gs.value = lyTopic.gender;
+    var gw = $('ly-gender-wrap'); if (gw) gw.hidden = lyTopic.cat !== 'hun';
+    var hs = $('ly-cat-sel'); if (hs && hs.value !== lyTopic.cat) hs.value = lyTopic.cat;
+  }
+  function refreshDuanIfShown() {
+    var rc = $('ly-result-card');
+    if (rc && !rc.hidden && lines.length === 6) renderResult(true);
+  }
+
   // 互卦/错卦/综卦名
   function huGua(key) {
     // 互卦：2-3-4为下，3-4-5为上（key是下爻在前，索引0=初爻）
@@ -331,11 +656,9 @@ var LiuYao = (function () {
           lunarStr = '<br>农历:' + l.getYearInChinese() + '年' + l.getMonthInChinese() + '月' + l.getDayInChinese();
         }
       } catch (e) {}
-      var cats = ['综合','感情','事业','财运','健康','学业','出行','其他'];
-      var curCat = '';
-      try { curCat = localStorage.getItem('wuri_ly_cat') || '综合'; } catch (e) { curCat = '综合'; }
-      var catOpts = cats.map(function (cc) {
-        return '<option value="' + cc + '"' + (cc === curCat ? ' selected' : '') + '>' + cc + '</option>';
+      var curCat = topicLabel(lyTopic.cat);
+      var catOpts = LY_TOPICS.map(function (o) {
+        return '<option value="' + o.k + '"' + (o.k === lyTopic.cat ? ' selected' : '') + '>' + o.label + '</option>';
       }).join('');
       var headerHtml = '<div class="ly-head-pro">'
         + '<div class="ly-head-row"><span class="ly-head-label">占问</span><span class="ly-head-val" id="ly-zhanwen-disp" onclick="(function(){var cur="";try{cur=localStorage.getItem("wuri_ly_zhanwen")||"";}catch(e){}var v=prompt("占问事由",cur);if(v!==null){try{localStorage.setItem("wuri_ly_zhanwen",v);}catch(e){}document.getElementById("ly-zhanwen-disp").textContent=v||"点击此处编辑占问事由";}})()" style="cursor:pointer">' + (zhanwen ? escHtml(zhanwen) : '点击此处编辑占问事由') + '</span></div>'
@@ -344,14 +667,20 @@ var LiuYao = (function () {
         + '<div class="ly-head-row"><span class="ly-head-label">时间</span><span class="ly-head-val">' + timeStr + lunarStr + '</span></div>'
         + '</div>';
       var detail = $('ly-yao-detail');
-      // 分类选择事件
+      // 分类选择事件（与起卦区「所问之事」同一状态；改事类即重算判读，只绑一次防重复）
       setTimeout(function () {
         var sel = $('ly-cat-sel');
-        if (sel) sel.addEventListener('change', function () {
-          try { localStorage.setItem('wuri_ly_cat', this.value); } catch (e) {}
-          var d = $('ly-cat-disp');
-          if (d) d.textContent = this.value;
-        });
+        if (sel && !sel._lyBound) {
+          sel._lyBound = true;
+          sel.addEventListener('change', function () {
+            lyTopic.cat = this.value;
+            saveTopic();
+            syncTopicUI();
+            var d = $('ly-cat-disp');
+            if (d) d.textContent = topicLabel(lyTopic.cat);
+            renderResult(true);
+          });
+        }
       }, 100);
 
       // 把 header 插到 detail 前面
@@ -373,13 +702,14 @@ var LiuYao = (function () {
     var sy = getShiYing(key);
     var nj = najia(key);
     // 日辰：用当前日期的干支（lunar-javascript）
-    var dayGz = '', dayGan = '甲';
+    var dayGz = '', dayGan = '甲', monthZhi = '';
     try {
       if (window.Lunar) {
         var now = effNow();
         var l = window.Lunar.fromDate(now);
         dayGz = l.getDayGan() + l.getDayZhi();
         dayGan = l.getDayGan();
+        monthZhi = l.getMonthZhi();
       }
     } catch (e) {}
     var xk = dayGz ? xunkong(dayGz) : '';
@@ -497,6 +827,11 @@ var LiuYao = (function () {
     // 互卦/错卦/综卦
     var hg = GUA[huGua(key)], cg = GUA[cuoGua(key)], zg = GUA[zongGua(key)];
     html += '<div class="ly-hcz">互卦：' + (hg ? hg[0] : '?') + '　错卦：' + (cg ? cg[0] : '?') + '　综卦：' + (zg ? zg[0] : '?') + '</div>';
+    // 断卦层：卦象判读卡（结构判读引擎，与 AI 文本同一口径）
+    try {
+      var dgRes = computeDuan(lines, { monthZhi: monthZhi, dayGz: dayGz, dayGan: dayGan, xk: xk }, lyTopic.cat, lyTopic.gender);
+      html += duanCardHtml(dgRes);
+    } catch (e) {}
     detail.innerHTML = html;
     var zwInput = $('ly-zhanwen-input');
     if (zwInput) zwInput.addEventListener('change', function () {
@@ -720,6 +1055,8 @@ var LiuYao = (function () {
     setCastTime(new Date(), true);
     reset();
     setMode('shake');
+    loadTopic();
+    syncTopicUI();
     renderHistory();
     bindShake();
   }
@@ -837,6 +1174,21 @@ var LiuYao = (function () {
     var mBack = $('ly-m-back'); if (mBack) mBack.addEventListener('click', manualBack);
     var mClear = $('ly-m-clear'); if (mClear) mClear.addEventListener('click', manualClear);
     var mCast = $('ly-m-cast'); if (mCast) mCast.addEventListener('click', manualCast);
+    /* 所问之事（事类）＋婚恋性别：与结果头分类同一状态，改动即重算判读 */
+    var tSel = $('ly-topic-sel');
+    if (tSel) tSel.addEventListener('change', function () {
+      lyTopic.cat = this.value;
+      saveTopic();
+      syncTopicUI();
+      refreshDuanIfShown();
+    });
+    var gSel = $('ly-gender-sel');
+    if (gSel) gSel.addEventListener('change', function () {
+      lyTopic.gender = this.value;
+      saveTopic();
+      refreshDuanIfShown();
+    });
+    syncTopicUI();
     /* iOS 摇一摇权限按钮：必须在用户直接点击中申请（2026-10-10 fix #5） */
     var mp = $('ly-motion-perm');
     if (mp) {
@@ -869,25 +1221,25 @@ var LiuYao = (function () {
     var gong = getGong(key);
     var zhanwen = '';
     try { zhanwen = localStorage.getItem('wuri_ly_zhanwen') || ''; } catch (e) {}
-    var cat = '综合';
-    try { cat = localStorage.getItem('wuri_ly_cat') || '综合'; } catch (e) {}
-    /* 分类→参考用神（通行取法，仅作提示，断卦时仍须结合所问事由确认） */
+    var cat = topicLabel(lyTopic.cat) + (lyTopic.cat === 'hun' ? '（' + (lyTopic.gender === 'f' ? '女问' : '男问') + '）' : '');
+    /* 事类→参考用神（通行取法，仅作提示，断卦时仍须结合所问事由确认） */
     var CAT_YONGSHEN = {
-      '综合': '请断卦时按所问事由自取用神，并说明取用理由',
-      '感情': '男问以妻财为用、女问以官鬼为用，并看世应关系',
-      '事业': '官鬼为用（工作、职位、上级），兼看父母（文书、合同）',
-      '财运': '妻财为用，子孙为财源，兄弟为劫财',
-      '健康': '官鬼为病症、子孙为医药，世爻为自身',
-      '学业': '父母为用（成绩、文书），兼看官鬼（名次、录取）',
-      '出行': '世爻为自身、应爻为目的地与同行人，兼看父母（行程、票据）',
-      '其他': '请断卦时按所问事由自取用神，并说明取用理由'
+      '': '未选择事类，请按所问事由自取用神，并说明取用理由',
+      'cai': '妻财为用（所求之财），子孙为财源，兄弟为劫财',
+      'shi': '官鬼为用（工作、职位、上级），兼看父母（文书、合同）',
+      'hun': lyTopic.gender === 'f' ? '官鬼为用（所问的男方），兼看世应关系' : '妻财为用（所问的女方），兼看世应关系',
+      'jian': '官鬼为病症、子孙为医药，世爻为自身（仅作结构解读，不作医疗判断）',
+      'xing': '世爻为自身、应爻为目的地与同行人，兼看父母（行程、票据）',
+      'kao': '父母为用（成绩、文书），兼看官鬼（名次、录取）',
+      'shiwu': '妻财为用（财物），文书证件类兼看父母',
+      'qi': '请按所问事由自取用神，并说明取用理由'
     };
     var nowQ = effNow();
     var qTime = nowQ.getFullYear() + '年' + (nowQ.getMonth()+1) + '月' + nowQ.getDate() + '日 '
       + nowQ.getHours() + '时' + nowQ.getMinutes() + '分' + nowQ.getSeconds() + '秒';
     var txt = '所问事由：' + (zhanwen || '未填写') + '\n';
     txt += '占问分类：' + cat + '\n';
-    txt += '参考用神：' + (CAT_YONGSHEN[cat] || CAT_YONGSHEN['综合']) + '\n';
+    txt += '参考用神：' + (CAT_YONGSHEN[lyTopic.cat] || CAT_YONGSHEN['']) + '\n';
     txt += '起卦时间：' + qTime + '\n';
     // 起卦四柱与月建日辰旬空（与盘面同一 lunar 口径）
     var dayGz = '', dayGan = '甲', monthZhi = '', xk = '';
@@ -969,11 +1321,19 @@ var LiuYao = (function () {
       var hg = GUA[huGua(key)], cg2 = GUA[cuoGua(key)], zg = GUA[zongGua(key)];
       txt += '互卦：' + (hg ? hg[0] : '?') + '｜错卦：' + (cg2 ? cg2[0] : '?') + '｜综卦：' + (zg ? zg[0] : '?') + '\n';
     } catch (e) {}
+    /* 结构判读（本站规则引擎，与盘面判读卡同一结论；只述结构与状态，不下吉凶断语） */
+    try {
+      var dgAi = computeDuan(lines, { monthZhi: monthZhi, dayGz: dayGz, dayGan: dayGan, xk: xk }, lyTopic.cat, lyTopic.gender);
+      txt += '\n【结构判读】（规则引擎判读，供参考，勿与卦象数据冲突）\n';
+      dgAi.rows.forEach(function (r) {
+        txt += r.label + '：' + r.items.join(' ') + '\n';
+      });
+    } catch (e) {}
     window.__wuriChartText = window.__wuriChartText || {};
     window.__wuriChartText.liuyao = txt;
   }
 
   document.addEventListener('DOMContentLoaded', init);
 
-  return { open: open, close: close, buildChartText: buildChartText };
+  return { open: open, close: close, buildChartText: buildChartText, duan: duanFor };
 })();

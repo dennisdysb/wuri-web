@@ -1349,6 +1349,20 @@ details.disc-foot .hint{margin-top:9px}
 .ly-m-actions{justify-content:center}
 .ly-history-src{display:inline-block;font-size:.72rem;color:var(--gold-deep,#8a6d1f);border:1px solid currentColor;border-radius:4px;padding:0 4px;margin-left:6px;vertical-align:1px}
 .ly-cat-sel{padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:0.9rem}
+/* 所问之事（事类）选择行：与起卦时间行同构 */
+.ly-topic-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:6px;flex-wrap:wrap}
+.ly-topic-row label{color:var(--ink-2);font-size:.92rem}
+.ly-topic-sel{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:.95rem}
+.ly-topic-hint{margin:0 0 10px}
+/* 断卦层判读卡：卦象表下方，分段（用神/旺衰/世应/动爻/格局）呈现，卡尾固定免责小字 */
+.ly-duan{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:12px 14px;text-align:left}
+.ly-duan-title{font-weight:700;color:var(--gold);font-size:1rem;letter-spacing:.12em;margin-bottom:6px}
+.ly-duan-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line-soft)}
+.ly-duan-row:last-of-type{border-bottom:none}
+.ly-duan-label{flex:none;min-width:2.4em;color:var(--ink-2);font-weight:700;font-size:.88rem;padding-top:2px}
+.ly-duan-body{flex:1;min-width:0;font-size:.9rem;line-height:1.65;color:var(--ink)}
+.ly-duan-body>div+div{margin-top:3px}
+.ly-duan-foot{margin-top:10px;font-size:.78rem;color:var(--muted);line-height:1.5}
 
 /* ---------- 我的日子（黄历自定义纪念日） ---------- */
 #mydays-card .card-title{display:flex;align-items:center;justify-content:space-between}
