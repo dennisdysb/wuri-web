@@ -143,7 +143,7 @@ $$('#tabbar button').forEach(function (btn) {
     target.classList.add('active');
     target.style.display = 'block';
     // 切换标签时隐藏六爻/八字/紫微等独立视图，防止内容泄漏
-    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer'].forEach(function (vid) {
+    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-affinity', 'view-affinity-result'].forEach(function (vid) {
       var v = document.getElementById(vid);
       if (v) v.hidden = true;
     });

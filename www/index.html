@@ -1034,9 +1034,74 @@
       <h1 class="brand-title">神祇图鉴</h1>
       <span class="appbar-spacer"></span>
     </header>
+    <!-- 神仙缘分测试入口 -->
+    <section class="aff-entry" id="affinity-entry">
+      <div class="aff-entry-main">
+        <h2 class="aff-entry-title" data-i18n="aff_title">神仙缘分测试</h2>
+        <p class="aff-entry-sub" id="affinity-entry-sub" data-i18n="aff_entry_sub">十二道情境小题，看看七十四位尊神之中，谁与你最相合。</p>
+      </div>
+      <button class="btn primary" id="affinity-enter">开始测试</button>
+    </section>
     <div id="deities-groups"></div>
     <div class="tab-spacer"></div>
   </main>
+
+  <!-- ============ 神仙缘分测试 · 答题（免费） ============ -->
+  <main id="view-affinity" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('affinity-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="affinity-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="aff_title">神仙缘分测试</h1>
+      <span class="appbar-spacer"></span>
+      <button class="mini-btn" id="affinity-restart" data-i18n="aff_restart" hidden>从头开始</button>
+    </header>
+    <div class="aff-wrap">
+      <p class="aff-resumed" id="affinity-resumed" hidden></p>
+      <div class="aff-progress"><div class="aff-progress-bar" id="affinity-bar"></div></div>
+      <p class="aff-step" id="affinity-step"></p>
+      <h2 class="aff-q" id="affinity-q"></h2>
+      <div class="aff-opts" id="affinity-opts"></div>
+      <p class="aff-note" data-i18n="aff_note">凭第一感觉选就好，没有对错。进度会自动保存，中途退出，下次可以继续。</p>
+    </div>
+  </main>
+
+  <!-- ============ 神仙缘分测试 · 结果（免费） ============ -->
+  <main id="view-affinity-result" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('affinity-result-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="affinity-result-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="aff_title">神仙缘分测试</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div class="aff-wrap">
+      <p class="aff-kicker" data-i18n="aff_main_label">与你最相合</p>
+      <section class="aff-main-card">
+        <div class="aff-main-imgbox"><img id="aff-main-img" alt=""></div>
+        <h2 class="aff-main-name" id="aff-main-name"></h2>
+        <p class="aff-main-title" id="aff-main-title"></p>
+        <p class="aff-why-t" data-i18n="aff_why">为何与你相合</p>
+        <p class="aff-why" id="aff-main-why"></p>
+        <button class="btn primary" id="aff-main-detail" data-i18n="aff_view_detail">查看图鉴详情</button>
+      </section>
+      <p class="aff-kicker" data-i18n="aff_sub_label">同样与你投缘</p>
+      <div class="aff-subs" id="aff-subs"></div>
+      <div class="aff-actions">
+        <button class="btn primary" id="aff-share" data-i18n="aff_share">生成分享卡</button>
+        <button class="btn" id="aff-retake" data-i18n="aff_retake">再测一次</button>
+      </div>
+      <p class="aff-honest" data-i18n="aff_honest"></p>
+    </div>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- 神仙缘分测试 · 分享卡弹层 -->
+  <div id="affinity-share-modal" class="aff-modal" hidden>
+    <div class="aff-modal-box">
+      <img id="affinity-share-img" alt="">
+      <p class="aff-modal-hint" data-i18n="aff_share_hint">长按图片即可保存到相册</p>
+      <button class="btn" id="affinity-share-close" data-i18n="aff_close">关闭</button>
+    </div>
+  </div>
 
   <!-- ============ 神祇详情（免费） ============ -->
   <main id="view-deity-detail" class="view" hidden>
@@ -1386,6 +1451,8 @@
 <script src="js/jingwen.js"></script>
 <script src="js/deities-data.js"></script>
 <script src="js/deities.js"></script>
+<script src="js/affinity-data.js"></script>
+<script src="js/affinity.js"></script>
 <script src="js/content-feed.js"></script>
 <script src="js/offline-download.js"></script>
 <script>

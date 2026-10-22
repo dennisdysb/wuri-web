@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+"""由 affinity_model.py（题库+已仿真验证）与 affinity-tags.json 生成 www/js/affinity-data.js。
+口径：74 位全入池（含酆都大帝、太岁殷元帅）；贵人逢源不单设轴，计分时其权重并入主所求（见 affinity.js）。"""
+import importlib.util, json, os
+
+spec = importlib.util.spec_from_file_location("am", os.path.expanduser("~/workspace/wuri-web/qimen-build/affinity_model.py"))
+am = importlib.util.module_from_spec(spec); spec.loader.exec_module(am)
+
+tags = [{"id": d["id"], "name": d["name"],
+         "needs": {"primary": d["needs"]["primary"], "secondary": d["needs"]["secondary"]},
+         "traits": d["traits"], "motifs": d["motifs"]} for d in am.TAGS["deities"]]
+assert len(tags) == 74
+qs = [{"q": q, "options": [{"t": t, "s": s} for t, s in opts]} for q, opts in am.Q]
+assert len(qs) == 12 and all(len(q["options"]) == 4 for q in qs)
+
+out = ("/* 神仙缘分测试数据：74 位标签（源 affinity-tags.json 定版）+ 12 题原创题库（双轴计分）\n"
+       " * 由 qimen-build/gen_affinity_data.py 生成，勿手改；计分口径见 js/affinity.js */\n"
+       "window.AFFINITY_TAGS = " + json.dumps(tags, ensure_ascii=False, indent=1) + ";\n"
+       "window.AFFINITY_QUESTIONS = " + json.dumps(qs, ensure_ascii=False, indent=1) + ";\n")
+path = os.path.expanduser("~/workspace/wuri-web/www/js/affinity-data.js")
+open(path, "w").write(out)
+print("wrote", path, len(out), "bytes")
