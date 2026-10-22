@@ -850,11 +850,15 @@
  *    框间隙恒 2px、中心步距恒 67px），但「文字间隙」严重不均——问事/盘面标签文字仅 28.9px、
  *    四字标签 50.9px，居中后文字间隙 = 列宽 − 两侧文字半宽和，412 档实测
  *    问事→盘面 38.2px、四字标签之间仅 16.1px（2.4 倍），即用户所见「问事后空档偏大」。
- *    本版：grid 五等分列＋每项标签逐字两端分布（.qm-tl 定宽 4.3em、space-between），
- *    五个标签文字宽度被拉成一致，框等宽、文字间隙也等宽。选中金下划线口径不变。 */
+ *    本版：grid 五等分列＋每项标签逐字两端分布（.qm-tl 定宽、space-between），
+ *    五个标签文字宽度被拉成一致，框等宽、文字间隙也等宽。选中金下划线口径不变。
+ *    终版批修正（2026-10-22 用户真机验收）：统一 4.3em 把两字标签（问事/盘面）
+ *    撑得字间孔过大——改按字数分档定宽：两字 .n2 收窄到 3.3em、四字略收 4.1em；
+ *    字距回自然，文字间隙悬殊由 2.4 倍压到 1.5 倍内（四档实测 1.31–1.47，框仍严格等分）。 */
 .qm-scope nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; }
 .qm-scope nav .tabbtn { text-align: center; letter-spacing: 0; }
-.qm-scope .qm-tl { display: flex; justify-content: space-between; width: 4.3em; margin: 0 auto; letter-spacing: 0; }
+.qm-scope .qm-tl { display: flex; justify-content: space-between; width: 4.1em; margin: 0 auto; letter-spacing: 0; }
+.qm-scope .qm-tl.n2 { width: 3.3em; }
 .qm-scope .qm-tl i { font-style: normal; }
 @media (max-width: 720px) {
   .qm-scope nav {

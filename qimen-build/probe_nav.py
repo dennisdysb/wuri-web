@@ -10,25 +10,29 @@ URL = "file://" + os.path.expanduser("~/workspace/wuri-web/www") + "/index.html"
 MEASURE = """(() => {
   const nav = document.querySelector('.qm-scope nav');
   if (!nav) return null;
-  const items = [...nav.children].map(el => {
+  const btns = [...nav.querySelectorAll('.tabbtn')];
+  const items = btns.map(el => {
     const r = el.getBoundingClientRect();
-    let tr = null;
-    const node = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
-    if (node) { const rg = document.createRange(); rg.selectNodeContents(node); tr = rg.getBoundingClientRect(); }
+    const tl = el.querySelector('.qm-tl').getBoundingClientRect();
     return { label: el.textContent.trim(), x: +r.left.toFixed(1), w: +r.width.toFixed(1),
-             tx: tr ? +tr.left.toFixed(1) : null, tw: tr ? +tr.width.toFixed(1) : null,
-             ml: getComputedStyle(el).marginLeft, flex: getComputedStyle(el).flex };
+             tx: +tl.left.toFixed(1), tw: +tl.width.toFixed(1) };
   });
   const gaps = [], tgaps = [];
   for (let i = 0; i + 1 < items.length; i++) {
     gaps.push(+(items[i+1].x - (items[i].x + items[i].w)).toFixed(1));
-    if (items[i].tx != null && items[i+1].tx != null)
-      tgaps.push(+(items[i+1].tx - (items[i].tx + items[i].tw)).toFixed(1));
+    tgaps.push(+(items[i+1].tx - (items[i].tx + items[i].tw)).toFixed(1));
   }
+  // 字内距：两字标签（.n2）首尾两字之间的空隙
+  const inners = btns.slice(0, 2).map(el => {
+    const ch = [...el.querySelectorAll('.qm-tl i')].map(n => n.getBoundingClientRect());
+    return ch.length === 2 ? +(ch[1].left - ch[0].right).toFixed(1) : null;
+  });
   const centers = items.map(it => +(it.x + it.w / 2).toFixed(1));
   const csteps = [];
   for (let i = 0; i + 1 < centers.length; i++) csteps.push(+(centers[i+1] - centers[i]).toFixed(1));
-  return { navW: +nav.getBoundingClientRect().width.toFixed(1), items, gaps, tgaps, centers, csteps };
+  return { navW: +nav.getBoundingClientRect().width.toFixed(1), items, gaps, tgaps,
+           inners, tratio: +(Math.max(...tgaps) / Math.min(...tgaps)).toFixed(2),
+           centers, csteps };
 })()"""
 
 def main():

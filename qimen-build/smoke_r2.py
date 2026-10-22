@@ -112,7 +112,12 @@ def main():
               const tgaps = []; for (let i = 1; i < ts.length; i++) tgaps.push(+(ts[i].left - ts[i-1].right).toFixed(1));
               return { ws: rs.map(r => +r.width.toFixed(1)), gaps, tws: ts.map(r => +r.width.toFixed(1)), tgaps }; })()""")
             check(f"[{theme}] 页签五项等宽", len(navm["ws"]) == 5 and max(navm["ws"]) - min(navm["ws"]) <= 1, navm)
-            check(f"[{theme}] 页签文字间隙均匀", max(navm["tgaps"]) - min(navm["tgaps"]) <= 2, navm)
+            # 终版批：标签按字数分档（两字收窄、四字略收）——文字间隙不再求全等，
+            # 改验悬殊比值 ≤1.6（旧全等宽时 2.4 倍即用户所报「问事后空档偏大」）
+            check(f"[{theme}] 页签文字间隙悬殊≤1.6倍", max(navm["tgaps"]) / min(navm["tgaps"]) <= 1.6, navm)
+            check(f"[{theme}] 标签分档定宽（两字窄于四字）",
+                  abs(navm["tws"][0] - navm["tws"][1]) <= 1 and navm["tws"][0] < navm["tws"][2]
+                  and max(navm["tws"][2:]) - min(navm["tws"][2:]) <= 1, navm)
             # --- 第1/6项间距 ---
             gap = ev("""(() => { const brief = document.getElementById('qm-brief');
               const view = document.getElementById('view-qimen');
@@ -180,8 +185,9 @@ def main():
             time.sleep(0.5)
             nm = ev(NAVM)
             check(f"[{wdt}] 页签框等宽", max(nm["ws"]) - min(nm["ws"]) <= 1, nm["ws"])
-            check(f"[{wdt}] 标签等宽", max(nm["tws"]) - min(nm["tws"]) <= 1, nm["tws"])
-            check(f"[{wdt}] 文字间隙均匀", max(nm["tgaps"]) - min(nm["tgaps"]) <= 2, nm["tgaps"])
+            check(f"[{wdt}] 标签分档定宽", abs(nm["tws"][0] - nm["tws"][1]) <= 1 and nm["tws"][0] < nm["tws"][2]
+                  and max(nm["tws"][2:]) - min(nm["tws"][2:]) <= 1, nm["tws"])
+            check(f"[{wdt}] 文字间隙悬殊≤1.6倍", max(nm["tgaps"]) / min(nm["tgaps"]) <= 1.6, nm["tgaps"])
             check(f"[{wdt}] 中心步距均匀", max(nm["csteps"]) - min(nm["csteps"]) <= 1.5, nm["csteps"])
             if wdt in (360, 412):
                 shot(f"day-nav-{wdt}", "document.getElementById('view-qimen').scrollTop = 0")
