@@ -73,6 +73,19 @@ def main():
                   and m["maxCellRight"] <= m["contentRight"] + 1 and m["tableSW"] <= m["detailCW"] + 1
                   and m["viewSW"] <= 390, m)
 
+        def bar_measure():
+            return ev("""(() => { const bars = [...document.querySelectorAll('.lyx .lyx-bar')];
+              const colL = c => [...document.querySelectorAll('.lyx tr td:nth-child(' + c + ') .lyx-bar')]
+                .map(b => +b.getBoundingClientRect().left.toFixed(1));
+              return { widths: bars.map(b => +b.getBoundingClientRect().width.toFixed(1)),
+                       lefts2: colL(2), lefts3: colL(3) }; })()""")
+
+        def check_bars(theme):
+            bm = bar_measure()
+            ok = bm and len(bm["widths"]) == 12 and max(bm["widths"]) - min(bm["widths"]) <= 0.6 \
+                and max(bm["lefts2"]) - min(bm["lefts2"]) <= 1 and max(bm["lefts3"]) - min(bm["lefts3"]) <= 1
+            check(f"[{theme}] 12 根爻条等宽且分列对齐", ok, bm)
+
         ev("document.getElementById('liuyao-enter').click(); 'ok'"); time.sleep(1.2)
 
         # ---------- Phase A：手动录入交互 ----------
@@ -91,6 +104,13 @@ def main():
         check("录满6爻标题", "录满" in title, title)
         filled = ev("document.querySelectorAll('#ly-lines .ly-line:not(.empty)').length")
         check("预览已录6爻成型", filled == 6, filled)
+        pv = ev("""(() => { const wraps = [...document.querySelectorAll('#ly-lines .ly-barwrap')];
+          const dongs = [...document.querySelectorAll('#ly-lines .ly-dong')];
+          return { lefts: wraps.map(r => +r.getBoundingClientRect().left.toFixed(1)),
+                   widths: wraps.map(r => +r.getBoundingClientRect().width.toFixed(1)),
+                   dongLefts: dongs.map(r => +r.getBoundingClientRect().left.toFixed(1)) }; })()""")
+        check("预览六线左缘对齐、同宽、标记成列", pv and max(pv["lefts"]) - min(pv["lefts"]) <= 1
+              and max(pv["widths"]) - min(pv["widths"]) <= 0.6 and max(pv["dongLefts"]) - min(pv["dongLefts"]) <= 1, pv)
         shot("day-01-manual", "document.getElementById('view-liuyao').scrollTop = 0")
         # 点已录的初爻（DOM 中最后一个已录元素）→ 重选
         ev("""(() => { const f = document.querySelectorAll('#ly-lines .ly-line:not(.empty)');
@@ -119,6 +139,7 @@ def main():
         for theme in ("day", "night"):
             ev(f"document.documentElement.setAttribute('data-theme','{theme}'); 'ok'"); time.sleep(0.5)
             check_overflow(theme)
+            check_bars(theme)
             shot(f"{theme}-02-result", "document.getElementById('ly-result-card').scrollIntoView({block:'start'})")
         ev("document.documentElement.setAttribute('data-theme','day'); 'ok'"); time.sleep(0.4)
         hist = ev("""(() => { const h = JSON.parse(localStorage.getItem('ly_history') || '[]');
@@ -144,6 +165,7 @@ def main():
         names2 = ev("document.querySelector('.ly-gua-names').textContent")
         check("全老阳 → 乾变坤", "乾" in names2 and "坤" in names2, names2)
         check_overflow("day")
+        check_bars("day")
         ev("document.getElementById('ly-m-clear').click(); 'ok'"); time.sleep(0.3)
         for c in ["1,1,0", "1,0,0", "1,1,0", "1,0,0", "1,1,0", "1,0,0"]:  # 既济 101010，全静
             ev(f"document.querySelector('.ly-m-btn[data-coins=\"{c}\"]').click(); 'ok'"); time.sleep(0.12)
@@ -160,6 +182,7 @@ def main():
         head2 = ev("document.getElementById('ly-head-pro-inserted').textContent")
         check("摇卦共用所填时间", "2024年12月25日" in head2, head2[:80])
         check_overflow("day")
+        check_bars("day")
 
         errs = [e for e in cdp.events if e.get("method") == "Runtime.exceptionThrown"]
         check("零 JS 异常", len(errs) == 0, len(errs))

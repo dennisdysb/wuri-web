@@ -237,7 +237,11 @@ function buildCell(b) {
   } catch (e) {}
   if (item) cell += '<div class="zw-scope-name">' + LAYER_LABEL[layer] + '·' + item.palaceNames[b] + '</div>';
   cell += '<div class="zw-gz-pro">' + p.heavenlyStem + p.earthlyBranch + '</div>';
-  cell += '<div class="zw-pname-pro">' + p.name + (p.isBodyPalace ? '<span class="zw-body-tag">身</span>' : '') + '</div>';
+  // 盘面宫名口径（2026-10-22 用户裁定）：仆役宫主名改「交友宫」＋小字灰注古名「仆役」；引擎 p.name 不动、AI 文本另有 dispName
+  var pnameHtml = p.name === '仆役'
+    ? '交友宫<span class="zw-pname-old">仆役</span>'
+    : p.name;
+  cell += '<div class="zw-pname-pro">' + pnameHtml + (p.isBodyPalace ? '<span class="zw-body-tag">身</span>' : '') + '</div>';
   cell += '</div>';
   return cell;
 }
@@ -289,7 +293,8 @@ function renderPalInfo() {
     var flyTxt = flyInfo(p).map(function (f) {
       return f.hua + '（' + f.star + '）→' + (f.to ? (f.isSelf ? '本宫（自化）' : f.to.name) : '—');
     }).join('、');
-    host.innerHTML = '<b>' + p.name + '（' + p.heavenlyStem + p.earthlyBranch + '）</b>'
+    var headName = p.name === '仆役' ? '交友宫（古名仆役宫）' : p.name;
+    host.innerHTML = '<b>' + headName + '（' + p.heavenlyStem + p.earthlyBranch + '）</b>'
       + '<br>三方四正：' + sf
       + (selfTxt ? '<br>自化：' + selfTxt : '')
       + '<br>飞化：' + flyTxt;

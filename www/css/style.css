@@ -994,13 +994,14 @@ details.disc-foot .hint{margin-top:9px}
 /* 卦象显示 */
 .ly-gua-display{display:flex;gap:20px;align-items:flex-start;margin:12px 0}
 .ly-gua-lines{display:flex;flex-direction:column;gap:10px;min-width:120px}
-.ly-line{display:flex;align-items:center;gap:6px;height:22px;justify-content:center}
+.ly-line{display:flex;align-items:center;height:22px;justify-content:center}
+.ly-barwrap{display:flex;gap:6px;width:104px;flex:0 0 auto}
 .ly-line .ly-bar{height:8px;background:var(--ink);border-radius:2px}
-.ly-line.yang .ly-bar{width:100px}
-.ly-line.yin .ly-bar.left,.ly-line.yin .ly-bar.right{width:46px}
-.ly-line.empty .ly-bar.ghost{width:100px;background:var(--line);opacity:.4}
+.ly-line.yang .ly-bar{width:104px}
+.ly-line.yin .ly-bar.left,.ly-line.yin .ly-bar.right{width:49px}
+.ly-line.empty .ly-bar.ghost{width:104px;background:var(--line);opacity:.4}
 .ly-line.dong .ly-bar{background:#b8860b}
-.ly-dong{color:#b8860b;font-weight:700;margin-left:4px}
+.ly-dong{color:#b8860b;font-weight:700;width:20px;flex:0 0 auto;text-align:center;margin-left:4px}
 .ly-gua-info{flex:1}
 .ly-gua-name{font-size:1.4rem;font-weight:700;color:var(--gold);margin-bottom:8px}
 .ly-gua-ci{font-size:.95rem;line-height:1.7;color:var(--ink-2)}
@@ -1189,7 +1190,8 @@ details.disc-foot .hint{margin-top:9px}
 .zw-sqjq{color:#888;font-size:9px}
 .zw-xiaoxian{color:#999;font-size:8px;white-space:nowrap;overflow:hidden}
 .zw-gz-pro{font-size:16px;font-weight:bold;margin-top:2px}
-.zw-pname-pro{color:#a33;font-weight:bold;font-size:11px}
+.zw-pname-pro{color:#a33;font-weight:bold;font-size:11px;white-space:nowrap}
+.zw-pname-old{font-size:8px;color:#999;font-weight:normal;margin-left:2px}
 .zw-center-pro{background:var(--card);padding:8px;text-align:center;grid-column:span 2;grid-row:span 2}
 .zw-c-name{font-size:14px;font-weight:bold}
 .zw-c-time{font-size:10px;color:#666;margin:2px 0}
@@ -1292,24 +1294,35 @@ details.disc-foot .hint{margin-top:9px}
 .lyb sup{color:#c0392b;font-size:9px}
 [data-theme="night"] .lyb-y,[data-theme="night"] .lyb-n{background:#ddd}
 /* === 六爻像素级（照专业盘实测）=== */
-.lyx{width:100%;max-width:100%;border-collapse:collapse;font-size:12px;line-height:1.8}
+.lyx{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px;line-height:1.8}
 .lyx th,.lyx td{border:none;padding:4px 3px;vertical-align:middle}
-.lyx th:first-child,.lyx td.lyx-shen{white-space:nowrap;padding-right:8px}
-/* 单元格 flex 排版（2026-10-22 溢出根治）：六亲干支/动标记/世应定宽，爻条弹性伸缩吸收全部宽度差。
-   旧版为 nowrap + 固定宽爻条，三列 min-content 合计 331px > 卡片内容宽 316px（390px 视口实测），
-   表格无法收缩必然溢出；且爻条宽度有两段重复定义（32px 被后段 38px 静默覆盖，v1.1.2 整包导入时带入）。 */
-.lyx-flex{display:flex;align-items:center;gap:4px;min-width:0}
-.lyx .lyx-info{flex:0 0 auto;min-width:4.2em}
+/* 固定列宽网格（2026-10-22 对齐根治，废弃弹性爻条）：上一版爻条 flex 弹性伸缩虽堵住溢出，
+   但每行文字长短不一使爻条参差（用户真机实测三爻过长、变卦右列视觉出框、预览不对齐）。
+   本版：表 table-layout:fixed，六神列 46px（伏神改列六神下方一行腾宽），本/变卦两列等分；
+   单元格内 grid 定轨（六亲干支 46px｜爻条 48px｜动/世应标记 1fr），爻条全表统一 48px
+   （阳爻整条 48、阴爻 22+4+22），任何行内容长短都不再影响爻条宽度与位置。 */
+.lyx-flex{display:grid;grid-template-columns:46px 48px 1fr;column-gap:2px;align-items:center;min-width:0}
+.lyx .lyx-info{white-space:nowrap}
 .lyx .lyx-info sup{font-size:9px;color:#c0392b;vertical-align:super;line-height:1;margin-left:1px}
-.lyx-bar{flex:1 1 auto;display:flex;align-items:center;gap:4px;min-width:16px}
-.lyx-y,.lyx-n{display:block;flex:1 1 auto;height:7px;background:#2c2c2c;border-radius:2px}
+.lyx-bar{display:flex;align-items:center;gap:4px;width:48px;flex:none}
+.lyx-y{display:block;width:48px;height:7px;background:#2c2c2c;border-radius:2px}
+.lyx-n{display:block;width:22px;height:7px;background:#2c2c2c;border-radius:2px}
 .lyx th{color:var(--ink-2);font-weight:600;font-size:14px;text-align:left}
-.lyx th:first-child,.lyx td.lyx-shen{width:5.5em;text-align:left}
-.lyx td:nth-child(2),.lyx td:nth-child(3){width:auto;text-align:left}
+.lyx th:first-child,.lyx td.lyx-shen{width:46px;text-align:left}
+.lyx td.lyx-shen{line-height:1.5}
+.lyx .ly-fushen{font-size:10px}
+.lyx td:nth-child(2),.lyx td:nth-child(3){text-align:left}
 .lyx-mv{background:rgba(180,40,40,0.06)}
-.lyx-d{color:#c0392b;font-weight:700;font-size:15px;flex:0 0 auto}
-.lyx .lyx-sy{flex:0 0 auto}
+.lyx-d{color:#c0392b;font-weight:700;font-size:14px}
+.lyx-mark{white-space:nowrap;min-width:0}
+.lyx .lyx-sy{margin-left:3px}
 .lyx sup{color:#c0392b;font-size:10px}
+@media (max-width:380px){
+  .lyx-flex{grid-template-columns:44px 40px 1fr}
+  .lyx-bar{width:40px}
+  .lyx-y{width:40px}
+  .lyx-n{width:18px}
+}
 [data-theme="night"] .lyx-y,[data-theme="night"] .lyx-n{background:#e0e0e0}
 /* 六爻手动录入（2026-10-22 新功能）：模式分段切换 / 共用起卦时间 / 逐爻录入 */
 /* .ly-stage/.btn-row 是 author 层 display:flex，会盖过 hidden 属性，须显式守卫 */

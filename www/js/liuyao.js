@@ -263,23 +263,24 @@ var LiuYao = (function () {
     var box = $('ly-lines');
     if (!box) return;
     box.innerHTML = '';
-    // 自上而下显示（第六爻在上）
+    // 自上而下显示（第六爻在上）。固定几何（2026-10-22 对齐根治）：每行 = 条宽槽 104px
+    // （阳爻整条 104、阴爻 49+6+49）＋动标记固定列 20px，动/静/虚线行同宽同位，不再随标记有无漂移。
     for (var i = lines.length - 1; i >= 0; i--) {
       var l = lines[i];
       var d = document.createElement('div');
       d.className = 'ly-line ' + (l.yao === 1 ? 'yang' : 'yin') + (l.dong ? ' dong' : '');
-      if (l.yao === 1) {
-        d.innerHTML = '<span class="ly-bar"></span>' + (l.dong ? '<span class="ly-dong">○</span>' : '');
-      } else {
-        d.innerHTML = '<span class="ly-bar left"></span><span class="ly-bar right"></span>' + (l.dong ? '<span class="ly-dong">×</span>' : '');
-      }
+      var bars = l.yao === 1
+        ? '<span class="ly-bar"></span>'
+        : '<span class="ly-bar left"></span><span class="ly-bar right"></span>';
+      var mk = l.dong ? (l.yao === 1 ? '○' : '×') : '';
+      d.innerHTML = '<span class="ly-barwrap">' + bars + '</span><span class="ly-dong">' + mk + '</span>';
       box.appendChild(d);
     }
     // 未摇出的爻显示虚线
     for (var j = lines.length; j < 6; j++) {
       var e = document.createElement('div');
       e.className = 'ly-line empty';
-      e.innerHTML = '<span class="ly-bar ghost"></span>';
+      e.innerHTML = '<span class="ly-barwrap"><span class="ly-bar ghost"></span></span><span class="ly-dong"></span>';
       box.insertBefore(e, box.firstChild);
     }
   }
@@ -471,8 +472,8 @@ var LiuYao = (function () {
       var syMark = '';
       if (i === sy.shi) syMark = ' 世';
       else if (i === sy.ying) syMark = ' 应';
-      // 六神+伏神同行
-      var shenFu = beasts[i] + (fuShen[i] ? ' ' + fuShen[i] : '');
+      // 六神+伏神：伏神改列于六神下方（固定列宽网格的宽度预算所限，2026-10-22 对齐根治）
+      var shenFu = beasts[i] + (fuShen[i] ? '<br><span class="ly-fushen">' + fuShen[i] + '</span>' : '');
       // 变卦
       var bInfo = info, bBar = yaoBar3(l.yao === 1), bSY = syMark;
       if (hasDong && bianNj) {
@@ -485,12 +486,12 @@ var LiuYao = (function () {
         if (i === bianSy.shi) bSY = ' 世';
         else if (i === bianSy.ying) bSY = ' 应';
       }
+      var mark = '<span class="lyx-mark">' + dong + (syMark ? '<span class="lyx-sy">' + syMark.trim() + '</span>' : '') + '</span>';
+      var bMark = '<span class="lyx-mark">' + (bSY ? '<span class="lyx-sy">' + bSY.trim() + '</span>' : '') + '</span>';
       html += '<tr' + (l.dong ? ' class="lyx-mv"' : '') + '>'
         + '<td class="lyx-shen">' + shenFu + '</td>'
-        + '<td><span class="lyx-flex"><span class="lyx-info">' + info + '</span><span class="lyx-bar">' + bar + '</span>' + dong
-        + (syMark ? '<span class="lyx-sy">' + syMark.trim() + '</span>' : '') + '</span></td>'
-        + '<td><span class="lyx-flex"><span class="lyx-info">' + bInfo + '</span><span class="lyx-bar">' + bBar + '</span>'
-        + (bSY ? '<span class="lyx-sy">' + bSY.trim() + '</span>' : '') + '</span></td></tr>';
+        + '<td><span class="lyx-flex"><span class="lyx-info">' + info + '</span><span class="lyx-bar">' + bar + '</span>' + mark + '</span></td>'
+        + '<td><span class="lyx-flex"><span class="lyx-info">' + bInfo + '</span><span class="lyx-bar">' + bBar + '</span>' + bMark + '</span></td></tr>';
     }
     html += '</table>';
     // 互卦/错卦/综卦
