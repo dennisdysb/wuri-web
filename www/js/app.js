@@ -216,10 +216,6 @@ function renderHome() {
     td.y + '年' + td.m + '月' + td.d + '日 星期' + WEEK[new Date(td.y, td.m - 1, td.d).getDay()] +
     '<span class="dl-lunar">' + t('d_lunar') + tx(lunar.getMonthInChinese()) + '月' + tx(lunar.getDayInChinese()) + '</span>';
 
-  /* 修行图卡「今日」签：与上方日期行同口径（农历月日＋戊日标记） */
-  var todayPill = $('#home-today-pill');
-  if (todayPill) todayPill.textContent = '今日 · ' + t('d_lunar') + tx(lunar.getMonthInChinese()) + '月' + tx(lunar.getDayInChinese()) + (wu ? ' · 戊日' : '');
-
   var card = $('#status-card');
   if (wu) {
     card.className = 'card status wu';

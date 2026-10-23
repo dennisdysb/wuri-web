@@ -6,9 +6,10 @@ import importlib.util, json, os, subprocess, sys, time, urllib.request, base64
 spec = importlib.util.spec_from_file_location("smoke", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
 smoke = importlib.util.module_from_spec(spec); spec.loader.exec_module(smoke)
 CDP, WS, free_port = smoke.CDP, smoke.WS, smoke.free_port
-WWW = os.path.expanduser("~/workspace/wuri-web/www")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WWW = os.path.join(ROOT, "www")
 URL = "file://" + WWW + "/index.html"
-OUT = os.path.expanduser("~/workspace/wuri-web/qimen-build/shots-hero")
+OUT = os.path.join(ROOT, "qimen-build", "shots-hero")
 os.makedirs(OUT, exist_ok=True)
 fails = []
 def check(name, ok, extra=""):
@@ -50,18 +51,24 @@ def run(width, tag):
 
         st = ev("""(() => {
           const heroes = document.querySelectorAll('#tab-home .hero2');
-          const pill = document.getElementById('home-today-pill');
+          const seal = document.querySelector('#practice-entry-card .h2-seal');
+          const pillEl = document.getElementById('home-today-pill');
+          const segTops = Array.from(document.querySelectorAll('#shushu-entry-card .h2-seg'))
+            .map(s => Math.round(s.getBoundingClientRect().top));
           const visBtns = Array.from(document.querySelectorAll('.hero2 .btn')).filter(b => {
             const r = b.getBoundingClientRect(); const cs = getComputedStyle(b);
             return cs.display !== 'none' && r.width > 0; });
           const sw = document.documentElement.scrollWidth, iw = window.innerWidth;
           const bgDay = getComputedStyle(document.querySelector('.h2-bg-practice')).backgroundImage;
-          return { nHeroes: heroes.length, pill: pill ? pill.textContent : null,
+          return { nHeroes: heroes.length, seal: !!seal, pillExists: !!pillEl,
+                   segTops: segTops,
+                   segOneRow: segTops.length === 4 && (Math.max(...segTops) - Math.min(...segTops)) <= 1,
                    visBtns: visBtns.length, overflow: sw - iw, bgDay: bgDay.slice(0, 80),
                    count: (document.getElementById('deities-count-cn')||{}).textContent };
         })()""")
         check(f"[{tag}] 首页 hero 块 = 3", st["nHeroes"] == 3, st)
-        check(f"[{tag}] 今日签已填（农历）", bool(st["pill"]) and "农历" in st["pill"], st["pill"])
+        check(f"[{tag}] 修行卡无朱印无今日签", st["seal"] is False and st["pillExists"] is False, st)
+        check(f"[{tag}] 术数四胶囊一行排齐", st["segOneRow"] is True, st["segTops"])
         check(f"[{tag}] hero 内可见按钮 = 0", st["visBtns"] == 0, st["visBtns"])
         check(f"[{tag}] 首页无横向溢出", st["overflow"] <= 0, st["overflow"])
         check(f"[{tag}] 日间底图指向 heroes/day", "heroes/day/practice" in st["bgDay"], st["bgDay"])
@@ -111,6 +118,8 @@ def run(width, tag):
         ev("document.documentElement.setAttribute('data-theme','night'); 'ok'"); time.sleep(0.8)
         bgN = ev("getComputedStyle(document.querySelector('.h2-bg-compass')).backgroundImage")
         check(f"[{tag}] 夜间底图指向 heroes 原图", "heroes/compass" in bgN and "/day/" not in bgN, bgN[:80])
+        bgDeityN = ev("getComputedStyle(document.querySelector('.h2-bg-deity')).backgroundImage")
+        check(f"[{tag}] 夜间图鉴底图指向 deity-night", "heroes/deity-night" in bgDeityN, bgDeityN[:80])
         fullshot(f"home-night-{tag}")
         ev("document.getElementById('shushu-entry-card').click(); 'ok'"); time.sleep(0.8)
         fullshot(f"sub-night-{tag}")
