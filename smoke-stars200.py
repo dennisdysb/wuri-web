@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""v2.0.0 中国星象模块专项冒烟（本地 file:// + CDP）。
-断言：首页四卡序/星象卡底图、今日星空卡三值与值神行同源、图鉴 102 位、
+"""v2.0.0 (1) 中国星象模块专项冒烟（本地 file:// + CDP）。
+断言：首页三卡序且无今日星空卡/星象卡、标签栏六标签序、星象页首块今日星象三值与值神行同源、
 星官图鉴 287/31 与徽标统计、区页折叠+搜索、详情简图/双表/分歧/合咏注、
 互链双向（星官↔星君↔神祇强链）、步天歌分架与逐句跳详情、双主题双宽度零溢出、无 JS 异常。"""
 import importlib.util, json, os, subprocess, sys, time, urllib.request
@@ -59,22 +59,32 @@ try:
 
     # ---------- 首页 ----------
     r = ev("""(() => {
-      const ids = ['practice-entry-card','shushu-entry-card','deities-entry-card','stars-entry-card'];
+      const home = document.getElementById('tab-home');
+      const ids = ['practice-entry-card','shushu-entry-card','deities-entry-card'];
       const order = ids.map(id => { const el = document.getElementById(id);
-        return el ? [...document.querySelectorAll('.hero2')].indexOf(el) : -1; });
-      const card = document.getElementById('stars-entry-card');
-      const bg = getComputedStyle(card.querySelector('.h2-bg')).backgroundImage;
-      return { order, bgStarmap: bg.includes('starmap.webp'),
-               visible: !!(card.offsetParent) }; })()""")
-    report("首页四卡顺序 修行<术数<图鉴<星象", r["order"] == sorted(r["order"]) and -1 not in r["order"], r)
-    report("星象卡夜间底图 starmap.webp", r["bgStarmap"] and r["visible"], r)
+        return el ? [...home.querySelectorAll('.hero2')].indexOf(el) : -1; });
+      const tabs = [...document.querySelectorAll('#tabbar button')].map(b => b.getAttribute('data-tab'));
+      return { order, heroN: home.querySelectorAll('.hero2').length, tabs,
+               noSky: !home.querySelector('#today-sky-card'),
+               noStarsCard: !home.querySelector('#stars-entry-card') }; })()""")
+    report("首页三卡顺序 修行<术数<图鉴", r["order"] == sorted(r["order"]) and -1 not in r["order"] and r["heroN"] == 3, r)
+    report("首页无今日星空卡/星象卡", r["noSky"] and r["noStarsCard"], r)
+    report("标签栏六标签序 首页/黄历/经文/星象/提醒/我的",
+           r["tabs"] == ['tab-home', 'tab-cal', 'tab-jing', 'tab-stars', 'tab-remind', 'tab-me'], r)
+    shot("home-390-day")
 
-    # ---------- 今日星空卡 ----------
-    r = ev("""(() => {
+    # ---------- 星象标签页：首块今日星象 ----------
+    ev("document.querySelector('[data-tab=\"tab-stars\"]').click(); true", 0.4)
+    r = ev(r"""(() => {
       const zs = (document.getElementById('zhishen-line') || {}).textContent || '';
       const xiu = (document.getElementById('sx-sky-xiu') || {}).textContent || '';
       const zm = zs.match(/日值神\s*(\S)/);
-      return { zsXiu: zm ? zm[1] : '', cardXiu: xiu.trim(),
+      const sky = document.getElementById('today-sky-card');
+      const sxHome = document.getElementById('sx-home');
+      return { tabActive: document.getElementById('tab-stars').classList.contains('active'),
+        inTab: !!document.querySelector('#tab-stars #today-sky-card'),
+        skyFirst: !!(sky.compareDocumentPosition(sxHome) & Node.DOCUMENT_POSITION_FOLLOWING),
+        zsXiu: zm ? zm[1] : '', cardXiu: xiu.trim(),
         dipper: (document.getElementById('sx-sky-dipper-big') || {}).textContent || '',
         dipperSub: (document.getElementById('sx-sky-dipper-sub') || {}).textContent || '',
         moonBig: (document.getElementById('sx-sky-moon-big') || {}).textContent || '',
@@ -82,26 +92,29 @@ try:
         compassSvg: !!document.querySelector('#sx-sky-compass svg'),
         moonSvg: !!document.querySelector('#sx-sky-moon svg, #sx-sky-moon canvas'),
         lordImg: (document.getElementById('sx-sky-img') || {}).naturalWidth > 0 }; })()""")
+    report("星象页激活+今日星象卡在图鉴内容之上", r["tabActive"] and r["inTab"] and r["skyFirst"], r)
     report("今日卡值日宿与值神行同源（宿字起首）", r["zsXiu"] and r["cardXiu"].startswith(r["zsXiu"]), r)
     report("今日卡斗柄方位+月建支", bool(r["dipper"]) and bool(r["dipperSub"]), r)
     report("今日卡月相名+照亮%+月龄", bool(r["moonBig"]) and "%" in r["moonSub"] and "月龄" in r["moonSub"], r)
     report("今日卡罗盘/月形 SVG 与星君图", r["compassSvg"] and r["moonSvg"] and r["lordImg"], r)
-    shot("today-sky-390-day")
+    shot("stars-tab-390-day")
 
-    # ---------- 进星官图鉴 ----------
-    ev("document.getElementById('stars-entry-card').click(); true", 0.4)
+    # ---------- 星官图鉴（星象页内） ----------
     for _ in range(30):
         if ev("!!document.querySelector('#sx-home .sx-yuan-name')"): break
         time.sleep(0.5)
     r = ev("""(() => { const home = document.getElementById('sx-home');
       const txt = home.textContent;
-      return { vis: !document.getElementById('view-stars').hidden,
+      return { tabActive: document.getElementById('tab-stars').classList.contains('active'),
         has287: txt.includes('287'), has39: (txt.match(/39/g) || []).length,
         yuanCards: home.querySelectorAll('.sx-yuan-card, [data-sx-region]').length,
         chips: home.querySelectorAll('.sx-chips [data-sx-region]').length,
+        noStrip: !home.querySelector('[data-sx-todaylord],[data-sx-gosky]'),
+        noViewStars: !document.getElementById('view-stars'),
         lordImgOk: [...home.querySelectorAll('img')].every(i => i.naturalWidth > 0),
         overflow: document.documentElement.scrollWidth <= window.innerWidth + 1 }; })()""")
-    report("s1 星官图鉴打开+懒加载渲染", r["vis"] and r["has287"], r)
+    report("s1 星官图鉴渲染（星象页内）", r["tabActive"] and r["has287"], r)
+    report("s1 图鉴首页无重复值日宿条、view-stars 已除", r["noStrip"] and r["noViewStars"], r)
     report("s1 宿签 28 枚", r["chips"] == 28, r)
     report("s1 造像图全加载/零溢出", r["lordImgOk"] and r["overflow"], r)
     shot("s1-390-day")
@@ -113,7 +126,7 @@ try:
         rows: reg.querySelectorAll('[data-sx-detail]').length,
         hasSearch: !!reg.querySelector('input'),
         hasMore: !!reg.querySelector('[data-sx-more]'),
-        lordCard: !!reg.querySelector('[data-sx-todaylord], .sx-lord-head') }; })()""")
+        lordCard: !!reg.querySelector('[data-sx-deity]') }; })()""")
     report("s2 紫微垣区页打开（首屏 13 行+折叠钮+搜索框）", r["vis"] and r["hasSearch"] and r["hasMore"] and r["rows"] >= 13, r)
     ev("""(() => { const inp = document.querySelector('#sx-region input');
         inp.value = '北斗'; inp.dispatchEvent(new Event('input', {bubbles:true})); return true; })()""", 0.5)
@@ -165,7 +178,6 @@ try:
     report("合咏注：华盖详情有合咏十六星小字", "十六" in r, r)
 
     # ---------- 图鉴 102 ----------
-    ev("window.__wuri_openDeity && document.getElementById('stars-back').click(); true", 0.3)
     ev("""(() => { const b = document.querySelector('[data-tab="tab-home"]'); if (b) b.click(); return true; })()""", 0.5)
     ev("document.getElementById('deities-entry-card').click(); true", 0.8)
     r = ev("""(() => { const g = document.getElementById('deities-groups');
@@ -202,11 +214,12 @@ try:
     r = ev("!document.getElementById('view-star-detail').hidden")
     report("s5 逐句签→星官详情跳转", r is True, r)
 
-    # ---------- 切 tab 后新视图全隐藏 ----------
+    # ---------- 切 tab 后星象子视图全隐藏 ----------
     ev("""(() => { const b = document.querySelector('[data-tab="tab-home"]'); if (b) b.click(); return true; })()""", 0.5)
-    r = ev("""(() => ['view-stars','view-star-region','view-star-detail','view-butiange']
-        .every(id => document.getElementById(id).hidden))()""")
-    report("切 tab 后星象四视图全隐藏", r is True, r)
+    r = ev("""(() => ['view-star-region','view-star-detail','view-butiange']
+        .every(id => document.getElementById(id).hidden)
+        && !document.getElementById('tab-stars').classList.contains('active'))()""")
+    report("切 tab 后星象三子视图全隐藏", r is True, r)
 
     # ---------- 夜间 + 412 复验 ----------
     ev("""(() => { const b = document.querySelector('[data-theme-toggle]');
@@ -214,12 +227,16 @@ try:
         return document.documentElement.getAttribute('data-theme'); })()""", 0.5)
     cdp.call("Emulation.setDeviceMetricsOverride", {"width": 412, "height": 915, "deviceScaleFactor": 2, "mobile": True})
     time.sleep(0.4)
-    r = ev("""(() => { const card = document.getElementById('stars-entry-card');
-      const bg = getComputedStyle(card.querySelector('.h2-bg')).backgroundImage;
+    r = ev("""(() => { const home = document.getElementById('tab-home');
+      const btns = [...document.querySelectorAll('#tabbar button')];
       return { night: document.documentElement.getAttribute('data-theme'),
-        bgNight: bg.includes('heroes/starmap.webp'),
+        heroN: home.querySelectorAll('.hero2').length,
+        btnN: btns.length,
+        minW: Math.min.apply(null, btns.map(b => b.offsetWidth)),
+        barW: document.getElementById('tabbar').scrollWidth,
         overflow: document.documentElement.scrollWidth <= window.innerWidth + 1 }; })()""")
-    report("夜间 412：星象卡夜图+零溢出", r["night"] == "night" and r["bgNight"] and r["overflow"], r)
+    report("夜间 412：首页三卡+六标签不挤压+零溢出",
+           r["night"] == "night" and r["heroN"] == 3 and r["btnN"] == 6 and r["minW"] >= 55 and r["barW"] <= 413 and r["overflow"], r)
     shot("home-412-night")
     ev("window.Stars.openHome(); true", 0.9)
     r = ev("document.documentElement.scrollWidth <= window.innerWidth + 1")

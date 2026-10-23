@@ -1,5 +1,5 @@
-/* 戊日不上香 · 中国星象模块（v2.0.0）
- * 星官图鉴（s1 首页 / s2 区页 / s3 星官详情）＋《步天歌》典籍页（s5）＋首页今日星空卡（s4）。
+/* 戊日不上香 · 中国星象模块（v2.0.0；v2.0.0 (1) 改底部「星象」标签页）
+ * 星象标签页＝页首今日星象卡（s4，原首页卡整块搬入）＋星官图鉴（s1 首页 / s2 区页 / s3 星官详情）＋《步天歌》典籍页（s5）。
  * 数据懒加载：首次打开星官图鉴才 fetch data/xingguan.json＋data/butiange.json（Promise 缓存）。
  * 数据文本（官名/歌诀/星名）不走 i18n，显示一律过 tx() 简繁转换；固定文案走 sx_* 键。
  * 值日宿显示与首页 zhishen-line 同源：lunar.getXiu()＋XINGSU28 映射全称；
@@ -75,9 +75,10 @@
   }
   function openDeity(id) {
     if (!window.__wuri_openDeity) return;
-    /* 神祇详情视图在 DOM 中位于星象视图之前（同 z-index 下星象视图会盖住详情），
-     * 故先收起星象四视图、亮出图鉴列表垫底，详情返回即落回神祇图鉴。 */
-    hide('view-stars'); hide('view-star-region'); hide('view-star-detail'); hide('view-butiange');
+    /* 神祇详情视图在 DOM 中位于星象子视图之前（同 z-index 下子视图会盖住详情），
+     * 故先收起星象三子视图、亮出图鉴列表垫底，详情返回即落回神祇图鉴。
+     * 星象标签页（tab-stars）是普通标签主区、不在此列。 */
+    hide('view-star-region'); hide('view-star-detail'); hide('view-butiange');
     show('view-deities');
     window.__wuri_openDeity(id);
   }
@@ -95,13 +96,21 @@
   function hide(id) { var v = $(id); if (v) v.hidden = true; }
   function scrollTopOf(id) { var v = $(id); if (v) v.scrollTop = 0; }
 
+  /* 深链/外部入口：切到星象标签页（app.js 的标签钩子会调 activate） */
   function openHome() {
+    var tab = $('tab-stars');
+    var btn = document.querySelector('#tabbar button[data-tab="tab-stars"]');
+    if (btn && !(tab && tab.classList.contains('active'))) { btn.click(); return; }
+    activate();
+  }
+
+  /* 星象标签页激活：收起子视图、懒加载并渲染图鉴首页（今日星象卡由 renderTodaySky 常驻渲染） */
+  function activate() {
     hide('view-star-region'); hide('view-star-detail'); hide('view-butiange');
-    show('view-stars');
     var host = $('sx-home');
-    if (XG && BT) { renderHome(); scrollTopOf('view-stars'); return; }
+    if (XG && BT) { renderHome(); return; }
     if (host) host.innerHTML = loadingHTML();
-    loadData().then(function () { renderHome(); scrollTopOf('view-stars'); })
+    loadData().then(function () { renderHome(); })
       .catch(function () { if (host) host.innerHTML = failHTML('home'); });
   }
 
@@ -119,7 +128,7 @@
     if (XG && !secInfo[section] && !lordOfMansion(section)) section = resolveSection(section);
     if (XG && !secInfo[section]) return;
     hide('view-star-detail');
-    show('view-stars'); show('view-star-region');
+    show('view-star-region');
     var host = $('sx-region');
     if (XG && BT) { renderRegion(section); scrollTopOf('view-star-region'); return; }
     if (host) host.innerHTML = loadingHTML();
@@ -131,7 +140,7 @@
   }
 
   function openDetail(key) {
-    show('view-stars'); show('view-star-detail');
+    show('view-star-detail');
     var host = $('sx-detail');
     if (XG && BT) { renderDetail(key); scrollTopOf('view-star-detail'); return; }
     if (host) host.innerHTML = loadingHTML();
@@ -191,22 +200,11 @@
     XG.asterisms.forEach(function (a) {
       if (a.status === '确定') det++; if (a.status === '存疑') doubt++; if (a.qing_variant) dual++;
     });
-    var tx1 = todayXiu();
     var h = '';
     h += '<div class="sx-kicker">' + esc(t('sx_kicker')) + '</div>';
     h += '<div class="sx-title">' + esc(t('sx_home_title')) + '</div>';
     h += '<div class="sx-sub">' + txEsc(tf(t('sx_data_line'), total, secOrder.length)) + '<br>' +
       txEsc(tf(t('sx_data_line2'), det, doubt, dual)) + '</div>';
-
-    /* 今日值日宿条 */
-    if (tx1) {
-      h += '<div class="sx-card sx-today" data-sx-todaylord="' + (tx1.lord ? esc(tx1.lord.id) : '') + '">';
-      if (tx1.lord) h += '<img src="img/deities/' + esc(tx1.lord.image) + '" alt="' + txEsc(tx1.full) + '">';
-      h += '<div><div class="t1">' + esc(t('sx_today_xiu')) + '</div>' +
-        '<div class="t2">' + txEsc(tx1.full) + '</div>' +
-        '<div class="t3">' + txEsc(tx1.group + ' · ' + tx1.xiu + '宿 · 值日') + '</div></div>' +
-        '<div class="go" data-sx-gosky="1">' + esc(t('sx_today_sky')) + '</div></div>';
-    }
 
     /* 三垣 */
     h += '<div class="sx-sec">' + esc(t('sx_sanyuan')) + ' <small>' + esc(t('sx_sanyuan_note')) + '</small></div>';
@@ -631,18 +629,8 @@
 
   /* ---------------- 全局点击委托 ---------------- */
   document.addEventListener('click', function (e) {
-    var el = e.target && e.target.closest ? e.target.closest('[data-sx-region],[data-sx-detail],[data-sx-deity],[data-sx-book],[data-sx-booksec],[data-sx-lords],[data-sx-todaylord],[data-sx-more],[data-sx-toc],[data-sx-retry],[data-sx-gosky]') : null;
+    var el = e.target && e.target.closest ? e.target.closest('[data-sx-region],[data-sx-detail],[data-sx-deity],[data-sx-book],[data-sx-booksec],[data-sx-lords],[data-sx-more],[data-sx-toc],[data-sx-retry]') : null;
     if (!el) return;
-    if (el.hasAttribute('data-sx-gosky')) {
-      e.stopPropagation();
-      var tabBtn = document.querySelector('#tabbar button[data-tab="tab-home"]');
-      if (tabBtn) tabBtn.click();
-      setTimeout(function () {
-        var c = $('today-sky-card');
-        if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 60);
-      return;
-    }
     if (el.hasAttribute('data-sx-retry')) {
       var what = el.getAttribute('data-sx-retry');
       if (what === 'home') openHome();
@@ -677,11 +665,6 @@
       }, 60);
       return;
     }
-    if (el.hasAttribute('data-sx-todaylord')) {
-      var lid = el.getAttribute('data-sx-todaylord');
-      if (lid) openDeity(lid);
-      return;
-    }
     if (el.hasAttribute('data-sx-deity')) { openDeity(el.getAttribute('data-sx-deity')); return; }
     if (el.hasAttribute('data-sx-detail')) { openDetail(el.getAttribute('data-sx-detail')); return; }
     if (el.hasAttribute('data-sx-region')) { openRegion(el.getAttribute('data-sx-region')); return; }
@@ -689,12 +672,7 @@
 
   /* ---------------- 绑定 ---------------- */
   function bind() {
-    var enter = $('stars-enter');
-    if (enter) enter.addEventListener('click', openHome);
     var b;
-    if ((b = $('stars-back'))) b.addEventListener('click', function () {
-      hide('view-stars'); hide('view-star-region'); hide('view-star-detail'); hide('view-butiange');
-    });
     if ((b = $('star-region-back'))) b.addEventListener('click', function () { hide('view-star-region'); hide('view-star-detail'); });
     if ((b = $('star-detail-back'))) b.addEventListener('click', function () { hide('view-star-detail'); });
     if ((b = $('butiange-back'))) b.addEventListener('click', function () { hide('view-butiange'); });
@@ -715,7 +693,8 @@
       var sh = $('sx-jing-shelf'); if (sh) sh.remove();
       injectShelf();
       if (XG && BT) {
-        if (!$('view-stars').hidden) renderHome();
+        var tsTab = $('tab-stars');
+        if (tsTab && tsTab.classList.contains('active')) renderHome();
         if (!$('view-star-region').hidden && curSection) {
           var q = regionState.query, ex = regionState.expanded;
           renderRegion(curSection); regionState.query = q; regionState.expanded = ex;
@@ -731,5 +710,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 
-  window.Stars = { openHome: openHome, openRegion: openRegion, openDetail: openDetail, openButiange: openButiange, renderTodaySky: renderTodaySky };
+  window.Stars = { openHome: openHome, activate: activate, openRegion: openRegion, openDetail: openDetail, openButiange: openButiange, renderTodaySky: renderTodaySky };
 })();

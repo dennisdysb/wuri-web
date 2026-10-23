@@ -143,7 +143,7 @@ $$('#tabbar button').forEach(function (btn) {
     target.classList.add('active');
     target.style.display = 'block';
     // 切换标签时隐藏六爻/八字/紫微等独立视图，防止内容泄漏
-    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-affinity', 'view-affinity-result', 'view-stars', 'view-star-region', 'view-star-detail', 'view-butiange'].forEach(function (vid) {
+    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-affinity', 'view-affinity-result', 'view-star-region', 'view-star-detail', 'view-butiange'].forEach(function (vid) {
       var v = document.getElementById(vid);
       if (v) v.hidden = true;
     });
@@ -151,6 +151,10 @@ $$('#tabbar button').forEach(function (btn) {
     // 切到黄历时刷新日历（我的日子等标记及时显示）
     if (btn.getAttribute('data-tab') === 'tab-cal') { try { renderCalendar(); } catch (e) {} }
     // 进入经文 tab 时重置回目录页（问题1修复）
+    // 进入星象 tab 时懒加载星官数据并渲染图鉴首页（v2.0.0 (1)）
+    if (btn.getAttribute('data-tab') === 'tab-stars') {
+      if (window.Stars && window.Stars.activate) window.Stars.activate();
+    }
     if (btn.getAttribute('data-tab') === 'tab-jing') {
       if (window.JingWen && window.JingWen.resetToCatalog) {
         window.JingWen.resetToCatalog();
@@ -1552,7 +1556,6 @@ function bindMe() {
   }
   fwd('practice-entry-card', 'practice-enter');
   fwd('deities-entry-card', 'deities-enter');
-  fwd('stars-entry-card', 'stars-enter');
   var shushu = document.getElementById('view-shushu');
   var ssCard = document.getElementById('shushu-entry-card');
   if (ssCard && shushu) ssCard.addEventListener('click', function () { shushu.hidden = false; window.scrollTo(0, 0); });
