@@ -113,7 +113,7 @@ for width in (412, 390):
         chrome.terminate()
 
 # ---------------- B. App 分享三路 ----------------
-SEED = """localStorage.setItem('wuri_affinity_result', JSON.stringify({a:[0,0,0,0,0,0,0,0,0,0,0,0], main:'baosheng', subs:['taiyi','mazu']}));"""
+SEED = """localStorage.setItem('wuri_affinity_result', JSON.stringify({a:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], main:'shennong', subs:['wenqiong','baosheng']}));"""
 
 # B1: navigator.share 在位 → 系统分享
 inject_share = """
@@ -132,14 +132,14 @@ try:
     do(ev, "document.getElementById('affinity-enter').click()")
     time.sleep(0.6)
     check("B1 结果页打开", ev("!document.getElementById('view-affinity-result').hidden"))
-    check("B1 主缘为保生大帝", ev("document.getElementById('aff-main-name').textContent").strip() == "保生大帝")
+    check("B1 主缘为神农大帝", ev("document.getElementById('aff-main-name').textContent").strip() == "神农大帝")
     do(ev, "document.getElementById('aff-share-link').click()")
     time.sleep(0.4)
     calls = ev("window.__shareCalls")
     check("B1 系统分享被调用", bool(calls) and len(calls) == 1, calls)
     if calls:
-        check("B1 分享URL为主缘专属页", calls[0].get("url") == "https://wuri.shengboyu.ca/yuanfen/baosheng.html", calls[0].get("url"))
-        check("B1 分享title带名号", "保生大帝" in (calls[0].get("title") or ""), calls[0].get("title"))
+        check("B1 分享URL为主缘专属页", calls[0].get("url") == "https://wuri.shengboyu.ca/yuanfen/shennong.html", calls[0].get("url"))
+        check("B1 分享title带名号", "神农大帝" in (calls[0].get("title") or ""), calls[0].get("title"))
     check("B1 复制链接按钮在位", ev("!!document.getElementById('aff-copy-link')"))
     check("B1 生成分享卡按钮在位", ev("!!document.getElementById('aff-share')"))
     check("B1 小红书提示行", "小红书" in (ev("document.querySelector('.aff-save-hint').textContent") or ""))
@@ -169,7 +169,7 @@ try:
     do(ev, "document.getElementById('aff-copy-link').click()")
     time.sleep(0.5)
     clip = ev("window.__clip")
-    check("B2 复制链接写入剪贴板", clip == ["https://wuri.shengboyu.ca/yuanfen/baosheng.html"], clip)
+    check("B2 复制链接写入剪贴板", clip == ["https://wuri.shengboyu.ca/yuanfen/shennong.html"], clip)
     toasts = ev("window.__toasts")
     check("B2 复制后toast", bool(toasts) and any("复制" in t for t in toasts), toasts)
     do(ev, "document.getElementById('aff-share-link').click()")

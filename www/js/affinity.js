@@ -1,4 +1,4 @@
-/* 神仙缘分测试（免费）：12 道原创情境题 → 双轴计分 → 1 主缘 + 2 次缘
+/* 神仙缘分测试（免费）：16 道原创情境题 → 双轴计分 → 1 主缘 + 2 次缘
  * 标签源：js/affinity-data.js（74 位全入池，含酆都大帝、太岁殷元帅独立一位）
  * 双轴：所求(needs) + 气质(traits)，经历母题(motifs)作小权重。
  * 神祇权重：主所求 3 / 次所求 1.5 / 气质 1 / 母题 0.6；
@@ -18,7 +18,7 @@
   if (!TAGS || !QS) return;
 
   var LS_PROG = 'wuri_affinity_progress'; /* {a:[已答选项下标]} */
-  var LS_RES = 'wuri_affinity_result';     /* {a:[12], main:id, subs:[id,id]} */
+  var LS_RES = 'wuri_affinity_result';     /* {a:[16], main:id, subs:[id,id]} */
 
   function T(k) { return (window.t ? window.t(k) : k); }
   function TX(s) { return (window.tx ? window.tx(s) : s); }
@@ -29,6 +29,14 @@
   function lsGet(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  /* 2026-10-22 题库扩至 16 题：旧结果（答卷长度不符）作废，避免按新参考值错算雷达；
+   * 旧进度前 12 题与新题库同序同题，保留续答（补答新增 4 题即可）。 */
+  (function () {
+    var res = lsGet(LS_RES);
+    if (res && (!res.a || res.a.length !== QS.length)) lsDel(LS_RES);
+    var prog = lsGet(LS_PROG);
+    if (prog && prog.a && prog.a.length > QS.length) lsDel(LS_PROG);
+  })();
 
   /* ---------- 计分（与 qimen-build/affinity_model.py 同口径，已仿真验证） ---------- */
   function weightsOf(d) {
