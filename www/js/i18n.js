@@ -115,7 +115,7 @@ tb_hint: '真太阳时按经度换算，用于时辰判定（时值神、此刻�
 tz_hint: '身在海外时，若按国内老黄历对照请选择「北京时间」。',
 me_theme: '外观主题', theme_auto: '跟随系统', theme_day: '白天 · 宣纸', theme_night: '黑夜 · 玄黑',
 me_lang: '语言', lang_auto: '跟随系统', lang_cn: '简体中文', lang_tw: '繁體中文',
-me_about: '关于', me_app: '应用', me_ver: '戊日不上香 v2.0.0 (4) (2026-10-23)',
+me_about: '关于', me_app: '应用', me_ver: '戊日不上香 v2.0.0 (5) (2026-10-23)',
 me_about_hint: '戊日不上香。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。本应用采用地支藏干法推算暗戊日（日支藏戊：寅、辰、巳、申、戌）；暗戊规则并无跨门派统一标准，请遵师承。',
 privacy: '隐私政策',
 disclaimer_title: '免责声明',
@@ -224,7 +224,17 @@ sx_caliber: '斗柄为传统斗建口径（初昏锚定月建、每时辰顺进�
 sx_shelf_kicker: '典 籍 · 天 文', sx_shelf_title: '步天歌', sx_shelf_note: '全歌三百七十二句 · 逐句可查星官',
 sx_book_kicker: '典 籍 · 天 文', sx_book_sub: '全歌 %d 句 · %d 区 · 与经文库分格：彼为经，此为籍',
 sx_toc: '全歌目录', sx_toc_note: '点区名直达该段', sx_section_lines: '本段共 %d 句', sx_to_region: '本区图鉴 ›', sx_expand: '展开',
-sx_kind_struct: '结构句', sx_kind_ref: '回指句'
+sx_kind_struct: '结构句', sx_kind_ref: '回指句',
+sx_sky_to_ast: '本宿星官 %s', sx_sky_to_lord: '本宿星君 %s',
+sx_link_beidou: '北斗星官', sx_link_doumu: '斗姆元君',
+sx_fenye: '分野', sx_fenye_ci: '次：%s', sx_fenye_chen: '辰：%s',
+sx_fenye_main: '%s · %s之次 · 国分野 %s · 州 %s',
+sx_fenye_cross: '本宿跨次：%s', sx_fenye_seg: '属%s %s度', sx_fenye_cross_note: '主属以度数过半定（见分野主属）。',
+sx_fenye_hanshu: '汉书·地理志', sx_fenye_hanshu_guo: '国 %s（整宿制，与《晋书》分宿制不同源）', sx_fenye_hanshu_none: '整宿制分野表中独缺此宿，无所属。',
+sx_fenye_modern: '今地域（后人比附）', sx_fenye_div: '分歧',
+sx_fenye_src: '分野以宿为最小单位，本区星官分野随本宿；主本《晋书·天文志上》陈卓系，《汉书·地理志》整宿制对校。',
+sun_line: '太阳所在：%s · %s之次 · 入%s约 %s 度', sun_note: '按太阳视黄经折合二十八宿古度（《晋书》十二次宿度为骨架、中气定锚），定位止于宿；入宿度为约数。',
+d_sun: '日躔', zs_day_hint: '点按看本宿星官图鉴', zs_month_hint: '月将由太阳所在之宫定——点按看太阳今躔之宿'
 },
 'zh-TW': {
 app_title: '戊日不上香',
@@ -335,7 +345,7 @@ tb_hint: '真太陽時按經度換算，用於時辰判定（時值神、此刻�
 tz_hint: '身在海外時，若按國內老黃曆對照請選擇「北京時間」。',
 me_theme: '外觀主題', theme_auto: '跟隨系統', theme_day: '白天 · 宣紙', theme_night: '黑夜 · 玄黑',
 me_lang: '語言', lang_auto: '跟隨系統', lang_cn: '簡體中文', lang_tw: '繁體中文',
-me_about: '關於', me_app: '應用', me_ver: '戊日不上香 v2.0.0 (4) (2026-10-23)',
+me_about: '關於', me_app: '應用', me_ver: '戊日不上香 v2.0.0 (5) (2026-10-23)',
 me_about_hint: '戊日不上香。本應用按日柱天干推算戊日並提前提醒，農曆、干支、節氣、宜忌均由內置曆法庫離線計算。本應用採用地支藏干法推算暗戊日（日支藏戊：寅、辰、巳、申、戌）；暗戊規則並無跨門派統一標準，請遵師承。',
 privacy: '隱私政策',
 disclaimer_title: '免責聲明',
@@ -444,7 +454,17 @@ sx_caliber: '斗柄為傳統斗建口徑（初昏錨定月建、每時辰順進�
 sx_shelf_kicker: '典 籍 · 天 文', sx_shelf_title: '步天歌', sx_shelf_note: '全歌三百七十二句 · 逐句可查星官',
 sx_book_kicker: '典 籍 · 天 文', sx_book_sub: '全歌 %d 句 · %d 區 · 與經文庫分格：彼為經，此為籍',
 sx_toc: '全歌目錄', sx_toc_note: '點區名直達該段', sx_section_lines: '本段共 %d 句', sx_to_region: '本區圖鑑 ›', sx_expand: '展開',
-sx_kind_struct: '結構句', sx_kind_ref: '回指句'
+sx_kind_struct: '結構句', sx_kind_ref: '回指句',
+sx_sky_to_ast: '本宿星官 %s', sx_sky_to_lord: '本宿星君 %s',
+sx_link_beidou: '北斗星官', sx_link_doumu: '斗姆元君',
+sx_fenye: '分野', sx_fenye_ci: '次：%s', sx_fenye_chen: '辰：%s',
+sx_fenye_main: '%s · %s之次 · 國分野 %s · 州 %s',
+sx_fenye_cross: '本宿跨次：%s', sx_fenye_seg: '屬%s %s度', sx_fenye_cross_note: '主屬以度數過半定（見分野主屬）。',
+sx_fenye_hanshu: '漢書·地理志', sx_fenye_hanshu_guo: '國 %s（整宿制，與《晉書》分宿制不同源）', sx_fenye_hanshu_none: '整宿制分野表中獨缺此宿，無所屬。',
+sx_fenye_modern: '今地域（後人比附）', sx_fenye_div: '分歧',
+sx_fenye_src: '分野以宿為最小單位，本區星官分野隨本宿；主本《晉書·天文志上》陳卓系，《漢書·地理志》整宿制對校。',
+sun_line: '太陽所在：%s · %s之次 · 入%s約 %s 度', sun_note: '按太陽視黃經折合二十八宿古度（《晉書》十二次宿度為骨架、中氣定錨），定位止於宿；入宿度為約數。',
+d_sun: '日躔', zs_day_hint: '點按看本宿星官圖鑑', zs_month_hint: '月將由太陽所在之宮定——點按看太陽今躔之宿'
 }};
 
 /* 简→繁逐字映射：仅收录历法文本中出现且无歧义的字 */

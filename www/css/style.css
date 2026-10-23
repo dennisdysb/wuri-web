@@ -1750,3 +1750,52 @@ details.disc-foot .hint{margin-top:9px}
 [data-theme="night"] .sx-deity-starlink{color:var(--teal);background:transparent}
 .deity-sec[hidden]{display:none}
 #deity-star-link{padding-bottom:6px}
+
+/* ===== v2.0.0 (5) 贯通批：值神互链 / 太阳躔宿 / 分野卡 / 步罡踏斗 ===== */
+.zs-link{color:var(--gold);cursor:pointer;border-bottom:1px dotted var(--gold);padding-bottom:1px}
+.zs-link b{color:var(--gold)}
+.sunline{margin-top:8px;text-align:center;color:var(--muted);font-size:.94rem;line-height:1.6}
+.sunline:empty{display:none}
+.sunline-note{margin-top:2px;font-size:.8rem;color:var(--muted);opacity:.85}
+.sx-sky-links{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;margin:2px 0 10px}
+.sx-sky-links.cell{margin:8px 0 0}
+.sx-sky-link{font-family:var(--sans);font-size:.85rem;color:var(--gold);cursor:pointer;border-bottom:1px dotted var(--gold);padding-bottom:1px}
+.sx-sky-link[hidden]{display:none}
+#sx-sky-compass{cursor:pointer}
+.sx-fenye .sx-fenye-head{font-family:var(--serif);font-size:1.06rem;font-weight:700;color:var(--ink);margin-bottom:6px}
+.sx-fenye .sx-fenye-head small{font-family:var(--sans);font-size:.78rem;color:var(--muted);margin-left:8px;font-weight:400}
+.sx-fenye .sx-fenye-main{font-size:.94rem;color:var(--ink);line-height:1.75}
+.sx-fenye .sx-fenye-line{margin-top:6px;font-size:.88rem;color:var(--muted);line-height:1.7}
+.sx-fenye .sx-fenye-line b{color:var(--ink)}
+.sx-fenye .sx-fenye-div{margin-top:8px;font-size:.86rem;color:var(--muted);line-height:1.7;border-left:3px solid var(--gold);padding-left:10px}
+.sx-fenye .sx-fenye-div b{color:var(--ink)}
+.sx-fenye .sx-fenye-src{margin-top:8px;font-size:.8rem;color:var(--muted);opacity:.85;line-height:1.6}
+#bugang-view{position:fixed;inset:0;z-index:70;overflow-y:auto;background:var(--bg);padding:0 14px 40px}
+#bugang-view[hidden]{display:none}
+body.bugang-open{overflow:hidden}
+.bg-card{max-width:560px;margin:14px auto 0}
+.bg-foot-row{display:flex;align-items:center;gap:10px;margin:10px 0 2px}
+.bg-foot-label{font-size:.9rem;color:var(--muted)}
+.bg-seg{font-size:.9rem;padding:6px 16px;border:1px solid var(--line);border-radius:999px;cursor:pointer;color:var(--ink);background:var(--card)}
+.bg-seg.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+[data-theme="night"] .bg-seg.on{color:#1a1f2e}
+.bg-src{margin-top:6px;line-height:1.7}
+#bg-stage{margin:8px auto 0;max-width:420px}
+.bg-plot{width:100%;height:auto;display:block}
+.bg-line{stroke:var(--line);stroke-width:1.2}
+.bg-path{stroke:var(--gold);stroke-width:2}
+.bg-step{fill:var(--card);stroke:var(--muted);stroke-width:1.2}
+.bg-step.done{fill:var(--gold);stroke:var(--gold)}
+.bg-step.now{fill:var(--paper);stroke:var(--gold);stroke-width:2.4}
+.bg-step-n{font-family:var(--sans);font-size:8.5px;fill:var(--muted)}
+.bg-step-n.now{fill:var(--gold);font-weight:700;font-size:9.5px}
+.bg-fu{fill:var(--muted);opacity:.7}
+.bg-fu-t{font-family:var(--sans);font-size:9px;fill:var(--muted)}
+.bg-star-t{font-family:var(--serif);font-size:10.5px;fill:var(--muted)}
+.bg-star-t.now{fill:var(--gold);font-weight:700}
+.bg-now{text-align:center;margin-top:6px;line-height:1.5}
+.bg-now-main{display:block;font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--ink);letter-spacing:.06em}
+.bg-now-sub{display:block;font-size:.92rem;color:var(--muted);margin-top:2px}
+.bg-progress{text-align:center;font-size:.88rem;color:var(--muted);margin-top:8px}
+.bg-btns{justify-content:center;margin-top:12px}
+.bg-btns .btn{min-width:76px}

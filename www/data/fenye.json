@@ -1,0 +1,1113 @@
+{
+  "title": "十二次分野数据层（二十八宿粒度）",
+  "version": "1.0（2026-10-23 备料）",
+  "caliber": "主本《晋书·天文志上》所载十二次度数与分野（魏太史令陈卓系）；《汉书·地理志上》整宿配国为对校系；现代地理对应为后人比附、仅作近似范围，逐处注明。",
+  "sources": [
+    "《晋书》卷十一《天文志上》：十二次度数（起讫宿度）与国、州分野——主本",
+    "《汉书》卷二十八上《地理志上》：秦、魏、周、韩、赵、燕、齐、鲁、宋、卫、楚、吴、粤诸地「于天官某宿之分野」——对校（唐《初学记》卷八引《地理志》「吴地斗之分野」「越地牵牛婺女之分野」互证）",
+    "郑樵《六经奥论·分野辨》：费直、班固、蔡邕、陈卓、李淳风、一行诸家「大同小异」",
+    "李淳风《乙巳占》引《天文录》：蔡邕《月令章句》以二十四气日度所宿分次；费直说世不施用；今行十二次本刘向撰、班固列《汉志》",
+    "宋叶时《礼经会元》（《钦定古今图书集成》引）：娵訾属卫而配并州、魏分晋地而配益州之疑",
+    "现代地理比附依据：古国故地与汉代州部范围（参谭其骧主编《中国历史地图集》汉代州域）；明孙穀《春明梦余录》、明《管窥辑要》已有逐宿今地对照，为后人比附之先例"
+  ],
+  "shierci": [
+    {
+      "name": "寿星",
+      "chen": "辰",
+      "span_start": {
+        "mansion": "轸",
+        "degree": 12
+      },
+      "span_mid": {
+        "mansion": "角",
+        "degree": 10,
+        "solar_term": "秋分"
+      },
+      "span_end": {
+        "mansion": "氐",
+        "degree": 4
+      },
+      "guo": [
+        "郑"
+      ],
+      "zhou": "兖州",
+      "modern_geo": "河南中东部（郑州、许昌、新郑一带）及山东西南部（菏泽、济宁一带）",
+      "modern_geo_note": "郑国故地在今河南中部；兖州汉域约当鲁西南与豫东。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "大火",
+      "chen": "卯",
+      "span_start": {
+        "mansion": "氐",
+        "degree": 5
+      },
+      "span_mid": {
+        "mansion": "房",
+        "degree": 5,
+        "solar_term": "霜降"
+      },
+      "span_end": {
+        "mansion": "尾",
+        "degree": 9
+      },
+      "guo": [
+        "宋"
+      ],
+      "zhou": "豫州",
+      "modern_geo": "河南东部（商丘、周口、开封东部）及鲁西南一角",
+      "modern_geo_note": "宋国故地在今商丘一带；豫州为汉大州，此取其东部与宋地相合部分。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "析木",
+      "chen": "寅",
+      "span_start": {
+        "mansion": "尾",
+        "degree": 10
+      },
+      "span_mid": {
+        "mansion": "箕",
+        "degree": 7,
+        "solar_term": "小雪"
+      },
+      "span_end": {
+        "mansion": "斗",
+        "degree": 11
+      },
+      "guo": [
+        "燕"
+      ],
+      "zhou": "幽州",
+      "modern_geo": "河北北部、北京、天津及辽宁大部",
+      "modern_geo_note": "燕国故地在今华北北部；汉幽州辖域与之大体相合。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "星纪",
+      "chen": "丑",
+      "span_start": {
+        "mansion": "斗",
+        "degree": 12
+      },
+      "span_mid": {
+        "mansion": "牛",
+        "degree": 0,
+        "solar_term": "冬至"
+      },
+      "span_end": {
+        "mansion": "女",
+        "degree": 7
+      },
+      "guo": [
+        "吴",
+        "越"
+      ],
+      "zhou": "扬州",
+      "modern_geo": "江苏南部、上海、浙江、安徽南部及江西东部",
+      "modern_geo_note": "吴越故地在长江下游南岸；汉扬州极盛时辖境更广，及于福建、江西大部，此取核心。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "玄枵",
+      "chen": "子",
+      "span_start": {
+        "mansion": "女",
+        "degree": 8
+      },
+      "span_mid": {
+        "mansion": "危",
+        "degree": 0,
+        "solar_term": "大寒"
+      },
+      "span_end": {
+        "mansion": "危",
+        "degree": 15
+      },
+      "guo": [
+        "齐"
+      ],
+      "zhou": "青州",
+      "modern_geo": "山东大部（中东部为核心）",
+      "modern_geo_note": "齐国故地与汉青州约当今山东大部，青州西界及河北东南一角。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "娵訾",
+      "chen": "亥",
+      "span_start": {
+        "mansion": "危",
+        "degree": 16
+      },
+      "span_mid": {
+        "mansion": "室",
+        "degree": 14,
+        "solar_term": "雨水"
+      },
+      "span_end": {
+        "mansion": "奎",
+        "degree": 4
+      },
+      "guo": [
+        "卫"
+      ],
+      "zhou": "并州",
+      "modern_geo": "以并州计：山西大部及河北西部、陕西北部边缘；卫国故地则在河南北部、河北南部（濮阳、邯郸、安阳一带）",
+      "modern_geo_note": "国、州错位：卫封河内，与并州不相涉（后世论者已指出，见分歧 D3）；现代对应两存。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "降娄",
+      "chen": "戌",
+      "span_start": {
+        "mansion": "奎",
+        "degree": 5
+      },
+      "span_mid": {
+        "mansion": "娄",
+        "degree": 4,
+        "solar_term": "春分"
+      },
+      "span_end": {
+        "mansion": "胃",
+        "degree": 6
+      },
+      "guo": [
+        "鲁"
+      ],
+      "zhou": "徐州",
+      "modern_geo": "山东南部及西南部、江苏北部、安徽东北部",
+      "modern_geo_note": "鲁国故地在今鲁南（曲阜一带）；汉徐州辖域约当苏北、鲁南、皖北。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "大梁",
+      "chen": "酉",
+      "span_start": {
+        "mansion": "胃",
+        "degree": 7
+      },
+      "span_mid": {
+        "mansion": "昴",
+        "degree": 8,
+        "solar_term": "谷雨"
+      },
+      "span_end": {
+        "mansion": "毕",
+        "degree": 11
+      },
+      "guo": [
+        "赵"
+      ],
+      "zhou": "冀州",
+      "modern_geo": "河北中南部及山西东部边缘",
+      "modern_geo_note": "赵国故地在今河北中南部；汉冀州辖域与之大体相合。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "实沈",
+      "chen": "申",
+      "span_start": {
+        "mansion": "毕",
+        "degree": 12
+      },
+      "span_mid": {
+        "mansion": "井",
+        "degree": 0,
+        "solar_term": "小满"
+      },
+      "span_end": {
+        "mansion": "井",
+        "degree": 15
+      },
+      "guo": [
+        "晋"
+      ],
+      "zhou": "益州",
+      "modern_geo": "以晋国故地计：山西大部；晋书配州益州则为四川、重庆、云南、贵州北部",
+      "modern_geo_note": "国、州大相悬绝，为分野学著名疑点（见分歧 D2）；现代对应以国故地（山西）为主读法，州属并录。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "鹑首",
+      "chen": "未",
+      "span_start": {
+        "mansion": "井",
+        "degree": 16
+      },
+      "span_mid": {
+        "mansion": "井",
+        "degree": 31,
+        "solar_term": "夏至"
+      },
+      "span_end": {
+        "mansion": "柳",
+        "degree": 8
+      },
+      "guo": [
+        "秦"
+      ],
+      "zhou": "雍州",
+      "modern_geo": "陕西中部、甘肃大部及宁夏",
+      "modern_geo_note": "秦国故地以关中为核；汉雍州（凉州）辖域及于河西。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "鹑火",
+      "chen": "午",
+      "span_start": {
+        "mansion": "柳",
+        "degree": 9
+      },
+      "span_mid": {
+        "mansion": "张",
+        "degree": 3,
+        "solar_term": "大暑"
+      },
+      "span_end": {
+        "mansion": "张",
+        "degree": 17
+      },
+      "guo": [
+        "周"
+      ],
+      "zhou": "三河",
+      "modern_geo": "河南中部（洛阳、郑州一带）及山西西南部（河东）",
+      "modern_geo_note": "三河谓河东、河内、河南三郡，约当晋南与豫中；周室东迁后王畿在此。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    },
+    {
+      "name": "鹑尾",
+      "chen": "巳",
+      "span_start": {
+        "mansion": "张",
+        "degree": 18
+      },
+      "span_mid": {
+        "mansion": "翼",
+        "degree": 15,
+        "solar_term": "处暑"
+      },
+      "span_end": {
+        "mansion": "轸",
+        "degree": 11
+      },
+      "guo": [
+        "楚"
+      ],
+      "zhou": "荆州",
+      "modern_geo": "湖北、湖南大部、江西及安徽南部部分地区",
+      "modern_geo_note": "楚国故地以江汉为核、极盛时及于两湖江西；汉荆州辖域与之大体相合。",
+      "source": "《晋书·天文志上》十二次度数（陈卓系）"
+    }
+  ],
+  "mansions": [
+    {
+      "id": "jiaomujiao",
+      "mansion": "角宿",
+      "full_name": "角木蛟",
+      "quadrant": "东方青龙",
+      "width_degrees": 12,
+      "ci_primary": "寿星",
+      "ci_span": [
+        {
+          "ci": "寿星",
+          "degrees": 12
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "郑"
+      ],
+      "fenye_zhou": "兖州",
+      "modern_geo": "河南中东部（郑州、许昌、新郑一带）及山东西南部（菏泽、济宁一带）",
+      "hanshu_dilizhi": {
+        "guo": "韩"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "kangjinlong",
+      "mansion": "亢宿",
+      "full_name": "亢金龙",
+      "quadrant": "东方青龙",
+      "width_degrees": 9,
+      "ci_primary": "寿星",
+      "ci_span": [
+        {
+          "ci": "寿星",
+          "degrees": 9
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "郑"
+      ],
+      "fenye_zhou": "兖州",
+      "modern_geo": "河南中东部（郑州、许昌、新郑一带）及山东西南部（菏泽、济宁一带）",
+      "hanshu_dilizhi": {
+        "guo": "韩"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "dituhe",
+      "mansion": "氐宿",
+      "full_name": "氐土貉",
+      "quadrant": "东方青龙",
+      "width_degrees": 15,
+      "ci_primary": "大火",
+      "ci_span": [
+        {
+          "ci": "寿星",
+          "degrees": 4
+        },
+        {
+          "ci": "大火",
+          "degrees": 11
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "宋"
+      ],
+      "fenye_zhou": "豫州",
+      "modern_geo": "河南东部（商丘、周口、开封东部）及鲁西南一角",
+      "hanshu_dilizhi": {
+        "guo": "韩"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "fangritu",
+      "mansion": "房宿",
+      "full_name": "房日兔",
+      "quadrant": "东方青龙",
+      "width_degrees": 5,
+      "ci_primary": "大火",
+      "ci_span": [
+        {
+          "ci": "大火",
+          "degrees": 5
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "宋"
+      ],
+      "fenye_zhou": "豫州",
+      "modern_geo": "河南东部（商丘、周口、开封东部）及鲁西南一角",
+      "hanshu_dilizhi": {
+        "guo": "宋"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "xinyuehu",
+      "mansion": "心宿",
+      "full_name": "心月狐",
+      "quadrant": "东方青龙",
+      "width_degrees": 5,
+      "ci_primary": "大火",
+      "ci_span": [
+        {
+          "ci": "大火",
+          "degrees": 5
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "宋"
+      ],
+      "fenye_zhou": "豫州",
+      "modern_geo": "河南东部（商丘、周口、开封东部）及鲁西南一角",
+      "hanshu_dilizhi": {
+        "guo": "宋"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "weihuohu",
+      "mansion": "尾宿",
+      "full_name": "尾火虎",
+      "quadrant": "东方青龙",
+      "width_degrees": 18,
+      "ci_primary": "析木",
+      "ci_span": [
+        {
+          "ci": "大火",
+          "degrees": 9
+        },
+        {
+          "ci": "析木",
+          "degrees": 9
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "燕"
+      ],
+      "fenye_zhou": "幽州",
+      "modern_geo": "河北北部、北京、天津及辽宁大部",
+      "hanshu_dilizhi": {
+        "guo": "燕"
+      },
+      "note": "本宿十八度两分，两次各半；主属从通行整宿配次表（尾、箕入析木），度界则前半在大火。",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "jishuibao",
+      "mansion": "箕宿",
+      "full_name": "箕水豹",
+      "quadrant": "东方青龙",
+      "width_degrees": 11,
+      "ci_primary": "析木",
+      "ci_span": [
+        {
+          "ci": "析木",
+          "degrees": 11
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "燕"
+      ],
+      "fenye_zhou": "幽州",
+      "modern_geo": "河北北部、北京、天津及辽宁大部",
+      "hanshu_dilizhi": {
+        "guo": "燕"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "doumuxie",
+      "mansion": "斗宿",
+      "full_name": "斗木獬",
+      "quadrant": "北方玄武",
+      "width_degrees": 26,
+      "ci_primary": "星纪",
+      "ci_span": [
+        {
+          "ci": "析木",
+          "degrees": 11
+        },
+        {
+          "ci": "星纪",
+          "degrees": 15
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "吴",
+        "越"
+      ],
+      "fenye_zhou": "扬州",
+      "modern_geo": "江苏南部、上海、浙江、安徽南部及江西东部",
+      "hanshu_dilizhi": {
+        "guo": "吴"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "niujinniu",
+      "mansion": "牛宿",
+      "full_name": "牛金牛",
+      "quadrant": "北方玄武",
+      "width_degrees": 8,
+      "ci_primary": "星纪",
+      "ci_span": [
+        {
+          "ci": "星纪",
+          "degrees": 8
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "吴",
+        "越"
+      ],
+      "fenye_zhou": "扬州",
+      "modern_geo": "江苏南部、上海、浙江、安徽南部及江西东部",
+      "hanshu_dilizhi": {
+        "guo": "越"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "nvtufu",
+      "mansion": "女宿",
+      "full_name": "女土蝠",
+      "quadrant": "北方玄武",
+      "width_degrees": 12,
+      "ci_primary": "星纪",
+      "ci_span": [
+        {
+          "ci": "星纪",
+          "degrees": 7
+        },
+        {
+          "ci": "玄枵",
+          "degrees": 5
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "吴",
+        "越"
+      ],
+      "fenye_zhou": "扬州",
+      "modern_geo": "江苏南部、上海、浙江、安徽南部及江西东部",
+      "hanshu_dilizhi": {
+        "guo": "越"
+      },
+      "note": "主属按晋书度数过半取星纪；通行整宿表与汉志系统则以女归玄枵/越（虚危同齐、女属越），见分歧 D5。",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "xurishu",
+      "mansion": "虚宿",
+      "full_name": "虚日鼠",
+      "quadrant": "北方玄武",
+      "width_degrees": 10,
+      "ci_primary": "玄枵",
+      "ci_span": [
+        {
+          "ci": "玄枵",
+          "degrees": 10
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "齐"
+      ],
+      "fenye_zhou": "青州",
+      "modern_geo": "山东大部（中东部为核心）",
+      "hanshu_dilizhi": {
+        "guo": "齐"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "weiyueyan",
+      "mansion": "危宿",
+      "full_name": "危月燕",
+      "quadrant": "北方玄武",
+      "width_degrees": 17,
+      "ci_primary": "玄枵",
+      "ci_span": [
+        {
+          "ci": "玄枵",
+          "degrees": 15
+        },
+        {
+          "ci": "娵訾",
+          "degrees": 2
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "齐"
+      ],
+      "fenye_zhou": "青州",
+      "modern_geo": "山东大部（中东部为核心）",
+      "hanshu_dilizhi": {
+        "guo": "齐"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "shihuozhu",
+      "mansion": "室宿",
+      "full_name": "室火猪",
+      "quadrant": "北方玄武",
+      "width_degrees": 16,
+      "ci_primary": "娵訾",
+      "ci_span": [
+        {
+          "ci": "娵訾",
+          "degrees": 16
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "卫"
+      ],
+      "fenye_zhou": "并州",
+      "modern_geo": "以并州计：山西大部及河北西部、陕西北部边缘；卫国故地则在河南北部、河北南部（濮阳、邯郸、安阳一带）",
+      "hanshu_dilizhi": {
+        "guo": "卫"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "bishuiyu",
+      "mansion": "壁宿",
+      "full_name": "壁水貐",
+      "quadrant": "北方玄武",
+      "width_degrees": 9,
+      "ci_primary": "娵訾",
+      "ci_span": [
+        {
+          "ci": "娵訾",
+          "degrees": 9
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "卫"
+      ],
+      "fenye_zhou": "并州",
+      "modern_geo": "以并州计：山西大部及河北西部、陕西北部边缘；卫国故地则在河南北部、河北南部（濮阳、邯郸、安阳一带）",
+      "hanshu_dilizhi": {
+        "guo": "卫"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "kuimulang",
+      "mansion": "奎宿",
+      "full_name": "奎木狼",
+      "quadrant": "西方白虎",
+      "width_degrees": 16,
+      "ci_primary": "降娄",
+      "ci_span": [
+        {
+          "ci": "娵訾",
+          "degrees": 4
+        },
+        {
+          "ci": "降娄",
+          "degrees": 12
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "鲁"
+      ],
+      "fenye_zhou": "徐州",
+      "modern_geo": "山东南部及西南部、江苏北部、安徽东北部",
+      "hanshu_dilizhi": {
+        "guo": "鲁"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "loujingou",
+      "mansion": "娄宿",
+      "full_name": "娄金狗",
+      "quadrant": "西方白虎",
+      "width_degrees": 12,
+      "ci_primary": "降娄",
+      "ci_span": [
+        {
+          "ci": "降娄",
+          "degrees": 12
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "鲁"
+      ],
+      "fenye_zhou": "徐州",
+      "modern_geo": "山东南部及西南部、江苏北部、安徽东北部",
+      "hanshu_dilizhi": {
+        "guo": "鲁"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "weituzhi",
+      "mansion": "胃宿",
+      "full_name": "胃土雉",
+      "quadrant": "西方白虎",
+      "width_degrees": 14,
+      "ci_primary": "大梁",
+      "ci_span": [
+        {
+          "ci": "降娄",
+          "degrees": 6
+        },
+        {
+          "ci": "大梁",
+          "degrees": 8
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "赵"
+      ],
+      "fenye_zhou": "冀州",
+      "modern_geo": "河北中南部及山西东部边缘",
+      "hanshu_dilizhi": null,
+      "note": "《汉书·地理志》分野诸条独缺胃宿，无所属（见分歧 D6）。",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "maoriji",
+      "mansion": "昴宿",
+      "full_name": "昴日鸡",
+      "quadrant": "西方白虎",
+      "width_degrees": 11,
+      "ci_primary": "大梁",
+      "ci_span": [
+        {
+          "ci": "大梁",
+          "degrees": 11
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "赵"
+      ],
+      "fenye_zhou": "冀州",
+      "modern_geo": "河北中南部及山西东部边缘",
+      "hanshu_dilizhi": {
+        "guo": "赵"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "biyuewu",
+      "mansion": "毕宿",
+      "full_name": "毕月乌",
+      "quadrant": "西方白虎",
+      "width_degrees": 16,
+      "ci_primary": "大梁",
+      "ci_span": [
+        {
+          "ci": "大梁",
+          "degrees": 11
+        },
+        {
+          "ci": "实沈",
+          "degrees": 5
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "赵"
+      ],
+      "fenye_zhou": "冀州",
+      "modern_geo": "河北中南部及山西东部边缘",
+      "hanshu_dilizhi": {
+        "guo": "赵"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "zihuohou",
+      "mansion": "觜宿",
+      "full_name": "觜火猴",
+      "quadrant": "西方白虎",
+      "width_degrees": 2,
+      "ci_primary": "实沈",
+      "ci_span": [
+        {
+          "ci": "实沈",
+          "degrees": 2
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "晋"
+      ],
+      "fenye_zhou": "益州",
+      "modern_geo": "以晋国故地计：山西大部；晋书配州益州则为四川、重庆、云南、贵州北部",
+      "hanshu_dilizhi": {
+        "guo": "魏"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "shenshuiyuan",
+      "mansion": "参宿",
+      "full_name": "参水猿",
+      "quadrant": "西方白虎",
+      "width_degrees": 9,
+      "ci_primary": "实沈",
+      "ci_span": [
+        {
+          "ci": "实沈",
+          "degrees": 9
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "晋"
+      ],
+      "fenye_zhou": "益州",
+      "modern_geo": "以晋国故地计：山西大部；晋书配州益州则为四川、重庆、云南、贵州北部",
+      "hanshu_dilizhi": {
+        "guo": "魏"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "jingmugan",
+      "mansion": "井宿",
+      "full_name": "井木犴",
+      "quadrant": "南方朱雀",
+      "width_degrees": 33,
+      "ci_primary": "鹑首",
+      "ci_span": [
+        {
+          "ci": "实沈",
+          "degrees": 15
+        },
+        {
+          "ci": "鹑首",
+          "degrees": 18
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "秦"
+      ],
+      "fenye_zhou": "雍州",
+      "modern_geo": "陕西中部、甘肃大部及宁夏",
+      "hanshu_dilizhi": {
+        "guo": "秦"
+      },
+      "note": "井跨秦、晋两分：前十五度入实沈（晋），后十八度入鹑首（秦）；汉志则东井全归秦。",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "guijinyang",
+      "mansion": "鬼宿",
+      "full_name": "鬼金羊",
+      "quadrant": "南方朱雀",
+      "width_degrees": 4,
+      "ci_primary": "鹑首",
+      "ci_span": [
+        {
+          "ci": "鹑首",
+          "degrees": 4
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "秦"
+      ],
+      "fenye_zhou": "雍州",
+      "modern_geo": "陕西中部、甘肃大部及宁夏",
+      "hanshu_dilizhi": {
+        "guo": "秦"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "liutuzhang",
+      "mansion": "柳宿",
+      "full_name": "柳土獐",
+      "quadrant": "南方朱雀",
+      "width_degrees": 15,
+      "ci_primary": "鹑首",
+      "ci_span": [
+        {
+          "ci": "鹑首",
+          "degrees": 8
+        },
+        {
+          "ci": "鹑火",
+          "degrees": 7
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "秦"
+      ],
+      "fenye_zhou": "雍州",
+      "modern_geo": "陕西中部、甘肃大部及宁夏",
+      "hanshu_dilizhi": {
+        "guo": "周"
+      },
+      "note": "主属按晋书度数过半取鹑首，仅差一度；汉志柳、七星、张全归周（鹑火之次），通行整宿表亦以柳入鹑火，见分歧 D5。",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "xingrima",
+      "mansion": "星宿",
+      "full_name": "星日马",
+      "quadrant": "南方朱雀",
+      "width_degrees": 7,
+      "ci_primary": "鹑火",
+      "ci_span": [
+        {
+          "ci": "鹑火",
+          "degrees": 7
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "周"
+      ],
+      "fenye_zhou": "三河",
+      "modern_geo": "河南中部（洛阳、郑州一带）及山西西南部（河东）",
+      "hanshu_dilizhi": {
+        "guo": "周"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "zhangyuelu",
+      "mansion": "张宿",
+      "full_name": "张月鹿",
+      "quadrant": "南方朱雀",
+      "width_degrees": 18,
+      "ci_primary": "鹑火",
+      "ci_span": [
+        {
+          "ci": "鹑火",
+          "degrees": 17
+        },
+        {
+          "ci": "鹑尾",
+          "degrees": 1
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "周"
+      ],
+      "fenye_zhou": "三河",
+      "modern_geo": "河南中部（洛阳、郑州一带）及山西西南部（河东）",
+      "hanshu_dilizhi": {
+        "guo": "周"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "yihuoshe",
+      "mansion": "翼宿",
+      "full_name": "翼火蛇",
+      "quadrant": "南方朱雀",
+      "width_degrees": 18,
+      "ci_primary": "鹑尾",
+      "ci_span": [
+        {
+          "ci": "鹑尾",
+          "degrees": 18
+        }
+      ],
+      "cross_ci": false,
+      "fenye_guo": [
+        "楚"
+      ],
+      "fenye_zhou": "荆州",
+      "modern_geo": "湖北、湖南大部、江西及安徽南部部分地区",
+      "hanshu_dilizhi": {
+        "guo": "楚"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    },
+    {
+      "id": "zhenshuiyin",
+      "mansion": "轸宿",
+      "full_name": "轸水蚓",
+      "quadrant": "南方朱雀",
+      "width_degrees": 17,
+      "ci_primary": "鹑尾",
+      "ci_span": [
+        {
+          "ci": "鹑尾",
+          "degrees": 11
+        },
+        {
+          "ci": "寿星",
+          "degrees": 6
+        }
+      ],
+      "cross_ci": true,
+      "fenye_guo": [
+        "楚"
+      ],
+      "fenye_zhou": "荆州",
+      "modern_geo": "湖北、湖南大部、江西及安徽南部部分地区",
+      "hanshu_dilizhi": {
+        "guo": "楚"
+      },
+      "note": "",
+      "source": "主属与度界：《晋书·天文志上》；汉志属国：《汉书·地理志上》"
+    }
+  ],
+  "divergences": [
+    {
+      "id": "D1",
+      "topic": "实沈国名：晋 / 魏",
+      "detail": "晋书系诸表多作「晋」（《春明梦余录》、叶时说同），一本作「魏」；晋即魏之旧封（觜、参为晋星，汉志作魏地），指同一地。本数据取「晋」为主、并存「魏」。"
+    },
+    {
+      "id": "D2",
+      "topic": "实沈配州益州，与晋地不合",
+      "detail": "晋在北方（今山西），益州在西南（今四川一带），国与州大相悬绝；宋叶时已指出「魏分晋地，与益州亦不相关」，后世或归咎李淳风配郡之误。此为分野体系著名疑点，现代对应以国故地为主读法、州属并录。"
+    },
+    {
+      "id": "D3",
+      "topic": "娵訾配州并州，与卫故地不合",
+      "detail": "卫受封河内，故地在冀、兖之间（今豫北、冀南），与并州（今山西）不相涉；后世论者同以此为配属之误（出处同 D2）。"
+    },
+    {
+      "id": "D4",
+      "topic": "寿星国名：郑 / 陈",
+      "detail": "通行作郑（兖州）；叶时《礼经会元》作「寿星，陈也」。陈、郑故地相邻（今豫中、豫东），本数据取郑、并存陈说。"
+    },
+    {
+      "id": "D5",
+      "topic": "汉志整宿制 vs 晋书度数制：女、柳、氐归属异",
+      "detail": "汉志以整宿配国（女属越、柳属周、氐属韩）；晋书以度数分次，三宿皆跨界：女前七度在星纪、柳前八度在鹑首、氐前四度在寿星。主属按晋书度数过半定，汉志说逐条并录于各宿 hanshu_dilizhi。"
+    },
+    {
+      "id": "D6",
+      "topic": "汉志缺胃宿",
+      "detail": "《汉书·地理志上》分野诸条遍及二十七宿，独胃无所属；胃之分野唯待晋书度数制（前六度降娄、后八度大梁）。"
+    },
+    {
+      "id": "D7",
+      "topic": "吴、越分工与后世合称异",
+      "detail": "汉志分言：吴主斗、越（粤）主牵牛婺女（《初学记》引可证）；晋书星纪则合称吴越、辖斗牛女天区。后世简表多合并为「吴越·斗牛女」，与汉志分工不同。"
+    },
+    {
+      "id": "D8",
+      "topic": "郑玄《周礼》注九州配宿为另一体系",
+      "detail": "郑注保章氏之分以两宿（或一组）配一州：角亢氐兖州、房心豫州、尾箕幽州、斗牛女扬州、虚危青州、室壁并州、娄胃徐州、昴毕冀州、觜参益州、井鬼雍州、柳星张翼轸荆州——与十二次体系并行而不同（如觜参在此属益州，与实沈配益州隐相呼应；娄胃属徐州则合降娄之鲁）。本数据以晋书十二次为主本，此系仅志于此备考。"
+    },
+    {
+      "id": "D9",
+      "topic": "分度诸家先后小异",
+      "detail": "费直《周易》分野、班固《汉志》、蔡邕《月令章句》、陈卓、李淳风、一行诸家，郑樵总评「大同小异」；蔡邕以二十四气日躔之度立分，与宿度分次法门不同；费直说后世不施用。今行度数从晋书所载陈卓系，起讫一度之差的版本异文（如危十五/十六度交界）不另立条，遇跨界以本表为准并注。"
+    }
+  ],
+  "inheritance_rule": {
+    "rule": "星官随本宿继承分野：xingguan.json 中每座星官隶属一宿（图鉴按宿分区），其分野即该宿的分野（次＋国＋州），不逐星官另判。",
+    "basis": "分野的最小配属单位在晋书体系是「次」（以宿度划界），在汉志体系是「宿」（整宿配国）；两系皆无逐星官配分野的正文。故星官一律随宿，是文献口径而非权宜。",
+    "cross_ci_handling": "跨次之宿（12 宿）的星官仍随宿主属展示；在宿条 ci_span 中给出两段度数，界面可在宿页注明「本宿前段属某次」，但不下沉到单座星官逐个判度——本数据不含星官的宿内古度坐标，逐官判度即属无据，不为。",
+    "primary_rule": "宿主属以《晋书》度数过半者定；尾宿两分各半，从通行整宿配次表作析木；女、柳二宿与汉志/通行整宿表异，逐条注记（见 D5）。"
+  },
+  "sanguan_exception": {
+    "rule": "三垣（紫微垣、太微垣、天市垣）诸星官不入分野体系，不配国、州。",
+    "basis": "《晋书·天文志上》分野正文专行于十二次所辖二十八宿天区；三垣为天帝宫廷与天市之象，体制属「宫垣」而非「分野」。汉志诸地条目所配亦皆二十八宿，无一语及三垣。",
+    "ziwei_zhongzhou": "后世说法存录：紫微垣居天中央、为大帝之座（《晋书·天文志上》语），星占家与明清分野图有比附王畿/中州者，属象征引申——正史天文志无「紫微垣配中州」的分野明文。本数据不立条、不配属，仅在此存其说，以待考。"
+  }
+}

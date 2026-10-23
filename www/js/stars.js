@@ -8,6 +8,8 @@
   'use strict';
 
   var XG = null, BT = null, LNX = null, LINES = null, loadPromise = null;
+  var FY = null, fyPromise = null;   /* 分野数据（v2.0.0 (5) 贯通批）：独立轻量加载，
+    首页太阳躔宿一行只拉这一份小数据，不惊动图鉴全量懒加载 */
   var secOrder = [];           /* 区序（《步天歌》序）：紫微垣…轸宿 */
   var secInfo = {};            /* section -> {name, region, list:[asterism], lines:[], lineCount} */
   var byKey = {};              /* key -> asterism（key = a.id 或 section|name，同名官跨区不撞） */
@@ -46,13 +48,23 @@
     });
   }
 
+  function loadFenye() {
+    if (FY) return Promise.resolve(FY);
+    if (fyPromise) return fyPromise;
+    fyPromise = fetch('data/fenye.json').then(function (r) { if (!r.ok) throw new Error('fy'); return r.json(); })
+      .then(function (j) { FY = j; fyPromise = null; return j; })
+      .catch(function (e) { fyPromise = null; throw e; });
+    return fyPromise;
+  }
+
   function loadData() {
     if (XG && BT) return Promise.resolve(true);
     if (loadPromise) return loadPromise;
     loadPromise = Promise.all([
       fetch('data/xingguan.json').then(function (r) { if (!r.ok) throw new Error('xg'); return r.json(); }),
       fetch('data/butiange.json').then(function (r) { if (!r.ok) throw new Error('bt'); return r.json(); }),
-      fetch('data/xingguan-lines.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+      fetch('data/xingguan-lines.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+      loadFenye().catch(function () { return null; })
     ]).then(function (res) {
       XG = res[0]; BT = res[1]; LNX = res[2]; indexData(); indexLines(); loadPromise = null;
       return true;
@@ -177,6 +189,47 @@
       .catch(function () { if (host) host.innerHTML = failHTML('book'); });
   }
 
+  /* ---------------- 贯通批（v2.0.0 (5)）：跨模块互链 ---------------- */
+  /* 本宿星官：与宿同名的那座星官（28 宿逐宿皆有，数据核对无缺） */
+  function mansionAsterism(section) {
+    var si = secInfo[section]; if (!si) return null;
+    var base = section.replace(/宿$/, '');
+    for (var i = 0; i < si.list.length; i++) if (si.list[i].name === base) return si.list[i];
+    return null;
+  }
+  function openMansionAsterism(section) {
+    if (!section) return;
+    var go = function () {
+      var a = mansionAsterism(section);
+      if (a) openDetail(astKey(a)); else openRegion(section);
+    };
+    if (XG && BT) go();
+    else loadData().then(go).catch(function () {});
+  }
+  /* 太阳躔宿（引擎在 today-sky.js，口径见其注释）：只拉 fenye 小数据 */
+  function sunMansion(date) {
+    return loadFenye().then(function (fy) {
+      if (!window.WuriTodaySky) return null;
+      var d = date || new Date();
+      var jd = WuriTodaySky.jdFromDate(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12));
+      return WuriTodaySky.sunMansionOf(jd, fy);
+    }).catch(function () { return null; });
+  }
+  /* 月将落点：月将由太阳所在宫（次）定，其落点即太阳今躔之宿——开其区页 */
+  function openSunRegion(date) {
+    sunMansion(date).then(function (sm) { if (sm) openRegion(sm.mansion); });
+  }
+  function openBeidouDetail() {
+    var go = function () {
+      var si = secInfo['紫微垣']; if (!si) return;
+      for (var i = 0; i < si.list.length; i++) {
+        if (si.list[i].name === '北斗') { openDetail(astKey(si.list[i])); return; }
+      }
+    };
+    if (XG && BT) go();
+    else loadData().then(go).catch(function () {});
+  }
+
   /* deities.js 的「本宿星官 ›」签入口：key 为星君 link_key（如 jiaomujiao）或区名 */
   window.__wuri_openStarRegion = function (key) {
     if (!key) return;
@@ -292,6 +345,67 @@
     return h;
   }
 
+  /* ---------------- 分野层（v2.0.0 (5) 贯通批，fenye.json） ----------------
+   * 呈现界线（备料继承规则）：分野只下沉到宿区页——本卡给本宿的
+   * 次/国/州、跨次分段、汉志对校、分歧双轨与现代对应（后人比附）；
+   * 不逐星官判度（数据无星官宿内古度坐标，判即无据）。三垣不立
+   * 分野条，只注「不入分野」之据。分歧条目按宿/次归属挂接
+   * （D1/D2 实沈、D3 娵訾、D4 寿星、D5 女柳氐、D6 胃、D7 斗牛女），
+   * 文本逐字取 fenye.json divergences，不改写。 */
+  var MANSION_DIVS = {
+    '毕宿': ['D1', 'D2'], '觜宿': ['D1', 'D2'], '参宿': ['D1', 'D2'], '井宿': ['D1', 'D2'],
+    '危宿': ['D3'], '室宿': ['D3'], '壁宿': ['D3'], '奎宿': ['D3'],
+    '轸宿': ['D4'], '角宿': ['D4'], '亢宿': ['D4'], '氐宿': ['D4', 'D5'],
+    '女宿': ['D5', 'D7'], '柳宿': ['D5'], '胃宿': ['D6'], '斗宿': ['D7'], '牛宿': ['D7']
+  };
+  function fenyeOf(section) {
+    if (!FY || !FY.mansions) return null;
+    for (var i = 0; i < FY.mansions.length; i++) if (FY.mansions[i].mansion === section) return FY.mansions[i];
+    return null;
+  }
+  function ciEntryOf(name) {
+    if (!FY || !FY.shierci) return null;
+    for (var i = 0; i < FY.shierci.length; i++) if (FY.shierci[i].name === name) return FY.shierci[i];
+    return null;
+  }
+  function fenyeCardHTML(section, isYuan) {
+    if (!FY) return '';
+    if (isYuan) {
+      var ex = FY.sanguan_exception;
+      if (!ex) return '';
+      return '<div class="sx-note"><b>' + esc(t('sx_fenye')) + '：</b>' + txEsc(ex.rule) + txEsc(ex.basis) + '</div>';
+    }
+    var m = fenyeOf(section); if (!m) return '';
+    var ci = ciEntryOf(m.ci_primary);
+    var h = '<div class="sx-card sx-fenye">';
+    h += '<div class="sx-fenye-head">' + esc(t('sx_fenye')) + ' · ' + txEsc(tf(t('sx_fenye_ci'), m.ci_primary)) +
+      (ci ? '<small>' + txEsc(tf(t('sx_fenye_chen'), ci.chen)) + '</small>' : '') + '</div>';
+    h += '<div class="sx-fenye-main">' + txEsc(tf(t('sx_fenye_main'), section, m.ci_primary, m.fenye_guo.join('、'), m.fenye_zhou)) + '</div>';
+    if (m.cross_ci && (m.ci_span || []).length > 1) {
+      var parts = m.ci_span.map(function (sg) { return tf(t('sx_fenye_seg'), sg.ci, sg.degrees); });
+      h += '<div class="sx-fenye-line">' + txEsc(tf(t('sx_fenye_cross'), parts.join('；'))) +
+        '<br>' + esc(t('sx_fenye_cross_note')) + '</div>';
+    }
+    if (m.hanshu_dilizhi && m.hanshu_dilizhi.guo) {
+      h += '<div class="sx-fenye-line"><b>' + esc(t('sx_fenye_hanshu')) + '：</b>' +
+        txEsc(tf(t('sx_fenye_hanshu_guo'), m.hanshu_dilizhi.guo)) + '</div>';
+    } else {
+      h += '<div class="sx-fenye-line"><b>' + esc(t('sx_fenye_hanshu')) + '：</b>' +
+        esc(t('sx_fenye_hanshu_none')) + '</div>';
+    }
+    if (m.note) h += '<div class="sx-fenye-line">' + txEsc(m.note) + '</div>';
+    (MANSION_DIVS[section] || []).forEach(function (id) {
+      var d = null;
+      (FY.divergences || []).forEach(function (x) { if (x.id === id) d = x; });
+      if (d) h += '<div class="sx-fenye-div"><b>' + esc(t('sx_fenye_div')) + ' · ' + txEsc(d.topic) + '：</b>' + txEsc(d.detail) + '</div>';
+    });
+    if (m.modern_geo) {
+      h += '<div class="sx-fenye-line"><b>' + esc(t('sx_fenye_modern')) + '：</b>' + txEsc(m.modern_geo) + '</div>';
+    }
+    h += '<div class="sx-fenye-src">' + esc(t('sx_fenye_src')) + '</div>';
+    return h + '</div>';
+  }
+
   function renderRegion(section) {
     var si = secInfo[section]; if (!si) return;
     curSection = section;
@@ -316,6 +430,7 @@
       h += '<div class="sx-card sx-lead" data-sx-booksec="' + esc(section) + '">' + txEsc(lead) + '。' +
         '<small>' + txEsc(tf(t('sx_lead_hint'), section)) + '</small></div>';
     }
+    h += fenyeCardHTML(section, isYuan);
     h += '<div class="sx-search"><input id="sx-region-q" type="search" placeholder="' + esc(t('sx_search_ph')) + '" aria-label="' + esc(t('sx_search_ph')) + '"></div>';
     h += '<div id="sx-region-rows">' + regionRowsHTML(si) + '</div>';
     $('sx-region').innerHTML = h;
@@ -743,6 +858,8 @@
     } catch (e) { return undefined; }
   }
 
+  var curSkySection = null;   /* 今日值日宿所在区（如「角宿」），供「本宿星官」链 */
+
   function renderTodaySky() {
     var card = $('today-sky-card'); if (!card) return;
     if (!window.WuriTodaySky || typeof Solar === 'undefined') return;
@@ -764,6 +881,14 @@
       if (nameEl) nameEl.textContent = T(tx1.full);
       if (subEl) subEl.textContent = T(tf(t('sx_sky_xiu_sub'), tx1.group, tx1.xiu + '宿'));
       card.setAttribute('data-sx-lord', tx1.lord ? tx1.lord.id : '');
+      /* 贯通批互链：本宿星官（同名星官详情）／本宿星君（神祇详情，与点头像卡同落点） */
+      curSkySection = tx1.xiu + '宿';
+      var toAst = $('sx-sky-to-ast'), toLord = $('sx-sky-to-lord');
+      if (toAst) { toAst.hidden = false; toAst.textContent = T(tf(t('sx_sky_to_ast'), tx1.xiu)) + ' ›'; }
+      if (toLord) {
+        if (tx1.lord) { toLord.hidden = false; toLord.textContent = T(tf(t('sx_sky_to_lord'), tx1.lord.name)) + ' ›'; }
+        else toLord.hidden = true;
+      }
     }
     var comp = $('sx-sky-compass'); if (comp) comp.innerHTML = compassSVG(dip);
     var dBig = $('sx-sky-dipper-big');
@@ -850,6 +975,20 @@
       var id = $('today-sky-card').getAttribute('data-sx-lord');
       if (id) openDeity(id);
     });
+    /* 贯通批互链绑定：本宿星官/本宿星君链、罗盘与北斗链、斗姆链 */
+    var toAstB = $('sx-sky-to-ast');
+    if (toAstB) toAstB.addEventListener('click', function () { if (curSkySection) openMansionAsterism(curSkySection); });
+    var toLordB = $('sx-sky-to-lord');
+    if (toLordB) toLordB.addEventListener('click', function () {
+      var id = $('today-sky-card').getAttribute('data-sx-lord');
+      if (id) openDeity(id);
+    });
+    var compB = $('sx-sky-compass');
+    if (compB) compB.addEventListener('click', function () { openBeidouDetail(); });
+    var bdB = $('sx-sky-beidou');
+    if (bdB) bdB.addEventListener('click', function () { openBeidouDetail(); });
+    var dmB = $('sx-sky-doumu');
+    if (dmB) dmB.addEventListener('click', function () { openDeity('doumu'); });
     renderTodaySky();
     setInterval(renderTodaySky, 60000);
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderTodaySky(); });
@@ -879,5 +1018,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 
-  window.Stars = { openHome: openHome, activate: activate, openRegion: openRegion, openDetail: openDetail, openButiange: openButiange, renderTodaySky: renderTodaySky };
+  window.Stars = { openHome: openHome, activate: activate, openRegion: openRegion, openDetail: openDetail, openButiange: openButiange, renderTodaySky: renderTodaySky,
+    openMansionAsterism: openMansionAsterism, openSunRegion: openSunRegion, sunMansion: sunMansion, openBeidouDetail: openBeidouDetail, loadFenye: loadFenye };
 })();

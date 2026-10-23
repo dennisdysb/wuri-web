@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=93">
+<link rel="stylesheet" href="css/style.css?v=94">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=65">
 </head>
@@ -61,6 +61,7 @@
       </div>
       <div id="jieqi-line" class="jieqi"></div>
       <div id="zhishen-line" class="zhishen"></div>
+      <div id="sun-line" class="sunline"></div>
     </section>
 
     <!-- 修行日程入口（v1.4.0 封版批：整卡图卡·整卡即按钮，旧 enter 钮隐藏保留、整卡点击转发） -->
@@ -157,6 +158,7 @@
       <div class="detail-row"><span class="dl" data-i18n="d_lunar">农历</span><span id="detail-lunar"></span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_gz">干支</span><span id="detail-gz"></span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_jieqi">节气</span><span id="detail-jq"></span></div>
+      <div class="detail-row"><span class="dl" data-i18n="d_sun">日躔</span><span id="detail-sun">—</span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_chongsha">冲煞</span><span id="detail-chong"></span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_zhishen">值神</span><span id="detail-zhishen"></span></div>
       <details class="detail-note"><summary data-i18n="zs_note_title">值神说明</summary><p class="hint" data-i18n="zs_note"></p></details>
@@ -881,7 +883,7 @@
     </section>
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.0.0 (4) (2026-10-23)</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.0.0 (5) (2026-10-23)</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint">奇门遁甲排盘功能基于开源项目「掌上乾坤 · 奇门遁甲助手」（作者 qzp001，依 MIT 许可证使用），特此鸣谢。</p>
@@ -1189,9 +1191,14 @@
         <img id="sx-sky-img" alt="" hidden>
         <div><div class="h1" data-i18n="sx_sky_kicker">今 日 星 空 · 值 日 宿</div><div class="h2" id="sx-sky-xiu"></div><div class="h3" id="sx-sky-xiu-sub"></div></div>
       </div>
+      <div class="sx-sky-links">
+        <span class="sx-sky-link" id="sx-sky-to-ast" hidden></span>
+        <span class="sx-sky-link" id="sx-sky-to-lord" hidden></span>
+      </div>
       <div class="sx-sky-grid">
-        <div class="sx-sky-cell"><div class="c1" data-i18n="sx_dipper">斗 柄 指 向</div><div id="sx-sky-compass"></div>
-          <div class="sx-cell-big" id="sx-sky-dipper-big"></div><div class="sx-cell-sub" id="sx-sky-dipper-sub"></div></div>
+        <div class="sx-sky-cell"><div class="c1" data-i18n="sx_dipper">斗 柄 指 向</div><div id="sx-sky-compass" title="北斗"></div>
+          <div class="sx-cell-big" id="sx-sky-dipper-big"></div><div class="sx-cell-sub" id="sx-sky-dipper-sub"></div>
+          <div class="sx-sky-links cell"><span class="sx-sky-link" id="sx-sky-beidou" data-i18n="sx_link_beidou">北斗星官 ›</span><span class="sx-sky-link" id="sx-sky-doumu" data-i18n="sx_link_doumu">斗姆元君 ›</span></div></div>
         <div class="sx-sky-cell"><div class="c1" data-i18n="sx_moon">月 相</div><div id="sx-sky-moon"></div>
           <div class="sx-cell-big" id="sx-sky-moon-big"></div><div class="sx-cell-sub" id="sx-sky-moon-sub"></div></div>
       </div>
@@ -1251,6 +1258,20 @@
       <div class="card-title">今日打卡 <span class="daka-date" id="daka-today-date"></span></div>
       <div id="daka-habit-list"></div>
       <div class="btn-row"><button class="btn" id="daka-add-btn">＋ 自建打卡项</button></div>
+    </section>
+
+    <!-- 步罡踏斗跟练（v2.0.0 (5) 贯通批：《太上助国救民总真秘要》卷八北斗七星纲） -->
+    <section class="card" id="bugang-entry-card">
+      <div class="card-title">步罡踏斗</div>
+      <div class="daka-item" id="bugang-open" role="button" tabindex="0">
+        <div class="daka-icon">罡</div>
+        <div class="daka-main">
+          <div class="daka-name">北斗七星纲跟练<span class="daka-type">三匝 · 二十一步</span></div>
+          <div class="daka-sub">顺行 · 倒行 · 返行 —— 点按进入跟练</div>
+        </div>
+        <div class="daka-actions"><span class="sx-sky-link">开始 ›</span></div>
+      </div>
+      <p class="hint">步序出《太上助国救民总真秘要》卷八：从贪狼起、至破军下禁，顺倒返三匝。</p>
     </section>
 
     <!-- 倒计时弹窗 -->
@@ -1468,6 +1489,37 @@
   </div>
 
   <!-- ============ 打坐冥想（沉浸页） ============ -->
+  <!-- ============ 步罡踏斗跟练（v2.0.0 (5) 贯通批） ============ -->
+  <div id="bugang-view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('bugang-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="bugang-back">‹ 返回</button>
+      <h1 class="brand-title">步罡踏斗</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <section class="card bg-card">
+      <div class="card-title">北斗七星纲 <span class="daka-type">顺倒返三匝</span></div>
+      <p class="hint bg-src">步序出《太上助国救民总真秘要》卷八《太上正法禹步斗纲掌日诀法图文》：「如步七星，即从第一至第七，谓之顺行。却从第七倒行。复从第一至第七，谓之返行。」同书诸法明言「从贪狼起，至破军下禁」。</p>
+      <div class="bg-foot-row">
+        <span class="bg-foot-label">起步足</span>
+        <span class="bg-seg on" id="bg-foot-left" role="button" tabindex="0">左足先</span>
+        <span class="bg-seg" id="bg-foot-right" role="button" tabindex="0">右足先</span>
+      </div>
+      <p class="hint bg-src">总诀：「男当用春秋（左足先），女用冬夏（右足先）。」跟练只记先后，临步自择合脚者。</p>
+      <div id="bg-stage"></div>
+      <div class="bg-now" id="bg-now"></div>
+      <div class="bg-progress" id="bg-progress"></div>
+      <div class="btn-row bg-btns">
+        <button class="btn" id="bg-prev">上一步</button>
+        <button class="btn primary" id="bg-next">下一步</button>
+        <button class="btn" id="bg-auto">自动</button>
+        <button class="btn" id="bg-reset">重头</button>
+      </div>
+      <p class="hint bg-src">步位图几何取步天歌北斗连线（坐标 BSC5/J2000，与星官图鉴同源）；《秘要》原罡图以灰线点星、图式不存于文字，此图不冒称原图。开阳旁辅星（Alcor）只标不步——《秘要》天狱法有八星之式，而辅星步位无文，不敢妄补。</p>
+    </section>
+    <div class="tab-spacer"></div>
+  </div>
+
   <div id="meditation-view" hidden>
     <div class="med-bg-stack" id="med-bg-stack"></div>
     <div class="med-scrim-top"></div>
@@ -1525,6 +1577,7 @@
 <script src="js/yearview.js"></script>
 <script src="js/media-session.js"></script>
 <script src="js/practice.js"></script>
+<script src="js/bugang.js"></script>
 <script src="js/meditation.js"></script>
 <script src="js/citydata.js"></script>
 <script src="js/bazi.js"></script>

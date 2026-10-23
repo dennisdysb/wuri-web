@@ -187,8 +187,104 @@ synodic: SYNODIC
 };
 }
 
+/* ================= 4) 太阳躔宿（v2.0.0 (5) 贯通批） =================
+ * 口径：以《晋书·天文志上》十二次宿度（陈卓系，fenye.json）为骨架——
+ * 二十八宿古度宽（角12…轸17，合计 365 度，余分在斗、旧制通例）定宿界，
+ * 十二次的起讫/中点宿度为锚点，锚点黄经以中气定之（次中点＝中气，
+ * 次界＝相邻中气黄经正中，即中气 ±15°）。太阳视黄经（上文 Meeus 式，
+ * 约 0.01° 量级）经锚点分段线性折合为宿度位置，再按宿宽定所在之宿
+ * 与入宿度。此谓「以宿度为准的黄道过宫近似」：锚点处与节气严合，
+ * 段内为线性约数；古度为整数、锚点本身有一度内出入（见 fenye 分歧
+ * D9），故入宿度只作约数（一位小数系折合算术、非实测精度）。
+ * 定位粒度止于「宿」：星官在宿内分布广狭不一，无逐官宿度正文可据，
+ * 不判太阳入某星官（宁粗而真）。 */
+var ZHONGQI_LON = { '冬至': 270, '大寒': 300, '雨水': 330, '春分': 0, '谷雨': 30, '小满': 60,
+  '夏至': 90, '大暑': 120, '处暑': 150, '秋分': 180, '霜降': 210, '小雪': 240 };
+var MANSION_ORDER = ['角', '亢', '氐', '房', '心', '尾', '箕', '斗', '牛', '女', '虚', '危',
+  '室', '壁', '奎', '娄', '胃', '昴', '毕', '觜', '参', '井', '鬼', '柳', '星', '张', '翼', '轸'];
+
+function sunMansionOf(jd, fenye) {
+  if (!fenye || !fenye.mansions || !fenye.shierci) return null;
+  var width = {}, entry = {};
+  fenye.mansions.forEach(function (m) {
+    var base = m.mansion.replace(/宿$/, '');
+    width[base] = m.width_degrees; entry[base] = m;
+  });
+  var cum = {}, acc = 0, total = 0;
+  MANSION_ORDER.forEach(function (n) { cum[n] = acc; acc += width[n] || 0; });
+  total = acc; // 365（晋书古度合计）
+  if (!total) return null;
+  function ptPos(p) { return cum[p.mansion.replace(/宿$/, '')] + p.degree; }
+  /* 锚点：[黄经, 宿度位置]，按黄经升序，宿度位置解缠为单调递增 */
+  var raw = [];
+  fenye.shierci.forEach(function (c) {
+    var mid = ZHONGQI_LON[c.span_mid.solar_term];
+    if (typeof mid !== 'number') return;
+    raw.push([norm360(mid - 15), ptPos(c.span_start)]);
+    raw.push([mid, ptPos(c.span_mid)]);
+    raw.push([norm360(mid + 15), ptPos(c.span_end)]);
+  });
+  if (raw.length < 12) return null;
+  raw.sort(function (a, b) { return a[0] - b[0]; });
+  var anchors = [], lastPos = -Infinity;
+  raw.forEach(function (p) {
+    var pos = p[1];
+    while (pos < lastPos - 1e-9) pos += total;
+    /* 同一黄经容许重复锚点（次界一点两记），宿度位置应一致，取先到者 */
+    if (anchors.length && Math.abs(anchors[anchors.length - 1][0] - p[0]) < 1e-9) return;
+    anchors.push([p[0], pos]); lastPos = pos;
+  });
+  var lam = sunLongitude(jd);
+  /* 锚点列复制一份 +360°/+total 拼接，把 lam 归一到首锚点起的 360° 窗内找包夹段 */
+  var ext = anchors.concat(anchors.map(function (p) { return [p[0] + 360, p[1] + total]; }));
+  var base = anchors[0][0], lamN = lam;
+  while (lamN < base) lamN += 360;
+  while (lamN >= base + 360) lamN -= 360;
+  var pos = null;
+  for (var i = 0; i + 1 < ext.length; i++) {
+    if (lamN >= ext[i][0] && lamN <= ext[i + 1][0]) {
+      var span = ext[i + 1][0] - ext[i][0];
+      pos = ext[i][1] + (span > 0 ? (ext[i + 1][1] - ext[i][1]) * (lamN - ext[i][0]) / span : 0);
+      break;
+    }
+  }
+  if (pos === null) return null;
+  pos = ((pos % total) + total) % total;
+  for (var k = 0; k < MANSION_ORDER.length; k++) {
+    var n = MANSION_ORDER[k];
+    if (pos >= cum[n] && pos < cum[n] + width[n]) {
+      var m = entry[n];
+      var inDeg = pos - cum[n];
+      /* 所在之次按本宿 ci_span 分段定（跨次之宿前後段各归其次，
+       * 如井前十五度在实沈、后十八度在鹑首），国/州随段取十二次表 */
+      var segCi = m.ci_primary, acc2 = 0;
+      (m.ci_span || []).forEach(function (sg) {
+        if (inDeg >= acc2) segCi = sg.ci;
+        acc2 += sg.degrees;
+      });
+      var ciEntry = null;
+      fenye.shierci.forEach(function (c) { if (c.name === segCi) ciEntry = c; });
+      return {
+        mansion: m.mansion,            // 如「危宿」
+        base: n,                        // 如「危」
+        inDeg: Math.round(inDeg * 10) / 10,
+        ci: segCi,                      // 太阳所在段之次（跨次宿按段分）
+        ciPrimary: m.ci_primary,        // 本宿主属之次
+        guo: ciEntry ? ciEntry.guo : m.fenye_guo,
+        zhou: ciEntry ? ciEntry.zhou : m.fenye_zhou,
+        sunLon: Math.round(lam * 100) / 100,
+        fenye: m
+      };
+    }
+  }
+  return null;
+}
+
 var api = {
 julianDayNumber: julianDayNumber,
+sunMansionOf: sunMansionOf,
+ZHONGQI_LON: ZHONGQI_LON,
+MANSION_ORDER: MANSION_ORDER,
 jdFromDate: jdFromDate,
 XIU28: XIU28,
 xiuOfDate: xiuOfDate,
