@@ -143,7 +143,7 @@ $$('#tabbar button').forEach(function (btn) {
     target.classList.add('active');
     target.style.display = 'block';
     // 切换标签时隐藏六爻/八字/紫微等独立视图，防止内容泄漏
-    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-affinity', 'view-affinity-result'].forEach(function (vid) {
+    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-affinity', 'view-affinity-result', 'view-stars', 'view-star-region', 'view-star-detail', 'view-butiange'].forEach(function (vid) {
       var v = document.getElementById(vid);
       if (v) v.hidden = true;
     });
@@ -1552,6 +1552,7 @@ function bindMe() {
   }
   fwd('practice-entry-card', 'practice-enter');
   fwd('deities-entry-card', 'deities-enter');
+  fwd('stars-entry-card', 'stars-enter');
   var shushu = document.getElementById('view-shushu');
   var ssCard = document.getElementById('shushu-entry-card');
   if (ssCard && shushu) ssCard.addEventListener('click', function () { shushu.hidden = false; window.scrollTo(0, 0); });

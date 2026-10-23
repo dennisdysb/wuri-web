@@ -4,9 +4,9 @@
  "generatedAt": "2026-10-22",
  "sections": {
   "deities": {
-   "version": 2,
+   "version": 3,
    "file": "deities.json",
-   "count": 74
+   "count": 102
   },
   "scriptures": {
    "version": 7,

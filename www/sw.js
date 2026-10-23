@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v88-20261023-v1405';
+const CACHE = 'wuri-v89-20261023-v200';
 /* 离线下载专用缓存（一键下载的音频/正文/图鉴）：版本更新时绝不清除，
  * 否则用户下好的几百 MB 音频会在每次发版后被 activate 误删（2026-10-21） */
 const OFFLINE_CACHE = 'wuri-offline-v1';
@@ -15,7 +15,7 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=88',
+  './css/style.css?v=89',
   './css/qimen.css?v=78',
   './css/meditation.css?v=65',
   './icon-192.png',
@@ -27,6 +27,8 @@ const ASSETS = [
   './js/citydata.js',
   './js/deities-data.js',
   './js/deities.js',
+  './js/today-sky.js',
+  './js/stars.js',
   './js/i18n.js',
   './js/iztro.min.js',
   './js/jingwen.js',

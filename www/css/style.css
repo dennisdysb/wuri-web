@@ -1590,3 +1590,149 @@ details.disc-foot .hint{margin-top:9px}
   background: linear-gradient(180deg, rgba(245,241,229,.10), rgba(245,241,229,.16) 55%, rgba(245,241,229,.26)); }
 [data-theme="day"] .hero2 .h2-in {
   background: radial-gradient(ellipse 78% 62% at 50% 46%, rgba(245,241,229,.14), rgba(245,241,229,0) 72%); }
+
+/* ================= 中国星象模块（v2.0.0）· sx- 前缀防撞车 ================= */
+.hero2 .h2-bg-stars { background-image: url('../img/heroes/starmap.webp'); background-color:#101725; }
+[data-theme="day"] .hero2 .h2-bg-stars { background-image: url('../img/heroes/day/starmap.webp'); }
+
+.sx-main{padding:18px 0 26px}
+.sx-kicker{font-family:var(--sans);font-size:.72rem;letter-spacing:.3em;color:var(--gold);margin-bottom:6px}
+.sx-title{font-family:var(--serif);font-size:1.9rem;font-weight:700;letter-spacing:.18em;color:var(--ink)}
+.sx-sub{font-family:var(--sans);font-size:.8rem;color:var(--muted);margin-top:6px;line-height:1.6}
+.sx-sec{font-family:var(--serif);font-size:1.02rem;font-weight:700;letter-spacing:.24em;color:var(--ink);margin:24px 0 10px;display:flex;align-items:center;gap:10px}
+.sx-sec::after{content:"";flex:1;height:1px;background:var(--line)}
+.sx-sec small{font-family:var(--sans);font-weight:400;font-size:.72rem;letter-spacing:.05em;color:var(--muted)}
+.sx-card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.sx-loading{font-family:var(--sans);font-size:.85rem;color:var(--muted);text-align:center;padding:38px 12px;line-height:1.7}
+.sx-today{display:flex;gap:12px;align-items:center;padding:12px 14px;margin-top:14px;cursor:pointer}
+.sx-today img{width:52px;height:68px;object-fit:cover;border-radius:9px}
+.sx-today .t1{font-family:var(--sans);font-size:.7rem;letter-spacing:.22em;color:var(--gold)}
+.sx-today .t2{font-family:var(--serif);font-size:1.22rem;font-weight:700;color:var(--ink);margin-top:2px}
+.sx-today .t3{font-family:var(--sans);font-size:.76rem;color:var(--muted);margin-top:2px}
+.sx-today .go{margin-left:auto;font-family:var(--sans);font-size:.78rem;color:var(--teal-deep);white-space:nowrap}
+[data-theme="night"] .sx-today .go{color:var(--teal)}
+.sx-yuan{padding:13px 14px 11px;margin-bottom:10px;cursor:pointer}
+.sx-yuan-top{display:flex;justify-content:space-between;align-items:baseline}
+.sx-yuan-name{font-family:var(--serif);font-size:1.18rem;font-weight:700;letter-spacing:.14em;color:var(--ink)}
+.sx-yuan-n{font-family:var(--sans);font-size:.74rem;color:var(--gold)}
+.sx-yuan-verse{font-family:var(--serif);font-size:.92rem;color:var(--ink);opacity:.85;margin-top:5px;letter-spacing:.06em}
+.sx-yuan-note{font-family:var(--sans);font-size:.74rem;color:var(--muted);margin-top:3px}
+.sx-group{margin-bottom:14px}
+.sx-group-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.sx-group-name{font-family:var(--serif);font-size:1rem;font-weight:700;letter-spacing:.12em;color:var(--ink)}
+.sx-group-n{font-family:var(--sans);font-size:.72rem;color:var(--muted)}
+.sx-chips{display:flex;flex-wrap:wrap;gap:6px}
+.sx-chip{font-family:var(--serif);font-size:.9rem;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer}
+.sx-chip i{font-style:normal;font-family:var(--sans);font-size:.68rem;color:var(--gold);margin-left:5px}
+.sx-duo{display:flex;gap:10px;margin-top:6px}
+.sx-entry{flex:1;display:flex;gap:10px;align-items:center;padding:12px;cursor:pointer;min-width:0}
+.sx-entry img{width:40px;height:52px;object-fit:cover;border-radius:8px}
+.sx-entry .e1{font-family:var(--serif);font-weight:700;color:var(--ink);font-size:.98rem}
+.sx-entry .e2{font-family:var(--sans);font-size:.7rem;color:var(--muted);margin-top:2px;line-height:1.5}
+.sx-crumb{font-family:var(--sans);font-size:.74rem;color:var(--muted);letter-spacing:.08em}
+.sx-lead{padding:13px 14px;margin:12px 0 14px;font-family:var(--serif);font-size:1rem;line-height:1.9;color:var(--ink);letter-spacing:.05em;cursor:pointer}
+.sx-lead small{display:block;font-family:var(--sans);font-size:.72rem;color:var(--muted);letter-spacing:.1em;margin-top:4px}
+.sx-search{margin:2px 0 6px}
+.sx-search input{width:100%;box-sizing:border-box;font-family:var(--sans);font-size:.9rem;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.sx-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.sx-row-main{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sx-row-name{font-family:var(--serif);font-size:1.04rem;font-weight:700;color:var(--ink);letter-spacing:.08em}
+.sx-row-verse{font-family:var(--serif);font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sx-row-side{display:flex;align-items:center;gap:6px;flex:none}
+.sx-row-n{font-family:var(--sans);font-size:.74rem;color:var(--muted)}
+.sx-badge{font-family:var(--sans);font-size:.64rem;line-height:1;padding:3px 6px;border-radius:5px;letter-spacing:.06em;white-space:nowrap}
+.sx-badge.dual{color:var(--amber-deep);background:var(--amber-wash);border:1px solid var(--amber)}
+[data-theme="night"] .sx-badge.dual{color:var(--gold);background:transparent;border-color:var(--line)}
+.sx-badge.doubt{color:var(--cinnabar-deep);background:var(--cinnabar-wash);border:1px solid var(--cinnabar)}
+[data-theme="night"] .sx-badge.doubt{color:#e0a294;background:transparent;border-color:var(--line)}
+.sx-badges{display:inline-flex;gap:6px;margin-left:8px;vertical-align:middle}
+.sx-more{text-align:center;font-family:var(--sans);font-size:.78rem;color:var(--muted);padding:12px 0 2px;cursor:pointer}
+.sx-count-note{font-family:var(--sans);font-size:.74rem;color:var(--muted);line-height:1.7;margin-top:6px}
+.sx-plot{width:100%;height:auto;display:block;background:color-mix(in srgb,var(--paper-2) 40%,transparent);border:1px solid var(--line);border-radius:12px;margin-top:12px}
+.sx-star{fill:var(--gold);stroke:var(--gold-deep);stroke-width:.6}
+.sx-star.ghost{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:3 2}
+.sx-star-ring{fill:none;stroke:var(--cinnabar);stroke-width:1;opacity:.75}
+.sx-plot-line{stroke:var(--gold);stroke-width:1.4}
+.sx-plot-dash{stroke:var(--muted);stroke-width:1.1;stroke-dasharray:4 3;fill:none}
+.sx-plot-t{font-family:var(--serif);font-size:11px;fill:var(--ink)}
+.sx-plot-s{font-family:var(--sans);font-size:8.5px;fill:var(--muted)}
+.sx-calib{margin-top:12px;padding:12px 14px}
+.sx-calib-head{font-family:var(--serif);font-weight:700;color:var(--ink);font-size:.98rem;letter-spacing:.06em}
+.sx-calib-head small{font-family:var(--sans);font-weight:400;font-size:.7rem;color:var(--muted);margin-left:8px}
+.sx-calib.qing{opacity:.92}
+.sx-ct-head,.sx-ct-row{display:flex;font-family:var(--sans);font-size:.8rem;padding:6px 0}
+.sx-ct-head{color:var(--muted);font-size:.68rem;letter-spacing:.1em;border-bottom:1px solid var(--line);margin-top:8px}
+.sx-ct-row{color:var(--ink);border-bottom:1px solid var(--line-soft)}
+.sx-ct-head span,.sx-ct-row span{flex:1;min-width:0}
+.sx-ct-head span:last-child,.sx-ct-row span:last-child{flex:0 0 52px;text-align:right}
+.sx-ct-d{font-family:var(--serif)}
+.sx-ct-note{display:block;font-family:var(--sans);font-size:.66rem;color:var(--muted);line-height:1.5;margin-top:2px}
+.sx-qing-prose{font-family:var(--sans);font-size:.76rem;line-height:1.75;color:var(--muted);margin-top:8px}
+.sx-qing-prose.in{margin-top:10px}
+.sx-note{font-family:var(--sans);font-size:.78rem;line-height:1.75;color:var(--muted);margin-top:12px;padding:11px 13px;border-left:3px solid var(--gold);background:color-mix(in srgb,var(--gold-wash) 45%,transparent);border-radius:0 10px 10px 0}
+.sx-note b{color:var(--ink)}
+.sx-link{display:flex;gap:12px;align-items:center;padding:12px 14px;margin-top:12px;cursor:pointer}
+.sx-link img{width:46px;height:60px;object-fit:cover;border-radius:8px}
+.sx-link .l1{font-family:var(--serif);font-weight:700;color:var(--ink)}
+.sx-link .l2{font-family:var(--sans);font-size:.72rem;color:var(--muted);margin-top:2px;line-height:1.55}
+.sx-link .go{margin-left:auto;color:var(--gold);font-size:1.1rem;flex:none}
+/* 今日星空卡（首页） */
+.sx-sky{padding:16px 14px 8px}
+.sx-sky-head{display:flex;align-items:center;gap:12px;cursor:pointer}
+.sx-sky-head img{width:46px;height:60px;object-fit:cover;border-radius:8px}
+.sx-sky .h1{font-family:var(--sans);font-size:.68rem;letter-spacing:.24em;color:var(--gold)}
+.sx-sky .h2{font-family:var(--serif);font-size:1.3rem;font-weight:700;color:var(--ink);margin-top:2px}
+.sx-sky .h3{font-family:var(--sans);font-size:.74rem;color:var(--muted);margin-top:2px}
+.sx-sky-grid{display:flex;gap:8px;margin-top:8px}
+.sx-sky-cell{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:6px 2px 10px;min-width:0}
+.sx-sky-cell .c1{font-family:var(--sans);font-size:.68rem;letter-spacing:.2em;color:var(--muted);margin-bottom:6px}
+.sx-compass{width:150px;height:150px;max-width:100%}
+.sx-comp-ring{fill:none;stroke:var(--line);stroke-width:1}
+.sx-comp-ring2{fill:none;stroke:var(--line-soft);stroke-width:1}
+.sx-comp-d{font-family:var(--serif);font-size:10px;fill:var(--muted)}
+.sx-comp-d.main{font-size:12px;fill:var(--ink);font-weight:700}
+.sx-comp-b{font-family:var(--serif);font-size:8.5px;fill:var(--faint)}
+.sx-comp-b.hot{fill:var(--cinnabar);font-weight:700;font-size:10px}
+.sx-needle{fill:var(--cinnabar);opacity:.9}
+.sx-comp-c{fill:var(--gold)}
+.sx-moon{width:104px;height:104px}
+.sx-moon-lit{fill:#E9D9A8}
+[data-theme="night"] .sx-moon-lit{fill:#d8c88f}
+.sx-moon-dark{fill:var(--ink);opacity:.16}
+.sx-cell-big{font-family:var(--serif);font-size:1.24rem;font-weight:700;color:var(--ink)}
+.sx-cell-sub{font-family:var(--sans);font-size:.72rem;color:var(--muted);margin-top:3px;line-height:1.55}
+.sx-caliber{font-family:var(--sans);font-size:.66rem;color:var(--faint);text-align:center;padding:2px 10px 10px;line-height:1.6}
+/* 步天歌典籍页 */
+.sx-band{margin:-18px -16px 16px;padding:26px 16px 20px;background:linear-gradient(160deg,#101725,#1d2c42 55%,#0c1420);color:#EDE4C8;position:relative;overflow:hidden}
+.sx-band::after{content:"✦ ✧ · ✦ · ✧ ✦ · ✧";position:absolute;right:10px;top:8px;font-size:.7rem;letter-spacing:.7em;color:rgba(237,228,200,.35)}
+.sx-band .sx-kicker{color:#c9a86a}
+.sx-band .sx-title{color:#F3ECD4}
+.sx-band .sx-sub{color:rgba(237,228,200,.72)}
+.sx-toc{display:flex;flex-wrap:wrap;gap:6px}
+.sx-toc span{font-family:var(--serif);font-size:.86rem;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 9px;cursor:pointer}
+.sx-toc i{font-style:normal;font-family:var(--sans);font-size:.64rem;color:var(--gold);margin-left:4px}
+.sx-toregion{font-family:var(--sans);font-weight:400;font-size:.74rem;letter-spacing:.05em;color:var(--teal-deep);margin-left:auto;cursor:pointer}
+[data-theme="night"] .sx-toregion{color:var(--teal)}
+.sx-verse{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line-soft)}
+.sx-verse-t{font-family:var(--serif);font-size:1.12rem;color:var(--ink);letter-spacing:.1em}
+.sx-verse.dim .sx-verse-t{color:var(--muted);font-size:1rem}
+.sx-verse-tags{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.sx-verse-tag{font-family:var(--sans);font-size:.68rem;color:var(--teal-deep);background:var(--teal-wash);border-radius:5px;padding:3px 7px;white-space:nowrap;cursor:pointer}
+[data-theme="night"] .sx-verse-tag{color:var(--teal);background:transparent;border:1px solid var(--line)}
+.sx-verse-tag.off{cursor:default;opacity:.65}
+.sx-verse-kind{font-family:var(--sans);font-size:.66rem;color:var(--faint);white-space:nowrap}
+.sx-verse.more{font-family:var(--sans);font-size:.76rem;color:var(--muted);letter-spacing:.05em;cursor:pointer}
+.sx-foot{font-family:var(--sans);font-size:.72rem;line-height:1.8;color:var(--muted);margin-top:14px}
+/* 经文库「典籍 · 天文」分架（星空带，与经书条目分格） */
+.sx-shelf{margin-top:14px;border-radius:14px;padding:14px;background:linear-gradient(160deg,#101725,#1d2c42 55%,#0c1420);color:#EDE4C8;display:flex;align-items:center;gap:10px;cursor:pointer;position:relative;overflow:hidden}
+.sx-shelf::after{content:"✦ ✧ · ✦";position:absolute;right:10px;top:6px;font-size:.62rem;letter-spacing:.6em;color:rgba(237,228,200,.35)}
+.sx-shelf-in{flex:1;min-width:0}
+.sx-shelf-k{font-family:var(--sans);font-size:.64rem;letter-spacing:.3em;color:#c9a86a}
+.sx-shelf-t{font-family:var(--serif);font-size:1.14rem;font-weight:700;color:#F3ECD4;margin-top:3px}
+.sx-shelf-n{font-family:var(--sans);font-size:.7rem;color:rgba(237,228,200,.72);margin-top:2px}
+.sx-shelf-go{color:#c9a86a;font-size:1.2rem;flex:none}
+/* 神祇详情内的星象互链签与空字段隐藏保险 */
+.sx-deity-starlink{font-family:var(--sans);font-size:.78rem;color:var(--teal-deep);background:var(--teal-wash);border:1px solid var(--line);border-radius:999px;padding:7px 14px;margin:4px 16px 0;cursor:pointer}
+[data-theme="night"] .sx-deity-starlink{color:var(--teal);background:transparent}
+.deity-sec[hidden]{display:none}
+#deity-star-link{padding-bottom:6px}

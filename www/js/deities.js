@@ -101,6 +101,24 @@
     F.domain.textContent = d.domain;
     F.intro.textContent = d.intro;
     F.appearance.textContent = d.appearance;
+    /* 空字段隐藏整行（如二十八宿星君 birthday 为空）：仅空才隐，有值照旧 */
+    [['birthday', d.birthday], ['temple', d.temple], ['domain', d.domain], ['intro', d.intro], ['appearance', d.appearance]].forEach(function (pair) {
+      var sec = F[pair[0]] && F[pair[0]].closest ? F[pair[0]].closest('.deity-sec') : null;
+      if (sec) sec.hidden = !(pair[1] && String(pair[1]).trim());
+    });
+    /* 星象互链：条目带 link_key（二十八宿星君）时追加「本宿星官 ›」签；
+     * stars.js 未加载（无 __wuri_openStarRegion）时不出现 */
+    var starLink = document.getElementById('deity-star-link');
+    if (starLink) {
+      if (d.link_key && typeof window.__wuri_openStarRegion === 'function') {
+        starLink.innerHTML = '<button class="sx-deity-starlink" type="button">本宿星官 ›</button>';
+        starLink.querySelector('.sx-deity-starlink').addEventListener('click', function () {
+          window.__wuri_openStarRegion(d.link_key);
+        });
+      } else {
+        starLink.innerHTML = '';
+      }
+    }
     curIdx = order.indexOf(id);
     if (F.pos) F.pos.textContent = '第 ' + (curIdx + 1) + ' / ' + total + ' 位';
     if (F.navPrev) F.navPrev.disabled = curIdx <= 0;
@@ -175,4 +193,6 @@
   if (dBack) dBack.addEventListener('click', function () { detailView.hidden = true; });
 
   window.Deities = { openDetail: openDetail };
+  /* 星象模块互链入口（js/stars.js 调用）：包 openDetail，走其内部打开路径 */
+  window.__wuri_openDeity = function (id) { openDetail(id); };
 })();

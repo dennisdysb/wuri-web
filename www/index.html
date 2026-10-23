@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=88">
+<link rel="stylesheet" href="css/style.css?v=89">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=65">
 </head>
@@ -63,6 +63,21 @@
       <div id="zhishen-line" class="zhishen"></div>
     </section>
 
+    <!-- 今日星空卡（v2.0.0 星象模块 s4：值日宿/斗柄/月相，数据走 js/today-sky.js，js/stars.js 渲染） -->
+    <section class="card sx-sky" id="today-sky-card" data-sx-lord="">
+      <div class="sx-sky-head" id="sx-sky-head">
+        <img id="sx-sky-img" alt="" hidden>
+        <div><div class="h1" data-i18n="sx_sky_kicker">今 日 星 空 · 值 日 宿</div><div class="h2" id="sx-sky-xiu"></div><div class="h3" id="sx-sky-xiu-sub"></div></div>
+      </div>
+      <div class="sx-sky-grid">
+        <div class="sx-sky-cell"><div class="c1" data-i18n="sx_dipper">斗 柄 指 向</div><div id="sx-sky-compass"></div>
+          <div class="sx-cell-big" id="sx-sky-dipper-big"></div><div class="sx-cell-sub" id="sx-sky-dipper-sub"></div></div>
+        <div class="sx-sky-cell"><div class="c1" data-i18n="sx_moon">月 相</div><div id="sx-sky-moon"></div>
+          <div class="sx-cell-big" id="sx-sky-moon-big"></div><div class="sx-cell-sub" id="sx-sky-moon-sub"></div></div>
+      </div>
+      <div class="sx-caliber" data-i18n="sx_caliber">斗柄为传统斗建口径（初昏锚定月建、每时辰顺进一辰，《鹖冠子·环流》），非现代天文方位角；月龄照亮系本地推算，不联网。</div>
+    </section>
+
     <!-- 修行日程入口（v1.4.0 封版批：整卡图卡·整卡即按钮，旧 enter 钮隐藏保留、整卡点击转发） -->
     <section class="hero2" id="practice-entry-card">
       <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
@@ -97,6 +112,17 @@
         <div class="h2-gold"><span><span id="deities-count-cn">七十四</span>位尊神</span></div>
       </div>
       <button class="btn primary hero-enter" id="deities-enter" hidden>进入图鉴</button>
+    </section>
+
+    <!-- 星象（v2.0.0：中国星象模块入口·第四卡，整卡点击转发 stars-enter） -->
+    <section class="hero2" id="stars-entry-card">
+      <div class="h2-bg h2-bg-stars" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="sx_card_title">星象</div>
+        <p class="h2-sub" data-i18n="sx_card_sub">璇玑玉衡，观星读天：三垣二十八宿，步天而歌。</p>
+        <div class="h2-gold"><span data-i18n="sx_card_gold">二百八十七星官 · 三垣二十八宿</span></div>
+      </div>
+      <button class="btn primary hero-enter" id="stars-enter" hidden>进入星官图鉴</button>
     </section>
     <div class="tab-spacer"></div>
   </main>
@@ -869,7 +895,7 @@
     </section>
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v1.4.0 (5) (2026-10-23)</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.0.0 (2026-10-23)</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint">奇门遁甲排盘功能基于开源项目「掌上乾坤 · 奇门遁甲助手」（作者 qzp001，依 MIT 许可证使用），特此鸣谢。</p>
@@ -1157,7 +1183,56 @@
         <div class="card-title">形象特征</div>
         <p id="deity-f-appearance"></p>
       </section>
+      <div id="deity-star-link"></div>
     </div>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 星官图鉴 · 首页（v2.0.0 星象模块 s1） ============ -->
+  <main id="view-stars" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('stars-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="stars-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="sx_home_bar">星官图鉴</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div id="sx-home" class="sx-main"></div>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 星官图鉴 · 区页（v2.0.0 s2） ============ -->
+  <main id="view-star-region" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('star-region-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="star-region-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="sx_home_bar">星官图鉴</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div id="sx-region" class="sx-main"></div>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 《步天歌》典籍页（v2.0.0 s5） ============ -->
+  <main id="view-butiange" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('butiange-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="butiange-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="sx_entry_book">步天歌</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div id="sx-book" class="sx-main"></div>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 星官详情（v2.0.0 s3） ============ -->
+  <main id="view-star-detail" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('star-detail-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="star-detail-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="sx_home_bar">星官图鉴</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div id="sx-detail" class="sx-main"></div>
     <div class="tab-spacer"></div>
   </main>
 
@@ -1467,6 +1542,8 @@
 <script src="js/jingwen.js"></script>
 <script src="js/deities-data.js"></script>
 <script src="js/deities.js"></script>
+<script src="js/today-sky.js"></script>
+<script src="js/stars.js"></script>
 <script src="js/affinity-data.js"></script>
 <script src="js/affinity.js"></script>
 <script src="js/content-feed.js"></script>
