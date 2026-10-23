@@ -112,9 +112,10 @@ self.addEventListener('fetch', e => {
   }
   // JS 文件：完全不拦截，让浏览器直接请求（SW 缓存 JS 出问题，2026-10-11）
   if (isJs) return;
-  // 远程内容数据源（content/*.json）：网络优先＋no-store，保证内容更新即时生效；
+  // 远程内容数据源（content/*.json）与星官数据（data/*.json）：网络优先＋no-store，保证内容更新即时生效；
   // 网络失败才回落缓存里的上一版 JSON，绝不回落 index.html（2026-10-19 内容通道上线）
-  var isFeedJson = url.pathname.indexOf('/content/') !== -1 && url.pathname.endsWith('.json');
+  // data/*.json 原走文末通用 cache-first，用户端会滞留旧数据，2026-10-23 并入本分支（同 feed 规范）
+  var isFeedJson = (url.pathname.indexOf('/content/') !== -1 || url.pathname.indexOf('/data/') !== -1) && url.pathname.endsWith('.json');
   if (isFeedJson && e.request.method === 'GET') {
     e.respondWith(
       fetch(e.request, { cache: 'no-store' }).then(function (res) {

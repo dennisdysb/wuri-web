@@ -371,8 +371,125 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "左樞",
+     "designation": "ι Dra",
+     "HR": 5744,
+     "HIP": 75458,
+     "ra_deg": 231.2325,
+     "dec_deg": 58.96611,
+     "vmag": 3.29,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "上宰",
+     "designation": "θ Dra",
+     "HR": 5986,
+     "HIP": 78527,
+     "ra_deg": 240.47208,
+     "dec_deg": 58.56528,
+     "vmag": 4.01,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "少宰",
+     "designation": "η Dra",
+     "HR": 6132,
+     "HIP": 80331,
+     "ra_deg": 245.99792,
+     "dec_deg": 61.51417,
+     "vmag": 2.74,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "上弼",
+     "designation": "ζ Dra",
+     "HR": 6396,
+     "HIP": 83895,
+     "ra_deg": 257.19667,
+     "dec_deg": 65.71472,
+     "vmag": 3.17,
+     "sources": [
+      "wiki",
+      "stellarium",
+      "仪象考成（清表星名）"
+     ],
+     "note": "清名；歌诀（主口径）作上辅"
+    },
+    {
+     "cn_name": "少弼",
+     "designation": "υ Dra",
+     "HR": 7180,
+     "HIP": 92782,
+     "ra_deg": 283.59958,
+     "dec_deg": 71.29722,
+     "vmag": 4.82,
+     "sources": [
+      "wiki",
+      "stellarium",
+      "仪象考成（清表星名）"
+     ],
+     "note": "清名；歌诀作少辅"
+    },
+    {
+     "cn_name": "上卫",
+     "designation": "73 Dra",
+     "HR": 7879,
+     "HIP": 101260,
+     "ra_deg": 307.87667,
+     "dec_deg": 74.95472,
+     "vmag": 5.2,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "少卫",
+     "designation": "π Cep",
+     "HR": 8819,
+     "HIP": 114222,
+     "ra_deg": 346.97458,
+     "dec_deg": 75.3875,
+     "vmag": 4.41,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "少丞",
+     "designation": "23 Cas",
+     "HR": 208,
+     "HIP": 3721,
+     "ra_deg": 11.94208,
+     "dec_deg": 74.8475,
+     "vmag": 5.41,
+     "sources": [
+      "wiki",
+      "stellarium",
+      "仪象考成（清表星名）"
+     ],
+     "note": "清名；歌诀作上丞"
+    }
+   ],
    "status": "确定",
-   "qing_variant": "清《儀象考成》口徑：左垣第四、五星作上弼、少弼（歌訣作上輔、少輔），第八星作少丞（歌訣序列終星為上丞，且句末以「大贊府」稱之）；本表從歌訣／《宋史·天文志》東蕃序列",
+   "qing_variant": "清《儀象考成》口徑：左垣第四、五星作上弼、少弼（歌訣作上輔、少輔），第八星作少丞（歌訣序列終星為上丞，且句末以「大贊府」稱之）；本表從歌訣／《宋史·天文志》東蕃序列。清口径逐星全录：左樞＝ι Dra（HR 5744，RA 231.2325°，Dec 58.96611°，V 3.29），上宰＝θ Dra（HR 5986，RA 240.47208°，Dec 58.56528°，V 4.01），少宰＝η Dra（HR 6132，RA 245.99792°，Dec 61.51417°，V 2.74），上弼＝ζ Dra（HR 6396，RA 257.19667°，Dec 65.71472°，V 3.17），少弼＝υ Dra（HR 7180，RA 283.59958°，Dec 71.29722°，V 4.82），上卫＝73 Dra（HR 7879，RA 307.87667°，Dec 74.95472°，V 5.20），少卫＝π Cep（HR 8819，RA 346.97458°，Dec 75.3875°，V 4.41），少丞＝23 Cas（HR 208，RA 11.94208°，Dec 74.8475°，V 5.41）。",
    "dispute": "左垣八星名兩系有別：歌訣＋宋志作上丞，清表作少丞；「大贊府」定字見notes",
    "basis": "兩源成員星一致（ι/θ/η/ζ/υ Dra、73 Dra、π Cep、23 Cas）；星名從歌訣序列"
   },
@@ -487,8 +604,109 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "右樞",
+     "designation": "α Dra",
+     "HR": 5291,
+     "HIP": 68756,
+     "ra_deg": 211.09708,
+     "dec_deg": 64.37583,
+     "vmag": 3.65,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "少尉",
+     "designation": "κ Dra",
+     "HR": 4787,
+     "HIP": 61281,
+     "ra_deg": 188.37083,
+     "dec_deg": 69.78833,
+     "vmag": 3.87,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "上輔",
+     "designation": "λ Dra",
+     "HR": 4434,
+     "HIP": 56211,
+     "ra_deg": 172.85083,
+     "dec_deg": 69.33111,
+     "vmag": 3.84,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "少輔",
+     "designation": "24 UMa",
+     "HR": 3771,
+     "HIP": 46977,
+     "ra_deg": 143.62042,
+     "dec_deg": 69.83028,
+     "vmag": 4.56,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "上卫",
+     "designation": "43 Cam",
+     "HR": 2511,
+     "HIP": 33104,
+     "ra_deg": 103.42583,
+     "dec_deg": 68.88833,
+     "vmag": 5.12,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "少卫",
+     "designation": "α Cam",
+     "HR": 1542,
+     "HIP": 22783,
+     "ra_deg": 73.5125,
+     "dec_deg": 66.34278,
+     "vmag": 4.29,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "上丞",
+     "designation": "HD 20336",
+     "HR": 985,
+     "HIP": 15520,
+     "ra_deg": 49.9975,
+     "dec_deg": 65.65222,
+     "vmag": 4.84,
+     "sources": [
+      "wiki",
+      "stellarium",
+      "仪象考成（清表星名）"
+     ],
+     "note": "清名；歌诀作少丞"
+    }
+   ],
    "status": "确定",
-   "qing_variant": "清《儀象考成》口徑：右垣第七星作上丞（BK Cam，維基「上丞」條即此星），與左垣八星名互換；本表從歌訣序列作少丞",
+   "qing_variant": "清《儀象考成》口徑：右垣第七星作上丞（BK Cam，維基「上丞」條即此星），與左垣八星名互換；本表從歌訣序列作少丞。清口径逐星全录：右樞＝α Dra（HR 5291，RA 211.09708°，Dec 64.37583°，V 3.65），少尉＝κ Dra（HR 4787，RA 188.37083°，Dec 69.78833°，V 3.87），上輔＝λ Dra（HR 4434，RA 172.85083°，Dec 69.33111°，V 3.84），少輔＝24 UMa（HR 3771，RA 143.62042°，Dec 69.83028°，V 4.56），上卫＝43 Cam（HR 2511，RA 103.42583°，Dec 68.88833°，V 5.12），少卫＝α Cam（HR 1542，RA 73.5125°，Dec 66.34278°，V 4.29），上丞＝HD 20336（HR 985，RA 49.9975°，Dec 65.65222°，V 4.84）。",
    "dispute": "右垣七星名與清表互換（歌訣少丞／清表上丞），成員星本身兩源一致",
    "basis": "兩源成員星一致；星名從歌訣序列"
   },
@@ -6400,8 +6618,162 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "柱一",
+     "designation": "υ² Cen",
+     "HR": 5260,
+     "HIP": 68523,
+     "ra_deg": 210.43083,
+     "dec_deg": -45.60361,
+     "vmag": 4.34,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "本条 stars 即清定十一星；歌诀作十五星，差四星无现代对照"
+    },
+    {
+     "cn_name": "柱二",
+     "designation": "υ¹ Cen",
+     "HR": 5249,
+     "HIP": 68282,
+     "ra_deg": 209.67,
+     "dec_deg": -44.80361,
+     "vmag": 3.87,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱三",
+     "designation": "ι Lup",
+     "HR": 5354,
+     "HIP": 69996,
+     "ra_deg": 214.85083,
+     "dec_deg": -46.05778,
+     "vmag": 3.55,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱四",
+     "designation": "τ¹ Lup",
+     "HR": 5395,
+     "HIP": 70574,
+     "ra_deg": 216.53417,
+     "dec_deg": -45.22139,
+     "vmag": 4.56,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱五",
+     "designation": "a Cen",
+     "HR": 5378,
+     "HIP": 70300,
+     "ra_deg": 215.75917,
+     "dec_deg": -39.51222,
+     "vmag": 4.42,
+     "sources": [
+      "wiki"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱六",
+     "designation": "ψ Cen",
+     "HR": 5367,
+     "HIP": 70090,
+     "ra_deg": 215.13917,
+     "dec_deg": -37.88528,
+     "vmag": 4.05,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱七",
+     "designation": "4 Cen",
+     "HR": 5221,
+     "HIP": 67786,
+     "ra_deg": 208.30208,
+     "dec_deg": -31.92778,
+     "vmag": 4.73,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱八",
+     "designation": "3 Cen",
+     "HR": 5210,
+     "HIP": 67669,
+     "ra_deg": 207.95667,
+     "dec_deg": -32.99444,
+     "vmag": 4.56,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱九",
+     "designation": "1 Cen",
+     "HR": 5168,
+     "HIP": 67153,
+     "ra_deg": 206.42167,
+     "dec_deg": -33.04389,
+     "vmag": 4.23,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱十",
+     "designation": "π Cen",
+     "HR": 4390,
+     "HIP": 55425,
+     "ra_deg": 170.25167,
+     "dec_deg": -54.49111,
+     "vmag": 3.89,
+     "sources": [
+      "wiki"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "柱十一",
+     "designation": "ι Cen",
+     "HR": 5028,
+     "HIP": 65109,
+     "ra_deg": 200.14917,
+     "dec_deg": -36.71222,
+     "vmag": 2.75,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清《仪象考成》定柱 11 星、分五个部分分处库楼外侧（本表 stars 即清定 11 星）；歌诀作十五星，差四星无现代对照。",
+   "qing_variant": "清《仪象考成》定柱 11 星、分五个部分分处库楼外侧（本表 stars 即清定 11 星）；歌诀作十五星，差四星无现代对照。清口径逐星全录：柱一＝υ² Cen（HR 5260，RA 210.43083°，Dec -45.60361°，V 4.34），柱二＝υ¹ Cen（HR 5249，RA 209.67°，Dec -44.80361°，V 3.87），柱三＝ι Lup（HR 5354，RA 214.85083°，Dec -46.05778°，V 3.55），柱四＝τ¹ Lup（HR 5395，RA 216.53417°，Dec -45.22139°，V 4.56），柱五＝a Cen（HR 5378，RA 215.75917°，Dec -39.51222°，V 4.42），柱六＝ψ Cen（HR 5367，RA 215.13917°，Dec -37.88528°，V 4.05），柱七＝4 Cen（HR 5221，RA 208.30208°，Dec -31.92778°，V 4.73），柱八＝3 Cen（HR 5210，RA 207.95667°，Dec -32.99444°，V 4.56），柱九＝1 Cen（HR 5168，RA 206.42167°，Dec -33.04389°，V 4.23），柱十＝π Cen（HR 4390，RA 170.25167°，Dec -54.49111°，V 3.89），柱十一＝ι Cen（HR 5028，RA 200.14917°，Dec -36.71222°，V 2.75）。",
    "dispute": "歌诀十五星与清定十一星差四星无考；柱十（π Cen）仅维基一源。",
    "basis": "汇总裁定补立：歌诀明言「楼中柱有十五星」；维基东方表与「柱（星官）」条独立立官，Stellarium 连线分五组与清定五部互证。骨架原并入库楼，今按歌诀与两源立目，星从清定 11 星。"
   },
@@ -6512,6 +6884,36 @@
       "数据摸底正本§2.7（宋图口径）"
      ],
      "note": "两口径共有之星：清口径中为南门一。"
+    }
+   ],
+   "qing_stars": [
+    {
+     "cn_name": "南门一",
+     "designation": "ε Cen",
+     "HR": 5132,
+     "HIP": 66657,
+     "ra_deg": 204.97167,
+     "dec_deg": -53.46639,
+     "vmag": 2.3,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "两口径共有之星（步天歌口径作南门二）"
+    },
+    {
+     "cn_name": "南门二",
+     "designation": "α Cen",
+     "HR": 5459,
+     "HIP": 71683,
+     "ra_deg": 219.89958,
+     "dec_deg": -60.83528,
+     "vmag": -0.01,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
     }
    ],
    "status": "存疑",
@@ -7218,6 +7620,64 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "亢池一",
+     "designation": "20 Boo",
+     "HR": 5370,
+     "HIP": 70027,
+     "ra_deg": 214.93833,
+     "dec_deg": 16.30694,
+     "vmag": 4.86,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "亢池二",
+     "designation": "HD 124034",
+     "HR": null,
+     "HIP": 69260,
+     "ra_deg": 212.68075,
+     "dec_deg": 15.29076,
+     "vmag": 6.95,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "BSC 未收（无 HR 编号），坐标星等同主表来源"
+    },
+    {
+     "cn_name": "亢池三",
+     "designation": "14 Boo",
+     "HR": 5323,
+     "HIP": 69536,
+     "ra_deg": 213.52167,
+     "dec_deg": 12.95944,
+     "vmag": 5.54,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "亢池四",
+     "designation": "18 Boo",
+     "HR": 5365,
+     "HIP": 69989,
+     "ra_deg": 214.81792,
+     "dec_deg": 13.00417,
+     "vmag": 5.41,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
    "qing_variant": "清《仪象考成》口径（维基表、Stellarium、日文氐宿表）均只认四星，即本条所列四星；乙系歌诀亦作『亢池大角微南四』。",
    "dispute": "歌诀（甲系）明言六星，今两源只能定四星，余二星无考；四星之数与清口径及乙系歌诀相合，六星之数仅甲系歌诀一源。故 star_count_tradition 从歌诀作 6，stars 列可定之 4 星。",
@@ -7375,8 +7835,150 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "骑官一",
+     "designation": "γ Lup",
+     "HR": 5776,
+     "HIP": 76297,
+     "ra_deg": 233.78542,
+     "dec_deg": -41.16694,
+     "vmag": 2.78,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官二",
+     "designation": "δ Lup",
+     "HR": 5695,
+     "HIP": 75141,
+     "ra_deg": 230.34292,
+     "dec_deg": -40.6475,
+     "vmag": 3.22,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官三",
+     "designation": "κ Cen",
+     "HR": 5576,
+     "HIP": 73334,
+     "ra_deg": 224.79042,
+     "dec_deg": -42.10417,
+     "vmag": 3.13,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官四",
+     "designation": "β Lup",
+     "HR": 5571,
+     "HIP": 73273,
+     "ra_deg": 224.63292,
+     "dec_deg": -43.13389,
+     "vmag": 2.68,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官五",
+     "designation": "λ Lup",
+     "HR": 5626,
+     "HIP": 74117,
+     "ra_deg": 227.21083,
+     "dec_deg": -45.27972,
+     "vmag": 4.05,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官六",
+     "designation": "ε Lup",
+     "HR": 5708,
+     "HIP": 75264,
+     "ra_deg": 230.67042,
+     "dec_deg": -44.68944,
+     "vmag": 3.37,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官七",
+     "designation": "μ Lup",
+     "HR": 5683,
+     "HIP": 74911,
+     "ra_deg": 229.63333,
+     "dec_deg": -47.875,
+     "vmag": 4.27,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官八",
+     "designation": "π Lup",
+     "HR": 5605,
+     "HIP": 73807,
+     "ra_deg": 226.28,
+     "dec_deg": -47.05111,
+     "vmag": 4.72,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官九",
+     "designation": "ο Lup",
+     "HR": 5528,
+     "HIP": 72683,
+     "ra_deg": 222.91,
+     "dec_deg": -43.57556,
+     "vmag": 4.32,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "骑官十",
+     "designation": "α Lup",
+     "HR": 5469,
+     "HIP": 71860,
+     "ra_deg": 220.4825,
+     "dec_deg": -47.38833,
+     "vmag": 2.3,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "确定",
-   "qing_variant": "清《仪象考成》口径为十星（维基表、Stellarium、日文表一致），星官名径作『骑官』；骨架名『骑官十』即由此十星得名。",
+   "qing_variant": "清《仪象考成》口径为十星（维基表、Stellarium、日文表一致），星官名径作『骑官』；骨架名『骑官十』即由此十星得名。清口径逐星全录：骑官一＝γ Lup（HR 5776，RA 233.78542°，Dec -41.16694°，V 2.78），骑官二＝δ Lup（HR 5695，RA 230.34292°，Dec -40.6475°，V 3.22），骑官三＝κ Cen（HR 5576，RA 224.79042°，Dec -42.10417°，V 3.13），骑官四＝β Lup（HR 5571，RA 224.63292°，Dec -43.13389°，V 2.68），骑官五＝λ Lup（HR 5626，RA 227.21083°，Dec -45.27972°，V 4.05），骑官六＝ε Lup（HR 5708，RA 230.67042°，Dec -44.68944°，V 3.37），骑官七＝μ Lup（HR 5683，RA 229.63333°，Dec -47.875°，V 4.27），骑官八＝π Lup（HR 5605，RA 226.28°，Dec -47.05111°，V 4.72），骑官九＝ο Lup（HR 5528，RA 222.91°，Dec -43.57556°，V 4.32），骑官十＝α Lup（HR 5469，RA 220.4825°，Dec -47.38833°，V 2.30）。",
    "dispute": "甲系歌诀作『骑官之众二十七，三三相连十欠一』，与清口径十星大相径庭：二十七之数疑统数氐南骑官、阵车、车骑、天辐、骑阵将军诸官及周边散星之总众（诸官合计十九星，仍不合），或为歌诀夸饰/别本计数，今无从确解。本条从两源互证的十星立表，歌诀二十七之说录此备考。",
    "basis": "十星成员两源逐星一致（Stellarium hip_names 序与维基表序全合）"
   },
@@ -8077,8 +8679,38 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "积卒一",
+     "designation": "θ Lup",
+     "HR": 5987,
+     "HIP": 78918,
+     "ra_deg": 241.64792,
+     "dec_deg": -36.80222,
+     "vmag": 4.23,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "清《仪象考成》正星仅二星；增星 HIP 78970 不入正星"
+    },
+    {
+     "cn_name": "积卒二",
+     "designation": "η Lup",
+     "HR": 5948,
+     "HIP": 78384,
+     "ra_deg": 240.03042,
+     "dec_deg": -38.39694,
+     "vmag": 3.41,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清《仪象考成》仅认二星（θ、η Lup），另增一星即积卒二之重复登录、一星为 HIP 78970（无 BSC 对应资料录此备考）。",
+   "qing_variant": "清《仪象考成》仅认二星（θ、η Lup），另增一星即积卒二之重复登录、一星为 HIP 78970（无 BSC 对应资料录此备考）。清口径逐星全录：积卒一＝θ Lup（HR 5987，RA 241.64792°，Dec -36.80222°，V 4.23），积卒二＝η Lup（HR 5948，RA 240.03042°，Dec -38.39694°，V 3.41）。",
    "dispute": "歌诀明言十二星、三三相聚，然自清《仪象考成》以来仅二星有定考，余十星无对照（维基积卒条、东方表、Stellarium 三处皆只二星）。本条 stars 仅列可定之二星，余十星存疑待考。",
    "basis": "二星成员三源一致；十二之数从歌诀"
   },
@@ -9128,8 +9760,164 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "鳖一",
+     "designation": "α Tel",
+     "HR": 6897,
+     "HIP": 90422,
+     "ra_deg": 276.74333,
+     "dec_deg": -45.96833,
+     "vmag": 3.51,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖二",
+     "designation": "η1 CrA",
+     "HR": 7062,
+     "HIP": 92308,
+     "ra_deg": 282.21042,
+     "dec_deg": -43.68,
+     "vmag": 5.49,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖三",
+     "designation": "ζ CrA",
+     "HR": 7188,
+     "HIP": 93542,
+     "ra_deg": 285.77875,
+     "dec_deg": -42.09528,
+     "vmag": 4.75,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖四",
+     "designation": "δ CrA",
+     "HR": 7242,
+     "HIP": 94005,
+     "ra_deg": 287.08708,
+     "dec_deg": -40.49667,
+     "vmag": 4.59,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖五",
+     "designation": "β CrA",
+     "HR": 7259,
+     "HIP": 94160,
+     "ra_deg": 287.50708,
+     "dec_deg": -39.34083,
+     "vmag": 4.11,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖六",
+     "designation": "α CrA",
+     "HR": 7254,
+     "HIP": 94114,
+     "ra_deg": 287.36792,
+     "dec_deg": -37.90444,
+     "vmag": 4.11,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖七",
+     "designation": "γ CrA",
+     "HR": 7226,
+     "HIP": 93825,
+     "ra_deg": 286.60458,
+     "dec_deg": -37.06333,
+     "vmag": 4.93,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖八",
+     "designation": "ε CrA",
+     "HR": 7152,
+     "HIP": 93174,
+     "ra_deg": 284.68083,
+     "dec_deg": -37.1075,
+     "vmag": 4.87,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖九",
+     "designation": "V686 CrA",
+     "HR": 7129,
+     "HIP": 92989,
+     "ra_deg": 284.16875,
+     "dec_deg": -37.34333,
+     "vmag": 5.38,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖十",
+     "designation": "κ2 CrA",
+     "HR": 6952,
+     "HIP": 90968,
+     "ra_deg": 278.34708,
+     "dec_deg": -38.72028,
+     "vmag": 6.32,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鳖十一",
+     "designation": "θ CrA",
+     "HR": 6951,
+     "HIP": 90982,
+     "ra_deg": 278.37583,
+     "dec_deg": -42.3125,
+     "vmag": 4.64,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清《仪象考成》鳖正星11颗（α Tel、η1/ζ/δ/β/α/γ/ε CrA、V686 CrA、κ2 CrA、θ CrA）；歌诀作十四星，多出3星清代体系无对应",
+   "qing_variant": "清《仪象考成》鳖正星11颗（α Tel、η1/ζ/δ/β/α/γ/ε CrA、V686 CrA、κ2 CrA、θ CrA）；歌诀作十四星，多出3星清代体系无对应。清口径逐星全录：鳖一＝α Tel（HR 6897，RA 276.74333°，Dec -45.96833°，V 3.51），鳖二＝η1 CrA（HR 7062，RA 282.21042°，Dec -43.68°，V 5.49），鳖三＝ζ CrA（HR 7188，RA 285.77875°，Dec -42.09528°，V 4.75），鳖四＝δ CrA（HR 7242，RA 287.08708°，Dec -40.49667°，V 4.59），鳖五＝β CrA（HR 7259，RA 287.50708°，Dec -39.34083°，V 4.11），鳖六＝α CrA（HR 7254，RA 287.36792°，Dec -37.90444°，V 4.11），鳖七＝γ CrA（HR 7226，RA 286.60458°，Dec -37.06333°，V 4.93），鳖八＝ε CrA（HR 7152，RA 284.68083°，Dec -37.1075°，V 4.87），鳖九＝V686 CrA（HR 7129，RA 284.16875°，Dec -37.34333°，V 5.38），鳖十＝κ2 CrA（HR 6952，RA 278.34708°，Dec -38.72028°，V 6.32），鳖十一＝θ CrA（HR 6951，RA 278.37583°，Dec -42.3125°，V 4.64）。",
    "dispute": "歌诀十四星与清代正星11颗不合，差3星无确指；已定11星两源一致",
    "basis": "维基正星11星与Stellarium鳖连线11星（HIP逐名）完全一致"
   },
@@ -9427,8 +10215,52 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "天渊一",
+     "designation": "β2 Sgr",
+     "HR": 7343,
+     "HIP": 95294,
+     "ra_deg": 290.805,
+     "dec_deg": -44.79972,
+     "vmag": 4.29,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "清正星三颗；清增星三颗（ι、θ1 Sgr 等）不入正星"
+    },
+    {
+     "cn_name": "天渊二",
+     "designation": "β1 Sgr",
+     "HR": 7337,
+     "HIP": 95241,
+     "ra_deg": 290.65958,
+     "dec_deg": -44.45889,
+     "vmag": 4.01,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天渊三",
+     "designation": "α Sgr",
+     "HR": 7348,
+     "HIP": 95347,
+     "ra_deg": 290.97167,
+     "dec_deg": -40.61611,
+     "vmag": 3.97,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清《仪象考成》天渊正星仅3颗（β2、β1、α Sgr），另有增星3颗（ι、θ1 Sgr等）仍不足十星；歌诀两言『十星』『十黄』",
+   "qing_variant": "清《仪象考成》天渊正星仅3颗（β2、β1、α Sgr），另有增星3颗（ι、θ1 Sgr等）仍不足十星；歌诀两言『十星』『十黄』。清口径逐星全录：天渊一＝β2 Sgr（HR 7343，RA 290.805°，Dec -44.79972°，V 4.29），天渊二＝β1 Sgr（HR 7337，RA 290.65958°，Dec -44.45889°，V 4.01），天渊三＝α Sgr（HR 7348，RA 290.97167°，Dec -40.61611°，V 3.97）。",
    "dispute": "歌诀十星仅3星可定，余7星唐宋旧数与清代认星 irreconcilable，无确指，不硬凑",
    "basis": "已定3星维基与Stellarium天渊连线（HIP 95294/95241/95347）一致"
   },
@@ -9671,8 +10503,66 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "天田一",
+     "designation": "HIP 104750",
+     "HR": 8110,
+     "HIP": 104750,
+     "ra_deg": 318.32208,
+     "dec_deg": -27.61944,
+     "vmag": 5.42,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天田二",
+     "designation": "ω Cap",
+     "HR": 7980,
+     "HIP": 102978,
+     "ra_deg": 312.95542,
+     "dec_deg": -26.91917,
+     "vmag": 4.11,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天田三",
+     "designation": "24 Cap",
+     "HR": 8080,
+     "HIP": 104234,
+     "ra_deg": 316.78208,
+     "dec_deg": -25.00583,
+     "vmag": 4.5,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天田四",
+     "designation": "ψ Cap",
+     "HR": 7936,
+     "HIP": 102485,
+     "ra_deg": 311.52375,
+     "dec_deg": -25.27083,
+     "vmag": 4.14,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "确定",
-   "qing_variant": "清《仪象考成》天田（牛宿）正星4颗（HIP 104750、ω、24、ψ Cap）",
+   "qing_variant": "清《仪象考成》天田（牛宿）正星4颗（HIP 104750、ω、24、ψ Cap）。清口径逐星全录：天田一＝HIP 104750（HR 8110，RA 318.32208°，Dec -27.61944°，V 5.42），天田二＝ω Cap（HR 7980，RA 312.95542°，Dec -26.91917°，V 4.11），天田三＝24 Cap（HR 8080，RA 316.78208°，Dec -25.00583°，V 4.50），天田四＝ψ Cap（HR 7936，RA 311.52375°，Dec -25.27083°，V 4.14）。",
    "dispute": "歌诀『牛下九黑是天田』字面作九星，与清代正星4颗不合；『九黑』或连下句九坎合言、或旧数已佚，成员4星本身两源确定，故星数差异记此",
    "basis": "维基天田（牛宿）正星4星与Stellarium『天田(牛宿)』连线4星（HIP 104750/102978/104234/102485，天田一为HIP星）逐名一致"
   },
@@ -10703,6 +11593,232 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "周一",
+     "designation": "η Cap",
+     "HR": 8060,
+     "HIP": 104019,
+     "ra_deg": 316.10125,
+     "dec_deg": -19.855,
+     "vmag": 4.84,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "周二",
+     "designation": "21 Cap",
+     "HR": null,
+     "HIP": 103703,
+     "ra_deg": 315.21577,
+     "dec_deg": -17.53086,
+     "vmag": 6.07,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "BSC 未收（无 HR 编号），坐标星等同主表来源"
+    },
+    {
+     "cn_name": "秦一",
+     "designation": "θ Cap",
+     "HR": 8075,
+     "HIP": 104139,
+     "ra_deg": 316.48667,
+     "dec_deg": -17.23278,
+     "vmag": 4.07,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "秦二",
+     "designation": "30 Cap",
+     "HR": 8137,
+     "HIP": 105143,
+     "ra_deg": 319.48875,
+     "dec_deg": -17.98528,
+     "vmag": 5.43,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "代一",
+     "designation": "ι Cap",
+     "HR": 8167,
+     "HIP": 105515,
+     "ra_deg": 320.56167,
+     "dec_deg": -16.83444,
+     "vmag": 4.28,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "清于代增 37、41 Cap 二星，不入正星；正星仍十六"
+    },
+    {
+     "cn_name": "代二",
+     "designation": "38 Cap",
+     "HR": null,
+     "HIP": 106568,
+     "ra_deg": 323.72906,
+     "dec_deg": -20.25256,
+     "vmag": 6.74,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "BSC 未收（无 HR 编号），坐标星等同主表来源"
+    },
+    {
+     "cn_name": "赵一",
+     "designation": "26 Cap",
+     "HR": null,
+     "HIP": 104429,
+     "ra_deg": 317.31421,
+     "dec_deg": -20.19316,
+     "vmag": 6.73,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "BSC 未收（无 HR 编号），坐标星等同主表来源"
+    },
+    {
+     "cn_name": "赵二",
+     "designation": "27 Cap",
+     "HR": 8091,
+     "HIP": 104452,
+     "ra_deg": 317.3875,
+     "dec_deg": -20.55639,
+     "vmag": 6.25,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "越",
+     "designation": "19 Cap",
+     "HR": 8000,
+     "HIP": 103226,
+     "ra_deg": 313.69958,
+     "dec_deg": -17.92306,
+     "vmag": 5.78,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "齐",
+     "designation": "χ Cap",
+     "HR": 8087,
+     "HIP": 104365,
+     "ra_deg": 317.14,
+     "dec_deg": -21.19361,
+     "vmag": 5.3,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "楚",
+     "designation": "φ Cap",
+     "HR": 8127,
+     "HIP": 104963,
+     "ra_deg": 318.90792,
+     "dec_deg": -20.65167,
+     "vmag": 5.24,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "郑",
+     "designation": "20 Cap",
+     "HR": 8033,
+     "HIP": 103616,
+     "ra_deg": 314.90042,
+     "dec_deg": -19.03528,
+     "vmag": 6.25,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "魏",
+     "designation": "33 Cap",
+     "HR": 8183,
+     "HIP": 105665,
+     "ra_deg": 321.04,
+     "dec_deg": -20.85194,
+     "vmag": 5.41,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "韩",
+     "designation": "35 Cap",
+     "HR": 8207,
+     "HIP": 105928,
+     "ra_deg": 321.81167,
+     "dec_deg": -21.19611,
+     "vmag": 5.78,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "晋",
+     "designation": "36 Cap",
+     "HR": 8213,
+     "HIP": 106039,
+     "ra_deg": 322.18083,
+     "dec_deg": -21.80722,
+     "vmag": 4.51,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "燕",
+     "designation": "ζ Cap",
+     "HR": 8204,
+     "HIP": 105881,
+     "ra_deg": 321.66667,
+     "dec_deg": -22.41139,
+     "vmag": 3.74,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "确定",
    "qing_variant": "清《仪象考成》于代增2星（37、41 Cap），不入正星；正星仍16",
    "dispute": "歌诀『雍州』『雁门』『平原』为咏地理方位之辞，非另有星：平原君指赵（两邑=赵二星），与16星名单不冲突",
@@ -10774,8 +11890,66 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "离珠一",
+     "designation": "70 Aql",
+     "HR": 7873,
+     "HIP": 101692,
+     "ra_deg": 309.18167,
+     "dec_deg": -2.55,
+     "vmag": 4.89,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "清正星四颗；增 68 Aql 不入正星（见本条裁定）"
+    },
+    {
+     "cn_name": "离珠二",
+     "designation": "l Aql",
+     "HR": 7884,
+     "HIP": 101847,
+     "ra_deg": 309.58458,
+     "dec_deg": -1.10528,
+     "vmag": 4.32,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "离珠三",
+     "designation": "1 Aqr",
+     "HR": 7897,
+     "HIP": 101936,
+     "ra_deg": 309.85375,
+     "dec_deg": 0.48639,
+     "vmag": 5.16,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "离珠四",
+     "designation": "69 Aql",
+     "HR": 7831,
+     "HIP": 101101,
+     "ra_deg": 307.4125,
+     "dec_deg": -2.88556,
+     "vmag": 4.91,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清《仪象考成》离珠正星4颗（70、l、1 Aqr、69 Aql），另增68 Aql为增一；歌诀作五星",
+   "qing_variant": "清《仪象考成》离珠正星4颗（70、l、1 Aqr、69 Aql），另增68 Aql为增一；歌诀作五星。清口径逐星全录：离珠一＝70 Aql（HR 7873，RA 309.18167°，Dec -2.55°，V 4.89），离珠二＝l Aql（HR 7884，RA 309.58458°，Dec -1.10528°，V 4.32），离珠三＝1 Aqr（HR 7897，RA 309.85375°，Dec 0.48639°，V 5.16），离珠四＝69 Aql（HR 7831，RA 307.4125°，Dec -2.88556°，V 4.91）。",
    "dispute": "歌诀五星与清代正星4颗差1星，第5星无确指（不得以清增星68 Aql充正星）；已定4星两源一致",
    "basis": "维基正星4星与Stellarium离珠连线4星逐名一致"
   },
@@ -12016,8 +13190,66 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "人一",
+     "designation": "2 Peg",
+     "HR": 8225,
+     "HIP": 106140,
+     "ra_deg": 322.48708,
+     "dec_deg": 23.63889,
+     "vmag": 4.57,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "人二",
+     "designation": "1 Peg",
+     "HR": 8173,
+     "HIP": 105502,
+     "ra_deg": 320.52167,
+     "dec_deg": 19.80444,
+     "vmag": 4.08,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "人三",
+     "designation": "12 Peg",
+     "HR": 8321,
+     "HIP": 107472,
+     "ra_deg": 326.51833,
+     "dec_deg": 22.94889,
+     "vmag": 5.29,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "人四",
+     "designation": "9 Peg",
+     "HR": 8313,
+     "HIP": 107348,
+     "ra_deg": 326.12792,
+     "dec_deg": 17.35,
+     "vmag": 4.34,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清代认星系统（伊世同表）只认四星，第五星无对照",
+   "qing_variant": "清代认星系统（伊世同表）只认四星，第五星无对照。清口径逐星全录：人一＝2 Peg（HR 8225，RA 322.48708°，Dec 23.63889°，V 4.57），人二＝1 Peg（HR 8173，RA 320.52167°，Dec 19.80444°，V 4.08），人三＝12 Peg（HR 8321，RA 326.51833°，Dec 22.94889°，V 5.29），人四＝9 Peg（HR 8313，RA 326.12792°，Dec 17.35°，V 4.34）。",
    "dispute": "歌诀明言「五黑」、旧注亦称五星，但维基北方表与Stellarium均只认四星（2/1/12/9 Peg），第五星无现代对照，未列",
    "basis": "已认四星两源一致；星数歌诀与认星系统分歧"
   },
@@ -12710,8 +13942,80 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "天钱一",
+     "designation": "13 PsA",
+     "HR": 8405,
+     "HIP": 108952,
+     "ra_deg": 331.09958,
+     "dec_deg": -29.91667,
+     "vmag": 6.47,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天钱二",
+     "designation": "θ PsA",
+     "HR": 8326,
+     "HIP": 107608,
+     "ra_deg": 326.93417,
+     "dec_deg": -30.89833,
+     "vmag": 5.01,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天钱三",
+     "designation": "ι PsA",
+     "HR": 8305,
+     "HIP": 107380,
+     "ra_deg": 326.23667,
+     "dec_deg": -33.02583,
+     "vmag": 4.34,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天钱四",
+     "designation": "μ PsA",
+     "HR": 8431,
+     "HIP": 109285,
+     "ra_deg": 332.09583,
+     "dec_deg": -32.98861,
+     "vmag": 4.5,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天钱五",
+     "designation": "τ PsA",
+     "HR": 8447,
+     "HIP": 109422,
+     "ra_deg": 332.53667,
+     "dec_deg": -32.54833,
+     "vmag": 4.92,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清《仪象考成》系统（维基北方表）认天钱 5 星（13/θ/ι/μ/τ PsA）；歌诀作「十个」、《天文秘略》注亦称十星，差五星无对照。",
+   "qing_variant": "清《仪象考成》系统（维基北方表）认天钱 5 星（13/θ/ι/μ/τ PsA）；歌诀作「十个」、《天文秘略》注亦称十星，差五星无对照。清口径逐星全录：天钱一＝13 PsA（HR 8405，RA 331.09958°，Dec -29.91667°，V 6.47），天钱二＝θ PsA（HR 8326，RA 326.93417°，Dec -30.89833°，V 5.01），天钱三＝ι PsA（HR 8305，RA 326.23667°，Dec -33.02583°，V 4.34），天钱四＝μ PsA（HR 8431，RA 332.09583°，Dec -32.98861°，V 4.50），天钱五＝τ PsA（HR 8447，RA 332.53667°，Dec -32.54833°，V 4.92）。",
    "dispute": "歌诀十星与清认五星差五星无考。",
    "basis": "汇总裁定补立：甲系歌诀明言；维基《危宿》条计危宿 11 官含天钱，北方表标题星官数与其正星行自差一官即漏计此官；Stellarium hip_names 有天钱一至五。骨架原未立目。"
   },
@@ -14012,8 +15316,94 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "八魁一",
+     "designation": "6 Cet",
+     "HR": 33,
+     "HIP": 910,
+     "ra_deg": 2.81625,
+     "dec_deg": -15.46806,
+     "vmag": 4.89,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "八魁二",
+     "designation": "2 Cet",
+     "HR": 9098,
+     "HIP": 301,
+     "ra_deg": 0.935,
+     "dec_deg": -17.33611,
+     "vmag": 4.55,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "八魁三",
+     "designation": "1 Cet",
+     "HR": 9065,
+     "HIP": 118178,
+     "ra_deg": 359.58833,
+     "dec_deg": -15.8475,
+     "vmag": 6.26,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "八魁四",
+     "designation": "3 Cet",
+     "HR": 9103,
+     "HIP": 355,
+     "ra_deg": 1.12542,
+     "dec_deg": -10.50944,
+     "vmag": 4.94,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "八魁五",
+     "designation": "9 Cet",
+     "HR": 88,
+     "HIP": 1803,
+     "ra_deg": 5.71583,
+     "dec_deg": -12.20944,
+     "vmag": 6.39,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "八魁六",
+     "designation": "7 Cet",
+     "HR": 48,
+     "HIP": 1170,
+     "ra_deg": 3.66,
+     "dec_deg": -18.93278,
+     "vmag": 4.44,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清代认星系统只认六星（6/2/1/3/9/7 Cet），歌诀所余三星无对照",
+   "qing_variant": "清代认星系统只认六星（6/2/1/3/9/7 Cet），歌诀所余三星无对照。清口径逐星全录：八魁一＝6 Cet（HR 33，RA 2.81625°，Dec -15.46806°，V 4.89），八魁二＝2 Cet（HR 9098，RA 0.935°，Dec -17.33611°，V 4.55），八魁三＝1 Cet（HR 9065，RA 359.58833°，Dec -15.8475°，V 6.26），八魁四＝3 Cet（HR 9103，RA 1.12542°，Dec -10.50944°，V 4.94），八魁五＝9 Cet（HR 88，RA 5.71583°，Dec -12.20944°，V 6.39），八魁六＝7 Cet（HR 48，RA 3.66°，Dec -18.93278°，V 4.44）。",
    "dispute": "歌诀明言「九个子」、旧注称九黑星，但维基北方表与Stellarium均只认六星，余三星无现代对照，未列",
    "basis": "已认六星两源一致；星数歌诀与认星系统分歧"
   },
@@ -14392,8 +15782,290 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "腾蛇一",
+     "designation": "α Lac",
+     "HR": 8585,
+     "HIP": 111169,
+     "ra_deg": 337.82292,
+     "dec_deg": 50.2825,
+     "vmag": 3.77,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇二",
+     "designation": "4 Lac",
+     "HR": 8541,
+     "HIP": 110609,
+     "ra_deg": 336.12917,
+     "dec_deg": 49.47639,
+     "vmag": 4.57,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇三",
+     "designation": "π2 Cyg",
+     "HR": 8335,
+     "HIP": 107533,
+     "ra_deg": 326.69833,
+     "dec_deg": 49.30944,
+     "vmag": 4.23,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇四",
+     "designation": "π1 Cyg",
+     "HR": 8301,
+     "HIP": 107136,
+     "ra_deg": 325.52375,
+     "dec_deg": 51.18972,
+     "vmag": 4.67,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "清口径螣蛇六留空无对照（主口径从 Stellarium 暂定 HIP 105064）；螣蛇五两口径皆无对照"
+    },
+    {
+     "cn_name": "腾蛇七",
+     "designation": "HIP 106886",
+     "HR": 8281,
+     "HIP": 106886,
+     "ra_deg": 324.74,
+     "dec_deg": 57.48917,
+     "vmag": 5.62,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇八",
+     "designation": "13 Cep",
+     "HR": 8371,
+     "HIP": 108165,
+     "ra_deg": 328.72167,
+     "dec_deg": 56.61139,
+     "vmag": 5.8,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇九",
+     "designation": "ε Cep",
+     "HR": 8494,
+     "HIP": 109857,
+     "ra_deg": 333.75833,
+     "dec_deg": 57.04361,
+     "vmag": 4.19,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十",
+     "designation": "β Lac",
+     "HR": 8538,
+     "HIP": 110538,
+     "ra_deg": 335.89,
+     "dec_deg": 52.22917,
+     "vmag": 4.43,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十一",
+     "designation": "σ Cas",
+     "HR": 9071,
+     "HIP": 118243,
+     "ra_deg": 359.75208,
+     "dec_deg": 55.755,
+     "vmag": 4.88,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十二",
+     "designation": "ρ Cas",
+     "HR": 9045,
+     "HIP": 117863,
+     "ra_deg": 358.59583,
+     "dec_deg": 57.49944,
+     "vmag": 4.54,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十三",
+     "designation": "τ Cas",
+     "HR": 9008,
+     "HIP": 117301,
+     "ra_deg": 356.76458,
+     "dec_deg": 58.65194,
+     "vmag": 4.87,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十四",
+     "designation": "AR Cas",
+     "HR": 8926,
+     "HIP": 115990,
+     "ra_deg": 352.50833,
+     "dec_deg": 58.54889,
+     "vmag": 4.91,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十五",
+     "designation": "9 Lac",
+     "HR": 8613,
+     "HIP": 111674,
+     "ra_deg": 339.34333,
+     "dec_deg": 51.54528,
+     "vmag": 4.63,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十六",
+     "designation": "3 And",
+     "HR": 8780,
+     "HIP": 113919,
+     "ra_deg": 346.04583,
+     "dec_deg": 50.05222,
+     "vmag": 4.65,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十七",
+     "designation": "7 And",
+     "HR": 8830,
+     "HIP": 114570,
+     "ra_deg": 348.1375,
+     "dec_deg": 49.40639,
+     "vmag": 4.52,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十八",
+     "designation": "8 And",
+     "HR": 8860,
+     "HIP": 115022,
+     "ra_deg": 349.43625,
+     "dec_deg": 49.01528,
+     "vmag": 4.85,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇十九",
+     "designation": "λ And",
+     "HR": 8961,
+     "HIP": 116584,
+     "ra_deg": 354.39125,
+     "dec_deg": 46.45806,
+     "vmag": 3.82,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇廿",
+     "designation": "ψ And",
+     "HR": 9003,
+     "HIP": 117221,
+     "ra_deg": 356.50875,
+     "dec_deg": 46.42028,
+     "vmag": 4.95,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇廿一",
+     "designation": "κ And",
+     "HR": 8976,
+     "HIP": 116805,
+     "ra_deg": 355.10208,
+     "dec_deg": 44.33389,
+     "vmag": 4.14,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "腾蛇廿二",
+     "designation": "ι And",
+     "HR": 8965,
+     "HIP": 116631,
+     "ra_deg": 354.53417,
+     "dec_deg": 43.26806,
+     "vmag": 4.29,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清代认星系统螣蛇五、六两星留空无对照；Stellarium仅螣蛇六给出带*的暂定对应",
+   "qing_variant": "清代认星系统螣蛇五、六两星留空无对照；Stellarium仅螣蛇六给出带*的暂定对应。清口径逐星全录：腾蛇一＝α Lac（HR 8585，RA 337.82292°，Dec 50.2825°，V 3.77），腾蛇二＝4 Lac（HR 8541，RA 336.12917°，Dec 49.47639°，V 4.57），腾蛇三＝π2 Cyg（HR 8335，RA 326.69833°，Dec 49.30944°，V 4.23），腾蛇四＝π1 Cyg（HR 8301，RA 325.52375°，Dec 51.18972°，V 4.67），腾蛇七＝HIP 106886（HR 8281，RA 324.74°，Dec 57.48917°，V 5.62），腾蛇八＝13 Cep（HR 8371，RA 328.72167°，Dec 56.61139°，V 5.80），腾蛇九＝ε Cep（HR 8494，RA 333.75833°，Dec 57.04361°，V 4.19），腾蛇十＝β Lac（HR 8538，RA 335.89°，Dec 52.22917°，V 4.43），腾蛇十一＝σ Cas（HR 9071，RA 359.75208°，Dec 55.755°，V 4.88），腾蛇十二＝ρ Cas（HR 9045，RA 358.59583°，Dec 57.49944°，V 4.54），腾蛇十三＝τ Cas（HR 9008，RA 356.76458°，Dec 58.65194°，V 4.87），腾蛇十四＝AR Cas（HR 8926，RA 352.50833°，Dec 58.54889°，V 4.91），腾蛇十五＝9 Lac（HR 8613，RA 339.34333°，Dec 51.54528°，V 4.63），腾蛇十六＝3 And（HR 8780，RA 346.04583°，Dec 50.05222°，V 4.65），腾蛇十七＝7 And（HR 8830，RA 348.1375°，Dec 49.40639°，V 4.52），腾蛇十八＝8 And（HR 8860，RA 349.43625°，Dec 49.01528°，V 4.85），腾蛇十九＝λ And（HR 8961，RA 354.39125°，Dec 46.45806°，V 3.82），腾蛇廿＝ψ And（HR 9003，RA 356.50875°，Dec 46.42028°，V 4.95），腾蛇廿一＝κ And（HR 8976，RA 355.10208°，Dec 44.33389°，V 4.14），腾蛇廿二＝ι And（HR 8965，RA 354.53417°，Dec 43.26806°，V 4.29）。",
    "dispute": "螣蛇五两源皆无对照，未列；螣蛇六仅Stellarium暂定（HIP 105064），维基留空。故实列21星",
    "basis": "已列21星中20星两源一致；歌诀明言二十二星"
   },
@@ -14649,8 +16321,52 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "天厩一",
+     "designation": "θ And",
+     "HR": 63,
+     "HIP": 1366,
+     "ra_deg": 4.27292,
+     "dec_deg": 38.68167,
+     "vmag": 4.61,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "清正星三颗；另增一星不入正星"
+    },
+    {
+     "cn_name": "天厩二",
+     "designation": "ρ And",
+     "HR": 82,
+     "HIP": 1686,
+     "ra_deg": 5.28042,
+     "dec_deg": 37.96861,
+     "vmag": 5.18,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天厩三",
+     "designation": "σ And",
+     "HR": 68,
+     "HIP": 1473,
+     "ra_deg": 4.58208,
+     "dec_deg": 36.78528,
+     "vmag": 4.52,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清《仪象考成》系统只认三正星（θ/ρ/σ And）加一增星，歌诀十星中七星无对照",
+   "qing_variant": "清《仪象考成》系统只认三正星（θ/ρ/σ And）加一增星，歌诀十星中七星无对照。清口径逐星全录：天厩一＝θ And（HR 63，RA 4.27292°，Dec 38.68167°，V 4.61），天厩二＝ρ And（HR 82，RA 5.28042°，Dec 37.96861°，V 5.18），天厩三＝σ And（HR 68，RA 4.58208°，Dec 36.78528°，V 4.52）。",
    "dispute": "歌诀与《晋书》《星经》均作十星，但现代认星仅得三星，余七星无对照，未列",
    "basis": "已认三星两源一致；星数传统与认星系统分歧"
   },
@@ -14719,8 +16435,52 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "鈇鑕一",
+     "designation": "48 Cet",
+     "HR": 433,
+     "HIP": 6960,
+     "ra_deg": 22.40042,
+     "dec_deg": -21.62944,
+     "vmag": 5.12,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": "清口径鈇鑕二、三留空无对照（主口径二从 Stellarium 暂定 HIP 7679）"
+    },
+    {
+     "cn_name": "鈇鑕四",
+     "designation": "υ Cet",
+     "HR": 585,
+     "HIP": 9347,
+     "ra_deg": 30.00125,
+     "dec_deg": -21.07778,
+     "vmag": 4.0,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "鈇鑕五",
+     "designation": "56 Cet",
+     "HR": 565,
+     "HIP": 9061,
+     "ra_deg": 29.1675,
+     "dec_deg": -22.52694,
+     "vmag": 4.85,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清代认星系统五星中二、三留空无对照；Stellarium（作𫓧锧）只连四星且三缺位",
+   "qing_variant": "清代认星系统五星中二、三留空无对照；Stellarium（作𫓧锧）只连四星且三缺位。清口径逐星全录：鈇鑕一＝48 Cet（HR 433，RA 22.40042°，Dec -21.62944°，V 5.12），鈇鑕四＝υ Cet（HR 585，RA 30.00125°，Dec -21.07778°，V 4.00），鈇鑕五＝56 Cet（HR 565，RA 29.1675°，Dec -22.52694°，V 4.85）。",
    "dispute": "鈇鑕二仅Stellarium带?暂定（HIP 7679／HR 473）；鈇鑕三两源皆无对照，未列。故实列4星",
    "basis": "一（48 Cet）、四（υ Cet）、五（56 Cet）两源一致；歌诀明言五星"
   },
@@ -15186,8 +16946,66 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "天溷一",
+     "designation": "21 Cet",
+     "HR": 255,
+     "HIP": 4257,
+     "ra_deg": 13.57333,
+     "dec_deg": -8.74083,
+     "vmag": 6.16,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天溷二",
+     "designation": "φ3 Cet",
+     "HR": 267,
+     "HIP": 4371,
+     "ra_deg": 14.00625,
+     "dec_deg": -11.26667,
+     "vmag": 5.31,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天溷三",
+     "designation": "18 Cet",
+     "HR": 203,
+     "HIP": 3559,
+     "ra_deg": 11.36958,
+     "dec_deg": -12.88083,
+     "vmag": 6.15,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "天溷四",
+     "designation": "φ1 Cet",
+     "HR": 194,
+     "HIP": 3455,
+     "ra_deg": 11.0475,
+     "dec_deg": -10.60944,
+     "vmag": 4.76,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "确定",
-   "qing_variant": "清《仪象考成》天溷仅4星（21 Cet、φ³ Cet、18 Cet、φ¹ Cet）；歌本作7星，多出3星无现代对照",
+   "qing_variant": "清《仪象考成》天溷仅4星（21 Cet、φ³ Cet、18 Cet、φ¹ Cet）；歌本作7星，多出3星无现代对照。清口径逐星全录：天溷一＝21 Cet（HR 255，RA 13.57333°，Dec -8.74083°，V 6.16），天溷二＝φ3 Cet（HR 267，RA 14.00625°，Dec -11.26667°，V 5.31），天溷三＝18 Cet（HR 203，RA 11.36958°，Dec -12.88083°，V 6.15），天溷四＝φ1 Cet（HR 194，RA 11.0475°，Dec -10.60944°，V 4.76）。",
    "dispute": "歌本传统7星，现代仅能认定4星（维基详表、Stellarium一致），其余3星无对照，stars仅列4星",
    "basis": "歌诀明言「屏下七星天溷明」，从歌本计7；认定从两源一致之4星"
   },
@@ -18063,8 +19881,94 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "九州殊口一",
+     "designation": "39 Eri",
+     "HR": 1318,
+     "HIP": 19777,
+     "ra_deg": 63.59875,
+     "dec_deg": -10.25639,
+     "vmag": 4.87,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "九州殊口二",
+     "designation": "ο1 Eri",
+     "HR": 1298,
+     "HIP": 19587,
+     "ra_deg": 62.96625,
+     "dec_deg": -6.8375,
+     "vmag": 4.04,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "九州殊口三",
+     "designation": "ξ Eri",
+     "HR": 1383,
+     "HIP": 20507,
+     "ra_deg": 65.92,
+     "dec_deg": -3.74556,
+     "vmag": 5.17,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "九州殊口四",
+     "designation": "ν Eri",
+     "HR": 1463,
+     "HIP": 21444,
+     "ra_deg": 69.07958,
+     "dec_deg": -3.3525,
+     "vmag": 3.93,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "九州殊口五",
+     "designation": "56 Eri",
+     "HR": 1508,
+     "HIP": 22024,
+     "ra_deg": 71.02208,
+     "dec_deg": -8.50361,
+     "vmag": 5.9,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "九州殊口六",
+     "designation": "55 Eri",
+     "HR": 1505,
+     "HIP": 21986,
+     "ra_deg": 70.89417,
+     "dec_deg": -8.79361,
+     "vmag": 6.82,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "确定",
-   "qing_variant": "清《仪象考成》仅记6星；《石氏星经》作9星（「九州殊口九星，在毕之下」），歌本传统从石氏计9，多出3星无现代对照",
+   "qing_variant": "清《仪象考成》仅记6星；《石氏星经》作9星（「九州殊口九星，在毕之下」），歌本传统从石氏计9，多出3星无现代对照。清口径逐星全录：九州殊口一＝39 Eri（HR 1318，RA 63.59875°，Dec -10.25639°，V 4.87），九州殊口二＝ο1 Eri（HR 1298，RA 62.96625°，Dec -6.8375°，V 4.04），九州殊口三＝ξ Eri（HR 1383，RA 65.92°，Dec -3.74556°，V 5.17），九州殊口四＝ν Eri（HR 1463，RA 69.07958°，Dec -3.3525°，V 3.93），九州殊口五＝56 Eri（HR 1508，RA 71.02208°，Dec -8.50361°，V 5.90），九州殊口六＝55 Eri（HR 1505，RA 70.89417°，Dec -8.79361°，V 6.82）。",
    "dispute": "传统9星，现代仅认定6星（详表、Stellarium一致：一作39 Eri；维基九州殊口条作α Eri系误，Achernar远在南天，不从），其余3星无对照，stars仅列6星",
    "basis": "歌本口径从石氏九星；认定从两源一致之6星"
   },
@@ -20420,8 +22324,94 @@
      "note": ""
     }
    ],
+   "qing_stars": [
+    {
+     "cn_name": "军市一",
+     "designation": "β CMa",
+     "HR": 2294,
+     "HIP": 30324,
+     "ra_deg": 95.675,
+     "dec_deg": -17.95583,
+     "vmag": 1.98,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "军市二",
+     "designation": "ν3 CMa",
+     "HR": 2443,
+     "HIP": 31700,
+     "ra_deg": 99.4725,
+     "dec_deg": -18.2375,
+     "vmag": 4.43,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "军市三",
+     "designation": "15 CMa",
+     "HR": 2571,
+     "HIP": 33092,
+     "ra_deg": 103.38708,
+     "dec_deg": -20.22417,
+     "vmag": 4.83,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "军市四",
+     "designation": "17 CMa",
+     "HR": 2588,
+     "HIP": 33248,
+     "ra_deg": 103.76125,
+     "dec_deg": -20.40472,
+     "vmag": 5.74,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "军市五",
+     "designation": "ο1 CMa",
+     "HR": 2580,
+     "HIP": 33152,
+     "ra_deg": 103.53292,
+     "dec_deg": -24.18389,
+     "vmag": 3.87,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    },
+    {
+     "cn_name": "军市六",
+     "designation": "ξ1 CMa",
+     "HR": 2387,
+     "HIP": 31125,
+     "ra_deg": 97.96375,
+     "dec_deg": -23.41833,
+     "vmag": 4.33,
+     "sources": [
+      "wiki",
+      "stellarium"
+     ],
+     "note": ""
+    }
+   ],
    "status": "存疑",
-   "qing_variant": "清《仪象考成》军市只认6星；步天歌歌诀明言十三星",
+   "qing_variant": "清《仪象考成》军市只认6星；步天歌歌诀明言十三星。清口径逐星全录：军市一＝β CMa（HR 2294，RA 95.675°，Dec -17.95583°，V 1.98），军市二＝ν3 CMa（HR 2443，RA 99.4725°，Dec -18.2375°，V 4.43），军市三＝15 CMa（HR 2571，RA 103.38708°，Dec -20.22417°，V 4.83），军市四＝17 CMa（HR 2588，RA 103.76125°，Dec -20.40472°，V 5.74），军市五＝ο1 CMa（HR 2580，RA 103.53292°，Dec -24.18389°，V 3.87），军市六＝ξ1 CMa（HR 2387，RA 97.96375°，Dec -23.41833°，V 4.33）。",
    "dispute": "歌诀口径13星，清代以后只能落实6星，其余7星两源均无确切对照；stars仅列已落实6星",
    "basis": "歌诀明言十三星；维基南方表正星6行与Stellarium连线6点一致"
   },
