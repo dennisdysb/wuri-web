@@ -25,12 +25,12 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v95 缓存名", "wuri-v95-20261023-v200-6" in sw)
+report("SW v96 缓存名", "wuri-v96-20261023-v200-7" in sw)
 report("SW 预缓存不含图鉴全图", "img/deities/" not in assets)
 report("SW 含图鉴全图分支（豁免缓存优先）", "isDeityFull" in sw and "OFFLINE_CACHE" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
 report("设置页图鉴素材卡在位", 'id="deity-dl-btn"' in html and 'id="deity-dl-status"' in html)
-report("CSS ?v=95 与版本 (6)", "css/style.css?v=95" in html and "v2.0.0 (6)" in html)
+report("CSS ?v=96 与版本 (7)", "css/style.css?v=96" in html and "v2.0.0 (7)" in html)
 _fy_web = open(os.path.join(WWW, "data/fenye.json"), "rb").read()
 _fy_src = open(os.path.expanduser("~/workspace/wuri-app/star-module/fenye.json"), "rb").read()
 report("fenye.json 与备料逐字节一致", _fy_web == _fy_src)
@@ -193,6 +193,31 @@ try:
     report("硬断言(6)：索引页来源区页返回→落回索引页（三星象子视图全收＋最上层＝索引页）",
            ev("document.getElementById('view-star-region').hidden && document.getElementById('view-butiange').hidden && document.getElementById('view-star-detail').hidden")
            and ev(TOPMOST) == "stars-home", ev(TOPMOST))
+
+    # ---------- (7) 神祇详情「本宿星官 ›」真点击链（(6) 时此路径仅代码核实、实为死键：
+    # 区页 z-50 被神祇详情 z-61 整页盖住；(7) 区页 z-62 修复后必须真点断言） ----------
+    ev("(document.querySelector('#tabbar button[data-tab=\\\"tab-home\\\"]').click(), true)", 0.5)
+    ev("(document.getElementById('deities-enter').click(), true)", 1.0)
+    ev("(document.querySelector('[data-deity=\\\"biyuewu\\\"]').click(), true)", 0.6)
+    report("硬断言(7)：毕月乌详情打开＋本宿星官键在位",
+           ev("!document.getElementById('view-deity-detail').hidden && document.getElementById('deity-detail-name').textContent.includes('毕月乌') && !!document.querySelector('#deity-star-link .sx-deity-starlink')"))
+    ev("document.getElementById('view-deity-detail').scrollTop = 350; true")
+    ev("(document.querySelector('#deity-star-link .sx-deity-starlink').click(), true)", 1.2)
+    report("硬断言(7)：点本宿星官→毕宿区页（区页可见＋标题毕宿＋最上层＝区页）",
+           ev("!document.getElementById('view-star-region').hidden && (document.querySelector('#sx-region .sx-title') || {}).textContent.includes('毕宿')")
+           and ev(TOPMOST) == "region", ev(TOPMOST))
+    shot("starlink-biyuewu-region")
+    ev("(document.getElementById('star-region-back').click(), true)", 0.6)
+    dsc = ev("document.getElementById('view-deity-detail').scrollTop")
+    report("硬断言(7)：区页返回→回到毕月乌详情（详情可见＋区页已收＋滚动保持）",
+           ev("!document.getElementById('view-deity-detail').hidden && document.getElementById('view-star-region').hidden && document.getElementById('deity-detail-name').textContent.includes('毕月乌')")
+           and abs(dsc - 350) <= 40, "scroll=%s" % dsc)
+    ev("(document.getElementById('deity-detail-back').click(), true)", 0.4)
+    ev("(document.querySelector('[data-deity=\\\"yuanshi\\\"]').click(), true)", 0.6)
+    report("硬断言(7)：非星君（元始天尊）详情无本宿星官键",
+           ev("!document.getElementById('view-deity-detail').hidden && document.getElementById('deity-detail-name').textContent.includes('元始天尊') && !document.querySelector('#deity-star-link .sx-deity-starlink')"))
+    ev("(document.getElementById('deity-detail-back').click(), true)", 0.3)
+    ev("(document.getElementById('deities-back').click(), true)", 0.3)
 
     # ---------- 月相：双主题对比度 + 双相位夜间截图 ----------
     def moon_measure(theme):

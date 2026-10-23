@@ -99,8 +99,8 @@
   }
   function openDeity(id) {
     if (!window.__wuri_openDeity) return;
-    /* 神祇详情在 DOM 中位于星象子视图之前（同 z-index 下子视图会盖住详情），
-     * 仍需先收起星象子视图；但把「当时开着的子视图栈＋各自滚动位置」作为来源
+    /* 神祇详情 z-61 高于星象子视图原始层级，此处收起子视图是为来源返回语义
+     * （详情关闭后来源视图要原样露出，不靠层级叠压）；把「当时开着的子视图栈＋各自滚动位置」作为来源
      * 递给图鉴（v2.0.0 (2)），详情返回即回来源（区页/星官详情/步天歌），
      * 不再写死落到神祇图鉴主页。星象标签页（tab-stars）是普通标签主区、不在此列。 */
     var stack = [], scroll = {};
@@ -247,7 +247,9 @@
     else loadData().then(go).catch(function () {});
   }
 
-  /* deities.js 的「本宿星官 ›」签入口：key 为星君 link_key（如 jiaomujiao）或区名 */
+  /* deities.js 的「本宿星官 ›」签入口：key 为星君 link_key（如 jiaomujiao）或区名。
+   * 层级：区页 z-62 盖在神祇详情（z-61）之上（css 注明），详情不收起，
+   * 区页返回收起自身即回该星君详情、滚动保持。 */
   window.__wuri_openStarRegion = function (key) {
     if (!key) return;
     if (secInfo[key] || !XG) { openRegion(key); return; }

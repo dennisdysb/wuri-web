@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v2.0.0 (6) 双线线上验活（桥框架复用 offline34_test.py）：SW v95 激活、关于版 v2.0.0 (6)、
+"""v2.0.0 (7) 双线线上验活（桥框架复用 offline34_test.py）：SW v96 激活、关于版 v2.0.0 (7)、
 首页三卡且无今日卡/星象卡、六标签序、星象页今日星象实值、图鉴 102 位（feed 覆盖后仍 102）、星官图鉴懒加载 287 渲染。"""
 import importlib.util, os, sys, time
 
@@ -18,9 +18,9 @@ def run(base, tag):
         b.nav(base)
         report(tag + " SW 激活", wait_sw_active(b))
         caches = b.ev("(async () => await caches.keys())()")
-        report(tag + " SW 缓存 v95", any("wuri-v95" in c for c in caches), caches)
+        report(tag + " SW 缓存 v96", any("wuri-v96" in c for c in caches), caches)
         ver = b.ev("document.querySelector('[data-i18n=\"me_ver\"]').textContent")
-        report(tag + " 关于版本 v2.0.0 (6)", "v2.0.0 (6)" in ver, ver)
+        report(tag + " 关于版本 v2.0.0 (7)", "v2.0.0 (7)" in ver, ver)
         r = b.ev("""(() => { const home = document.getElementById('tab-home');
           const ids = ['practice-entry-card','shushu-entry-card','deities-entry-card'];
           return { cards: ids.every(id => !!document.getElementById(id)),
@@ -57,6 +57,25 @@ def run(base, tag):
         time.sleep(0.6)
         back = b.ev("!document.getElementById('view-butiange').hidden && document.getElementById('view-star-region').hidden")
         report(tag + " (6)步天歌→区页→返回＝步天歌", okbtg and okreg and back, "btg=%s reg=%s back=%s" % (okbtg, okreg, back))
+        # (7) 神祇详情「本宿星官 ›」线上真点击：毕月乌→毕宿区页（最上层）→返回＝毕月乌详情
+        b.ev("document.querySelector('[data-tab=\"tab-home\"]').click(); true")
+        time.sleep(0.6)
+        b.ev("document.getElementById('deities-entry-card').click(); true")
+        okcard = b.wait("!!document.querySelector('[data-deity=\"biyuewu\"]')", 20)
+        b.ev("document.querySelector('[data-deity=\"biyuewu\"]').click(); true")
+        okname = b.wait("!document.getElementById('view-deity-detail').hidden && document.getElementById('deity-detail-name').textContent.includes('毕月乌')", 20)
+        haskey = b.ev("!!document.querySelector('#deity-star-link .sx-deity-starlink')")
+        b.ev("(() => { const k = document.querySelector('#deity-star-link .sx-deity-starlink'); if (k) k.click(); })()")
+        okreg2 = b.wait("!document.getElementById('view-star-region').hidden && (document.querySelector('#sx-region .sx-title') || {}).textContent.includes('毕宿')", 20)
+        top2 = b.ev("""(() => { const el = document.elementFromPoint(Math.floor(innerWidth/2), Math.floor(innerHeight/2));
+          const rv = document.getElementById('view-star-region'); return !!(el && rv && !rv.hidden && rv.contains(el)); })()""")
+        b.ev("document.getElementById('star-region-back').click(); true")
+        time.sleep(0.6)
+        backd = b.ev("document.getElementById('view-star-region').hidden && !document.getElementById('view-deity-detail').hidden && document.getElementById('deity-detail-name').textContent.includes('毕月乌')")
+        report(tag + " (7)详情本宿星官→毕宿区页→返回＝详情", bool(okcard and okname and haskey and okreg2 and top2 and backd),
+               "card=%s name=%s key=%s region=%s top=%s back=%s" % (okcard, okname, haskey, okreg2, top2, backd))
+        b.ev("document.getElementById('deity-detail-back').click(); true")
+        time.sleep(0.4)
         b.shot("live-" + tag)
     finally:
         b.close()
