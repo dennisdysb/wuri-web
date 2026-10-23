@@ -14,13 +14,13 @@
 
   /* 有声经文清单：与 jingwen.js 的 JING_HAS_AUDIO 保持一致（新增有声经文时两处同步） */
   var AUDIO_BOOKS = ['s01', 's02', 's03', 's04', 's05', 's07', 's09', 's15', 's10', 's12',
-    's13', 's14', 's16', 's17', 's26', 's27', 's28', 's29', 's30', 's31', 's32', 's33', 's35', 's34', 's36'];
+    's13', 's14', 's16', 's17', 's26', 's27', 's28', 's29', 's30', 's31', 's32', 's33', 's35', 's34', 's36', 's39'];
   var VOICES = ['female', 'male'];
   var VOICE_NAME = { female: '女声', male: '男声' };
 
   /* 各文件字节数兜底表（GitHub 线实测值；弹窗大小以实时 HEAD 为准，HEAD 失败才用此表。
    * CF 镜像线 s01/s02 四个文件是 64kbps 转码版、更小，同样以该线 HEAD 实测为准。） */
-  var FALLBACK_SIZES = {"s01_female": 39274506, "s01_male": 36314536, "s02_female": 48009639, "s02_male": 44893336, "s03_female": 9929859, "s03_male": 9355582, "s04_female": 11672126, "s04_male": 11049790, "s05_female": 11608799, "s05_male": 10027243, "s07_female": 23374194, "s07_male": 23153110, "s09_female": 23868532, "s09_male": 20458400, "s10_female": 4865479, "s10_male": 4489316, "s12_female": 1519731, "s12_male": 1367595, "s13_female": 5680896, "s13_male": 5058552, "s14_female": 22597369, "s14_male": 19822536, "s15_female": 6793106, "s15_male": 5963041, "s16_female": 5714360, "s16_male": 5161819, "s17_female": 1582847, "s17_male": 1310754, "s26_female": 2969964, "s26_male": 3233192, "s27_female": 1148560, "s27_male": 1194805, "s28_female": 1048256, "s28_male": 962573, "s29_female": 11956561, "s29_male": 10792546, "s30_female": 2201792, "s30_male": 2136172, "s31_female": 1439472, "s31_male": 1360479, "s32_female": 5858140, "s32_male": 5234545, "s33_female": 2045905, "s33_male": 1974020, "s35_female": 4971649, "s35_male": 4443767, "s34_female": 37177200, "s34_male": 35747360, "s36_female": 41408789, "s36_male": 37410581};
+  var FALLBACK_SIZES = {"s01_female": 39274506, "s01_male": 36314536, "s02_female": 48009639, "s02_male": 44893336, "s03_female": 9929859, "s03_male": 9355582, "s04_female": 11672126, "s04_male": 11049790, "s05_female": 11608799, "s05_male": 10027243, "s07_female": 23374194, "s07_male": 23153110, "s09_female": 23868532, "s09_male": 20458400, "s10_female": 4865479, "s10_male": 4489316, "s12_female": 1519731, "s12_male": 1367595, "s13_female": 5680896, "s13_male": 5058552, "s14_female": 22597369, "s14_male": 19822536, "s15_female": 6793106, "s15_male": 5963041, "s16_female": 5714360, "s16_male": 5161819, "s17_female": 1582847, "s17_male": 1310754, "s26_female": 2969964, "s26_male": 3233192, "s27_female": 1148560, "s27_male": 1194805, "s28_female": 1048256, "s28_male": 962573, "s29_female": 11956561, "s29_male": 10792546, "s30_female": 2201792, "s30_male": 2136172, "s31_female": 1439472, "s31_male": 1360479, "s32_female": 5858140, "s32_male": 5234545, "s33_female": 2045905, "s33_male": 1974020, "s35_female": 4971649, "s35_male": 4443767, "s34_female": 37177200, "s34_male": 35747360, "s36_female": 41408789, "s36_male": 37410581, "s39_female": 6235537, "s39_male": 5660007};
 
   var ABORT = { abort: true };
   var running = false;

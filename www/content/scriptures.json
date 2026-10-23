@@ -1,7 +1,7 @@
 {
  "section": "scriptures",
- "version": 6,
- "updated": "2026-10-21",
+ "version": 7,
+ "updated": "2026-10-22",
  "filesBase": "content/jing/",
  "index": [
   {
@@ -136,6 +136,10 @@
   {
    "id": "s38",
    "title": "通玄真经"
+  },
+  {
+   "id": "s39",
+   "title": "太一救苦护身妙经"
   }
  ]
 }
