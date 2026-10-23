@@ -2,7 +2,8 @@
  * 设置页一颗按钮 → 弹窗选声线（女声/男声/双声）→ 后台下载全部经文诵读音频到
  * 本地 Cache Storage（独立缓存 wuri-offline-v1，SW 版本更新不清除），
  * 全程半透明悬浮进度；关页/断网中断后下次打开自动按已缓存清单断点续传。
- * 顺带预取经文正文（content/jing/*.js）、时间码、图鉴数据与图片，离线可读可看。
+ * 顺带预取经文正文（content/jing/*.js）、时间码、图鉴数据与缩略图，离线可读可看。
+ * 图鉴全图另有「图鉴素材」一键下载（本文件后半段，v2.0.0 (2) 神图外置）。
  * 播放本地优先由 sw.js 的音频路由实现（命中离线缓存才出本地，未命中照常流播）。
  * 门控与 (32) 单文件下载同口径：离线下载属高级版，未激活先弹付费墙。
  */
@@ -323,10 +324,9 @@
       }).catch(function () { return null; }).then(function (dj) {
         if (dj && dj.deities) {
           dj.deities.forEach(function (d) {
-            if (d.image) {
-              rels.push('img/deities/thumbs/' + d.image);
-              rels.push('img/deities/' + d.image);
-            }
+            /* 神图外置（v2.0.0 (2)）：预取只带缩略图，全图走「图鉴素材」单独下载，
+             * 不再随音频一键下载整包拉回（否则外置瘦身被预取抵消） */
+            if (d.image) rels.push('img/deities/thumbs/' + d.image);
           });
         }
         var uniq = [];
@@ -357,6 +357,7 @@
 
   function start(tier) {
     if (running) return;
+    if (deityRunning) { toast('图鉴素材正在下载，请稍候'); return; }
     if (!('caches' in window)) { toast('当前环境不支持离线缓存'); return; }
     running = true;
     abortFlag = false;
@@ -513,6 +514,233 @@
     if (m) m.classList.remove('show');
   }
 
+
+  /* ---------- 图鉴素材下载（v2.0.0 (2) 神图外置） ----------
+   * 全图平时从服务器按需加载、看过的留运行时缓存；此按钮把 102 张全图一次下进
+   * 同一豁免缓存（wuri-offline-v1），SW 图鉴分支命中即本地出。逐文件先查缓存＝
+   * 断点续传。与音频下载共用悬浮进度窗，互斥运行。总大小以 HEAD 实测为准，
+   * 失败回落兜底表（呈现版上线字节数，构建时实算，非估算）。删除只删全图条目，
+   * 不动同缓存里的音频/正文。 */
+  var DEITY_LS = 'wuri_deity_dl_v1';
+  var DEITY_FALLBACK_SIZES = {"baosheng.webp": 227964, "beidou.webp": 181270, "beiyue.webp": 226862, "bigan.webp": 217512, "bishuiyu.webp": 270218, "bixia.webp": 217648, "biyuewu.webp": 271516, "caoguojiu.webp": 189292, "changsheng.webp": 252624, "chenghuang.webp": 168268, "daode.webp": 168802, "diguan.webp": 188590, "dituhe.webp": 247930, "donghua.webp": 287960, "dongyue.webp": 258310, "doumu.webp": 178204, "doumuxie.webp": 362496, "erlang.webp": 193512, "fangritu.webp": 262874, "fengdu.webp": 243928, "gexuan.webp": 207172, "gouchen.webp": 221498, "guandi.webp": 215984, "guangze.webp": 241440, "guijinyang.webp": 294318, "hanxiangzi.webp": 177168, "hehe.webp": 209356, "hexiangu.webp": 131568, "houtu.webp": 188512, "huaguang.webp": 252268, "jiaomujiao.webp": 340744, "jingmugan.webp": 299832, "jishuibao.webp": 272674, "kangjinlong.webp": 300718, "kuimulang.webp": 272864, "kuixing.webp": 247098, "lancaihe.webp": 199452, "lingbao.webp": 202738, "linshui.webp": 247016, "lishan.webp": 191760, "liuhai.webp": 207310, "liutuzhang.webp": 296968, "longwang.webp": 267182, "loujingou.webp": 286124, "luban.webp": 193126, "lvdongbin.webp": 146838, "magu.webp": 223710, "maoriji.webp": 297230, "mazu.webp": 172962, "nandou.webp": 186588, "nanyue.webp": 233270, "nezha.webp": 216902, "niujinniu.webp": 280428, "nvtufu.webp": 237912, "puhua.webp": 233604, "qiuchuji.webp": 161208, "sanmao.webp": 180386, "sashoujian.webp": 207310, "shennong.webp": 273024, "shenshuiyuan.webp": 291734, "shihuozhu.webp": 266400, "shuiguan.webp": 194126, "taisui.webp": 242290, "taiyang.webp": 266428, "taiyi.webp": 221068, "taiyin.webp": 184960, "tianguan.webp": 184670, "tieguai.webp": 168592, "tudi.webp": 222826, "wangchongyang.webp": 187944, "wanglingguan.webp": 194316, "wangmu.webp": 241030, "weihuohu.webp": 283210, "weituzhi.webp": 274596, "weiyueyan.webp": 278350, "wenchang.webp": 163870, "wenqiong.webp": 223304, "xingrima.webp": 258098, "xinyuehu.webp": 282966, "xiyue.webp": 228918, "xuannv.webp": 211486, "xurishu.webp": 268168, "xuxun.webp": 222616, "yaowang.webp": 198222, "yihuoshe.webp": 304192, "yuanshi.webp": 200448, "yuelao.webp": 184452, "yuhuang.webp": 245560, "zaojun.webp": 171822, "zhangdaoling.webp": 169728, "zhangguolao.webp": 145226, "zhangsanfeng.webp": 165022, "zhangyuelu.webp": 245732, "zhaogongming.webp": 200574, "zhenshuiyin.webp": 257790, "zhenwu.webp": 195020, "zhongkui.webp": 179212, "zhongli.webp": 200756, "zhongyue.webp": 262486, "zhusheng.webp": 230742, "zihuohou.webp": 305390, "ziwei.webp": 198404};
+  var deityRunning = false;
+  var deityAbort = false;
+  var deitySizeMap = null;
+
+  function deityNames() {
+    var D = window.DEITIES_DATA;
+    var out = [], seen = {};
+    if (D && D.deities) D.deities.forEach(function (d) {
+      if (d.image && !seen[d.image]) { seen[d.image] = 1; out.push(d.image); }
+    });
+    return out;
+  }
+  function deityUrl(name) { return relUrl('img/deities/' + name); }
+  function deityLoadState() {
+    try { return JSON.parse(localStorage.getItem(DEITY_LS) || 'null'); } catch (e) { return null; }
+  }
+  function deitySaveState(st) {
+    try {
+      if (st) localStorage.setItem(DEITY_LS, JSON.stringify(st));
+      else localStorage.removeItem(DEITY_LS);
+    } catch (e) {}
+  }
+  function deitySizes() {
+    if (deitySizeMap) return Promise.resolve(deitySizeMap);
+    var names = deityNames();
+    var map = {};
+    var i = 0;
+    function worker() {
+      if (i >= names.length) return Promise.resolve();
+      var name = names[i++];
+      return headSize(deityUrl(name)).then(function (n) {
+        map[name] = n || DEITY_FALLBACK_SIZES[name] || 0;
+        return worker();
+      });
+    }
+    var pool = [];
+    for (var k = 0; k < 6; k++) pool.push(worker());
+    return Promise.all(pool).then(function () { deitySizeMap = map; return map; });
+  }
+  function deityPaint(doneAll, totalN, doneBytes, totalBytes) {
+    showFloat();
+    var pct = totalBytes ? Math.min(100, Math.floor(doneBytes * 100 / totalBytes)) : 0;
+    $('of-title').textContent = '正在下载图鉴素材 · ' + pct + '%';
+    $('of-sub').textContent = '第 ' + doneAll + ' / 共 ' + totalN + ' 张 · 已下载 ' +
+      fmtMB(doneBytes) + ' / ' + fmtMB(totalBytes);
+    $('of-fill').style.width = pct + '%';
+    var st = $('deity-dl-status');
+    if (st) st.textContent = '正在下载图鉴素材：' + pct + '%（第 ' + doneAll + '/' + totalN + ' 张），可放心切换页面。';
+  }
+  function deityDownloadOne(cache, name, size) {
+    var url = deityUrl(name);
+    return cache.match(url).then(function (hit) {
+      if (hit) {
+        var len = parseInt(hit.headers.get('content-length') || '0', 10);
+        return { ok: true, size: len || size };
+      }
+      var attempt = 0;
+      function tryOnce() {
+        if (deityAbort) return Promise.reject(ABORT);
+        attempt++;
+        return fetch(url, { cache: 'no-store' }).then(function (res) {
+          if (!res.ok) throw new Error('http ' + res.status);
+          return res.blob();
+        }).then(function (blob) {
+          if (blob.size < 5000) throw new Error('too small');
+          if (size && blob.size < size * 0.98) throw new Error('truncated');
+          var stored = new Response(blob, {
+            headers: { 'Content-Type': 'image/webp', 'Content-Length': String(blob.size) }
+          });
+          return cache.put(url, stored).then(function () { return { ok: true, size: blob.size }; });
+        }).catch(function (e) {
+          if (e === ABORT) throw e;
+          if (attempt >= 3) return { ok: false, size: 0 };
+          return sleep(attempt === 1 ? 800 : 2500).then(tryOnce);
+        });
+      }
+      return tryOnce();
+    });
+  }
+  function deityStart() {
+    if (deityRunning) return;
+    if (running) { toast('离线音频正在下载，请稍候'); return; }
+    if (!('caches' in window)) { toast('当前环境不支持离线缓存'); return; }
+    var names = deityNames();
+    if (!names.length) { toast('图鉴数据尚未就绪'); return; }
+    deityRunning = true;
+    deityAbort = false;
+    deitySaveState({ v: 1, status: 'running', failed: [], ts: Date.now() });
+    deitySyncCard();
+    deitySizes().then(function (map) {
+      var totalBytes = names.reduce(function (sm, n) { return sm + (map[n] || 0); }, 0);
+      return caches.open(CACHE_NAME).then(function (cache) {
+        var doneN = 0, doneBytes = 0, failed = [];
+        deityPaint(0, names.length, 0, totalBytes);
+        var chain = Promise.resolve();
+        names.forEach(function (name) {
+          chain = chain.then(function () {
+            if (deityAbort) return;
+            return deityDownloadOne(cache, name, map[name] || 0).then(function (r) {
+              if (r.ok) { doneN++; doneBytes += r.size || map[name] || 0; }
+              else failed.push(name);
+              deityPaint(doneN + failed.length, names.length, doneBytes, totalBytes);
+            });
+          });
+        });
+        return chain.then(function () {
+          if (deityAbort) return;
+          deitySaveState({ v: 1, status: failed.length ? 'partial' : 'done', failed: failed, ts: Date.now() });
+          showFloat();
+          if (failed.length) {
+            $('of-title').textContent = '图鉴素材未全部下载';
+            $('of-sub').textContent = '有 ' + failed.length + ' 张没下完，再点一次「一键下载图鉴素材」补齐';
+            $('of-fill').style.width = '100%';
+          } else {
+            $('of-title').textContent = '图鉴素材下载完成 ✓';
+            $('of-sub').textContent = '断网、飞行模式也能看全图了';
+            $('of-fill').style.width = '100%';
+            fadeFloat(4200);
+          }
+          try { document.dispatchEvent(new Event('wuri-deity-dl-done')); } catch (e) {}
+        });
+      });
+    }).catch(function () {}).then(function () {
+      deityRunning = false;
+      deitySyncCard();
+      deityRefreshStats();
+    });
+  }
+  function deityDelete() {
+    if (deityRunning) return Promise.resolve(false);
+    if (!('caches' in window)) return Promise.resolve(false);
+    return caches.open(CACHE_NAME).then(function (cache) {
+      return cache.keys().then(function (reqs) {
+        var chain = Promise.resolve();
+        reqs.forEach(function (req) {
+          var u = new URL(req.url);
+          if (/\/img\/deities\/[^/]+\.webp$/.test(u.pathname)) {
+            chain = chain.then(function () { return cache.delete(req); });
+          }
+        });
+        return chain;
+      });
+    }).then(function () {
+      deitySaveState(null);
+      deitySyncCard();
+      deityRefreshStats();
+      toast('图鉴素材已删除');
+      return true;
+    });
+  }
+  function deityStats() {
+    if (!('caches' in window)) return Promise.resolve({ count: 0, bytes: 0 });
+    var names = deityNames();
+    return caches.open(CACHE_NAME).then(function (cache) {
+      return cache.keys().then(function (reqs) {
+        var count = 0, bytes = 0;
+        var chain = Promise.resolve();
+        reqs.forEach(function (req) {
+          var u = new URL(req.url);
+          var m = /\/img\/deities\/([^/]+\.webp)$/.exec(u.pathname);
+          if (!m || names.indexOf(m[1]) < 0) return;
+          chain = chain.then(function () {
+            return cache.match(req).then(function (res) {
+              if (!res) return;
+              count++;
+              var len = parseInt(res.headers.get('content-length') || '0', 10);
+              if (len) { bytes += len; return; }
+              return res.blob().then(function (b) { bytes += b.size; });
+            });
+          });
+        });
+        return chain.then(function () { return { count: count, bytes: bytes }; });
+      });
+    }).catch(function () { return { count: 0, bytes: 0 }; });
+  }
+  function deitySyncCard() {
+    var btn = $('deity-dl-btn'), del = $('deity-del-btn'), failBox = $('deity-dl-failed');
+    if (btn) {
+      btn.disabled = deityRunning || running;
+      btn.textContent = deityRunning ? '正在下载…' : '一键下载图鉴素材';
+    }
+    if (del) del.disabled = deityRunning || running;
+    var st = deityLoadState();
+    if (failBox) {
+      if (st && st.failed && st.failed.length && !deityRunning) {
+        failBox.hidden = false;
+        failBox.textContent = '上次有 ' + st.failed.length + ' 张图没下完，联网后点「一键下载图鉴素材」补齐。';
+      } else {
+        failBox.hidden = true;
+      }
+    }
+  }
+  function deityRefreshStats() {
+    var st = $('deity-dl-status');
+    if (!st) return Promise.resolve();
+    return deityStats().then(function (sm) {
+      if (deityRunning) return;
+      var total = deityNames().length;
+      if (!sm.count) st.textContent = '尚未下载图鉴素材。';
+      else if (sm.count >= total) st.textContent = '已下载图鉴素材 ' + sm.count + ' 张 · ' + fmtMB(sm.bytes) + '，断网时可直接看全图。';
+      else st.textContent = '已下载图鉴素材 ' + sm.count + ' / ' + total + ' 张 · ' + fmtMB(sm.bytes) + '，没下完的点按钮补齐。';
+      deitySyncCard();
+    });
+  }
+  function deityInit() {
+    var btn = $('deity-dl-btn');
+    if (!btn) return;
+    btn.addEventListener('click', deityStart);
+    var del = $('deity-del-btn');
+    if (del) del.addEventListener('click', function () { deityDelete(); });
+    deityRefreshStats();
+    /* 中断续传：上次没下完，打开后自动接着下（与音频错峰） */
+    var st = deityLoadState();
+    if (st && st.status && st.status !== 'done') {
+      setTimeout(function () { if (!deityRunning && !running) deityStart(); }, 2600);
+    }
+  }
+
   /* ---------- 初始化 ---------- */
   function init() {
     var btn = $('offline-dl-btn');
@@ -539,6 +767,7 @@
     var resumeBtn = $('offline-resume-btn');
     if (resumeBtn) resumeBtn.addEventListener('click', resume);
     refreshStats();
+    deityInit();
     /* 中断续传：上次没下完（含关页中断/部分失败），打开后自动接着下 */
     var s = loadState();
     if (s && s.tier && s.status !== 'done') {
@@ -592,5 +821,15 @@
         return ok;
       });
     }
+  };
+
+  /* 图鉴素材下载调试/测试入口（v2.0.0 (2)） */
+  window.WuriDeityDl = {
+    start: deityStart,
+    deleteAll: deityDelete,
+    stats: deityStats,
+    sizes: deitySizes,
+    state: deityLoadState,
+    isRunning: function () { return deityRunning; }
   };
 })();

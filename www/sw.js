@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v90-20261023-v200-1';
+const CACHE = 'wuri-v91-20261023-v200-2';
 /* 离线下载专用缓存（一键下载的音频/正文/图鉴）：版本更新时绝不清除，
  * 否则用户下好的几百 MB 音频会在每次发版后被 activate 误删（2026-10-21） */
 const OFFLINE_CACHE = 'wuri-offline-v1';
@@ -15,7 +15,7 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=90',
+  './css/style.css?v=91',
   './css/qimen.css?v=78',
   './css/meditation.css?v=65',
   './icon-192.png',
@@ -190,6 +190,30 @@ self.addEventListener('fetch', e => {
   // 分段请求（音频 Range 拖动/续播）不拦截，交给浏览器直连：
   // 以前把 206 半截音频当完整响应缓存下来，会让环境音永远播不出（2026-10-19 冥想无声修）
   if (e.request.headers.get('range')) return;
+  // 神祇图鉴全图（v2.0.0 (2) 外置）：不入预缓存；已下载集（离线豁免缓存）优先，
+  // 其次运行时缓存，看过即留；都未命中才联网取并存运行时缓存。缩略图走下方通用分支。
+  var isDeityFull = /\/img\/deities\/[^/]+\.webp$/.test(url.pathname);
+  if (isDeityFull && e.request.method === 'GET') {
+    e.respondWith(
+      caches.open(OFFLINE_CACHE).then(function (c) { return c.match(e.request); })
+        .then(function (hit) {
+          if (hit) return hit;
+          return caches.open(CACHE).then(function (c2) { return c2.match(e.request); });
+        })
+        .then(function (hit) {
+          if (hit) return hit;
+          return fetch(e.request).then(function (res) {
+            if (res.ok && url.origin === location.origin) {
+              var copy = res.clone();
+              caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+            }
+            return res;
+          });
+        })
+        .catch(function () { return new Response('', { status: 504, statusText: 'offline' }); })
+    );
+    return;
+  }
   var isAudio = /\.(mp3|m4a|aac|wav|ogg)$/i.test(url.pathname);
   e.respondWith(
     caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {

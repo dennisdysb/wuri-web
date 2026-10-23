@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  var XG = null, BT = null, loadPromise = null;
+  var XG = null, BT = null, LNX = null, LINES = null, loadPromise = null;
   var secOrder = [];           /* 区序（《步天歌》序）：紫微垣…轸宿 */
   var secInfo = {};            /* section -> {name, region, list:[asterism], lines:[], lineCount} */
   var byKey = {};              /* key -> asterism（key = a.id 或 section|name，同名官跨区不撞） */
@@ -22,6 +22,11 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
   function txEsc(s) { return esc(T(s)); }
+  var IMG = window.WuriImg || {
+    full: function (n) { return 'img/deities/' + n; },
+    thumb: function (n) { return 'img/deities/thumbs/' + n; },
+    fallback: function () {}
+  };
 
   /* ---------------- 数据 ---------------- */
   function astKey(a) { return a.id || (a.section + '|' + a.name); }
@@ -46,9 +51,10 @@
     if (loadPromise) return loadPromise;
     loadPromise = Promise.all([
       fetch('data/xingguan.json').then(function (r) { if (!r.ok) throw new Error('xg'); return r.json(); }),
-      fetch('data/butiange.json').then(function (r) { if (!r.ok) throw new Error('bt'); return r.json(); })
+      fetch('data/butiange.json').then(function (r) { if (!r.ok) throw new Error('bt'); return r.json(); }),
+      fetch('data/xingguan-lines.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
     ]).then(function (res) {
-      XG = res[0]; BT = res[1]; indexData(); loadPromise = null;
+      XG = res[0]; BT = res[1]; LNX = res[2]; indexData(); indexLines(); loadPromise = null;
       return true;
     }).catch(function (e) { loadPromise = null; throw e; });
     return loadPromise;
@@ -61,6 +67,12 @@
     return '<div class="sx-loading">' + esc(t('sx_load_fail')) +
       '<div style="margin-top:12px"><button class="btn primary" data-sx-retry="' + retryFnName + '">' + esc(t('sx_retry')) + '</button></div></div>';
   }
+
+  function indexLines() {
+    LINES = {};
+    ((LNX && LNX.asterisms) || []).forEach(function (e) { LINES[e.section + '|' + e.name] = e; });
+  }
+  function lineEntry(a) { return LINES ? (LINES[a.section + '|' + a.name] || null) : null; }
 
   /* ---------------- 神祇图鉴互链 ---------------- */
   function deityById(id) {
@@ -75,18 +87,23 @@
   }
   function openDeity(id) {
     if (!window.__wuri_openDeity) return;
-    /* 神祇详情视图在 DOM 中位于星象子视图之前（同 z-index 下子视图会盖住详情），
-     * 故先收起星象三子视图、亮出图鉴列表垫底，详情返回即落回神祇图鉴。
-     * 星象标签页（tab-stars）是普通标签主区、不在此列。 */
+    /* 神祇详情在 DOM 中位于星象子视图之前（同 z-index 下子视图会盖住详情），
+     * 仍需先收起星象子视图；但把「当时开着的子视图栈＋各自滚动位置」作为来源
+     * 递给图鉴（v2.0.0 (2)），详情返回即回来源（区页/星官详情/步天歌），
+     * 不再写死落到神祇图鉴主页。星象标签页（tab-stars）是普通标签主区、不在此列。 */
+    var stack = [], scroll = {};
+    ['view-star-region', 'view-butiange', 'view-star-detail'].forEach(function (vid) {
+      var v = $(vid);
+      if (v && !v.hidden) { stack.push(vid); scroll[vid] = v.scrollTop; }
+    });
     hide('view-star-region'); hide('view-star-detail'); hide('view-butiange');
-    show('view-deities');
-    window.__wuri_openDeity(id);
+    window.__wuri_openDeity(id, stack.length ? { views: stack, scroll: scroll } : null);
   }
 
   function lordCardHTML(d, subText) {
     if (!d) return '';
     return '<div class="sx-card sx-link" data-sx-deity="' + esc(d.id) + '">' +
-      '<img src="img/deities/' + esc(d.image) + '" alt="' + txEsc(d.name) + '">' +
+      '<img src="' + esc(IMG.full(d.image)) + '" onerror="WuriImg.fallback(this,\'' + esc(d.image) + '\')" alt="' + txEsc(d.name) + '">' +
       '<div><div class="l1">' + txEsc(d.name) + '</div><div class="l2">' + txEsc(subText || d.title) + '</div></div>' +
       '<div class="go">›</div></div>';
   }
@@ -238,7 +255,7 @@
       '<div class="sx-card sx-entry" data-sx-book="1"><div><div class="e1">' + esc(t('sx_entry_book')) + '</div>' +
       '<div class="e2">' + txEsc(tf(t('sx_entry_book_sub'), BT.total_lines)) + '</div></div></div>' +
       '<div class="sx-card sx-entry" data-sx-lords="1">' +
-      (lord0 ? '<img src="img/deities/' + esc(lord0.image) + '" alt="">' : '') +
+      (lord0 ? '<img src="' + esc(IMG.full(lord0.image)) + '" onerror="WuriImg.fallback(this,\'' + esc(lord0.image) + '\')" alt="">' : '') +
       '<div><div class="e1">' + esc(t('sx_entry_lords')) + '</div><div class="e2">' + esc(t('sx_entry_lords_sub')) + '</div></div></div>' +
       '</div>';
     host.innerHTML = h;
@@ -337,59 +354,200 @@
     return h + '</div>';
   }
 
+  /* 简图（v2.0.0 (2) 重做）：
+   * 连线改取 xingguan-lines.json（步天歌星序链＋图形官图式手订，doubtful 虚线）——
+   * 与旧版「按赤经排序逐星直连」的出入：井/鬼/轸/毕/参/五车/三柱/张等图形官按传统
+   * 图式成形、不再是赤经序折线；清表无连线数据、仍按赤经序虚线（旧行为）。
+   * 标签只留星名（口径归属见下方双表；图内不再拖「两口径共有」等后缀），
+   * 16 候选位贪心取重叠最小、远置加引线，密集图字号自动降一档。
+   * 上下文模式：本官可绘星 <2 或跨度 <0.5° 时扩视场纳邻官（灰点＋虚线＋小字官名），
+   * 本官居中放大实绘。阈值：CTX_SPAN_MIN=0.5°、视场 14°–30°。 */
+  var CTX_SPAN_MIN = 0.5;
+  var CTX_FIELD_MIN = 14;
+  var CTX_FIELD_MAX = 30;
+
   function plotSVG(a, qingStars) {
     function has(s) { return typeof s.ra_deg === 'number' && typeof s.dec_deg === 'number'; }
     var main = (a.stars || []).filter(has);
     var qing = (qingStars || []).filter(has);
-    var all = main.concat(qing);
-    if (!all.length) return '<div class="sx-note">' + esc(t('sx_plot_none')) + '</div>';
-    var W = 320, H = 228, pL = 14, pR = 14, pT = 18, pB = 30;
-    var minRA = 1e9, maxRA = -1e9, minDec = 1e9, maxDec = -1e9;
-    all.forEach(function (s) {
-      minRA = Math.min(minRA, s.ra_deg); maxRA = Math.max(maxRA, s.ra_deg);
-      minDec = Math.min(minDec, s.dec_deg); maxDec = Math.max(maxDec, s.dec_deg);
-    });
-    var spanRA = Math.max(maxRA - minRA, 1), spanDec = Math.max(maxDec - minDec, 1);
-    function X(ra) { return pL + (maxRA - ra) / spanRA * (W - pL - pR); }   /* 赤经向左递增 */
-    function Y(dec) { return pT + (maxDec - dec) / spanDec * (H - pT - pB); }
-    function R(mag) { return Math.max(1.6, Math.min(8.6, 6.6 - (typeof mag === 'number' ? mag : 3) * 0.85)); }
+    var mainByName = {}; main.forEach(function (s) { mainByName[s.cn_name] = s; });
     var qDes = {}; qing.forEach(function (s) { qDes[s.designation] = 1; });
-    var mDes = {}; main.forEach(function (s) { mDes[s.designation] = 1; });
-    function lineFor(list, cls) {
+    var focal = main.length ? main : qing;
+    if (!focal.length) return '<div class="sx-note">' + esc(t('sx_plot_none')) + '</div>';
+
+    function boundsOf(list) {
+      var b = { minRA: 1e18, maxRA: -1e18, minDec: 1e18, maxDec: -1e18 };
+      list.forEach(function (s) {
+        b.minRA = Math.min(b.minRA, s.ra_deg); b.maxRA = Math.max(b.maxRA, s.ra_deg);
+        b.minDec = Math.min(b.minDec, s.dec_deg); b.maxDec = Math.max(b.maxDec, s.dec_deg);
+      });
+      return b;
+    }
+    function spansOf(b) {
+      var cd = Math.cos((b.minDec + b.maxDec) / 2 * Math.PI / 180);
+      return { ra: Math.max((b.maxRA - b.minRA) * cd, 0.001), dec: Math.max(b.maxDec - b.minDec, 0.001), cd: cd };
+    }
+    var fb = boundsOf(focal), fsp = spansOf(fb);
+    var ctxMode = focal.length < 2 || Math.max(fsp.ra, fsp.dec) < CTX_SPAN_MIN;
+
+    var vb;
+    if (ctxMode) {
+      var cRA = (fb.minRA + fb.maxRA) / 2, cDec = (fb.minDec + fb.maxDec) / 2;
+      var span = Math.min(CTX_FIELD_MAX, Math.max(CTX_FIELD_MIN, Math.max(fsp.ra, fsp.dec) * 3));
+      vb = { minRA: cRA - span / 2 / Math.max(fsp.cd, 0.2), maxRA: cRA + span / 2 / Math.max(fsp.cd, 0.2),
+             minDec: cDec - span / 2, maxDec: cDec + span / 2 };
+    } else {
+      vb = boundsOf(main.concat(qing));
+      var vs = spansOf(vb);
+      if (vs.ra < 1) { var m1 = (vb.minRA + vb.maxRA) / 2; vb.minRA = m1 - 0.5 / vs.cd; vb.maxRA = m1 + 0.5 / vs.cd; }
+      if (vs.dec < 1) { var m2 = (vb.minDec + vb.maxDec) / 2; vb.minDec = m2 - 0.5; vb.maxDec = m2 + 0.5; }
+    }
+    var W = 320, H = 228, pL = 14, pR = 14, pT = 18, pB = 30;
+    var spanRA = Math.max(vb.maxRA - vb.minRA, 0.01), spanDec = Math.max(vb.maxDec - vb.minDec, 0.01);
+    function X(ra) { return pL + (vb.maxRA - ra) / spanRA * (W - pL - pR); }
+    function Y(dec) { return pT + (vb.maxDec - dec) / spanDec * (H - pT - pB); }
+    function R(mag) { return Math.max(1.6, Math.min(8.6, 6.6 - (typeof mag === 'number' ? mag : 3) * 0.85)); }
+    function subOf(s) { return (s.designation || '') + ' · ' + (typeof s.vmag === 'number' ? s.vmag.toFixed(2) : '—'); }
+
+    var le = lineEntry(a);
+    var focalCls = le && le.status === 'doubtful' ? 'sx-plot-dash' : 'sx-plot-line';
+    function edgesByName(ast, byName) {
+      var e0 = lineEntry(ast);
+      if (!e0 || !e0.edges) return null;
+      var out = [];
+      e0.edges.forEach(function (e) { if (byName[e[0]] && byName[e[1]]) out.push([byName[e[0]], byName[e[1]]]); });
+      return out;
+    }
+    function edgeLines(edges, cls) {
+      var out = '';
+      (edges || []).forEach(function (e) {
+        out += '<line class="' + cls + '" x1="' + X(e[0].ra_deg).toFixed(1) + '" y1="' + Y(e[0].dec_deg).toFixed(1) +
+          '" x2="' + X(e[1].ra_deg).toFixed(1) + '" y2="' + Y(e[1].dec_deg).toFixed(1) + '"/>';
+      });
+      return out;
+    }
+    function raPolyline(list, cls) {
       if (list.length < 2) return '';
       var pts = list.slice().sort(function (x, y) { return x.ra_deg - y.ra_deg; })
         .map(function (s) { return X(s.ra_deg).toFixed(1) + ',' + Y(s.dec_deg).toFixed(1); }).join(' ');
       return '<polyline class="' + cls + '" points="' + pts + '" fill="none"/>';
     }
-    function labelFor(s, extra, ghost, idx) {
-      var x = X(s.ra_deg), y = Y(s.dec_deg), r = R(s.vmag);
-      var right = x > W * 0.52;
-      var txp = right ? x - r - 5 : x + r + 5;
-      var anchor = right ? 'end' : 'start';
-      var dy = (idx % 2 === 0) ? -4 : 14;
-      var yy = Math.max(11, Math.min(H - pB - 14, y + dy));
-      var name = s.cn_name + (extra || '');
-      return '<text class="sx-plot-t" text-anchor="' + anchor + '" x="' + txp.toFixed(1) + '" y="' + yy.toFixed(1) + '">' + txEsc(name) + '</text>' +
-        '<text class="sx-plot-s" text-anchor="' + anchor + '" x="' + txp.toFixed(1) + '" y="' + (yy + 13).toFixed(1) + '">' +
-        esc((s.designation || '') + ' · ' + (typeof s.vmag === 'number' ? s.vmag.toFixed(2) : '—')) + '</text>';
+
+    var h = '';
+    var labels = []; /* {x,y,r,name,sub,cls,pr} */
+
+    if (ctxMode) {
+      /* 邻官：成员星落入视场者按官聚合（空间相邻、不限区），最近 10 官 */
+      var fc = { x: (fb.minRA + fb.maxRA) / 2, y: (fb.minDec + fb.maxDec) / 2 };
+      var neigh = [];
+      (XG.asterisms || []).forEach(function (o) {
+        if (o.name === a.name && o.section === a.section) return;
+        var pts = (o.stars || []).filter(has).filter(function (s) {
+          return s.ra_deg >= vb.minRA && s.ra_deg <= vb.maxRA && s.dec_deg >= vb.minDec && s.dec_deg <= vb.maxDec;
+        });
+        if (!pts.length) return;
+        var cx = 0, cy = 0;
+        pts.forEach(function (s) { cx += s.ra_deg; cy += s.dec_deg; });
+        neigh.push({ ast: o, pts: pts, cx: cx / pts.length, cy: cy / pts.length });
+      });
+      neigh.sort(function (p, q) { return Math.hypot(p.cx - fc.x, p.cy - fc.y) - Math.hypot(q.cx - fc.x, q.cy - fc.y); });
+      neigh = neigh.slice(0, 10);
+      neigh.forEach(function (n) {
+        var byName = {}; n.pts.forEach(function (s) { byName[s.cn_name] = s; });
+        var es = edgesByName(n.ast, byName);
+        if (es && es.length) h += edgeLines(es, 'sx-plot-line ctx');
+        else if (n.pts.length > 1) h += raPolyline(n.pts, 'sx-plot-line ctx');
+        n.pts.forEach(function (s) {
+          h += '<circle class="sx-star ctx" cx="' + X(s.ra_deg).toFixed(1) + '" cy="' + Y(s.dec_deg).toFixed(1) +
+            '" r="' + Math.max(1.3, R(s.vmag) * 0.55).toFixed(1) + '"/>';
+        });
+        labels.push({ x: X(n.cx), y: Y(n.cy), r: 3, name: n.ast.name, sub: '', cls: 'ctx', pr: 2 });
+      });
+      var fEdges = edgesByName(a, mainByName);
+      if (fEdges && fEdges.length) h += edgeLines(fEdges, focalCls);
+      focal.forEach(function (s) {
+        var rr = Math.max(R(s.vmag) * 1.15, 2.8); /* 暗星本官也须醒目，下限 2.8 */
+        h += '<circle class="sx-star focal" cx="' + X(s.ra_deg).toFixed(1) + '" cy="' + Y(s.dec_deg).toFixed(1) + '" r="' + rr.toFixed(1) + '"/>';
+        labels.push({ x: X(s.ra_deg), y: Y(s.dec_deg), r: rr, name: s.cn_name, sub: subOf(s), cls: '', pr: 0 });
+      });
+    } else {
+      var fEdges2 = edgesByName(a, mainByName);
+      if (fEdges2 && fEdges2.length) h += edgeLines(fEdges2, focalCls);
+      else if (main.length > 1) h += raPolyline(main, focalCls);
+      h += raPolyline(qing, 'sx-plot-dash');
+      var mDes = {}; main.forEach(function (s) { mDes[s.designation] = 1; });
+      qing.forEach(function (s) {
+        if (mDes[s.designation]) return; /* 共有星在主口径点上标注 */
+        h += '<circle class="sx-star ghost" cx="' + X(s.ra_deg).toFixed(1) + '" cy="' + Y(s.dec_deg).toFixed(1) + '" r="' + R(s.vmag).toFixed(1) + '"/>';
+        labels.push({ x: X(s.ra_deg), y: Y(s.dec_deg), r: R(s.vmag), name: s.cn_name, sub: subOf(s), cls: 'ghost', pr: 1 });
+      });
+      main.forEach(function (s) {
+        var shared = !!qDes[s.designation];
+        if (shared) h += '<circle class="sx-star-ring" cx="' + X(s.ra_deg).toFixed(1) + '" cy="' + Y(s.dec_deg).toFixed(1) + '" r="' + (R(s.vmag) + 3.2).toFixed(1) + '"/>';
+        h += '<circle class="sx-star" cx="' + X(s.ra_deg).toFixed(1) + '" cy="' + Y(s.dec_deg).toFixed(1) + '" r="' + R(s.vmag).toFixed(1) + '"/>';
+        labels.push({ x: X(s.ra_deg), y: Y(s.dec_deg), r: R(s.vmag), name: s.cn_name, sub: subOf(s), cls: '', pr: 0 });
+      });
     }
-    var h = '<svg class="sx-plot" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + txEsc(a.name) + '">';
-    h += lineFor(main, 'sx-plot-line') + lineFor(qing, 'sx-plot-dash');
-    qing.forEach(function (s, i) {
-      if (mDes[s.designation]) return; /* 共有星在主口径点上标注 */
-      var x = X(s.ra_deg), y = Y(s.dec_deg), r = R(s.vmag);
-      h += '<circle class="sx-star ghost" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(1) + '"/>';
-      h += labelFor(s, '（' + t('sx_qing_short') + '）', true, i);
+
+    /* ---- 标签排版：16 候选位（两圈×八向）贪心取重叠面积最小，同分取近位；
+     * 标签盒被钳进图幅；盒心离星点过远时加引线。确定性：同输入同结果。 ---- */
+    var dense = labels.length >= 10;
+    var fsT = dense ? 10 : 11, fsS = dense ? 7.5 : 8.5;
+    function textW(txt, fs) {
+      var w = 0;
+      for (var i = 0; i < txt.length; i++) w += (txt.charCodeAt(i) > 0x2E7F ? fs : fs * 0.58);
+      return w;
+    }
+    var placed = [{ x: 4, y: H - 18, w: 190, h: 14 }]; /* 左下注记行预留位 */
+    labels.sort(function (p, q) { return p.pr - q.pr; });
+    var leaderSVG = '', labelSVG = '';
+    labels.forEach(function (lb) {
+      var nameFs = lb.cls === 'ctx' ? 9 : fsT;
+      var w = Math.max(textW(lb.name, nameFs), lb.sub ? textW(lb.sub, fsS) : 0) + 3;
+      var hh = lb.sub ? (fsT + fsS + 5) : 13;
+      var g = lb.r + 4;
+      var dirs = [];
+      [[1, 0], [0.72, -0.72], [0.72, 0.72], [0, -1], [0, 1], [-1, 0], [-0.72, -0.72], [-0.72, 0.72]].forEach(function (u) {
+        dirs.push([u[0], u[1], g]);
+        dirs.push([u[0], u[1], g * 1.9]);
+        dirs.push([u[0], u[1], 30]);
+        dirs.push([u[0], u[1], 44]);
+      });
+      var best = null, bestScore = Infinity;
+      dirs.forEach(function (d, ci) {
+        var bx = lb.x + d[0] * d[2] - (d[0] < -0.1 ? w : (Math.abs(d[0]) <= 0.1 ? w / 2 : 0));
+        var by = lb.y + d[1] * d[2] - (d[1] < -0.1 ? hh : (Math.abs(d[1]) <= 0.1 ? hh / 2 : 0));
+        var cx = Math.max(2, Math.min(W - 2 - w, bx));
+        var cy = Math.max(2, Math.min(H - 2 - hh, by));
+        var ov = 0;
+        placed.forEach(function (p) {
+          var ox = Math.max(0, Math.min(cx + w, p.x + p.w) - Math.max(cx, p.x));
+          var oy = Math.max(0, Math.min(cy + hh, p.y + p.h) - Math.max(cy, p.y));
+          ov += ox * oy;
+        });
+        var score = ov * 1000 + ci;
+        if (score < bestScore) { bestScore = score; best = { x: cx, y: cy }; }
+      });
+      placed.push({ x: best.x, y: best.y, w: w, h: hh });
+      var ncx = best.x + w / 2, ncy = best.y + hh / 2;
+      var dist = Math.hypot(ncx - lb.x, ncy - lb.y);
+      if (dist > lb.r + 17) {
+        var ex = lb.x + (ncx - lb.x) / dist * (lb.r + 1.5), ey = lb.y + (ncy - lb.y) / dist * (lb.r + 1.5);
+        var gx2 = lb.x + (ncx - lb.x) / dist * Math.max(lb.r + 2, dist - Math.min(w, hh) / 2 - 1);
+        var gy2 = lb.y + (ncy - lb.y) / dist * Math.max(lb.r + 2, dist - Math.min(w, hh) / 2 - 1);
+        leaderSVG += '<line class="sx-leader" x1="' + ex.toFixed(1) + '" y1="' + ey.toFixed(1) + '" x2="' + gx2.toFixed(1) + '" y2="' + gy2.toFixed(1) + '"/>';
+      }
+      labelSVG += '<g class="sx-label"><text class="sx-plot-t' + (lb.cls === 'ctx' ? ' ctx' : '') +
+        '" x="' + (best.x + 1).toFixed(1) + '" y="' + (best.y + (lb.cls === 'ctx' ? 10 : fsT + 1)).toFixed(1) + '">' + txEsc(lb.name) + '</text>';
+      if (lb.sub) labelSVG += '<text class="sx-plot-s" x="' + (best.x + 1).toFixed(1) + '" y="' + (best.y + fsT + fsS + 3).toFixed(1) + '">' + esc(lb.sub) + '</text>';
+      labelSVG += '</g>';
     });
-    main.forEach(function (s, i) {
-      var x = X(s.ra_deg), y = Y(s.dec_deg), r = R(s.vmag);
-      var shared = !!qDes[s.designation];
-      if (shared) h += '<circle class="sx-star-ring" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + (r + 3.2).toFixed(1) + '"/>';
-      h += '<circle class="sx-star" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(1) + '"/>';
-      h += labelFor(s, shared ? ' · ' + t('sx_plot_shared') : '', false, i);
-    });
-    h += '<text class="sx-plot-s" x="8" y="' + (H - 8) + '">' + esc(t('sx_plot_note')) + '</text>';
-    return h + '</svg>';
+
+    var note = (ctxMode ? t('sx_plot_note_ctx') : t('sx_plot_note')) +
+      (le && le.status === 'doubtful' && !ctxMode ? ' · ' + t('sx_plot_doubt') : '');
+    return '<svg class="sx-plot' + (dense ? ' dense' : '') + '" viewBox="0 0 320 228" role="img" aria-label="' + txEsc(a.name) + '">' +
+      h + leaderSVG + labelSVG +
+      '<text class="sx-plot-s" x="8" y="' + (H - 8) + '">' + esc(note) + '</text></svg>';
   }
 
   function countingNote(a) {
@@ -564,7 +722,8 @@
     var r = 40, rx = Math.max(0.5, Math.abs(2 * illum - 1) * r);
     var sweep = (2 * illum - 1) > 0 ? 1 : 0;
     var dark = 'M 50 10 A 40 40 0 0 0 50 90 A ' + rx.toFixed(1) + ' 40 0 0 ' + sweep + ' 50 10 Z';
-    var inner = '<circle class="sx-moon-lit" cx="50" cy="50" r="40"/><path class="sx-moon-dark" d="' + dark + '"/>';
+    var inner = '<circle class="sx-moon-lit" cx="50" cy="50" r="40"/><path class="sx-moon-dark" d="' + dark + '"/>' +
+      '<circle class="sx-moon-rim" cx="50" cy="50" r="39.3"/>';
     if (!waxing) inner = '<g transform="translate(100,0) scale(-1,1)">' + inner + '</g>';
     return '<svg class="sx-moon" viewBox="0 0 100 100" role="img" aria-label="' + txEsc(moon.phaseName) + '">' + inner + '</svg>';
   }
@@ -589,7 +748,12 @@
     var img = $('sx-sky-img'), nameEl = $('sx-sky-xiu'), subEl = $('sx-sky-xiu-sub');
     if (tx1) {
       if (img) {
-        if (tx1.lord) { img.src = 'img/deities/' + tx1.lord.image; img.hidden = false; }
+        if (tx1.lord) {
+          img.removeAttribute('data-wuri-fb');
+          img.onerror = function () { IMG.fallback(img, tx1.lord.image); };
+          img.src = IMG.full(tx1.lord.image);
+          img.hidden = false;
+        }
         else img.hidden = true;
       }
       if (nameEl) nameEl.textContent = T(tx1.full);

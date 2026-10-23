@@ -342,7 +342,12 @@
     curRes = res;
     var prof = profileOf(res.a);
     var info = deityInfo(res.main), d = tagById(res.main);
-    if (info) { E.mainImg.src = 'img/deities/' + info.image; E.mainImg.alt = TX(info.name); }
+    if (info) {
+      E.mainImg.removeAttribute('data-wuri-fb');
+      E.mainImg.onerror = function () { if (window.WuriImg) WuriImg.fallback(E.mainImg, info.image); };
+      E.mainImg.src = window.WuriImg ? WuriImg.full(info.image) : 'img/deities/' + info.image;
+      E.mainImg.alt = TX(info.name);
+    }
     E.mainName.textContent = TX(d.name);
     E.mainTitle.textContent = TX(info ? info.title : '');
     E.mainWhy.textContent = TX(explain(res.main, prof, true));
@@ -566,8 +571,18 @@
         paint(null);
       }
     };
-    img.onerror = function () { if (window.toast) window.toast(T('aff_share_fail')); };
-    img.src = 'img/deities/' + (info ? info.image : '');
+    img.onerror = function () {
+      if (!img._fbThumb) {
+        img._fbThumb = 1;
+        img.removeAttribute('crossorigin');
+        img.src = 'img/deities/thumbs/' + (info ? info.image : '');
+        return;
+      }
+      if (window.toast) window.toast(T('aff_share_fail'));
+    };
+    var shareFull = window.WuriImg ? WuriImg.full(info ? info.image : '') : 'img/deities/' + (info ? info.image : '');
+    if (window.WuriImg && WuriImg.isRemote(shareFull)) img.crossOrigin = 'anonymous';
+    img.src = shareFull;
   }
 
   /* ---------- 接线 ---------- */

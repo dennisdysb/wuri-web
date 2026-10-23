@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=90">
+<link rel="stylesheet" href="css/style.css?v=91">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=65">
 </head>
@@ -868,9 +868,20 @@
       <p class="hint" id="offline-status">尚未下载离线音频。</p>
       <p class="hint" id="offline-failed" hidden></p>
     </section>
+    <!-- ============ 图鉴素材（离线） ============ -->
+    <section class="card">
+      <div class="card-title">图鉴素材</div>
+      <p class="hint">神祇图鉴的全图平时从服务器按需加载，看过的会自动留在本机。点下面按钮可一次把全部 102 位尊神的全图下载到本机，断网也能慢慢看；不需要时可随时删除腾出空间。</p>
+      <div class="btn-row">
+        <button class="btn primary" id="deity-dl-btn">一键下载图鉴素材</button>
+        <button class="btn" id="deity-del-btn">删除图鉴素材</button>
+      </div>
+      <p class="hint" id="deity-dl-status">尚未下载图鉴素材。</p>
+      <p class="hint" id="deity-dl-failed" hidden></p>
+    </section>
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.0.0 (1) (2026-10-23)</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.0.0 (2) (2026-10-23)</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint">奇门遁甲排盘功能基于开源项目「掌上乾坤 · 奇门遁甲助手」（作者 qzp001，依 MIT 许可证使用），特此鸣谢。</p>
@@ -1132,6 +1143,7 @@
     </header>
     <div class="deity-detail-wrap">
       <div class="deity-img-box">
+        <div class="deity-img-ph" id="deity-img-ph"><span id="deity-img-ph-name"></span></div>
         <img id="deity-detail-img" class="deity-detail-img" alt="">
         <button class="deity-nav-arrow prev" id="deity-nav-prev" aria-label="上一位">‹</button>
         <button class="deity-nav-arrow next" id="deity-nav-next" aria-label="下一位">›</button>
@@ -1450,7 +1462,7 @@
       <label class="radio"><input type="radio" name="offline-tier" value="female"> 女声诵读 · <span data-tier-size="female">计算大小中…</span></label>
       <label class="radio"><input type="radio" name="offline-tier" value="male"> 男声诵读 · <span data-tier-size="male">计算大小中…</span></label>
       <label class="radio"><input type="radio" name="offline-tier" value="both"> 双声全下 · <span data-tier-size="both">计算大小中…</span></label>
-      <p class="hint">还会顺带缓存全部经文正文与神祇图鉴，离线可读可看。确认后弹窗关闭、后台下载，界面上会有半透明进度条陪着你。</p>
+      <p class="hint">还会顺带缓存全部经文正文与图鉴缩略图，离线可读；图鉴全图可在下方「图鉴素材」里单独下载。确认后弹窗关闭、后台下载，界面上会有半透明进度条陪着你。</p>
       <button class="btn primary big" id="offline-start">开始下载</button>
     </div>
   </div>

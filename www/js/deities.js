@@ -1,4 +1,37 @@
 /* 神祇图鉴（免费开放）：列表（分组）+ 详情（神诞/道场/职掌/生平·事迹/形象特征） */
+/* 神图外置（v2.0.0 (2)）：全图 URL 统一解析。构建注入点 window.WURI_IMG_BASE——
+ * 网页版不设（同源相对路径，行为与旧版一致）；原生包由 prepare_*_www.py 注入
+ * CF 线绝对基址。原生壳内已下载到本机的素材（WuBridge 本地文件，文件名
+ * deity_<图名>，与音频同目录）优先于远程。缩略图永远走包内相对路径。 */
+window.WuriImg = window.WuriImg || (function () {
+  function base() {
+    return (typeof window.WURI_IMG_BASE === 'string' && window.WURI_IMG_BASE) ? window.WURI_IMG_BASE : '';
+  }
+  function localFile(name) {
+    try {
+      if (window.WuBridge && typeof WuBridge.getLocalAudioPath === 'function') {
+        var p = WuBridge.getLocalAudioPath('deity_' + name);
+        if (p) return 'file://' + p;
+      }
+    } catch (e) {}
+    return '';
+  }
+  return {
+    full: function (name) { return localFile(name) || (base() + 'img/deities/' + name); },
+    remoteFull: function (name) { return base() + 'img/deities/' + name; },
+    thumb: function (name) { return 'img/deities/thumbs/' + name; },
+    isRemote: function (url) {
+      return /^https?:\/\//.test(url) && url.indexOf(location.origin) !== 0;
+    },
+    /* <img> 全图加载失败时回落缩略图（只回落一次，绝不裂图） */
+    fallback: function (img, name) {
+      if (!img || img.getAttribute('data-wuri-fb')) return;
+      img.setAttribute('data-wuri-fb', '1');
+      img.src = 'img/deities/thumbs/' + name;
+    }
+  };
+})();
+
 (function () {
   var DATA = window.DEITIES_DATA;
   if (!DATA) return;
@@ -40,7 +73,7 @@
         var d = byId[id];
         if (!d) return;
         html += '<button class="deity-card" data-deity="' + d.id + '">' +
-          '<img loading="lazy" src="img/deities/thumbs/' + d.image + '" alt="' + d.name + '">' +
+          '<img loading="lazy" src="' + WuriImg.thumb(d.image) + '" alt="' + d.name + '">' +
           '<span class="deity-card-name">' + d.name + '</span>' +
           '<span class="deity-card-title">' + d.title + '</span>' +
           '</button>';
@@ -89,11 +122,39 @@
     if (F.hint) F.hint.hidden = true;
   }
 
+  /* ---------- 来源返回（v2.0.0 (2)）：进入详情时记来源视图栈与滚动位置，
+   * 返回即回来源；无记录时只收详情（回退到其下层视图，与旧行为一致）。
+   * 详情内左右切换不改来源。 ---------- */
+  var navOrigin = null; /* {views:[viewId...], scroll:{viewId: top}} | null */
+  var detailToken = 0;
+
+  function loadDetailImage(d) {
+    var my = ++detailToken;
+    F.img.alt = d.name;
+    var box = F.img.closest ? F.img.closest('.deity-img-box') : null;
+    var phName = document.getElementById('deity-img-ph-name');
+    if (phName) phName.textContent = d.name;
+    if (box) box.classList.remove('ph-off');
+    F.img.hidden = true;
+    var tImg = new Image();
+    tImg.onload = function () {
+      if (my !== detailToken) return;
+      F.img.src = WuriImg.thumb(d.image);
+      F.img.hidden = false;
+      if (box) box.classList.add('ph-off');
+      var fImg = new Image();
+      fImg.onload = function () { if (my === detailToken) F.img.src = WuriImg.full(d.image); };
+      fImg.onerror = function () { /* 全图不到货：停在缩略图，不裂图 */ };
+      fImg.src = WuriImg.full(d.image);
+    };
+    tImg.onerror = function () { /* 缩略图也失败：留宣纸底＋名号占位 */ };
+    tImg.src = WuriImg.thumb(d.image);
+  }
+
   function openDetail(id) {
     var d = byId[id];
     if (!d) return;
-    F.img.src = 'img/deities/' + d.image;
-    F.img.alt = d.name;
+    loadDetailImage(d);
     F.name.textContent = d.name;
     F.title.textContent = d.title;
     F.birthday.textContent = d.birthday;
@@ -181,7 +242,17 @@
 
   groupsEl.addEventListener('click', function (e) {
     var card = e.target.closest ? e.target.closest('[data-deity]') : null;
-    if (card) openDetail(card.getAttribute('data-deity'));
+    if (card) {
+      navOrigin = { views: ['view-deities'], scroll: { 'view-deities': listView.scrollTop } };
+      openDetail(card.getAttribute('data-deity'));
+    }
+  });
+
+  /* 图鉴素材下载完成后，若详情正开着，重走一遍图片解析（原生本地文件优先） */
+  document.addEventListener('wuri-deity-dl-done', function () {
+    if (!detailView.hidden && curIdx >= 0 && order[curIdx] && byId[order[curIdx]]) {
+      loadDetailImage(byId[order[curIdx]]);
+    }
   });
 
   /* ---------- 开/关 ---------- */
@@ -190,9 +261,26 @@
   var back = document.getElementById('deities-back');
   if (back) back.addEventListener('click', function () { listView.hidden = true; detailView.hidden = true; });
   var dBack = document.getElementById('deity-detail-back');
-  if (dBack) dBack.addEventListener('click', function () { detailView.hidden = true; });
+  if (dBack) dBack.addEventListener('click', function () {
+    detailView.hidden = true;
+    var o = navOrigin;
+    navOrigin = null;
+    if (o && o.views && o.views.length) {
+      o.views.forEach(function (vid) {
+        var v = document.getElementById(vid);
+        if (v) v.hidden = false;
+      });
+      requestAnimationFrame(function () {
+        o.views.forEach(function (vid) {
+          var v = document.getElementById(vid);
+          if (v && o.scroll && typeof o.scroll[vid] === 'number') v.scrollTop = o.scroll[vid];
+        });
+      });
+    }
+  });
 
-  window.Deities = { openDetail: openDetail };
-  /* 星象模块互链入口（js/stars.js 调用）：包 openDetail，走其内部打开路径 */
-  window.__wuri_openDeity = function (id) { openDetail(id); };
+  window.Deities = { openDetail: function (id) { navOrigin = null; openDetail(id); } };
+  /* 星象模块互链入口（js/stars.js 调用）：可携来源（来源视图栈＋滚动位置），
+   * 详情返回即回来源（星官区页/星官详情/步天歌等），不再写死落图鉴主页 */
+  window.__wuri_openDeity = function (id, origin) { navOrigin = origin || null; openDetail(id); };
 })();

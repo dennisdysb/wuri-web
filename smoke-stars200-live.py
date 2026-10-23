@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v2.0.0 (1) 双线线上验活（桥框架复用 offline34_test.py）：SW v90 激活、关于版 v2.0.0 (1)、
+"""v2.0.0 (2) 双线线上验活（桥框架复用 offline34_test.py）：SW v91 激活、关于版 v2.0.0 (2)、
 首页三卡且无今日卡/星象卡、六标签序、星象页今日星象实值、图鉴 102 位（feed 覆盖后仍 102）、星官图鉴懒加载 287 渲染。"""
 import importlib.util, os, sys, time
 
@@ -18,9 +18,9 @@ def run(base, tag):
         b.nav(base)
         report(tag + " SW 激活", wait_sw_active(b))
         caches = b.ev("(async () => await caches.keys())()")
-        report(tag + " SW 缓存 v90", any("wuri-v90" in c for c in caches), caches)
+        report(tag + " SW 缓存 v91", any("wuri-v91" in c for c in caches), caches)
         ver = b.ev("document.querySelector('[data-i18n=\"me_ver\"]').textContent")
-        report(tag + " 关于版本 v2.0.0 (1)", "v2.0.0 (1)" in ver, ver)
+        report(tag + " 关于版本 v2.0.0 (2)", "v2.0.0 (2)" in ver, ver)
         r = b.ev("""(() => { const home = document.getElementById('tab-home');
           const ids = ['practice-entry-card','shushu-entry-card','deities-entry-card'];
           return { cards: ids.every(id => !!document.getElementById(id)),

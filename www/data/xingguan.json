@@ -738,14 +738,15 @@
      "designation": "HD 91114",
      "HR": null,
      "HIP": 51734,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 158.55618,
+     "dec_deg": 73.83453,
+     "vmag": 7.57,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     }
    ],
@@ -939,14 +940,15 @@
      "designation": "HD 160538",
      "HR": null,
      "HIP": 85852,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 263.17229,
+     "dec_deg": 74.22726,
+     "vmag": 6.61,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -1582,14 +1584,15 @@
      "designation": "HD 12441",
      "HR": null,
      "HIP": 9802,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 31.51103,
+     "dec_deg": 74.58371,
+     "vmag": 7.49,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -1611,14 +1614,15 @@
      "designation": "HD 12800",
      "HR": null,
      "HIP": 10031,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 32.28206,
+     "dec_deg": 71.55259,
+     "vmag": 6.57,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -1712,14 +1716,15 @@
      "designation": "HD 5775",
      "HR": null,
      "HIP": 4714,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 15.13739,
+     "dec_deg": 65.11507,
+     "vmag": 8.36,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -2308,14 +2313,15 @@
      "designation": "HD 130834",
      "HR": null,
      "HIP": 72181,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 221.4632,
+     "dec_deg": 71.9661,
+     "vmag": 7.52,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     }
    ],
@@ -2798,14 +2804,15 @@
      "designation": "HD 97889",
      "HR": null,
      "HIP": 55060,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 169.07925,
+     "dec_deg": 59.94318,
+     "vmag": 6.91,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -3365,14 +3372,15 @@
      "designation": "HD 109764",
      "HR": null,
      "HIP": 61579,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 189.28187,
+     "dec_deg": 8.79686,
+     "vmag": 6.61,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     }
    ],
@@ -3580,14 +3588,15 @@
      "designation": "HD 102103",
      "HR": null,
      "HIP": 57320,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 176.29774,
+     "dec_deg": 14.26333,
+     "vmag": 6.51,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -3639,14 +3648,15 @@
      "designation": "HD 104207",
      "HR": null,
      "HIP": 58519,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 180.01982,
+     "dec_deg": 19.41944,
+     "vmag": 6.94,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     }
    ],
@@ -4242,14 +4252,15 @@
      "designation": "HD 96418",
      "HR": null,
      "HIP": 54347,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 166.77044,
+     "dec_deg": 25.53716,
+     "vmag": 6.86,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -5405,14 +5416,15 @@
      "designation": "HD 145958",
      "HR": null,
      "HIP": 79492,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 243.32643,
+     "dec_deg": 13.52793,
+     "vmag": 6.68,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -5420,14 +5432,15 @@
      "designation": "HD 146279",
      "HR": null,
      "HIP": 79634,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 243.75532,
+     "dec_deg": 11.49021,
+     "vmag": 7.55,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     },
     {
@@ -5449,14 +5462,15 @@
      "designation": "HD 149805",
      "HR": null,
      "HIP": 81354,
-     "ra_deg": null,
-     "dec_deg": null,
-     "vmag": null,
+     "ra_deg": 249.21519,
+     "dec_deg": 7.1072,
+     "vmag": 7.29,
      "sources": [
       "wiki",
-      "stellarium"
+      "stellarium",
+      "XHIP"
      ],
-     "note": "BSC5未收（暗星），坐标星等待XHIP补",
+     "note": "BSC5未收（暗星），坐标星等据XHIP补",
      "bsc5": null
     }
    ],

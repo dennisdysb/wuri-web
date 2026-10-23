@@ -1,0 +1,9228 @@
+{
+ "title": "中国星官连线表（戊日不上香·中国星象二期「相机认星」备料）",
+ "source_data": "xingguan.json（287 星官）；连线只依据其主口径 stars，连线不改变主数据",
+ "identifier": "边端点以该官 stars[].cn_name 逐字引用（官内唯一）；同名星官以 section 区分",
+ "method": "默认从《步天歌》星序逐星直连（出版星图通例）；图形官（井、鬼、轸、毕、参、五车、三柱、张）按传统图式手订边表；无从两源互证者标 doubtful 并给拟合边；连线只用已定星（有坐标者）",
+ "counts": {
+  "asterisms": 287,
+  "lined": 226,
+  "single": 49,
+  "no_stars": 9,
+  "doubtful": 3,
+  "edges_total": 995
+ },
+ "asterisms": [
+  {
+   "name": "北极",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "太子",
+    "帝",
+    "庶子",
+    "後宮",
+    "天樞"
+   ],
+   "edges": [
+    [
+     "太子",
+     "帝"
+    ],
+    [
+     "帝",
+     "庶子"
+    ],
+    [
+     "庶子",
+     "後宮"
+    ],
+    [
+     "後宮",
+     "天樞"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "四辅",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 3,
+   "stars_used": [
+    "四輔二",
+    "四輔三",
+    "四輔四"
+   ],
+   "edges": [
+    [
+     "四輔二",
+     "四輔三"
+    ],
+    [
+     "四輔三",
+     "四輔四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 4 星，本表已定 3 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "天乙",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天乙"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "太乙",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "太乙"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "紫微左垣",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 8,
+   "positioned_stars": 8,
+   "stars_used": [
+    "左樞",
+    "上宰",
+    "少宰",
+    "上輔",
+    "少輔",
+    "上卫",
+    "少卫",
+    "上丞"
+   ],
+   "edges": [
+    [
+     "左樞",
+     "上宰"
+    ],
+    [
+     "上宰",
+     "少宰"
+    ],
+    [
+     "少宰",
+     "上輔"
+    ],
+    [
+     "上輔",
+     "少輔"
+    ],
+    [
+     "少輔",
+     "上卫"
+    ],
+    [
+     "上卫",
+     "少卫"
+    ],
+    [
+     "少卫",
+     "上丞"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "紫微右垣",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "右樞",
+    "少尉",
+    "上輔",
+    "少輔",
+    "上卫",
+    "少卫",
+    "少丞"
+   ],
+   "edges": [
+    [
+     "右樞",
+     "少尉"
+    ],
+    [
+     "少尉",
+     "上輔"
+    ],
+    [
+     "上輔",
+     "少輔"
+    ],
+    [
+     "少輔",
+     "上卫"
+    ],
+    [
+     "上卫",
+     "少卫"
+    ],
+    [
+     "少卫",
+     "少丞"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "阴德",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "阴德一",
+    "阴德二"
+   ],
+   "edges": [
+    [
+     "阴德一",
+     "阴德二"
+    ]
+   ],
+   "basis": "两星已定，直线相连",
+   "note": "传统 2 星；阴德二坐标于 2026-10-23 经 XHIP 回填后补此连线（原表按已定 1 星记 single）。"
+  },
+  {
+   "name": "尚书",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "尚書一",
+    "尚書二",
+    "尚書三",
+    "尚書四",
+    "尚書五"
+   ],
+   "edges": [
+    [
+     "尚書一",
+     "尚書二"
+    ],
+    [
+     "尚書二",
+     "尚書三"
+    ],
+    [
+     "尚書三",
+     "尚書四"
+    ],
+    [
+     "尚書四",
+     "尚書五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "女史",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "女史"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "柱史",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "柱史"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "御女",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 3,
+   "stars_used": [
+    "御女一",
+    "御女二",
+    "御女四"
+   ],
+   "edges": [
+    [
+     "御女一",
+     "御女二"
+    ],
+    [
+     "御女二",
+     "御女四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 4 星，本表已定 3 星，连线仅用已定星。"
+  },
+  {
+   "name": "天柱",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "天柱一",
+    "天柱二",
+    "天柱三",
+    "天柱四",
+    "天柱五"
+   ],
+   "edges": [
+    [
+     "天柱一",
+     "天柱二"
+    ],
+    [
+     "天柱二",
+     "天柱三"
+    ],
+    [
+     "天柱三",
+     "天柱四"
+    ],
+    [
+     "天柱四",
+     "天柱五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "大理",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 2,
+   "positioned_stars": 1,
+   "stars_used": [
+    "大理一"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": "传统 2 星，本表已定 1 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "勾陈",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "勾陈一",
+    "勾陈二",
+    "勾陈三",
+    "勾陈四",
+    "勾陈五",
+    "勾陈六"
+   ],
+   "edges": [
+    [
+     "勾陈一",
+     "勾陈二"
+    ],
+    [
+     "勾陈二",
+     "勾陈三"
+    ],
+    [
+     "勾陈三",
+     "勾陈四"
+    ],
+    [
+     "勾陈四",
+     "勾陈五"
+    ],
+    [
+     "勾陈五",
+     "勾陈六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "六甲",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "六甲一",
+    "六甲二",
+    "六甲三",
+    "六甲四",
+    "六甲五",
+    "六甲六"
+   ],
+   "edges": [
+    [
+     "六甲一",
+     "六甲二"
+    ],
+    [
+     "六甲二",
+     "六甲三"
+    ],
+    [
+     "六甲三",
+     "六甲四"
+    ],
+    [
+     "六甲四",
+     "六甲五"
+    ],
+    [
+     "六甲五",
+     "六甲六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "六甲六星分东西两簇，星序链于六甲四→五之间有长跨，属图式固有。"
+  },
+  {
+   "name": "天皇大帝",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天皇大帝"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "五帝内座",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "五帝內座一",
+    "五帝內座二",
+    "五帝內座三",
+    "五帝內座四",
+    "五帝內座五"
+   ],
+   "edges": [
+    [
+     "五帝內座一",
+     "五帝內座二"
+    ],
+    [
+     "五帝內座二",
+     "五帝內座三"
+    ],
+    [
+     "五帝內座三",
+     "五帝內座四"
+    ],
+    [
+     "五帝內座四",
+     "五帝內座五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "华盖",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 6,
+   "stars_used": [
+    "华盖二",
+    "华盖三",
+    "华盖四",
+    "华盖五",
+    "华盖六",
+    "华盖七"
+   ],
+   "edges": [
+    [
+     "华盖二",
+     "华盖三"
+    ],
+    [
+     "华盖三",
+     "华盖四"
+    ],
+    [
+     "华盖四",
+     "华盖五"
+    ],
+    [
+     "华盖五",
+     "华盖六"
+    ],
+    [
+     "华盖六",
+     "华盖七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 7 星，本表已定 6 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "杠",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 7,
+   "stars_used": [
+    "杠一",
+    "杠二",
+    "杠三",
+    "杠五",
+    "杠七",
+    "杠八",
+    "杠九"
+   ],
+   "edges": [
+    [
+     "杠一",
+     "杠二"
+    ],
+    [
+     "杠二",
+     "杠三"
+    ],
+    [
+     "杠三",
+     "杠五"
+    ],
+    [
+     "杠五",
+     "杠七"
+    ],
+    [
+     "杠七",
+     "杠八"
+    ],
+    [
+     "杠八",
+     "杠九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 9 星，本表已定 7 星，连线仅用已定星。"
+  },
+  {
+   "name": "传舍",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 8,
+   "stars_used": [
+    "傳舍一",
+    "傳舍二",
+    "傳舍四",
+    "傳舍五",
+    "傳舍六",
+    "傳舍七",
+    "傳舍八",
+    "傳舍九"
+   ],
+   "edges": [
+    [
+     "傳舍一",
+     "傳舍二"
+    ],
+    [
+     "傳舍二",
+     "傳舍四"
+    ],
+    [
+     "傳舍四",
+     "傳舍五"
+    ],
+    [
+     "傳舍五",
+     "傳舍六"
+    ],
+    [
+     "傳舍六",
+     "傳舍七"
+    ],
+    [
+     "傳舍七",
+     "傳舍八"
+    ],
+    [
+     "傳舍八",
+     "傳舍九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 9 星，本表已定 8 星，连线仅用已定星。"
+  },
+  {
+   "name": "内阶",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "內階一",
+    "內階二",
+    "內階三",
+    "內階四",
+    "內階五",
+    "內階六"
+   ],
+   "edges": [
+    [
+     "內階一",
+     "內階二"
+    ],
+    [
+     "內階二",
+     "內階三"
+    ],
+    [
+     "內階三",
+     "內階四"
+    ],
+    [
+     "內階四",
+     "內階五"
+    ],
+    [
+     "內階五",
+     "內階六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天厨",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "天廚一",
+    "天廚二",
+    "天廚三",
+    "天廚四",
+    "天廚五",
+    "天廚六"
+   ],
+   "edges": [
+    [
+     "天廚一",
+     "天廚二"
+    ],
+    [
+     "天廚二",
+     "天廚三"
+    ],
+    [
+     "天廚三",
+     "天廚四"
+    ],
+    [
+     "天廚四",
+     "天廚五"
+    ],
+    [
+     "天廚五",
+     "天廚六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "八谷",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 8,
+   "positioned_stars": 8,
+   "stars_used": [
+    "八穀一",
+    "八穀二",
+    "八穀三",
+    "八穀四",
+    "八穀五",
+    "八穀六",
+    "八穀七",
+    "八穀八"
+   ],
+   "edges": [
+    [
+     "八穀一",
+     "八穀二"
+    ],
+    [
+     "八穀二",
+     "八穀三"
+    ],
+    [
+     "八穀三",
+     "八穀四"
+    ],
+    [
+     "八穀四",
+     "八穀五"
+    ],
+    [
+     "八穀五",
+     "八穀六"
+    ],
+    [
+     "八穀六",
+     "八穀七"
+    ],
+    [
+     "八穀七",
+     "八穀八"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天棓",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "天棓一",
+    "天棓二",
+    "天棓三",
+    "天棓四",
+    "天棓五"
+   ],
+   "edges": [
+    [
+     "天棓一",
+     "天棓二"
+    ],
+    [
+     "天棓二",
+     "天棓三"
+    ],
+    [
+     "天棓三",
+     "天棓四"
+    ],
+    [
+     "天棓四",
+     "天棓五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天床",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 5,
+   "stars_used": [
+    "天床一",
+    "天床二",
+    "天床三",
+    "天床四",
+    "天床五"
+   ],
+   "edges": [
+    [
+     "天床一",
+     "天床二"
+    ],
+    [
+     "天床二",
+     "天床三"
+    ],
+    [
+     "天床三",
+     "天床四"
+    ],
+    [
+     "天床四",
+     "天床五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 6 星，本表已定 5 星，连线仅用已定星。"
+  },
+  {
+   "name": "内厨",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "內廚一",
+    "內廚二"
+   ],
+   "edges": [
+    [
+     "內廚一",
+     "內廚二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "文昌",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 5,
+   "stars_used": [
+    "文昌二",
+    "文昌三",
+    "文昌四",
+    "文昌五",
+    "文昌六"
+   ],
+   "edges": [
+    [
+     "文昌二",
+     "文昌三"
+    ],
+    [
+     "文昌三",
+     "文昌四"
+    ],
+    [
+     "文昌四",
+     "文昌五"
+    ],
+    [
+     "文昌五",
+     "文昌六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 6 星，本表已定 5 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "三公",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 2,
+   "stars_used": [
+    "三公三[紫微垣]",
+    "三公二[紫微垣]"
+   ],
+   "edges": [
+    [
+     "三公三[紫微垣]",
+     "三公二[紫微垣]"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 3 星，本表已定 2 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "太尊",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "太尊"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "天牢",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "天牢一",
+    "天牢二",
+    "天牢三",
+    "天牢四",
+    "天牢五",
+    "天牢六"
+   ],
+   "edges": [
+    [
+     "天牢一",
+     "天牢二"
+    ],
+    [
+     "天牢二",
+     "天牢三"
+    ],
+    [
+     "天牢三",
+     "天牢四"
+    ],
+    [
+     "天牢四",
+     "天牢五"
+    ],
+    [
+     "天牢五",
+     "天牢六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "势",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "勢一",
+    "勢二",
+    "勢三",
+    "勢四"
+   ],
+   "edges": [
+    [
+     "勢一",
+     "勢二"
+    ],
+    [
+     "勢二",
+     "勢三"
+    ],
+    [
+     "勢三",
+     "勢四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "宰相",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "宰相"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "玄戈",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "玄戈"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "天理",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 3,
+   "stars_used": [
+    "天理二",
+    "天理三",
+    "天理四"
+   ],
+   "edges": [
+    [
+     "天理二",
+     "天理三"
+    ],
+    [
+     "天理三",
+     "天理四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 4 星，本表已定 3 星，连线仅用已定星。"
+  },
+  {
+   "name": "北斗",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "天樞",
+    "天璇",
+    "天璣",
+    "天權",
+    "玉衡",
+    "开阳",
+    "搖光"
+   ],
+   "edges": [
+    [
+     "天樞",
+     "天璇"
+    ],
+    [
+     "天璇",
+     "天璣"
+    ],
+    [
+     "天璣",
+     "天權"
+    ],
+    [
+     "天權",
+     "玉衡"
+    ],
+    [
+     "玉衡",
+     "开阳"
+    ],
+    [
+     "开阳",
+     "搖光"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "辅",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "輔"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "天枪",
+   "section": "紫微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "天槍一",
+    "天槍二",
+    "天槍三"
+   ],
+   "edges": [
+    [
+     "天槍一",
+     "天槍二"
+    ],
+    [
+     "天槍二",
+     "天槍三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "太微左垣",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "左執法",
+    "东上相",
+    "东次相",
+    "东次將",
+    "东上將"
+   ],
+   "edges": [
+    [
+     "左執法",
+     "东上相"
+    ],
+    [
+     "东上相",
+     "东次相"
+    ],
+    [
+     "东次相",
+     "东次將"
+    ],
+    [
+     "东次將",
+     "东上將"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "太微右垣",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "右執法",
+    "西上將",
+    "西次將",
+    "西次相",
+    "西上相"
+   ],
+   "edges": [
+    [
+     "右執法",
+     "西上將"
+    ],
+    [
+     "西上將",
+     "西次將"
+    ],
+    [
+     "西次將",
+     "西次相"
+    ],
+    [
+     "西次相",
+     "西上相"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "谒者",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "謁者"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "三公",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 2,
+   "stars_used": [
+    "三公二[太微垣]",
+    "三公三[太微垣]"
+   ],
+   "edges": [
+    [
+     "三公二[太微垣]",
+     "三公三[太微垣]"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 3 星，本表已定 2 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "九卿",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 2,
+   "stars_used": [
+    "九卿一",
+    "九卿二"
+   ],
+   "edges": [
+    [
+     "九卿一",
+     "九卿二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 3 星，本表已定 2 星，连线仅用已定星。"
+  },
+  {
+   "name": "五诸侯",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 4,
+   "stars_used": [
+    "五諸侯五[太微垣]",
+    "五諸侯三[太微垣]",
+    "五諸侯二[太微垣]",
+    "五諸侯一[太微垣]"
+   ],
+   "edges": [
+    [
+     "五諸侯五[太微垣]",
+     "五諸侯三[太微垣]"
+    ],
+    [
+     "五諸侯三[太微垣]",
+     "五諸侯二[太微垣]"
+    ],
+    [
+     "五諸侯二[太微垣]",
+     "五諸侯一[太微垣]"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 5 星，本表已定 4 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "内屏",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "內屏一",
+    "內屏二",
+    "內屏三",
+    "內屏四"
+   ],
+   "edges": [
+    [
+     "內屏一",
+     "內屏二"
+    ],
+    [
+     "內屏二",
+     "內屏三"
+    ],
+    [
+     "內屏三",
+     "內屏四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "五帝座",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "doubtful",
+   "trad_stars": 5,
+   "positioned_stars": 4,
+   "stars_used": [
+    "五帝座一",
+    "五帝座二",
+    "五帝座四",
+    "五帝座五"
+   ],
+   "edges": [
+    [
+     "五帝座一",
+     "五帝座二"
+    ],
+    [
+     "五帝座一",
+     "五帝座四"
+    ],
+    [
+     "五帝座一",
+     "五帝座五"
+    ]
+   ],
+   "basis": "图式存疑（拟合）：五帝座五座环列、五帝座一（β Leo）居中偏东；出版图式有链式、环式两画，未能两源互证",
+   "note": "五帝座三未定星；所给为以五帝座一为枢的拟合边。 传统 5 星，本表已定 4 星，连线仅用已定星。"
+  },
+  {
+   "name": "幸臣",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "no_stars",
+   "trad_stars": 1,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 1 星，本表已定 0 星，连线仅用已定星。"
+  },
+  {
+   "name": "太子",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "太子"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "从官",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "从官[太微垣]"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "虎贲",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "虎賁"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "常陈",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "常陈一",
+    "常陈二",
+    "常陈三",
+    "常陈四",
+    "常陈五",
+    "常陈六",
+    "常陈七"
+   ],
+   "edges": [
+    [
+     "常陈一",
+     "常陈二"
+    ],
+    [
+     "常陈二",
+     "常陈三"
+    ],
+    [
+     "常陈三",
+     "常陈四"
+    ],
+    [
+     "常陈四",
+     "常陈五"
+    ],
+    [
+     "常陈五",
+     "常陈六"
+    ],
+    [
+     "常陈六",
+     "常陈七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "郎位",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 15,
+   "positioned_stars": 14,
+   "stars_used": [
+    "郎位一",
+    "郎位三",
+    "郎位四",
+    "郎位五",
+    "郎位六",
+    "郎位七",
+    "郎位八",
+    "郎位九",
+    "郎位十",
+    "郎位十一",
+    "郎位十二",
+    "郎位十三",
+    "郎位十四",
+    "郎位十五"
+   ],
+   "edges": [
+    [
+     "郎位一",
+     "郎位三"
+    ],
+    [
+     "郎位三",
+     "郎位四"
+    ],
+    [
+     "郎位四",
+     "郎位五"
+    ],
+    [
+     "郎位五",
+     "郎位六"
+    ],
+    [
+     "郎位六",
+     "郎位七"
+    ],
+    [
+     "郎位七",
+     "郎位八"
+    ],
+    [
+     "郎位八",
+     "郎位九"
+    ],
+    [
+     "郎位九",
+     "郎位十"
+    ],
+    [
+     "郎位十",
+     "郎位十一"
+    ],
+    [
+     "郎位十一",
+     "郎位十二"
+    ],
+    [
+     "郎位十二",
+     "郎位十三"
+    ],
+    [
+     "郎位十三",
+     "郎位十四"
+    ],
+    [
+     "郎位十四",
+     "郎位十五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 15 星，本表已定 14 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "郎将",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "郎將"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "明堂",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "明堂一",
+    "明堂二",
+    "明堂三"
+   ],
+   "edges": [
+    [
+     "明堂一",
+     "明堂二"
+    ],
+    [
+     "明堂二",
+     "明堂三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "灵台",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "靈台一",
+    "靈台二",
+    "靈台三"
+   ],
+   "edges": [
+    [
+     "靈台一",
+     "靈台二"
+    ],
+    [
+     "靈台二",
+     "靈台三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "少微",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 3,
+   "stars_used": [
+    "少微二",
+    "少微三",
+    "少微四"
+   ],
+   "edges": [
+    [
+     "少微二",
+     "少微三"
+    ],
+    [
+     "少微三",
+     "少微四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 4 星，本表已定 3 星，连线仅用已定星。"
+  },
+  {
+   "name": "长垣",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "长垣一",
+    "长垣二",
+    "长垣三",
+    "长垣四"
+   ],
+   "edges": [
+    [
+     "长垣一",
+     "长垣二"
+    ],
+    [
+     "长垣二",
+     "长垣三"
+    ],
+    [
+     "长垣三",
+     "长垣四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "三台",
+   "section": "太微垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "上台一",
+    "上台二",
+    "中台一",
+    "中台二",
+    "下台一",
+    "下台二"
+   ],
+   "edges": [
+    [
+     "上台一",
+     "上台二"
+    ],
+    [
+     "上台二",
+     "中台一"
+    ],
+    [
+     "中台一",
+     "中台二"
+    ],
+    [
+     "中台二",
+     "下台一"
+    ],
+    [
+     "下台一",
+     "下台二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天市左垣",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 11,
+   "positioned_stars": 11,
+   "stars_used": [
+    "魏",
+    "赵",
+    "九河",
+    "中山",
+    "齐",
+    "吳越",
+    "徐",
+    "东海",
+    "燕",
+    "南海",
+    "宋"
+   ],
+   "edges": [
+    [
+     "魏",
+     "赵"
+    ],
+    [
+     "赵",
+     "九河"
+    ],
+    [
+     "九河",
+     "中山"
+    ],
+    [
+     "中山",
+     "齐"
+    ],
+    [
+     "齐",
+     "吳越"
+    ],
+    [
+     "吳越",
+     "徐"
+    ],
+    [
+     "徐",
+     "东海"
+    ],
+    [
+     "东海",
+     "燕"
+    ],
+    [
+     "燕",
+     "南海"
+    ],
+    [
+     "南海",
+     "宋"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天市右垣",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 11,
+   "positioned_stars": 11,
+   "stars_used": [
+    "河中",
+    "河間",
+    "晉",
+    "鄭",
+    "周",
+    "秦",
+    "蜀",
+    "巴",
+    "梁",
+    "楚",
+    "韩"
+   ],
+   "edges": [
+    [
+     "河中",
+     "河間"
+    ],
+    [
+     "河間",
+     "晉"
+    ],
+    [
+     "晉",
+     "鄭"
+    ],
+    [
+     "鄭",
+     "周"
+    ],
+    [
+     "周",
+     "秦"
+    ],
+    [
+     "秦",
+     "蜀"
+    ],
+    [
+     "蜀",
+     "巴"
+    ],
+    [
+     "巴",
+     "梁"
+    ],
+    [
+     "梁",
+     "楚"
+    ],
+    [
+     "楚",
+     "韩"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "市楼",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "市樓一",
+    "市樓二",
+    "市樓三",
+    "市樓四",
+    "市樓五",
+    "市樓六"
+   ],
+   "edges": [
+    [
+     "市樓一",
+     "市樓二"
+    ],
+    [
+     "市樓二",
+     "市樓三"
+    ],
+    [
+     "市樓三",
+     "市樓四"
+    ],
+    [
+     "市樓四",
+     "市樓五"
+    ],
+    [
+     "市樓五",
+     "市樓六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "车肆",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "车肆一",
+    "车肆二"
+   ],
+   "edges": [
+    [
+     "车肆一",
+     "车肆二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "宗正",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "宗正一",
+    "宗正二"
+   ],
+   "edges": [
+    [
+     "宗正一",
+     "宗正二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "宗人",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "宗人一",
+    "宗人二",
+    "宗人三",
+    "宗人四"
+   ],
+   "edges": [
+    [
+     "宗人一",
+     "宗人二"
+    ],
+    [
+     "宗人二",
+     "宗人三"
+    ],
+    [
+     "宗人三",
+     "宗人四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "宗",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "宗一",
+    "宗二"
+   ],
+   "edges": [
+    [
+     "宗一",
+     "宗二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "帛度",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "帛度一",
+    "帛度二"
+   ],
+   "edges": [
+    [
+     "帛度一",
+     "帛度二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "屠肆",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "屠肆一",
+    "屠肆二"
+   ],
+   "edges": [
+    [
+     "屠肆一",
+     "屠肆二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "候",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "候"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "帝座",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "帝座"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "宦者",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "宦者一",
+    "宦者二",
+    "宦者三",
+    "宦者四"
+   ],
+   "edges": [
+    [
+     "宦者一",
+     "宦者二"
+    ],
+    [
+     "宦者二",
+     "宦者三"
+    ],
+    [
+     "宦者三",
+     "宦者四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "列肆",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "列肆一",
+    "列肆二"
+   ],
+   "edges": [
+    [
+     "列肆一",
+     "列肆二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "斗",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 2,
+   "stars_used": [
+    "斗一",
+    "斗四"
+   ],
+   "edges": [
+    [
+     "斗一",
+     "斗四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 5 星，本表已定 2 星，连线仅用已定星。"
+  },
+  {
+   "name": "斛",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "斛一",
+    "斛二",
+    "斛三",
+    "斛四"
+   ],
+   "edges": [
+    [
+     "斛一",
+     "斛二"
+    ],
+    [
+     "斛二",
+     "斛三"
+    ],
+    [
+     "斛三",
+     "斛四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "贯索",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "貫索一",
+    "貫索二",
+    "貫索三",
+    "貫索四",
+    "貫索五",
+    "貫索六",
+    "貫索七",
+    "貫索八",
+    "貫索九"
+   ],
+   "edges": [
+    [
+     "貫索一",
+     "貫索二"
+    ],
+    [
+     "貫索二",
+     "貫索三"
+    ],
+    [
+     "貫索三",
+     "貫索四"
+    ],
+    [
+     "貫索四",
+     "貫索五"
+    ],
+    [
+     "貫索五",
+     "貫索六"
+    ],
+    [
+     "貫索六",
+     "貫索七"
+    ],
+    [
+     "貫索七",
+     "貫索八"
+    ],
+    [
+     "貫索八",
+     "貫索九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "七公",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "七公一",
+    "七公二",
+    "七公三",
+    "七公四",
+    "七公五",
+    "七公六",
+    "七公七"
+   ],
+   "edges": [
+    [
+     "七公一",
+     "七公二"
+    ],
+    [
+     "七公二",
+     "七公三"
+    ],
+    [
+     "七公三",
+     "七公四"
+    ],
+    [
+     "七公四",
+     "七公五"
+    ],
+    [
+     "七公五",
+     "七公六"
+    ],
+    [
+     "七公六",
+     "七公七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天纪",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 8,
+   "stars_used": [
+    "天紀一",
+    "天紀二",
+    "天紀三",
+    "天紀四",
+    "天紀五",
+    "天紀六",
+    "天紀七",
+    "天紀九"
+   ],
+   "edges": [
+    [
+     "天紀一",
+     "天紀二"
+    ],
+    [
+     "天紀二",
+     "天紀三"
+    ],
+    [
+     "天紀三",
+     "天紀四"
+    ],
+    [
+     "天紀四",
+     "天紀五"
+    ],
+    [
+     "天紀五",
+     "天紀六"
+    ],
+    [
+     "天紀六",
+     "天紀七"
+    ],
+    [
+     "天紀七",
+     "天紀九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 9 星，本表已定 8 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "女床",
+   "section": "天市垣",
+   "region": "三垣",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "女床一",
+    "女床二",
+    "女床三"
+   ],
+   "edges": [
+    [
+     "女床一",
+     "女床二"
+    ],
+    [
+     "女床二",
+     "女床三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "角",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "角宿一",
+    "角宿二"
+   ],
+   "edges": [
+    [
+     "角宿一",
+     "角宿二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "平道",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "平道一",
+    "平道二"
+   ],
+   "edges": [
+    [
+     "平道一",
+     "平道二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天田",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "天田一",
+    "天田二"
+   ],
+   "edges": [
+    [
+     "天田一",
+     "天田二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "进贤",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "进贤"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "周鼎",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "周鼎一",
+    "周鼎二",
+    "周鼎三"
+   ],
+   "edges": [
+    [
+     "周鼎一",
+     "周鼎二"
+    ],
+    [
+     "周鼎二",
+     "周鼎三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天门",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "天门一",
+    "天门二"
+   ],
+   "edges": [
+    [
+     "天门一",
+     "天门二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "平",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "平一",
+    "平二"
+   ],
+   "edges": [
+    [
+     "平一",
+     "平二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "库楼",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 10,
+   "positioned_stars": 10,
+   "stars_used": [
+    "库楼一",
+    "库楼二",
+    "库楼三",
+    "库楼四",
+    "库楼五",
+    "库楼六",
+    "库楼七",
+    "库楼八",
+    "库楼九",
+    "库楼十"
+   ],
+   "edges": [
+    [
+     "库楼一",
+     "库楼二"
+    ],
+    [
+     "库楼二",
+     "库楼三"
+    ],
+    [
+     "库楼三",
+     "库楼四"
+    ],
+    [
+     "库楼四",
+     "库楼五"
+    ],
+    [
+     "库楼五",
+     "库楼六"
+    ],
+    [
+     "库楼六",
+     "库楼七"
+    ],
+    [
+     "库楼七",
+     "库楼八"
+    ],
+    [
+     "库楼八",
+     "库楼九"
+    ],
+    [
+     "库楼九",
+     "库楼十"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "柱",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "doubtful",
+   "trad_stars": 15,
+   "positioned_stars": 11,
+   "stars_used": [
+    "柱一",
+    "柱二",
+    "柱三",
+    "柱四",
+    "柱五",
+    "柱六",
+    "柱七",
+    "柱八",
+    "柱九",
+    "柱十",
+    "柱十一"
+   ],
+   "edges": [
+    [
+     "柱一",
+     "柱二"
+    ],
+    [
+     "柱三",
+     "柱四"
+    ],
+    [
+     "柱五",
+     "柱六"
+    ],
+    [
+     "柱七",
+     "柱八"
+    ],
+    [
+     "柱八",
+     "柱九"
+    ],
+    [
+     "柱九",
+     "柱十一"
+    ]
+   ],
+   "basis": "图式存疑（拟合）：柱本为库楼之柱、传统作数列；然本表成员散布逾 40°，柱十（π Cen）孤悬西南约 30° 外，与诸星不成列",
+   "note": "柱十不连，孤点待核；本官主数据状态存疑、传统 15 星仅定 11。 传统 15 星，本表已定 11 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "衡",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "衡一",
+    "衡二",
+    "衡三",
+    "衡四"
+   ],
+   "edges": [
+    [
+     "衡一",
+     "衡二"
+    ],
+    [
+     "衡二",
+     "衡三"
+    ],
+    [
+     "衡三",
+     "衡四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "南门",
+   "section": "角宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "南门一",
+    "南门二"
+   ],
+   "edges": [
+    [
+     "南门一",
+     "南门二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "亢",
+   "section": "亢宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "亢宿一",
+    "亢宿二",
+    "亢宿三",
+    "亢宿四"
+   ],
+   "edges": [
+    [
+     "亢宿一",
+     "亢宿二"
+    ],
+    [
+     "亢宿二",
+     "亢宿三"
+    ],
+    [
+     "亢宿三",
+     "亢宿四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "大角",
+   "section": "亢宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "大角"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "折威",
+   "section": "亢宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 5,
+   "stars_used": [
+    "折威一",
+    "折威三",
+    "折威四",
+    "折威六",
+    "折威七"
+   ],
+   "edges": [
+    [
+     "折威一",
+     "折威三"
+    ],
+    [
+     "折威三",
+     "折威四"
+    ],
+    [
+     "折威四",
+     "折威六"
+    ],
+    [
+     "折威六",
+     "折威七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 7 星，本表已定 5 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "左摄提",
+   "section": "亢宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "左摄提一",
+    "左摄提二",
+    "左摄提三"
+   ],
+   "edges": [
+    [
+     "左摄提一",
+     "左摄提二"
+    ],
+    [
+     "左摄提二",
+     "左摄提三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "右摄提",
+   "section": "亢宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "右摄提一",
+    "右摄提二",
+    "右摄提三"
+   ],
+   "edges": [
+    [
+     "右摄提一",
+     "右摄提二"
+    ],
+    [
+     "右摄提二",
+     "右摄提三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "顿顽",
+   "section": "亢宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "顿顽一",
+    "顿顽二"
+   ],
+   "edges": [
+    [
+     "顿顽一",
+     "顿顽二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "阳门",
+   "section": "亢宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "阳门一",
+    "阳门二"
+   ],
+   "edges": [
+    [
+     "阳门一",
+     "阳门二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "氐",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "氐宿一",
+    "氐宿二",
+    "氐宿三",
+    "氐宿四"
+   ],
+   "edges": [
+    [
+     "氐宿一",
+     "氐宿二"
+    ],
+    [
+     "氐宿二",
+     "氐宿三"
+    ],
+    [
+     "氐宿三",
+     "氐宿四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天乳",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天乳"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "招摇",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "招摇"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "梗河",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "梗河一",
+    "梗河二",
+    "梗河三"
+   ],
+   "edges": [
+    [
+     "梗河一",
+     "梗河二"
+    ],
+    [
+     "梗河二",
+     "梗河三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "帝席",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "帝席一",
+    "帝席二",
+    "帝席三"
+   ],
+   "edges": [
+    [
+     "帝席一",
+     "帝席二"
+    ],
+    [
+     "帝席二",
+     "帝席三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "亢池",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 4,
+   "stars_used": [
+    "亢池一",
+    "亢池二",
+    "亢池三",
+    "亢池四"
+   ],
+   "edges": [
+    [
+     "亢池一",
+     "亢池二"
+    ],
+    [
+     "亢池二",
+     "亢池三"
+    ],
+    [
+     "亢池三",
+     "亢池四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 6 星，本表已定 4 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "骑官十",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 10,
+   "positioned_stars": 10,
+   "stars_used": [
+    "骑官一",
+    "骑官二",
+    "骑官三",
+    "骑官四",
+    "骑官五",
+    "骑官六",
+    "骑官七",
+    "骑官八",
+    "骑官九",
+    "骑官十"
+   ],
+   "edges": [
+    [
+     "骑官一",
+     "骑官二"
+    ],
+    [
+     "骑官二",
+     "骑官三"
+    ],
+    [
+     "骑官三",
+     "骑官四"
+    ],
+    [
+     "骑官四",
+     "骑官五"
+    ],
+    [
+     "骑官五",
+     "骑官六"
+    ],
+    [
+     "骑官六",
+     "骑官七"
+    ],
+    [
+     "骑官七",
+     "骑官八"
+    ],
+    [
+     "骑官八",
+     "骑官九"
+    ],
+    [
+     "骑官九",
+     "骑官十"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "阵车",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "阵车一",
+    "阵车二",
+    "阵车三"
+   ],
+   "edges": [
+    [
+     "阵车一",
+     "阵车二"
+    ],
+    [
+     "阵车二",
+     "阵车三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "车骑",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "车骑一",
+    "车骑二",
+    "车骑三"
+   ],
+   "edges": [
+    [
+     "车骑一",
+     "车骑二"
+    ],
+    [
+     "车骑二",
+     "车骑三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天辐",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "天辐一",
+    "天辐二"
+   ],
+   "edges": [
+    [
+     "天辐一",
+     "天辐二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "骑阵将军",
+   "section": "氐宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "骑阵将军"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "房",
+   "section": "房宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "房宿一",
+    "房宿二",
+    "房宿三",
+    "房宿四"
+   ],
+   "edges": [
+    [
+     "房宿一",
+     "房宿二"
+    ],
+    [
+     "房宿二",
+     "房宿三"
+    ],
+    [
+     "房宿三",
+     "房宿四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "键闭",
+   "section": "房宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "键闭"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "钩钤",
+   "section": "房宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "钩钤一",
+    "钩钤二"
+   ],
+   "edges": [
+    [
+     "钩钤一",
+     "钩钤二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "罚",
+   "section": "房宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "罚一",
+    "罚二",
+    "罚三"
+   ],
+   "edges": [
+    [
+     "罚一",
+     "罚二"
+    ],
+    [
+     "罚二",
+     "罚三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "东咸",
+   "section": "房宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "东咸一",
+    "东咸二",
+    "东咸三",
+    "东咸四"
+   ],
+   "edges": [
+    [
+     "东咸一",
+     "东咸二"
+    ],
+    [
+     "东咸二",
+     "东咸三"
+    ],
+    [
+     "东咸三",
+     "东咸四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "西咸",
+   "section": "房宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "西咸一",
+    "西咸二",
+    "西咸三",
+    "西咸四"
+   ],
+   "edges": [
+    [
+     "西咸一",
+     "西咸二"
+    ],
+    [
+     "西咸二",
+     "西咸三"
+    ],
+    [
+     "西咸三",
+     "西咸四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "日",
+   "section": "房宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "日"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "从官",
+   "section": "房宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "从官一",
+    "从官二"
+   ],
+   "edges": [
+    [
+     "从官一",
+     "从官二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "心",
+   "section": "心宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "心宿一",
+    "心宿二",
+    "心宿三"
+   ],
+   "edges": [
+    [
+     "心宿一",
+     "心宿二"
+    ],
+    [
+     "心宿二",
+     "心宿三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "积卒",
+   "section": "心宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 12,
+   "positioned_stars": 2,
+   "stars_used": [
+    "积卒一",
+    "积卒二"
+   ],
+   "edges": [
+    [
+     "积卒一",
+     "积卒二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 12 星，本表已定 2 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "尾",
+   "section": "尾宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "尾宿一",
+    "尾宿二",
+    "尾宿三",
+    "尾宿四",
+    "尾宿五",
+    "尾宿六",
+    "尾宿七",
+    "尾宿八",
+    "尾宿九"
+   ],
+   "edges": [
+    [
+     "尾宿一",
+     "尾宿二"
+    ],
+    [
+     "尾宿二",
+     "尾宿三"
+    ],
+    [
+     "尾宿三",
+     "尾宿四"
+    ],
+    [
+     "尾宿四",
+     "尾宿五"
+    ],
+    [
+     "尾宿五",
+     "尾宿六"
+    ],
+    [
+     "尾宿六",
+     "尾宿七"
+    ],
+    [
+     "尾宿七",
+     "尾宿八"
+    ],
+    [
+     "尾宿八",
+     "尾宿九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "龟",
+   "section": "尾宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "龟一",
+    "龟二",
+    "龟三",
+    "龟四",
+    "龟五"
+   ],
+   "edges": [
+    [
+     "龟一",
+     "龟二"
+    ],
+    [
+     "龟二",
+     "龟三"
+    ],
+    [
+     "龟三",
+     "龟四"
+    ],
+    [
+     "龟四",
+     "龟五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天江",
+   "section": "尾宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "天江一",
+    "天江二",
+    "天江三",
+    "天江四"
+   ],
+   "edges": [
+    [
+     "天江一",
+     "天江二"
+    ],
+    [
+     "天江二",
+     "天江三"
+    ],
+    [
+     "天江三",
+     "天江四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "傅说",
+   "section": "尾宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "傅说"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "鱼",
+   "section": "尾宿",
+   "region": "东方苍龙",
+   "status": "no_stars",
+   "trad_stars": 1,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 1 星，本表已定 0 星，连线仅用已定星。"
+  },
+  {
+   "name": "神宫",
+   "section": "尾宿",
+   "region": "东方苍龙",
+   "status": "no_stars",
+   "trad_stars": 1,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 1 星，本表已定 0 星，连线仅用已定星。"
+  },
+  {
+   "name": "箕",
+   "section": "箕宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "箕宿一",
+    "箕宿二",
+    "箕宿三",
+    "箕宿四"
+   ],
+   "edges": [
+    [
+     "箕宿一",
+     "箕宿二"
+    ],
+    [
+     "箕宿二",
+     "箕宿三"
+    ],
+    [
+     "箕宿三",
+     "箕宿四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "杵",
+   "section": "箕宿",
+   "region": "东方苍龙",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "杵一",
+    "杵二",
+    "杵三"
+   ],
+   "edges": [
+    [
+     "杵一",
+     "杵二"
+    ],
+    [
+     "杵二",
+     "杵三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "糠",
+   "section": "箕宿",
+   "region": "东方苍龙",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "糠"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "斗",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "斗宿一",
+    "斗宿二",
+    "斗宿三",
+    "斗宿四",
+    "斗宿五",
+    "斗宿六"
+   ],
+   "edges": [
+    [
+     "斗宿一",
+     "斗宿二"
+    ],
+    [
+     "斗宿二",
+     "斗宿三"
+    ],
+    [
+     "斗宿三",
+     "斗宿四"
+    ],
+    [
+     "斗宿四",
+     "斗宿五"
+    ],
+    [
+     "斗宿五",
+     "斗宿六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "建",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "建一",
+    "建二",
+    "建三",
+    "建四",
+    "建五",
+    "建六"
+   ],
+   "edges": [
+    [
+     "建一",
+     "建二"
+    ],
+    [
+     "建二",
+     "建三"
+    ],
+    [
+     "建三",
+     "建四"
+    ],
+    [
+     "建四",
+     "建五"
+    ],
+    [
+     "建五",
+     "建六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天弁",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "天弁一",
+    "天弁二",
+    "天弁三",
+    "天弁四",
+    "天弁五",
+    "天弁六",
+    "天弁七",
+    "天弁八",
+    "天弁九"
+   ],
+   "edges": [
+    [
+     "天弁一",
+     "天弁二"
+    ],
+    [
+     "天弁二",
+     "天弁三"
+    ],
+    [
+     "天弁三",
+     "天弁四"
+    ],
+    [
+     "天弁四",
+     "天弁五"
+    ],
+    [
+     "天弁五",
+     "天弁六"
+    ],
+    [
+     "天弁六",
+     "天弁七"
+    ],
+    [
+     "天弁七",
+     "天弁八"
+    ],
+    [
+     "天弁八",
+     "天弁九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "鳖",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 14,
+   "positioned_stars": 11,
+   "stars_used": [
+    "鳖一",
+    "鳖二",
+    "鳖三",
+    "鳖四",
+    "鳖五",
+    "鳖六",
+    "鳖七",
+    "鳖八",
+    "鳖九",
+    "鳖十",
+    "鳖十一"
+   ],
+   "edges": [
+    [
+     "鳖一",
+     "鳖二"
+    ],
+    [
+     "鳖二",
+     "鳖三"
+    ],
+    [
+     "鳖三",
+     "鳖四"
+    ],
+    [
+     "鳖四",
+     "鳖五"
+    ],
+    [
+     "鳖五",
+     "鳖六"
+    ],
+    [
+     "鳖六",
+     "鳖七"
+    ],
+    [
+     "鳖七",
+     "鳖八"
+    ],
+    [
+     "鳖八",
+     "鳖九"
+    ],
+    [
+     "鳖九",
+     "鳖十"
+    ],
+    [
+     "鳖十",
+     "鳖十一"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 14 星，本表已定 11 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "天鸡",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "天鸡一",
+    "天鸡二"
+   ],
+   "edges": [
+    [
+     "天鸡一",
+     "天鸡二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天籥",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 8,
+   "positioned_stars": 8,
+   "stars_used": [
+    "天籥一",
+    "天籥二",
+    "天籥三",
+    "天籥四",
+    "天籥五",
+    "天籥六",
+    "天籥七",
+    "天籥八"
+   ],
+   "edges": [
+    [
+     "天籥一",
+     "天籥二"
+    ],
+    [
+     "天籥二",
+     "天籥三"
+    ],
+    [
+     "天籥三",
+     "天籥四"
+    ],
+    [
+     "天籥四",
+     "天籥五"
+    ],
+    [
+     "天籥五",
+     "天籥六"
+    ],
+    [
+     "天籥六",
+     "天籥七"
+    ],
+    [
+     "天籥七",
+     "天籥八"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "狗国",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "狗国一",
+    "狗国二",
+    "狗国三",
+    "狗国四"
+   ],
+   "edges": [
+    [
+     "狗国一",
+     "狗国二"
+    ],
+    [
+     "狗国二",
+     "狗国三"
+    ],
+    [
+     "狗国三",
+     "狗国四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天渊",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 10,
+   "positioned_stars": 3,
+   "stars_used": [
+    "天渊一",
+    "天渊二",
+    "天渊三"
+   ],
+   "edges": [
+    [
+     "天渊一",
+     "天渊二"
+    ],
+    [
+     "天渊二",
+     "天渊三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 10 星，本表已定 3 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "狗",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "狗一",
+    "狗二"
+   ],
+   "edges": [
+    [
+     "狗一",
+     "狗二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "农丈人",
+   "section": "斗宿",
+   "region": "北方玄武",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "农丈人"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "牛",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "牛宿一",
+    "牛宿二",
+    "牛宿三",
+    "牛宿四",
+    "牛宿五",
+    "牛宿六"
+   ],
+   "edges": [
+    [
+     "牛宿一",
+     "牛宿二"
+    ],
+    [
+     "牛宿二",
+     "牛宿三"
+    ],
+    [
+     "牛宿三",
+     "牛宿四"
+    ],
+    [
+     "牛宿四",
+     "牛宿五"
+    ],
+    [
+     "牛宿五",
+     "牛宿六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天田",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "天田一",
+    "天田二",
+    "天田三",
+    "天田四"
+   ],
+   "edges": [
+    [
+     "天田一",
+     "天田二"
+    ],
+    [
+     "天田二",
+     "天田三"
+    ],
+    [
+     "天田三",
+     "天田四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "九坎",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "single",
+   "trad_stars": 9,
+   "positioned_stars": 1,
+   "stars_used": [
+    "九坎二"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": "传统 9 星，本表已定 1 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "河鼓",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "河鼓一",
+    "河鼓二",
+    "河鼓三"
+   ],
+   "edges": [
+    [
+     "河鼓一",
+     "河鼓二"
+    ],
+    [
+     "河鼓二",
+     "河鼓三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "织女",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "织女一",
+    "织女二",
+    "织女三"
+   ],
+   "edges": [
+    [
+     "织女一",
+     "织女二"
+    ],
+    [
+     "织女二",
+     "织女三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "左旗",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "左旗一",
+    "左旗二",
+    "左旗三",
+    "左旗四",
+    "左旗五",
+    "左旗六",
+    "左旗七",
+    "左旗八",
+    "左旗九"
+   ],
+   "edges": [
+    [
+     "左旗一",
+     "左旗二"
+    ],
+    [
+     "左旗二",
+     "左旗三"
+    ],
+    [
+     "左旗三",
+     "左旗四"
+    ],
+    [
+     "左旗四",
+     "左旗五"
+    ],
+    [
+     "左旗五",
+     "左旗六"
+    ],
+    [
+     "左旗六",
+     "左旗七"
+    ],
+    [
+     "左旗七",
+     "左旗八"
+    ],
+    [
+     "左旗八",
+     "左旗九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "右旗",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "右旗一",
+    "右旗二",
+    "右旗三",
+    "右旗四",
+    "右旗五",
+    "右旗六",
+    "右旗七",
+    "右旗八",
+    "右旗九"
+   ],
+   "edges": [
+    [
+     "右旗一",
+     "右旗二"
+    ],
+    [
+     "右旗二",
+     "右旗三"
+    ],
+    [
+     "右旗三",
+     "右旗四"
+    ],
+    [
+     "右旗四",
+     "右旗五"
+    ],
+    [
+     "右旗五",
+     "右旗六"
+    ],
+    [
+     "右旗六",
+     "右旗七"
+    ],
+    [
+     "右旗七",
+     "右旗八"
+    ],
+    [
+     "右旗八",
+     "右旗九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天桴",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "天桴一",
+    "天桴二",
+    "天桴三",
+    "天桴四"
+   ],
+   "edges": [
+    [
+     "天桴一",
+     "天桴二"
+    ],
+    [
+     "天桴二",
+     "天桴三"
+    ],
+    [
+     "天桴三",
+     "天桴四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "罗堰",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "罗堰一",
+    "罗堰二",
+    "罗堰三"
+   ],
+   "edges": [
+    [
+     "罗堰一",
+     "罗堰二"
+    ],
+    [
+     "罗堰二",
+     "罗堰三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "渐台",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "渐台一",
+    "渐台二",
+    "渐台三",
+    "渐台四"
+   ],
+   "edges": [
+    [
+     "渐台一",
+     "渐台二"
+    ],
+    [
+     "渐台二",
+     "渐台三"
+    ],
+    [
+     "渐台三",
+     "渐台四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "辇道",
+   "section": "牛宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "辇道一",
+    "辇道二",
+    "辇道三",
+    "辇道四",
+    "辇道五"
+   ],
+   "edges": [
+    [
+     "辇道一",
+     "辇道二"
+    ],
+    [
+     "辇道二",
+     "辇道三"
+    ],
+    [
+     "辇道三",
+     "辇道四"
+    ],
+    [
+     "辇道四",
+     "辇道五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "女",
+   "section": "女宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "女宿一",
+    "女宿二",
+    "女宿三",
+    "女宿四"
+   ],
+   "edges": [
+    [
+     "女宿一",
+     "女宿二"
+    ],
+    [
+     "女宿二",
+     "女宿三"
+    ],
+    [
+     "女宿三",
+     "女宿四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "十二国",
+   "section": "女宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 16,
+   "positioned_stars": 16,
+   "stars_used": [
+    "周一",
+    "周二",
+    "秦一",
+    "秦二",
+    "代一",
+    "代二",
+    "赵一",
+    "赵二",
+    "越",
+    "齐",
+    "楚",
+    "郑",
+    "魏",
+    "韩",
+    "晋",
+    "燕"
+   ],
+   "edges": [
+    [
+     "周一",
+     "周二"
+    ],
+    [
+     "周二",
+     "秦一"
+    ],
+    [
+     "秦一",
+     "秦二"
+    ],
+    [
+     "秦二",
+     "代一"
+    ],
+    [
+     "代一",
+     "代二"
+    ],
+    [
+     "代二",
+     "赵一"
+    ],
+    [
+     "赵一",
+     "赵二"
+    ],
+    [
+     "赵二",
+     "越"
+    ],
+    [
+     "越",
+     "齐"
+    ],
+    [
+     "齐",
+     "楚"
+    ],
+    [
+     "楚",
+     "郑"
+    ],
+    [
+     "郑",
+     "魏"
+    ],
+    [
+     "魏",
+     "韩"
+    ],
+    [
+     "韩",
+     "晋"
+    ],
+    [
+     "晋",
+     "燕"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "离珠",
+   "section": "女宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 4,
+   "stars_used": [
+    "离珠一",
+    "离珠二",
+    "离珠三",
+    "离珠四"
+   ],
+   "edges": [
+    [
+     "离珠一",
+     "离珠二"
+    ],
+    [
+     "离珠二",
+     "离珠三"
+    ],
+    [
+     "离珠三",
+     "离珠四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 5 星，本表已定 4 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "败瓜",
+   "section": "女宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "败瓜一",
+    "败瓜二",
+    "败瓜三",
+    "败瓜四",
+    "败瓜五"
+   ],
+   "edges": [
+    [
+     "败瓜一",
+     "败瓜二"
+    ],
+    [
+     "败瓜二",
+     "败瓜三"
+    ],
+    [
+     "败瓜三",
+     "败瓜四"
+    ],
+    [
+     "败瓜四",
+     "败瓜五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "瓠瓜",
+   "section": "女宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "瓠瓜一",
+    "瓠瓜二",
+    "瓠瓜三",
+    "瓠瓜四",
+    "瓠瓜五"
+   ],
+   "edges": [
+    [
+     "瓠瓜一",
+     "瓠瓜二"
+    ],
+    [
+     "瓠瓜二",
+     "瓠瓜三"
+    ],
+    [
+     "瓠瓜三",
+     "瓠瓜四"
+    ],
+    [
+     "瓠瓜四",
+     "瓠瓜五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "扶筐",
+   "section": "女宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "扶筐一",
+    "扶筐二",
+    "扶筐三",
+    "扶筐四",
+    "扶筐五",
+    "扶筐六",
+    "扶筐七"
+   ],
+   "edges": [
+    [
+     "扶筐一",
+     "扶筐二"
+    ],
+    [
+     "扶筐二",
+     "扶筐三"
+    ],
+    [
+     "扶筐三",
+     "扶筐四"
+    ],
+    [
+     "扶筐四",
+     "扶筐五"
+    ],
+    [
+     "扶筐五",
+     "扶筐六"
+    ],
+    [
+     "扶筐六",
+     "扶筐七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "虚",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "虚宿一",
+    "虚宿二"
+   ],
+   "edges": [
+    [
+     "虚宿一",
+     "虚宿二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "司命",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "司命一",
+    "司命二"
+   ],
+   "edges": [
+    [
+     "司命一",
+     "司命二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "司禄",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "司禄一",
+    "司禄二"
+   ],
+   "edges": [
+    [
+     "司禄一",
+     "司禄二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "司危",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "司危一",
+    "司危二"
+   ],
+   "edges": [
+    [
+     "司危一",
+     "司危二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "司非",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "司非一",
+    "司非二"
+   ],
+   "edges": [
+    [
+     "司非一",
+     "司非二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "哭",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "哭一",
+    "哭二"
+   ],
+   "edges": [
+    [
+     "哭一",
+     "哭二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "泣",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "泣一",
+    "泣二"
+   ],
+   "edges": [
+    [
+     "泣一",
+     "泣二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天津",
+   "section": "女宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "天津一",
+    "天津二",
+    "天津三",
+    "天津四",
+    "天津五",
+    "天津六",
+    "天津七",
+    "天津八",
+    "天津九"
+   ],
+   "edges": [
+    [
+     "天津一",
+     "天津二"
+    ],
+    [
+     "天津二",
+     "天津三"
+    ],
+    [
+     "天津三",
+     "天津四"
+    ],
+    [
+     "天津四",
+     "天津五"
+    ],
+    [
+     "天津五",
+     "天津六"
+    ],
+    [
+     "天津六",
+     "天津七"
+    ],
+    [
+     "天津七",
+     "天津八"
+    ],
+    [
+     "天津八",
+     "天津九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "奚仲",
+   "section": "女宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "奚仲一",
+    "奚仲二",
+    "奚仲三",
+    "奚仲四"
+   ],
+   "edges": [
+    [
+     "奚仲一",
+     "奚仲二"
+    ],
+    [
+     "奚仲二",
+     "奚仲三"
+    ],
+    [
+     "奚仲三",
+     "奚仲四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天垒城",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 13,
+   "positioned_stars": 13,
+   "stars_used": [
+    "天垒城一",
+    "天垒城二",
+    "天垒城三",
+    "天垒城四",
+    "天垒城五",
+    "天垒城六",
+    "天垒城七",
+    "天垒城八",
+    "天垒城九",
+    "天垒城十",
+    "天垒城十一",
+    "天垒城十二",
+    "天垒城十三"
+   ],
+   "edges": [
+    [
+     "天垒城一",
+     "天垒城二"
+    ],
+    [
+     "天垒城二",
+     "天垒城三"
+    ],
+    [
+     "天垒城三",
+     "天垒城四"
+    ],
+    [
+     "天垒城四",
+     "天垒城五"
+    ],
+    [
+     "天垒城五",
+     "天垒城六"
+    ],
+    [
+     "天垒城六",
+     "天垒城七"
+    ],
+    [
+     "天垒城七",
+     "天垒城八"
+    ],
+    [
+     "天垒城八",
+     "天垒城九"
+    ],
+    [
+     "天垒城九",
+     "天垒城十"
+    ],
+    [
+     "天垒城十",
+     "天垒城十一"
+    ],
+    [
+     "天垒城十一",
+     "天垒城十二"
+    ],
+    [
+     "天垒城十二",
+     "天垒城十三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "离瑜",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 2,
+   "stars_used": [
+    "离瑜二",
+    "离瑜三"
+   ],
+   "edges": [
+    [
+     "离瑜二",
+     "离瑜三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 3 星，本表已定 2 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "败臼",
+   "section": "虚宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "败臼一",
+    "败臼二",
+    "败臼三",
+    "败臼四"
+   ],
+   "edges": [
+    [
+     "败臼一",
+     "败臼二"
+    ],
+    [
+     "败臼二",
+     "败臼三"
+    ],
+    [
+     "败臼三",
+     "败臼四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "危",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "危宿一",
+    "危宿二",
+    "危宿三"
+   ],
+   "edges": [
+    [
+     "危宿一",
+     "危宿二"
+    ],
+    [
+     "危宿二",
+     "危宿三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "人",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 4,
+   "stars_used": [
+    "人一",
+    "人二",
+    "人三",
+    "人四"
+   ],
+   "edges": [
+    [
+     "人一",
+     "人二"
+    ],
+    [
+     "人二",
+     "人三"
+    ],
+    [
+     "人三",
+     "人四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 5 星，本表已定 4 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "杵",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "杵一",
+    "杵二",
+    "杵三"
+   ],
+   "edges": [
+    [
+     "杵一",
+     "杵二"
+    ],
+    [
+     "杵二",
+     "杵三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "臼",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "臼一",
+    "臼二",
+    "臼三",
+    "臼四"
+   ],
+   "edges": [
+    [
+     "臼一",
+     "臼二"
+    ],
+    [
+     "臼二",
+     "臼三"
+    ],
+    [
+     "臼三",
+     "臼四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "车府",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "车府一",
+    "车府二",
+    "车府三",
+    "车府四",
+    "车府五",
+    "车府六",
+    "车府七"
+   ],
+   "edges": [
+    [
+     "车府一",
+     "车府二"
+    ],
+    [
+     "车府二",
+     "车府三"
+    ],
+    [
+     "车府三",
+     "车府四"
+    ],
+    [
+     "车府四",
+     "车府五"
+    ],
+    [
+     "车府五",
+     "车府六"
+    ],
+    [
+     "车府六",
+     "车府七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天钩",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "天钩一",
+    "天钩二",
+    "天钩三",
+    "天钩四",
+    "天钩五",
+    "天钩六",
+    "天钩七",
+    "天钩八",
+    "天钩九"
+   ],
+   "edges": [
+    [
+     "天钩一",
+     "天钩二"
+    ],
+    [
+     "天钩二",
+     "天钩三"
+    ],
+    [
+     "天钩三",
+     "天钩四"
+    ],
+    [
+     "天钩四",
+     "天钩五"
+    ],
+    [
+     "天钩五",
+     "天钩六"
+    ],
+    [
+     "天钩六",
+     "天钩七"
+    ],
+    [
+     "天钩七",
+     "天钩八"
+    ],
+    [
+     "天钩八",
+     "天钩九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "造父",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "造父一",
+    "造父二",
+    "造父三",
+    "造父四",
+    "造父五"
+   ],
+   "edges": [
+    [
+     "造父一",
+     "造父二"
+    ],
+    [
+     "造父二",
+     "造父三"
+    ],
+    [
+     "造父三",
+     "造父四"
+    ],
+    [
+     "造父四",
+     "造父五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "坟墓",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "坟墓一",
+    "坟墓二",
+    "坟墓三",
+    "坟墓四"
+   ],
+   "edges": [
+    [
+     "坟墓一",
+     "坟墓二"
+    ],
+    [
+     "坟墓二",
+     "坟墓三"
+    ],
+    [
+     "坟墓三",
+     "坟墓四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "虚梁",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "虚梁一",
+    "虚梁二",
+    "虚梁三",
+    "虚梁四"
+   ],
+   "edges": [
+    [
+     "虚梁一",
+     "虚梁二"
+    ],
+    [
+     "虚梁二",
+     "虚梁三"
+    ],
+    [
+     "虚梁三",
+     "虚梁四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天钱",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 10,
+   "positioned_stars": 5,
+   "stars_used": [
+    "天钱一",
+    "天钱二",
+    "天钱三",
+    "天钱四",
+    "天钱五"
+   ],
+   "edges": [
+    [
+     "天钱一",
+     "天钱二"
+    ],
+    [
+     "天钱二",
+     "天钱三"
+    ],
+    [
+     "天钱三",
+     "天钱四"
+    ],
+    [
+     "天钱四",
+     "天钱五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 10 星，本表已定 5 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "盖屋",
+   "section": "危宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "盖屋一",
+    "盖屋二"
+   ],
+   "edges": [
+    [
+     "盖屋一",
+     "盖屋二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "室",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "室宿一",
+    "室宿二"
+   ],
+   "edges": [
+    [
+     "室宿一",
+     "室宿二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "离宫",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "离宫一",
+    "离宫二",
+    "离宫三",
+    "离宫四",
+    "离宫五",
+    "离宫六"
+   ],
+   "edges": [
+    [
+     "离宫一",
+     "离宫二"
+    ],
+    [
+     "离宫二",
+     "离宫三"
+    ],
+    [
+     "离宫三",
+     "离宫四"
+    ],
+    [
+     "离宫四",
+     "离宫五"
+    ],
+    [
+     "离宫五",
+     "离宫六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "雷电",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "雷电一",
+    "雷电二",
+    "雷电三",
+    "雷电四",
+    "雷电五",
+    "雷电六"
+   ],
+   "edges": [
+    [
+     "雷电一",
+     "雷电二"
+    ],
+    [
+     "雷电二",
+     "雷电三"
+    ],
+    [
+     "雷电三",
+     "雷电四"
+    ],
+    [
+     "雷电四",
+     "雷电五"
+    ],
+    [
+     "雷电五",
+     "雷电六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "垒壁阵",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 12,
+   "positioned_stars": 12,
+   "stars_used": [
+    "垒壁阵一",
+    "垒壁阵二",
+    "垒壁阵三",
+    "垒壁阵四",
+    "垒壁阵五",
+    "垒壁阵六",
+    "垒壁阵七",
+    "垒壁阵八",
+    "垒壁阵九",
+    "垒壁阵十",
+    "垒壁阵十一",
+    "垒壁阵十二"
+   ],
+   "edges": [
+    [
+     "垒壁阵一",
+     "垒壁阵二"
+    ],
+    [
+     "垒壁阵二",
+     "垒壁阵三"
+    ],
+    [
+     "垒壁阵三",
+     "垒壁阵四"
+    ],
+    [
+     "垒壁阵四",
+     "垒壁阵五"
+    ],
+    [
+     "垒壁阵五",
+     "垒壁阵六"
+    ],
+    [
+     "垒壁阵六",
+     "垒壁阵七"
+    ],
+    [
+     "垒壁阵七",
+     "垒壁阵八"
+    ],
+    [
+     "垒壁阵八",
+     "垒壁阵九"
+    ],
+    [
+     "垒壁阵九",
+     "垒壁阵十"
+    ],
+    [
+     "垒壁阵十",
+     "垒壁阵十一"
+    ],
+    [
+     "垒壁阵十一",
+     "垒壁阵十二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "羽林军",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 45,
+   "positioned_stars": 45,
+   "stars_used": [
+    "羽林军一",
+    "羽林军二",
+    "羽林军三",
+    "羽林军四",
+    "羽林军五",
+    "羽林军六",
+    "羽林军七",
+    "羽林军八",
+    "羽林军九",
+    "羽林军十",
+    "羽林军十一",
+    "羽林军十二",
+    "羽林军十三",
+    "羽林军十四",
+    "羽林军十五",
+    "羽林军十六",
+    "羽林军十七",
+    "羽林军十八",
+    "羽林军十九",
+    "羽林军廿",
+    "羽林军廿一",
+    "羽林军廿二",
+    "羽林军廿三",
+    "羽林军廿四",
+    "羽林军廿五",
+    "羽林军廿六",
+    "羽林军廿七",
+    "羽林军廿八",
+    "羽林军廿九",
+    "羽林军卅",
+    "羽林军卅一",
+    "羽林军卅二",
+    "羽林军卅三",
+    "羽林军卅四",
+    "羽林军卅五",
+    "羽林军卅六",
+    "羽林军卅七",
+    "羽林军卅八",
+    "羽林军卅九",
+    "羽林军四十",
+    "羽林军四一",
+    "羽林军四二",
+    "羽林军四三",
+    "羽林军四四",
+    "羽林军四五"
+   ],
+   "edges": [
+    [
+     "羽林军一",
+     "羽林军二"
+    ],
+    [
+     "羽林军二",
+     "羽林军三"
+    ],
+    [
+     "羽林军三",
+     "羽林军四"
+    ],
+    [
+     "羽林军四",
+     "羽林军五"
+    ],
+    [
+     "羽林军五",
+     "羽林军六"
+    ],
+    [
+     "羽林军六",
+     "羽林军七"
+    ],
+    [
+     "羽林军七",
+     "羽林军八"
+    ],
+    [
+     "羽林军八",
+     "羽林军九"
+    ],
+    [
+     "羽林军九",
+     "羽林军十"
+    ],
+    [
+     "羽林军十",
+     "羽林军十一"
+    ],
+    [
+     "羽林军十一",
+     "羽林军十二"
+    ],
+    [
+     "羽林军十二",
+     "羽林军十三"
+    ],
+    [
+     "羽林军十三",
+     "羽林军十四"
+    ],
+    [
+     "羽林军十四",
+     "羽林军十五"
+    ],
+    [
+     "羽林军十五",
+     "羽林军十六"
+    ],
+    [
+     "羽林军十六",
+     "羽林军十七"
+    ],
+    [
+     "羽林军十七",
+     "羽林军十八"
+    ],
+    [
+     "羽林军十八",
+     "羽林军十九"
+    ],
+    [
+     "羽林军十九",
+     "羽林军廿"
+    ],
+    [
+     "羽林军廿",
+     "羽林军廿一"
+    ],
+    [
+     "羽林军廿一",
+     "羽林军廿二"
+    ],
+    [
+     "羽林军廿二",
+     "羽林军廿三"
+    ],
+    [
+     "羽林军廿三",
+     "羽林军廿四"
+    ],
+    [
+     "羽林军廿四",
+     "羽林军廿五"
+    ],
+    [
+     "羽林军廿五",
+     "羽林军廿六"
+    ],
+    [
+     "羽林军廿六",
+     "羽林军廿七"
+    ],
+    [
+     "羽林军廿七",
+     "羽林军廿八"
+    ],
+    [
+     "羽林军廿八",
+     "羽林军廿九"
+    ],
+    [
+     "羽林军廿九",
+     "羽林军卅"
+    ],
+    [
+     "羽林军卅",
+     "羽林军卅一"
+    ],
+    [
+     "羽林军卅一",
+     "羽林军卅二"
+    ],
+    [
+     "羽林军卅二",
+     "羽林军卅三"
+    ],
+    [
+     "羽林军卅三",
+     "羽林军卅四"
+    ],
+    [
+     "羽林军卅四",
+     "羽林军卅五"
+    ],
+    [
+     "羽林军卅五",
+     "羽林军卅六"
+    ],
+    [
+     "羽林军卅六",
+     "羽林军卅七"
+    ],
+    [
+     "羽林军卅七",
+     "羽林军卅八"
+    ],
+    [
+     "羽林军卅八",
+     "羽林军卅九"
+    ],
+    [
+     "羽林军卅九",
+     "羽林军四十"
+    ],
+    [
+     "羽林军四十",
+     "羽林军四一"
+    ],
+    [
+     "羽林军四一",
+     "羽林军四二"
+    ],
+    [
+     "羽林军四二",
+     "羽林军四三"
+    ],
+    [
+     "羽林军四三",
+     "羽林军四四"
+    ],
+    [
+     "羽林军四四",
+     "羽林军四五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "鈇鉞",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "鈇鉞一",
+    "鈇鉞二",
+    "鈇鉞三"
+   ],
+   "edges": [
+    [
+     "鈇鉞一",
+     "鈇鉞二"
+    ],
+    [
+     "鈇鉞二",
+     "鈇鉞三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "北落师门",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "北落师门"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "八魁",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 6,
+   "stars_used": [
+    "八魁一",
+    "八魁二",
+    "八魁三",
+    "八魁四",
+    "八魁五",
+    "八魁六"
+   ],
+   "edges": [
+    [
+     "八魁一",
+     "八魁二"
+    ],
+    [
+     "八魁二",
+     "八魁三"
+    ],
+    [
+     "八魁三",
+     "八魁四"
+    ],
+    [
+     "八魁四",
+     "八魁五"
+    ],
+    [
+     "八魁五",
+     "八魁六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 9 星，本表已定 6 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "天纲",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天纲"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "土公吏",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "土公吏一",
+    "土公吏二"
+   ],
+   "edges": [
+    [
+     "土公吏一",
+     "土公吏二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "腾蛇",
+   "section": "室宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 22,
+   "positioned_stars": 21,
+   "stars_used": [
+    "腾蛇一",
+    "腾蛇二",
+    "腾蛇三",
+    "腾蛇四",
+    "腾蛇六",
+    "腾蛇七",
+    "腾蛇八",
+    "腾蛇九",
+    "腾蛇十",
+    "腾蛇十一",
+    "腾蛇十二",
+    "腾蛇十三",
+    "腾蛇十四",
+    "腾蛇十五",
+    "腾蛇十六",
+    "腾蛇十七",
+    "腾蛇十八",
+    "腾蛇十九",
+    "腾蛇廿",
+    "腾蛇廿一",
+    "腾蛇廿二"
+   ],
+   "edges": [
+    [
+     "腾蛇一",
+     "腾蛇二"
+    ],
+    [
+     "腾蛇二",
+     "腾蛇三"
+    ],
+    [
+     "腾蛇三",
+     "腾蛇四"
+    ],
+    [
+     "腾蛇四",
+     "腾蛇六"
+    ],
+    [
+     "腾蛇六",
+     "腾蛇七"
+    ],
+    [
+     "腾蛇七",
+     "腾蛇八"
+    ],
+    [
+     "腾蛇八",
+     "腾蛇九"
+    ],
+    [
+     "腾蛇九",
+     "腾蛇十"
+    ],
+    [
+     "腾蛇十",
+     "腾蛇十一"
+    ],
+    [
+     "腾蛇十一",
+     "腾蛇十二"
+    ],
+    [
+     "腾蛇十二",
+     "腾蛇十三"
+    ],
+    [
+     "腾蛇十三",
+     "腾蛇十四"
+    ],
+    [
+     "腾蛇十四",
+     "腾蛇十五"
+    ],
+    [
+     "腾蛇十五",
+     "腾蛇十六"
+    ],
+    [
+     "腾蛇十六",
+     "腾蛇十七"
+    ],
+    [
+     "腾蛇十七",
+     "腾蛇十八"
+    ],
+    [
+     "腾蛇十八",
+     "腾蛇十九"
+    ],
+    [
+     "腾蛇十九",
+     "腾蛇廿"
+    ],
+    [
+     "腾蛇廿",
+     "腾蛇廿一"
+    ],
+    [
+     "腾蛇廿一",
+     "腾蛇廿二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 22 星，本表已定 21 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "壁",
+   "section": "壁宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "壁宿一",
+    "壁宿二"
+   ],
+   "edges": [
+    [
+     "壁宿一",
+     "壁宿二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "霹雳",
+   "section": "壁宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "霹雳一",
+    "霹雳二",
+    "霹雳三",
+    "霹雳四",
+    "霹雳五"
+   ],
+   "edges": [
+    [
+     "霹雳一",
+     "霹雳二"
+    ],
+    [
+     "霹雳二",
+     "霹雳三"
+    ],
+    [
+     "霹雳三",
+     "霹雳四"
+    ],
+    [
+     "霹雳四",
+     "霹雳五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "云雨",
+   "section": "壁宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "云雨一",
+    "云雨二",
+    "云雨三",
+    "云雨四"
+   ],
+   "edges": [
+    [
+     "云雨一",
+     "云雨二"
+    ],
+    [
+     "云雨二",
+     "云雨三"
+    ],
+    [
+     "云雨三",
+     "云雨四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天厩",
+   "section": "壁宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 10,
+   "positioned_stars": 3,
+   "stars_used": [
+    "天厩一",
+    "天厩二",
+    "天厩三"
+   ],
+   "edges": [
+    [
+     "天厩一",
+     "天厩二"
+    ],
+    [
+     "天厩二",
+     "天厩三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 10 星，本表已定 3 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "鈇鑕",
+   "section": "壁宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 4,
+   "stars_used": [
+    "鈇鑕一",
+    "鈇鑕二",
+    "鈇鑕四",
+    "鈇鑕五"
+   ],
+   "edges": [
+    [
+     "鈇鑕一",
+     "鈇鑕二"
+    ],
+    [
+     "鈇鑕二",
+     "鈇鑕四"
+    ],
+    [
+     "鈇鑕四",
+     "鈇鑕五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 5 星，本表已定 4 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "土公",
+   "section": "壁宿",
+   "region": "北方玄武",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "土公一",
+    "土公二"
+   ],
+   "edges": [
+    [
+     "土公一",
+     "土公二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "奎",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 16,
+   "positioned_stars": 16,
+   "stars_used": [
+    "奎宿一",
+    "奎宿二",
+    "奎宿三",
+    "奎宿四",
+    "奎宿五",
+    "奎宿六",
+    "奎宿七",
+    "奎宿八",
+    "奎宿九",
+    "奎宿十",
+    "奎宿十一",
+    "奎宿十二",
+    "奎宿十三",
+    "奎宿十四",
+    "奎宿十五",
+    "奎宿十六"
+   ],
+   "edges": [
+    [
+     "奎宿一",
+     "奎宿二"
+    ],
+    [
+     "奎宿二",
+     "奎宿三"
+    ],
+    [
+     "奎宿三",
+     "奎宿四"
+    ],
+    [
+     "奎宿四",
+     "奎宿五"
+    ],
+    [
+     "奎宿五",
+     "奎宿六"
+    ],
+    [
+     "奎宿六",
+     "奎宿七"
+    ],
+    [
+     "奎宿七",
+     "奎宿八"
+    ],
+    [
+     "奎宿八",
+     "奎宿九"
+    ],
+    [
+     "奎宿九",
+     "奎宿十"
+    ],
+    [
+     "奎宿十",
+     "奎宿十一"
+    ],
+    [
+     "奎宿十一",
+     "奎宿十二"
+    ],
+    [
+     "奎宿十二",
+     "奎宿十三"
+    ],
+    [
+     "奎宿十三",
+     "奎宿十四"
+    ],
+    [
+     "奎宿十四",
+     "奎宿十五"
+    ],
+    [
+     "奎宿十五",
+     "奎宿十六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "外屏",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "外屏一",
+    "外屏二",
+    "外屏三",
+    "外屏四",
+    "外屏五",
+    "外屏六",
+    "外屏七"
+   ],
+   "edges": [
+    [
+     "外屏一",
+     "外屏二"
+    ],
+    [
+     "外屏二",
+     "外屏三"
+    ],
+    [
+     "外屏三",
+     "外屏四"
+    ],
+    [
+     "外屏四",
+     "外屏五"
+    ],
+    [
+     "外屏五",
+     "外屏六"
+    ],
+    [
+     "外屏六",
+     "外屏七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天溷",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 4,
+   "stars_used": [
+    "天溷一",
+    "天溷二",
+    "天溷三",
+    "天溷四"
+   ],
+   "edges": [
+    [
+     "天溷一",
+     "天溷二"
+    ],
+    [
+     "天溷二",
+     "天溷三"
+    ],
+    [
+     "天溷三",
+     "天溷四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 7 星，本表已定 4 星，连线仅用已定星。"
+  },
+  {
+   "name": "土司空",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "土司空"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "军南门",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "军南门"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "阁道",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "阁道一",
+    "阁道二",
+    "阁道三",
+    "阁道四",
+    "阁道五",
+    "阁道六"
+   ],
+   "edges": [
+    [
+     "阁道一",
+     "阁道二"
+    ],
+    [
+     "阁道二",
+     "阁道三"
+    ],
+    [
+     "阁道三",
+     "阁道四"
+    ],
+    [
+     "阁道四",
+     "阁道五"
+    ],
+    [
+     "阁道五",
+     "阁道六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "附路",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "附路"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "王良",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "王良一",
+    "王良二",
+    "王良三",
+    "王良四",
+    "王良五"
+   ],
+   "edges": [
+    [
+     "王良一",
+     "王良二"
+    ],
+    [
+     "王良二",
+     "王良三"
+    ],
+    [
+     "王良三",
+     "王良四"
+    ],
+    [
+     "王良四",
+     "王良五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "策",
+   "section": "奎宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "策"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "娄",
+   "section": "娄宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "娄宿一",
+    "娄宿二",
+    "娄宿三"
+   ],
+   "edges": [
+    [
+     "娄宿一",
+     "娄宿二"
+    ],
+    [
+     "娄宿二",
+     "娄宿三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "左更",
+   "section": "娄宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "左更一",
+    "左更二",
+    "左更三",
+    "左更四",
+    "左更五"
+   ],
+   "edges": [
+    [
+     "左更一",
+     "左更二"
+    ],
+    [
+     "左更二",
+     "左更三"
+    ],
+    [
+     "左更三",
+     "左更四"
+    ],
+    [
+     "左更四",
+     "左更五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "右更",
+   "section": "娄宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "右更一",
+    "右更二",
+    "右更三",
+    "右更四",
+    "右更五"
+   ],
+   "edges": [
+    [
+     "右更一",
+     "右更二"
+    ],
+    [
+     "右更二",
+     "右更三"
+    ],
+    [
+     "右更三",
+     "右更四"
+    ],
+    [
+     "右更四",
+     "右更五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天仓",
+   "section": "娄宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "天仓一",
+    "天仓二",
+    "天仓三",
+    "天仓四",
+    "天仓五",
+    "天仓六"
+   ],
+   "edges": [
+    [
+     "天仓一",
+     "天仓二"
+    ],
+    [
+     "天仓二",
+     "天仓三"
+    ],
+    [
+     "天仓三",
+     "天仓四"
+    ],
+    [
+     "天仓四",
+     "天仓五"
+    ],
+    [
+     "天仓五",
+     "天仓六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天庾",
+   "section": "娄宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "天庾一",
+    "天庾二",
+    "天庾三"
+   ],
+   "edges": [
+    [
+     "天庾一",
+     "天庾二"
+    ],
+    [
+     "天庾二",
+     "天庾三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天大将军",
+   "section": "娄宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 11,
+   "positioned_stars": 11,
+   "stars_used": [
+    "天大将军一",
+    "天大将军二",
+    "天大将军三",
+    "天大将军四",
+    "天大将军五",
+    "天大将军六",
+    "天大将军七",
+    "天大将军八",
+    "天大将军九",
+    "天大将军十",
+    "天大将军十一"
+   ],
+   "edges": [
+    [
+     "天大将军一",
+     "天大将军二"
+    ],
+    [
+     "天大将军二",
+     "天大将军三"
+    ],
+    [
+     "天大将军三",
+     "天大将军四"
+    ],
+    [
+     "天大将军四",
+     "天大将军五"
+    ],
+    [
+     "天大将军五",
+     "天大将军六"
+    ],
+    [
+     "天大将军六",
+     "天大将军七"
+    ],
+    [
+     "天大将军七",
+     "天大将军八"
+    ],
+    [
+     "天大将军八",
+     "天大将军九"
+    ],
+    [
+     "天大将军九",
+     "天大将军十"
+    ],
+    [
+     "天大将军十",
+     "天大将军十一"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "胃",
+   "section": "胃宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "胃宿一",
+    "胃宿二",
+    "胃宿三"
+   ],
+   "edges": [
+    [
+     "胃宿一",
+     "胃宿二"
+    ],
+    [
+     "胃宿二",
+     "胃宿三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天廪",
+   "section": "胃宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "天廪一",
+    "天廪二",
+    "天廪三",
+    "天廪四"
+   ],
+   "edges": [
+    [
+     "天廪一",
+     "天廪二"
+    ],
+    [
+     "天廪二",
+     "天廪三"
+    ],
+    [
+     "天廪三",
+     "天廪四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天囷",
+   "section": "胃宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 13,
+   "positioned_stars": 13,
+   "stars_used": [
+    "天囷一",
+    "天囷二",
+    "天囷三",
+    "天囷四",
+    "天囷五",
+    "天囷六",
+    "天囷七",
+    "天囷八",
+    "天囷九",
+    "天囷十",
+    "天囷十一",
+    "天囷十二",
+    "天囷十三"
+   ],
+   "edges": [
+    [
+     "天囷一",
+     "天囷二"
+    ],
+    [
+     "天囷二",
+     "天囷三"
+    ],
+    [
+     "天囷三",
+     "天囷四"
+    ],
+    [
+     "天囷四",
+     "天囷五"
+    ],
+    [
+     "天囷五",
+     "天囷六"
+    ],
+    [
+     "天囷六",
+     "天囷七"
+    ],
+    [
+     "天囷七",
+     "天囷八"
+    ],
+    [
+     "天囷八",
+     "天囷九"
+    ],
+    [
+     "天囷九",
+     "天囷十"
+    ],
+    [
+     "天囷十",
+     "天囷十一"
+    ],
+    [
+     "天囷十一",
+     "天囷十二"
+    ],
+    [
+     "天囷十二",
+     "天囷十三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "大陵",
+   "section": "胃宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 8,
+   "positioned_stars": 8,
+   "stars_used": [
+    "大陵一",
+    "大陵二",
+    "大陵三",
+    "大陵四",
+    "大陵五",
+    "大陵六",
+    "大陵七",
+    "大陵八"
+   ],
+   "edges": [
+    [
+     "大陵一",
+     "大陵二"
+    ],
+    [
+     "大陵二",
+     "大陵三"
+    ],
+    [
+     "大陵三",
+     "大陵四"
+    ],
+    [
+     "大陵四",
+     "大陵五"
+    ],
+    [
+     "大陵五",
+     "大陵六"
+    ],
+    [
+     "大陵六",
+     "大陵七"
+    ],
+    [
+     "大陵七",
+     "大陵八"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天船",
+   "section": "胃宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "天船一",
+    "天船二",
+    "天船三",
+    "天船四",
+    "天船五",
+    "天船六",
+    "天船七",
+    "天船八",
+    "天船九"
+   ],
+   "edges": [
+    [
+     "天船一",
+     "天船二"
+    ],
+    [
+     "天船二",
+     "天船三"
+    ],
+    [
+     "天船三",
+     "天船四"
+    ],
+    [
+     "天船四",
+     "天船五"
+    ],
+    [
+     "天船五",
+     "天船六"
+    ],
+    [
+     "天船六",
+     "天船七"
+    ],
+    [
+     "天船七",
+     "天船八"
+    ],
+    [
+     "天船八",
+     "天船九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "积尸",
+   "section": "胃宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "积尸"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "积水",
+   "section": "胃宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "积水"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "昴",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "昴宿一",
+    "昴宿二",
+    "昴宿三",
+    "昴宿四",
+    "昴宿五",
+    "昴宿六",
+    "昴宿七"
+   ],
+   "edges": [
+    [
+     "昴宿一",
+     "昴宿二"
+    ],
+    [
+     "昴宿二",
+     "昴宿三"
+    ],
+    [
+     "昴宿三",
+     "昴宿四"
+    ],
+    [
+     "昴宿四",
+     "昴宿五"
+    ],
+    [
+     "昴宿五",
+     "昴宿六"
+    ],
+    [
+     "昴宿六",
+     "昴宿七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天阿",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天阿"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "月",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "月"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "天阴",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "天阴一",
+    "天阴二",
+    "天阴三",
+    "天阴四",
+    "天阴五"
+   ],
+   "edges": [
+    [
+     "天阴一",
+     "天阴二"
+    ],
+    [
+     "天阴二",
+     "天阴三"
+    ],
+    [
+     "天阴三",
+     "天阴四"
+    ],
+    [
+     "天阴四",
+     "天阴五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "刍稿",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "刍藁一",
+    "刍藁二",
+    "刍藁三",
+    "刍藁四",
+    "刍藁五",
+    "刍藁六"
+   ],
+   "edges": [
+    [
+     "刍藁一",
+     "刍藁二"
+    ],
+    [
+     "刍藁二",
+     "刍藁三"
+    ],
+    [
+     "刍藁三",
+     "刍藁四"
+    ],
+    [
+     "刍藁四",
+     "刍藁五"
+    ],
+    [
+     "刍藁五",
+     "刍藁六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天苑",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 16,
+   "positioned_stars": 16,
+   "stars_used": [
+    "天苑一",
+    "天苑二",
+    "天苑三",
+    "天苑四",
+    "天苑五",
+    "天苑六",
+    "天苑七",
+    "天苑八",
+    "天苑九",
+    "天苑十",
+    "天苑十一",
+    "天苑十二",
+    "天苑十三",
+    "天苑十四",
+    "天苑十五",
+    "天苑十六"
+   ],
+   "edges": [
+    [
+     "天苑一",
+     "天苑二"
+    ],
+    [
+     "天苑二",
+     "天苑三"
+    ],
+    [
+     "天苑三",
+     "天苑四"
+    ],
+    [
+     "天苑四",
+     "天苑五"
+    ],
+    [
+     "天苑五",
+     "天苑六"
+    ],
+    [
+     "天苑六",
+     "天苑七"
+    ],
+    [
+     "天苑七",
+     "天苑八"
+    ],
+    [
+     "天苑八",
+     "天苑九"
+    ],
+    [
+     "天苑九",
+     "天苑十"
+    ],
+    [
+     "天苑十",
+     "天苑十一"
+    ],
+    [
+     "天苑十一",
+     "天苑十二"
+    ],
+    [
+     "天苑十二",
+     "天苑十三"
+    ],
+    [
+     "天苑十三",
+     "天苑十四"
+    ],
+    [
+     "天苑十四",
+     "天苑十五"
+    ],
+    [
+     "天苑十五",
+     "天苑十六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "卷舌",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "卷舌一",
+    "卷舌二",
+    "卷舌三",
+    "卷舌四",
+    "卷舌五",
+    "卷舌六"
+   ],
+   "edges": [
+    [
+     "卷舌一",
+     "卷舌二"
+    ],
+    [
+     "卷舌二",
+     "卷舌三"
+    ],
+    [
+     "卷舌三",
+     "卷舌四"
+    ],
+    [
+     "卷舌四",
+     "卷舌五"
+    ],
+    [
+     "卷舌五",
+     "卷舌六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天谗",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天谗"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "砺石",
+   "section": "昴宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "砺石一",
+    "砺石二",
+    "砺石三",
+    "砺石四"
+   ],
+   "edges": [
+    [
+     "砺石一",
+     "砺石二"
+    ],
+    [
+     "砺石二",
+     "砺石三"
+    ],
+    [
+     "砺石三",
+     "砺石四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "毕",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "毕宿一",
+    "毕宿二",
+    "毕宿三",
+    "毕宿四",
+    "毕宿五",
+    "毕宿六",
+    "毕宿七",
+    "毕宿八",
+    "附耳"
+   ],
+   "edges": [
+    [
+     "毕宿一",
+     "毕宿二"
+    ],
+    [
+     "毕宿二",
+     "毕宿三"
+    ],
+    [
+     "毕宿三",
+     "毕宿四"
+    ],
+    [
+     "毕宿四",
+     "毕宿七"
+    ],
+    [
+     "毕宿七",
+     "毕宿六"
+    ],
+    [
+     "毕宿六",
+     "毕宿五"
+    ],
+    [
+     "毕宿五",
+     "附耳"
+    ],
+    [
+     "毕宿四",
+     "毕宿八"
+    ]
+   ],
+   "basis": "毕形双臂：北臂毕一-二-三-四、南臂毕四-七-六-五（毕宿星群 V 形），附耳附于毕五之东（《步天歌》「附耳微东一数随」），毕八（λ Tau）自毕四西南长引——伊世同图式",
+   "note": "附耳（σ² Tau）本表并入毕官。毕八连法据出版星图通例，个别图本有异画。"
+  },
+  {
+   "name": "天街",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "天街一",
+    "天街二"
+   ],
+   "edges": [
+    [
+     "天街一",
+     "天街二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天节",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 8,
+   "positioned_stars": 8,
+   "stars_used": [
+    "天节一",
+    "天节二",
+    "天节三",
+    "天节四",
+    "天节五",
+    "天节六",
+    "天节七",
+    "天节八"
+   ],
+   "edges": [
+    [
+     "天节一",
+     "天节二"
+    ],
+    [
+     "天节二",
+     "天节三"
+    ],
+    [
+     "天节三",
+     "天节四"
+    ],
+    [
+     "天节四",
+     "天节五"
+    ],
+    [
+     "天节五",
+     "天节六"
+    ],
+    [
+     "天节六",
+     "天节七"
+    ],
+    [
+     "天节七",
+     "天节八"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "诸王",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "诸王一",
+    "诸王二",
+    "诸王三",
+    "诸王四",
+    "诸王五",
+    "诸王六"
+   ],
+   "edges": [
+    [
+     "诸王一",
+     "诸王二"
+    ],
+    [
+     "诸王二",
+     "诸王三"
+    ],
+    [
+     "诸王三",
+     "诸王四"
+    ],
+    [
+     "诸王四",
+     "诸王五"
+    ],
+    [
+     "诸王五",
+     "诸王六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天高",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "天高一",
+    "天高二",
+    "天高三",
+    "天高四"
+   ],
+   "edges": [
+    [
+     "天高一",
+     "天高二"
+    ],
+    [
+     "天高二",
+     "天高三"
+    ],
+    [
+     "天高三",
+     "天高四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "九州殊口",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 6,
+   "stars_used": [
+    "九州殊口一",
+    "九州殊口二",
+    "九州殊口三",
+    "九州殊口四",
+    "九州殊口五",
+    "九州殊口六"
+   ],
+   "edges": [
+    [
+     "九州殊口一",
+     "九州殊口二"
+    ],
+    [
+     "九州殊口二",
+     "九州殊口三"
+    ],
+    [
+     "九州殊口三",
+     "九州殊口四"
+    ],
+    [
+     "九州殊口四",
+     "九州殊口五"
+    ],
+    [
+     "九州殊口五",
+     "九州殊口六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 9 星，本表已定 6 星，连线仅用已定星。"
+  },
+  {
+   "name": "五车",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "五车一",
+    "五车二",
+    "五车三",
+    "五车四",
+    "五车五"
+   ],
+   "edges": [
+    [
+     "五车一",
+     "五车二"
+    ],
+    [
+     "五车二",
+     "五车三"
+    ],
+    [
+     "五车三",
+     "五车四"
+    ],
+    [
+     "五车四",
+     "五车五"
+    ],
+    [
+     "五车五",
+     "五车一"
+    ]
+   ],
+   "basis": "五车环形：五星成五角环（伊世同《中西对照恒星图表》图式；《步天歌》「座旗东北迭三弯」咏其环曲之势）",
+   "note": ""
+  },
+  {
+   "name": "三柱",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 8,
+   "stars_used": [
+    "三柱一",
+    "三柱二",
+    "三柱三",
+    "三柱四",
+    "三柱五",
+    "三柱六",
+    "三柱七",
+    "三柱八"
+   ],
+   "edges": [
+    [
+     "三柱一",
+     "三柱二"
+    ],
+    [
+     "三柱二",
+     "三柱三"
+    ],
+    [
+     "三柱四",
+     "三柱五"
+    ],
+    [
+     "三柱五",
+     "三柱六"
+    ],
+    [
+     "三柱七",
+     "三柱八"
+    ]
+   ],
+   "basis": "三列分立：《步天歌》「西三东六柱分承」——三柱分三列，各列内直连、列间不连",
+   "note": "三柱九未定星，第三列仅存三柱七、八两星。 传统 9 星，本表已定 8 星，连线仅用已定星。"
+  },
+  {
+   "name": "天潢",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "天潢一",
+    "天潢二",
+    "天潢三",
+    "天潢四",
+    "天潢五"
+   ],
+   "edges": [
+    [
+     "天潢一",
+     "天潢二"
+    ],
+    [
+     "天潢二",
+     "天潢三"
+    ],
+    [
+     "天潢三",
+     "天潢四"
+    ],
+    [
+     "天潢四",
+     "天潢五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "咸池",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "咸池一",
+    "咸池二",
+    "咸池三"
+   ],
+   "edges": [
+    [
+     "咸池一",
+     "咸池二"
+    ],
+    [
+     "咸池二",
+     "咸池三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天关",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天关"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "参旗",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "参旗一",
+    "参旗二",
+    "参旗三",
+    "参旗四",
+    "参旗五",
+    "参旗六",
+    "参旗七",
+    "参旗八",
+    "参旗九"
+   ],
+   "edges": [
+    [
+     "参旗一",
+     "参旗二"
+    ],
+    [
+     "参旗二",
+     "参旗三"
+    ],
+    [
+     "参旗三",
+     "参旗四"
+    ],
+    [
+     "参旗四",
+     "参旗五"
+    ],
+    [
+     "参旗五",
+     "参旗六"
+    ],
+    [
+     "参旗六",
+     "参旗七"
+    ],
+    [
+     "参旗七",
+     "参旗八"
+    ],
+    [
+     "参旗八",
+     "参旗九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "九斿",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "九斿一",
+    "九斿二",
+    "九斿三",
+    "九斿四",
+    "九斿五",
+    "九斿六",
+    "九斿七",
+    "九斿八",
+    "九斿九"
+   ],
+   "edges": [
+    [
+     "九斿一",
+     "九斿二"
+    ],
+    [
+     "九斿二",
+     "九斿三"
+    ],
+    [
+     "九斿三",
+     "九斿四"
+    ],
+    [
+     "九斿四",
+     "九斿五"
+    ],
+    [
+     "九斿五",
+     "九斿六"
+    ],
+    [
+     "九斿六",
+     "九斿七"
+    ],
+    [
+     "九斿七",
+     "九斿八"
+    ],
+    [
+     "九斿八",
+     "九斿九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天园",
+   "section": "毕宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 13,
+   "positioned_stars": 13,
+   "stars_used": [
+    "天园一",
+    "天园二",
+    "天园三",
+    "天园四",
+    "天园五",
+    "天园六",
+    "天园七",
+    "天园八",
+    "天园九",
+    "天园十",
+    "天园十一",
+    "天园十二",
+    "天园十三"
+   ],
+   "edges": [
+    [
+     "天园一",
+     "天园二"
+    ],
+    [
+     "天园二",
+     "天园三"
+    ],
+    [
+     "天园三",
+     "天园四"
+    ],
+    [
+     "天园四",
+     "天园五"
+    ],
+    [
+     "天园五",
+     "天园六"
+    ],
+    [
+     "天园六",
+     "天园七"
+    ],
+    [
+     "天园七",
+     "天园八"
+    ],
+    [
+     "天园八",
+     "天园九"
+    ],
+    [
+     "天园九",
+     "天园十"
+    ],
+    [
+     "天园十",
+     "天园十一"
+    ],
+    [
+     "天园十一",
+     "天园十二"
+    ],
+    [
+     "天园十二",
+     "天园十三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "觜",
+   "section": "觜宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "觜宿一",
+    "觜宿二",
+    "觜宿三"
+   ],
+   "edges": [
+    [
+     "觜宿一",
+     "觜宿二"
+    ],
+    [
+     "觜宿二",
+     "觜宿三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "座旗",
+   "section": "觜宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "座旗一",
+    "座旗二",
+    "座旗三",
+    "座旗四",
+    "座旗五",
+    "座旗六",
+    "座旗七",
+    "座旗八",
+    "座旗九"
+   ],
+   "edges": [
+    [
+     "座旗一",
+     "座旗二"
+    ],
+    [
+     "座旗二",
+     "座旗三"
+    ],
+    [
+     "座旗三",
+     "座旗四"
+    ],
+    [
+     "座旗四",
+     "座旗五"
+    ],
+    [
+     "座旗五",
+     "座旗六"
+    ],
+    [
+     "座旗六",
+     "座旗七"
+    ],
+    [
+     "座旗七",
+     "座旗八"
+    ],
+    [
+     "座旗八",
+     "座旗九"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "司怪",
+   "section": "觜宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "司怪一",
+    "司怪二",
+    "司怪三",
+    "司怪四"
+   ],
+   "edges": [
+    [
+     "司怪一",
+     "司怪二"
+    ],
+    [
+     "司怪二",
+     "司怪三"
+    ],
+    [
+     "司怪三",
+     "司怪四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "参",
+   "section": "参宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 10,
+   "positioned_stars": 10,
+   "stars_used": [
+    "参宿一",
+    "参宿二",
+    "参宿三",
+    "参宿四",
+    "参宿五",
+    "参宿六",
+    "参宿七",
+    "伐一",
+    "伐二",
+    "伐三"
+   ],
+   "edges": [
+    [
+     "参宿五",
+     "参宿三"
+    ],
+    [
+     "参宿三",
+     "参宿二"
+    ],
+    [
+     "参宿二",
+     "参宿一"
+    ],
+    [
+     "参宿一",
+     "参宿四"
+    ],
+    [
+     "参宿四",
+     "参宿五"
+    ],
+    [
+     "参宿三",
+     "参宿七"
+    ],
+    [
+     "参宿一",
+     "参宿六"
+    ],
+    [
+     "伐一",
+     "伐二"
+    ],
+    [
+     "伐二",
+     "伐三"
+    ]
+   ],
+   "basis": "人身图式：两肩（参四 α Ori、参五 γ Ori）横系、腰带参三-二-一、带端下系两足（参七 β Ori、参六 κ Ori）；伐三星在带下（《步天歌》「参宿七星……中下伐星三颗具」）——苏州石刻天文图、伊世同图同式",
+   "note": "伐一/二/三本表并入参官，作带下小链。"
+  },
+  {
+   "name": "玉井",
+   "section": "参宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "玉井一",
+    "玉井二",
+    "玉井三",
+    "玉井四"
+   ],
+   "edges": [
+    [
+     "玉井一",
+     "玉井二"
+    ],
+    [
+     "玉井二",
+     "玉井三"
+    ],
+    [
+     "玉井三",
+     "玉井四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "屏",
+   "section": "参宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "屏一",
+    "屏二"
+   ],
+   "edges": [
+    [
+     "屏一",
+     "屏二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "军井",
+   "section": "参宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "军井一",
+    "军井二",
+    "军井三",
+    "军井四"
+   ],
+   "edges": [
+    [
+     "军井一",
+     "军井二"
+    ],
+    [
+     "军井二",
+     "军井三"
+    ],
+    [
+     "军井三",
+     "军井四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天厕",
+   "section": "参宿",
+   "region": "西方白虎",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "天厕一",
+    "天厕二",
+    "天厕三",
+    "天厕四"
+   ],
+   "edges": [
+    [
+     "天厕一",
+     "天厕二"
+    ],
+    [
+     "天厕二",
+     "天厕三"
+    ],
+    [
+     "天厕三",
+     "天厕四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天屎",
+   "section": "参宿",
+   "region": "西方白虎",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天屎"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "井",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "井宿一",
+    "井宿二",
+    "井宿三",
+    "井宿四",
+    "井宿五",
+    "井宿六",
+    "井宿七",
+    "井宿八",
+    "钺"
+   ],
+   "edges": [
+    [
+     "井宿一",
+     "井宿二"
+    ],
+    [
+     "井宿二",
+     "井宿三"
+    ],
+    [
+     "井宿三",
+     "井宿四"
+    ],
+    [
+     "井宿五",
+     "井宿六"
+    ],
+    [
+     "井宿六",
+     "井宿七"
+    ],
+    [
+     "井宿七",
+     "井宿八"
+    ],
+    [
+     "井宿一",
+     "井宿五"
+    ],
+    [
+     "井宿四",
+     "井宿八"
+    ],
+    [
+     "井宿一",
+     "钺"
+    ]
+   ],
+   "basis": "井字格：西列井一→四、东列井五→八，上下以井一-井五、井四-井八横系，钺自井一出（《步天歌》「井宿八星如井形，一星名钺井边安」；苏州石刻天文图、伊世同图同式）",
+   "note": "钺（η Gem）为井之附座星，本表并入井官。"
+  },
+  {
+   "name": "北河",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "北河一",
+    "北河二",
+    "北河三"
+   ],
+   "edges": [
+    [
+     "北河一",
+     "北河二"
+    ],
+    [
+     "北河二",
+     "北河三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "南河",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "南河一",
+    "南河二",
+    "南河三"
+   ],
+   "edges": [
+    [
+     "南河一",
+     "南河二"
+    ],
+    [
+     "南河二",
+     "南河三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天樽",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "天樽一",
+    "天樽二",
+    "天樽三"
+   ],
+   "edges": [
+    [
+     "天樽一",
+     "天樽二"
+    ],
+    [
+     "天樽二",
+     "天樽三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "五诸侯",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 5,
+   "positioned_stars": 5,
+   "stars_used": [
+    "五诸侯一",
+    "五诸侯二",
+    "五诸侯三",
+    "五诸侯四",
+    "五诸侯五"
+   ],
+   "edges": [
+    [
+     "五诸侯一",
+     "五诸侯二"
+    ],
+    [
+     "五诸侯二",
+     "五诸侯三"
+    ],
+    [
+     "五诸侯三",
+     "五诸侯四"
+    ],
+    [
+     "五诸侯四",
+     "五诸侯五"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "积水",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "积水"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "积薪",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "积薪"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "水府",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "水府一",
+    "水府二",
+    "水府三",
+    "水府四"
+   ],
+   "edges": [
+    [
+     "水府一",
+     "水府二"
+    ],
+    [
+     "水府二",
+     "水府三"
+    ],
+    [
+     "水府三",
+     "水府四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "水位",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "水位一",
+    "水位二",
+    "水位三",
+    "水位四"
+   ],
+   "edges": [
+    [
+     "水位一",
+     "水位二"
+    ],
+    [
+     "水位二",
+     "水位三"
+    ],
+    [
+     "水位三",
+     "水位四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "四渎",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "四渎一",
+    "四渎二",
+    "四渎三",
+    "四渎四"
+   ],
+   "edges": [
+    [
+     "四渎一",
+     "四渎二"
+    ],
+    [
+     "四渎二",
+     "四渎三"
+    ],
+    [
+     "四渎三",
+     "四渎四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "军市",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 13,
+   "positioned_stars": 6,
+   "stars_used": [
+    "军市一",
+    "军市二",
+    "军市三",
+    "军市四",
+    "军市五",
+    "军市六"
+   ],
+   "edges": [
+    [
+     "军市一",
+     "军市二"
+    ],
+    [
+     "军市二",
+     "军市三"
+    ],
+    [
+     "军市三",
+     "军市四"
+    ],
+    [
+     "军市四",
+     "军市五"
+    ],
+    [
+     "军市五",
+     "军市六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 13 星，本表已定 6 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "野鸡",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "野鸡"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "丈人",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "丈人一",
+    "丈人二"
+   ],
+   "edges": [
+    [
+     "丈人一",
+     "丈人二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "子",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "子一",
+    "子二"
+   ],
+   "edges": [
+    [
+     "子一",
+     "子二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "孙",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "孙一",
+    "孙二"
+   ],
+   "edges": [
+    [
+     "孙一",
+     "孙二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "阙丘",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 2,
+   "positioned_stars": 2,
+   "stars_used": [
+    "阙丘一",
+    "阙丘二"
+   ],
+   "edges": [
+    [
+     "阙丘一",
+     "阙丘二"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "狼",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天狼"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "弧矢",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "doubtful",
+   "trad_stars": 9,
+   "positioned_stars": 9,
+   "stars_used": [
+    "弧矢一",
+    "弧矢二",
+    "弧矢三",
+    "弧矢四",
+    "弧矢五",
+    "弧矢六",
+    "弧矢七",
+    "弧矢八",
+    "弧矢九"
+   ],
+   "edges": [
+    [
+     "弧矢八",
+     "弧矢七"
+    ],
+    [
+     "弧矢七",
+     "弧矢一"
+    ],
+    [
+     "弧矢一",
+     "弧矢二"
+    ],
+    [
+     "弧矢二",
+     "弧矢九"
+    ],
+    [
+     "弧矢二",
+     "弧矢六"
+    ],
+    [
+     "弧矢六",
+     "弧矢五"
+    ],
+    [
+     "弧矢五",
+     "弧矢四"
+    ],
+    [
+     "弧矢四",
+     "弧矢三"
+    ]
+   ],
+   "basis": "图式存疑（拟合）：《步天歌》只咏「九个弯弧弓，一矢拟射顽狼星胸」——弓体取弧矢八-七-一-二-九之弧，矢杆取二-六-五-四-三向东南；九星在弓、矢间的确切划分，出版图式彼此不一",
+   "note": "所给边为拟合方案，待核伊世同原图定谳后升为定式。"
+  },
+  {
+   "name": "老人",
+   "section": "井宿",
+   "region": "南方朱雀",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "老人"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "鬼",
+   "section": "鬼宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "鬼宿一",
+    "鬼宿二",
+    "鬼宿三",
+    "鬼宿四"
+   ],
+   "edges": [
+    [
+     "鬼宿一",
+     "鬼宿二"
+    ],
+    [
+     "鬼宿二",
+     "鬼宿三"
+    ],
+    [
+     "鬼宿三",
+     "鬼宿四"
+    ],
+    [
+     "鬼宿四",
+     "鬼宿一"
+    ]
+   ],
+   "basis": "方框闭环：《步天歌》「鬼四星册方似木櫃，中央白者积尸气」——四星成方，积尸（M44）居中另为一官单点",
+   "note": ""
+  },
+  {
+   "name": "积尸",
+   "section": "鬼宿",
+   "region": "南方朱雀",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "积尸气"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "爟",
+   "section": "鬼宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "爟一",
+    "爟二",
+    "爟三",
+    "爟四"
+   ],
+   "edges": [
+    [
+     "爟一",
+     "爟二"
+    ],
+    [
+     "爟二",
+     "爟三"
+    ],
+    [
+     "爟三",
+     "爟四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天狗",
+   "section": "鬼宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "天狗一",
+    "天狗二",
+    "天狗三",
+    "天狗四",
+    "天狗五",
+    "天狗六",
+    "天狗七"
+   ],
+   "edges": [
+    [
+     "天狗一",
+     "天狗二"
+    ],
+    [
+     "天狗二",
+     "天狗三"
+    ],
+    [
+     "天狗三",
+     "天狗四"
+    ],
+    [
+     "天狗四",
+     "天狗五"
+    ],
+    [
+     "天狗五",
+     "天狗六"
+    ],
+    [
+     "天狗六",
+     "天狗七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "外厨",
+   "section": "鬼宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 4,
+   "stars_used": [
+    "外厨一",
+    "外厨二",
+    "外厨三",
+    "外厨四"
+   ],
+   "edges": [
+    [
+     "外厨一",
+     "外厨二"
+    ],
+    [
+     "外厨二",
+     "外厨三"
+    ],
+    [
+     "外厨三",
+     "外厨四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 6 星，本表已定 4 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "天社",
+   "section": "鬼宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "天社一",
+    "天社二",
+    "天社三",
+    "天社四",
+    "天社五",
+    "天社六"
+   ],
+   "edges": [
+    [
+     "天社一",
+     "天社二"
+    ],
+    [
+     "天社二",
+     "天社三"
+    ],
+    [
+     "天社三",
+     "天社四"
+    ],
+    [
+     "天社四",
+     "天社五"
+    ],
+    [
+     "天社五",
+     "天社六"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "主数据（xingguan.json）本科目状态为存疑。 天社三→四一段跨约 18°，系星序固有（φ Vel 孤悬于东），从传统星序。"
+  },
+  {
+   "name": "天记",
+   "section": "鬼宿",
+   "region": "南方朱雀",
+   "status": "single",
+   "trad_stars": 1,
+   "positioned_stars": 1,
+   "stars_used": [
+    "天记"
+   ],
+   "edges": [],
+   "basis": "单星官，独立成点，不连线",
+   "note": ""
+  },
+  {
+   "name": "柳",
+   "section": "柳宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 8,
+   "positioned_stars": 8,
+   "stars_used": [
+    "柳宿一",
+    "柳宿二",
+    "柳宿三",
+    "柳宿四",
+    "柳宿五",
+    "柳宿六",
+    "柳宿七",
+    "柳宿八"
+   ],
+   "edges": [
+    [
+     "柳宿一",
+     "柳宿二"
+    ],
+    [
+     "柳宿二",
+     "柳宿三"
+    ],
+    [
+     "柳宿三",
+     "柳宿四"
+    ],
+    [
+     "柳宿四",
+     "柳宿五"
+    ],
+    [
+     "柳宿五",
+     "柳宿六"
+    ],
+    [
+     "柳宿六",
+     "柳宿七"
+    ],
+    [
+     "柳宿七",
+     "柳宿八"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "酒旗",
+   "section": "柳宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "酒旗一",
+    "酒旗二",
+    "酒旗三"
+   ],
+   "edges": [
+    [
+     "酒旗一",
+     "酒旗二"
+    ],
+    [
+     "酒旗二",
+     "酒旗三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "星",
+   "section": "星宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "星宿一",
+    "星宿二",
+    "星宿三",
+    "星宿四",
+    "星宿五",
+    "星宿六",
+    "星宿七"
+   ],
+   "edges": [
+    [
+     "星宿一",
+     "星宿二"
+    ],
+    [
+     "星宿二",
+     "星宿三"
+    ],
+    [
+     "星宿三",
+     "星宿四"
+    ],
+    [
+     "星宿四",
+     "星宿五"
+    ],
+    [
+     "星宿五",
+     "星宿六"
+    ],
+    [
+     "星宿六",
+     "星宿七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "轩辕",
+   "section": "星宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 17,
+   "positioned_stars": 17,
+   "stars_used": [
+    "轩辕一",
+    "轩辕二",
+    "轩辕三",
+    "轩辕四",
+    "轩辕五",
+    "轩辕六",
+    "轩辕七",
+    "轩辕八",
+    "轩辕九",
+    "轩辕十",
+    "轩辕十一",
+    "轩辕十二",
+    "轩辕十三",
+    "轩辕十四",
+    "轩辕十五",
+    "轩辕十六",
+    "轩辕十七（御女）"
+   ],
+   "edges": [
+    [
+     "轩辕一",
+     "轩辕二"
+    ],
+    [
+     "轩辕二",
+     "轩辕三"
+    ],
+    [
+     "轩辕三",
+     "轩辕四"
+    ],
+    [
+     "轩辕四",
+     "轩辕五"
+    ],
+    [
+     "轩辕五",
+     "轩辕六"
+    ],
+    [
+     "轩辕六",
+     "轩辕七"
+    ],
+    [
+     "轩辕七",
+     "轩辕八"
+    ],
+    [
+     "轩辕八",
+     "轩辕九"
+    ],
+    [
+     "轩辕九",
+     "轩辕十"
+    ],
+    [
+     "轩辕十",
+     "轩辕十一"
+    ],
+    [
+     "轩辕十一",
+     "轩辕十二"
+    ],
+    [
+     "轩辕十二",
+     "轩辕十三"
+    ],
+    [
+     "轩辕十三",
+     "轩辕十四"
+    ],
+    [
+     "轩辕十四",
+     "轩辕十五"
+    ],
+    [
+     "轩辕十五",
+     "轩辕十六"
+    ],
+    [
+     "轩辕十六",
+     "轩辕十七（御女）"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "内平",
+   "section": "星宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 4,
+   "positioned_stars": 4,
+   "stars_used": [
+    "内平一",
+    "内平二",
+    "内平三",
+    "内平四"
+   ],
+   "edges": [
+    [
+     "内平一",
+     "内平二"
+    ],
+    [
+     "内平二",
+     "内平三"
+    ],
+    [
+     "内平三",
+     "内平四"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "天相",
+   "section": "星宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 3,
+   "positioned_stars": 3,
+   "stars_used": [
+    "天相一",
+    "天相二",
+    "天相三"
+   ],
+   "edges": [
+    [
+     "天相一",
+     "天相二"
+    ],
+    [
+     "天相二",
+     "天相三"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "天稷",
+   "section": "星宿",
+   "region": "南方朱雀",
+   "status": "no_stars",
+   "trad_stars": 5,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 5 星，本表已定 0 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "张",
+   "section": "张宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 6,
+   "positioned_stars": 6,
+   "stars_used": [
+    "张宿一",
+    "张宿二",
+    "张宿三",
+    "张宿四",
+    "张宿五",
+    "张宿六"
+   ],
+   "edges": [
+    [
+     "张宿一",
+     "张宿二"
+    ],
+    [
+     "张宿二",
+     "张宿三"
+    ],
+    [
+     "张宿三",
+     "张宿四"
+    ],
+    [
+     "张宿四",
+     "张宿一"
+    ],
+    [
+     "张宿一",
+     "张宿五"
+    ],
+    [
+     "张宿三",
+     "张宿六"
+    ]
+   ],
+   "basis": "斜方＋两牵：《步天歌》「两珠左右各分牵，中有斜方四略偏。方际西星应作距」——张一至四成斜方闭环，张五（κ Hya）牵于西方距星张一，张六（φ³ Hya）牵于东方张三",
+   "note": ""
+  },
+  {
+   "name": "天庙",
+   "section": "张宿",
+   "region": "南方朱雀",
+   "status": "no_stars",
+   "trad_stars": 14,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 14 星，本表已定 0 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "翼",
+   "section": "翼宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 22,
+   "positioned_stars": 18,
+   "stars_used": [
+    "翼宿一",
+    "翼宿二",
+    "翼宿三",
+    "翼宿四",
+    "翼宿五",
+    "翼宿六",
+    "翼宿七",
+    "翼宿八",
+    "翼宿九",
+    "翼宿十",
+    "翼宿十一",
+    "翼宿十二",
+    "翼宿十三",
+    "翼宿十四",
+    "翼宿十六",
+    "翼宿十七",
+    "翼宿廿",
+    "翼宿廿一"
+   ],
+   "edges": [
+    [
+     "翼宿一",
+     "翼宿二"
+    ],
+    [
+     "翼宿二",
+     "翼宿三"
+    ],
+    [
+     "翼宿三",
+     "翼宿四"
+    ],
+    [
+     "翼宿四",
+     "翼宿五"
+    ],
+    [
+     "翼宿五",
+     "翼宿六"
+    ],
+    [
+     "翼宿六",
+     "翼宿七"
+    ],
+    [
+     "翼宿七",
+     "翼宿八"
+    ],
+    [
+     "翼宿八",
+     "翼宿九"
+    ],
+    [
+     "翼宿九",
+     "翼宿十"
+    ],
+    [
+     "翼宿十",
+     "翼宿十一"
+    ],
+    [
+     "翼宿十一",
+     "翼宿十二"
+    ],
+    [
+     "翼宿十二",
+     "翼宿十三"
+    ],
+    [
+     "翼宿十三",
+     "翼宿十四"
+    ],
+    [
+     "翼宿十四",
+     "翼宿十六"
+    ],
+    [
+     "翼宿十六",
+     "翼宿十七"
+    ],
+    [
+     "翼宿十七",
+     "翼宿廿"
+    ],
+    [
+     "翼宿廿",
+     "翼宿廿一"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": "传统 22 星，本表已定 18 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。 翼宿星序本身横跨南北两列（《步天歌》「南北星皆五数充」），星序链中段有长跨，属图式固有，非误连。"
+  },
+  {
+   "name": "东瓯",
+   "section": "翼宿",
+   "region": "南方朱雀",
+   "status": "no_stars",
+   "trad_stars": 5,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 5 星，本表已定 0 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "轸",
+   "section": "轸宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "轸宿一",
+    "轸宿二",
+    "轸宿三",
+    "长沙",
+    "左辖",
+    "右辖",
+    "轸宿四"
+   ],
+   "edges": [
+    [
+     "轸宿一",
+     "轸宿三"
+    ],
+    [
+     "轸宿三",
+     "轸宿四"
+    ],
+    [
+     "轸宿四",
+     "轸宿二"
+    ],
+    [
+     "轸宿二",
+     "轸宿一"
+    ],
+    [
+     "轸宿三",
+     "左辖"
+    ],
+    [
+     "轸宿二",
+     "右辖"
+    ]
+   ],
+   "basis": "方框＋双辖：《步天歌》「轸为方式象宜参，内附长沙一粒含。辖其两星分左右，左依东北右西南」——四星成方，长沙居框内不连线，左辖（η Crv）附东北之轸三，右辖（α Crv）附西南之轸二",
+   "note": "长沙（ζ Crv）为框内单点，无边。"
+  },
+  {
+   "name": "军门",
+   "section": "轸宿",
+   "region": "南方朱雀",
+   "status": "no_stars",
+   "trad_stars": 2,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 2 星，本表已定 0 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "土司空",
+   "section": "轸宿",
+   "region": "南方朱雀",
+   "status": "no_stars",
+   "trad_stars": 4,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 4 星，本表已定 0 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  },
+  {
+   "name": "青丘",
+   "section": "轸宿",
+   "region": "南方朱雀",
+   "status": "lined",
+   "trad_stars": 7,
+   "positioned_stars": 7,
+   "stars_used": [
+    "青丘一",
+    "青丘二",
+    "青丘三",
+    "青丘四",
+    "青丘五",
+    "青丘六",
+    "青丘七"
+   ],
+   "edges": [
+    [
+     "青丘一",
+     "青丘二"
+    ],
+    [
+     "青丘二",
+     "青丘三"
+    ],
+    [
+     "青丘三",
+     "青丘四"
+    ],
+    [
+     "青丘四",
+     "青丘五"
+    ],
+    [
+     "青丘五",
+     "青丘六"
+    ],
+    [
+     "青丘六",
+     "青丘七"
+    ]
+   ],
+   "basis": "星序链：依《步天歌》星序（xingguan.json 之 stars 序）逐星直连——伊世同《中西对照恒星图表》、陈遵妫星图之通行图式",
+   "note": ""
+  },
+  {
+   "name": "器府",
+   "section": "轸宿",
+   "region": "南方朱雀",
+   "status": "no_stars",
+   "trad_stars": 32,
+   "positioned_stars": 0,
+   "stars_used": [],
+   "edges": [],
+   "basis": "无已定星（本表未录坐标），无从连线",
+   "note": "本官在本表无一颗带坐标的已定星，星图上暂缺位。 传统 32 星，本表已定 0 星，连线仅用已定星。 主数据（xingguan.json）本科目状态为存疑。"
+  }
+ ]
+}
