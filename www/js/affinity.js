@@ -8,7 +8,10 @@
  * ②所求槽位稀有度：主/次所求权重 × (1 + 0.08×ln(74/该槽位持有数))；
  * ③得分 = Σ(校正后用户分 × 有效权重) / 神祇总权重^0.52，同分按图鉴 id 序。
  * 定位：文化趣味与自我认识，文案不作吉凶断语（与全站免责正本一致）。
- * 进度与结果只存本地 localStorage，不上传。 */
+ * 进度与结果只存本地 localStorage，不上传。
+ * 2026-10-22 分享卡改长版（750×1450）：中段加「特质相合」五边形（见下方雷达口径，
+ * 结果页同步同款图）；下段双版本——带码版（二维码回流＋短域名）与小红书版
+ * （无码无网址，底部印全名「戊日不上香APP」作可搜关键词）。 */
 (function () {
   var TAGS = window.AFFINITY_TAGS;
   var QS = window.AFFINITY_QUESTIONS;
@@ -89,6 +92,89 @@
     return out;
   }
 
+  /* ---------- 特质五边形（五轴雷达，与 qimen-build/affinity_model.py 同口径） ----------
+   * 同一套标签数据的可视化，不参与主缘计分。五轴由气质标签池（12）归纳，母题（12）按
+   * 同轴补映射，每个标签恰好归一轴：仁厚＝温厚亲和、悯人助人；刚正＝正气威严、守序护众；
+   * 灵慧＝聪慧通透、点化启悟；清峻＝清高孤介、苦修放下；洒脱＝自在来去、不拘形迹。
+   * 归一（0–5，同尺＝占该轴可达上限之比）：用户＝答案原始标签分（气质原值＋母题×0.6）
+   * 按轴汇总 ÷ 该轴问卷可达上限；神祇＝气质权重(1/个)＋母题权重(0.6/个) 按轴汇总
+   * ÷ 全体该轴最大值。映射表改动须与 affinity_model.py 同步。 */
+  var RADAR_AXES = ['仁厚', '刚正', '灵慧', '清峻', '洒脱'];
+  var TRAIT_AXIS = { '慈悲仁厚': 0, '温厚守成': 0, '刚正威严': 1, '英武果决': 1, '豪迈仗义': 1,
+    '聪慧机敏': 2, '沉稳谋略': 2, '清净淡泊': 3, '孤高清峻': 3, '坚毅苦修': 3, '逍遥洒脱': 4, '纯真活泼': 4 };
+  var MOTIF_AXIS = { '母仪守护': 0, '行医济世': 0, '冤屈昭雪': 0, '守职尽责': 1, '镇妖除害': 1, '护民救劫': 1,
+    '点化众生': 2, '少年英才': 2, '技艺成名': 2, '苦修成道': 3, '放下执念': 3, '漂泊历练': 4 };
+  function axisSum(tmap, mmapScaled) {
+    var out = [0, 0, 0, 0, 0], k;
+    for (k in tmap) if (TRAIT_AXIS[k] !== undefined) out[TRAIT_AXIS[k]] += tmap[k];
+    for (k in mmapScaled) if (MOTIF_AXIS[k] !== undefined) out[MOTIF_AXIS[k]] += mmapScaled[k];
+    return out;
+  }
+  var USER_REF = (function () {
+    var ref = [0, 0, 0, 0, 0];
+    QS.forEach(function (q) {
+      var per = [0, 0, 0, 0, 0];
+      q.options.forEach(function (o) {
+        var ms = {}, k;
+        for (k in (o.s.m || {})) ms[k] = o.s.m[k] * 0.6;
+        var s = axisSum(o.s.t || {}, ms);
+        for (var i = 0; i < 5; i++) if (s[i] > per[i]) per[i] = s[i];
+      });
+      for (var i = 0; i < 5; i++) ref[i] += per[i];
+    });
+    return ref;
+  })();
+  var DEITY_REF = (function () {
+    var ref = [0, 0, 0, 0, 0];
+    TAGS.forEach(function (d) {
+      var s = axisSum(WEIGHTS[d.id].t, WEIGHTS[d.id].m);
+      for (var i = 0; i < 5; i++) if (s[i] > ref[i]) ref[i] = s[i];
+    });
+    return ref;
+  })();
+  function radarUser(answers) {
+    var p = profileOf(answers), ms = {}, k;
+    for (k in p.m) ms[k] = p.m[k] * 0.6;
+    return axisSum(p.t, ms).map(function (v, i) { return Math.min(5, 5 * v / USER_REF[i]); });
+  }
+  function radarDeity(id) {
+    return axisSum(WEIGHTS[id].t, WEIGHTS[id].m).map(function (v, i) { return Math.min(5, 5 * v / DEITY_REF[i]); });
+  }
+  /* 雷达绘制（结果页与分享卡共用同画法）：五环网格＋轴线＋轴名＋用户层（深绿）
+   * ＋神祇层（金），顶点描点。 */
+  function drawRadar(c, cx, cy, R, uVals, dVals, labelPx) {
+    var SERIF = '"Noto Serif SC","Songti SC","STSong","SimSun",serif';
+    function pt(i, r) { var a = -Math.PI / 2 + i * 2 * Math.PI / 5; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; }
+    var ring, i, p;
+    c.save();
+    for (ring = 1; ring <= 5; ring++) {
+      c.beginPath();
+      for (i = 0; i < 5; i++) { p = pt(i, R * ring / 5); if (i === 0) c.moveTo(p[0], p[1]); else c.lineTo(p[0], p[1]); }
+      c.closePath();
+      c.strokeStyle = ring === 5 ? '#C9BB8E' : '#E3DBC3'; c.lineWidth = ring === 5 ? 2 : 1; c.stroke();
+    }
+    for (i = 0; i < 5; i++) {
+      p = pt(i, R);
+      c.beginPath(); c.moveTo(cx, cy); c.lineTo(p[0], p[1]);
+      c.strokeStyle = '#E3DBC3'; c.lineWidth = 1; c.stroke();
+    }
+    function layer(vals, stroke, fill) {
+      var j, q;
+      c.beginPath();
+      for (j = 0; j < 5; j++) { q = pt(j, R * Math.max(vals[j], 0) / 5); if (j === 0) c.moveTo(q[0], q[1]); else c.lineTo(q[0], q[1]); }
+      c.closePath(); c.fillStyle = fill; c.fill();
+      c.strokeStyle = stroke; c.lineWidth = 3; c.lineJoin = 'round'; c.stroke();
+      c.fillStyle = stroke;
+      for (j = 0; j < 5; j++) { q = pt(j, R * Math.max(vals[j], 0) / 5); c.beginPath(); c.arc(q[0], q[1], 4, 0, 2 * Math.PI); c.fill(); }
+    }
+    layer(uVals, '#2A5044', 'rgba(42,80,68,0.20)');
+    layer(dVals, '#A2813B', 'rgba(162,129,59,0.20)');
+    c.fillStyle = '#5B5340'; c.font = '600 ' + labelPx + 'px ' + SERIF;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (i = 0; i < 5; i++) { p = pt(i, R + labelPx * 0.95); c.fillText(RADAR_AXES[i], p[0], p[1]); }
+    c.restore();
+  }
+
   /* ---------- 相合说明（引职掌/气质/母题，不作断语） ---------- */
   function tagById(id) { for (var i = 0; i < TAGS.length; i++) if (TAGS[i].id === id) return TAGS[i]; return null; }
   function deityInfo(id) {
@@ -150,7 +236,10 @@
     mainWhy: document.getElementById('aff-main-why'),
     mainDetail: document.getElementById('aff-main-detail'),
     subs: document.getElementById('aff-subs'),
+    radar: document.getElementById('aff-radar'),
+    radarDeityName: document.getElementById('aff-radar-deity-name'),
     share: document.getElementById('aff-share'),
+    shareXhs: document.getElementById('aff-share-xhs'),
     shareLink: document.getElementById('aff-share-link'),
     copyLink: document.getElementById('aff-copy-link'),
     retake: document.getElementById('aff-retake'),
@@ -235,6 +324,16 @@
     E.mainName.textContent = TX(d.name);
     E.mainTitle.textContent = TX(info ? info.title : '');
     E.mainWhy.textContent = TX(explain(res.main, prof, true));
+    /* 特质五边形：与分享卡同数据同画法，先在结果页看到；数值挂 dataset 供冒烟对拍 */
+    if (E.radar) {
+      var uv = radarUser(res.a), dv = radarDeity(res.main);
+      E.radar.setAttribute('data-user', uv.map(function (v) { return v.toFixed(2); }).join(','));
+      E.radar.setAttribute('data-deity', dv.map(function (v) { return v.toFixed(2); }).join(','));
+      var rc = E.radar.getContext('2d');
+      rc.clearRect(0, 0, E.radar.width, E.radar.height);
+      drawRadar(rc, E.radar.width / 2, E.radar.height / 2, E.radar.width * 0.36, uv, dv, 44);
+      if (E.radarDeityName) E.radarDeityName.textContent = TF('aff_radar_deity', TX(d.name));
+    }
     E.subs.innerHTML = '';
     res.subs.forEach(function (id) {
       var sd = tagById(id), si = deityInfo(id);
@@ -266,6 +365,10 @@
   /* ---------- 分享结果（专属页链接：www/yuanfen/<id>.html，由 qimen-build/gen_share_pages.py 生成） ---------- */
   var SHARE_PAGE_BASE = 'https://wuri.shengboyu.ca/yuanfen/';
   function sharePageUrl(id) { return SHARE_PAGE_BASE + id + '.html'; }
+  /* 分享卡二维码目标 URL —— 全仓单一常量：二维码 PNG 资产（www/img/qr-yuanfen.png）
+   * 由 qimen-build/gen_qr.py 读取本常量生成。发布核验时若缘分子域名未通，
+   * 改此一处为 'https://wuri.shengboyu.ca/?yuanfen=1' 后重跑 gen_qr.py 即可。 */
+  var QR_TARGET_URL = 'https://yuanfen.shengboyu.ca/';
   function copyText(text, done) {
     function legacy() {
       try {
@@ -324,7 +427,10 @@
     ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
   }
-  function makeShareCard() {
+  /* 长版分享卡 750×1450：上段（品牌/造像/名号/相合行）不变；中段「特质相合」五边形
+   * ＋图例；下段诚实标注＋回流带。withQR=true 为带码版（二维码＋扫码语＋短域名）；
+   * withQR=false 为小红书版（无码无网址，底部品牌行印全名「戊日不上香APP」）。 */
+  function makeShareCard(withQR) {
     var res = curRes || lsGet(LS_RES);
     if (!res) return;
     var info = deityInfo(res.main), d = tagById(res.main);
@@ -332,46 +438,87 @@
     var st = shareTags(res.main, prof);
     var img = new Image();
     img.onload = function () {
-      try {
-        var W = 750, H = 1060, cv = document.createElement('canvas');
-        cv.width = W; cv.height = H;
-        var c = cv.getContext('2d');
-        var SERIF = '"Noto Serif SC","Songti SC","STSong","SimSun",serif';
-        c.fillStyle = '#F5F1E5'; c.fillRect(0, 0, W, H);
-        c.strokeStyle = '#A2813B'; c.lineWidth = 3; c.strokeRect(26, 26, W - 52, H - 52);
-        c.lineWidth = 1; c.strokeRect(40, 40, W - 80, H - 80);
-        c.textAlign = 'center';
-        c.fillStyle = '#86702E'; c.font = '600 30px ' + SERIF;
-        c.fillText('戊 日 不 上 香', W / 2, 96);
-        c.fillStyle = '#8C8371'; c.font = '25px ' + SERIF;
-        c.fillText('神 仙 缘 分 测 试', W / 2, 138);
-        /* 造像：顶部对齐裁切（与图鉴卡 object-position:top 一致） */
-        var ix = 165, iy = 168, iw = 420, ih = 540;
-        c.save(); roundRect(c, ix, iy, iw, ih, 16); c.clip();
-        var sc = Math.max(iw / img.naturalWidth, ih / img.naturalHeight);
-        var dw = img.naturalWidth * sc, dh = img.naturalHeight * sc;
-        c.drawImage(img, ix + (iw - dw) / 2, iy, dw, dh);
-        c.restore();
-        c.strokeStyle = '#E3DBC3'; c.lineWidth = 2; roundRect(c, ix, iy, iw, ih, 16); c.stroke();
-        c.fillStyle = '#2A251B'; c.font = '700 62px ' + SERIF;
-        c.fillText(d.name, W / 2, 792);
-        c.fillStyle = '#86702E'; c.font = '29px ' + SERIF;
-        c.fillText(info ? info.title : '', W / 2, 838);
-        c.strokeStyle = '#A2813B'; c.lineWidth = 2;
-        c.beginPath(); c.moveTo(W / 2 - 130, 866); c.lineTo(W / 2 - 14, 866); c.moveTo(W / 2 + 14, 866); c.lineTo(W / 2 + 130, 866); c.stroke();
-        c.save(); c.translate(W / 2, 866); c.rotate(Math.PI / 4); c.fillStyle = '#A2813B'; c.fillRect(-6, -6, 12, 12); c.restore();
-        c.fillStyle = '#2A5044'; c.font = '600 34px ' + SERIF;
-        c.fillText('与' + d.name + '最相合', W / 2, 916);
-        var line2 = [];
-        if (st.need) line2.push('所求「' + st.need + '」');
-        if (st.trait) line2.push('气质「' + st.trait + '」');
-        if (line2.length) { c.fillStyle = '#5B5340'; c.font = '27px ' + SERIF; c.fillText(line2.join(' · '), W / 2, 956); }
-        c.fillStyle = '#8C8371'; c.font = '20px ' + SERIF;
-        c.fillText('题目为现代创作 · 文化趣味与自我认识 · 不作吉凶断言', W / 2, 1002);
-        E.modalImg.src = cv.toDataURL('image/png');
-        E.modal.hidden = false;
-      } catch (e) {
-        if (window.toast) window.toast(T('aff_share_fail')); else alert(T('aff_share_fail'));
+      function paint(qr) {
+        try {
+          var W = 750, H = 1450, cv = document.createElement('canvas');
+          cv.width = W; cv.height = H;
+          var c = cv.getContext('2d');
+          var SERIF = '"Noto Serif SC","Songti SC","STSong","SimSun",serif';
+          c.fillStyle = '#F5F1E5'; c.fillRect(0, 0, W, H);
+          c.strokeStyle = '#A2813B'; c.lineWidth = 3; c.strokeRect(26, 26, W - 52, H - 52);
+          c.lineWidth = 1; c.strokeRect(40, 40, W - 80, H - 80);
+          c.textAlign = 'center';
+          c.fillStyle = '#86702E'; c.font = '600 30px ' + SERIF;
+          c.fillText('戊 日 不 上 香', W / 2, 96);
+          c.fillStyle = '#8C8371'; c.font = '25px ' + SERIF;
+          c.fillText('神 仙 缘 分 测 试', W / 2, 138);
+          /* 造像：顶部对齐裁切（与图鉴卡 object-position:top 一致） */
+          var ix = 165, iy = 168, iw = 420, ih = 540;
+          c.save(); roundRect(c, ix, iy, iw, ih, 16); c.clip();
+          var sc = Math.max(iw / img.naturalWidth, ih / img.naturalHeight);
+          var dw = img.naturalWidth * sc, dh = img.naturalHeight * sc;
+          c.drawImage(img, ix + (iw - dw) / 2, iy, dw, dh);
+          c.restore();
+          c.strokeStyle = '#E3DBC3'; c.lineWidth = 2; roundRect(c, ix, iy, iw, ih, 16); c.stroke();
+          c.fillStyle = '#2A251B'; c.font = '700 62px ' + SERIF;
+          c.fillText(d.name, W / 2, 792);
+          c.fillStyle = '#86702E'; c.font = '29px ' + SERIF;
+          c.fillText(info ? info.title : '', W / 2, 838);
+          c.strokeStyle = '#A2813B'; c.lineWidth = 2;
+          c.beginPath(); c.moveTo(W / 2 - 130, 866); c.lineTo(W / 2 - 14, 866); c.moveTo(W / 2 + 14, 866); c.lineTo(W / 2 + 130, 866); c.stroke();
+          c.save(); c.translate(W / 2, 866); c.rotate(Math.PI / 4); c.fillStyle = '#A2813B'; c.fillRect(-6, -6, 12, 12); c.restore();
+          c.fillStyle = '#2A5044'; c.font = '600 34px ' + SERIF;
+          c.fillText('与' + d.name + '最相合', W / 2, 916);
+          var line2 = [];
+          if (st.need) line2.push('所求「' + st.need + '」');
+          if (st.trait) line2.push('气质「' + st.trait + '」');
+          if (line2.length) { c.fillStyle = '#5B5340'; c.font = '27px ' + SERIF; c.fillText(line2.join(' · '), W / 2, 956); }
+          /* 中段：特质相合五边形（与结果页同数据同画法） */
+          c.fillStyle = '#86702E'; c.font = '600 27px ' + SERIF;
+          c.fillText('特 质 相 合', W / 2, 1008);
+          drawRadar(c, W / 2, 1134, 78, radarUser(res.a), radarDeity(res.main), 25);
+          /* 图例：你的特质（深绿）／{名号}的特质（金），整行居中 */
+          var lg1 = T('aff_radar_you'), lg2 = TF('aff_radar_deity', d.name);
+          c.font = '600 24px ' + SERIF;
+          var w1 = c.measureText(lg1).width, w2 = c.measureText(lg2).width;
+          var lx = (W - (22 + 10 + w1 + 46 + 22 + 10 + w2)) / 2, lgY = 1264;
+          c.textAlign = 'left'; c.textBaseline = 'middle';
+          c.fillStyle = '#2A5044'; c.fillRect(lx, lgY - 9, 22, 18);
+          c.fillStyle = '#5B5340'; c.fillText(lg1, lx + 32, lgY);
+          c.fillStyle = '#A2813B'; c.fillRect(lx + 32 + w1 + 46, lgY - 9, 22, 18);
+          c.fillStyle = '#5B5340'; c.fillText(lg2, lx + 32 + w1 + 46 + 32, lgY);
+          c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+          /* 下段：诚实标注 */
+          c.fillStyle = '#8C8371'; c.font = '20px ' + SERIF;
+          c.fillText('题目为现代创作 · 文化趣味与自我认识 · 不作吉凶断言', W / 2, 1304);
+          if (withQR) {
+            /* 带码版：左二维码（资产底色同卡面，含静区），右扫码语＋短域名 */
+            if (qr) c.drawImage(qr, 84, 1316, 88, 88);
+            c.textAlign = qr ? 'left' : 'center';
+            var tx0 = qr ? 200 : W / 2;
+            c.fillStyle = '#2A5044'; c.font = '600 27px ' + SERIF;
+            c.fillText('扫码测测与你有缘的神仙', tx0, 1352);
+            c.fillStyle = '#86702E'; c.font = '25px ' + SERIF;
+            c.fillText('wuri.shengboyu.ca', tx0, 1386);
+            c.textAlign = 'center';
+          } else {
+            /* 小红书版：无码无网址，底部品牌行印全名作可搜关键词 */
+            c.fillStyle = '#86702E'; c.font = '600 32px ' + SERIF;
+            c.fillText('戊日不上香APP', W / 2, 1378);
+          }
+          E.modalImg.src = cv.toDataURL('image/png');
+          E.modal.hidden = false;
+        } catch (e) {
+          if (window.toast) window.toast(T('aff_share_fail')); else alert(T('aff_share_fail'));
+        }
+      }
+      if (withQR) {
+        var q = new Image();
+        q.onload = function () { paint(q); };
+        q.onerror = function () { paint(null); }; /* 码图缺失时降级：只印文字行 */
+        q.src = 'img/qr-yuanfen.png';
+      } else {
+        paint(null);
       }
     };
     img.onerror = function () { if (window.toast) window.toast(T('aff_share_fail')); };
@@ -415,7 +562,8 @@
     openQuiz(false);
     refreshEntry();
   });
-  E.share.addEventListener('click', makeShareCard);
+  E.share.addEventListener('click', function () { makeShareCard(true); });
+  if (E.shareXhs) E.shareXhs.addEventListener('click', function () { makeShareCard(false); });
   if (E.shareLink) E.shareLink.addEventListener('click', shareResultLink);
   if (E.copyLink) E.copyLink.addEventListener('click', copyResultLink);
   E.modalClose.addEventListener('click', function () { E.modal.hidden = true; });

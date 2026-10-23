@@ -2,7 +2,10 @@
 """神仙缘分测试端到端冒烟：入口卡→答题→中途退出续答→结果→分享卡→重测清进度；
 与 Python 模型（affinity_model.py）同向量对拍主缘；390/412 × 日/夜，零溢出、零 JS 异常。
 用法: python3 qimen-build/smoke_affinity.py — 截图落 qimen-build/shots-aff/"""
-import importlib.util, json, os, subprocess, time, urllib.request, base64
+import importlib.util, json, os, subprocess, sys, time, urllib.request, base64
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import affinity_model as AM  # 五边形对拍基准（同答卷同数值）
 
 spec = importlib.util.spec_from_file_location("smoke", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
 smoke = importlib.util.module_from_spec(spec); spec.loader.exec_module(smoke)
@@ -113,12 +116,33 @@ try:
     check("[day412] 结果页零横向溢出", overflow_of(ev, "view-affinity-result") <= 0)
     shot("result-day-412")
 
+    st = ev("""(() => { const r = document.getElementById('aff-radar');
+      return { u: r && r.dataset.user, d: r && r.dataset.deity,
+        lg: document.getElementById('aff-radar-deity-name').textContent }; })()""")
+    _bid = next(d["id"] for d in AM.TAGS["deities"] if d["name"] == "保生大帝")
+    _eu, _ed = AM.radar_user([0] * 12), AM.radar_deity(_bid)
+    _ju = [float(x) for x in st["u"].split(",")] if st["u"] else []
+    _jd = [float(x) for x in st["d"].split(",")] if st["d"] else []
+    check("[day412] 五边形用户值与模型对拍（全A）",
+          len(_ju) == 5 and all(abs(a - b) <= 0.011 for a, b in zip(_ju, _eu)), (_ju, _eu))
+    check("[day412] 五边形神祇值与模型对拍（保生大帝）",
+          len(_jd) == 5 and all(abs(a - b) <= 0.011 for a, b in zip(_jd, _ed)), (_jd, _ed))
+    check("[day412] 五边形图例含主缘名号", "保生大帝" in (st["lg"] or ""), st["lg"])
+
     ev("document.getElementById('aff-share').click(), true"); time.sleep(1.2)
     st = ev("""(() => { const m = document.getElementById('affinity-share-modal');
       const img = document.getElementById('affinity-share-img');
       return { vis: !m.hidden, srcHead: (img.src||'').slice(0,22), nw: img.naturalWidth, nh: img.naturalHeight }; })()""")
-    check("[day412] 分享卡生成（PNG 750×1060）", st["vis"] and st["srcHead"].startswith("data:image/png") and st["nw"] == 750 and st["nh"] == 1060, st)
+    check("[day412] 分享卡生成（带码版 PNG 750×1450）", st["vis"] and st["srcHead"].startswith("data:image/png") and st["nw"] == 750 and st["nh"] == 1450, st)
     shot("share-day-412")
+    ev("document.getElementById('affinity-share-close').click(), true")
+
+    ev("document.getElementById('aff-share-xhs').click(), true"); time.sleep(1.2)
+    st = ev("""(() => { const m = document.getElementById('affinity-share-modal');
+      const img = document.getElementById('affinity-share-img');
+      return { vis: !m.hidden, srcHead: (img.src||'').slice(0,22), nw: img.naturalWidth, nh: img.naturalHeight }; })()""")
+    check("[day412] 小红书版分享卡生成（无码 PNG 750×1450）", st["vis"] and st["srcHead"].startswith("data:image/png") and st["nw"] == 750 and st["nh"] == 1450, st)
+    shot("share-xhs-day-412")
     ev("document.getElementById('affinity-share-close').click(), true")
 
     ev("document.getElementById('aff-retake').click(), true"); time.sleep(0.3)

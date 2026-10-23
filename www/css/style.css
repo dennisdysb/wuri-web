@@ -727,6 +727,13 @@ details.disc-foot .hint{margin-top:9px}
 .aff-actions{display:flex;gap:11px;margin:22px 0 6px}
 .aff-actions + .aff-actions{margin-top:0}
 .aff-actions .btn{flex:1}
+.aff-radar-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 12px 12px;box-shadow:var(--shadow)}
+#aff-radar{display:block;width:min(78vw,330px);height:auto;margin:0 auto;background:#F5F1E5;border-radius:12px}
+.aff-radar-legend{display:flex;justify-content:center;gap:26px;margin-top:6px;font-size:.86rem;color:var(--ink-2)}
+.aff-lg{display:inline-flex;align-items:center;gap:7px}
+.aff-dot{width:13px;height:13px;border-radius:3px;display:inline-block}
+.aff-dot.dot-user{background:#2A5044}
+.aff-dot.dot-deity{background:#A2813B}
 .aff-save-hint{color:var(--muted);font-size:.78rem;text-align:center;margin:2px 0 0}
 .aff-honest{color:var(--muted);font-size:.79rem;line-height:1.8;margin:16px 2px 0}
 .aff-modal{position:fixed;inset:0;z-index:80;background:rgba(10,8,4,.72);display:flex;align-items:center;justify-content:center;padding:22px}

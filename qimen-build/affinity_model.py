@@ -211,9 +211,92 @@ def main():
     never = [names[did] for did, _, _ in DEITIES if wins[did] == 0]
     print(f"从未成为主缘: {len(never)} 位: {never}")
     print(f"主缘不同神祇数: {len(wins)}/74, 最高占比 {wins.most_common(1)[0][1]/N:.1%}")
+    radar_audit()
 
-if __name__ == "__main__":
-    main()
+# ================= 特质五边形（五轴雷达，与 affinity.js 同口径） =================
+# 定位：同一套标签数据的可视化，不参与主缘计分（计分引擎零改动）。
+# 五轴由气质标签池（12）归纳，母题（12）按同轴补映射；每个标签恰好归一轴。
+#   仁厚＝温厚亲和、悯人助人；刚正＝正气威严、守序护众；
+#   灵慧＝聪慧通透、点化启悟；清峻＝清高孤介、苦修放下；洒脱＝自在来去、不拘形迹。
+# 归轴说明（边际项）：豪迈仗义归刚正（仗义以正气为本）；护民救劫归刚正（护民是守序执行面，
+#   与镇妖除害同族）；冤屈昭雪归仁厚（为含冤者出头，出发点是悯人）；放下执念归清峻
+#   （放下即心清境寂，归清峻的超脱面）；坚毅苦修归清峻（苦修即 austerity）。
+AXES = ["仁厚", "刚正", "灵慧", "清峻", "洒脱"]
+TRAIT_AXIS = {
+    "慈悲仁厚": "仁厚", "温厚守成": "仁厚",
+    "刚正威严": "刚正", "英武果决": "刚正", "豪迈仗义": "刚正",
+    "聪慧机敏": "灵慧", "沉稳谋略": "灵慧",
+    "清净淡泊": "清峻", "孤高清峻": "清峻", "坚毅苦修": "清峻",
+    "逍遥洒脱": "洒脱", "纯真活泼": "洒脱",
+}
+MOTIF_AXIS = {
+    "母仪守护": "仁厚", "行医济世": "仁厚", "冤屈昭雪": "仁厚",
+    "守职尽责": "刚正", "镇妖除害": "刚正", "护民救劫": "刚正",
+    "点化众生": "灵慧", "少年英才": "灵慧", "技艺成名": "灵慧",
+    "苦修成道": "清峻", "放下执念": "清峻",
+    "漂泊历练": "洒脱",
+}
+assert set(TRAIT_AXIS) == {t for d in TAGS["deities"] for t in d["traits"]}
+assert set(MOTIF_AXIS) == {m for d in TAGS["deities"] for m in d["motifs"]}
+
+def _axis_sum(tmap, mmap):
+    """气质分（原值）+ 母题分（已按 0.6 计）按轴汇总。"""
+    out = {a: 0.0 for a in AXES}
+    for k, v in tmap.items():
+        out[TRAIT_AXIS[k]] += v
+    for k, v in mmap.items():
+        out[MOTIF_AXIS[k]] += v
+    return out
+
+# 用户轴上限：每题取该题选项可达的最大轴分（气质原值 + 母题×0.6），逐题累加
+USER_REF = {a: 0.0 for a in AXES}
+for _q, _opts in Q:
+    _per = {a: 0.0 for a in AXES}
+    for _txt, _sc in _opts:
+        _s = _axis_sum(_sc.get("t", {}), {k: v * 0.6 for k, v in _sc.get("m", {}).items()})
+        for a in AXES:
+            _per[a] = max(_per[a], _s[a])
+    for a in AXES:
+        USER_REF[a] += _per[a]
+
+def radar_user(answers):
+    """用户五轴（0–5）：答案原始标签分（不做供给稀有度校正）按轴汇总 / 该轴问卷可达上限 ×5。"""
+    p = profile(answers)
+    raw = _axis_sum(dict(p["t"]), {k: v * 0.6 for k, v in p["m"].items()})
+    return tuple(round(5 * raw[a] / USER_REF[a], 4) for a in AXES)
+
+_DEITY_RAW = {d["id"]: _axis_sum(deity_weights(d)["t"], deity_weights(d)["m"]) for d in TAGS["deities"]}
+DEITY_REF = {a: max(r[a] for r in _DEITY_RAW.values()) for a in AXES}
+
+def radar_deity(did):
+    """神祇五轴（0–5）：气质权重（1/个）+ 母题权重（0.6/个）按轴汇总 / 全体该轴最大值 ×5。与用户同为「占可达上限之比」的同尺。"""
+    r = _DEITY_RAW[did]
+    return tuple(round(5 * r[a] / DEITY_REF[a], 4) for a in AXES)
+
+def radar_audit():
+    names = {d["id"]: d["name"] for d in TAGS["deities"]}
+    shapes = {did: tuple(round(v, 2) for v in radar_deity(did)) for did in names}
+    groups = collections.defaultdict(list)
+    for did, s in shapes.items():
+        groups[s].append(did)
+    dups = {s: ids for s, ids in groups.items() if len(ids) > 1}
+    top_n = math.ceil(len(names) / 3)
+    thr = {}
+    for i, a in enumerate(AXES):
+        vals = sorted((vec[i] for vec in shapes.values()), reverse=True)
+        thr[a] = vals[top_n - 1]
+    nohome = [did for did, vec in shapes.items()
+              if not any(vec[i] >= thr[AXES[i]] - 1e-9 for i in range(5))]
+    print(f"\n[五轴审计] 互异形状 {len(groups)}/74 组；同形 {sum(len(v) for v in dups.values())} 位 / {len(dups)} 组；无主场轴 {len(nohome)} 位")
+    for s, ids in sorted(dups.items(), key=lambda kv: -len(kv[1])):
+        print(f"  同形组 {[names[i] for i in ids]}: {s}")
+    if nohome:
+        print("  无主场轴:", [names[i] for i in nohome])
+    for nm, ans in [("全A", [0] * 12), ("全B", [1] * 12), ("全C", [2] * 12), ("全D", [3] * 12),
+                    ("悟道画像", [3, 2, 1, 2, 2, 2, 3, 2, 2, 0, 2, 1]),
+                    ("慈悲医者", [0, 0, 3, 0, 1, 2, 0, 3, 3, 0, 3, 3])]:
+        r = rank(ans)
+        print(f"  {nm}: 用户{radar_user(ans)} 主缘={r[0][2]} 神祇{radar_deity(r[0][1])}")
 
 def personas():
     P = {
@@ -240,3 +323,7 @@ def personas():
     for name, ans in P.items():
         r = rank(ans)
         print(f"{name}: 主缘={r[0][2]} 次缘={r[1][2]},{r[2][2]}")
+
+
+if __name__ == "__main__":
+    main()
