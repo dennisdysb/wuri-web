@@ -141,7 +141,11 @@
     return axisSum(WEIGHTS[id].t, WEIGHTS[id].m).map(function (v, i) { return Math.min(5, 5 * v / DEITY_REF[i]); });
   }
   /* 雷达绘制（结果页与分享卡共用同画法）：五环网格＋轴线＋轴名＋用户层（深绿）
-   * ＋神祇层（金），顶点描点。 */
+   * ＋神祇层（金）＋交集层（赭红，逐轴 min——气质上真正相合的部分），顶点描点。
+   * 绘制顺序：三层填充先行、两层边线与顶点后描，交集填充不遮边线。
+   * 五边形只对照气质一层；主缘主要由所求驱动，口径说明见结果页/卡面小字。 */
+  var RADAR_BOTH_FILL = 'rgba(178,84,44,0.45)';
+  var RADAR_BOTH_HEX = '#B2542C';
   function drawRadar(c, cx, cy, R, uVals, dVals, labelPx) {
     var SERIF = '"Noto Serif SC","Songti SC","STSong","SimSun",serif';
     function pt(i, r) { var a = -Math.PI / 2 + i * 2 * Math.PI / 5; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; }
@@ -158,17 +162,26 @@
       c.beginPath(); c.moveTo(cx, cy); c.lineTo(p[0], p[1]);
       c.strokeStyle = '#E3DBC3'; c.lineWidth = 1; c.stroke();
     }
-    function layer(vals, stroke, fill) {
+    function polyPath(vals) {
       var j, q;
       c.beginPath();
       for (j = 0; j < 5; j++) { q = pt(j, R * Math.max(vals[j], 0) / 5); if (j === 0) c.moveTo(q[0], q[1]); else c.lineTo(q[0], q[1]); }
-      c.closePath(); c.fillStyle = fill; c.fill();
+      c.closePath();
+    }
+    function layerFill(vals, fill) { polyPath(vals); c.fillStyle = fill; c.fill(); }
+    function layerEdge(vals, stroke) {
+      var j, q;
+      polyPath(vals);
       c.strokeStyle = stroke; c.lineWidth = 3; c.lineJoin = 'round'; c.stroke();
       c.fillStyle = stroke;
       for (j = 0; j < 5; j++) { q = pt(j, R * Math.max(vals[j], 0) / 5); c.beginPath(); c.arc(q[0], q[1], 4, 0, 2 * Math.PI); c.fill(); }
     }
-    layer(uVals, '#2A5044', 'rgba(42,80,68,0.20)');
-    layer(dVals, '#A2813B', 'rgba(162,129,59,0.20)');
+    var bothVals = uVals.map(function (v, j) { return Math.min(v, Math.max(dVals[j], 0)); });
+    layerFill(uVals, 'rgba(42,80,68,0.20)');
+    layerFill(dVals, 'rgba(162,129,59,0.20)');
+    layerFill(bothVals, RADAR_BOTH_FILL);
+    layerEdge(uVals, '#2A5044');
+    layerEdge(dVals, '#A2813B');
     c.fillStyle = '#5B5340'; c.font = '600 ' + labelPx + 'px ' + SERIF;
     c.textAlign = 'center'; c.textBaseline = 'middle';
     for (i = 0; i < 5; i++) { p = pt(i, R + labelPx * 0.95); c.fillText(RADAR_AXES[i], p[0], p[1]); }
@@ -238,6 +251,7 @@
     subs: document.getElementById('aff-subs'),
     radar: document.getElementById('aff-radar'),
     radarDeityName: document.getElementById('aff-radar-deity-name'),
+    radarNote: document.getElementById('aff-radar-note'),
     share: document.getElementById('aff-share'),
     shareXhs: document.getElementById('aff-share-xhs'),
     shareLink: document.getElementById('aff-share-link'),
@@ -327,12 +341,20 @@
     /* 特质五边形：与分享卡同数据同画法，先在结果页看到；数值挂 dataset 供冒烟对拍 */
     if (E.radar) {
       var uv = radarUser(res.a), dv = radarDeity(res.main);
+      var bv = uv.map(function (v, j) { return Math.min(v, dv[j]); });
       E.radar.setAttribute('data-user', uv.map(function (v) { return v.toFixed(2); }).join(','));
       E.radar.setAttribute('data-deity', dv.map(function (v) { return v.toFixed(2); }).join(','));
+      E.radar.setAttribute('data-both', bv.map(function (v) { return v.toFixed(2); }).join(','));
       var rc = E.radar.getContext('2d');
       rc.clearRect(0, 0, E.radar.width, E.radar.height);
       drawRadar(rc, E.radar.width / 2, E.radar.height / 2, E.radar.width * 0.39, uv, dv, 44);
       if (E.radarDeityName) E.radarDeityName.textContent = TF('aff_radar_deity', TX(d.name));
+      /* 口径小字：五边形只对照气质，主缘主要相合在所求（头号共享所求动态填） */
+      if (E.radarNote) {
+        var topNeed = shareTags(res.main, prof).need;
+        E.radarNote.textContent = topNeed ? TX(TF('aff_radar_note', topNeed)) : '';
+        E.radarNote.hidden = !topNeed;
+      }
     }
     E.subs.innerHTML = '';
     res.subs.forEach(function (id) {
@@ -428,7 +450,7 @@
     ctx.closePath();
   }
   /* 长版分享卡 750×1450：上段（品牌/造像/名号/相合行）；中段「特质相合」五边形
-   * ＋图例；下段诚实标注＋回流带。withQR=true 为带码版（二维码＋扫码语＋短域名）；
+   * （含交集层）＋三项图例＋口径小字；下段诚实标注＋回流带。withQR=true 为带码版（二维码＋扫码语＋短域名）；
    * withQR=false 为小红书版（无码无网址，底部品牌行印全名「戊日不上香APP」）。
    * v1.4.0(3) 起：五边形半径 110、二维码 104（用户看样卡后要求放大）。 */
   function makeShareCard(withQR) {
@@ -454,8 +476,9 @@
           c.fillStyle = '#8C8371'; c.font = '25px ' + SERIF;
           c.fillText('神 仙 缘 分 测 试', W / 2, 138);
           /* 造像：顶部对齐裁切（与图鉴卡 object-position:top 一致）；
-           * v1.4.0(3)：造像高 540→486 让位给放大后的五边形与二维码，下方各段同幅上移 */
-          var ix = 165, iy = 160, iw = 420, ih = 486;
+           * v1.4.0(3)：造像高 540→486 让位给放大后的五边形与二维码，下方各段同幅上移；
+           * 本次：造像再让 24（486→462）、下方各段同幅上移，腾出五边形口径小字一行 */
+          var ix = 165, iy = 160, iw = 420, ih = 462;
           c.save(); roundRect(c, ix, iy, iw, ih, 16); c.clip();
           var sc = Math.max(iw / img.naturalWidth, ih / img.naturalHeight);
           var dw = img.naturalWidth * sc, dh = img.naturalHeight * sc;
@@ -463,37 +486,47 @@
           c.restore();
           c.strokeStyle = '#E3DBC3'; c.lineWidth = 2; roundRect(c, ix, iy, iw, ih, 16); c.stroke();
           c.fillStyle = '#2A251B'; c.font = '700 62px ' + SERIF;
-          c.fillText(d.name, W / 2, 730);
+          c.fillText(d.name, W / 2, 700);
           c.fillStyle = '#86702E'; c.font = '29px ' + SERIF;
-          c.fillText(info ? info.title : '', W / 2, 776);
+          c.fillText(info ? info.title : '', W / 2, 746);
           c.strokeStyle = '#A2813B'; c.lineWidth = 2;
-          c.beginPath(); c.moveTo(W / 2 - 130, 800); c.lineTo(W / 2 - 14, 800); c.moveTo(W / 2 + 14, 800); c.lineTo(W / 2 + 130, 800); c.stroke();
-          c.save(); c.translate(W / 2, 800); c.rotate(Math.PI / 4); c.fillStyle = '#A2813B'; c.fillRect(-6, -6, 12, 12); c.restore();
+          c.beginPath(); c.moveTo(W / 2 - 130, 770); c.lineTo(W / 2 - 14, 770); c.moveTo(W / 2 + 14, 770); c.lineTo(W / 2 + 130, 770); c.stroke();
+          c.save(); c.translate(W / 2, 770); c.rotate(Math.PI / 4); c.fillStyle = '#A2813B'; c.fillRect(-6, -6, 12, 12); c.restore();
           c.fillStyle = '#2A5044'; c.font = '600 34px ' + SERIF;
-          c.fillText('与' + d.name + '最相合', W / 2, 844);
+          c.fillText('与' + d.name + '最相合', W / 2, 814);
           var line2 = [];
           if (st.need) line2.push('所求「' + st.need + '」');
           if (st.trait) line2.push('气质「' + st.trait + '」');
-          if (line2.length) { c.fillStyle = '#5B5340'; c.font = '27px ' + SERIF; c.fillText(line2.join(' · '), W / 2, 880); }
-          /* 中段：特质相合五边形（与结果页同数据同画法）；
+          if (line2.length) { c.fillStyle = '#5B5340'; c.font = '27px ' + SERIF; c.fillText(line2.join(' · '), W / 2, 850); }
+          /* 中段：特质相合五边形（与结果页同数据同画法，含交集层）；
            * v1.4.0(3)：半径 78→110（+41%）、轴标签 25→30，间距已按新尺寸排匀 */
           c.fillStyle = '#86702E'; c.font = '600 27px ' + SERIF;
-          c.fillText('特 质 相 合', W / 2, 924);
-          drawRadar(c, W / 2, 1092, 110, radarUser(res.a), radarDeity(res.main), 30);
-          /* 图例：你的特质（深绿）／{名号}的特质（金），整行居中 */
-          var lg1 = T('aff_radar_you'), lg2 = TF('aff_radar_deity', d.name);
-          c.font = '600 24px ' + SERIF;
-          var w1 = c.measureText(lg1).width, w2 = c.measureText(lg2).width;
-          var lx = (W - (22 + 10 + w1 + 46 + 22 + 10 + w2)) / 2, lgY = 1243;
+          c.fillText('特 质 相 合', W / 2, 894);
+          drawRadar(c, W / 2, 1062, 110, radarUser(res.a), radarDeity(res.main), 30);
+          /* 图例：你的特质（深绿）／{名号}的特质（金）／气质相合的部分（赭红），
+           * 整行居中；长名号时字号自适应收窄防出框 */
+          var lgItems = [['#2A5044', T('aff_radar_you')], ['#A2813B', TF('aff_radar_deity', d.name)], [RADAR_BOTH_HEX, T('aff_radar_both')]];
+          var lgPx = 24, lgW = 0, li2;
+          while (lgPx > 18) {
+            c.font = '600 ' + lgPx + 'px ' + SERIF;
+            lgW = 40 * (lgItems.length - 1);
+            for (li2 = 0; li2 < lgItems.length; li2++) { lgItems[li2][2] = c.measureText(lgItems[li2][1]).width; lgW += 32 + lgItems[li2][2]; }
+            if (lgW <= W - 92) break;
+            lgPx -= 2;
+          }
+          var lx = (W - lgW) / 2, lgY = 1216;
           c.textAlign = 'left'; c.textBaseline = 'middle';
-          c.fillStyle = '#2A5044'; c.fillRect(lx, lgY - 9, 22, 18);
-          c.fillStyle = '#5B5340'; c.fillText(lg1, lx + 32, lgY);
-          c.fillStyle = '#A2813B'; c.fillRect(lx + 32 + w1 + 46, lgY - 9, 22, 18);
-          c.fillStyle = '#5B5340'; c.fillText(lg2, lx + 32 + w1 + 46 + 32, lgY);
+          for (li2 = 0; li2 < lgItems.length; li2++) {
+            c.fillStyle = lgItems[li2][0]; c.fillRect(lx, lgY - 9, 22, 18);
+            c.fillStyle = '#5B5340'; c.fillText(lgItems[li2][1], lx + 32, lgY);
+            lx += 32 + lgItems[li2][2] + 40;
+          }
           c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+          /* 口径小字（卡面短版）：五边形只对照气质，主要相合在所求 */
+          if (st.need) { c.fillStyle = '#5B5340'; c.font = '20px ' + SERIF; c.fillText(TF('aff_radar_note_card', st.need), W / 2, 1252); }
           /* 下段：诚实标注 */
           c.fillStyle = '#8C8371'; c.font = '20px ' + SERIF;
-          c.fillText('题目为现代创作 · 文化趣味与自我认识 · 不作吉凶断言', W / 2, 1282);
+          c.fillText('题目为现代创作 · 文化趣味与自我认识 · 不作吉凶断言', W / 2, 1284);
           if (withQR) {
             /* 带码版：左二维码（资产底色同卡面，含静区），右扫码语＋短域名；
              * v1.4.0(3)：码面 88→104，解码验证随发版回归重跑 */
