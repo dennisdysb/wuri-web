@@ -1081,6 +1081,14 @@
         <p class="aff-why" id="aff-main-why"></p>
         <button class="btn primary" id="aff-main-detail" data-i18n="aff_view_detail">查看图鉴详情</button>
       </section>
+      <p class="aff-kicker" data-i18n="aff_radar_title">特质相合</p>
+      <section class="aff-radar-card">
+        <canvas id="aff-radar" width="660" height="660"></canvas>
+        <div class="aff-radar-legend">
+          <span class="aff-lg"><i class="aff-dot dot-user"></i><span data-i18n="aff_radar_you">你的特质</span></span>
+          <span class="aff-lg"><i class="aff-dot dot-deity"></i><span id="aff-radar-deity-name"></span></span>
+        </div>
+      </section>
       <p class="aff-kicker" data-i18n="aff_sub_label">同样与你投缘</p>
       <div class="aff-subs" id="aff-subs"></div>
       <div class="aff-actions">
@@ -1088,10 +1096,13 @@
         <button class="btn" id="aff-copy-link" data-i18n="aff_copy_link">复制链接</button>
       </div>
       <div class="aff-actions">
-        <button class="btn" id="aff-share" data-i18n="aff_share">生成分享卡</button>
+        <button class="btn" id="aff-share" data-i18n="aff_share">保存分享卡（带二维码）</button>
+        <button class="btn" id="aff-share-xhs" data-i18n="aff_share_xhs">保存小红书版（无码）</button>
+      </div>
+      <div class="aff-actions">
         <button class="btn" id="aff-retake" data-i18n="aff_retake">再测一次</button>
       </div>
-      <p class="aff-save-hint" data-i18n="aff_save_hint">存图后可发小红书</p>
+      <p class="aff-save-hint" data-i18n="aff_save_hint">小红书请用无码版（无二维码、无网址）</p>
       <p class="aff-honest" data-i18n="aff_honest"></p>
     </div>
     <div class="tab-spacer"></div>

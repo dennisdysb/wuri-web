@@ -81,6 +81,7 @@ body{background:#EFE9D6;font-family:"Noto Serif SC","Songti SC","STSong","SimSun
   padding:14px 30px;border-radius:999px}
 .cta:active b{background:#1E3B32}
 .honest{font-size:.7rem;color:#8C8371;margin-top:16px;line-height:1.7}
+.sitedomain{font-size:.78rem;letter-spacing:.24em;color:#86702E;margin-top:12px;font-weight:600}
 """.strip()
 
 TPL = """<!DOCTYPE html>
@@ -118,6 +119,7 @@ TPL = """<!DOCTYPE html>
     <p class="domain">{domain}</p>
     <a class="cta" href="{cta}"><b>测测与你有缘的神仙</b></a>
     <p class="honest">题目为现代创作 · 文化趣味与自我认识 · 不作吉凶断言</p>
+    <p class="sitedomain">wuri.shengboyu.ca</p>
   </div>
 </main>
 </body>
