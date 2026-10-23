@@ -151,6 +151,8 @@
     mainDetail: document.getElementById('aff-main-detail'),
     subs: document.getElementById('aff-subs'),
     share: document.getElementById('aff-share'),
+    shareLink: document.getElementById('aff-share-link'),
+    copyLink: document.getElementById('aff-copy-link'),
     retake: document.getElementById('aff-retake'),
     modal: document.getElementById('affinity-share-modal'),
     modalImg: document.getElementById('affinity-share-img'),
@@ -261,6 +263,57 @@
     if (window.Deities && window.Deities.openDetail) window.Deities.openDetail(id);
   }
 
+  /* ---------- 分享结果（专属页链接：www/yuanfen/<id>.html，由 qimen-build/gen_share_pages.py 生成） ---------- */
+  var SHARE_PAGE_BASE = 'https://wuri.shengboyu.ca/yuanfen/';
+  function sharePageUrl(id) { return SHARE_PAGE_BASE + id + '.html'; }
+  function copyText(text, done) {
+    function legacy() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand && document.execCommand('copy');
+        document.body.removeChild(ta);
+        done(!!ok);
+      } catch (e) { done(false); }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, legacy);
+    } else legacy();
+  }
+  function sharePayload() {
+    var res = curRes || lsGet(LS_RES);
+    if (!res || !res.main) return null;
+    var d = tagById(res.main);
+    var name = TX(d ? d.name : '');
+    return {
+      title: TF('aff_share_title', name),
+      text: TF('aff_share_text', name),
+      url: sharePageUrl(res.main)
+    };
+  }
+  function copyResultLink() {
+    var payload = sharePayload();
+    if (!payload) return;
+    copyText(payload.url, function (ok) {
+      var msg = T(ok ? 'aff_link_copied' : 'aff_link_copy_fail');
+      if (window.toast) window.toast(msg); else alert(msg);
+    });
+  }
+  /* 系统分享（微信/Facebook 等走系统面板）；环境不支持时回退复制链接 */
+  function shareResultLink() {
+    var payload = sharePayload();
+    if (!payload) return;
+    if (navigator.share) {
+      navigator.share(payload).catch(function () { /* 用户取消分享：不回退复制 */ });
+    } else {
+      copyResultLink();
+    }
+  }
+
   /* ---------- 分享卡（canvas 合成，纯本地） ---------- */
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -363,10 +416,29 @@
     refreshEntry();
   });
   E.share.addEventListener('click', makeShareCard);
+  if (E.shareLink) E.shareLink.addEventListener('click', shareResultLink);
+  if (E.copyLink) E.copyLink.addEventListener('click', copyResultLink);
   E.modalClose.addEventListener('click', function () { E.modal.hidden = true; });
   E.modal.addEventListener('click', function (e) { if (e.target === E.modal) E.modal.hidden = true; });
 
   refreshEntry();
+
+  /* 分享页 CTA 落地（?yuanfen=1）：打开图鉴视图并定位到缘分测试入口卡。
+   * 只在首次加载时响应一次，不改变现有视图路由语义（等同点按首页图鉴入口）；
+   * 处理后清掉参数，避免刷新/分享本页地址时重复触发。 */
+  try {
+    if (new URLSearchParams(location.search).get('yuanfen')) {
+      var deEnter = document.getElementById('deities-enter');
+      if (deEnter) deEnter.click();
+      var entryCard = document.getElementById('affinity-entry');
+      if (entryCard) setTimeout(function () {
+        if (entryCard.scrollIntoView) entryCard.scrollIntoView({ block: 'start' });
+      }, 80);
+      if (window.history && history.replaceState) {
+        try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+      }
+    }
+  } catch (e) {}
 
   /* 语言切换时重绘本功能动态文案（挂入全站重绘链） */
   var prevRerender = window.__wuri_rerender;
