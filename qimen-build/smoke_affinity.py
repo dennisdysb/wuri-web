@@ -182,6 +182,49 @@ try:
 finally:
     chrome.terminate()
 
+# ---------------- 页眉几何：三档宽度标题与两钮零重叠、钮位不漂移（2026-10-22 修复验收） ----------------
+HDR_JS = """(() => { const R = el => { const b = el.getBoundingClientRect();
+    return { l: b.left, r: b.right, t: b.top, b: b.bottom, w: b.width }; };
+  const back = R(document.getElementById('%s')), title = R(document.querySelector('#%s .brand-title'));
+  const rstEl = document.getElementById('affinity-restart');
+  return { back, title, rst: rstEl ? R(rstEl) : null, vw: window.innerWidth }; })()"""
+def hdr_check(tag, g, vw, with_rst):
+    check(f"[{tag}] 页眉左钮贴左缘(12px)", abs(g["back"]["l"] - 12) <= 1.5, g["back"])
+    check(f"[{tag}] 页眉标题不压左钮", g["title"]["l"] >= g["back"]["r"] - 0.5, g)
+    check(f"[{tag}] 页眉标题全幅在视口内", g["title"]["l"] >= 0 and g["title"]["r"] <= vw + 0.5, g["title"])
+    if with_rst:
+        check(f"[{tag}] 页眉标题不压右钮「从头开始」", g["title"]["r"] <= g["rst"]["l"] + 0.5, g)
+        check(f"[{tag}] 页眉右钮贴右缘(12px)", abs(g["rst"]["r"] - (vw - 12)) <= 1.5, g["rst"])
+
+for W in (360, 390, 412):
+    chrome, cdp, ev, shot = boot(W, "day")
+    try:
+        ev("document.getElementById('deities-enter').click(), true"); time.sleep(0.4)
+        ev("document.getElementById('affinity-enter').click(), true"); time.sleep(0.3)
+        ev("document.getElementById('affinity-restart').hidden = false, true")  # 强制右钮在场再量
+        g = ev(HDR_JS % ("affinity-back", "view-affinity"))
+        hdr_check(f"hdr{W}", g, W, True)
+        shot(f"quiz-hdr-{W}")
+        answer_all(ev, [0]*12); time.sleep(0.4)  # 走到结果页量其页眉（左钮+标题，无右钮）
+        g2 = ev(HDR_JS % ("affinity-result-back", "view-affinity-result"))
+        hdr_check(f"hdrRes{W}", g2, W, False)
+        errs = ev("window.__errs")
+        check(f"[hdr{W}] 零 JS 异常", errs == [], errs)
+    finally:
+        chrome.terminate()
+
+# 夜间 390 页眉（夜间字距 .34em 亦须被覆盖）
+chrome, cdp, ev, shot = boot(390, "night")
+try:
+    ev("document.getElementById('deities-enter').click(), true"); time.sleep(0.4)
+    ev("document.getElementById('affinity-enter').click(), true"); time.sleep(0.3)
+    ev("document.getElementById('affinity-restart').hidden = false, true")
+    g = ev(HDR_JS % ("affinity-back", "view-affinity"))
+    hdr_check("hdrNight390", g, 390, True)
+    shot("quiz-hdr-night-390")
+finally:
+    chrome.terminate()
+
 # ---------------- 日间 412：六位原「从未主缘」贴题画像对拍（2026-10-22 权重调整验收） ----------------
 NEW_PERSONAS = [
     ("南极长生大帝", [1, 0, 1, 0, 1, 1, 3, 0, 0, 1, 1, 0]),
