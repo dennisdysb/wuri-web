@@ -117,17 +117,31 @@ try:
     shot("result-day-412")
 
     st = ev("""(() => { const r = document.getElementById('aff-radar');
-      return { u: r && r.dataset.user, d: r && r.dataset.deity,
-        lg: document.getElementById('aff-radar-deity-name').textContent }; })()""")
+      return { u: r && r.dataset.user, d: r && r.dataset.deity, b: r && r.dataset.both,
+        lg: document.getElementById('aff-radar-deity-name').textContent,
+        lgN: document.querySelectorAll('.aff-radar-legend .aff-lg').length,
+        lgBoth: (document.querySelector('.aff-radar-legend .dot-both') || {}).nextSibling ?
+          document.querySelector('.aff-radar-legend .dot-both').parentElement.textContent : '',
+        note: document.getElementById('aff-radar-note').textContent,
+        noteVis: !document.getElementById('aff-radar-note').hidden }; })()""")
     _bid = next(d["id"] for d in AM.TAGS["deities"] if d["name"] == "保生大帝")
     _eu, _ed = AM.radar_user([0] * 12), AM.radar_deity(_bid)
     _ju = [float(x) for x in st["u"].split(",")] if st["u"] else []
     _jd = [float(x) for x in st["d"].split(",")] if st["d"] else []
+    _jb = [float(x) for x in st["b"].split(",")] if st["b"] else []
     check("[day412] 五边形用户值与模型对拍（全A）",
           len(_ju) == 5 and all(abs(a - b) <= 0.011 for a, b in zip(_ju, _eu)), (_ju, _eu))
     check("[day412] 五边形神祇值与模型对拍（保生大帝）",
           len(_jd) == 5 and all(abs(a - b) <= 0.011 for a, b in zip(_jd, _ed)), (_jd, _ed))
     check("[day412] 五边形图例含主缘名号", "保生大帝" in (st["lg"] or ""), st["lg"])
+    check("[day412] 交集层存在且逐轴=min(用户,神祇)",
+          len(_jb) == 5 and all(abs(bv - min(a, b)) <= 0.021 for bv, a, b in zip(_jb, _ju, _jd)),
+          (_jb, _ju, _jd))
+    check("[day412] 图例三项含「气质相合的部分」",
+          st["lgN"] == 3 and "气质相合的部分" in (st["lgBoth"] or ""), st["lgBoth"])
+    check("[day412] 口径小字在位且填头号共享所求（康健祛病）",
+          st["noteVis"] and "五边形只对照气质一层" in st["note"] and "所求「康健祛病」" in st["note"],
+          st["note"])
 
     ev("document.getElementById('aff-share').click(), true"); time.sleep(1.2)
     st = ev("""(() => { const m = document.getElementById('affinity-share-modal');
@@ -180,8 +194,14 @@ try:
     time.sleep(0.4)
     st = ev("""(() => ({ vis: !document.getElementById('view-affinity-result').hidden,
       main: document.getElementById('aff-main-name').textContent,
-      subs: document.querySelectorAll('.aff-sub-card').length }))()""")
+      subs: document.querySelectorAll('.aff-sub-card').length,
+      both: (document.getElementById('aff-radar') || {}).dataset ?
+        document.getElementById('aff-radar').dataset.both : null,
+      note: document.getElementById('aff-radar-note').textContent }))()""")
     check("[night390] 全B主缘=魁星（与模型对拍）", st["vis"] and st["main"] == "魁星" and st["subs"] == 2, st)
+    check("[night390] 交集层与口径小字在位",
+          bool(st["both"]) and len(st["both"].split(",")) == 5 and "五边形只对照气质一层" in st["note"],
+          (st["both"], st["note"]))
     check("[night390] 结果页零横向溢出", overflow_of(ev, "view-affinity-result") <= 0)
     shot("result-night-390")
     errs = ev("window.__errs")
