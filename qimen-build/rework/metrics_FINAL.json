@@ -24,8 +24,8 @@
  "axis_within15": true,
  "coverage": "73/74",
  "top_share": 8.1,
- "mean_intersection": 0.664,
- "mean_intersection_pct": 1.1,
+ "mean_intersection": 0.685,
+ "mean_intersection_pct": 1.2,
  "shape_groups": "29 位 / 11 组",
  "home_axis": "74/74",
  "nohome": [],
@@ -165,7 +165,7 @@
   "家庭和合": 55,
   "姻缘": 83,
   "子嗣安康": 56,
-  "消灾解厄": 52,
+  "消灾解厄": 53,
   "南极长生·延寿守成": 43,
   "太阳·温厚刚正": 18,
   "酆都·孤高镇守": 57,
@@ -173,7 +173,7 @@
   "灵官·护宅镇妖": 23,
   "太岁·镇守本命": 21
  },
- "jitter_anchor_avg": 46.9,
- "jitter_all_avg": 42.3,
+ "jitter_anchor_avg": 47.0,
+ "jitter_all_avg": 42.4,
  "jitter_min": 17
 }
