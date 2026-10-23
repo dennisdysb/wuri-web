@@ -135,6 +135,7 @@
 
   /* 星象标签页激活：收起子视图、懒加载并渲染图鉴首页（今日星象卡由 renderTodaySky 常驻渲染） */
   function activate() {
+    regionOrigin = null; /* 切回星象标签即重置子视图栈，陈旧来源不得残留 */
     hide('view-star-region'); hide('view-star-detail'); hide('view-butiange');
     var host = $('sx-home');
     if (XG && BT) { renderHome(); return; }
@@ -152,10 +153,26 @@
     return key;
   }
 
+  /* ---------- 区页来源返回（v2.0.0 (6)）：与 deities.js navOrigin 同构——
+   * 进入区页时记下来源子视图栈＋各自滚动位置，返回即回来源并恢复滚动；
+   * 无来源记录（索引页/其他标签页/神祇详情等无星象子视图打开处进入）时
+   * 返回只收区页，落到其下层，与旧行为一致。 ---------- */
+  var regionOrigin = null; /* {views:[viewId...], scroll:{viewId: top}} | null */
+
   function openRegion(section) {
     if (!section) return;
     if (XG && !secInfo[section] && !lordOfMansion(section)) section = resolveSection(section);
     if (XG && !secInfo[section]) return;
+    /* 捕获来处必须在收起其他子视图之前；区页已打开时（失败重试等）保留原来源不覆写 */
+    var regionView = $('view-star-region');
+    if (regionView && regionView.hidden) {
+      var stack = [], scroll = {};
+      ['view-butiange', 'view-star-detail'].forEach(function (vid) {
+        var v = $(vid);
+        if (v && !v.hidden) { stack.push(vid); scroll[vid] = v.scrollTop; }
+      });
+      regionOrigin = stack.length ? { views: stack, scroll: scroll } : null;
+    }
     hide('view-star-detail');
     hide('view-butiange'); /* 典籍页 DOM 在区页之后、层级同高，不收起会整页盖住区页——
       (3) 真机修复：步天歌分架里点「本区图鉴 ›」无反应即此故 */
@@ -967,7 +984,20 @@
   /* ---------------- 绑定 ---------------- */
   function bind() {
     var b;
-    if ((b = $('star-region-back'))) b.addEventListener('click', function () { hide('view-star-region'); hide('view-star-detail'); });
+    if ((b = $('star-region-back'))) b.addEventListener('click', function () {
+      hide('view-star-region'); hide('view-star-detail');
+      var o = regionOrigin;
+      regionOrigin = null;
+      if (o && o.views && o.views.length) {
+        o.views.forEach(function (vid) { show(vid); });
+        requestAnimationFrame(function () {
+          o.views.forEach(function (vid) {
+            var v = $(vid);
+            if (v && o.scroll && typeof o.scroll[vid] === 'number') v.scrollTop = o.scroll[vid];
+          });
+        });
+      }
+    });
     if ((b = $('star-detail-back'))) b.addEventListener('click', function () { hide('view-star-detail'); });
     if ((b = $('butiange-back'))) b.addEventListener('click', function () { hide('view-butiange'); });
     var skyHead = $('sx-sky-head');
