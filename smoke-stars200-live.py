@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v2.0.0 (5) 双线线上验活（桥框架复用 offline34_test.py）：SW v94 激活、关于版 v2.0.0 (5)、
+"""v2.0.0 (6) 双线线上验活（桥框架复用 offline34_test.py）：SW v95 激活、关于版 v2.0.0 (6)、
 首页三卡且无今日卡/星象卡、六标签序、星象页今日星象实值、图鉴 102 位（feed 覆盖后仍 102）、星官图鉴懒加载 287 渲染。"""
 import importlib.util, os, sys, time
 
@@ -18,9 +18,9 @@ def run(base, tag):
         b.nav(base)
         report(tag + " SW 激活", wait_sw_active(b))
         caches = b.ev("(async () => await caches.keys())()")
-        report(tag + " SW 缓存 v94", any("wuri-v94" in c for c in caches), caches)
+        report(tag + " SW 缓存 v95", any("wuri-v95" in c for c in caches), caches)
         ver = b.ev("document.querySelector('[data-i18n=\"me_ver\"]').textContent")
-        report(tag + " 关于版本 v2.0.0 (5)", "v2.0.0 (5)" in ver, ver)
+        report(tag + " 关于版本 v2.0.0 (6)", "v2.0.0 (6)" in ver, ver)
         r = b.ev("""(() => { const home = document.getElementById('tab-home');
           const ids = ['practice-entry-card','shushu-entry-card','deities-entry-card'];
           return { cards: ids.every(id => !!document.getElementById(id)),
@@ -46,6 +46,17 @@ def run(base, tag):
             moon: (document.getElementById('sx-sky-moon-sub') || {}).textContent || '',
             first: !!(sky.compareDocumentPosition(sxHome) & Node.DOCUMENT_POSITION_FOLLOWING) }; })()""")
         report(tag + " 星象页今日星象实值+287+宿签28", ok287 and chips == 28 and bool(sky["xiu"]) and "%" in sky["moon"] and sky["first"], sky)
+        # (6) 区页返回回到来处（线上实测路径①）：经文分架→步天歌→本区图鉴→区页→返回＝步天歌
+        b.ev("document.querySelector('[data-tab=\"tab-jing\"]').click(); true")
+        time.sleep(0.6)
+        b.ev("document.getElementById('sx-jing-shelf').click(); true")
+        okbtg = b.wait("!document.getElementById('view-butiange').hidden", 20)
+        b.ev("(() => { const k = document.querySelector('#sx-sec-牛宿 .sx-toregion'); if (k) k.click(); return !!k; })()")
+        okreg = b.wait("!document.getElementById('view-star-region').hidden && document.getElementById('view-butiange').hidden", 20)
+        b.ev("document.getElementById('star-region-back').click(); true")
+        time.sleep(0.6)
+        back = b.ev("!document.getElementById('view-butiange').hidden && document.getElementById('view-star-region').hidden")
+        report(tag + " (6)步天歌→区页→返回＝步天歌", okbtg and okreg and back, "btg=%s reg=%s back=%s" % (okbtg, okreg, back))
         b.shot("live-" + tag)
     finally:
         b.close()
