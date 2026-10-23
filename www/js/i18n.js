@@ -115,7 +115,7 @@ tb_hint: '真太阳时按经度换算，用于时辰判定（时值神、此刻�
 tz_hint: '身在海外时，若按国内老黄历对照请选择「北京时间」。',
 me_theme: '外观主题', theme_auto: '跟随系统', theme_day: '白天 · 宣纸', theme_night: '黑夜 · 玄黑',
 me_lang: '语言', lang_auto: '跟随系统', lang_cn: '简体中文', lang_tw: '繁體中文',
-me_about: '关于', me_app: '应用', me_ver: '戊日不上香 v2.0.0 (2) (2026-10-23)',
+me_about: '关于', me_app: '应用', me_ver: '戊日不上香 v2.0.0 (3) (2026-10-23)',
 me_about_hint: '戊日不上香。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。本应用采用地支藏干法推算暗戊日（日支藏戊：寅、辰、巳、申、戌）；暗戊规则并无跨门派统一标准，请遵师承。',
 privacy: '隐私政策',
 disclaimer_title: '免责声明',
@@ -223,7 +223,7 @@ sx_hour_month: '%s时 · 月建%s',
 sx_caliber: '斗柄为传统斗建口径（初昏锚定月建、每时辰顺进一辰，《鹖冠子·环流》），非现代天文方位角；月龄照亮系本地推算，不联网。',
 sx_shelf_kicker: '典 籍 · 天 文', sx_shelf_title: '步天歌', sx_shelf_note: '全歌三百七十二句 · 逐句可查星官',
 sx_book_kicker: '典 籍 · 天 文', sx_book_sub: '全歌 %d 句 · %d 区 · 与经文库分格：彼为经，此为籍',
-sx_toc: '全歌目录', sx_toc_note: '点区名直达该段', sx_section_lines: '本段共 %d 句', sx_to_region: '区页 ›', sx_expand: '展开',
+sx_toc: '全歌目录', sx_toc_note: '点区名直达该段', sx_section_lines: '本段共 %d 句', sx_to_region: '本区图鉴 ›', sx_expand: '展开',
 sx_kind_struct: '结构句', sx_kind_ref: '回指句'
 },
 'zh-TW': {
@@ -335,7 +335,7 @@ tb_hint: '真太陽時按經度換算，用於時辰判定（時值神、此刻�
 tz_hint: '身在海外時，若按國內老黃曆對照請選擇「北京時間」。',
 me_theme: '外觀主題', theme_auto: '跟隨系統', theme_day: '白天 · 宣紙', theme_night: '黑夜 · 玄黑',
 me_lang: '語言', lang_auto: '跟隨系統', lang_cn: '簡體中文', lang_tw: '繁體中文',
-me_about: '關於', me_app: '應用', me_ver: '戊日不上香 v2.0.0 (2) (2026-10-23)',
+me_about: '關於', me_app: '應用', me_ver: '戊日不上香 v2.0.0 (3) (2026-10-23)',
 me_about_hint: '戊日不上香。本應用按日柱天干推算戊日並提前提醒，農曆、干支、節氣、宜忌均由內置曆法庫離線計算。本應用採用地支藏干法推算暗戊日（日支藏戊：寅、辰、巳、申、戌）；暗戊規則並無跨門派統一標準，請遵師承。',
 privacy: '隱私政策',
 disclaimer_title: '免責聲明',
@@ -443,7 +443,7 @@ sx_hour_month: '%s時 · 月建%s',
 sx_caliber: '斗柄為傳統斗建口徑（初昏錨定月建、每時辰順進一辰，《鶡冠子·環流》），非現代天文方位角；月齡照亮係本地推算，不聯網。',
 sx_shelf_kicker: '典 籍 · 天 文', sx_shelf_title: '步天歌', sx_shelf_note: '全歌三百七十二句 · 逐句可查星官',
 sx_book_kicker: '典 籍 · 天 文', sx_book_sub: '全歌 %d 句 · %d 區 · 與經文庫分格：彼為經，此為籍',
-sx_toc: '全歌目錄', sx_toc_note: '點區名直達該段', sx_section_lines: '本段共 %d 句', sx_to_region: '區頁 ›', sx_expand: '展開',
+sx_toc: '全歌目錄', sx_toc_note: '點區名直達該段', sx_section_lines: '本段共 %d 句', sx_to_region: '本區圖鑑 ›', sx_expand: '展開',
 sx_kind_struct: '結構句', sx_kind_ref: '回指句'
 }};
 

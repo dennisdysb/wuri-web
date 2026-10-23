@@ -145,6 +145,8 @@
     if (XG && !secInfo[section] && !lordOfMansion(section)) section = resolveSection(section);
     if (XG && !secInfo[section]) return;
     hide('view-star-detail');
+    hide('view-butiange'); /* 典籍页 DOM 在区页之后、层级同高，不收起会整页盖住区页——
+      (3) 真机修复：步天歌分架里点「本区图鉴 ›」无反应即此故 */
     show('view-star-region');
     var host = $('sx-region');
     if (XG && BT) { renderRegion(section); scrollTopOf('view-star-region'); return; }

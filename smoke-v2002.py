@@ -25,12 +25,12 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v91 缓存名", "wuri-v91-20261023-v200-2" in sw)
+report("SW v92 缓存名", "wuri-v92-20261023-v200-3" in sw)
 report("SW 预缓存不含图鉴全图", "img/deities/" not in assets)
 report("SW 含图鉴全图分支（豁免缓存优先）", "isDeityFull" in sw and "OFFLINE_CACHE" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
 report("设置页图鉴素材卡在位", 'id="deity-dl-btn"' in html and 'id="deity-dl-status"' in html)
-report("CSS ?v=91 与版本 (2)", "css/style.css?v=91" in html and "v2.0.0 (2)" in html)
+report("CSS ?v=92 与版本 (3)", "css/style.css?v=92" in html and "v2.0.0 (3)" in html)
 od = open(os.path.join(WWW, "js/offline-download.js"), encoding="utf-8").read()
 report("音频预取只带缩略图", "rels.push('img/deities/' + d.image)" not in od)
 
@@ -146,6 +146,21 @@ try:
     ev("(document.getElementById('star-detail-back').click(), true)", 0.4)
     report("对称：星官详情返回→步天歌", ev("!document.getElementById('view-butiange').hidden && document.getElementById('view-star-detail').hidden"))
     ev("(document.getElementById('butiange-back').click(), true)", 0.3)
+
+    # ---------- 经文库步天歌分架 →「本区图鉴 ›」( (3) 真机修复：典籍页盖住区页 ) ----------
+    ev("(document.querySelector('#tabbar button[data-tab=\"tab-jing\"]').click(), true)", 0.6)
+    report("经文标签步天歌分架入口在位", ev("!!document.getElementById('sx-jing-shelf')"))
+    ev("(document.getElementById('sx-jing-shelf').click(), true)", 0.8)
+    report("分架点开步天歌典籍页", ev("!document.getElementById('view-butiange').hidden"))
+    key_txt = ev("document.querySelector('#sx-sec-牛宿 .sx-toregion') ? document.querySelector('#sx-sec-牛宿 .sx-toregion').textContent.trim() : ''")
+    report("入口键文案＝本区图鉴 ›", key_txt == "本区图鉴 ›", key_txt)
+    ev("(document.querySelector('#sx-sec-牛宿 .sx-toregion').click(), true)", 0.8)
+    reg_txt = ev("document.getElementById('sx-region').textContent") or ""
+    report("硬断言：分架→本区图鉴→实际落到牛宿区页（区页可见＋典籍页已收起＋区页含牛宿）",
+           ev("!document.getElementById('view-star-region').hidden && document.getElementById('view-butiange').hidden")
+           and "牛宿" in reg_txt, reg_txt[:80])
+    ev("(document.getElementById('star-region-back').click(), true)", 0.3)
+    ev("(document.querySelector('#tabbar button[data-tab=\"tab-stars\"]').click(), true)", 0.4)
 
     # ---------- 月相：双主题对比度 + 双相位夜间截图 ----------
     def moon_measure(theme):
