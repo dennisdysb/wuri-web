@@ -715,7 +715,9 @@ details.disc-foot .hint{margin-top:9px}
 .aff-sub-title{color:var(--gold-deep);font-size:.78rem}
 .aff-sub-why{color:var(--ink-2);font-size:.86rem;line-height:1.7;margin-top:3px}
 .aff-actions{display:flex;gap:11px;margin:22px 0 6px}
+.aff-actions + .aff-actions{margin-top:0}
 .aff-actions .btn{flex:1}
+.aff-save-hint{color:var(--muted);font-size:.78rem;text-align:center;margin:2px 0 0}
 .aff-honest{color:var(--muted);font-size:.79rem;line-height:1.8;margin:16px 2px 0}
 .aff-modal{position:fixed;inset:0;z-index:80;background:rgba(10,8,4,.72);display:flex;align-items:center;justify-content:center;padding:22px}
 .aff-modal[hidden]{display:none}
