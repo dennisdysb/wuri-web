@@ -681,6 +681,16 @@ details.disc-foot .hint{margin-top:9px}
 #view-affinity,#view-affinity-result{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 40px}
 #view-affinity[hidden],#view-affinity-result[hidden]{display:none}
 #view-affinity .appbar,#view-affinity-result .appbar{position:sticky;top:0;z-index:20;background:var(--paper)}
+/* 缘分页眉三栏栅格：全站 .appbar.brand 标题为绝对居中（按整行宽算），答题页右侧有「从头开始」钮，
+   窄屏下标题尾字必被右钮压住（真机 412 即中招）。此两页改 grid 三栏：左钮位/标题栏/右钮位，
+   标题只在中栏内居中、字号随宽度收放、字距收紧（并覆盖夜间 .34em 字距）；两钮仍锚行首行尾不漂移。 */
+#view-affinity .appbar.brand,#view-affinity-result .appbar.brand{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}
+#view-affinity .appbar.brand::after,#view-affinity-result .appbar.brand::after{grid-column:1/-1}
+#view-affinity .appbar.brand .brand-title,#view-affinity-result .appbar.brand .brand-title{position:static;transform:none;flex:none;grid-column:2;grid-row:1;font-size:clamp(1rem,4.6vw,1.24rem);letter-spacing:.13em;text-indent:.13em}
+#view-affinity .appbar.brand .mini-btn,#view-affinity-result .appbar.brand .mini-btn{white-space:nowrap}
+#view-affinity #affinity-back,#view-affinity-result #affinity-result-back{grid-column:1;grid-row:1;justify-self:start}
+#view-affinity .appbar-spacer{display:none}
+#view-affinity #affinity-restart{grid-column:3;grid-row:1;justify-self:end}
 .aff-entry{display:flex;align-items:center;gap:14px;margin:18px 16px 4px;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
 .aff-entry-main{flex:1;min-width:0}
 .aff-entry-title{font-family:var(--serif);font-size:1.12rem;font-weight:700;color:var(--ink);letter-spacing:.14em;margin:0}
