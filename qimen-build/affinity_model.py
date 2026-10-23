@@ -1,8 +1,19 @@
 #!/usr/bin/env python3
-"""神仙缘分测试 · 题库与计分模型仿真（定稿后同口径移植 js/affinity-data.js）
+"""神仙缘分测试 · 题库与计分模型仿真（定稿后同口径移植 js/affinity.js）
 双轴：所求(needs) + 气质(traits)，经历母题(motifs)作小权重 tiebreak。
-神祇权重：主所求 3 / 次所求 1.5（贵人逢源不单设轴：其权重 0.75 并入主所求）/ 气质 1 / 母题 0.6
-得分 = Σ 用户标签分 × 神祇权重，再除以 sqrt(神祇总权重) 做规模归一。
+基础权重：主所求 3 / 次所求 1.5（贵人逢源不单设轴：其权重 0.75 并入主所求）/ 气质 1 / 母题 0.6
+
+2026-10-22 权重调整（规则层，不改标签与题面）：
+基线（上式 + 除以 sqrt(总权重)）随机仿真 4000 组有 6 位从未成为主缘
+（南极长生大帝、酆都大帝、太阳星君、北斗星君、王灵官、太岁殷元帅）——
+题库对部分标签供给极不均（所求轴消灾解厄全卷仅 3 分、平安镇宅 8 分），
+持有低供给标签者信号被系统性淹没。调整三处：
+1. 答案供给稀有度：用户标签分 × (全卷最大供给 / 该标签供给)^0.35——
+   越少见的答案越能说明人，信号权重越高（三轴统一公式）。
+2. 所求槽位稀有度：主/次所求权重 × (1 + 0.08 × ln(74 / 该槽位持有数))——
+   只有少数神祇主掌的所求，命中时区分度更高（气质/母题不加）。
+3. 规模归一指数 0.5 → 0.52：得分除以 总权重^0.52。
+调整后仿真：74/74 位可成主缘，最高单尊占比 8.8%，六位各有贴题画像可达主缘。
 """
 import json, math, random, collections, itertools, sys
 
@@ -103,6 +114,42 @@ def deity_weights(d):
 DEITIES = [(d["id"], d["name"], deity_weights(d)) for d in TAGS["deities"]]
 TOT = {did: sum(sum(ax.values()) for ax in w.values()) for did, _, w in DEITIES}
 
+# ---- 2026-10-22 权重调整参数（见模块 docstring） ----
+SUPPLY_IDF_EXP = 0.35   # 答案供给稀有度指数
+SLOT_IDF_BETA = 0.08    # 所求槽位稀有度系数（log 形式）
+NORM_EXP = 0.52         # 规模归一指数
+
+# 标签在全卷中的总供给（所有选项分值之和）
+SUPPLY = {"n": collections.Counter(), "t": collections.Counter(), "m": collections.Counter()}
+for _, opts in Q:
+    for _, sc in opts:
+        for ax, mp in sc.items():
+            for k, v in mp.items():
+                SUPPLY[ax][k] += v
+SMAX = max(v for ax in SUPPLY.values() for v in ax.values())
+
+# 所求槽位持有数（主位 / 次位分别计）
+PRI_C = collections.Counter()
+SEC_C = collections.Counter()
+for d in TAGS["deities"]:
+    for p in d["needs"]["primary"]:
+        PRI_C[p] += 1
+    for s in d["needs"]["secondary"]:
+        SEC_C[s] += 1
+
+def slot_factor(count):
+    return 1.0 + SLOT_IDF_BETA * math.log(74.0 / count)
+
+def effective_weights(d, w):
+    """在基础权重上叠加所求槽位稀有度（主所求含贵人逢源折入部分一并计算）。"""
+    ew = {"n": {}, "t": dict(w["t"]), "m": dict(w["m"])}
+    primaries = set(d["needs"]["primary"])
+    for k, v in w["n"].items():
+        ew["n"][k] = v * (slot_factor(PRI_C[k]) if k in primaries else slot_factor(SEC_C[k]))
+    return ew
+
+EFF = {d["id"]: effective_weights(d, deity_weights(d)) for d in TAGS["deities"]}
+
 def profile(answers):
     p = {"n": collections.Counter(), "t": collections.Counter(), "m": collections.Counter()}
     for qi, oi in enumerate(answers):
@@ -114,13 +161,17 @@ def profile(answers):
 
 def rank(answers):
     p = profile(answers)
+    # 答案供给稀有度校正：越少在问卷里出现的标签，用户的每一分越独特
+    up = {ax: {k: v * (SMAX / SUPPLY[ax][k]) ** SUPPLY_IDF_EXP for k, v in p[ax].items()}
+          for ax in ("n", "t", "m")}
     out = []
-    for did, name, w in DEITIES:
+    for did, name, _w in DEITIES:
+        w = EFF[did]
         s = 0.0
         for ax in ("n", "t", "m"):
             for k, dv in w[ax].items():
-                s += p[ax].get(k, 0) * dv
-        out.append((s / math.sqrt(TOT[did]), did, name))
+                s += up[ax].get(k, 0) * dv
+        out.append((s / TOT[did] ** NORM_EXP, did, name))
     out.sort(key=lambda x: (-x[0], x[1]))
     return out
 
@@ -178,6 +229,13 @@ def personas():
       "姻缘":       [3,1,2,2,3,3,2,0,3,2,3,0],
       "子嗣安康":   [0,0,2,0,1,2,0,0,3,0,3,2],
       "消灾解厄":   [1,2,3,2,2,2,3,3,2,3,2,3],
+      # 2026-10-22 新增：原「从未主缘」六位的贴题画像（权重调整验收用）
+      "南极长生·延寿守成": [1,0,1,0,1,1,3,0,0,1,1,0],
+      "太阳·温厚刚正":     [1,3,0,0,1,2,1,2,0,2,1,0],
+      "酆都·孤高镇守":     [1,2,3,1,0,0,1,2,1,3,0,2],
+      "北斗·延生解厄":     [1,1,2,1,1,0,2,0,0,3,3,2],
+      "灵官·护宅镇妖":     [1,3,1,1,0,3,2,0,0,0,0,3],
+      "太岁·镇守本命":     [1,2,0,0,2,0,0,1,0,3,1,1],
     }
     for name, ans in P.items():
         r = rank(ans)

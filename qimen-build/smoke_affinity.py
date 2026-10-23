@@ -107,7 +107,7 @@ try:
       res: localStorage.getItem('wuri_affinity_result') }))()""")
     check("[day412] 结果页打开·进度已清", st["vis"] and st["prog"] is None, st["vis"])
     check("[day412] 全A主缘=保生大帝（与模型对拍）", st["main"] == "保生大帝", st["main"])
-    check("[day412] 次缘=药王,碧霞元君（与模型对拍）", st["subNames"] == ["药王", "碧霞元君"], st["subNames"])
+    check("[day412] 次缘=药王,神农大帝（与模型对拍）", st["subNames"] == ["药王", "神农大帝"], st["subNames"])
     check("[day412] 相合说明非空且引职掌", len(st["why"]) > 30 and "职掌" in st["why"], st["why"][:60])
     check("[day412] 诚实标注含现代创作+信效度", "现代创作" in st["honest"] and "信效度" in st["honest"])
     check("[day412] 结果页零横向溢出", overflow_of(ev, "view-affinity-result") <= 0)
@@ -152,12 +152,12 @@ try:
     ev("document.getElementById('affinity-enter').click(), true"); time.sleep(0.3)
     check("[night390] 答题页零横向溢出", overflow_of(ev, "view-affinity") <= 0)
     shot("quiz-night-390")
-    answer_all(ev, [1]*12)  # 全B → 北岳大帝
+    answer_all(ev, [1]*12)  # 全B → 魁星（2026-10-22 权重调整后，模型对拍）
     time.sleep(0.4)
     st = ev("""(() => ({ vis: !document.getElementById('view-affinity-result').hidden,
       main: document.getElementById('aff-main-name').textContent,
       subs: document.querySelectorAll('.aff-sub-card').length }))()""")
-    check("[night390] 全B主缘=北岳大帝（与模型对拍）", st["vis"] and st["main"] == "北岳大帝" and st["subs"] == 2, st)
+    check("[night390] 全B主缘=魁星（与模型对拍）", st["vis"] and st["main"] == "魁星" and st["subs"] == 2, st)
     check("[night390] 结果页零横向溢出", overflow_of(ev, "view-affinity-result") <= 0)
     shot("result-night-390")
     errs = ev("window.__errs")
@@ -179,6 +179,31 @@ try:
     shot("result-day-390")
     errs = ev("window.__errs")
     check("[day390] 零 JS 异常", errs == [], errs)
+finally:
+    chrome.terminate()
+
+# ---------------- 日间 412：六位原「从未主缘」贴题画像对拍（2026-10-22 权重调整验收） ----------------
+NEW_PERSONAS = [
+    ("南极长生大帝", [1, 0, 1, 0, 1, 1, 3, 0, 0, 1, 1, 0]),
+    ("太阳星君",     [1, 3, 0, 0, 1, 2, 1, 2, 0, 2, 1, 0]),
+    ("酆都大帝",     [1, 2, 3, 1, 0, 0, 1, 2, 1, 3, 0, 2]),
+    ("北斗星君",     [1, 1, 2, 1, 1, 0, 2, 0, 0, 3, 3, 2]),
+    ("王灵官",       [1, 3, 1, 1, 0, 3, 2, 0, 0, 0, 0, 3]),
+    ("太岁殷元帅",   [1, 2, 0, 0, 2, 0, 0, 1, 0, 3, 1, 1]),
+]
+chrome, cdp, ev, shot = boot(412, "day")
+try:
+    ev("document.getElementById('deities-enter').click(), true"); time.sleep(0.4)
+    ev("document.getElementById('affinity-enter').click(), true"); time.sleep(0.3)
+    for i, (want, vec) in enumerate(NEW_PERSONAS):
+        if i > 0:
+            ev("document.getElementById('aff-retake').click(), true"); time.sleep(0.3)
+        answer_all(ev, vec)
+        time.sleep(0.4)
+        st = ev("document.getElementById('aff-main-name').textContent")
+        check(f"[personas] 画像主缘={want}（与模型对拍）", st == want, st)
+    errs = ev("window.__errs")
+    check("[personas] 零 JS 异常", errs == [], errs)
 finally:
     chrome.terminate()
 

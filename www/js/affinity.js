@@ -3,7 +3,10 @@
  * 双轴：所求(needs) + 气质(traits)，经历母题(motifs)作小权重。
  * 神祇权重：主所求 3 / 次所求 1.5 / 气质 1 / 母题 0.6；
  * 「贵人逢源」不单设轴——其权重 0.75 并入该神祇的主所求。
- * 得分 = Σ(用户标签分 × 神祇权重) / sqrt(神祇总权重)，同分按图鉴 id 序。
+ * 2026-10-22 权重调整（与 qimen-build/affinity_model.py 同口径）：
+ * ①答案供给稀有度：用户标签分 × (全卷最大供给/该标签供给)^0.35；
+ * ②所求槽位稀有度：主/次所求权重 × (1 + 0.08×ln(74/该槽位持有数))；
+ * ③得分 = Σ(校正后用户分 × 有效权重) / 神祇总权重^0.52，同分按图鉴 id 序。
  * 定位：文化趣味与自我认识，文案不作吉凶断语（与全站免责正本一致）。
  * 进度与结果只存本地 localStorage，不上传。 */
 (function () {
@@ -41,6 +44,29 @@
     var tot = 0; ['n', 't', 'm'].forEach(function (ax) { for (var k in w[ax]) tot += w[ax][k]; });
     TOTALS[d.id] = tot;
   });
+  /* 权重调整三件套（与 affinity_model.py 同口径，参数见该文件 docstring） */
+  var SUPPLY = { n: {}, t: {}, m: {} }, SMAX = 0;
+  QS.forEach(function (q) {
+    q.options.forEach(function (o) {
+      for (var ax in o.s) for (var k in o.s[ax]) {
+        SUPPLY[ax][k] = (SUPPLY[ax][k] || 0) + o.s[ax][k];
+        if (SUPPLY[ax][k] > SMAX) SMAX = SUPPLY[ax][k];
+      }
+    });
+  });
+  var PRI_C = {}, SEC_C = {};
+  TAGS.forEach(function (d) {
+    d.needs.primary.forEach(function (p) { PRI_C[p] = (PRI_C[p] || 0) + 1; });
+    d.needs.secondary.forEach(function (s) { SEC_C[s] = (SEC_C[s] || 0) + 1; });
+  });
+  function slotFactor(c) { return 1 + 0.08 * Math.log(74 / c); }
+  var EFFW = {};
+  TAGS.forEach(function (d) {
+    var w = WEIGHTS[d.id], ew = { n: {}, t: w.t, m: w.m }, pri = {};
+    d.needs.primary.forEach(function (p) { pri[p] = 1; });
+    for (var k in w.n) ew.n[k] = w.n[k] * slotFactor(pri[k] ? PRI_C[k] : SEC_C[k]);
+    EFFW[d.id] = ew;
+  });
   function profileOf(answers) {
     var p = { n: {}, t: {}, m: {} };
     answers.forEach(function (oi, qi) {
@@ -51,10 +77,13 @@
   }
   function rankOf(answers) {
     var p = profileOf(answers);
+    ['n', 't', 'm'].forEach(function (ax) {
+      for (var k in p[ax]) p[ax][k] *= Math.pow(SMAX / SUPPLY[ax][k], 0.35);
+    });
     var out = TAGS.map(function (d) {
-      var w = WEIGHTS[d.id], s = 0;
+      var w = EFFW[d.id], s = 0;
       ['n', 't', 'm'].forEach(function (ax) { for (var k in w[ax]) s += (p[ax][k] || 0) * w[ax][k]; });
-      return { id: d.id, score: s / Math.sqrt(TOTALS[d.id]) };
+      return { id: d.id, score: s / Math.pow(TOTALS[d.id], 0.52) };
     });
     out.sort(function (a, b) { return (b.score - a.score) || (a.id < b.id ? -1 : 1); });
     return out;
