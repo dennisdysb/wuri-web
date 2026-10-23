@@ -77,28 +77,28 @@ try:
       step: document.getElementById('affinity-step').textContent,
       nopts: document.querySelectorAll('#affinity-opts .aff-opt').length,
       q: document.getElementById('affinity-q').textContent }))()""")
-    check("[day412] 答题页打开·第1题·4选项", st["vis"] and st["step"] == "第 1 / 12 题" and st["nopts"] == 4, st)
+    check("[day412] 答题页打开·第1题·4选项", st["vis"] and st["step"] == "第 1 / 16 题" and st["nopts"] == 4, st)
 
     answer_all(ev, [0, 0, 0, 0, 0])  # 答 5 题
     st = ev("document.getElementById('affinity-step').textContent")
-    check("[day412] 答5题后到第6题", st == "第 6 / 12 题", st)
+    check("[day412] 答5题后到第6题", st == "第 6 / 16 题", st)
     ev("document.getElementById('affinity-back').click(), true"); time.sleep(0.3)
     st = ev("""(() => ({ quizHidden: document.getElementById('view-affinity').hidden,
       sub: document.getElementById('affinity-entry-sub').textContent,
       btn: document.getElementById('affinity-enter').textContent,
       ls: localStorage.getItem('wuri_affinity_progress') }))()""")
     check("[day412] 中途退出·进度已存", st["quizHidden"] and st["ls"] and json.loads(st["ls"])["a"] == [0]*5, st["ls"])
-    check("[day412] 入口显示已答5题/继续测试", "已答 5 / 12 题" in st["sub"] and st["btn"] == "继续测试", st)
+    check("[day412] 入口显示已答5题/继续测试", "已答 5 / 16 题" in st["sub"] and st["btn"] == "继续测试", st)
 
     ev("document.getElementById('affinity-enter').click(), true"); time.sleep(0.3)
     st = ev("""(() => ({ step: document.getElementById('affinity-step').textContent,
       resumed: !document.getElementById('affinity-resumed').hidden,
       resumedTxt: document.getElementById('affinity-resumed').textContent }))()""")
-    check("[day412] 续答恢复到第6题+横幅", st["step"] == "第 6 / 12 题" and st["resumed"] and "第 6 题" in st["resumedTxt"], st)
+    check("[day412] 续答恢复到第6题+横幅", st["step"] == "第 6 / 16 题" and st["resumed"] and "第 6 题" in st["resumedTxt"], st)
     check("[day412] 答题页零横向溢出", overflow_of(ev, "view-affinity") <= 0)
     shot("quiz-day-412")
 
-    answer_all(ev, [0, 0, 0, 0, 0, 0, 0])  # 补完 → 全A
+    answer_all(ev, [0] * 11)  # 补完 → 全A（16 题）
     time.sleep(0.4)
     st = ev("""(() => ({ vis: !document.getElementById('view-affinity-result').hidden,
       main: document.getElementById('aff-main-name').textContent,
@@ -109,8 +109,8 @@ try:
       prog: localStorage.getItem('wuri_affinity_progress'),
       res: localStorage.getItem('wuri_affinity_result') }))()""")
     check("[day412] 结果页打开·进度已清", st["vis"] and st["prog"] is None, st["vis"])
-    check("[day412] 全A主缘=保生大帝（与模型对拍）", st["main"] == "保生大帝", st["main"])
-    check("[day412] 次缘=药王,神农大帝（与模型对拍）", st["subNames"] == ["药王", "神农大帝"], st["subNames"])
+    check("[day412] 全A主缘=神农大帝（与模型对拍）", st["main"] == "神农大帝", st["main"])
+    check("[day412] 次缘=温元帅,保生大帝（与模型对拍）", st["subNames"] == ["温元帅", "保生大帝"], st["subNames"])
     check("[day412] 相合说明非空且引职掌", len(st["why"]) > 30 and "职掌" in st["why"], st["why"][:60])
     check("[day412] 诚实标注含现代创作+信效度", "现代创作" in st["honest"] and "信效度" in st["honest"])
     check("[day412] 结果页零横向溢出", overflow_of(ev, "view-affinity-result") <= 0)
@@ -124,16 +124,16 @@ try:
           document.querySelector('.aff-radar-legend .dot-both').parentElement.textContent : '',
         note: document.getElementById('aff-radar-note').textContent,
         noteVis: !document.getElementById('aff-radar-note').hidden }; })()""")
-    _bid = next(d["id"] for d in AM.TAGS["deities"] if d["name"] == "保生大帝")
-    _eu, _ed = AM.radar_user([0] * 12), AM.radar_deity(_bid)
+    _bid = next(d["id"] for d in AM.TAGS["deities"] if d["name"] == "神农大帝")
+    _eu, _ed = AM.radar_user([0] * 16), AM.radar_deity(_bid)
     _ju = [float(x) for x in st["u"].split(",")] if st["u"] else []
     _jd = [float(x) for x in st["d"].split(",")] if st["d"] else []
     _jb = [float(x) for x in st["b"].split(",")] if st["b"] else []
     check("[day412] 五边形用户值与模型对拍（全A）",
           len(_ju) == 5 and all(abs(a - b) <= 0.011 for a, b in zip(_ju, _eu)), (_ju, _eu))
-    check("[day412] 五边形神祇值与模型对拍（保生大帝）",
+    check("[day412] 五边形神祇值与模型对拍（神农大帝）",
           len(_jd) == 5 and all(abs(a - b) <= 0.011 for a, b in zip(_jd, _ed)), (_jd, _ed))
-    check("[day412] 五边形图例含主缘名号", "保生大帝" in (st["lg"] or ""), st["lg"])
+    check("[day412] 五边形图例含主缘名号", "神农大帝" in (st["lg"] or ""), st["lg"])
     check("[day412] 交集层存在且逐轴=min(用户,神祇)",
           len(_jb) == 5 and all(abs(bv - min(a, b)) <= 0.021 for bv, a, b in zip(_jb, _ju, _jd)),
           (_jb, _ju, _jd))
@@ -163,9 +163,9 @@ try:
     st = ev("""(() => ({ quiz: !document.getElementById('view-affinity').hidden,
       step: document.getElementById('affinity-step').textContent,
       res: localStorage.getItem('wuri_affinity_result') }))()""")
-    check("[day412] 再测一次清结果回第1题", st["quiz"] and st["step"] == "第 1 / 12 题" and st["res"] is None, st)
+    check("[day412] 再测一次清结果回第1题", st["quiz"] and st["step"] == "第 1 / 16 题" and st["res"] is None, st)
 
-    answer_all(ev, [2]*12)  # 全C → 月老
+    answer_all(ev, [2]*16)  # 全C → 月老
     time.sleep(0.4)
     st = ev("document.getElementById('aff-main-name').textContent")
     check("[day412] 全C主缘=月老（与模型对拍）", st == "月老", st)
@@ -174,10 +174,10 @@ try:
     # 纯悟道画像对拍：清掉结果再走入口重测
     ev("document.getElementById('affinity-enter').click(), true"); time.sleep(0.3)  # 有结果→结果页
     ev("document.getElementById('aff-retake').click(), true"); time.sleep(0.3)
-    answer_all(ev, [3, 2, 1, 2, 2, 2, 3, 2, 2, 0, 2, 1])
+    answer_all(ev, [3, 2, 1, 2, 2, 2, 3, 2, 2, 0, 2, 1, 2, 1, 3, 0])  # 悟道画像 12 题 + 草案补答
     time.sleep(0.4)
     st = ev("document.getElementById('aff-main-name').textContent")
-    check("[day412] 悟道画像主缘=东华帝君（与模型对拍）", st == "东华帝君", st)
+    check("[day412] 悟道画像主缘=骊山老母（与模型对拍）", st == "骊山老母", st)
     errs = ev("window.__errs")
     check("[day412] 零 JS 异常", errs == [], errs)
 finally:
@@ -190,7 +190,7 @@ try:
     ev("document.getElementById('affinity-enter').click(), true"); time.sleep(0.3)
     check("[night390] 答题页零横向溢出", overflow_of(ev, "view-affinity") <= 0)
     shot("quiz-night-390")
-    answer_all(ev, [1]*12)  # 全B → 魁星（2026-10-22 权重调整后，模型对拍）
+    answer_all(ev, [1]*16)  # 全B → 魁星（模型对拍）
     time.sleep(0.4)
     st = ev("""(() => ({ vis: !document.getElementById('view-affinity-result').hidden,
       main: document.getElementById('aff-main-name').textContent,
@@ -215,10 +215,10 @@ try:
     ev("document.getElementById('deities-enter').click(), true"); time.sleep(0.4)
     shot("deities-day-390")
     ev("document.getElementById('affinity-enter').click(), true"); time.sleep(0.3)
-    answer_all(ev, [3]*12)  # 全D → 骊山老母
+    answer_all(ev, [3]*16)  # 全D → 灵宝天尊
     time.sleep(0.4)
     st = ev("document.getElementById('aff-main-name').textContent")
-    check("[day390] 全D主缘=骊山老母（与模型对拍）", st == "骊山老母", st)
+    check("[day390] 全D主缘=灵宝天尊（与模型对拍）", st == "灵宝天尊", st)
     check("[day390] 结果页零横向溢出", overflow_of(ev, "view-affinity-result") <= 0)
     shot("result-day-390")
     errs = ev("window.__errs")
@@ -249,7 +249,7 @@ for W in (360, 390, 412):
         g = ev(HDR_JS % ("affinity-back", "view-affinity"))
         hdr_check(f"hdr{W}", g, W, True)
         shot(f"quiz-hdr-{W}")
-        answer_all(ev, [0]*12); time.sleep(0.4)  # 走到结果页量其页眉（左钮+标题，无右钮）
+        answer_all(ev, [0]*16); time.sleep(0.4)  # 走到结果页量其页眉（左钮+标题，无右钮）
         g2 = ev(HDR_JS % ("affinity-result-back", "view-affinity-result"))
         hdr_check(f"hdrRes{W}", g2, W, False)
         errs = ev("window.__errs")
@@ -269,14 +269,14 @@ try:
 finally:
     chrome.terminate()
 
-# ---------------- 日间 412：六位原「从未主缘」贴题画像对拍（2026-10-22 权重调整验收） ----------------
+# ---------------- 日间 412：六位贴题画像对拍（2026-10-22 缘分改造后按终版模型更新期望） ----------------
 NEW_PERSONAS = [
-    ("南极长生大帝", [1, 0, 1, 0, 1, 1, 3, 0, 0, 1, 1, 0]),
-    ("太阳星君",     [1, 3, 0, 0, 1, 2, 1, 2, 0, 2, 1, 0]),
-    ("酆都大帝",     [1, 2, 3, 1, 0, 0, 1, 2, 1, 3, 0, 2]),
-    ("北斗星君",     [1, 1, 2, 1, 1, 0, 2, 0, 0, 3, 3, 2]),
-    ("王灵官",       [1, 3, 1, 1, 0, 3, 2, 0, 0, 0, 0, 3]),
-    ("太岁殷元帅",   [1, 2, 0, 0, 2, 0, 0, 1, 0, 3, 1, 1]),
+    ("天官大帝",     [1, 0, 1, 0, 1, 1, 3, 0, 0, 1, 1, 0, 1, 0, 2, 3]),
+    ("太阳星君",     [1, 3, 0, 0, 1, 2, 1, 2, 0, 2, 1, 0, 0, 3, 0, 2]),
+    ("太阴星君",     [1, 2, 3, 1, 0, 0, 1, 2, 1, 3, 0, 2, 0, 1, 3, 0]),
+    ("东岳大帝",     [1, 1, 2, 1, 1, 0, 2, 0, 0, 3, 3, 2, 2, 0, 3, 3]),
+    ("勾陈大帝",     [1, 3, 1, 1, 0, 3, 2, 0, 0, 0, 0, 3, 0, 3, 0, 2]),
+    ("太岁殷元帅",   [1, 2, 0, 0, 2, 0, 0, 1, 0, 3, 1, 1, 0, 3, 0, 2]),
 ]
 chrome, cdp, ev, shot = boot(412, "day")
 try:

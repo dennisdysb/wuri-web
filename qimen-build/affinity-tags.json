@@ -1,0 +1,1609 @@
+{
+ "version": 2,
+ "count": 74,
+ "deities": [
+  {
+   "id": "yuanshi",
+   "name": "元始天尊",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "孤高清峻",
+    "清净淡泊"
+   ],
+   "motifs": [
+    "点化众生"
+   ],
+   "pool": "in",
+   "pool_reason": "道之化身、开劫度人，悟道轴核心，结果庄重"
+  },
+  {
+   "id": "lingbao",
+   "name": "灵宝天尊",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "点化众生"
+   ],
+   "pool": "in",
+   "pool_reason": "传经授箓、接引度人，契合求道与接引诉求"
+  },
+  {
+   "id": "daode",
+   "name": "道德天尊",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "清净淡泊",
+    "逍遥洒脱",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "点化众生",
+    "放下执念",
+    "行医济世"
+   ],
+   "pool": "in",
+   "pool_reason": "道祖与《道德经》国民认知度最高，悟道轴代表"
+  },
+  {
+   "id": "yuhuang",
+   "name": "玉皇大帝",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "平安镇宅",
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "苦修成道",
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "统御三界、考校祸福，福禄平安诉求覆盖面广"
+  },
+  {
+   "id": "wangmu",
+   "name": "西王母",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "智慧悟道"
+    ]
+   },
+   "traits": [
+    "孤高清峻"
+   ],
+   "motifs": [
+    "母仪守护"
+   ],
+   "pool": "in",
+   "pool_reason": "蟠桃长生与女仙之宗，长寿与女性修真双线明确"
+  },
+  {
+   "id": "ziwei",
+   "name": "紫微大帝",
+   "needs": {
+    "primary": [
+     "事业功名"
+    ],
+    "secondary": [
+     "延寿福禄",
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "万星之主、执掌秩序，契合事业与命途诉求"
+  },
+  {
+   "id": "gouchen",
+   "name": "勾陈大帝",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "英武果决"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "统御雷霆、主兵革，护佑安宁取向明确"
+  },
+  {
+   "id": "houtu",
+   "name": "后土皇地祇",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "子嗣安胎",
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚",
+    "温厚守成"
+   ],
+   "motifs": [
+    "母仪守护"
+   ],
+   "pool": "in",
+   "pool_reason": "大地之母、五谷社稷，安宅与生育诉求皆有据"
+  },
+  {
+   "id": "taiyi",
+   "name": "太乙救苦天尊",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "康健祛病",
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "寻声救苦是全图鉴最鲜明的救难神格，正向温暖"
+  },
+  {
+   "id": "puhua",
+   "name": "九天应元雷声普化天尊",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "英武果决"
+   ],
+   "motifs": [
+    "镇妖除害"
+   ],
+   "pool": "in",
+   "pool_reason": "雷祖赏善罚恶、解三灾九厄，解厄轴主力"
+  },
+  {
+   "id": "doumu",
+   "name": "斗姆元君",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "消灾解厄",
+     "康健祛病"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚",
+    "刚正威严"
+   ],
+   "motifs": [
+    "母仪守护",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "众星之母、延生注寿，长寿与解厄双线"
+  },
+  {
+   "id": "zhenwu",
+   "name": "真武大帝",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "英武果决",
+    "坚毅苦修",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "苦修成道",
+    "镇妖除害",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "荡魔护民、国民认知度高，镇宅轴代表"
+  },
+  {
+   "id": "tianguan",
+   "name": "天官大帝",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "贵人逢源",
+     "事业功名"
+    ]
+   },
+   "traits": [
+    "温厚守成",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "天官赐福直指福禄诉求，结果寓意吉祥"
+  },
+  {
+   "id": "diguan",
+   "name": "地官大帝",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "守职尽责",
+    "冤屈昭雪"
+   ],
+   "pool": "in",
+   "pool_reason": "地官赦罪，契合自省谢罪、放下过往的诉求"
+  },
+  {
+   "id": "shuiguan",
+   "name": "水官大帝",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "康健祛病"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "守职尽责",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "水官解厄专司疾病口舌之厄，指向明确"
+  },
+  {
+   "id": "wenchang",
+   "name": "文昌帝君",
+   "needs": {
+    "primary": [
+     "文运学业"
+    ],
+    "secondary": [
+     "事业功名"
+    ]
+   },
+   "traits": [
+    "聪慧机敏"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "文运功名本职，学子诉求第一落点"
+  },
+  {
+   "id": "guandi",
+   "name": "关圣帝君",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "财运",
+     "事业功名"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "豪迈仗义",
+    "英武果决"
+   ],
+   "motifs": [
+    "守职尽责",
+    "镇妖除害"
+   ],
+   "pool": "in",
+   "pool_reason": "忠义护法兼武财神，正气形象国民度最高"
+  },
+  {
+   "id": "zhaogongming",
+   "name": "赵公明",
+   "needs": {
+    "primary": [
+     "财运"
+    ],
+    "secondary": [
+     "康健祛病",
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "正一正财神、主持公道，财运轴第一落点"
+  },
+  {
+   "id": "zhangdaoling",
+   "name": "张道陵",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄",
+     "智慧悟道"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "坚毅苦修"
+   ],
+   "motifs": [
+    "点化众生",
+    "镇妖除害",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "祖天师授箓降魔，护佑与求道双线"
+  },
+  {
+   "id": "lvdongbin",
+   "name": "吕洞宾",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "贵人逢源"
+    ]
+   },
+   "traits": [
+    "逍遥洒脱",
+    "慈悲仁厚",
+    "英武果决"
+   ],
+   "motifs": [
+    "放下执念",
+    "点化众生",
+    "漂泊历练"
+   ],
+   "pool": "in",
+   "pool_reason": "黄粱点化、遍度世人，逍遥气质最具人气"
+  },
+  {
+   "id": "wangchongyang",
+   "name": "王重阳",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "康健祛病"
+    ]
+   },
+   "traits": [
+    "坚毅苦修",
+    "清净淡泊"
+   ],
+   "motifs": [
+    "苦修成道",
+    "点化众生",
+    "放下执念"
+   ],
+   "pool": "in",
+   "pool_reason": "全真教祖、活死人墓苦修，苦修母题代表"
+  },
+  {
+   "id": "erlang",
+   "name": "二郎真君",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "英武果决"
+   ],
+   "motifs": [
+    "护民救劫",
+    "镇妖除害",
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "治水斩蛟、护堤安澜，少年英雄气质鲜明"
+  },
+  {
+   "id": "nezha",
+   "name": "哪吒",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "子嗣安胎"
+    ]
+   },
+   "traits": [
+    "英武果决"
+   ],
+   "motifs": [
+    "少年英才",
+    "镇妖除害",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "中坛元帅护法护童，少年英才母题代表"
+  },
+  {
+   "id": "mazu",
+   "name": "妈祖",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "海上保护神、护侨旅安宁，亲和度极高"
+  },
+  {
+   "id": "bixia",
+   "name": "碧霞元君",
+   "needs": {
+    "primary": [
+     "子嗣安胎"
+    ],
+    "secondary": [
+     "康健祛病",
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "母仪守护",
+    "行医济世"
+   ],
+   "pool": "in",
+   "pool_reason": "泰山娘娘护妇幼、主生育，子嗣轴第一落点"
+  },
+  {
+   "id": "linshui",
+   "name": "临水夫人",
+   "needs": {
+    "primary": [
+     "子嗣安胎"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚",
+    "英武果决",
+    "聪慧机敏"
+   ],
+   "motifs": [
+    "镇妖除害",
+    "母仪守护",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "临水夫人助产保胎，安胎诉求指向最专"
+  },
+  {
+   "id": "chenghuang",
+   "name": "城隍神",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责",
+    "护民救劫",
+    "冤屈昭雪"
+   ],
+   "pool": "in",
+   "pool_reason": "守护一方城池、监察善恶，家乡守护感强"
+  },
+  {
+   "id": "tudi",
+   "name": "土地公",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "财运",
+     "家宅和合"
+    ]
+   },
+   "traits": [
+    "温厚守成",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "离百姓最近的神，家宅生意亲和度最高"
+  },
+  {
+   "id": "zaojun",
+   "name": "灶君",
+   "needs": {
+    "primary": [
+     "家宅和合"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "东厨司命系一家饮食起居，家宅轴本职"
+  },
+  {
+   "id": "yuelao",
+   "name": "月老",
+   "needs": {
+    "primary": [
+     "姻缘感情"
+    ],
+    "secondary": []
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [],
+   "pool": "in",
+   "pool_reason": "红线系足专司姻缘，感情轴唯一落点、不可或缺",
+   "motif_note": "月老源出唐代传奇、走入信仰，并无修行成道或救劫的生平事迹可对应母题，故留空"
+  },
+  {
+   "id": "tieguai",
+   "name": "铁拐李",
+   "needs": {
+    "primary": [
+     "康健祛病"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "行医济世"
+   ],
+   "pool": "in",
+   "pool_reason": "葫芦藏药普济病苦，祛病轴与慈悲形象鲜明"
+  },
+  {
+   "id": "zhongli",
+   "name": "汉钟离",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "逍遥洒脱",
+    "豪迈仗义"
+   ],
+   "motifs": [
+    "点化众生",
+    "放下执念"
+   ],
+   "pool": "in",
+   "pool_reason": "黄粱点醒吕洞宾的点化者，旷达气质突出"
+  },
+  {
+   "id": "zhangguolao",
+   "name": "张果老",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "子嗣安胎"
+    ]
+   },
+   "traits": [
+    "清净淡泊"
+   ],
+   "motifs": [
+    "苦修成道"
+   ],
+   "pool": "in",
+   "pool_reason": "倒骑驴知退守拙，长寿安康诉求明确"
+  },
+  {
+   "id": "hexiangu",
+   "name": "何仙姑",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "康健祛病"
+    ]
+   },
+   "traits": [
+    "清净淡泊",
+    "坚毅苦修"
+   ],
+   "motifs": [
+    "放下执念",
+    "苦修成道",
+    "漂泊历练"
+   ],
+   "pool": "in",
+   "pool_reason": "拒婚修道的清净女仙，女性修真线代表"
+  },
+  {
+   "id": "lancaihe",
+   "name": "蓝采和",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": []
+   },
+   "traits": [
+    "纯真活泼",
+    "逍遥洒脱"
+   ],
+   "motifs": [
+    "点化众生",
+    "漂泊历练"
+   ],
+   "pool": "in",
+   "pool_reason": "踏歌闹市点化痴迷财货者，游戏人间风格独特"
+  },
+  {
+   "id": "hanxiangzi",
+   "name": "韩湘子",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "文运学业"
+    ]
+   },
+   "traits": [
+    "聪慧机敏"
+   ],
+   "motifs": [
+    "点化众生",
+    "技艺成名"
+   ],
+   "pool": "in",
+   "pool_reason": "横笛通神、谶语点化韩愈，书卷气与才艺线"
+  },
+  {
+   "id": "caoguojiu",
+   "name": "曹国舅",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "事业功名"
+    ]
+   },
+   "traits": [
+    "温厚守成",
+    "清净淡泊"
+   ],
+   "motifs": [
+    "放下执念"
+   ],
+   "pool": "in",
+   "pool_reason": "散尽家财急流勇退，放下执念母题代表"
+  },
+  {
+   "id": "changsheng",
+   "name": "南极长生大帝",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "消灾解厄",
+     "事业功名"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "守职尽责",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "神霄玉清真王下辖福禄寿三星，寿福本职"
+  },
+  {
+   "id": "donghua",
+   "name": "东华帝君",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "贵人逢源"
+    ]
+   },
+   "traits": [
+    "孤高清峻"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "男仙之宗、升仙必先谒木公，接引提携取向明确"
+  },
+  {
+   "id": "dongyue",
+   "name": "东岳大帝",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "延寿福禄",
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "守职尽责",
+    "冤屈昭雪",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "泰山信仰为国家祀典主流、民间观感庄重，虽主生死簿籍仍属正向"
+  },
+  {
+   "id": "fengdu",
+   "name": "酆都大帝",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责",
+    "冤屈昭雪"
+   ],
+   "pool": "hold",
+   "pool_reason": "冥界最高主宰、专决亡魂罪福，普通用户测得此结果观感特殊，按预设口径暂缓，候用户裁定"
+  },
+  {
+   "id": "taiyang",
+   "name": "太阳星君",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "日宫帝君管阳宫生籍、注禄寿，阳气生发取向正向"
+  },
+  {
+   "id": "taiyin",
+   "name": "太阴星君",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "孤高清峻",
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "月宫女神清辉涵育，清冷气质可承接安宁消厄诉求"
+  },
+  {
+   "id": "nandou",
+   "name": "南斗星君",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "事业功名",
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "守职尽责",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "南斗注生、增禄益算，延寿与禄运双线"
+  },
+  {
+   "id": "beidou",
+   "name": "北斗星君",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "守职尽责",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "北斗本命延生是道教礼斗核心，解厄延生并重"
+  },
+  {
+   "id": "gexuan",
+   "name": "葛玄",
+   "needs": {
+    "primary": [
+     "康健祛病"
+    ],
+    "secondary": [
+     "智慧悟道"
+    ]
+   },
+   "traits": [
+    "坚毅苦修",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "苦修成道",
+    "行医济世",
+    "护民救劫",
+    "点化众生",
+    "漂泊历练"
+   ],
+   "pool": "in",
+   "pool_reason": "太极仙翁以符箓驱病、炼丹济世，祛病与求道双线"
+  },
+  {
+   "id": "xuxun",
+   "name": "许逊",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "康健祛病",
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚",
+    "英武果决",
+    "坚毅苦修"
+   ],
+   "motifs": [
+    "护民救劫",
+    "镇妖除害",
+    "点化众生",
+    "行医济世"
+   ],
+   "pool": "in",
+   "pool_reason": "旌阳县令斩蛟治水、驱瘟护民，清官护民形象正向"
+  },
+  {
+   "id": "sashoujian",
+   "name": "萨守坚",
+   "needs": {
+    "primary": [
+     "康健祛病"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚",
+    "英武果决",
+    "逍遥洒脱"
+   ],
+   "motifs": [
+    "行医济世",
+    "镇妖除害",
+    "护民救劫",
+    "点化众生"
+   ],
+   "pool": "in",
+   "pool_reason": "咒枣济贫、扇疾救苦，治病救苦取向鲜明"
+  },
+  {
+   "id": "sanmao",
+   "name": "三茅真君",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "康健祛病"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚",
+    "坚毅苦修"
+   ],
+   "motifs": [
+    "苦修成道",
+    "行医济世",
+    "护民救劫",
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "茅山祖师司命注禄、采药治病，寿禄与祛病双线"
+  },
+  {
+   "id": "zhangsanfeng",
+   "name": "张三丰",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "康健祛病"
+    ]
+   },
+   "traits": [
+    "逍遥洒脱",
+    "清净淡泊"
+   ],
+   "motifs": [
+    "苦修成道",
+    "漂泊历练",
+    "放下执念"
+   ],
+   "pool": "in",
+   "pool_reason": "武当祖师性命双修、清静养生，悟道与养生双线"
+  },
+  {
+   "id": "qiuchuji",
+   "name": "丘处机",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "智慧悟道",
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "坚毅苦修",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "漂泊历练",
+    "苦修成道",
+    "护民救劫",
+    "点化众生"
+   ],
+   "pool": "in",
+   "pool_reason": "万里西行劝止杀、护生济世，历练母题代表"
+  },
+  {
+   "id": "liuhai",
+   "name": "刘海蟾",
+   "needs": {
+    "primary": [
+     "财运"
+    ],
+    "secondary": [
+     "智慧悟道"
+    ]
+   },
+   "traits": [
+    "逍遥洒脱",
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "放下执念"
+   ],
+   "pool": "in",
+   "pool_reason": "刘海戏金蟾、散钱济贫，民间财神认知深厚"
+  },
+  {
+   "id": "wanglingguan",
+   "name": "王灵官",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "英武果决"
+   ],
+   "motifs": [
+    "镇妖除害",
+    "守职尽责",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "宫观山门第一护法、正气纠察，镇宅轴主力"
+  },
+  {
+   "id": "huaguang",
+   "name": "马元帅",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "英武果决"
+   ],
+   "motifs": [
+    "镇妖除害",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "华光大帝行火荡妖、护一方水火之安"
+  },
+  {
+   "id": "wenqiong",
+   "name": "温元帅",
+   "needs": {
+    "primary": [
+     "康健祛病"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚",
+    "刚正威严"
+   ],
+   "motifs": [
+    "护民救劫",
+    "镇妖除害",
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "独吞瘟药代众生、捉祟治病，舍己护民形象感人"
+  },
+  {
+   "id": "zhongkui",
+   "name": "钟馗",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄",
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "镇妖除害",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "赐福镇宅圣君、正气伏魔，端午岁末挂像民俗国民度高，结果正向"
+  },
+  {
+   "id": "taisui",
+   "name": "太岁殷元帅",
+   "needs": {
+    "primary": [
+     "消灾解厄"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "英武果决"
+   ],
+   "motifs": [
+    "守职尽责",
+    "镇妖除害",
+    "护民救劫"
+   ],
+   "pool": "hold",
+   "pool_reason": "值年太岁主一岁休咎、民间素有犯太岁之忌，测得此结果易引发用户忌讳联想，按预设口径暂缓，候用户裁定"
+  },
+  {
+   "id": "xiyue",
+   "name": "西岳大帝",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "事业功名"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "华山之神掌五金陶铸、镇守西方，安宅与行业诉求有据"
+  },
+  {
+   "id": "nanyue",
+   "name": "南岳大帝",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "衡山为寿岳、上应轸星主寿，延寿取向有典据"
+  },
+  {
+   "id": "zhongyue",
+   "name": "中岳大帝",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "家宅和合"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "嵩山为五土之主、掌土地陵谷，地基家宅取向"
+  },
+  {
+   "id": "beiyue",
+   "name": "北岳大帝",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "恒山之神掌江河湖海，镇守北方、安澜护境"
+  },
+  {
+   "id": "xuannv",
+   "name": "九天玄女",
+   "needs": {
+    "primary": [
+     "事业功名"
+    ],
+    "secondary": [
+     "智慧悟道"
+    ]
+   },
+   "traits": [
+    "聪慧机敏",
+    "沉稳谋略"
+   ],
+   "motifs": [
+    "点化众生",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "授黄帝兵法谋略，决胜与谋略气质是事业轴稀缺落点"
+  },
+  {
+   "id": "yaowang",
+   "name": "药王",
+   "needs": {
+    "primary": [
+     "康健祛病"
+    ],
+    "secondary": [
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "行医济世"
+   ],
+   "pool": "in",
+   "pool_reason": "孙思邈《大医精诚》、医德医术双绝，祛病轴第一落点"
+  },
+  {
+   "id": "baosheng",
+   "name": "保生大帝",
+   "needs": {
+    "primary": [
+     "康健祛病"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "行医济世",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "大道公精于针灸汤药、泉漳乡土守护，亲和度高"
+  },
+  {
+   "id": "shennong",
+   "name": "神农大帝",
+   "needs": {
+    "primary": [
+     "康健祛病"
+    ],
+    "secondary": [
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚",
+    "坚毅苦修"
+   ],
+   "motifs": [
+    "行医济世",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "亲尝百草、教民稼穑，农医之祖形象厚重正向"
+  },
+  {
+   "id": "bigan",
+   "name": "比干",
+   "needs": {
+    "primary": [
+     "财运"
+    ],
+    "secondary": [
+     "事业功名"
+    ]
+   },
+   "traits": [
+    "刚正威严",
+    "英武果决"
+   ],
+   "motifs": [
+    "冤屈昭雪",
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "无心无偏的文财神，公平发财取向与忠谏形象皆正向"
+  },
+  {
+   "id": "kuixing",
+   "name": "魁星",
+   "needs": {
+    "primary": [
+     "文运学业"
+    ],
+    "secondary": [
+     "事业功名"
+    ]
+   },
+   "traits": [
+    "聪慧机敏",
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "魁星点斗主文运科考，学子诉求专属落点"
+  },
+  {
+   "id": "longwang",
+   "name": "龙王",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "延寿福禄"
+    ]
+   },
+   "traits": [
+    "刚正威严"
+   ],
+   "motifs": [
+    "守职尽责",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "兴云布雨、风调雨顺，渔航与农耕平安诉求皆有据"
+  },
+  {
+   "id": "luban",
+   "name": "鲁班",
+   "needs": {
+    "primary": [
+     "事业功名"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "聪慧机敏"
+   ],
+   "motifs": [
+    "技艺成名"
+   ],
+   "pool": "in",
+   "pool_reason": "百工祖师、技艺成名母题唯一落点，手艺人亲和度高"
+  },
+  {
+   "id": "hehe",
+   "name": "和合二仙",
+   "needs": {
+    "primary": [
+     "家宅和合"
+    ],
+    "secondary": [
+     "姻缘感情"
+    ]
+   },
+   "traits": [
+    "纯真活泼",
+    "逍遥洒脱"
+   ],
+   "motifs": [
+    "漂泊历练"
+   ],
+   "pool": "in",
+   "pool_reason": "寒山拾得主和合喜乐，婚姻家庭和睦取向喜庆正向"
+  },
+  {
+   "id": "magu",
+   "name": "麻姑",
+   "needs": {
+    "primary": [
+     "延寿福禄"
+    ],
+    "secondary": [
+     "康健祛病"
+    ]
+   },
+   "traits": [
+    "纯真活泼"
+   ],
+   "motifs": [],
+   "pool": "in",
+   "pool_reason": "麻姑献寿是祝寿第一意象，长寿诉求落点鲜明",
+   "motif_note": "麻姑为《神仙传》所载先天女仙，其事迹重在见证沧海桑田与献寿，并无修行历练或救劫的经历母题可对应，故留空"
+  },
+  {
+   "id": "lishan",
+   "name": "骊山老母",
+   "needs": {
+    "primary": [
+     "智慧悟道"
+    ],
+    "secondary": [
+     "贵人逢源"
+    ]
+   },
+   "traits": [
+    "孤高清峻"
+   ],
+   "motifs": [
+    "点化众生"
+   ],
+   "pool": "in",
+   "pool_reason": "骊山老母授经点化、不问出身，女性修行宗师气质独特"
+  },
+  {
+   "id": "guangze",
+   "name": "广泽尊王",
+   "needs": {
+    "primary": [
+     "平安镇宅"
+    ],
+    "secondary": [
+     "消灾解厄"
+    ]
+   },
+   "traits": [],
+   "motifs": [
+    "少年英才",
+    "护民救劫"
+   ],
+   "pool": "in",
+   "pool_reason": "郭圣王笃孝坐化、有求必应，闽台亲和度极高"
+  },
+  {
+   "id": "zhusheng",
+   "name": "注生娘娘",
+   "needs": {
+    "primary": [
+     "子嗣安胎"
+    ],
+    "secondary": [
+     "平安镇宅"
+    ]
+   },
+   "traits": [
+    "慈悲仁厚"
+   ],
+   "motifs": [
+    "母仪守护",
+    "守职尽责"
+   ],
+   "pool": "in",
+   "pool_reason": "注生娘娘执笔注籍子嗣，安胎护婴指向最专"
+  }
+ ]
+}
