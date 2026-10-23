@@ -25,12 +25,12 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v92 缓存名", "wuri-v92-20261023-v200-3" in sw)
+report("SW v93 缓存名", "wuri-v93-20261023-v200-4" in sw)
 report("SW 预缓存不含图鉴全图", "img/deities/" not in assets)
 report("SW 含图鉴全图分支（豁免缓存优先）", "isDeityFull" in sw and "OFFLINE_CACHE" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
 report("设置页图鉴素材卡在位", 'id="deity-dl-btn"' in html and 'id="deity-dl-status"' in html)
-report("CSS ?v=92 与版本 (3)", "css/style.css?v=92" in html and "v2.0.0 (3)" in html)
+report("CSS ?v=93 与版本 (4)", "css/style.css?v=93" in html and "v2.0.0 (4)" in html)
 od = open(os.path.join(WWW, "js/offline-download.js"), encoding="utf-8").read()
 report("音频预取只带缩略图", "rels.push('img/deities/' + d.image)" not in od)
 
@@ -254,6 +254,25 @@ try:
     gq = ev("""(() => { const svg = document.querySelector('#sx-detail svg.sx-plot'); if (!svg) return {};
       return { focal: svg.querySelectorAll('.sx-star.focal').length, ctx: svg.querySelectorAll('.sx-star.ctx').length }; })()""")
     report("钩钤（跨度 0.2°）：上下文模式", okp and gq.get("focal") == 2 and gq.get("ctx", 0) >= 3, gq)
+    # ---------- 同区星官片区：标题 + 人话说明（(4) 真机反馈：北极页底一墙胶囊无标题） ----------
+    okp = open_plot("紫微垣", "北极")
+    sib = ev("""(() => {
+      const secs = Array.from(document.querySelectorAll('#sx-detail .sx-sec'));
+      const title = secs.find(e => e.textContent.includes('同区星官'));
+      const note = document.querySelector('#sx-detail .sx-sec-note');
+      const chips = document.querySelector('#sx-detail .sx-chips');
+      if (!title || !chips) return { found: false };
+      return { found: true, title: title.textContent.trim(),
+               note: note ? note.textContent.trim() : '',
+               before: !!(title.compareDocumentPosition(chips) & Node.DOCUMENT_POSITION_FOLLOWING),
+               noteBefore: note ? !!(note.compareDocumentPosition(chips) & Node.DOCUMENT_POSITION_FOLLOWING) : false,
+               n: chips.querySelectorAll('.sx-chip').length };
+    })()""")
+    report("同区星官片区：标题「同区星官 · 紫微垣」紧贴胶囊区之前",
+           okp and sib.get("found") and "同区星官 · 紫微垣" in sib.get("title", "")
+           and sib.get("before") and sib.get("n", 0) >= 30, sib)
+    report("同区星官片区：人话说明（按区动态生成）",
+           sib.get("note") == "同属紫微垣区的其他星官，点按直达各自详情" and sib.get("noteBefore"), sib)
     ev("document.documentElement.setAttribute('data-theme', 'night'); true")
     open_plot("太微垣", "幸臣")
     shot("plot-xingchen-night")

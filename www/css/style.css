@@ -1605,6 +1605,7 @@ details.disc-foot .hint{margin-top:9px}
 .sx-sec{font-family:var(--serif);font-size:1.02rem;font-weight:700;letter-spacing:.24em;color:var(--ink);margin:24px 0 10px;display:flex;align-items:center;gap:10px}
 .sx-sec::after{content:"";flex:1;height:1px;background:var(--line)}
 .sx-sec small{font-family:var(--sans);font-weight:400;font-size:.72rem;letter-spacing:.05em;color:var(--muted)}
+.sx-sec-note{font-family:var(--sans);font-size:.78rem;line-height:1.6;color:var(--muted);margin:-4px 0 10px}
 .sx-card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
 .sx-loading{font-family:var(--sans);font-size:.85rem;color:var(--muted);text-align:center;padding:38px 12px;line-height:1.7}
 .sx-today{display:flex;gap:12px;align-items:center;padding:12px 14px;margin-top:14px;cursor:pointer}

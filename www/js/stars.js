@@ -617,7 +617,10 @@
 
     var others = si.list.filter(function (x) { return astKey(x) !== key; });
     if (others.length) {
-      h += '<div class="sx-chips" style="margin-top:14px">';
+      h += '<div class="sx-sec">' + esc(t('sx_siblings')) + ' · ' + txEsc(a.section) +
+        ' <small>' + esc(t('sx_tap_go')) + '</small></div>';
+      h += '<div class="sx-sec-note">' + esc(tf(t('sx_siblings_note'), a.section)) + '</div>';
+      h += '<div class="sx-chips">';
       others.forEach(function (x) {
         h += '<span class="sx-chip" data-sx-detail="' + esc(astKey(x)) + '">' + txEsc((isYuan ? '' : '同' + a.section.replace(/宿$/, '') + ' · ') + x.name) + '</span>';
       });
