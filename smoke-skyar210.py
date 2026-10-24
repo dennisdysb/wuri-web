@@ -26,10 +26,10 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v101 缓存名", "wuri-v101-20261024-v210-5" in sw)
+report("SW v102 缓存名", "wuri-v102-20261024-v210-6" in sw)
 report("SW 预缓存含 sky-ar.js", "js/sky-ar.js" in assets)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("AR 视图与脚本在位", 'id="view-sky-ar"' in html and "js/sky-ar.js" in html and "v2.1.0 (5)" in html)
+report("AR 视图与脚本在位", 'id="view-sky-ar"' in html and "js/sky-ar.js" in html and "v2.1.0 (6)" in html)
 arjs = open(os.path.join(WWW, "js/sky-ar.js"), encoding="utf-8").read()
 report("AR 模块含姿态/校准/回落关键件", all(x in arjs for x in
        ["deviceorientation", "getUserMedia", "requestPermission", "_injectPose", "facingMode"]))
@@ -161,16 +161,20 @@ try:
     report("红光模式开关（红类＋存档）", red and saved2 and '"red":true' in saved2, (red, saved2))
     ev("document.querySelector('.ar-bar [data-ar=\"red\"]').click(); true", 0.3)
 
-    # ---------- 拍照合成 ----------
-    cap = ev("""(async () => { const u = window.WuriSkyAR._captureDataURL();
+    # ---------- 拍照合成（(6)：底图必须真有实景帧，星层黑底不算数） ----------
+    cap = ev("""(async () => { const u = await window.WuriSkyAR._captureDataURL();
       if (!u) return {ok: false};
       const img = new Image(); await new Promise(r => { img.onload = r; img.src = u; });
-      const c = document.createElement('canvas'); c.width = 32; c.height = 32;
-      const x = c.getContext('2d'); x.drawImage(img, 0, 0, 32, 32);
-      const d = x.getImageData(0, 0, 32, 32).data, seen = new Set();
-      for (let i = 0; i < d.length; i += 4) seen.add(d[i] + ',' + d[i+1] + ',' + d[i+2]);
-      return {ok: u.startsWith('data:image/png'), len: u.length, colors: seen.size}; })()""")
-    report("拍照合成出图（PNG＋像素多样 ≥3 色）", cap and cap["ok"] and cap["len"] > 8000 and cap["colors"] >= 3, cap)
+      const c = document.createElement('canvas'); c.width = 64; c.height = 64;
+      const x = c.getContext('2d'); x.drawImage(img, 0, 0, 64, 64);
+      const d = x.getImageData(0, 0, 64, 64).data, seen = new Set();
+      let lit = 0, n = 0;
+      for (let i = 0; i < d.length; i += 4) { seen.add(d[i] + ',' + d[i+1] + ',' + d[i+2]);
+        n++; if (Math.max(d[i], d[i+1], d[i+2]) > 24) lit++; }
+      return {ok: u.startsWith('data:image/png'), len: u.length, colors: seen.size,
+              litFrac: lit / n, w: img.width, h: img.height}; })()""")
+    report("拍照合成出图（PNG＋像素多样 ≥3 色＋底图非黑占比 ≥15%）",
+           cap and cap["ok"] and cap["len"] > 8000 and cap["colors"] >= 3 and cap["litFrac"] >= 0.15, cap)
 
     # ---------- 零溢出 ----------
     report("390 日间：AR 页零横向溢出",

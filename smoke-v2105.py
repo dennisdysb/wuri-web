@@ -24,11 +24,11 @@ def report(name, ok, extra=""):
 
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v101 缓存名", "wuri-v101-20261024-v210-5" in sw)
+report("SW v102 缓存名", "wuri-v102-20261024-v210-6" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
 css = open(os.path.join(WWW, "css/style.css"), encoding="utf-8").read()
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
-report("四件套：CSS ?v=101＋版本 v2.1.0 (5)", "css/style.css?v=101" in html and "v2.1.0 (5)" in html)
+report("四件套：CSS ?v=102＋版本 v2.1.0 (6)", "css/style.css?v=102" in html and "v2.1.0 (6)" in html)
 report("首页小行已删净（html/css/i18n 三处）",
        "home-ar-entry" not in html and "home-ar-entry" not in css and "hae-" not in css
        and "home_ar_sub" not in i18n)
@@ -74,7 +74,7 @@ try:
     errs = []
     cdp.call("Page.navigate", {"url": "file://" + os.path.join(WWW, "index.html")})
     assert waitfor("!!document.querySelector('#tabbar')")
-    assert waitfor("!!document.getElementById('zhishen-line') && document.getElementById('zhishen-line').textContent.trim().length > 4")
+    assert waitfor("['jieqi-line','zhishen-line','sun-line'].every(id => { const e = document.getElementById(id); return e && e.textContent.trim().length > 4; })")
 
     report("运行时：首页 DOM 无 .home-ar-entry", ev("!document.querySelector('.home-ar-entry')"))
     report("值神区完整（节气＋四值神＋太阳所在均有内容)",

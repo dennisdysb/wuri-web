@@ -108,7 +108,7 @@
   /* ---------------- 状态 ---------------- */
   var S = {
     running: false, stream: null, raf: 0, pose: null, poseAt: 0, startAt: 0,
-    noPose: false, fallback: null, posCache: null, posAt: 0,
+    noPose: false, fallback: null, posCache: null, posAt: 0, msgText: '', msgUntil: 0,
     labels: [], segments: 0, hudText: '', els: null, oriBound: false
   };
 
@@ -143,10 +143,12 @@
   }
   function starR(m) { return m <= 1 ? 3.4 : m <= 2 ? 2.8 : m <= 3 ? 2.2 : m <= 4 ? 1.7 : m <= 5 ? 1.35 : m <= 6 ? 1.05 : 0.85; }
 
-  /* 场景绘制：ctx 已按工作尺寸设好变换；w/h 为工作单位（显示时 = CSS px） */
-  function drawScene(ctx, w, h) {
+  /* 场景绘制：ctx 已按工作尺寸设好变换；w/h 为工作单位（显示时 = CSS px）。
+   * keepBase=true 时不 clearRect——拍照合成的底图已画在同一画布上，
+   * 清屏会把实景帧整张擦掉（v2.1.0 (6) 修的黑底合成图根因） */
+  function drawScene(ctx, w, h, keepBase) {
     S.labels = []; S.segments = 0;
-    ctx.clearRect(0, 0, w, h);
+    if (!keepBase) ctx.clearRect(0, 0, w, h);
     if (!S.pose || !S.posCache) return;
     var ax = camAxes();
     var focal = (h / 2) / Math.tan(VFOV / 2 * D2R);
@@ -256,8 +258,9 @@
     drawScene(ctx, cw, ch);
     /* 标签坐标是工作单位（CSS px），与 _state/pick 同口径 */
     var hud = '';
-    if (S.pose && S.centerAz != null) hud = tf(t('sx2_ar_hud'), S.centerAz.toFixed(0), S.centerAlt.toFixed(0));
-    if (S.noPose) hud = (hud ? hud + ' · ' : '') + t('sx2_ar_nopose');
+    if (S.msgText && now < S.msgUntil) hud = S.msgText;
+    else if (S.pose && S.centerAz != null) hud = tf(t('sx2_ar_hud'), S.centerAz.toFixed(0), S.centerAlt.toFixed(0));
+    if (S.noPose && hud !== S.msgText) hud = (hud ? hud + ' · ' : '') + t('sx2_ar_nopose');
     if (hud !== S.hudText) { S.hudText = hud; if (S.els.hud) S.els.hud.textContent = hud; }
     S.cssW = cw; S.cssH = ch;
   }
@@ -354,18 +357,88 @@
     frame();
   }
 
-  function captureCanvas() {
+  /* ---------- 拍照合成（v2.1.0 (6) 重做） ----------
+   * 旧版三宗罪：①先把 video 帧画进合成画布、再调 drawScene，而 drawScene
+   * 开头 clearRect 把刚画的实景帧整张擦掉，JPEG 无 alpha 通道 → 成品必然
+   * 黑底（用户真机实证：只有星点/连线/标签/准星、实景一帧没进来）；
+   * ②合成用视频原始宽高比，与预览 object-fit:cover 的裁切几何不一致，
+   * 星层会与实景错位；③安卓 Chrome 对直播 <video> 直接 drawImage 可能
+   * 取到黑帧，旧版对此毫无检测、拿黑底交差。
+   * 新版：ImageCapture.grabFrame() 优先抓帧（回落 drawImage 且要求
+   * readyState≥2、videoWidth>0）→ 按预览同一 cover 口径裁切画满 →
+   * 死帧检测（采样 ≥99% 近纯黑判死）→ 不过关等 260ms 重抓一次 →
+   * 再不过关明确报错不产图；星层用与预览完全相同的变换
+   * （舞台 CSS 尺寸 × dpr、drawScene keepBase）叠上，所见即所得。 */
+  function flashMsg(text) { S.msgText = text; S.msgUntil = performance.now() + 3400; }
+
+  async function grabFrame() {
+    var track = S.stream && S.stream.getVideoTracks && S.stream.getVideoTracks()[0];
+    if (track && window.ImageCapture) {
+      try {
+        var bmp = await new ImageCapture(track).grabFrame();
+        if (bmp && bmp.width > 0 && bmp.height > 0) return { src: bmp, w: bmp.width, h: bmp.height, bmp: bmp };
+      } catch (e) { /* 落回 drawImage */ }
+    }
     var v = S.els && S.els.video;
-    if (!v || !v.videoWidth || !v.videoHeight || !S.pose) return null;
-    var c = document.createElement('canvas');
-    c.width = v.videoWidth; c.height = v.videoHeight;
-    var ctx = c.getContext('2d');
-    ctx.drawImage(v, 0, 0, c.width, c.height);
-    drawScene(ctx, c.width, c.height);
-    return c;
+    if (v && v.readyState >= 2 && v.videoWidth > 0 && v.videoHeight > 0) {
+      return { src: v, w: v.videoWidth, h: v.videoHeight, bmp: null };
+    }
+    return null;
   }
-  function snap() {
-    var c = captureCanvas(); if (!c) return;
+
+  /* 按 object-fit:cover 的同一口径把源帧裁切画满目标矩形 */
+  function drawBaseCover(ctx, src, sw, sh, W, H) {
+    var sa = sw / sh, ta = W / H, cw, ch, cx, cy;
+    if (sa > ta) { ch = sh; cw = sh * ta; cx = (sw - cw) / 2; cy = 0; }
+    else { cw = sw; ch = sw / ta; cx = 0; cy = (sh - ch) / 2; }
+    ctx.drawImage(src, cx, cy, cw, ch, 0, 0, W, H);
+  }
+
+  /* 死帧检测：24×24 采样网格中 ≥99% 像素近纯黑（max(r,g,b)≤3）判死帧。
+   * 真夜空照片有传感器噪声与梯度、达不到这个均匀度；drawImage 取空帧
+   * 则是整张纯 0 —— 只拦后者，宁可报错也不拿黑底交差。 */
+  function frameAlive(c) {
+    var t = document.createElement('canvas'); t.width = 24; t.height = 24;
+    var x = t.getContext('2d'); if (!x) return true;
+    x.drawImage(c, 0, 0, 24, 24);
+    var d;
+    try { d = x.getImageData(0, 0, 24, 24).data; } catch (e) { return true; }
+    var dark = 0, n = 0;
+    for (var i = 0; i < d.length; i += 4) { n++; if (Math.max(d[i], d[i + 1], d[i + 2]) <= 3) dark++; }
+    return n > 0 && dark / n < 0.99;
+  }
+
+  async function capturePhoto() {
+    var stage = S.els && S.els.stage;
+    if (!stage || !S.pose || !S.running) return null;
+    var W = stage.clientWidth, H = stage.clientHeight;
+    if (!W || !H) return null;
+    var scale = Math.min(2, window.devicePixelRatio || 1);
+    for (var attempt = 0; attempt < 2; attempt++) {
+      var fr = await grabFrame();
+      if (fr) {
+        var c = document.createElement('canvas');
+        c.width = Math.round(W * scale); c.height = Math.round(H * scale);
+        var ctx = c.getContext('2d');
+        /* 红光模式下预览对 video 有 CSS 滤镜，合成底图按同滤镜过一遍再叠红星层 */
+        if (cal.red && 'filter' in ctx) ctx.filter = 'brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2)';
+        drawBaseCover(ctx, fr.src, fr.w, fr.h, c.width, c.height);
+        ctx.filter = 'none';
+        if (fr.bmp && fr.bmp.close) fr.bmp.close();
+        if (frameAlive(c)) {
+          ctx.setTransform(scale, 0, 0, scale, 0, 0);
+          drawScene(ctx, W, H, true);
+          return c;
+        }
+      }
+      if (attempt === 0) await new Promise(function (r) { setTimeout(r, 260); });
+    }
+    return null;
+  }
+
+  async function snap() {
+    var c = await capturePhoto();
+    if (!c) { flashMsg(t('sx2_ar_snap_fail')); return; }
     c.toBlob(function (blob) {
       if (!blob) return;
       var file = null;
@@ -551,7 +624,7 @@
         centerAz: S.centerAz, centerAlt: S.centerAlt, polePoint: S.polePoint };
     },
     _setCal: function (az, alt) { cal.az = az; cal.alt = alt; clampCal(); saveCal(); },
-    _captureDataURL: function () { var c = captureCanvas(); return c ? c.toDataURL('image/png') : null; },
+    _captureDataURL: async function () { var c = await capturePhoto(); return c ? c.toDataURL('image/png') : null; },
     _stop: stopAR
   };
 })();
