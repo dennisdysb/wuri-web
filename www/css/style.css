@@ -654,7 +654,7 @@ details.disc-foot .hint{margin-top:9px}
 /* 星象三子视图须高于神祇详情（61）：神祇详情页「本宿星官 ›」打开的区页要盖在
  * 详情之上（子视图通用 .view 只有 z-50，此前区页被详情整页遮住、点击看似无反应，
  * v2.0.0 (7) 真机修复）；区页返回收起自身即露回详情，详情滚动天然保持。 */
-#view-star-region,#view-butiange,#view-star-detail{z-index:62}
+#view-star-region,#view-butiange,#view-star-detail,#view-sky-tonight,#view-sky-chart{z-index:62}
 .deity-group-title{font-size:1.05rem;font-weight:700;color:var(--gold-deep);letter-spacing:.2em;margin:22px 16px 10px}
 .deity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px}
 .deity-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;cursor:pointer;font-family:inherit;color:var(--ink)}
@@ -1803,3 +1803,31 @@ body.bugang-open{overflow:hidden}
 .bg-progress{text-align:center;font-size:.88rem;color:var(--muted);margin-top:8px}
 .bg-btns{justify-content:center;margin-top:12px}
 .bg-btns .btn{min-width:76px}
+
+/* ============ 星象二期一步：今夜可见＋平面星图（v2.1.0） ============ */
+.sk-loc{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 2px 4px;font-family:var(--sans);font-size:.8rem;color:var(--ink-2)}
+.sk-loc-lab{color:var(--muted)}
+.sk-loc-val{color:var(--ink)}
+.sk-loc-edit{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 2px 2px;font-family:var(--sans);font-size:.8rem;color:var(--ink-2)}
+.sk-loc-edit[hidden]{display:none}
+.sk-loc-edit label{display:flex;align-items:center;gap:5px}
+.sk-in{width:96px;padding:5px 7px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:var(--sans);font-size:.82rem;min-width:0}
+.sk-loc-note{width:100%;font-size:.72rem;color:var(--gold-deep)}
+.sk-night-head{font-family:var(--sans);font-size:.82rem;color:var(--ink-2);line-height:1.7;padding:8px 2px 2px}
+.sk-best{font-family:var(--sans);font-size:.74rem;color:var(--gold-deep);white-space:nowrap}
+#view-sky-tonight .sx-row-side{flex-direction:column;align-items:flex-end;gap:1px}
+.sk-chart-wrap{margin:10px auto 2px;max-width:430px}
+#sk-chart-svg{width:100%;height:auto;display:block;touch-action:none;cursor:grab}
+#sk-chart-svg:active{cursor:grabbing}
+.sk-disc{fill:var(--card);stroke:var(--line);stroke-width:1}
+.sk-ring{fill:none;stroke:var(--line);stroke-width:.7;stroke-dasharray:3 4}
+.sk-line{fill:none;stroke:var(--gold);stroke-width:1.1;opacity:.55}
+.sk-line.doubtful{stroke-dasharray:4 3;opacity:.45}
+.sk-star{fill:var(--ink)}
+.sk-label{font-family:var(--serif);font-size:10.5px;fill:var(--gold-deep);text-anchor:middle;paint-order:stroke;stroke:var(--card);stroke-width:2.4;letter-spacing:.06em}
+.sk-cardinal{font-family:var(--serif);font-size:13px;font-weight:700;fill:var(--ink-2);text-anchor:middle;dominant-baseline:middle}
+.sk-cardinal.minor{font-size:9.5px;font-weight:400;fill:var(--muted)}
+.sk-controls{display:flex;align-items:center;gap:10px;padding:8px 2px 0;font-family:var(--sans);font-size:.8rem;color:var(--ink-2)}
+.sk-controls input[type="range"]{flex:1;min-width:0;accent-color:var(--gold)}
+#sk-time-lab{flex:none;min-width:86px;text-align:right;color:var(--ink)}
+.sk-hint{font-family:var(--sans);font-size:.72rem;color:var(--muted);text-align:center;padding:6px 10px 0}
