@@ -97,6 +97,27 @@
     return r ? r.date : null;
   }
 
+  /* 太阳当日期分点赤道坐标（度）：黄道线上的太阳位置点用 */
+  function sunEqd(date) {
+    if (!A) return null;
+    var eq = A.Equator(A.Body.Sun, date, makeObserver(DEFAULT_OBS), true, true);
+    return { ra: norm360(eq.ra * 15), dec: eq.dec };
+  }
+
+  /* 「最暗星等」共用口径（v2.1.0 (2)）：平面星图、今夜可见、相机认星
+   * 三处共用同一存档档位（3/4/5/6 等，默认 6），星图页设定、他处跟随。 */
+  var MAGLIM_KEY = 'wuri_sky_maglim_v1';
+  function magLim() {
+    try {
+      var v = parseFloat(localStorage.getItem(MAGLIM_KEY));
+      if (v === 3 || v === 4 || v === 5 || v === 6) return v;
+    } catch (e) {}
+    return 6;
+  }
+  function setMagLim(v) {
+    try { localStorage.setItem(MAGLIM_KEY, String(v)); } catch (e) {}
+  }
+
   global.WuriSky = {
     available: !!A,
     DEFAULT_OBS: DEFAULT_OBS,
@@ -106,6 +127,9 @@
     lstDeg: lstDeg,
     eqdFromAltAz: eqdFromAltAz,
     sunAltAz: sunAltAz,
-    astroDusk: astroDusk
+    sunEqd: sunEqd,
+    astroDusk: astroDusk,
+    magLim: magLim,
+    setMagLim: setMagLim
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -654,7 +654,7 @@ details.disc-foot .hint{margin-top:9px}
 /* 星象三子视图须高于神祇详情（61）：神祇详情页「本宿星官 ›」打开的区页要盖在
  * 详情之上（子视图通用 .view 只有 z-50，此前区页被详情整页遮住、点击看似无反应，
  * v2.0.0 (7) 真机修复）；区页返回收起自身即露回详情，详情滚动天然保持。 */
-#view-star-region,#view-butiange,#view-star-detail,#view-sky-tonight,#view-sky-chart{z-index:62}
+#view-star-region,#view-butiange,#view-star-detail,#view-sky-tonight,#view-sky-chart,#view-sky-ar{z-index:62}
 .deity-group-title{font-size:1.05rem;font-weight:700;color:var(--gold-deep);letter-spacing:.2em;margin:22px 16px 10px}
 .deity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px}
 .deity-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;cursor:pointer;font-family:inherit;color:var(--ink)}
@@ -1824,10 +1824,73 @@ body.bugang-open{overflow:hidden}
 .sk-line{fill:none;stroke:var(--gold);stroke-width:1.1;opacity:.55}
 .sk-line.doubtful{stroke-dasharray:4 3;opacity:.45}
 .sk-star{fill:var(--ink)}
-.sk-label{font-family:var(--serif);font-size:10.5px;fill:var(--gold-deep);text-anchor:middle;paint-order:stroke;stroke:var(--card);stroke-width:2.4;letter-spacing:.06em}
+.sk-label{font-family:var(--serif);font-size:8.5px;fill:var(--gold-deep);text-anchor:middle;paint-order:stroke;stroke:var(--card);stroke-width:2;letter-spacing:.06em;opacity:.85}
 .sk-cardinal{font-family:var(--serif);font-size:13px;font-weight:700;fill:var(--ink-2);text-anchor:middle;dominant-baseline:middle}
 .sk-cardinal.minor{font-size:9.5px;font-weight:400;fill:var(--muted)}
 .sk-controls{display:flex;align-items:center;gap:10px;padding:8px 2px 0;font-family:var(--sans);font-size:.8rem;color:var(--ink-2)}
 .sk-controls input[type="range"]{flex:1;min-width:0;accent-color:var(--gold)}
 #sk-time-lab{flex:none;min-width:86px;text-align:right;color:var(--ink)}
 .sk-hint{font-family:var(--sans);font-size:.72rem;color:var(--muted);text-align:center;padding:6px 10px 0}
+/* 星图二期追加（v2.1.0 (2)）：搜索定位/播放/星等/线层/信息条/侧栏 */
+.sk-search{display:flex;align-items:center;gap:8px;padding:10px 2px 0;font-family:var(--sans)}
+.sk-search .sk-in{flex:1;width:auto}
+.sk-q-note{font-size:.74rem;color:var(--gold-deep);white-space:nowrap}
+.sk-focusbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 2px 0;font-family:var(--sans);font-size:.8rem;color:var(--ink-2)}
+.sk-focusbar[hidden]{display:none}
+.sk-focusbar b{color:var(--gold-deep)}
+.sk-sel{width:76px;flex:none}
+.sk-ctl-lab{flex:none;color:var(--ink-2)}
+.sk-toggles{flex-wrap:wrap}
+.sk-controls .mini-btn.on{border-color:var(--gold);color:var(--gold-deep);font-weight:700}
+.sk-ecliptic{fill:none;stroke:#d8a03c;stroke-width:1.1;stroke-dasharray:6 4;opacity:.85}
+.sk-eqline{fill:none;stroke:#7d94b8;stroke-width:1;stroke-dasharray:2 4;opacity:.8}
+.sk-sun{fill:#f5b301;stroke:#fff2c0;stroke-width:1}
+.sk-linelabel{fill:#b8860b}
+.sk-sunlabel{fill:#b8860b;font-weight:700}
+.sk-hl{fill:none;stroke:var(--gold);stroke-width:1.6;pointer-events:none;animation:skpulse 1.6s ease-in-out infinite}
+@keyframes skpulse{0%,100%{opacity:.95}50%{opacity:.3}}
+.sk-infobar{position:fixed;left:84px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom));background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:10px;z-index:63;box-shadow:0 6px 24px rgba(0,0,0,.18);font-family:var(--sans)}
+.sk-infobar[hidden]{display:none}
+.sk-info-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sk-info-name{font-family:var(--serif);font-weight:700;color:var(--ink)}
+.sk-info-data{font-size:.74rem;color:var(--muted)}
+.sk-side-tonight{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.sk-side-h{font-family:var(--serif);font-weight:700;color:var(--gold-deep);letter-spacing:.12em;font-size:.86rem;margin-bottom:6px}
+.sk-side-row{display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer;font-family:var(--sans);font-size:.8rem;color:var(--ink-2);border-bottom:1px dashed var(--line)}
+.sk-side-row:last-child{border-bottom:none}
+.sk-side-row.none{cursor:default;color:var(--muted)}
+.sk-side-name{font-family:var(--serif);font-weight:700;color:var(--ink);min-width:3.2em}
+.sk-side-row .sk-best{margin-left:auto}
+/* ============ 星象模块平板适配（v2.1.0 (2)，≥768px） ============
+ * 断点 768 与全站既有平板档一致。星图：主体＋右侧 320px 侧栏并排，
+ * 星盘直径取主区宽与视口高之较小者（整幅铺展、正圆不拉伸）；
+ * 今夜可见双列；星象页/区页/详情内容放宽至 1080；AR 全幅。 */
+@media (min-width:768px){
+  .sk-layout{display:flex;gap:22px;align-items:flex-start}
+  .sk-main{flex:1 1 auto;min-width:0}
+  .sk-side{flex:0 0 264px;width:264px}
+  .sk-chart-wrap{max-width:min(100%,calc(100dvh - 180px));margin-top:6px}
+  .sk-infobar{position:static;transform:none;width:auto;box-shadow:none;margin-top:12px}
+  #sk-tonight-body{display:grid;grid-template-columns:1fr 1fr;column-gap:22px;align-items:start}
+  #sk-tonight-body .sk-night-head,#sk-tonight-body .sx-caliber,#sk-tonight-body .sx-loading{grid-column:1/-1}
+  #view-stars .sx-main,#view-star-region .sx-main,#view-star-detail .sx-main,#view-butiange .sx-main{max-width:1080px;margin:0 auto}
+}
+@media (min-width:1100px){
+  .sk-side{flex-basis:320px;width:320px}
+}
+
+/* ============ 星象二期第二步：相机认星 AR（v2.1.0 (2)） ============ */
+.ar-stage{position:relative;margin:10px auto 0;max-width:430px;height:min(72vh,660px);border-radius:14px;overflow:hidden;background:#05060a}
+#ar-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#ar-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.ar-stage.red #ar-video{filter:brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2)}
+.ar-hud{position:absolute;top:8px;left:0;right:0;text-align:center;font-family:var(--sans);font-size:.72rem;color:#ffe9b0;text-shadow:0 1px 6px rgba(0,0,0,.85);pointer-events:none;padding:0 14px;line-height:1.6;z-index:3}
+.ar-panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(9,11,19,.74);color:#f3ead2;padding:22px;text-align:center;font-family:var(--sans);z-index:4}
+.ar-panel[hidden]{display:none}
+.ar-panel .ar-msg{font-size:.86rem;line-height:1.75;max-width:302px}
+.ar-bar{display:flex;gap:8px;justify-content:flex-start;flex-wrap:wrap;padding:10px 2px 0 62px;font-family:var(--sans)}
+.ar-bar .mini-btn.on{border-color:var(--gold);color:var(--gold-deep);font-weight:700}
+/* AR 平板全幅（须置于 .ar-stage 基础规则之后以胜出级联） */
+@media (min-width:768px){
+  .ar-stage{max-width:none;height:calc(100dvh - 175px)}
+}
