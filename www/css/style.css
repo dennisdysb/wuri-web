@@ -1902,9 +1902,12 @@ body.bugang-open{overflow:hidden}
 .ar-panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(9,11,19,.74);color:#f3ead2;padding:22px;text-align:center;font-family:var(--sans);z-index:4}
 .ar-panel[hidden]{display:none}
 .ar-panel .ar-msg{font-size:.86rem;line-height:1.75;max-width:302px}
-.ar-bar{display:flex;gap:8px;justify-content:flex-start;flex-wrap:wrap;padding:10px 2px 0 62px;font-family:var(--sans)}
+/* 工具栏 2×2 等宽网格（v2.1.0 (7)：原流式 flex 三挤一孤，用户真机指排版参差）——与舞台同宽同心（同为 max-width:430 居中），四格等宽等高、间距一致 */
+.ar-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:430px;margin:0 auto;padding:10px 0 0;font-family:var(--sans)}
+.ar-bar .mini-btn{height:44px;padding:6px 8px;display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center}
 .ar-bar .mini-btn.on{border-color:var(--gold);color:var(--gold-deep);font-weight:700}
 /* AR 平板全幅（须置于 .ar-stage 基础规则之后以胜出级联） */
 @media (min-width:768px){
   .ar-stage{max-width:none;height:calc(100dvh - 175px)}
+  .ar-bar{max-width:640px}
 }

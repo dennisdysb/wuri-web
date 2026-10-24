@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v102-20261024-v210-6';
+const CACHE = 'wuri-v103-20261024-v210-7';
 /* 离线下载专用缓存（一键下载的音频/正文/图鉴）：版本更新时绝不清除，
  * 否则用户下好的几百 MB 音频会在每次发版后被 activate 误删（2026-10-21） */
 const OFFLINE_CACHE = 'wuri-offline-v1';

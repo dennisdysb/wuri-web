@@ -25,12 +25,12 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v102 缓存名", "wuri-v102-20261024-v210-6" in sw)
+report("SW v103 缓存名", "wuri-v103-20261024-v210-7" in sw)
 report("SW 预缓存不含图鉴全图", "img/deities/" not in assets)
 report("SW 含图鉴全图分支（豁免缓存优先）", "isDeityFull" in sw and "OFFLINE_CACHE" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
 report("设置页图鉴素材卡在位", 'id="deity-dl-btn"' in html and 'id="deity-dl-status"' in html)
-report("CSS ?v=102 与版本 v2.1.0 (3)", "css/style.css?v=102" in html and "v2.1.0 (6)" in html)
+report("CSS ?v=103 与版本 v2.1.0 (3)", "css/style.css?v=103" in html and "v2.1.0 (7)" in html)
 _fy_web = open(os.path.join(WWW, "data/fenye.json"), "rb").read()
 _fy_src = open(os.path.expanduser("~/workspace/wuri-app/star-module/fenye.json"), "rb").read()
 report("fenye.json 与备料逐字节一致", _fy_web == _fy_src)
