@@ -97,18 +97,30 @@
     for (var i = 0; i < D.deities.length; i++) if (D.deities[i].mansion === section) return D.deities[i];
     return null;
   }
+  /* 全局层级规矩（v2.1.0 (3) 定版，此后勿再单点改 z-index 打地鼠）：
+   * 静态层级只定「同类相叠」的底序：.view 通用 50；图鉴列表/排盘/修行/缘分 60；
+   * 神祇详情 61；星象六子视图 62；星图信息条 63；步罡 70；弹窗 80+。
+   * 跨模块互链一律走「来源栈收起/恢复」语义，不靠静态层级叠压：
+   * ①神祇详情从任一星象子视图打开 → 本函数把当时开着的子视图全部记入来源栈并收起，
+   *   详情返回即按栈恢复（deities.js navOrigin）。收起名单必须含全部六视图——
+   *   (1)(2) 新增的星图/今夜可见/相机认星曾漏收：AR 开着时点星官详情里的互链神祇卡，
+   *   神祇详情（61）开在仍开着的 AR 视图（62）之下，真机表现为「点了没反应」、
+   *   按一次返回关掉 AR 才露出详情（2026-10-24 真机报障，本地真点击复现坐实）。
+   * ②相机开着时先停相机/姿态再收起（不留后台拍摄）；返回恢复 view-sky-ar 时
+   *   由 deities.js 特判走 WuriSkyAR.open() 重开（回开启面板，授权手势链完整）。
+   * ③反向（神祇详情内「本宿星官 ›」开区页）不收详情：区页靠 62>61 盖住，
+   *   返回收区页即露回详情、详情滚动天然保持（v2.0.0 (7) 口径，不变）。
+   * 星象标签页（tab-stars）是普通标签主区、不在此列。 */
+  var STAR_SUBVIEWS = ['view-star-region', 'view-butiange', 'view-star-detail', 'view-sky-tonight', 'view-sky-chart', 'view-sky-ar'];
   function openDeity(id) {
     if (!window.__wuri_openDeity) return;
-    /* 神祇详情 z-61 高于星象子视图原始层级，此处收起子视图是为来源返回语义
-     * （详情关闭后来源视图要原样露出，不靠层级叠压）；把「当时开着的子视图栈＋各自滚动位置」作为来源
-     * 递给图鉴（v2.0.0 (2)），详情返回即回来源（区页/星官详情/步天歌），
-     * 不再写死落到神祇图鉴主页。星象标签页（tab-stars）是普通标签主区、不在此列。 */
     var stack = [], scroll = {};
-    ['view-star-region', 'view-butiange', 'view-star-detail'].forEach(function (vid) {
+    STAR_SUBVIEWS.forEach(function (vid) {
       var v = $(vid);
       if (v && !v.hidden) { stack.push(vid); scroll[vid] = v.scrollTop; }
     });
-    hide('view-star-region'); hide('view-star-detail'); hide('view-butiange');
+    if (stack.indexOf('view-sky-ar') >= 0 && window.WuriSkyAR && typeof window.WuriSkyAR.close === 'function') window.WuriSkyAR.close();
+    STAR_SUBVIEWS.forEach(function (vid) { hide(vid); });
     window.__wuri_openDeity(id, stack.length ? { views: stack, scroll: scroll } : null);
   }
 

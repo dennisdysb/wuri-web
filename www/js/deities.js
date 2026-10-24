@@ -268,7 +268,12 @@ window.WuriImg = window.WuriImg || (function () {
     if (o && o.views && o.views.length) {
       o.views.forEach(function (vid) {
         var v = document.getElementById(vid);
-        if (v) v.hidden = false;
+        if (!v) return;
+        /* 相机认星在打开详情时已停相机（stars.js openDeity 规矩②）：恢复不走简单
+         * 揭开（壳内是停掉的空舞台），走 WuriSkyAR.open() 重开回开启面板——
+         * 相机/姿态授权由用户点「开启」的新手势触发，iOS 手势链完整。 */
+        if (vid === 'view-sky-ar' && window.WuriSkyAR && typeof window.WuriSkyAR.open === 'function') { window.WuriSkyAR.open(); return; }
+        v.hidden = false;
       });
       requestAnimationFrame(function () {
         o.views.forEach(function (vid) {

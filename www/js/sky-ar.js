@@ -468,6 +468,25 @@
   var bb;
   if ((bb = $('sky-ar-back'))) bb.addEventListener('click', function () { stopAR(); hide('view-sky-ar'); });
 
+  /* 星象页悬浮相机钮（v2.1.0 (3) 方案2）：#sx-ar-fab 仅在星象标签激活时显示，
+   * 跟随 #tabbar 的 active 态同步（MutationObserver 监听 class 变化，覆盖点击与
+   * 程序化切标签）；钮带 data-sxar="open"，点击走上方既有委托 → openAR，
+   * 开启面板→「开启」手势内请姿态授权的链与深层入口完全一致、不另起炉灶。
+   * 钮 z-40 低于所有 .view(50)，任一子视图打开时被自然盖住，不会浮在详情上。 */
+  function syncArFab() {
+    var fab = $('sx-ar-fab'); if (!fab) return;
+    var on = !!document.querySelector('#tabbar button[data-tab="tab-stars"].active');
+    fab.hidden = !on;
+  }
+  if (window.MutationObserver) {
+    var tbEl = $('tabbar');
+    if (tbEl) new MutationObserver(syncArFab).observe(tbEl, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  }
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.closest && e.target.closest('#tabbar button')) setTimeout(syncArFab, 0);
+  });
+  syncArFab();
+
   watchEntry();
   var prev = window.__wuri_rerender;
   window.__wuri_rerender = function () {
@@ -517,6 +536,9 @@
 
   window.WuriSkyAR = {
     open: openAR,
+    /* 供跨模块来源栈收起（stars.js openDeity）：停相机/姿态并收起视图；
+     * 恢复时走 open() 重开回开启面板，不揭旧壳 */
+    close: function () { stopAR(); hide('view-sky-ar'); },
     _watchHeading: watchHeading,
     _unwatchHeading: unwatchHeading,
     _requestOrient: requestOrient,
