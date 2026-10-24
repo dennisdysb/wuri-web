@@ -1893,17 +1893,6 @@ body.bugang-open{overflow:hidden}
   display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 #sx-ar-fab[hidden]{display:none}
 #sx-ar-fab:active{transform:scale(.92)}
-/* 首页小行：值神信息区下方、沉浸卡上方的一条克制入口 */
-.home-ar-entry{display:flex;align-items:center;gap:10px;width:calc(100% - 32px);margin:12px 16px 0;padding:10px 14px;
-  background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--ink);
-  font-family:inherit;cursor:pointer;text-align:left}
-.home-ar-entry svg{flex:none;color:var(--teal-deep)}
-[data-theme="night"] .home-ar-entry svg{color:var(--teal)}
-.home-ar-entry .hae-t{font-family:var(--serif);font-weight:700;font-size:.95rem;flex:none}
-.home-ar-entry .hae-s{flex:1;font-family:var(--sans);font-size:.7rem;color:var(--muted)}
-.home-ar-entry .hae-go{flex:none;color:var(--muted);font-size:1.05rem}
-.home-ar-entry:active{transform:scale(.99)}
-
 /* ============ 星象二期第二步：相机认星 AR（v2.1.0 (2)） ============ */
 .ar-stage{position:relative;margin:10px auto 0;max-width:430px;height:min(72vh,660px);border-radius:14px;overflow:hidden;background:#05060a}
 #ar-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}

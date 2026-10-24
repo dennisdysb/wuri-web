@@ -3,8 +3,8 @@
 ①层级互链修复：AR→星官详情→互链神祇卡→神祇详情（多点 elementFromPoint 网格全过、
   相机已停、AR 视图已收）、神祇返回→星官详情恢复（含滚动）＋AR 按来源重开回开启面板；
   星图链同验（星图+详情双双收起、返回双双恢复）；(7) 反向 神祇详情→本宿星官→区页→返回。
-②浅入口：星象页悬浮相机钮（可见/切标签隐藏/真点直达 AR）、首页值神区小入口（真点直达 AR）、
-  原深层入口（图鉴底双入口＋AR 整行卡）不回归。
+②浅入口：星象页悬浮相机钮（可见/切标签隐藏/真点直达 AR）；首页值神区小入口已于
+  v2.1.0 (5) 按用户要求删除（本脚本改为断言其不存在）；原深层入口不回归。
 沙箱边界：姿态合成注入、相机为 Chrome 假设备；真机手感不在覆盖内。"""
 import importlib.util, json, os, subprocess, sys, time, urllib.request
 
@@ -22,10 +22,10 @@ def report(name, ok, extra=""):
 
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v100 缓存名", "wuri-v100-20261024-v210-4" in sw)
+report("SW v101 缓存名", "wuri-v101-20261024-v210-5" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("四件套：CSS ?v=100＋版本 v2.1.0 (4)", "css/style.css?v=100" in html and "v2.1.0 (4)" in html)
-report("浅入口在位（悬浮钮＋首页小行）", 'id="sx-ar-fab"' in html and 'class="home-ar-entry"' in html)
+report("四件套：CSS ?v=101＋版本 v2.1.0 (5)", "css/style.css?v=101" in html and "v2.1.0 (5)" in html)
+report("入口状态（悬浮钮在位＋首页小行已删除）", 'id="sx-ar-fab"' in html and 'home-ar-entry' not in html)
 stars = open(os.path.join(WWW, "js/stars.js"), encoding="utf-8").read()
 report("openDeity 来源栈含全部六子视图",
        all(("'" + v + "'") in stars for v in ["view-star-region", "view-butiange", "view-star-detail", "view-sky-tonight", "view-sky-chart", "view-sky-ar"])
@@ -100,14 +100,13 @@ try:
     assert waitfor("!!document.querySelector('#tabbar button[data-tab=\\\"tab-stars\\\"]')")
     assert waitfor("!!window.WuriSkyAR && !!window.WuriSkyChart && !!window.Stars")
 
-    # ---------- ② 首页小入口 ----------
+    # ---------- ② 首页小行已于 v2.1.0 (5) 删除 ----------
     report("首屏（首页）悬浮钮隐藏", ev("document.getElementById('sx-ar-fab').hidden") is True)
-    click_el(".home-ar-entry")
-    report("硬断言：首页小入口真点→AR 视图（最上层＋开启面板）",
-           ev("!document.getElementById('view-sky-ar').hidden") and ev(CENTER) == "view-sky-ar"
-           and ev("!!document.querySelector('#ar-panel [data-ar=\\\"start\\\"]')"), ev(CENTER))
-    shot("home-entry-ar")
-    ev("document.getElementById('sky-ar-back').click(); true", 0.6)
+    report("首页小行已删除（DOM 无 .home-ar-entry）", ev("!document.querySelector('.home-ar-entry')"))
+    report("首页结构完整：值神区在位＋三块沉浸卡紧随",
+           ev("!!document.getElementById('zhishen-line')") and ev("!!document.getElementById('practice-entry-card')")
+           and ev("!!document.getElementById('shushu-entry-card')"))
+    shot("home-no-entry")
 
     # ---------- ② 星象页悬浮钮 ----------
     ev("document.querySelector('#tabbar button[data-tab=\\\"tab-stars\\\"]').click(); true", 1.2)
