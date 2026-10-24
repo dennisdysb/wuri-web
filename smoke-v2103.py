@@ -22,9 +22,9 @@ def report(name, ok, extra=""):
 
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v99 缓存名", "wuri-v99-20261024-v210-3" in sw)
+report("SW v100 缓存名", "wuri-v100-20261024-v210-4" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("四件套：CSS ?v=99＋版本 v2.1.0 (3)", "css/style.css?v=99" in html and "v2.1.0 (3)" in html)
+report("四件套：CSS ?v=100＋版本 v2.1.0 (4)", "css/style.css?v=100" in html and "v2.1.0 (4)" in html)
 report("浅入口在位（悬浮钮＋首页小行）", 'id="sx-ar-fab"' in html and 'class="home-ar-entry"' in html)
 stars = open(os.path.join(WWW, "js/stars.js"), encoding="utf-8").read()
 report("openDeity 来源栈含全部六子视图",

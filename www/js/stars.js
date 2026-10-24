@@ -838,6 +838,42 @@
     ['北', 0], ['东北', 45], ['东', 90], ['东南', 135], ['南', 180], ['西南', 225], ['西', 270], ['西北', 315]
   ];
 
+  /* 北斗七星小图（v2.1.0 (4)：替代原红色楔形指针）：坐标与图鉴北斗条、
+   * 步罡 STARS 同源（BSC5/J2000）；切平面投影——赤经向左（观天习惯，同
+   * bugang 步位图）、赤纬向上；以七星形心为原点归一化，最远星（摇光）
+   * 落在 r=44（圆盘 180 坐标系）。DIPPER_DIR＝本地投影中「斗身四星形心→
+   * 摇光」的罗盘角（北起顺时针）；渲染时整组旋转 pointing − DIPPER_DIR，
+   * 使斗柄指向角与原楔形尖端角（pointingIndex×30）严格一致、读数不变。 */
+  var DIPPER_STARS = [
+    { n: '天枢', ra: 165.93208, dec: 61.75083 },
+    { n: '天璇', ra: 165.46042, dec: 56.38250 },
+    { n: '天玑', ra: 178.45750, dec: 53.69472 },
+    { n: '天权', ra: 183.85667, dec: 57.03250 },
+    { n: '玉衡', ra: 193.50708, dec: 55.95972 },
+    { n: '开阳', ra: 200.98125, dec: 54.92528 },
+    { n: '摇光', ra: 206.88500, dec: 49.31333 }
+  ];
+  var DIPPER_PTS = (function () {
+    var raC = 0, decC = 0, i;
+    for (i = 0; i < 7; i++) { raC += DIPPER_STARS[i].ra; decC += DIPPER_STARS[i].dec; }
+    raC /= 7; decC /= 7;
+    var cd = Math.cos(decC * Math.PI / 180);
+    var pts = DIPPER_STARS.map(function (s) {
+      return { u: -(s.ra - raC) * cd, v: s.dec - decC };
+    });
+    var maxR = 0;
+    pts.forEach(function (p) { var r = Math.sqrt(p.u * p.u + p.v * p.v); if (r > maxR) maxR = r; });
+    var k = 44 / maxR;
+    pts.forEach(function (p) { p.u *= k; p.v *= k; });
+    return pts;
+  })();
+  var DIPPER_DIR = (function () {
+    var bu = 0, bv = 0, i;
+    for (i = 0; i < 4; i++) { bu += DIPPER_PTS[i].u; bv += DIPPER_PTS[i].v; }
+    var du = DIPPER_PTS[6].u - bu / 4, dv = DIPPER_PTS[6].v - bv / 4;
+    return Math.atan2(du, dv) * 180 / Math.PI;
+  })();
+
   function compassSVG(dip) {
     var cx = 90, cy = 90;
     function pt(r, deg) {
@@ -857,14 +893,20 @@
       var hot = (z === dip.monthBranch);
       h += '<text class="sx-comp-b' + (hot ? ' hot' : '') + '" x="' + p[0].toFixed(1) + '" y="' + (p[1] + 3).toFixed(1) + '" text-anchor="middle">' + esc(z) + '</text>';
     });
-    var tip = pt(58, dip.pointingIndex * 30);
-    var back = pt(-14, dip.pointingIndex * 30);
-    var perp = (dip.pointingIndex * 30 + 90) * Math.PI / 180;
-    var b1 = [back[0] + 7 * Math.sin(perp), back[1] - 7 * Math.cos(perp)];
-    var b2 = [back[0] - 7 * Math.sin(perp), back[1] + 7 * Math.cos(perp)];
-    h += '<polygon class="sx-needle" points="' + tip[0].toFixed(1) + ',' + tip[1].toFixed(1) + ' ' +
-      b1[0].toFixed(1) + ',' + b1[1].toFixed(1) + ' ' + b2[0].toFixed(1) + ',' + b2[1].toFixed(1) + '"/>';
-    h += '<circle class="sx-comp-c" cx="90" cy="90" r="3.5"/></svg>';
+    var rot = (dip.pointingIndex * 30 - DIPPER_DIR).toFixed(2);
+    var lp = DIPPER_PTS.map(function (p) {
+      return (cx + p.u).toFixed(1) + ',' + (cy - p.v).toFixed(1);
+    });
+    h += '<g class="sx-dipper" data-point-deg="' + (dip.pointingIndex * 30) + '" transform="rotate(' + rot + ' 90 90)">';
+    h += '<polyline class="sx-dipper-line" points="' + lp.join(' ') + '"/>';
+    h += '<line class="sx-dipper-line" x1="' + lp[3].split(',')[0] + '" y1="' + lp[3].split(',')[1] +
+      '" x2="' + lp[0].split(',')[0] + '" y2="' + lp[0].split(',')[1] + '"/>';
+    DIPPER_PTS.forEach(function (p, i) {
+      h += '<circle class="sx-dipper-star' + (i === 6 ? ' tip' : '') + '" cx="' + (cx + p.u).toFixed(1) +
+        '" cy="' + (cy - p.v).toFixed(1) + '" r="' + (i === 6 ? '3.4' : '2.7') + '"/>';
+    });
+    h += '</g>';
+    h += '<circle class="sx-comp-c" cx="90" cy="90" r="1.6"/></svg>';
     return h;
   }
 

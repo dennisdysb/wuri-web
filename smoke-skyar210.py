@@ -26,10 +26,10 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v99 缓存名", "wuri-v99-20261024-v210-3" in sw)
+report("SW v100 缓存名", "wuri-v100-20261024-v210-4" in sw)
 report("SW 预缓存含 sky-ar.js", "js/sky-ar.js" in assets)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("AR 视图与脚本在位", 'id="view-sky-ar"' in html and "js/sky-ar.js" in html and "v2.1.0 (3)" in html)
+report("AR 视图与脚本在位", 'id="view-sky-ar"' in html and "js/sky-ar.js" in html and "v2.1.0 (4)" in html)
 arjs = open(os.path.join(WWW, "js/sky-ar.js"), encoding="utf-8").read()
 report("AR 模块含姿态/校准/回落关键件", all(x in arjs for x in
        ["deviceorientation", "getUserMedia", "requestPermission", "_injectPose", "facingMode"]))

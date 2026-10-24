@@ -1711,7 +1711,9 @@ details.disc-foot .hint{margin-top:9px}
 .sx-comp-d.main{font-size:12px;fill:var(--ink);font-weight:700}
 .sx-comp-b{font-family:var(--serif);font-size:8.5px;fill:var(--faint)}
 .sx-comp-b.hot{fill:var(--cinnabar);font-weight:700;font-size:10px}
-.sx-needle{fill:var(--cinnabar);opacity:.9}
+.sx-dipper-line{fill:none;stroke:var(--gold);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round;opacity:.85}
+.sx-dipper-star{fill:var(--ink)}
+.sx-dipper-star.tip{fill:var(--gold)}
 .sx-comp-c{fill:var(--gold)}
 .sx-moon{width:104px;height:104px}
 .sx-moon-lit{fill:#E9D9A8}
