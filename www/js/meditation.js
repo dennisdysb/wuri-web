@@ -439,6 +439,9 @@ var Meditation = (function () {
 
   /* ---------- 开关 ---------- */
   function open() {
+    /* 未构建守卫：init 未跑完（如页面刚加载即被调起）时先补构建，
+       否则 setPage 会因 bgEls 为空抛错、视图打不开（2026-10-25 冒烟竞态实证） */
+    if (!bgEls.length) init();
     $('#med-done').hidden = true;
     $('#meditation-view').hidden = false;
     restoreOpts();
@@ -452,7 +455,10 @@ var Meditation = (function () {
     updatePlayBtn();
   }
 
+  var inited = false;
   function init() {
+    if (inited) return; /* 幂等：open() 守卫可能抢先 init，bootstrap 再调不得重复构建/绑事件 */
+    inited = true;
     build();
     restoreOpts();
     $('#med-back').addEventListener('click', back);

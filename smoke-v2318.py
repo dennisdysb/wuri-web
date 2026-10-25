@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v2.3.0（SW v118）冥想故障二轮修复专项冒烟。
+"""v2.3.0（SW v119）冥想故障二轮修复专项冒烟（v119＝open() 未构建守卫微修）。
 
 背景：v117 后用户真机复报依旧——播放中闪一下后场景名/倒计时/点点整层消失、
 大部分场景无声（仅虫鸣等一两个有声）、之后变黑。沙箱对抗复现（110 秒加速
@@ -18,8 +18,8 @@ will-change＋无限 transform 动画，UI 层（名/钟/点）无显式 z-index
 ④meditation.js/practice.js 冥想 URL ?v=2→?v=3。
 
 断言：
-①版本四件套：SW wuri-v118／style.css?v=118／meditation.css?v=67／显示仍
-  v2.3.0＋内部 v118（简繁＋静态兜底）。
+①版本四件套：SW wuri-v119／style.css?v=119／meditation.css?v=67／显示仍
+  v2.3.0＋内部 v119（简繁＋静态兜底）。
 ②静态：meditation.js 图 10＋loop 9＋bell 2 全 ?v=3、practice.js 9 条 ?v=3、
   懒赋值 ensureBg 在位；sw.js MED 清单 21 条 ?v=3＋ignoreSearch 分支＋安装
   容错；meditation.css 层级规则齐、无 will-change。
@@ -47,14 +47,14 @@ def report(name, ok, extra=""):
 
 # ---------- ① 版本口径 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v118 缓存名＋预缓存 style?v=118/meditation?v=67",
-       "wuri-v118-20261025-v230" in sw and "style.css?v=118" in sw and "meditation.css?v=67" in sw)
+report("SW v119 缓存名＋预缓存 style?v=119/meditation?v=67",
+       "wuri-v119-20261025-v230" in sw and "style.css?v=119" in sw and "meditation.css?v=67" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("index CSS ?v=118/?v=67＋静态版本行内部 v118",
-       "css/style.css?v=118" in html and "css/meditation.css?v=67" in html and "v2.3.0（内部 v118）" in html)
+report("index CSS ?v=119/?v=67＋静态版本行内部 v119",
+       "css/style.css?v=119" in html and "css/meditation.css?v=67" in html and "v2.3.0（内部 v119）" in html)
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
-report("me_ver 简（内部 v118）＋繁（內部 v118）",
-       "me_ver: '戊日不上香 v2.3.0（内部 v118）'" in i18n and "me_ver: '戊日不上香 v2.3.0（內部 v118）'" in i18n)
+report("me_ver 简（内部 v119）＋繁（內部 v119）",
+       "me_ver: '戊日不上香 v2.3.0（内部 v119）'" in i18n and "me_ver: '戊日不上香 v2.3.0（內部 v119）'" in i18n)
 report("显示版本仍 v2.3.0（无漂移）", "v2.3.1" not in i18n and "v2.4.0" not in html)
 
 # ---------- ② 静态 ----------
@@ -136,11 +136,11 @@ try:
       function MockCache(){ this.map = new Map(); }
       MockCache.prototype.add = async function(u){ const r = await MockCache._fetch(u);
         if (!r.ok) throw new Error('add fail ' + r.status);
-        this.map.set(new URL(u, location.href).href.split('?')[0] + '|' + new URL(u, location.href).search, await r.blob()); };
+        this.map.set(new URL(u, 'https://example.test/').href.split('?')[0] + '|' + new URL(u, 'https://example.test/').search, await r.blob()); };
       MockCache.prototype.addAll = async function(us){ for (const u of us) await this.add(u); };
       MockCache.prototype.match = async function(req, opts){ const url = typeof req === 'string' ? req : req.url;
         const pu = new URL(url);
-        for (const [k, v] of this.map) { const ku = new URL(k.split('|')[0] + (k.split('|')[1]||''), location.href);
+        for (const [k, v] of this.map) { const ku = new URL(k.split('|')[0] + (k.split('|')[1]||''), 'https://example.test/');
           if (ku.pathname === pu.pathname && ((opts && opts.ignoreSearch) || ku.search === pu.search))
             return new Response(v, {headers: {'Content-Type': url.endsWith('.mp3') ? 'audio/mpeg' : 'image/webp'}}); }
         return undefined; };
@@ -153,7 +153,9 @@ try:
       // ---- stub fetch：一个冥想资产故意 404，其余回 200 已知字节 ----
       const BODY = new Blob([new Uint8Array(1024).map((_, i) => i % 251)], {type: 'audio/mpeg'});
       const realFetch = window.fetch.bind(window);
+      let medDown = false;
       const stubFetch = (u, opts) => { const s = String(u && u.url ? u.url : u);
+        if (medDown && s.includes('meditation')) return Promise.resolve(new Response('down', {status: 404}));
         if (s.includes('bg-fire.webp')) return Promise.resolve(new Response('no', {status: 404}));
         if (s.includes('meditation')) return Promise.resolve(new Response(BODY.slice(), {status: 200, headers: {'Content-Type': 'audio/mpeg'}}));
         return Promise.resolve(new Response('x', {status: 200})); };
@@ -172,6 +174,7 @@ try:
         try { listeners['install']({ waitUntil: p => waitUntilP.push(p) });
           await Promise.all(waitUntilP); installDone = true;
         } catch (e) { installErr = String(e); }
+        medDown = true; // 此后冥想一律断网：fetch 断言只能靠缓存命中通过
         const medCache = stores.get('wuri-med-v3');
         const medCount = medCache ? medCache.map.size : 0;
         // fetch 分支：图 200 / 音频 Range 206 / &r=1 仍命中
@@ -267,6 +270,20 @@ try:
     report("会话结束出现完成层（结束铃路径走完）", done_seen)
     errs = ev("window.__errs || []")
     report("全程零 JS 异常", not errs, errs)
+
+    # 竞态探针：页面刚加载、Meditation 全局一出现就抢跑 open（不等 init 构建），
+    # open() 未构建守卫应先补 init 不抛错（v119 微修；此前此处实崩 setPage bgEls 空）
+    cdp.call("Page.navigate", {"url": "file://" + WWW + "/index.html"})
+    for _ in range(40):
+        try:
+            if ev("typeof window.Meditation") == "object": break
+        except Exception: pass
+        time.sleep(0.25)
+    race = ev("""(() => { try { Meditation.open(); } catch (e) { return {threw: String(e)}; }
+      return { threw: null, view: !document.getElementById('meditation-view').hidden,
+               bgs: document.querySelectorAll('.med-bg').length }; })()""")
+    report("竞态抢跑 open 不崩（未构建守卫）＋视图打开＋10 层背景建成",
+           race and not race.get("threw") and race.get("view") and race.get("bgs") == 10, race)
 
     # 390 场景扫（不播放，验懒赋值＋满幅）
     cdp.call("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 2, "mobile": True})
