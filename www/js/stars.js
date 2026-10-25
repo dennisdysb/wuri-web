@@ -8,6 +8,10 @@
   'use strict';
 
   var XG = null, BT = null, LNX = null, LINES = null, loadPromise = null;
+  var SCHEMA = null;   /* 图式层（data/xingguan-schema.json）：分区图的传统图式呈现。
+    与 BSC5 坐标并行——备妥的区（首批仅角宿，几何据《漫步中国星空》文图，
+    2026-10-25 用户裁定以书图为准）区页总览图与步天歌浮图改读图式坐标；
+    平面星图/今夜可见/相机 AR 仍只读现代坐标，零影响。 */
   var FY = null, fyPromise = null;   /* 分野数据（v2.0.0 (5) 贯通批）：独立轻量加载，
     首页太阳躔宿一行只拉这一份小数据，不惊动图鉴全量懒加载 */
   var secOrder = [];           /* 区序（《步天歌》序）：紫微垣…轸宿 */
@@ -108,9 +112,11 @@
     loadPromise = Promise.all([
       starData(),
       loadJSON('data/butiange.json'),
-      loadFenye().catch(function () { return null; })
+      loadFenye().catch(function () { return null; }),
+      loadJSON('data/xingguan-schema.json').catch(function () { return null; })
     ]).then(function (res) {
-      XG = res[0].xg; BT = res[1]; LNX = res[0].lines; indexData(); indexLines(); loadPromise = null;
+      XG = res[0].xg; BT = res[1]; LNX = res[0].lines; SCHEMA = res[3];
+      indexData(); indexLines(); loadPromise = null;
       return true;
     }).catch(function (e) { loadPromise = null; throw e; });
     return loadPromise;
@@ -494,23 +500,58 @@
    * 观天手性顺时针递增；其余区以本区星群质心为心作心射（gnomonic）
    * 投影。两式屏幕朝向均与详情简图同手性（以北斗三星三角形向与详情
    * 简图对表验证，见 smoke-v2113）：赤经大者居左、赤纬高者居上。 */
+  /* 图式层就绪判定：本区在 schema 数据里有段、且区内每官都有图式条目才启用；
+   * 任一不满足整区回落现行投影（分批上线、可随时退）。 */
+  function schemaReady(si) {
+    if (!SCHEMA || !SCHEMA.sections) return null;
+    var sch = SCHEMA.sections[si.name];
+    if (!sch || !sch.asterisms) return null;
+    for (var i = 0; i < si.list.length; i++) {
+      if (!sch.asterisms[si.list[i].name]) return null;
+    }
+    return sch;
+  }
+
   function regionMapHTML(si, opts) {
     /* opts（浮图样张扩展，区页调用不传＝行为不变）：{pop:true, hl:{key:1}} 时
      * 本句所指星官组挂 sx-hl、余官挂 sx-dim，不挂命中圈/详情委托（浮层内不跳页），
      * 数据层 principal 星另绘金环；图下注记由浮层自备，此处不绘。 */
     var popMode = !!(opts && opts.pop);
     var hlSet = (opts && opts.hl) || null;
+    var schSec = schemaReady(si);
+    var schemaMode = !!schSec;
     function has(s) { return typeof s.ra_deg === 'number' && typeof s.dec_deg === 'number'; }
     var entries = [], unplotted = 0, all = [];
-    si.list.forEach(function (a) {
-      var st = (a.stars || []).filter(has);
-      if (!st.length) { unplotted++; return; }
-      entries.push({ a: a, stars: st });
-      st.forEach(function (s) { all.push(s); });
-    });
+    if (schemaMode) {
+      /* 图式路：点位全从图式层来（含未定星点），x 右增、y 取负成「上增」
+       * 与投影路同手性，后段包围盒/缩放/名牌逻辑两路共用。命名星经 ref
+       * 对回星官条目（取 principal/vmag 等）；未定星点 s 为占位对象。 */
+      var byRef = {};
+      si.list.forEach(function (a) {
+        (a.stars || []).forEach(function (s) { byRef[a.name + '|' + s.cn_name] = s; });
+      });
+      si.list.forEach(function (a) {
+        var sa = schSec.asterisms[a.name];
+        var pts = (sa.stars || []).map(function (sp) {
+          var s = sp.ref ? (byRef[a.name + '|' + sp.ref] || null) : null;
+          return { s: s || { cn_name: null, unlocated: true }, schPt: sp, x: sp.x, y: -sp.y };
+        });
+        entries.push({ a: a, stars: (a.stars || []), pts: pts, schEdges: sa.edges || [] });
+        pts.forEach(function (p) { all.push(p.s); });
+      });
+    } else {
+      si.list.forEach(function (a) {
+        var st = (a.stars || []).filter(has);
+        if (!st.length) { unplotted++; return; }
+        entries.push({ a: a, stars: st });
+        st.forEach(function (s) { all.push(s); });
+      });
+    }
     if (!entries.length) return { html: '', unplotted: unplotted };
 
-    /* 赤经环跨（最大空隙法）与质心（单位向量均值） */
+    /* 赤经环跨（最大空隙法）与质心（单位向量均值）；图式路点位已备妥，整段跳过 */
+    var polar = false;
+    if (!schemaMode) {
     var ras = all.map(function (s) { return s.ra_deg; }).sort(function (x, y) { return x - y; });
     var maxGap = 0;
     for (var gi = 0; gi < ras.length; gi++) {
@@ -525,7 +566,7 @@
     });
     var ra0 = Math.atan2(vy, vx) * 180 / Math.PI; if (ra0 < 0) ra0 += 360;
     var dec0 = Math.atan2(vz, Math.hypot(vx, vy)) * 180 / Math.PI;
-    var polar = raSpan > 180 || all.some(function (s) { return s.dec_deg >= 85; });
+    polar = raSpan > 180 || all.some(function (s) { return s.dec_deg >= 85; });
 
     /* proj(s) -> [right, up]（投影面坐标，未缩放） */
     function proj(s) {
@@ -543,6 +584,7 @@
     entries.forEach(function (e) {
       e.pts = e.stars.map(function (s) { var p = proj(s); return { s: s, x: p[0], y: p[1] }; });
     });
+    }
     var minR = 1e18, maxR = -1e18, minU = 1e18, maxU = -1e18;
     entries.forEach(function (e) {
       e.pts.forEach(function (p) {
@@ -630,7 +672,16 @@
         ? '<g class="sx-rmap-g ' + (hlSet && hlSet[key] ? 'sx-hl' : 'sx-dim') + '" data-sx-gkey="' + esc(key) + '">'
         : '<g class="sx-rmap-g" data-sx-detail="' + esc(key) + '">';
       var es = le && le.edges ? le.edges.filter(function (ed) { return byName[ed[0]] && byName[ed[1]]; }) : null;
-      if (es && es.length) {
+      if (schemaMode) {
+        /* 图式连边：图式层索引对（以书图为准，与 lines 层走向不同处从图，
+         * 如库楼菱形闭合、衡上横双竖）；虚实仍从 lines 层 status（柱存疑虚线） */
+        (e.schEdges || []).forEach(function (pr) {
+          var p = e.pts[pr[0]], q = e.pts[pr[1]];
+          if (!p || !q) return;
+          g += '<line class="' + cls + '" x1="' + SX(p).toFixed(1) + '" y1="' + SY(p).toFixed(1) +
+            '" x2="' + SX(q).toFixed(1) + '" y2="' + SY(q).toFixed(1) + '"/>';
+        });
+      } else if (es && es.length) {
         es.forEach(function (ed) {
           var p = byName[ed[0]], q = byName[ed[1]];
           g += '<line class="' + cls + '" x1="' + SX(p).toFixed(1) + '" y1="' + SY(p).toFixed(1) +
@@ -644,6 +695,22 @@
         g += '<polyline class="' + cls + '" points="' + pts + '" fill="none"/>';
       }
       e.pts.forEach(function (p) {
+        if (schemaMode) {
+          /* 图式星点：统一小径（书图读法，不按星等放大）；实心墨点／空心圈
+           * 从书图原样；未定星点同为空心、降透明示「图式复原·未定」。
+           * 主星仍只以细金环点明（口径与投影路一致，有据才标）。 */
+          var srr = 2.6;
+          var scls = 'sx-star ' + (p.schPt.dot === 'filled' ? 'sx-sch-dot' : 'sx-sch-ring') +
+            (p.schPt.unlocated ? ' sx-sch-unloc' : '');
+          if (popMode && p.s.principal) {
+            g += '<circle class="sx-principal-ring" cx="' + SX(p).toFixed(1) + '" cy="' + SY(p).toFixed(1) +
+              '" r="' + (srr + 2).toFixed(1) + '"/>';
+            scls += ' sx-principal';
+          }
+          g += '<circle class="' + scls + '" cx="' + SX(p).toFixed(1) +
+            '" cy="' + SY(p).toFixed(1) + '" r="' + srr.toFixed(1) + '"/>';
+          return;
+        }
         var rr = R(p.s.vmag), isPrin = popMode && !!p.s.principal;
         if (isPrin) {
           /* 主星常驻标记（数据层 principal 字段，有据才标）：只以细金环点明身份。
@@ -680,8 +747,9 @@
       body += g + '</g>';
     });
 
-    var note = popMode ? '' : (polar ? t('sx_map_note_polar') : t('sx_map_note'));
+    var note = popMode ? '' : (schemaMode ? t('sx_map_note_schema') : (polar ? t('sx_map_note_polar') : t('sx_map_note')));
     var svg = '<svg class="sx-plot sx-rmap' + (dense ? ' dense' : '') + (popMode ? ' sx-popmap' : '') +
+      (schemaMode ? ' sx-schema' : '') +
       '" viewBox="0 0 ' + W + ' ' + H +
       '" role="img" aria-label="' + txEsc(si.name) + '">' + body +
       (note ? '<text class="sx-plot-s" x="8" y="' + (H - 8) + '">' + esc(note) + '</text>' : '') + '</svg>';
@@ -1118,6 +1186,7 @@
       targets.map(function (a) { return txEsc(a.name); }).join(' · ') + '</small>';
     $('sx-pop-chart').innerHTML = chart.html;
     var notes = [t('sx_pop_legend')];
+    if (schemaReady(si)) notes.push(t('sx_pop_schema_note'));
     targets.forEach(function (a) {
       var plotted = (a.stars || []).filter(function (st) {
         return typeof st.ra_deg === 'number' && typeof st.dec_deg === 'number';
