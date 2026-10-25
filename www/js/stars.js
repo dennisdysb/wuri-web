@@ -437,6 +437,191 @@
     return h + '</div>';
   }
 
+  /* ---------------- s2 区页总览星图（v2.1.1 (3)） ----------------
+   * 本区全部可绘星官一图总览，置于区页搜索框正上方（用户 2026-10-25 指定）：
+   * 星点按星等定大小、连线取 xingguan-lines 图式（status=doubtful 虚线、
+   * 无图式边时按赤经序连——与详情简图同口径）；名牌贪心避让，拥挤时只标
+   * 高优先级星官（同名官最优先、余按最亮星/星数），未标名者点星仍可达。
+   * 整官一组挂 data-sx-detail 走既有委托进详情；每星另置 r=20 命中圈
+   * （viewBox 360 宽在 390 屏约合 43px 触控径），名牌下另垫命中矩形。
+   * 投影：赤经环跨（最大空隙法）>180° 或含近极星（dec≥85°）的区（仅
+   * 紫微垣，环极且赤经缠绕）以北天极为心作极心立体投影——赤经绕极按
+   * 观天手性顺时针递增；其余区以本区星群质心为心作心射（gnomonic）
+   * 投影。两式屏幕朝向均与详情简图同手性（以北斗三星三角形向与详情
+   * 简图对表验证，见 smoke-v2113）：赤经大者居左、赤纬高者居上。 */
+  function regionMapHTML(si) {
+    function has(s) { return typeof s.ra_deg === 'number' && typeof s.dec_deg === 'number'; }
+    var entries = [], unplotted = 0, all = [];
+    si.list.forEach(function (a) {
+      var st = (a.stars || []).filter(has);
+      if (!st.length) { unplotted++; return; }
+      entries.push({ a: a, stars: st });
+      st.forEach(function (s) { all.push(s); });
+    });
+    if (!entries.length) return { html: '', unplotted: unplotted };
+
+    /* 赤经环跨（最大空隙法）与质心（单位向量均值） */
+    var ras = all.map(function (s) { return s.ra_deg; }).sort(function (x, y) { return x - y; });
+    var maxGap = 0;
+    for (var gi = 0; gi < ras.length; gi++) {
+      var gap = (ras[(gi + 1) % ras.length] - ras[gi] + 360) % 360;
+      if (gap > maxGap) maxGap = gap;
+    }
+    var raSpan = 360 - maxGap;
+    var vx = 0, vy = 0, vz = 0;
+    all.forEach(function (s) {
+      var ra = s.ra_deg * Math.PI / 180, dec = s.dec_deg * Math.PI / 180;
+      vx += Math.cos(dec) * Math.cos(ra); vy += Math.cos(dec) * Math.sin(ra); vz += Math.sin(dec);
+    });
+    var ra0 = Math.atan2(vy, vx) * 180 / Math.PI; if (ra0 < 0) ra0 += 360;
+    var dec0 = Math.atan2(vz, Math.hypot(vx, vy)) * 180 / Math.PI;
+    var polar = raSpan > 180 || all.some(function (s) { return s.dec_deg >= 85; });
+
+    /* proj(s) -> [right, up]（投影面坐标，未缩放） */
+    function proj(s) {
+      var ra = s.ra_deg * Math.PI / 180, dec = s.dec_deg * Math.PI / 180;
+      if (polar) {
+        var r = Math.tan((Math.PI / 2 - dec) / 2), d = ra - ra0 * Math.PI / 180;
+        return [r * Math.sin(d), r * Math.cos(d)];
+      }
+      var d0 = dec0 * Math.PI / 180, dra = ra - ra0 * Math.PI / 180;
+      var cosc = Math.sin(d0) * Math.sin(dec) + Math.cos(d0) * Math.cos(dec) * Math.cos(dra);
+      if (cosc < 0.05) cosc = 0.05;
+      return [-Math.cos(dec) * Math.sin(dra) / cosc,
+        (Math.cos(d0) * Math.sin(dec) - Math.sin(d0) * Math.cos(dec) * Math.cos(dra)) / cosc];
+    }
+    entries.forEach(function (e) {
+      e.pts = e.stars.map(function (s) { var p = proj(s); return { s: s, x: p[0], y: p[1] }; });
+    });
+    var minR = 1e18, maxR = -1e18, minU = 1e18, maxU = -1e18;
+    entries.forEach(function (e) {
+      e.pts.forEach(function (p) {
+        minR = Math.min(minR, p.x); maxR = Math.max(maxR, p.x);
+        minU = Math.min(minU, p.y); maxU = Math.max(maxU, p.y);
+      });
+    });
+    var bw = Math.max(maxR - minR, 1e-9), bh = Math.max(maxU - minU, 1e-9);
+    var W = 360, PAD = 30;
+    var H = Math.round(Math.min(470, Math.max(220, W * bh / bw)));
+    var k = Math.min((W - PAD * 2) / bw, (H - PAD * 2) / bh);
+    var midR = (minR + maxR) / 2, midU = (minU + maxU) / 2;
+    function SX(p) { return W / 2 + (p.x - midR) * k; }
+    function SY(p) { return H / 2 - (p.y - midU) * k; }
+    function R(mag) { return Math.max(1.6, Math.min(8.6, 6.6 - (typeof mag === 'number' ? mag : 3) * 0.85)); }
+
+    /* 优先级：同名官（宿区与宿同名者）最先，其次最亮星、星多者 */
+    var base = si.name.replace(/宿$/, '');
+    entries.forEach(function (e) {
+      var bright = 99;
+      e.stars.forEach(function (s) { if (typeof s.vmag === 'number') bright = Math.min(bright, s.vmag); });
+      e.bright = bright;
+      e.cx = 0; e.cy = 0;
+      e.pts.forEach(function (p) { e.cx += SX(p); e.cy += SY(p); });
+      e.cx /= e.pts.length; e.cy /= e.pts.length;
+    });
+    var byPrio = entries.slice().sort(function (p, q) {
+      var pn = p.a.name === base ? 0 : 1, qn = q.a.name === base ? 0 : 1;
+      if (pn !== qn) return pn - qn;
+      if (p.bright !== q.bright) return p.bright - q.bright;
+      return q.stars.length - p.stars.length;
+    });
+    var labelCap = entries.length <= 16 ? entries.length : 28;
+    var labeled = {};
+    byPrio.slice(0, labelCap).forEach(function (e) { labeled[astKey(e.a)] = 1; });
+    var nLabels = Math.min(labelCap, entries.length);
+    var dense = nLabels >= 18;
+    var fsT = dense ? 9.5 : 10.5;
+
+    /* 名牌贪心避让（与详情简图同法：多候选位取重叠最小、远置加引线） */
+    function textW(txt, fs) {
+      var w = 0;
+      for (var i = 0; i < txt.length; i++) w += (txt.charCodeAt(i) > 0x2E7F ? fs : fs * 0.58);
+      return w;
+    }
+    var placed = [{ x: 4, y: H - 18, w: 200, h: 14 }]; /* 左下注记行预留 */
+    var labelPos = {}; /* key -> {x, y, w, h, lx, ly}（lx/ly 为引线终点侧锚点心） */
+    byPrio.forEach(function (e) {
+      var key = astKey(e.a);
+      if (!labeled[key]) return;
+      var name = T(e.a.name);
+      var w = textW(name, fsT) + 3, hh = 13;
+      var dirs = [];
+      [[1, 0], [0.72, -0.72], [0.72, 0.72], [0, -1], [0, 1], [-1, 0], [-0.72, -0.72], [-0.72, 0.72]].forEach(function (u) {
+        dirs.push([u[0], u[1], 10]); dirs.push([u[0], u[1], 20]);
+        dirs.push([u[0], u[1], 32]); dirs.push([u[0], u[1], 46]);
+      });
+      var best = null, bestScore = Infinity;
+      dirs.forEach(function (d, ci) {
+        var bx = e.cx + d[0] * d[2] - (d[0] < -0.1 ? w : (Math.abs(d[0]) <= 0.1 ? w / 2 : 0));
+        var by = e.cy + d[1] * d[2] - (d[1] < -0.1 ? hh : (Math.abs(d[1]) <= 0.1 ? hh / 2 : 0));
+        var cx = Math.max(2, Math.min(W - 2 - w, bx));
+        var cy = Math.max(2, Math.min(H - 2 - hh, by));
+        var ov = 0;
+        placed.forEach(function (p) {
+          var ox = Math.max(0, Math.min(cx + w, p.x + p.w) - Math.max(cx, p.x));
+          var oy = Math.max(0, Math.min(cy + hh, p.y + p.h) - Math.max(cy, p.y));
+          ov += ox * oy;
+        });
+        var score = ov * 1000 + ci;
+        if (score < bestScore) { bestScore = score; best = { x: cx, y: cy }; }
+      });
+      placed.push({ x: best.x, y: best.y, w: w, h: hh });
+      labelPos[key] = { x: best.x, y: best.y, w: w, h: hh };
+    });
+
+    /* 绘制：低优先级先画（垫底），高优先级在上层保命中 */
+    var body = '';
+    byPrio.slice().reverse().forEach(function (e) {
+      var key = astKey(e.a);
+      var le = lineEntry(e.a);
+      var cls = le && le.status === 'doubtful' ? 'sx-plot-dash' : 'sx-plot-line';
+      var byName = {}; e.pts.forEach(function (p) { byName[p.s.cn_name] = p; });
+      var g = '<g class="sx-rmap-g" data-sx-detail="' + esc(key) + '">';
+      var es = le && le.edges ? le.edges.filter(function (ed) { return byName[ed[0]] && byName[ed[1]]; }) : null;
+      if (es && es.length) {
+        es.forEach(function (ed) {
+          var p = byName[ed[0]], q = byName[ed[1]];
+          g += '<line class="' + cls + '" x1="' + SX(p).toFixed(1) + '" y1="' + SY(p).toFixed(1) +
+            '" x2="' + SX(q).toFixed(1) + '" y2="' + SY(q).toFixed(1) + '"/>';
+        });
+      } else if (e.pts.length > 1) {
+        var pts = e.pts.slice().sort(function (p, q) { return p.s.ra_deg - q.s.ra_deg; })
+          .map(function (p) { return SX(p).toFixed(1) + ',' + SY(p).toFixed(1); }).join(' ');
+        g += '<polyline class="' + cls + '" points="' + pts + '" fill="none"/>';
+      }
+      e.pts.forEach(function (p) {
+        g += '<circle class="sx-star" cx="' + SX(p).toFixed(1) + '" cy="' + SY(p).toFixed(1) +
+          '" r="' + R(p.s.vmag).toFixed(1) + '"/>';
+      });
+      var lp = labelPos[key];
+      if (lp) {
+        var ncx = lp.x + lp.w / 2, ncy = lp.y + lp.h / 2;
+        var dist = Math.hypot(ncx - e.cx, ncy - e.cy);
+        if (dist > 27) {
+          var gx = e.cx + (ncx - e.cx) / dist * Math.max(8, dist - Math.min(lp.w, lp.h) / 2 - 1);
+          var gy = e.cy + (ncy - e.cy) / dist * Math.max(8, dist - Math.min(lp.w, lp.h) / 2 - 1);
+          g += '<line class="sx-leader" x1="' + (e.cx + (ncx - e.cx) / dist * 6).toFixed(1) +
+            '" y1="' + (e.cy + (ncy - e.cy) / dist * 6).toFixed(1) +
+            '" x2="' + gx.toFixed(1) + '" y2="' + gy.toFixed(1) + '"/>';
+        }
+        g += '<text class="sx-plot-t" x="' + (lp.x + 1).toFixed(1) + '" y="' + (lp.y + fsT + 1).toFixed(1) + '">' +
+          txEsc(e.a.name) + '</text>';
+        g += '<rect class="sx-rmap-hit" x="' + lp.x.toFixed(1) + '" y="' + lp.y.toFixed(1) +
+          '" width="' + lp.w.toFixed(1) + '" height="' + lp.h.toFixed(1) + '"/>';
+      }
+      e.pts.forEach(function (p) {
+        g += '<circle class="sx-rmap-hit" cx="' + SX(p).toFixed(1) + '" cy="' + SY(p).toFixed(1) + '" r="20"/>';
+      });
+      body += g + '</g>';
+    });
+
+    var note = polar ? t('sx_map_note_polar') : t('sx_map_note');
+    var svg = '<svg class="sx-plot sx-rmap' + (dense ? ' dense' : '') + '" viewBox="0 0 ' + W + ' ' + H +
+      '" role="img" aria-label="' + txEsc(si.name) + '">' + body +
+      '<text class="sx-plot-s" x="8" y="' + (H - 8) + '">' + esc(note) + '</text></svg>';
+    return { html: svg, unplotted: unplotted, polar: polar };
+  }
+
   function renderRegion(section) {
     var si = secInfo[section]; if (!si) return;
     curSection = section;
@@ -462,6 +647,12 @@
         '<small>' + txEsc(tf(t('sx_lead_hint'), section)) + '</small></div>';
     }
     h += fenyeCardHTML(section, isYuan);
+    /* 总览星图（v2.1.1 (3)）：用户指定置于搜索框正上方 */
+    var rmap = regionMapHTML(si);
+    h += rmap.html;
+    if (rmap.unplotted) {
+      h += '<div class="sx-count-note">' + txEsc(tf(t('sx_map_unplotted'), rmap.unplotted)) + '</div>';
+    }
     h += '<div class="sx-search"><input id="sx-region-q" type="search" placeholder="' + esc(t('sx_search_ph')) + '" aria-label="' + esc(t('sx_search_ph')) + '"></div>';
     h += '<div id="sx-region-rows">' + regionRowsHTML(si) + '</div>';
     $('sx-region').innerHTML = h;

@@ -39,11 +39,11 @@ def report(name, ok, extra=""):
 
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v107 缓存名", "wuri-v107-20261024-v211-2" in sw)
+report("SW v108 缓存名", "wuri-v108-20261025-v211-3" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("四件套：CSS ?v=107＋版本 v2.1.1 (2)", "css/style.css?v=107" in html and "v2.1.1 (2)" in html)
+report("四件套：CSS ?v=107＋版本 v2.1.1 (2)", "css/style.css?v=108" in html and "v2.1.1 (3)" in html)
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
-report("me_ver 简繁 v2.1.1 (2)", i18n.count("v2.1.1 (2)") >= 2)
+report("me_ver 简繁 v2.1.1 (2)", i18n.count("v2.1.1 (3)") >= 2)
 report("对齐文案简繁齐", i18n.count("sx2_ar_aligned") >= 2 and i18n.count("sx2_ar_align_too_big") >= 2
        and i18n.count("sx2_ar_align_guide") >= 2)
 eng = open(os.path.join(WWW, "js/sky-engine.js"), encoding="utf-8").read()

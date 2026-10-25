@@ -18,7 +18,7 @@ def run(base, tag):
         b.nav(base)
         report(tag + " SW 激活", wait_sw_active(b))
         caches = b.ev("(async () => await caches.keys())()")
-        report(tag + " SW 缓存 v107", any("wuri-v107" in c for c in caches), caches)
+        report(tag + " SW 缓存 v108", any("wuri-v108" in c for c in caches), caches)
         ver = b.ev("document.querySelector('[data-i18n=\"me_ver\"]').textContent")
         report(tag + " 关于版本 v2.1.1", "v2.1.1" in ver, ver)
         r = b.ev("""(() => { const home = document.getElementById('tab-home');

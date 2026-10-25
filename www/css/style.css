@@ -1674,6 +1674,12 @@ details.disc-foot .hint{margin-top:9px}
 .sx-plot-line.ctx{stroke:var(--muted);stroke-width:1;stroke-dasharray:4 3;opacity:.5;fill:none}
 .sx-plot-t.ctx{font-family:var(--sans);font-size:9px;fill:var(--muted)}
 .sx-plot-s{font-family:var(--sans);font-size:8.5px;fill:var(--muted)}
+/* 区页总览星图（v2.1.1 (3)）：整官可点、命中圈透明、名牌字号按密度 */
+.sx-rmap-g{cursor:pointer}
+.sx-rmap-hit{fill:transparent;stroke:none}
+.sx-rmap .sx-plot-t{font-size:10.5px}
+.sx-rmap.dense .sx-plot-t{font-size:9.5px}
+.sx-rmap-g:hover .sx-plot-t{fill:var(--gold-deep)}
 .sx-calib{margin-top:12px;padding:12px 14px}
 .sx-calib-head{font-family:var(--serif);font-weight:700;color:var(--ink);font-size:.98rem;letter-spacing:.06em}
 .sx-calib-head small{font-family:var(--sans);font-weight:400;font-size:.7rem;color:var(--muted);margin-left:8px}

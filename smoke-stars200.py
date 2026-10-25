@@ -123,7 +123,7 @@ try:
     ev("window.Stars.openRegion('紫微垣'); true", 0.8)
     r = ev("""(() => { const reg = document.getElementById('sx-region');
       return { vis: !document.getElementById('view-star-region').hidden,
-        rows: reg.querySelectorAll('[data-sx-detail]').length,
+        rows: reg.querySelectorAll('#sx-region-rows [data-sx-detail]').length,
         hasSearch: !!reg.querySelector('input'),
         hasMore: !!reg.querySelector('[data-sx-more]'),
         lordCard: !!reg.querySelector('[data-sx-deity]') }; })()""")
@@ -131,13 +131,13 @@ try:
     ev("""(() => { const inp = document.querySelector('#sx-region input');
         inp.value = '北斗'; inp.dispatchEvent(new Event('input', {bubbles:true})); return true; })()""", 0.5)
     r = ev("""(() => { const reg = document.getElementById('sx-region');
-      const rows = [...reg.querySelectorAll('[data-sx-detail]')];
+      const rows = [...reg.querySelectorAll('#sx-region-rows [data-sx-detail]')];
       return { n: rows.length, names: rows.map(x => x.textContent.slice(0,4)) }; })()""")
     report("s2 区内搜索「北斗」命中且收窄", 1 <= r["n"] <= 3 and any("北斗" in n for n in r["names"]), r)
     ev("""(() => { const inp = document.querySelector('#sx-region input');
         inp.value = ''; inp.dispatchEvent(new Event('input', {bubbles:true}));
         const m = document.querySelector('#sx-region [data-sx-more]'); if (m) m.click(); return true; })()""", 0.6)
-    r = ev("document.querySelectorAll('#sx-region [data-sx-detail]').length")
+    r = ev("document.querySelectorAll('#sx-region-rows [data-sx-detail]').length")
     report("s2 展开全部 = 37 行", r == 37, r)
 
     # ---------- 详情：南门（双口径+存疑+星君卡） ----------
