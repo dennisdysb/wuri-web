@@ -85,12 +85,14 @@ var CFG_KEY = 'wuri_cfg_v1';
 var CFG = loadCfg();
 function saveCfg() { try { localStorage.setItem('wuri_cfg_v1', JSON.stringify(CFG)); } catch (e) {} }
 
-/* ---------------- 时间（支持北京时间模式） ---------------- */
-function now() {
-  var n = new Date();
-  if (CFG.tz === 'beijing') return new Date(n.getTime() + (n.getTimezoneOffset() + 480) * 60000);
-  return n;
-}
+/* ---------------- 时间 ----------------
+ * 「当下」一律跟随手机系统时间/时区（2026-10-25 用户裁定）。
+ * 历史教训：此处曾按「排盘时区」CFG.tz 把 now() 整体平移到北京时间，
+ * 导致身在海外、排盘时区选北京时，首页此刻干支/四值神/黄历今日/提醒
+ * 全按北京时刻计算（多伦多 19:02 显示成 07:02、时柱辰）。排盘时区只
+ * 作用于排盘换算（奇门真太阳时基准经线，见 qimen-app.js），严禁再
+ * 进入任何当下类路径。 */
+function now() { return new Date(); }
 function ymd(d) { return { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() }; }
 function sameDay(a, b) { return a.y === b.y && a.m === b.m && a.d === b.d; }
 function fmtMD(o) { return o.m + '月' + o.d + '日'; }
@@ -934,8 +936,9 @@ window.initMyDays = initMyDays;
  * 真太阳时换算沿用 bazi.js 口径：经度修正 (lon-子午线)*4 分钟（不计均时差）。
  * solarNow() 仅用于时辰判定（时值神、首页时柱）；日期级逻辑（戊日、节气、提醒）仍用 now()。 */
 function baseMeridian() {
-  if (CFG.tz === 'beijing') return 120;
-  return -new Date().getTimezoneOffset() / 4; // 如 EDT(UTC-4) → -60
+  /* 基准经线 = 当下所在时区的中央经线，跟随设备时区（当下类口径，
+   * 2026-10-25 解耦：不再读排盘时区 CFG.tz；如 EDT(UTC-4) → -60） */
+  return -new Date().getTimezoneOffset() / 4;
 }
 function solarNow() {
   var n = now();

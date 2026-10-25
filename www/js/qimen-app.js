@@ -20,7 +20,10 @@
   const ROOT = document.getElementById("qm-root");
   const $ = s => ROOT.querySelector(s), $$ = s => Array.from(ROOT.querySelectorAll(s));
   /* 戊日适配：真太阳时取全站全局设置（我的 → 设置：时间基准 + 经度），与八字/值神共用：
-   * 仅经度差修正（每度 4 分钟，不计均时差），基准经线与 app.js solarNow() 同口径 */
+   * 仅经度差修正（每度 4 分钟，不计均时差）。
+   * 基准经线口径（2026-10-25 时区解耦后明示）：起局时刻属「排盘输入」，
+   * 按全站「排盘时区」取基准经线（北京=120，否则按设备时区推算）；
+   * app.js solarNow() 是当下类，已改走设备时区，两者口径不同、勿再混同。 */
   function wuriSolarCfg() {
     try {
       const c = (window.__wuriGetCfg && window.__wuriGetCfg()) || {};

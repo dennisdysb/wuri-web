@@ -1,0 +1,26 @@
+PASS S1 app.js 不再有 CFG.tz==='beijing' 分支
+PASS S2 app.js now() 为设备时间直通
+PASS S3 奇门保留排盘时区基准经线（排盘侧唯一消费者）
+PASS S4 四件套 v129
+PASS S5 tz_hint 新文案（简繁）且旧文案清除
+PASS A0 设备时区生效（Toronto, getTimezoneOffset=240）
+PASS A1 时钟=19:02:30（本地）
+PASS A2 日期行=10月25日
+PASS A3 日柱=壬申
+PASS A4 时柱=庚戌（非丙辰）
+PASS A5 四值神行已渲染（含时值神）
+PASS A6 黄历 today 格=25
+PASS A7 切 auto 后时钟仍 19:02:30
+PASS A8 切 auto 后日柱/时柱不变
+PASS A9 切回 beijing 后整卡仍不变
+PASS A10 设置页 tz_hint 为新文案
+PASS A11 零 JS 异常
+PASS B1 戊日判定按本地：状态卡=今日戊日
+PASS B2 日期行=10月31日
+PASS B3 零 JS 异常
+PASS C1 时钟=07:02:30（上海本地）
+PASS C2 日期行=10月26日
+PASS C3 日柱=癸酉
+PASS C4 时柱=丙辰（上海口径正确）
+PASS C5 零 JS 异常
+SMOKE v2329: 25/25 passed
