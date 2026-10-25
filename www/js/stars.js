@@ -32,6 +32,13 @@
 
   /* ---------------- 数据 ---------------- */
   function astKey(a) { return a.id || (a.section + '|' + a.name); }
+  /* 定本计数口径（2026-10-25）：附格星官（grid_parent，如钩铃附房、神宫附尾）
+   * 条目独立保留，但计数按《漫步中国星空》并格口径不另计——全表终数 283 格。 */
+  function gridCount(list) {
+    var n = 0;
+    (list || []).forEach(function (a) { if (!a.grid_parent) n++; });
+    return n;
+  }
 
   /* 包内 JSON 双通道加载（v2.1.1 (4)，根因与口径见 sky-engine.js 同名段）：
    * 优先用 WuriSky.loadJSON（与星图/AR 共用同一实现与同一份 starData 结果）；
@@ -335,7 +342,7 @@
 
   function renderHome() {
     var host = $('sx-home'); if (!host || !XG) return;
-    var total = XG.asterisms.length;
+    var total = gridCount(XG.asterisms);
     var det = 0, doubt = 0, dual = 0;
     XG.asterisms.forEach(function (a) {
       if (a.status === '确定') det++; if (a.status === '存疑') doubt++; if (a.qing_variant) dual++;
@@ -343,7 +350,7 @@
     var h = '';
     h += '<div class="sx-kicker">' + esc(t('sx_kicker')) + '</div>';
     h += '<div class="sx-title">' + esc(t('sx_home_title')) + '</div>';
-    h += '<div class="sx-sub">' + txEsc(tf(t('sx_data_line'), total, secOrder.length)) + '<br>' +
+    h += '<div class="sx-sub">' + txEsc(tf(t('sx_data_line'), total, secOrder.length, (XG.counts && XG.counts.tradition_star_sum) || 0)) + '<br>' +
       txEsc(tf(t('sx_data_line2'), det, doubt, dual)) + '</div>';
 
     /* 三垣 */
@@ -354,7 +361,7 @@
       var reps = si.list.slice(0, 3).map(function (a) { return a.name; }).join(' · ');
       h += '<div class="sx-card sx-yuan" data-sx-region="' + esc(y) + '">' +
         '<div class="sx-yuan-top"><span class="sx-yuan-name">' + txEsc(y) + '</span>' +
-        '<span class="sx-yuan-n">' + txEsc(tf(t('sx_asterisms_n'), si.list.length)) + '</span></div>' +
+        '<span class="sx-yuan-n">' + txEsc(tf(t('sx_asterisms_n'), gridCount(si.list))) + '</span></div>' +
         '<div class="sx-yuan-verse">' + txEsc(first) + '</div>' +
         '<div class="sx-yuan-note">' + txEsc(reps) + '</div></div>';
     });
@@ -363,11 +370,11 @@
     h += '<div class="sx-sec">' + esc(t('sx_xiu28')) + ' <small>' + esc(t('sx_xiu28_note')) + '</small></div>';
     QUAD.forEach(function (q) {
       var mansions = secOrder.filter(function (s) { return secInfo[s].region === q; });
-      var sum = 0; mansions.forEach(function (s) { sum += secInfo[s].list.length; });
+      var sum = 0; mansions.forEach(function (s) { sum += gridCount(secInfo[s].list); });
       h += '<div class="sx-group"><div class="sx-group-head"><span class="sx-group-name">' + txEsc(q) + '</span>' +
         '<span class="sx-group-n">' + txEsc(tf(t('sx_asterisms_n'), sum)) + '</span></div><div class="sx-chips">';
       mansions.forEach(function (s) {
-        h += '<span class="sx-chip" data-sx-region="' + esc(s) + '">' + txEsc(s.replace(/宿$/, '')) + '<i>' + secInfo[s].list.length + '</i></span>';
+        h += '<span class="sx-chip" data-sx-region="' + esc(s) + '">' + txEsc(s.replace(/宿$/, '')) + '<i>' + gridCount(secInfo[s].list) + '</i></span>';
       });
       h += '</div></div>';
     });
@@ -400,8 +407,9 @@
     var h = '';
     if (!list.length) h += '<div class="sx-loading">' + esc(t('sx_no_result')) + '</div>';
     shown.forEach(function (a) {
-      h += '<div class="sx-row" data-sx-detail="' + esc(astKey(a)) + '">' +
+      h += '<div class="sx-row' + (a.grid_parent ? ' sx-row-sub' : '') + '" data-sx-detail="' + esc(astKey(a)) + '">' +
         '<div class="sx-row-main"><span class="sx-row-name">' + txEsc(a.name) + '</span>' +
+        (a.grid_parent ? '<span class="sx-row-subtag">' + txEsc('附' + a.grid_parent + '格') + '</span>' : '') +
         '<span class="sx-row-verse">' + txEsc((a.verses || [])[0] || '') + '</span></div>' +
         '<div class="sx-row-side">' + badgesHTML(a) +
         '<span class="sx-row-n">' + txEsc(tf(t('sx_stars_n'), a.star_count_tradition)) + '</span></div></div>';
@@ -621,7 +629,9 @@
           g += '<line class="' + cls + '" x1="' + SX(p).toFixed(1) + '" y1="' + SY(p).toFixed(1) +
             '" x2="' + SX(q).toFixed(1) + '" y2="' + SY(q).toFixed(1) + '"/>';
         });
-      } else if (e.pts.length > 1) {
+      } else if (!le && e.pts.length > 1) {
+        /* 赤经序折线只作「连线数据缺失」时的降级回落；lines 条目存在（含定本
+         * scatter 散点、无边条目）即以条目为准，不另画线——与平面星图/AR 同源同规 */
         var pts = e.pts.slice().sort(function (p, q) { return p.s.ra_deg - q.s.ra_deg; })
           .map(function (p) { return SX(p).toFixed(1) + ',' + SY(p).toFixed(1); }).join(' ');
         g += '<polyline class="' + cls + '" points="' + pts + '" fill="none"/>';
@@ -668,7 +678,7 @@
     var h = '';
     h += '<div class="sx-crumb">' + esc(t('sx_crumb_home')) + ' › ' + txEsc(isYuan ? t('sx_sanyuan') : si.region) + '</div>';
     h += '<div class="sx-title" style="margin-top:8px">' + txEsc(section) + '</div>';
-    h += '<div class="sx-sub">' + txEsc(tf(t('sx_region_n'), si.list.length, si.lineCount)) + '</div>';
+    h += '<div class="sx-sub">' + txEsc(tf(t('sx_region_n'), gridCount(si.list), si.lineCount)) + '</div>';
 
     if (!isYuan) {
       var lord = lordOfMansion(section);
@@ -832,7 +842,7 @@
         var byName = {}; n.pts.forEach(function (s) { byName[s.cn_name] = s; });
         var es = edgesByName(n.ast, byName);
         if (es && es.length) h += edgeLines(es, 'sx-plot-line ctx');
-        else if (n.pts.length > 1) h += raPolyline(n.pts, 'sx-plot-line ctx');
+        else if (!lineEntry(n.ast) && n.pts.length > 1) h += raPolyline(n.pts, 'sx-plot-line ctx');
         n.pts.forEach(function (s) {
           h += '<circle class="sx-star ctx" cx="' + X(s.ra_deg).toFixed(1) + '" cy="' + Y(s.dec_deg).toFixed(1) +
             '" r="' + Math.max(1.3, R(s.vmag) * 0.55).toFixed(1) + '"/>';
@@ -849,7 +859,7 @@
     } else {
       var fEdges2 = edgesByName(a, mainByName);
       if (fEdges2 && fEdges2.length) h += edgeLines(fEdges2, focalCls);
-      else if (main.length > 1) h += raPolyline(main, focalCls);
+      else if (!le && main.length > 1) h += raPolyline(main, focalCls);
       h += raPolyline(qing, 'sx-plot-dash');
       var mDes = {}; main.forEach(function (s) { mDes[s.designation] = 1; });
       qing.forEach(function (s) {

@@ -1649,6 +1649,8 @@ details.disc-foot .hint{margin-top:9px}
 .sx-row-main{display:flex;flex-direction:column;gap:2px;min-width:0}
 .sx-row-name{font-family:var(--serif);font-size:1.04rem;font-weight:700;color:var(--ink);letter-spacing:.08em}
 .sx-row-verse{font-family:var(--serif);font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sx-row-sub{margin-left:16px;padding-left:10px;border-left:2px solid var(--line-soft)}
+.sx-row-subtag{font-size:.72rem;color:var(--muted);letter-spacing:.06em}
 .sx-row-side{display:flex;align-items:center;gap:6px;flex:none}
 .sx-row-n{font-family:var(--sans);font-size:.74rem;color:var(--muted)}
 .sx-badge{font-family:var(--sans);font-size:.64rem;line-height:1;padding:3px 6px;border-radius:5px;letter-spacing:.06em;white-space:nowrap}
