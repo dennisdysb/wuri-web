@@ -7,19 +7,19 @@ var Meditation = (function () {
   'use strict';
 
   var SOUNDS = [
-    { id: 'rain',    name: '温柔雨声', img: 'img/meditation/bg-rain.webp',    loop: 'audio/meditation/loop-rain.mp3',    asset: 'www/audio/meditation/loop-rain.mp3' },
-    { id: 'thunder', name: '雨·远雷',   img: 'img/meditation/bg-thunder.webp', loop: 'audio/meditation/loop-thunder.mp3', asset: 'www/audio/meditation/loop-thunder.mp3' },
-    { id: 'ocean',   name: '海浪',       img: 'img/meditation/bg-ocean.webp',   loop: 'audio/meditation/loop-ocean.mp3',   asset: 'www/audio/meditation/loop-ocean.mp3' },
-    { id: 'forest',  name: '森林鸟鸣', img: 'img/meditation/bg-forest.webp',  loop: 'audio/meditation/loop-forest.mp3',  asset: 'www/audio/meditation/loop-forest.mp3' },
-    { id: 'night',   name: '夜晚虫鸣', img: 'img/meditation/bg-night.webp',   loop: 'audio/meditation/loop-night.mp3',   asset: 'www/audio/meditation/loop-night.mp3' },
-    { id: 'fire',    name: '壁炉火声', img: 'img/meditation/bg-fire.webp',    loop: 'audio/meditation/loop-fire.mp3',    asset: 'www/audio/meditation/loop-fire.mp3' },
-    { id: 'creek',   name: '溪流',       img: 'img/meditation/bg-creek.webp',   loop: 'audio/meditation/loop-creek.mp3',   asset: 'www/audio/meditation/loop-creek.mp3' },
-    { id: 'wind',    name: '风声',       img: 'img/meditation/bg-wind.webp',    loop: 'audio/meditation/loop-wind.mp3',    asset: 'www/audio/meditation/loop-wind.mp3' },
-    { id: 'bowl',    name: '颂钵·静',   img: 'img/meditation/bg-bowl.webp',    loop: 'audio/meditation/loop-bowl.mp3',    asset: 'www/audio/meditation/loop-bowl.mp3' },
-    { id: 'silence', name: '无声·静室', img: 'img/meditation/bg-silence.webp', loop: '', asset: '' }
+    { id: 'rain',    name: '温柔雨声', img: 'img/meditation/bg-rain.webp?v=2',    loop: 'audio/meditation/loop-rain.mp3?v=2',    asset: 'www/audio/meditation/loop-rain.mp3' },
+    { id: 'thunder', name: '雨·远雷',   img: 'img/meditation/bg-thunder.webp?v=2', loop: 'audio/meditation/loop-thunder.mp3?v=2', asset: 'www/audio/meditation/loop-thunder.mp3' },
+    { id: 'ocean',   name: '海浪',       img: 'img/meditation/bg-ocean.webp?v=2',   loop: 'audio/meditation/loop-ocean.mp3?v=2',   asset: 'www/audio/meditation/loop-ocean.mp3' },
+    { id: 'forest',  name: '森林鸟鸣', img: 'img/meditation/bg-forest.webp?v=2',  loop: 'audio/meditation/loop-forest.mp3?v=2',  asset: 'www/audio/meditation/loop-forest.mp3' },
+    { id: 'night',   name: '夜晚虫鸣', img: 'img/meditation/bg-night.webp?v=2',   loop: 'audio/meditation/loop-night.mp3?v=2',   asset: 'www/audio/meditation/loop-night.mp3' },
+    { id: 'fire',    name: '壁炉火声', img: 'img/meditation/bg-fire.webp?v=2',    loop: 'audio/meditation/loop-fire.mp3?v=2',    asset: 'www/audio/meditation/loop-fire.mp3' },
+    { id: 'creek',   name: '溪流',       img: 'img/meditation/bg-creek.webp?v=2',   loop: 'audio/meditation/loop-creek.mp3?v=2',   asset: 'www/audio/meditation/loop-creek.mp3' },
+    { id: 'wind',    name: '风声',       img: 'img/meditation/bg-wind.webp?v=2',    loop: 'audio/meditation/loop-wind.mp3?v=2',    asset: 'www/audio/meditation/loop-wind.mp3' },
+    { id: 'bowl',    name: '颂钵·静',   img: 'img/meditation/bg-bowl.webp?v=2',    loop: 'audio/meditation/loop-bowl.mp3?v=2',    asset: 'www/audio/meditation/loop-bowl.mp3' },
+    { id: 'silence', name: '无声·静室', img: 'img/meditation/bg-silence.webp?v=2', loop: '', asset: '' }
   ];
-  var INTERVAL_BELL_LOOP = 'audio/meditation/bell-interval.mp3';
-  var END_BELL_LOOP = 'audio/meditation/bell-ending.mp3';
+  var INTERVAL_BELL_LOOP = 'audio/meditation/bell-interval.mp3?v=2';
+  var END_BELL_LOOP = 'audio/meditation/bell-ending.mp3?v=2';
   var INTERVAL_BELL_ASSET = 'www/audio/meditation/bell-interval.mp3';
   var END_BELL_ASSET = 'www/audio/meditation/bell-ending.mp3';
   var INTERVAL_SEC = 300; /* 间隔磬：每 5 分钟 */
@@ -74,7 +74,7 @@ var Meditation = (function () {
         img.draggable = false;
         /* 载入失败（弱网/缓存异常）时换参重试一次，避免背景图永久破图（2026-10-19 修） */
         img.addEventListener('error', function () {
-          if (!img.dataset.rt) { img.dataset.rt = '1'; img.src = SOUNDS[idx].img + '?r=1'; }
+          if (!img.dataset.rt) { img.dataset.rt = '1'; img.src = SOUNDS[idx].img + '&r=1'; }
         });
         bg.appendChild(img);
         stack.appendChild(bg);
@@ -306,8 +306,10 @@ var Meditation = (function () {
         fb.ambient.loop = true;
         /* 音频载入出错时重新 load 一次（同一 src 只重试一次），防瞬时失败变永久无声（2026-10-19 修） */
         fb.ambient.addEventListener('error', function () {
-          if (!fb.ambient.src || fb.retriedFor === fb.ambient.src) return;
+          if (!fb.ambient.src || fb.retriedFor) return;
           fb.retriedFor = fb.ambient.src;
+          /* 换破缓存参数重试一次：同 URL 重 load 可能再命中发版窗口期被污染的缓存（404/截断），2026-10-25 修 */
+          try { fb.ambient.src = fb.retriedFor + (fb.retriedFor.indexOf('?') >= 0 ? '&r=1' : '?r=1'); } catch (err0) {}
           try { fb.ambient.load(); } catch (err) {}
           try { var pr = fb.ambient.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (err2) {}
         });
@@ -318,6 +320,7 @@ var Meditation = (function () {
       try { curSrc = fb.ambient.src || ''; } catch (e1) {}
       /* 只有声音真的变了才换 src，避免重复 load */
       if (curSrc.indexOf(s.loop) === -1) {
+        fb.retriedFor = '';
         fb.ambient.src = s.loop;
         try { fb.ambient.load(); } catch (e2) {}
       }

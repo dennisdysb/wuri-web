@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v116-20261025-v230';
+const CACHE = 'wuri-v117-20261025-v230';
 /* 离线下载专用缓存（一键下载的音频/正文/图鉴）：版本更新时绝不清除，
  * 否则用户下好的几百 MB 音频会在每次发版后被 activate 误删（2026-10-21） */
 const OFFLINE_CACHE = 'wuri-offline-v1';
@@ -15,9 +15,9 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=116',
+  './css/style.css?v=117',
   './css/qimen.css?v=78',
-  './css/meditation.css?v=65',
+  './css/meditation.css?v=66',
   './icon-192.png',
   './icon-512.png',
   './js/ai-analysis.js',
@@ -196,6 +196,9 @@ self.addEventListener('fetch', e => {
   // 分段请求（音频 Range 拖动/续播）不拦截，交给浏览器直连：
   // 以前把 206 半截音频当完整响应缓存下来，会让环境音永远播不出（2026-10-19 冥想无声修）
   if (e.request.headers.get('range')) return;
+  // 冥想场景图与环境音：不经 SW（不查缓存、不落缓存）——运行时缓存若把发版窗口期的
+  // 截断/坏响应钉住，背景图会长期残缺、环境音长期无声（2026-10-25 冥想故障修）
+  if (/\/(img|audio)\/meditation\//.test(url.pathname)) return;
   // 神祇图鉴全图（v2.0.0 (2) 外置）：不入预缓存；已下载集（离线豁免缓存）优先，
   // 其次运行时缓存，看过即留；都未命中才联网取并存运行时缓存。缩略图走下方通用分支。
   var isDeityFull = /\/img\/deities\/[^/]+\.webp$/.test(url.pathname);

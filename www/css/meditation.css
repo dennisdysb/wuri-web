@@ -6,7 +6,7 @@
 #meditation-view[hidden]{display:none}
 
 /* ---------- 背景层（9 层叠放，JS 按滑动进度设 opacity/位移） ---------- */
-.med-bg-stack{position:absolute;inset:0;overflow:hidden;background:#0a0a0c}
+.med-bg-stack{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#0a0a0c}
 .med-bg{position:absolute;top:-40px;left:-40px;right:-40px;bottom:-40px;opacity:0;will-change:opacity,transform;transition:opacity .45s ease}
 .med-bg img{width:100%;height:100%;object-fit:cover;display:block}
 .med-bg.active img{animation:medKenBurns 20s ease-in-out infinite alternate}
