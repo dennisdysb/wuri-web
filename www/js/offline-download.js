@@ -545,22 +545,61 @@
       else localStorage.removeItem(DEITY_LS);
     } catch (e) {}
   }
+  /* 素材清单（v2.1.1 清单驱动）：发布环节由 gen-deity-manifest.py 按 feed
+   * 名单实算生成 img/deities/manifest.json（张数/总字节/逐文件），与全图
+   * 同源托管。运行时网络优先读清单并存 localStorage；断网用上次缓存；
+   * 再不行回落包内兜底表推导（数值由兜底表计算、不写死）。设置页张数/大小
+   * 与下载进度总量统一以清单为准。 */
+  var DEITY_MANIFEST_LS = 'wuri_deity_manifest_v1';
+  var deityManifestCache = null;
+  function deityFallbackManifest() {
+    var files = {}, total = 0, n = 0;
+    for (var k in DEITY_FALLBACK_SIZES) { files[k] = DEITY_FALLBACK_SIZES[k]; total += files[k]; n++; }
+    return { count: n, totalBytes: total, files: files };
+  }
+  function deityManifest() {
+    if (deityManifestCache) return Promise.resolve(deityManifestCache);
+    return fetch(relUrl('img/deities/manifest.json'), { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('manifest http');
+      return r.json();
+    }).then(function (m) {
+      if (!m || typeof m.count !== 'number' || typeof m.totalBytes !== 'number' || !m.files) throw new Error('manifest shape');
+      deityManifestCache = m;
+      try { localStorage.setItem(DEITY_MANIFEST_LS, JSON.stringify(m)); } catch (e) {}
+      return m;
+    }).catch(function () {
+      try {
+        var c = JSON.parse(localStorage.getItem(DEITY_MANIFEST_LS) || 'null');
+        if (c && c.files && typeof c.totalBytes === 'number') { deityManifestCache = c; return c; }
+      } catch (e) {}
+      deityManifestCache = deityFallbackManifest();
+      return deityManifestCache;
+    });
+  }
   function deitySizes() {
     if (deitySizeMap) return Promise.resolve(deitySizeMap);
-    var names = deityNames();
-    var map = {};
-    var i = 0;
-    function worker() {
-      if (i >= names.length) return Promise.resolve();
-      var name = names[i++];
-      return headSize(deityUrl(name)).then(function (n) {
-        map[name] = n || DEITY_FALLBACK_SIZES[name] || 0;
-        return worker();
+    return deityManifest().then(function (m) {
+      var names = deityNames();
+      var map = {}, missing = [];
+      names.forEach(function (n) {
+        if (m.files && typeof m.files[n] === 'number') map[n] = m.files[n];
+        else missing.push(n);
       });
-    }
-    var pool = [];
-    for (var k = 0; k < 6; k++) pool.push(worker());
-    return Promise.all(pool).then(function () { deitySizeMap = map; return map; });
+      if (!missing.length) { deitySizeMap = map; return map; }
+      /* 清单缺个别文件（素材刚换、清单未及重跑）：仅对缺项 HEAD 实测，再兜底表 */
+      var i = 0;
+      function worker() {
+        if (i >= missing.length) return Promise.resolve();
+        var name = missing[i++];
+        return headSize(deityUrl(name)).then(function (n) {
+          map[name] = n || DEITY_FALLBACK_SIZES[name] || 0;
+          return worker();
+        });
+      }
+      var pool = [];
+      for (var k = 0; k < 6; k++) pool.push(worker());
+      return Promise.all(pool).then(function () { deitySizeMap = map; return map; });
+    });
   }
   function deityPaint(doneAll, totalN, doneBytes, totalBytes) {
     showFloat();
@@ -727,9 +766,19 @@
       deitySyncCard();
     });
   }
+  /* 设置页素材栏文案数字读清单渲染（张数＋总大小与下载总量同源） */
+  function deityPaintDesc() {
+    var el = $('deity-dl-desc');
+    if (!el) return;
+    deityManifest().then(function (m) {
+      el.textContent = '神祇图鉴的全图平时从服务器按需加载，看过的会自动留在本机。点下面按钮可一次把全部 ' +
+        m.count + ' 位尊神的全图（约 ' + fmtMB(m.totalBytes) + '）下载到本机，断网也能慢慢看；不需要时可随时删除腾出空间。';
+    });
+  }
   function deityInit() {
     var btn = $('deity-dl-btn');
     if (!btn) return;
+    deityPaintDesc();
     btn.addEventListener('click', deityStart);
     var del = $('deity-del-btn');
     if (del) del.addEventListener('click', function () { deityDelete(); });

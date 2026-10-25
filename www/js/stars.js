@@ -1104,6 +1104,33 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 
+  /* ===== 星象全模块红光模式（v2.1.0 (9)）=====
+   * 一个总开关、两个入口（星象页页首 #sky-red-toggle＋设置页 #sky-red-toggle-me）、AR 页红光钮共用同一状态；
+   * 状态存 localStorage wuri_sky_redlight_v1；呈现走 body.sky-red 的作用域 CSS（星象子视图变量重映射＋图/svg 红处理），
+   * 其余模块不受影响；与日/夜主题正交。 */
+  var RED_KEY = 'wuri_sky_redlight_v1';
+  function redOn() { try { return localStorage.getItem(RED_KEY) === '1'; } catch (e) { return false; } }
+  function redSyncUI(v) {
+    ['sky-red-toggle', 'sky-red-toggle-me'].forEach(function (id) { var el = $(id); if (el) el.checked = !!v; });
+  }
+  function redSet(v) {
+    v = !!v;
+    try { localStorage.setItem(RED_KEY, v ? '1' : '0'); } catch (e) {}
+    document.body.classList.toggle('sky-red', v);
+    redSyncUI(v);
+    if (window.WuriSkyAR && WuriSkyAR.setRed) WuriSkyAR.setRed(v);
+  }
+  window.WuriRedlight = { on: redOn, set: redSet };
+  (function redBoot() {
+    var v = redOn();
+    document.body.classList.toggle('sky-red', v);
+    redSyncUI(v);
+    ['sky-red-toggle', 'sky-red-toggle-me'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.addEventListener('change', function () { redSet(el.checked); });
+    });
+  })();
+
   window.Stars = { openHome: openHome, activate: activate, openRegion: openRegion, openDetail: openDetail, openButiange: openButiange, renderTodaySky: renderTodaySky,
     openMansionAsterism: openMansionAsterism, openSunRegion: openSunRegion, sunMansion: sunMansion, openBeidouDetail: openBeidouDetail, loadFenye: loadFenye };
 })();

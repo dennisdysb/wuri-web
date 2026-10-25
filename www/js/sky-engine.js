@@ -118,6 +118,28 @@
     try { localStorage.setItem(MAGLIM_KEY, String(v)); } catch (e) {}
   }
 
+  /* 月亮与五大行星（v2.1.1 合并批）：与 sunAltAz 同路——A.Equator 给出
+   * 当日期分点赤道坐标（ra 单位小时），A.Horizon 换地平坐标（带折射）。
+   * 名字走 i18n（sx2_body_<id>），此处只存天文标识与呈现色。 */
+  var BODIES = [
+    { id: 'moon', body: A ? A.Body.Moon : null, kind: 'moon' },
+    { id: 'mercury', body: A ? A.Body.Mercury : null, kind: 'planet', color: '#c9ced6' },
+    { id: 'venus', body: A ? A.Body.Venus : null, kind: 'planet', color: '#ffd9a3' },
+    { id: 'mars', body: A ? A.Body.Mars : null, kind: 'planet', color: '#ff9e66' },
+    { id: 'jupiter', body: A ? A.Body.Jupiter : null, kind: 'planet', color: '#ffe3ae' },
+    { id: 'saturn', body: A ? A.Body.Saturn : null, kind: 'planet', color: '#eed9a4' }
+  ];
+  function bodyPos(date, obs, id) {
+    if (!A) return null;
+    var def = null;
+    for (var i = 0; i < BODIES.length; i++) if (BODIES[i].id === id) def = BODIES[i];
+    if (!def || !def.body) return null;
+    var ob = makeObserver(obs);
+    var eq = A.Equator(def.body, date, ob, true, true);
+    var h = A.Horizon(date, ob, eq.ra, eq.dec, 'normal');
+    return { alt: h.altitude, az: h.azimuth, ra: norm360(eq.ra * 15), dec: eq.dec };
+  }
+
   global.WuriSky = {
     available: !!A,
     DEFAULT_OBS: DEFAULT_OBS,
@@ -130,6 +152,8 @@
     sunEqd: sunEqd,
     astroDusk: astroDusk,
     magLim: magLim,
-    setMagLim: setMagLim
+    setMagLim: setMagLim,
+    BODIES: BODIES,
+    bodyPos: bodyPos
   };
 })(typeof window !== 'undefined' ? window : globalThis);

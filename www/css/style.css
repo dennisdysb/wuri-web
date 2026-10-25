@@ -1850,6 +1850,16 @@ body.bugang-open{overflow:hidden}
 .sk-ecliptic{fill:none;stroke:#d8a03c;stroke-width:1.1;stroke-dasharray:6 4;opacity:.85}
 .sk-eqline{fill:none;stroke:#7d94b8;stroke-width:1;stroke-dasharray:2 4;opacity:.8}
 .sk-sun{fill:#f5b301;stroke:#fff2c0;stroke-width:1}
+/* 月亮/行星（v2.1.1 合并批）：月相盘（亮盘＋暗盘影圆＋细描边）、行星圆点、名称标签 */
+.sk-moon-disc{fill:#e9d9a8}
+.sk-moon-shade{fill:#0d1320;opacity:.88}
+.sk-moon-rim{fill:none;stroke:rgba(233,217,168,.5);stroke-width:.8}
+.sk-planet{stroke:rgba(10,10,16,.4);stroke-width:.7}
+.sk-bodylabel{fill:#f0d9a0;font-weight:700}
+.sx-badge.body{color:var(--gold-deep);background:var(--paper-2);border:1px solid var(--line)}
+/* 今夜可见·最暗星等控件（v2.1.1 并入项，与星图 .sk-controls 同语言） */
+.sk-tn-mag{margin:10px 2px 2px}
+.ar-panel .ar-msg.dim{opacity:.78;font-size:.82rem;line-height:1.65}
 .sk-linelabel{fill:#b8860b}
 .sk-sunlabel{fill:#b8860b;font-weight:700}
 .sk-hl{fill:none;stroke:var(--gold);stroke-width:1.6;pointer-events:none;animation:skpulse 1.6s ease-in-out infinite}
@@ -1918,6 +1928,33 @@ body.bugang-open{overflow:hidden}
 .ar-shutter:active{transform:scale(.93);background:rgba(255,233,176,.16)}
 .ar-stage.red .ar-shutter{border-color:rgba(255,96,72,.55);background:rgba(26,8,6,.5)}
 .ar-stage.red .ar-shutter::after{border-color:rgba(255,96,72,.85)}
+
+/* ============ 星象全模块红光模式（v2.1.0 (9)） ============
+ * body.sky-red（stars.js WuriRedlight 总开关）下，星象子视图整套变量压到红谱低亮：
+ * 黑底、红字红线、高亮色（金/琥珀/朱砂/黛青）一律换暗红等价色；
+ * 视图内图片与 SVG（星君造像、星图、斗柄、月相）套用与 AR 快照同源的红处理滤镜；
+ * 悬浮相机钮与悬浮返回键不得是亮盘。其余模块（经文/图鉴/黄历等）不在作用域内。 */
+.sx-red-row{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);border:1px solid var(--line-soft);border-radius:14px;padding:10px 14px;margin:2px 0 12px}
+body.sky-red #tab-stars,body.sky-red #view-sky-tonight,body.sky-red #view-sky-chart,body.sky-red #view-sky-ar,body.sky-red #view-star-detail,body.sky-red #view-star-region,body.sky-red #view-butiange{
+  --paper:#050202;--bg:#050202;--paper-2:#1a0503;--card:#0e0302;--ink:#eda88f;--ink-2:#cf8668;--muted:#a96a52;--faint:#6e4033;
+  --line:#5a2013;--line-soft:#38130b;--teal:#d84f33;--teal-deep:#b03318;--teal-wash:#200604;
+  --gold:#e0563a;--gold-deep:#c2432a;--amber:#d84f33;--amber-deep:#e07a5f;--amber-wash:#200604;
+  --cinnabar:#e0563a;--cinnabar-deep:#e07a5f;--cinnabar-wash:#200604;
+  background:#050202}
+body.sky-red #tab-stars{min-height:100dvh}
+body.sky-red #tab-stars img,body.sky-red #tab-stars svg,
+body.sky-red #view-sky-tonight img,body.sky-red #view-sky-tonight svg,
+body.sky-red #view-sky-chart svg,
+body.sky-red #view-star-detail img,body.sky-red #view-star-detail svg,
+body.sky-red #view-star-region img,body.sky-red #view-star-region svg,
+body.sky-red #view-butiange img,body.sky-red #view-butiange svg{filter:brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2)}
+body.sky-red .sx-band,body.sky-red .sx-shelf{background:linear-gradient(160deg,#0d0303,#1e0603 55%,#070202);color:#eda88f}
+body.sky-red .sx-band .sx-kicker,body.sky-red .sx-shelf-go{color:#e0563a}
+body.sky-red .sx-band .sx-title{color:#f2c1b2}
+body.sky-red #sx-ar-fab{background:rgba(26,8,6,.55);border-color:rgba(255,96,72,.55);color:#ff8a6a}
+body.sky-red #view-sky-tonight .jing-back-fab,body.sky-red #view-star-detail .jing-back-fab,body.sky-red #view-star-region .jing-back-fab,body.sky-red #view-butiange .jing-back-fab{color:#f2c1b2;border-color:rgba(255,96,72,.4)}
+/* 红光下原生滑杆（星图 #sk-mag／今夜 #tn-mag）着红调，不留系统蓝灰亮块 */
+body.sky-red :is(#tab-stars,#view-sky-tonight,#view-sky-chart,#view-sky-ar,#view-star-detail,#view-star-region,#view-butiange) input[type="range"]{accent-color:#a01822}
 .ar-stage.red .ar-shutter:active{background:rgba(255,96,72,.16)}
 /* 工具栏 2×2 等宽网格（v2.1.0 (7)：原流式 flex 三挤一孤，用户真机指排版参差）——与舞台同宽同心（同为 max-width:430 居中），四格等宽等高、间距一致 */
 .ar-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:430px;margin:0 auto;padding:10px 0 0;font-family:var(--sans)}

@@ -18,9 +18,9 @@ def run(base, tag):
         b.nav(base)
         report(tag + " SW 激活", wait_sw_active(b))
         caches = b.ev("(async () => await caches.keys())()")
-        report(tag + " SW 缓存 v104", any("wuri-v104" in c for c in caches), caches)
+        report(tag + " SW 缓存 v105", any("wuri-v105" in c for c in caches), caches)
         ver = b.ev("document.querySelector('[data-i18n=\"me_ver\"]').textContent")
-        report(tag + " 关于版本 v2.1.0 (8)", "v2.1.0 (8)" in ver, ver)
+        report(tag + " 关于版本 v2.1.1", "v2.1.1" in ver, ver)
         r = b.ev("""(() => { const home = document.getElementById('tab-home');
           const ids = ['practice-entry-card','shushu-entry-card','deities-entry-card'];
           return { cards: ids.every(id => !!document.getElementById(id)),

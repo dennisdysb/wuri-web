@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """v2.1.0 (7) 专项冒烟：相机认星 AR 页底部工具栏排版整顿。
 现状（用户 vivo 真机截图）：.ar-bar 原为 flex 流式＋左内边距 62px（让位悬浮
-返回钮），四钮「拍照/红光/校准归零/打开平面星图」挤成 3+1、第二行孤钮左
+返回钮），四钮「拍照/红光/对星归零/打开平面星图」挤成 3+1、第二行孤钮左
 对齐。本批改为 2×2 等宽网格（与舞台同为 max-width:430 居中、格等宽等高、
 间距 8 一致、钮高 44、文字居中 nowrap），平板 ≥768 工具栏上限 640 居中。
 断言：①静态四件套 v103/(7)＋网格规则在位、旧流式规则退场；②390 日间与
 412 夜间两档几何：工具栏与舞台同宽同左缘、四格成网格（列左缘/行顶对齐、
 宽高差 ≤2px、横纵间距同为 8±1.5）、文字不溢出（scrollWidth≤clientWidth）、
 四钮中心 elementFromPoint 命中自身；③CDP 真实坐标点击四钮功能不回归：
-红光开关翻转、校准归零（先 _setCal(10,0) 再真点→偏移清零、极点回位）、
+红光开关翻转、对星归零（先 _setCal(10,0) 再真点→偏移清零、极点回位）、
 拍照走合成（toBlob 计数 ≥1）、打开平面星图（图表视图显示且最上层）。
 截图存 v2107-shots/（390 日间全幅＋工具栏特写、412 夜间同）。
 沙箱边界同前：视频源为 canvas.captureStream 注入图案帧、姿态注入；
@@ -29,11 +29,11 @@ def report(name, ok, extra=""):
 
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v104 缓存名", "wuri-v104-20261024-v210-8" in sw)
+report("SW v105 缓存名", "wuri-v105-20261024-v211" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("四件套：CSS ?v=104＋版本 v2.1.0 (8)", "css/style.css?v=104" in html and "v2.1.0 (8)" in html)
+report("四件套：CSS ?v=105＋版本 v2.1.1", "css/style.css?v=105" in html and "v2.1.1" in html)
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
-report("me_ver 简繁 v2.1.0 (8)", i18n.count("v2.1.0 (8)") >= 2)
+report("me_ver 简繁 v2.1.1", i18n.count("v2.1.1") >= 2)
 css = open(os.path.join(WWW, "css/style.css"), encoding="utf-8").read()
 report("工具栏网格规则在位（2 列等宽＋钮高 44）",
        ".ar-bar{display:grid;grid-template-columns:1fr 1fr" in css and ".ar-bar .mini-btn{height:44px" in css)
@@ -167,7 +167,7 @@ try:
     mouse(b["red"]["cx"], b["red"]["cy"]); time.sleep(0.4)
     red_off = ev("!document.getElementById('ar-stage').classList.contains('red')")
     report("[真点] 红光切换开→关", red_on and red_off, (red_on, red_off))
-    # 校准归零：先注入偏移，再真点归零
+    # 对星归零：先注入偏移，再真点归零
     st0 = ev("window.WuriSkyAR._state()")
     pole0 = st0.get("polePoint") or {}
     ev("window.WuriSkyAR._setCal(10, 0); true", 0.5)
@@ -177,7 +177,7 @@ try:
     st2 = ev("window.WuriSkyAR._state()")
     pole2 = st2.get("polePoint") or {}
     saved = ev("localStorage.getItem('wuri_sky_ar_cal_v1')") or ""
-    report("[真点] 校准归零（偏移生效后清零、极点回位、存档 az:0）",
+    report("[真点] 对星归零（偏移生效后清零、极点回位、存档 az:0）",
            pole1.get("x", 0) - pole0.get("x", 0) > 25 and abs(pole2.get("x", 0) - pole0.get("x", 999)) <= 3 and '"az":0' in saved,
            (pole0.get("x"), pole1.get("x"), pole2.get("x"), saved))
     # 拍照：真点走合成

@@ -109,6 +109,7 @@
   var S = {
     running: false, stream: null, raf: 0, pose: null, poseAt: 0, startAt: 0,
     noPose: false, fallback: null, posCache: null, posAt: 0, msgText: '', msgUntil: 0,
+    bodyCache: null, bodyAt: 0, bodyPts: [], moonIllum: null, moonWaxing: true,
     labels: [], segments: 0, hudText: '', els: null, oriBound: false
   };
 
@@ -168,6 +169,24 @@
       var cyv = v[0] * ax.Ud[0] + v[1] * ax.Ud[1] + v[2] * ax.Ud[2];
       P[i] = { x: w / 2 + focal * cxv / cz, y: h / 2 - focal * cyv / cz, cz: cz, alt: pc.alt };
     }
+    /* 月亮/行星投影点（与星点同一姿态管线；太阳投影点供月相暗盘定背阳向） */
+    var bpts = [];
+    if (S.bodyCache) {
+      var projBody = function (alt, az) {
+        var v = starVec(alt + cal.alt, az + cal.az);
+        var cz = v[0] * ax.f[0] + v[1] * ax.f[1] + v[2] * ax.f[2];
+        if (cz <= 0.08) return null;
+        return { x: w / 2 + focal * (v[0] * ax.Rd[0] + v[1] * ax.Rd[1] + v[2] * ax.Rd[2]) / cz,
+                 y: h / 2 - focal * (v[0] * ax.Ud[0] + v[1] * ax.Ud[1] + v[2] * ax.Ud[2]) / cz };
+      };
+      S.bodyCache.forEach(function (B) {
+        var pt = projBody(B.alt, B.az);
+        if (pt) { pt.B = B; bpts.push(pt); }
+      });
+      var sunAA = SKY.sunAltAz ? SKY.sunAltAz(new Date(), S.obs || SKY.DEFAULT_OBS) : null;
+      var sunPt = sunAA ? projBody(sunAA.alt, sunAA.az) : null;
+      bpts.sunPt = sunPt;
+    }
     /* 连线层（只画两端都在视场内的边；出界段由画布自然裁剪） */
     ctx.lineWidth = 1.2;
     ASTS.forEach(function (ast) {
@@ -197,8 +216,47 @@
       ctx.beginPath(); ctx.arc(pj.x, pj.y, starR(st.mag), 0, 6.2832); ctx.fill();
     }
     ctx.globalAlpha = 1;
+    /* 月亮/行星标记（v2.1.1）：月亮带月相盘面（亮盘＋背阳暗盘，偏移
+     * 2r·照亮比，与星图同一影圆模型）、行星本色圆点；红光下走红谱 */
+    S.bodyPts = [];
+    bpts.forEach(function (pt) {
+      if (pt.x < -20 || pt.x > w + 20 || pt.y < -20 || pt.y > h + 20) return;
+      var B = pt.B;
+      if (B.kind === 'moon') {
+        var rM2 = 7, il2 = S.moonIllum == null ? 0.5 : S.moonIllum;
+        var sdx2 = S.moonWaxing ? 1 : -1, sdy2 = 0;
+        if (bpts.sunPt) { var vx2 = bpts.sunPt.x - pt.x, vy2 = bpts.sunPt.y - pt.y, vl2 = Math.hypot(vx2, vy2); if (vl2 > 1) { sdx2 = vx2 / vl2; sdy2 = vy2 / vl2; } }
+        /* 暗盘裁剪在亮盘内（同星图）：亮实景下不裁剪会在月旁留独立暗圆 */
+        ctx.save();
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, rM2, 0, 6.2832); ctx.clip();
+        ctx.fillStyle = red ? '#ff8a6a' : '#e9d9a8';
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, rM2, 0, 6.2832); ctx.fill();
+        ctx.fillStyle = red ? 'rgba(24,5,3,0.92)' : 'rgba(13,18,28,0.92)';
+        ctx.beginPath(); ctx.arc(pt.x - sdx2 * 2 * rM2 * il2, pt.y - sdy2 * 2 * rM2 * il2, rM2, 0, 6.2832); ctx.fill();
+        ctx.restore();
+        ctx.strokeStyle = red ? 'rgba(255,138,106,0.8)' : 'rgba(233,217,168,0.55)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, rM2, 0, 6.2832); ctx.stroke();
+      } else {
+        ctx.fillStyle = red ? '#ff7a5c' : (B.color || '#fff6da');
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 3.6, 0, 6.2832); ctx.fill();
+      }
+      S.bodyPts.push({ id: B.id, x: pt.x, y: pt.y, alt: B.alt, az: B.az });
+    });
     /* 标签层（最亮星在视场内、高度 >0、≤ 星等设定；文字以屏幕系
-     * fillText 水平绘制，天然恒正立，不随姿态旋转） */
+     * fillText 水平绘制，天然恒正立，不随姿态旋转）。
+     * 月亮/行星标签先登记（优先级最高）：不受星等分级约束、恒显，
+     * pick 时与星官标签同表竞近。 */
+    ctx.font = '12px "Songti SC", "Noto Serif CJK SC", serif';
+    ctx.textAlign = 'center';
+    bpts.forEach(function (pt) {
+      if (pt.x < 16 || pt.x > w - 16 || pt.y < 20 || pt.y > h - 6) return;
+      var nm3 = t('sx2_body_' + pt.B.id);
+      ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(8,8,14,0.65)';
+      ctx.strokeText(nm3, pt.x, pt.y - 13);
+      ctx.fillStyle = colLabel;
+      ctx.fillText(nm3, pt.x, pt.y - 13);
+      S.labels.push({ body: pt.B.id, x: pt.x, y: pt.y - 13 });
+    });
     var mLabel = magLabel();
     ctx.font = '12px "Songti SC", "Noto Serif CJK SC", serif';
     ctx.textAlign = 'center';
@@ -251,6 +309,15 @@
       S.obs = getObs();
       S.posCache = SKY.projectAll(new Date(), S.obs, ALLSTARS);
       S.posAt = now;
+      /* 月亮/行星位置与恒星同节拍刷新（1 秒）：走 SKY.bodyPos 同一引擎口径 */
+      S.bodyCache = (SKY.BODIES || []).map(function (bd) {
+        var p = SKY.bodyPos ? SKY.bodyPos(new Date(), S.obs, bd.id) : null;
+        return p ? { id: bd.id, kind: bd.kind, color: bd.color, alt: p.alt, az: p.az } : null;
+      }).filter(Boolean);
+      var mpA = (window.WuriTodaySky && WuriTodaySky.moonPhaseOf) ? WuriTodaySky.moonPhaseOf(new Date()) : null;
+      S.moonIllum = mpA ? mpA.illumination : null;
+      S.moonWaxing = mpA ? mpA.elongationDeg < 180 : true;
+      S.bodyAt = now;
     }
     if (!S.pose && now - S.startAt > 2500) S.noPose = true;
     var ctx = canvas.getContext('2d');
@@ -293,6 +360,7 @@
   function panelHTML(kind) {
     if (kind === 'start') {
       return '<div class="ar-msg">' + esc(t('sx2_ar_intro')) + '</div>' +
+        '<div class="ar-msg dim">' + esc(t('sx2_ar_cal_hint1')) + '<br>' + esc(t('sx2_ar_cal_hint2')) + '</div>' +
         '<button class="btn" data-ar="start">' + esc(t('sx2_ar_start')) + '</button>';
     }
     if (kind === 'starting') return '<div class="ar-msg">' + esc(t('sx2_ar_starting')) + '</div>';
@@ -311,9 +379,19 @@
     S.els.panel.innerHTML = panelHTML(kind);
   }
 
+  /* 红光与星象全模块总开关共用同一状态（v2.1.0 (9)，stars.js WuriRedlight）：
+   * 开 AR 时从总开关同步 cal.red；AR 内点红光钮走总开关 set（全模块同步） */
+  function applyRed(v) {
+    cal.red = !!v; saveCal();
+    var st = $('ar-stage'); if (st) st.classList.toggle('red', cal.red);
+    var rb = document.querySelector('#sx-ar [data-ar="red"]');
+    if (rb) rb.classList.toggle('on', cal.red);
+  }
+
   function openAR() {
     show('view-sky-ar');
     var host = $('sx-ar'); if (!host) return;
+    if (window.WuriRedlight) cal.red = window.WuriRedlight.on();
     if (!SKY || !SKY.available) { host.innerHTML = '<div class="sx-loading">' + esc(t('sx_load_fail')) + '</div>'; return; }
     host.innerHTML = shellHTML();
     S.els = { host: host, stage: $('ar-stage'), video: $('ar-video'), canvas: $('ar-canvas'), hud: $('ar-hud'), panel: $('ar-panel') };
@@ -498,9 +576,8 @@
       if (act === 'start') startAR();
       else if (act === 'snap') snap();
       else if (act === 'red') {
-        cal.red = !cal.red; saveCal();
-        var st = $('ar-stage'); if (st) st.classList.toggle('red', cal.red);
-        b.classList.toggle('on', cal.red);
+        if (window.WuriRedlight) window.WuriRedlight.set(!cal.red);
+        else applyRed(!cal.red);
       } else if (act === 'calreset') { cal.az = 0; cal.alt = 0; saveCal(); }
       else if (act === 'tochart') {
         stopAR(); hide('view-sky-ar');
@@ -510,15 +587,31 @@
   }
 
   function pick(e) {
-    if (!S.labels.length || !window.Stars || !S.els) return;
+    if (!S.labels.length || !S.els) return;
     var r = S.els.canvas.getBoundingClientRect();
     var x = e.clientX - r.left, y = e.clientY - r.top;
     var best = null, bestD = 48;
     S.labels.forEach(function (L) {
       var d = Math.hypot(L.x - x, L.y - y);
-      if (d < bestD) { bestD = d; best = L.key; }
+      if (d < bestD) { bestD = d; best = L; }
     });
-    if (best) window.Stars.openDetail(best);
+    if (!best) return;
+    if (best.body) {
+      /* 月亮/行星没有详情页：点选在 HUD 出信息（名＋身份＋当前方位/高度
+       * ＋今晚最佳），不跳星官详情 */
+      var B = null;
+      (S.bodyCache || []).forEach(function (bb) { if (bb.id === best.body) B = bb; });
+      if (!B) return;
+      var bk = (window.WuriSkyChart && WuriSkyChart.bestBody) ? WuriSkyChart.bestBody(B.id) : null;
+      var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+      var s = t('sx2_body_' + B.id) + ' · ' + t(B.kind === 'moon' ? 'sx2_kind_moon' : 'sx2_kind_planet') + ' · ' +
+        tf(t('sx2_info_alt'), B.alt.toFixed(0)) + ' · ' + tf(t('sx2_info_az'), (((B.az % 360) + 360) % 360).toFixed(0)) + ' · ' +
+        tf(t('sx2_info_best'), bk && bk.alt >= 0 ? p2(bk.date.getHours()) + ':' + p2(bk.date.getMinutes()) : '—');
+      if (B.kind === 'moon' && S.moonIllum != null) s += ' · ' + tf(t('sx_moon_illum'), (Math.round(S.moonIllum * 1000) / 10).toFixed(1));
+      flashMsg(s);
+      return;
+    }
+    if (best.key && window.Stars) window.Stars.openDetail(best.key);
   }
 
   /* ---------------- 入口注入（星象页，继双入口之后的整行卡） ---------------- */
@@ -617,6 +710,8 @@
 
   window.WuriSkyAR = {
     open: openAR,
+    /* 红光总开关联动（stars.js WuriRedlight.set 调用）：只做 AR 侧应用，不回调总开关 */
+    setRed: function (v) { applyRed(v); },
     /* 供跨模块来源栈收起（stars.js openDeity）：停相机/姿态并收起视图；
      * 恢复时走 open() 重开回开启面板，不揭旧壳 */
     close: function () { stopAR(); hide('view-sky-ar'); },
@@ -628,7 +723,7 @@
     _injectPose: function (a, b, g) { S.pose = { a: a, b: b, g: g }; S.noPose = false; },
     _state: function () {
       return { running: S.running, hasPose: !!S.pose, noPose: S.noPose, fallback: S.fallback,
-        calAz: cal.az, calAlt: cal.alt, segments: S.segments, labels: S.labels,
+        calAz: cal.az, calAlt: cal.alt, segments: S.segments, labels: S.labels, bodies: S.bodyPts,
         centerAz: S.centerAz, centerAlt: S.centerAlt, polePoint: S.polePoint };
     },
     _setCal: function (az, alt) { cal.az = az; cal.alt = alt; clampCal(); saveCal(); },
