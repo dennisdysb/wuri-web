@@ -29,11 +29,11 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v103 缓存名", "wuri-v103-20261024-v210-7" in sw)
+report("SW v104 缓存名", "wuri-v104-20261024-v210-8" in sw)
 report("SW 预缓存含 vendor 与引擎/星图", all(x in assets for x in
        ["js/vendor/astronomy.js", "js/vendor/d3-array.min.js", "js/vendor/d3-geo.min.js", "js/sky-engine.js", "js/sky-chart.js"]))
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("CSS ?v=103 与版本 v2.1.0 (3)", "css/style.css?v=103" in html and "v2.1.0 (7)" in html)
+report("CSS ?v=103 与版本 v2.1.0 (3)", "css/style.css?v=104" in html and "v2.1.0 (8)" in html)
 report("两新视图在位", 'id="view-sky-tonight"' in html and 'id="view-sky-chart"' in html)
 astr = open(os.path.join(WWW, "js/vendor/astronomy.js"), encoding="utf-8").read()
 report("astronomy.js 原样（MIT 头＋体积）", "MIT License" in astr[:2000] and len(astr) > 400000, len(astr))

@@ -1902,6 +1902,23 @@ body.bugang-open{overflow:hidden}
 .ar-panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(9,11,19,.74);color:#f3ead2;padding:22px;text-align:center;font-family:var(--sans);z-index:4}
 .ar-panel[hidden]{display:none}
 .ar-panel .ar-msg{font-size:.86rem;line-height:1.75;max-width:302px}
+/* 舞台内快门钮（v2.1.0 (8)）：锚定舞台内侧左下（距左/下各 15px、整钮在框内，
+ * 不再悬在框外压工具栏）。低亮度夜间样式（用户夜间真机指出：旧悬浮返回键是
+ * 整块淡金近白实心盘、为夜景里最亮元素、毁暗适应）——深色毛玻璃底＋与 HUD
+ * 同族的淡金细环＋内圈描边圆芯（不填实），亮度与 HUD 读数/准星同量级；
+ * 红光模式转暗红调；日间同用此深色玻璃（舞台本身即暗场），与全站毛玻璃
+ * 语言一致。z-index 3 同 HUD 层（面板 z4 在场时由 JS 藏起）。 */
+.ar-shutter{position:absolute;left:15px;bottom:15px;width:58px;height:58px;border-radius:50%;
+  background:rgba(10,14,20,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border:1.5px solid rgba(255,233,176,.55);
+  box-shadow:0 2px 10px rgba(0,0,0,.35);z-index:3;padding:0;cursor:pointer}
+.ar-shutter::after{content:'';position:absolute;inset:9px;border-radius:50%;
+  border:2px solid rgba(255,233,176,.8);background:transparent}
+.ar-shutter[hidden]{display:none}
+.ar-shutter:active{transform:scale(.93);background:rgba(255,233,176,.16)}
+.ar-stage.red .ar-shutter{border-color:rgba(255,96,72,.55);background:rgba(26,8,6,.5)}
+.ar-stage.red .ar-shutter::after{border-color:rgba(255,96,72,.85)}
+.ar-stage.red .ar-shutter:active{background:rgba(255,96,72,.16)}
 /* 工具栏 2×2 等宽网格（v2.1.0 (7)：原流式 flex 三挤一孤，用户真机指排版参差）——与舞台同宽同心（同为 max-width:430 居中），四格等宽等高、间距一致 */
 .ar-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:430px;margin:0 auto;padding:10px 0 0;font-family:var(--sans)}
 .ar-bar .mini-btn{height:44px;padding:6px 8px;display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center}

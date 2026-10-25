@@ -275,6 +275,11 @@
       '<canvas id="ar-canvas"></canvas>' +
       '<div class="ar-hud" id="ar-hud"></div>' +
       '<div class="ar-panel" id="ar-panel"></div>' +
+      /* 舞台内快门钮（v2.1.0 (8)：取代原视图级悬浮返回键——它悬在舞台外
+       * 左下、压工具栏「拍照」钮。快门收进舞台框内左下，与工具栏拍照钮
+       * 同走 data-ar="snap" 委托 → 同一 snap() 合成流程（含死帧报错）；
+       * 面板（开启/回落）显示时藏起，见 setPanel 的联动。 */
+      '<button class="ar-shutter" id="ar-shutter" data-ar="snap" hidden title="' + esc(t('sx2_ar_snap')) + '" aria-label="' + esc(t('sx2_ar_snap')) + '"></button>' +
       '</div>' +
       '<div class="ar-bar">' +
       '<button class="mini-btn tiny" data-ar="snap">' + esc(t('sx2_ar_snap')) + '</button>' +
@@ -298,6 +303,9 @@
   }
   function setPanel(kind) {
     if (!S.els || !S.els.panel) return;
+    /* 快门钮只在相机运行中（无面板）时露面：开启面板/回落面板在场时藏起，
+     * 免得隔着半透明面板误点、也免得在无相机时点了只换来报错 */
+    var sh = $('ar-shutter'); if (sh) sh.hidden = !!kind;
     if (!kind) { S.els.panel.hidden = true; S.els.panel.innerHTML = ''; return; }
     S.els.panel.hidden = false;
     S.els.panel.innerHTML = panelHTML(kind);
