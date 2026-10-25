@@ -176,6 +176,16 @@ window.WuriImg = window.WuriImg || (function () {
         starLink.querySelector('.sx-deity-starlink').addEventListener('click', function () {
           window.__wuri_openStarRegion(d.link_key);
         });
+      } else if (d.star_region && typeof window.__wuri_openStarRegion === 'function') {
+        /* 星空系神祇（紫微/勾陈/斗姆/北斗→紫微垣、南斗→斗宿）：「星图」签同规格，
+         * openStarRegion 以区名直达区页；区页盖在详情之上、返回即回详情（同星君链） */
+        var srText = '星图 · ' + (d.star_region_label || d.star_region) + ' ›';
+        starLink.innerHTML = '<button class="sx-deity-starlink" type="button"></button>';
+        var srBtn = starLink.querySelector('.sx-deity-starlink');
+        srBtn.textContent = srText;
+        srBtn.addEventListener('click', function () {
+          window.__wuri_openStarRegion(d.star_region);
+        });
       } else {
         starLink.innerHTML = '';
       }

@@ -1,0 +1,47 @@
+PASS SW v124 缓存名＋CSS ?v=124 在 SW 预缓存
+PASS CSS ?v=124＋index 静态版本行带内部号 v124
+PASS me_ver 简（内部 v124）＋繁（內部 v124）
+PASS 显示版本仍 v2.3.0（无漂移）
+PASS feed star_region 映射恰 5 位且对
+PASS feed 太阳/太阴/太岁不挂链
+PASS feed 星君 link_key 仍 28
+PASS 包内 star_region 映射恰 5 位且对
+PASS 包内 太阳/太阴/太岁不挂链
+PASS 包内 星君 link_key 仍 28
+PASS 图鉴列表 102 卡
+PASS 紫微大帝 详情打开＋星图签文案
+PASS 紫微大帝 签 elementFromPoint 命中本体
+PASS 紫微大帝 点签落地区页 紫微垣
+PASS 紫微大帝 区页返回→详情在位＋滚动保持
+PASS 紫微大帝 详情返回→图鉴滚动恢复
+PASS 勾陈大帝 详情打开＋星图签文案
+PASS 勾陈大帝 签 elementFromPoint 命中本体
+PASS 勾陈大帝 点签落地区页 紫微垣
+PASS 勾陈大帝 区页返回→详情在位＋滚动保持
+PASS 勾陈大帝 详情返回→图鉴滚动恢复
+PASS 斗姆元君 详情打开＋星图签文案
+PASS 斗姆元君 签 elementFromPoint 命中本体
+PASS 斗姆元君 点签落地区页 紫微垣
+PASS 斗姆元君 区页返回→详情在位＋滚动保持
+PASS 斗姆元君 详情返回→图鉴滚动恢复
+PASS 北斗星君 详情打开＋星图签文案
+PASS 北斗星君 签 elementFromPoint 命中本体
+PASS 北斗星君 点签落地区页 紫微垣
+PASS 北斗星君 区页返回→详情在位＋滚动保持
+PASS 北斗星君 详情返回→图鉴滚动恢复
+PASS 南斗星君 详情打开＋星图签文案
+PASS 南斗星君 签 elementFromPoint 命中本体
+PASS 南斗星君 点签落地区页 斗宿
+PASS 南斗星君 区页返回→详情在位＋滚动保持
+PASS 南斗星君 详情返回→图鉴滚动恢复
+PASS 太阳星君 详情无星图签（不硬挂）
+PASS 太岁殷元帅 详情无星图签（不硬挂）
+PASS 回归：角木蛟仍「本宿星官 ›」
+PASS 回归：角木蛟点签→角宿区页
+PASS 夜间紫微大帝 详情打开＋星图签文案
+PASS 夜间紫微大帝 签 elementFromPoint 命中本体
+PASS 夜间紫微大帝 点签落地区页 紫微垣
+PASS 夜间紫微大帝 区页返回→详情在位＋滚动保持
+PASS 夜间紫微大帝 详情返回→图鉴滚动恢复
+PASS 全程零 JS 异常
+TOTAL 46/46
