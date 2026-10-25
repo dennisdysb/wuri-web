@@ -2004,6 +2004,21 @@ body.sky-red{
   background:#050202}
 body.sky-red #tab-stars{min-height:100dvh}
 body.sky-red img,body.sky-red svg{filter:brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2)}
+/* 照片卡底图红移（2026-10-25 晚用户真机报障：首页三卡＋术数子页四卡仍是原色照片）：
+ * .hero2 底图是 CSS background-image 而非 <img>，上行滤镜罩不到。滤镜只加在照片层
+ * .h2-bg（含其压暗渐变 ::after），文字层 .h2-in 不走滤镜、单独换红谱色，避免文字
+ * 二次色偏；标题/副文/胶囊/金字行在红光下统一红谱浅色（压过日间深墨口径），日间
+ * 纸色光晕（::before 与图鉴卡 .h2-in 纸晕）一并压暗红，免得照片上浮浅色块。 */
+body.sky-red .hero2 .h2-bg{filter:brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2)}
+body.sky-red .hero2 .h2-title{color:#f2c1b2}
+body.sky-red .hero2 .h2-sub{color:rgba(237,168,143,.94)}
+body.sky-red .hero2.h2-deity .h2-sub{color:rgba(237,168,143,.94)}
+body.sky-red .hero2 .h2-seg{background:rgba(26,8,6,.45);border-color:rgba(255,96,72,.45);color:#f2c1b2}
+body.sky-red .hero2 .h2-gold{color:#e07a5f}
+body.sky-red .hero2 .h2-gold::before{background:linear-gradient(to right,transparent,rgba(224,122,95,.85))}
+body.sky-red .hero2 .h2-gold::after{background:linear-gradient(to left,transparent,rgba(224,122,95,.85))}
+body.sky-red .hero2 .h2-title::before,body.sky-red .hero2 .h2-sub::before,body.sky-red .hero2 .h2-gold>span::before{background:rgba(20,5,3,.42)}
+body.sky-red .hero2.h2-deity .h2-in{background:radial-gradient(ellipse 84% 68% at 50% 46%,rgba(20,5,3,.34),rgba(20,5,3,0) 74%)}
 body.sky-red .sx-band,body.sky-red .sx-shelf{background:linear-gradient(160deg,#0d0303,#1e0603 55%,#070202);color:#eda88f}
 body.sky-red .sx-band .sx-kicker,body.sky-red .sx-shelf-go{color:#e0563a}
 body.sky-red .sx-band .sx-title{color:#f2c1b2}

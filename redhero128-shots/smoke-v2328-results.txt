@@ -1,0 +1,24 @@
+PASS SW v128 缓存名＋CSS ?v=128 预缓存
+PASS index CSS ?v=128＋静态内部号 v128
+PASS me_ver 简繁 v128
+PASS 显示版本仍 v2.3.0
+PASS CSS 含 .h2-bg 红光滤镜规则
+PASS CSS 含副文红谱色规则
+PASS 基线：.h2-bg 无滤镜
+PASS 红光开：body.sky-red 在
+PASS 红光开：照片层滤镜生效（sepia）
+PASS 红光开：标题红谱色
+PASS 红光开：副文红谱浅色
+PASS 红光开：图鉴卡副文红谱浅色
+PASS 红光开：胶囊文字红谱
+PASS 红光开：文字层本身无滤镜（不二次色偏）
+PASS 像素：照片区红开比红关明显更红 (R-G 增幅>25)
+PASS 术数卡点击点命中卡本体
+PASS 点开术数子页
+PASS 红光开：子页四卡照片层滤镜生效
+PASS 红光开：子页副文红谱浅色
+PASS 子页返回回首页
+PASS 红光关：照片层滤镜摘除
+PASS 红光关：副文不再是红谱色
+PASS 零 JS 异常
+TOTAL 23/23
