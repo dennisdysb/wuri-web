@@ -1,5 +1,32 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v117-20261025-v230';
+const CACHE = 'wuri-v118-20261025-v230';
+/* 冥想资产专用缓存（场景图 10＋环境音/磬 11，约 28MB）：安装期整包预缓存，
+ * 播放/显示一律本地出（用户 2026-10-25 定调「下载 App 时就该下载下来」）。
+ * 与主缓存分开：单件失败不拖垮整版 SW 更新，缺件运行时回落网络现拉。 */
+const MED_CACHE = 'wuri-med-v3';
+const MED_ASSETS = [
+  './img/meditation/bg-rain.webp?v=3',
+  './img/meditation/bg-thunder.webp?v=3',
+  './img/meditation/bg-ocean.webp?v=3',
+  './img/meditation/bg-forest.webp?v=3',
+  './img/meditation/bg-night.webp?v=3',
+  './img/meditation/bg-fire.webp?v=3',
+  './img/meditation/bg-creek.webp?v=3',
+  './img/meditation/bg-wind.webp?v=3',
+  './img/meditation/bg-bowl.webp?v=3',
+  './img/meditation/bg-silence.webp?v=3',
+  './audio/meditation/loop-rain.mp3?v=3',
+  './audio/meditation/loop-thunder.mp3?v=3',
+  './audio/meditation/loop-ocean.mp3?v=3',
+  './audio/meditation/loop-forest.mp3?v=3',
+  './audio/meditation/loop-night.mp3?v=3',
+  './audio/meditation/loop-fire.mp3?v=3',
+  './audio/meditation/loop-creek.mp3?v=3',
+  './audio/meditation/loop-wind.mp3?v=3',
+  './audio/meditation/loop-bowl.mp3?v=3',
+  './audio/meditation/bell-interval.mp3?v=3',
+  './audio/meditation/bell-ending.mp3?v=3'
+];
 /* 离线下载专用缓存（一键下载的音频/正文/图鉴）：版本更新时绝不清除，
  * 否则用户下好的几百 MB 音频会在每次发版后被 activate 误删（2026-10-21） */
 const OFFLINE_CACHE = 'wuri-offline-v1';
@@ -15,9 +42,9 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=117',
+  './css/style.css?v=118',
   './css/qimen.css?v=78',
-  './css/meditation.css?v=66',
+  './css/meditation.css?v=67',
   './icon-192.png',
   './icon-512.png',
   './js/ai-analysis.js',
@@ -89,13 +116,18 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS))
+      .then(() => caches.open(MED_CACHE))
+      .then(mc => Promise.all(MED_ASSETS.map(u => mc.add(u).catch(() => {}))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE && k !== OFFLINE_CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE && k !== OFFLINE_CACHE && k !== MED_CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
@@ -193,12 +225,46 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
+  // 冥想场景图与环境音：只出安装期预缓存（MED_CACHE，版本化 URL、只收完整 200），
+  // 播放/显示不再现拉网络——4G 现拉 2.7MB loop 的出声与否全看当下网络与浏览器
+  // HTTP 缓存里钉着什么，发版窗口期的截断响应更会长期残图/无声（2026-10-25 两轮故障）。
+  // ignoreSearch 匹配：页面重试参数（&r=1）同样命中本地。音频 Range 按缓存切片回 206。
+  var isMed = /\/(img|audio)\/meditation\//.test(url.pathname);
+  if (isMed && e.request.method === 'GET') {
+    e.respondWith(
+      caches.open(MED_CACHE).then(function (c) { return c.match(e.request, { ignoreSearch: true }); })
+        .then(function (hit) {
+          if (!hit) return fetch(e.request);
+          var range = e.request.headers.get('range');
+          if (!range || !/\.mp3$/i.test(url.pathname)) return hit;
+          return hit.blob().then(function (blob) {
+            var m = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+            if (!m) return new Response(blob, { headers: { 'Content-Type': 'audio/mpeg' } });
+            var total = blob.size, start, end;
+            if (m[1] === '') {
+              var n = parseInt(m[2], 10) || 0;
+              start = Math.max(0, total - n); end = total - 1;
+            } else {
+              start = parseInt(m[1], 10);
+              end = m[2] === '' ? total - 1 : Math.min(parseInt(m[2], 10), total - 1);
+            }
+            if (start > end || start >= total) {
+              return new Response('', { status: 416, headers: { 'Content-Range': 'bytes */' + total } });
+            }
+            var part = blob.slice(start, end + 1);
+            return new Response(part, { status: 206, headers: {
+              'Content-Type': 'audio/mpeg', 'Content-Length': String(part.size),
+              'Content-Range': 'bytes ' + start + '-' + end + '/' + total,
+              'Accept-Ranges': 'bytes' } });
+          });
+        })
+        .catch(function () { return fetch(e.request); })
+    );
+    return;
+  }
   // 分段请求（音频 Range 拖动/续播）不拦截，交给浏览器直连：
   // 以前把 206 半截音频当完整响应缓存下来，会让环境音永远播不出（2026-10-19 冥想无声修）
   if (e.request.headers.get('range')) return;
-  // 冥想场景图与环境音：不经 SW（不查缓存、不落缓存）——运行时缓存若把发版窗口期的
-  // 截断/坏响应钉住，背景图会长期残缺、环境音长期无声（2026-10-25 冥想故障修）
-  if (/\/(img|audio)\/meditation\//.test(url.pathname)) return;
   // 神祇图鉴全图（v2.0.0 (2) 外置）：不入预缓存；已下载集（离线豁免缓存）优先，
   // 其次运行时缓存，看过即留；都未命中才联网取并存运行时缓存。缩略图走下方通用分支。
   var isDeityFull = /\/img\/deities\/[^/]+\.webp$/.test(url.pathname);

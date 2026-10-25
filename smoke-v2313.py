@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""v2.3.0（SW v116）样张专项冒烟：《步天歌》点句浮图（作用域：角宿 13 句）。
+"""v2.3.0（SW v118，含主星盘径钳制＋进贤撤标）样张专项冒烟：《步天歌》点句浮图（作用域：角宿 13 句）。
 
 断言：
-①版本口径：SW wuri-v116／CSS ?v=116／显示版本仍 v2.3.0（用户明示不变），
-  关于页版本行带内部号——me_ver 简体「（内部 v116）」繁体「（內部 v116）」＋index 静态兜底。
-②数据层：xingguan.json 主星标记恰两颗（角宿一＝角宿距星、进贤＝独星成官），
+①版本口径：SW wuri-v118／CSS ?v=118／显示版本仍 v2.3.0（用户明示不变），
+  关于页版本行带内部号——me_ver 简体「（内部 v118）」繁体「（內部 v118）」＋index 静态兜底。
+②数据层：xingguan.json 主星标记恰一颗（角宿一＝角宿距星；进贤独星成官无文献称主星，2026-10-25 撤标），
   star-module 真源与 www 副本逐字一致；butiange 角宿 13 句映射与浮图高亮期望一致。
 ③运行时真点击（390×844 日间）：角宿 13 句逐句点击行身开浮层——浮层出现、
-  高亮组集合与本句星官逐句对账、中性组补集正确、主星金环恰 2（角宿一＋进贤常驻）、
+  高亮组集合与本句星官逐句对账、中性组补集正确、主星金环恰 1（仅角宿一常驻）、
   elementFromPoint 浮层中心落在浮层内（最上层）、关闭（✕）后浮层消失且
   view-butiange 滚动位置逐像素回到点击前；柱句图注含「柱尚有 4 星待考」；
   行内星官签点击同样开浮图（不跳详情）；点浮层外关闭；浮层「看详情」进详情且浮层已收。
@@ -32,18 +32,18 @@ def report(name, ok, extra=""):
 
 # ---------- ① 版本口径 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v116 缓存名", "wuri-v116-20261025-v230" in sw and "style.css?v=116" in sw)
+report("SW v118 缓存名", "wuri-v118-20261025-v230" in sw and "style.css?v=118" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("CSS ?v=116＋index 静态版本行带内部号", "css/style.css?v=116" in html and "戊日不上香 v2.3.0（内部 v116）" in html)
+report("CSS ?v=118＋index 静态版本行带内部号", "css/style.css?v=118" in html and "戊日不上香 v2.3.0（内部 v118）" in html)
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
-report("me_ver 简（内部 v116）＋繁（內部 v116）",
-       "me_ver: '戊日不上香 v2.3.0（内部 v116）'" in i18n and "me_ver: '戊日不上香 v2.3.0（內部 v116）'" in i18n)
+report("me_ver 简（内部 v118）＋繁（內部 v118）",
+       "me_ver: '戊日不上香 v2.3.0（内部 v118）'" in i18n and "me_ver: '戊日不上香 v2.3.0（內部 v118）'" in i18n)
 report("显示版本仍 v2.3.0（无 2.3.1/2.4.0 漂移）", "v2.3.1" not in i18n and "v2.4.0" not in html)
 
 # ---------- ② 数据层 ----------
 xg = json.load(open(os.path.join(WWW, "data/xingguan.json"), encoding="utf-8"))
 prin = sorted((a["section"], s["cn_name"]) for a in xg["asterisms"] for s in a["stars"] if s.get("principal"))
-report("主星标记恰两颗：角宿一＋进贤（均在角宿）", prin == [("角宿", "角宿一"), ("角宿", "进贤")], prin)
+report("主星标记恰一颗：仅角宿一（角宿距星）", prin == [("角宿", "角宿一")], prin)
 src = os.path.expanduser("~/workspace/wuri-app/star-module/xingguan.json")
 report("star-module 真源与 www 副本逐字一致",
        open(src, encoding="utf-8").read() == open(os.path.join(WWW, "data/xingguan.json"), encoding="utf-8").read())
@@ -114,6 +114,7 @@ try:
             svgBw: svgCs ? svgCs.borderTopWidth : '?', svgBg: svgCs ? svgCs.backgroundColor : '?',
             rings: pop.querySelectorAll('.sx-principal-ring').length,
             prinStars: pop.querySelectorAll('.sx-star.sx-principal').length,
+            prinR: parseFloat((pop.querySelector('.sx-star.sx-principal') || { getAttribute: () => 'NaN' }).getAttribute('r')),
             verse: (pop.querySelector('#sx-pop-verse')||{}).textContent || '',
             note: (pop.querySelector('#sx-pop-note')||{}).textContent || '',
             links: Array.from(pop.querySelectorAll('[data-sx-pop-detail]')).map(x => x.getAttribute('data-sx-pop-detail')),
@@ -153,14 +154,15 @@ try:
         if p["hl"] != sorted(EXPECT[i]) or p["dimN"] != 11 - len(EXPECT[i]) or sorted(p["links"]) != sorted(EXPECT[i]):
             hl_ok = False
             report("第 %d 句高亮对象" % (i + 1), False, {"hl": p["hl"], "want": sorted(EXPECT[i]), "dimN": p["dimN"], "links": p["links"]})
-        if p["rings"] != 2 or p["prinStars"] != 2:
+        if p["rings"] != 1 or p["prinStars"] != 1:
             hl_ok = False
-            report("第 %d 句主星金环常驻×2" % (i + 1), False, {"rings": p["rings"], "prin": p["prinStars"]})
+            report("第 %d 句主星金环常驻×1" % (i + 1), False, {"rings": p["rings"], "prin": p["prinStars"]})
         if i == 9:
             report("柱句图注如实标注待考（柱尚有 4 星待考）", "柱尚有 4 星待考" in p["note"], p["note"])
             shot("pop-day-zhu")
         if i == 0:
             report("角句图注无待考字样＋图例在位", "待考" not in p["note"] and "金环＝本官主星" in p["note"], p["note"])
+            report("主星盘径钳制普通档（角宿一 r≈2.0、非大金币）", abs((p["prinR"] or 99) - 2.0) < 0.2, p["prinR"])
             report("浮层精简：卡片高≤72%视口＋图区无内框（边框 0/底色透明）",
                    p["cardRatio"] <= 0.72 and p["svgBw"] == "0px" and p["svgBg"] in ("transparent", "rgba(0, 0, 0, 0)"),
                    {"cardRatio": round(p["cardRatio"], 3), "svgBw": p["svgBw"], "svgBg": p["svgBg"]})
@@ -208,7 +210,7 @@ try:
 
     # 运行时版本行（简体）
     ver = ev("document.querySelector('[data-i18n=\"me_ver\"]').textContent")
-    report("运行时关于版本行带内部号（简体）", ver and "v2.3.0（内部 v116）" in ver, ver)
+    report("运行时关于版本行带内部号（简体）", ver and "v2.3.0（内部 v118）" in ver, ver)
 
     # ---------- ⑤ 412 视口＋夜间＋红光 ----------
     set_viewport(412, 915)
@@ -270,7 +272,7 @@ try:
     ev("window.Stars.openButiange(%s); true" % json.dumps("角宿"), 1.2)
     click_sel('[data-sx-pop="角宿:0"]'); time.sleep(0.4)
     notetw = pop_probe()["note"]
-    report("繁体版本行（內部 v116）＋浮层图例繁体", vertw and "v2.3.0（內部 v116）" in vertw and "金環＝本官主星" in notetw,
+    report("繁体版本行（內部 v118）＋浮层图例繁体", vertw and "v2.3.0（內部 v118）" in vertw and "金環＝本官主星" in notetw,
            {"ver": vertw, "note": notetw})
     click_sel("#sx-pop-x"); time.sleep(0.2)
 

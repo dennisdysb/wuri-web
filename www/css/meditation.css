@@ -5,27 +5,30 @@
 #meditation-view{position:fixed;inset:0;z-index:9999;background:#0a0a0c;overflow:hidden}
 #meditation-view[hidden]{display:none}
 
-/* ---------- 背景层（9 层叠放，JS 按滑动进度设 opacity/位移） ---------- */
-.med-bg-stack{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#0a0a0c}
-.med-bg{position:absolute;top:-40px;left:-40px;right:-40px;bottom:-40px;opacity:0;will-change:opacity,transform;transition:opacity .45s ease}
+/* ---------- 背景层（10 层叠放，JS 按滑动进度设 opacity/位移） ---------- */
+/* 层级全部显式写死（2026-10-25 二轮故障修）：不再靠 DOM 顺序——背景图带无限
+ * transform 动画，在移动端合成器里会被提升为独立层，若 UI 层无显式 z-index，
+ * 真机上会出现文字层（名/钟/点）被背景层顶掉、闪屏、最终黑屏的症状。 */
+.med-bg-stack{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#0a0a0c;z-index:0}
+.med-bg{position:absolute;top:-40px;left:-40px;right:-40px;bottom:-40px;opacity:0;transition:opacity .45s ease}
 .med-bg img{width:100%;height:100%;object-fit:cover;display:block}
 .med-bg.active img{animation:medKenBurns 20s ease-in-out infinite alternate}
 @keyframes medKenBurns{from{transform:scale(1)}to{transform:scale(1.08)}}
 
 /* ---------- 顶部/底部渐变罩（保证文字可读） ---------- */
-.med-scrim-top{position:absolute;top:0;left:0;right:0;height:30%;pointer-events:none;
+.med-scrim-top{position:absolute;top:0;left:0;right:0;height:30%;pointer-events:none;z-index:1;
   background:linear-gradient(to bottom,rgba(0,0,0,.5),rgba(0,0,0,0))}
-.med-scrim-bottom{position:absolute;bottom:0;left:0;right:0;height:62%;pointer-events:none;
+.med-scrim-bottom{position:absolute;bottom:0;left:0;right:0;height:62%;pointer-events:none;z-index:1;
   background:linear-gradient(to top,rgba(0,0,0,.8),rgba(0,0,0,0))}
 
 /* ---------- 滑动 pager（透明页，仅驱动背景） ---------- */
-.med-pager{position:absolute;inset:0;display:flex;overflow-x:auto;overflow-y:hidden;
+.med-pager{position:absolute;inset:0;z-index:2;display:flex;overflow-x:auto;overflow-y:hidden;
   scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .med-pager::-webkit-scrollbar{display:none}
 .med-page{flex:0 0 100%;height:100%;scroll-snap-align:center}
 
 /* ---------- 顶栏 ---------- */
-.med-topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
+.med-topbar{position:absolute;top:0;left:0;right:0;z-index:4;display:flex;align-items:center;
   padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;pointer-events:none}
 .med-topbar>*{pointer-events:auto}
 .med-back{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.28);
@@ -37,7 +40,7 @@
 .med-top-sp{width:40px}
 
 /* ---------- 中央：声音名 + 倒计时 + 圆点 ---------- */
-.med-center{position:absolute;top:29%;left:0;right:0;text-align:center;pointer-events:none}
+.med-center{position:absolute;top:29%;left:0;right:0;z-index:3;transform:translateZ(0);text-align:center;pointer-events:none}
 .med-sound-name{color:rgba(245,241,230,.92);font-size:.95rem;letter-spacing:.35em;text-indent:.35em;
   transition:opacity .18s ease;text-shadow:0 1px 6px rgba(0,0,0,.7)}
 .med-clock{color:#fff;font-size:4.2rem;font-weight:200;font-variant-numeric:tabular-nums;
@@ -48,7 +51,7 @@
 .med-dot.on{background:#e8c877;box-shadow:0 0 8px rgba(232,200,119,.8)}
 
 /* ---------- 底部浮动控制层（图片全屏铺满，控件悬浮） ---------- */
-.med-controls{position:absolute;left:0;right:0;bottom:0;
+.med-controls{position:absolute;left:0;right:0;bottom:0;z-index:4;
   padding:18px 22px calc(env(safe-area-inset-bottom,0px) + 20px);
   display:flex;flex-direction:column;align-items:center;gap:12px}
 .med-dur-row{display:flex;gap:8px;align-items:center}
