@@ -18,6 +18,17 @@
  * 手势内调用，故「开始」流程先请姿态授权、再请相机；任一关被拒都落
  * 人话回落面板（可改开平面星图），不白屏。桌面/无陀螺仪设备：相机能开
  * 但收不到姿态数据时，HUD 常驻提示并给平面星图入口。
+ *
+ * 【v2.1.1 (1) 紧急修复·事件源】旧版只监听 deviceorientation 并把 α 当
+ * 罗盘绝对角用——安卓 Chrome 的该事件是「相对朝向」（游戏旋转矢量，
+ * α 零点任意、无磁北参考、靠陀螺积分会漂移乱跳）。2026-10-24 真机实证：
+ * 对准月亮 HUD 方位 272°→178°→265° 乱跳（真值 129°），而同机自带指南针
+ * 读 131°、咱的高度（靠重力）分毫不差——错不在换算（矩阵经锚点验算无误，
+ * 且冒烟的 _injectPose 绕过了事件层、缺口在此），错在事件源。改法：同时
+ * 监听 deviceorientationabsolute，只有可信事件（绝对事件类型 /
+ * e.absolute===true / iOS 的 webkitCompassHeading 在位）才写入 pose；
+ * 只收到相对事件时不写 pose（不拿相对值冒充罗盘）、HUD 明示方位不可靠。
+ * 平面星图「跟随手机」共用同一 ingest 管线，一并修复。
  * 真机手感（跟随延迟、罗盘漂移量级、横屏 φ 符号）沙箱无从验，留真机验收。
  */
 (function () {
@@ -110,14 +121,41 @@
     running: false, stream: null, raf: 0, pose: null, poseAt: 0, startAt: 0,
     noPose: false, fallback: null, posCache: null, posAt: 0, msgText: '', msgUntil: 0,
     bodyCache: null, bodyAt: 0, bodyPts: [], moonIllum: null, moonWaxing: true,
-    labels: [], segments: 0, hudText: '', els: null, oriBound: false
+    labels: [], segments: 0, hudText: '', els: null, oriBound: false,
+    absSeen: false, relSeen: false
   };
 
-  function onOri(e) {
-    if (!e || e.alpha == null) return;
+  /* 姿态事件 ingest（AR 与星图跟随共用，根因与口径见文件头注）：
+   * 只有「可信」事件才写 pose——绝对事件类型 deviceorientationabsolute、
+   * 或 e.absolute===true、或 iOS Safari 的 webkitCompassHeading 在位
+   * （iOS 不发 absolute 事件类型、其 deviceorientation 本就是罗盘参考，
+   * 以该字段在位为信任信号，α 用法与旧版一致、不回归）。相对事件只记
+   * relSeen 供 HUD 明示不可靠，绝不写入 pose 冒充罗盘。 */
+  function oriTrusted(e, fromAbsType) {
+    if (fromAbsType) return true;
+    if (e.absolute === true) return true;
+    if (typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0) return true;
+    return false;
+  }
+  function ingestOri(e, fromAbsType) {
+    if (!e || e.alpha == null) return false;
+    if (!oriTrusted(e, fromAbsType)) { if (!S.absSeen) S.relSeen = true; return false; }
+    S.absSeen = true; S.relSeen = false;
     S.pose = { a: e.alpha, b: e.beta || 0, g: e.gamma || 0 };
     S.poseAt = performance.now();
     S.noPose = false;
+    return true;
+  }
+  function onOri(e) { ingestOri(e, false); }
+  function onOriAbs(e) { ingestOri(e, true); }
+  /* 绑定/解绑必须双事件对称（相对＋绝对），stop/退订不留残监听 */
+  function bindOri(hRel, hAbs) {
+    window.addEventListener('deviceorientation', hRel);
+    window.addEventListener('deviceorientationabsolute', hAbs);
+  }
+  function unbindOri(hRel, hAbs) {
+    window.removeEventListener('deviceorientation', hRel);
+    window.removeEventListener('deviceorientationabsolute', hAbs);
   }
   function screenAngle() {
     if (window.screen && screen.orientation && typeof screen.orientation.angle === 'number') return screen.orientation.angle;
@@ -325,9 +363,12 @@
     drawScene(ctx, cw, ch);
     /* 标签坐标是工作单位（CSS px），与 _state/pick 同口径 */
     var hud = '';
-    if (S.msgText && now < S.msgUntil) hud = S.msgText;
+    var flashOn = !!(S.msgText && now < S.msgUntil);
+    if (flashOn) hud = S.msgText;
     else if (S.pose && S.centerAz != null) hud = tf(t('sx2_ar_hud'), S.centerAz.toFixed(0), S.centerAlt.toFixed(0));
-    if (S.noPose && hud !== S.msgText) hud = (hud ? hud + ' · ' : '') + t('sx2_ar_nopose');
+    /* 旧守卫 hud!==S.msgText 在初始态 ''!=='' 为假，无姿态提示永远出不来
+     * （v2.1.1 (1) 冒烟实证）——改为「闪烁消息在期则让位」为准 */
+    if (S.noPose && !flashOn) hud = (hud ? hud + ' · ' : '') + t(S.relSeen && !S.absSeen ? 'sx2_ar_relnav' : 'sx2_ar_nopose');
     if (hud !== S.hudText) { S.hudText = hud; if (S.els.hud) S.els.hud.textContent = hud; }
     S.cssW = cw; S.cssH = ch;
   }
@@ -405,7 +446,7 @@
     S.running = false;
     if (S.raf) cancelAnimationFrame(S.raf);
     if (S.stream) { S.stream.getTracks().forEach(function (tr) { tr.stop(); }); S.stream = null; }
-    if (S.oriBound) { window.removeEventListener('deviceorientation', onOri); S.oriBound = false; }
+    if (S.oriBound) { unbindOri(onOri, onOriAbs); S.oriBound = false; }
     if (S.els && S.els.video) S.els.video.srcObject = null;
     S.pose = null; S.posCache = null;
   }
@@ -436,7 +477,8 @@
     var video = S.els.video;
     video.srcObject = stream;
     try { await video.play(); } catch (e) {}
-    if (!S.oriBound) { window.addEventListener('deviceorientation', onOri); S.oriBound = true; }
+    S.absSeen = false; S.relSeen = false;
+    if (!S.oriBound) { bindOri(onOri, onOriAbs); S.oriBound = true; }
     try { await loadData(); } catch (e) { fallback('camera'); return; }
     S.running = true; S.startAt = performance.now(); S.noPose = false; S.poseAt = 0;
     setPanel(null);
@@ -682,20 +724,23 @@
     if (Math.abs(ax.Ud[2]) < 0.75) return azOf(ax.Ud);
     return azOf(ax.f);
   }
-  function onOriHeading(e) {
-    onOri(e);
+  function emitHeading() {
     var h = headingNow();
     headingCbs.forEach(function (cb) { try { cb(h); } catch (err) {} });
   }
+  /* 与 AR 同一 ingest：相对事件不写 pose，且不触发航向发射——哪怕值出自
+   * 此前的可信 pose，陈旧航向也不冒充实时跟随（冒烟 T7 实证后收紧） */
+  function onOriHeading(e) { if (ingestOri(e, false)) emitHeading(); }
+  function onOriHeadingAbs(e) { if (ingestOri(e, true)) emitHeading(); }
   function watchHeading(cb) {
     if (headingCbs.indexOf(cb) < 0) headingCbs.push(cb);
-    if (!headBound) { window.addEventListener('deviceorientation', onOriHeading); headBound = true; }
+    if (!headBound) { bindOri(onOriHeading, onOriHeadingAbs); headBound = true; }
     if (S.pose) cb(headingNow());
   }
   function unwatchHeading(cb) {
     headingCbs = headingCbs.filter(function (f) { return f !== cb; });
     if (!headingCbs.length && headBound && !S.running) {
-      window.removeEventListener('deviceorientation', onOriHeading); headBound = false;
+      unbindOri(onOriHeading, onOriHeadingAbs); headBound = false;
     }
   }
   function requestOrient() {
@@ -723,6 +768,7 @@
     _injectPose: function (a, b, g) { S.pose = { a: a, b: b, g: g }; S.noPose = false; },
     _state: function () {
       return { running: S.running, hasPose: !!S.pose, noPose: S.noPose, fallback: S.fallback,
+        absSeen: !!S.absSeen, relSeen: !!S.relSeen,
         calAz: cal.az, calAlt: cal.alt, segments: S.segments, labels: S.labels, bodies: S.bodyPts,
         centerAz: S.centerAz, centerAlt: S.centerAlt, polePoint: S.polePoint };
     },

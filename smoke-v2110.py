@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """v2.1.1 合并批 ③ 专项冒烟：月亮/五大行星入图＋校准说明
-断言：①静态（四件套 v105/v211 显示 v2.1.1、引擎 BODIES/bodyPos、星图 bodies/
+断言：①静态（四件套 v106/v211 显示 v2.1.1、引擎 BODIES/bodyPos、星图 bodies/
 信息条/今夜行、AR bodyCache/pick/面板指引、文案改名与口径补句、样式类）
 ②精度（硬指标）：3 个固定时刻×月亮/金星/木星，SKY.bodyPos 与独立参考
 （Astronomy.Equator 原始赤道坐标＋冒烟自带 Meeus 地平换算，不走 A.Horizon）
@@ -33,8 +33,8 @@ def read(p):
 
 idx, css, i18n, sw = read("index.html"), read("css/style.css"), read("js/i18n.js"), read("sw.js")
 eng, chart_js, ar_js = read("js/sky-engine.js"), read("js/sky-chart.js"), read("js/sky-ar.js")
-ok("静态 四件套 v105/v211＋显示 v2.1.1", "wuri-v105-20261024-v211" in sw and "css/style.css?v=105" in idx
-   and i18n.count("me_ver: '戊日不上香 v2.1.1") == 2 and "戊日不上香 v2.1.1 (2026-10-24)" in idx)
+ok("静态 四件套 v106/v211＋显示 v2.1.1", "wuri-v106-20261024-v211-1" in sw and "css/style.css?v=106" in idx
+   and i18n.count("me_ver: '戊日不上香 v2.1.1") == 2 and "戊日不上香 v2.1.1 (1) (2026-10-24)" in idx)
 ok("静态 引擎 BODIES＋bodyPos（Equator/Horizon 同源路）",
    "A.Body.Moon" in eng and "A.Body.Saturn" in eng and "function bodyPos" in eng and "BODIES: BODIES" in eng)
 ok("静态 星图 bodies（绘制/信息条/搜索/今夜行/导出）",

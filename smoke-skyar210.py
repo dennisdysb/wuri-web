@@ -26,7 +26,7 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v105 缓存名", "wuri-v105-20261024-v211" in sw)
+report("SW v106 缓存名", "wuri-v106-20261024-v211-1" in sw)
 report("SW 预缓存含 sky-ar.js", "js/sky-ar.js" in assets)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
 report("AR 视图与脚本在位", 'id="view-sky-ar"' in html and "js/sky-ar.js" in html and "v2.1.1" in html)
@@ -106,7 +106,7 @@ try:
     report("开启成功（相机流已起、面板收起）", ok and ev("document.getElementById('ar-panel').hidden"), st)
 
     # ---------- 注入姿态：朝北、上抬 45°（α0 β135 γ0） ----------
-    ev("""(() => { const e = new DeviceOrientationEvent('deviceorientation', {alpha: 0, beta: 135, gamma: 0});
+    ev("""(() => { const e = new DeviceOrientationEvent('deviceorientationabsolute', {alpha: 0, beta: 135, gamma: 0, absolute: true});
       window.dispatchEvent(e); return true; })()""", 1.6)
     st = ev("window.WuriSkyAR._state()")
     report("姿态已收（合成事件路径）", st["hasPose"], st)
