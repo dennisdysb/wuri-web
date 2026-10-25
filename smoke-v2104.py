@@ -23,9 +23,9 @@ def report(name, ok, extra=""):
 
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v108 缓存名", "wuri-v108-20261025-v211-3" in sw)
+report("SW v109 缓存名", "wuri-v109-20261025-v211-4" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("四件套：CSS ?v=106＋版本 v2.1.1", "css/style.css?v=108" in html and "v2.1.1" in html)
+report("四件套：CSS ?v=106＋版本 v2.1.1", "css/style.css?v=109" in html and "v2.1.1" in html)
 stars = open(os.path.join(WWW, "js/stars.js"), encoding="utf-8").read()
 report("七星数据与楔形退场（stars.js）", "DIPPER_STARS" in stars and "sx-dipper" in stars and "sx-needle" not in stars)
 css = open(os.path.join(WWW, "css/style.css"), encoding="utf-8").read()

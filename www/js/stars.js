@@ -33,6 +33,44 @@
   /* ---------------- 数据 ---------------- */
   function astKey(a) { return a.id || (a.section + '|' + a.name); }
 
+  /* 包内 JSON 双通道加载（v2.1.1 (4)，根因与口径见 sky-engine.js 同名段）：
+   * 优先用 WuriSky.loadJSON（与星图/AR 共用同一实现与同一份 starData 结果）；
+   * 引擎不在位时用本地同口径实现兜底，保证图鉴不依赖引擎文件也能加载。 */
+  function localLoadJSON(url) {
+    function viaXHR() {
+      return new Promise(function (resolve, reject) {
+        var x = new XMLHttpRequest();
+        x.open('GET', url, true);
+        x.onreadystatechange = function () {
+          if (x.readyState !== 4) return;
+          if (x.status === 200 || x.status === 0) {
+            try { resolve(JSON.parse(x.responseText)); }
+            catch (e) { reject(e); }
+          } else reject(new Error('xhr http ' + x.status));
+        };
+        x.onerror = function () { reject(new Error('xhr error')); };
+        x.send(null);
+      });
+    }
+    if (typeof location !== 'undefined' && location.protocol === 'file:') return viaXHR();
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    }).catch(function () { return viaXHR(); });
+  }
+  function loadJSON(url) {
+    return (window.WuriSky && WuriSky.loadJSON) ? WuriSky.loadJSON(url) : localLoadJSON(url);
+  }
+  /* 星官主数据（xingguan＋lines）：优先 WuriSky.starData 共享承诺，
+   * 与 sky-chart / sky-ar 同一份结果、全 App 只拉一次 */
+  function starData() {
+    if (window.WuriSky && WuriSky.starData) return WuriSky.starData();
+    return Promise.all([
+      loadJSON('data/xingguan.json'),
+      loadJSON('data/xingguan-lines.json').catch(function () { return null; })
+    ]).then(function (res) { return { xg: res[0], lines: res[1] }; });
+  }
+
   function indexData() {
     byKey = {}; secInfo = {}; secOrder = [];
     (BT.sections || []).forEach(function (s) {
@@ -51,7 +89,7 @@
   function loadFenye() {
     if (FY) return Promise.resolve(FY);
     if (fyPromise) return fyPromise;
-    fyPromise = fetch('data/fenye.json').then(function (r) { if (!r.ok) throw new Error('fy'); return r.json(); })
+    fyPromise = loadJSON('data/fenye.json')
       .then(function (j) { FY = j; fyPromise = null; return j; })
       .catch(function (e) { fyPromise = null; throw e; });
     return fyPromise;
@@ -61,12 +99,11 @@
     if (XG && BT) return Promise.resolve(true);
     if (loadPromise) return loadPromise;
     loadPromise = Promise.all([
-      fetch('data/xingguan.json').then(function (r) { if (!r.ok) throw new Error('xg'); return r.json(); }),
-      fetch('data/butiange.json').then(function (r) { if (!r.ok) throw new Error('bt'); return r.json(); }),
-      fetch('data/xingguan-lines.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }),
+      starData(),
+      loadJSON('data/butiange.json'),
       loadFenye().catch(function () { return null; })
     ]).then(function (res) {
-      XG = res[0]; BT = res[1]; LNX = res[2]; indexData(); indexLines(); loadPromise = null;
+      XG = res[0].xg; BT = res[1]; LNX = res[0].lines; indexData(); indexLines(); loadPromise = null;
       return true;
     }).catch(function (e) { loadPromise = null; throw e; });
     return loadPromise;

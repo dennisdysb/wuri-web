@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v2.1.1 (3) 专项冒烟：区页总览星图（本区星官一图总览＋可点进详情）。
+"""v2.1.1 (4) 专项冒烟：区页总览星图（本区星官一图总览＋可点进详情）。
 
 用户需求（2026-10-25）：点进任一区（28 宿＋三垣共 31 区）应有一幅星图
 总览，展示本区各星官的星星排列；图可点击，点星官的星/名牌跳详情页。
@@ -54,11 +54,11 @@ def key_of(a): return a.get("id") or (a["section"] + "|" + a["name"])
 
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v108 缓存名", "wuri-v108-20261025-v211-3" in sw)
+report("SW v109 缓存名", "wuri-v109-20261025-v211-4" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("四件套：CSS ?v=108＋版本 v2.1.1 (3)", "css/style.css?v=108" in html and "v2.1.1 (3)" in html)
+report("四件套：CSS ?v=108＋版本 v2.1.1 (4)", "css/style.css?v=109" in html and "v2.1.1 (4)" in html)
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
-report("me_ver 简繁 v2.1.1 (3)", i18n.count("v2.1.1 (3)") >= 2)
+report("me_ver 简繁 v2.1.1 (4)", i18n.count("v2.1.1 (4)") >= 2)
 report("总览文案简繁齐", i18n.count("sx_map_note:") >= 2 and i18n.count("sx_map_note_polar") >= 2
        and i18n.count("sx_map_unplotted") >= 2)
 sjs = open(os.path.join(WWW, "js/stars.js"), encoding="utf-8").read()

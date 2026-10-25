@@ -348,8 +348,57 @@
     return Math.atan2(by, bx) / D2R;
   }
 
+  /* ---------------- 包内数据双通道加载（v2.1.1 (4)） ----------------
+   * 背景：原生壳（国内版/Play 版）以 file:///android_asset 打开页面，
+   * Android WebView 的 fetch 走现代 CORS：file:// 源不透明，旧
+   * WebSettings 标志（AllowFileAccessFromFileURLs 等）只放行 XHR，
+   * 不放行 fetch——星象 data/*.json 在真机上必然加载失败
+   * （2026-10-25 真机报障；经文时间码走 XHR 一直正常即对照组）。
+   * 口径：https 下 fetch 优先（网页版行为与旧版一致）；fetch 失败或
+   * file:// 协议下改走 XHR（file:// 成功时 status 为 0，按成功处理）；
+   * JSON 解析失败同样算失败、由调用方走既有报错/重试路径。
+   * starData() 是星象三模块（stars / sky-chart / sky-ar）共用的同一份
+   * 加载结果：xingguan.json 全 App 只拉一次，先到者建、后到者共享，
+   * 不得再有第二条读包内数据的路径。 */
+  function loadJSON(url) {
+    function viaXHR() {
+      return new Promise(function (resolve, reject) {
+        var x = new XMLHttpRequest();
+        x.open('GET', url, true);
+        x.onreadystatechange = function () {
+          if (x.readyState !== 4) return;
+          if (x.status === 200 || x.status === 0) {
+            try { resolve(JSON.parse(x.responseText)); }
+            catch (e) { reject(e); }
+          } else reject(new Error('xhr http ' + x.status));
+        };
+        x.onerror = function () { reject(new Error('xhr error')); };
+        x.send(null);
+      });
+    }
+    var isFile = (typeof location !== 'undefined' && location.protocol === 'file:');
+    if (isFile) return viaXHR();
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    }).catch(function () { return viaXHR(); });
+  }
+  var starDataPromise = null;
+  function starData() {
+    if (starDataPromise) return starDataPromise;
+    starDataPromise = Promise.all([
+      loadJSON('data/xingguan.json'),
+      loadJSON('data/xingguan-lines.json').catch(function () { return null; })
+    ]).then(function (res) {
+      return { xg: res[0], lines: res[1] };
+    }).catch(function (e) { starDataPromise = null; throw e; });
+    return starDataPromise;
+  }
+
   global.WuriSky = {
     available: !!A,
+    loadJSON: loadJSON,
+    starData: starData,
     DEFAULT_OBS: DEFAULT_OBS,
     eqdOf: eqdOf,
     altAz: altAz,

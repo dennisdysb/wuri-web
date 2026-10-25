@@ -26,7 +26,7 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v108 缓存名", "wuri-v108-20261025-v211-3" in sw)
+report("SW v109 缓存名", "wuri-v109-20261025-v211-4" in sw)
 report("SW 预缓存含 sky-ar.js", "js/sky-ar.js" in assets)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
 report("AR 视图与脚本在位", 'id="view-sky-ar"' in html and "js/sky-ar.js" in html and "v2.1.1" in html)

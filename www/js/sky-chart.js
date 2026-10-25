@@ -34,16 +34,15 @@
 
   /* ---------------- 数据 ---------------- */
   var XG = null, dataPromise = null, ASTS = [], ALLSTARS = [];
+  /* 数据走 WuriSky.starData() 共享加载（v2.1.1 (4)）：与 stars.js 同一份
+   * 结果、同一条双通道（fetch→XHR）路径，不得另起 fetch 读包内数据 */
   function loadData() {
     if (XG) return Promise.resolve(XG);
     if (dataPromise) return dataPromise;
-    dataPromise = Promise.all([
-      fetch('data/xingguan.json').then(function (r) { if (!r.ok) throw new Error('xg'); return r.json(); }),
-      fetch('data/xingguan-lines.json').then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
-    ]).then(function (res) {
-      XG = res[0];
+    dataPromise = SKY.starData().then(function (d) {
+      XG = d.xg;
       var LINEMAP = {};
-      ((res[1] && res[1].asterisms) || []).forEach(function (e) { LINEMAP[e.section + '|' + e.name] = e; });
+      ((d.lines && d.lines.asterisms) || []).forEach(function (e) { LINEMAP[e.section + '|' + e.name] = e; });
       buildIndex(LINEMAP);
       return XG;
     }).catch(function (e) { dataPromise = null; throw e; });
