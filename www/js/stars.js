@@ -646,10 +646,11 @@
       e.pts.forEach(function (p) {
         var rr = R(p.s.vmag), isPrin = popMode && !!p.s.principal;
         if (isPrin) {
-          /* 主星常驻标记（数据层 principal 字段，有据才标）：星体约 1.5 倍＋一根细金环。
+          /* 主星常驻标记（数据层 principal 字段，有据才标）：星体约 1.2 倍＋一根细金环。
            * 2026-10-25 用户真机点验样张后改定：原实心金盘太大太抢眼——星体不再填金、
-           * 随本组配色（高亮朱砂／中性），只以细环点明主星身份，凑近能认、退远不抢戏。 */
-          rr = rr * 1.5;
+           * 随本组配色（高亮朱砂／中性），只以细环点明主星身份，凑近能认、退远不抢戏；
+           * 复验仍觉偏大，二轮再收一档：系数 1.5 → 1.2（环距随半径同步收、环宽不变）。 */
+          rr = rr * 1.2;
           g += '<circle class="sx-principal-ring" cx="' + SX(p).toFixed(1) + '" cy="' + SY(p).toFixed(1) +
             '" r="' + (rr + 2).toFixed(1) + '"/>';
         }
