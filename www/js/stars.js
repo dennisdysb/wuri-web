@@ -646,10 +646,12 @@
       e.pts.forEach(function (p) {
         var rr = R(p.s.vmag), isPrin = popMode && !!p.s.principal;
         if (isPrin) {
-          /* 主星常驻标记（数据层 principal 字段，有据才标）：大一号＋外加金环 */
+          /* 主星常驻标记（数据层 principal 字段，有据才标）：星体约 1.5 倍＋一根细金环。
+           * 2026-10-25 用户真机点验样张后改定：原实心金盘太大太抢眼——星体不再填金、
+           * 随本组配色（高亮朱砂／中性），只以细环点明主星身份，凑近能认、退远不抢戏。 */
+          rr = rr * 1.5;
           g += '<circle class="sx-principal-ring" cx="' + SX(p).toFixed(1) + '" cy="' + SY(p).toFixed(1) +
-            '" r="' + (rr * 1.35 + 3.2).toFixed(1) + '"/>';
-          rr = rr * 1.35 + 0.6;
+            '" r="' + (rr + 2).toFixed(1) + '"/>';
         }
         g += '<circle class="sx-star' + (isPrin ? ' sx-principal' : '') + '" cx="' + SX(p).toFixed(1) +
           '" cy="' + SY(p).toFixed(1) + '" r="' + rr.toFixed(1) + '"/>';

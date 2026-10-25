@@ -1787,8 +1787,8 @@ details.disc-foot .hint{margin-top:9px}
 .sx-pop .sx-hl .sx-plot-dash{stroke:var(--cinnabar);stroke-width:1.5}
 .sx-pop .sx-hl .sx-plot-t{fill:var(--cinnabar-deep);font-weight:700}
 .sx-pop .sx-hl .sx-leader{stroke:var(--cinnabar);opacity:.65}
-.sx-principal-ring{fill:none;stroke:var(--gold);stroke-width:1.7}
-.sx-pop .sx-star.sx-principal{fill:var(--gold);stroke:var(--gold-deep);stroke-width:.8;opacity:1}
+.sx-principal-ring{fill:none;stroke:var(--gold);stroke-width:1.1}
+.sx-pop .sx-star.sx-principal{opacity:1}
 /* 经文库「典籍 · 天文」分架（星空带，与经书条目分格） */
 .sx-shelf{margin-top:14px;border-radius:14px;padding:14px;background:linear-gradient(160deg,#101725,#1d2c42 55%,#0c1420);color:#EDE4C8;display:flex;align-items:center;gap:10px;cursor:pointer;position:relative;overflow:hidden}
 .sx-shelf::after{content:"✦ ✧ · ✦";position:absolute;right:10px;top:6px;font-size:.62rem;letter-spacing:.6em;color:rgba(237,228,200,.35)}

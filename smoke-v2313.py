@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""v2.3.0（SW v113）样张专项冒烟：《步天歌》点句浮图（作用域：角宿 13 句）。
+"""v2.3.0（SW v114）样张专项冒烟：《步天歌》点句浮图（作用域：角宿 13 句）。
 
 断言：
-①版本口径：SW wuri-v113／CSS ?v=113／显示版本仍 v2.3.0（用户明示不变），
-  关于页版本行带内部号——me_ver 简体「（内部 v113）」繁体「（內部 v113）」＋index 静态兜底。
+①版本口径：SW wuri-v114／CSS ?v=114／显示版本仍 v2.3.0（用户明示不变），
+  关于页版本行带内部号——me_ver 简体「（内部 v114）」繁体「（內部 v114）」＋index 静态兜底。
 ②数据层：xingguan.json 主星标记恰两颗（角宿一＝角宿距星、进贤＝独星成官），
   star-module 真源与 www 副本逐字一致；butiange 角宿 13 句映射与浮图高亮期望一致。
 ③运行时真点击（390×844 日间）：角宿 13 句逐句点击行身开浮层——浮层出现、
@@ -32,12 +32,12 @@ def report(name, ok, extra=""):
 
 # ---------- ① 版本口径 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v113 缓存名", "wuri-v113-20261025-v230" in sw and "style.css?v=113" in sw)
+report("SW v114 缓存名", "wuri-v114-20261025-v230" in sw and "style.css?v=114" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("CSS ?v=113＋index 静态版本行带内部号", "css/style.css?v=113" in html and "戊日不上香 v2.3.0（内部 v113）" in html)
+report("CSS ?v=114＋index 静态版本行带内部号", "css/style.css?v=114" in html and "戊日不上香 v2.3.0（内部 v114）" in html)
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
-report("me_ver 简（内部 v113）＋繁（內部 v113）",
-       "me_ver: '戊日不上香 v2.3.0（内部 v113）'" in i18n and "me_ver: '戊日不上香 v2.3.0（內部 v113）'" in i18n)
+report("me_ver 简（内部 v114）＋繁（內部 v114）",
+       "me_ver: '戊日不上香 v2.3.0（内部 v114）'" in i18n and "me_ver: '戊日不上香 v2.3.0（內部 v114）'" in i18n)
 report("显示版本仍 v2.3.0（无 2.3.1/2.4.0 漂移）", "v2.3.1" not in i18n and "v2.4.0" not in html)
 
 # ---------- ② 数据层 ----------
@@ -201,7 +201,7 @@ try:
 
     # 运行时版本行（简体）
     ver = ev("document.querySelector('[data-i18n=\"me_ver\"]').textContent")
-    report("运行时关于版本行带内部号（简体）", ver and "v2.3.0（内部 v113）" in ver, ver)
+    report("运行时关于版本行带内部号（简体）", ver and "v2.3.0（内部 v114）" in ver, ver)
 
     # ---------- ⑤ 412 视口＋夜间＋红光 ----------
     set_viewport(412, 915)
@@ -263,7 +263,7 @@ try:
     ev("window.Stars.openButiange(%s); true" % json.dumps("角宿"), 1.2)
     click_sel('[data-sx-pop="角宿:0"]'); time.sleep(0.4)
     notetw = pop_probe()["note"]
-    report("繁体版本行（內部 v113）＋浮层图例繁体", vertw and "v2.3.0（內部 v113）" in vertw and "金環＝本官主星" in notetw,
+    report("繁体版本行（內部 v114）＋浮层图例繁体", vertw and "v2.3.0（內部 v114）" in vertw and "金環＝本官主星" in notetw,
            {"ver": vertw, "note": notetw})
     click_sel("#sx-pop-x"); time.sleep(0.2)
 
