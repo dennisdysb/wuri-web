@@ -1,0 +1,18 @@
+PASS S1 i18n 简体新署名在位
+PASS S2 i18n 繁体新署名在位
+PASS S3 index 兜底新署名在位
+PASS S4 www 全仓无「待补/待補」残留
+PASS S5 四件套 v130
+PASS A1 折叠区默认收起
+PASS A2 真点击展开成功
+PASS A3 第⑥段＝新署名全文
+PASS A4 第⑥段无占位残留
+PASS A5 关于页版本号 v130
+PASS A6 零 JS 异常
+PASS B1 折叠区默认收起
+PASS B2 真点击展开成功
+PASS B3 第⑥段＝新署名全文
+PASS B4 第⑥段无占位残留
+PASS B5 关于页版本号 v130
+PASS B6 零 JS 异常
+SMOKE v2330: 17/17 passed
