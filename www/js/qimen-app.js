@@ -30,7 +30,10 @@
       if ((c.timebase || "true") !== "true") return null;
       const lon = parseFloat(c.lon);
       if (!Number.isFinite(lon)) return null;
-      const meridian = c.tz === "beijing" ? 120 : -new Date().getTimezoneOffset() / 4;
+      /* 基准经线按设备时区推中央经线，与 app.js baseMeridian() 同口径
+       * （2026-10-25 用户裁定：奇门起局属「当下」量，跟手机系统时间；
+       * 排盘时区 CFG.tz 自此只作用于排盘输入换算本身，不再影响任何当下量） */
+      const meridian = -new Date().getTimezoneOffset() / 4;
       return { lon: lon, meridian: meridian };
     } catch (e) { return null; }
   }

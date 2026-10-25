@@ -1,0 +1,19 @@
+PASS S1 奇门不再读 CFG.tz 定基准经线
+PASS S2 奇门基准经线改设备时区公式
+PASS S3 app.js v129 口径未动（now 直通/baseMeridian 设备）
+PASS S4 四件套 v131
+PASS S5 tz_hint 新文案（简繁＋index）且旧文案清除
+PASS Q0 设备时区生效（Toronto, offset=240）
+PASS Q1 盘面真太阳时修正=-54 分钟（设备经线 -60）
+PASS Q2 旧北京口径 -774 分钟已消失
+PASS Q3 时柱=己酉（18:08 酉时，非癸卯）
+PASS Q4 局数=阴遁8局（与 Node 参照一致）
+PASS Q5 四柱日=壬申
+PASS H1 首页时钟=19:02:30
+PASS H2 首页日柱=壬申
+PASS H3 首页时柱=己酉（设备经线口径）
+PASS Q6 切 auto 后修正仍 -54 分钟
+PASS Q7 切 auto 后局数/时柱不变
+PASS Q8 设置页 tz_hint 为新文案
+PASS Z1 零 JS 异常
+SMOKE v2331: 18/18 passed
