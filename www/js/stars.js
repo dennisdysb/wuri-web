@@ -536,6 +536,10 @@
           var s = sp.ref ? (byRef[a.name + '|' + sp.ref] || null) : null;
           return { s: s || { cn_name: null, unlocated: true }, schPt: sp, x: sp.x, y: -sp.y };
         });
+        /* 整官在书图无落点（如太微垣郎将，图式条目 stars 为空）：与投影路
+         * 「无定星整官」同口径——不入 entries（否则质心 0/0 成 NaN 炸名牌
+         * 布局），计入 unplotted，详情仍走下方名单呈现。 */
+        if (!pts.length) { unplotted++; return; }
         entries.push({ a: a, stars: (a.stars || []), pts: pts, schEdges: sa.edges || [] });
         pts.forEach(function (p) { all.push(p.s); });
       });
@@ -753,7 +757,7 @@
       '" viewBox="0 0 ' + W + ' ' + H +
       '" role="img" aria-label="' + txEsc(si.name) + '">' + body +
       (note ? '<text class="sx-plot-s" x="8" y="' + (H - 8) + '">' + esc(note) + '</text>' : '') + '</svg>';
-    return { html: svg, unplotted: unplotted, polar: polar };
+    return { html: svg, unplotted: unplotted, polar: polar, schemaMode: schemaMode };
   }
 
   function renderRegion(section) {
@@ -785,7 +789,7 @@
     var rmap = regionMapHTML(si);
     h += rmap.html;
     if (rmap.unplotted) {
-      h += '<div class="sx-count-note">' + txEsc(tf(t('sx_map_unplotted'), rmap.unplotted)) + '</div>';
+      h += '<div class="sx-count-note">' + txEsc(tf(t(rmap.schemaMode ? 'sx_map_unplotted_schema' : 'sx_map_unplotted'), rmap.unplotted)) + '</div>';
     }
     h += '<div class="sx-search"><input id="sx-region-q" type="search" placeholder="' + esc(t('sx_search_ph')) + '" aria-label="' + esc(t('sx_search_ph')) + '"></div>';
     h += '<div id="sx-region-rows">' + regionRowsHTML(si) + '</div>';
@@ -1102,7 +1106,7 @@
 
   /* ---------------- s5 《步天歌》典籍页 ---------------- */
   var bookOpen = {}; /* section -> 是否展开 */
-  var POP_SECTIONS = ['角宿', '亢宿', '氐宿', '房宿', '心宿', '尾宿', '箕宿', '斗宿', '牛宿', '女宿', '虚宿', '危宿', '室宿', '壁宿', '奎宿', '娄宿', '胃宿', '昴宿', '毕宿', '觜宿', '参宿', '井宿', '鬼宿', '柳宿', '星宿', '张宿', '翼宿', '轸宿']; /* 点句浮图作用域（v2.3.0 图式推广）：已落图式层的段歌诀句可点开浮图，随图式分批扩入 */
+  var POP_SECTIONS = ['角宿', '亢宿', '氐宿', '房宿', '心宿', '尾宿', '箕宿', '斗宿', '牛宿', '女宿', '虚宿', '危宿', '室宿', '壁宿', '奎宿', '娄宿', '胃宿', '昴宿', '毕宿', '觜宿', '参宿', '井宿', '鬼宿', '柳宿', '星宿', '张宿', '翼宿', '轸宿', '紫微垣', '太微垣', '天市垣']; /* 点句浮图作用域（v2.3.0 图式推广，31 区全量）：已落图式层的段歌诀句可点开浮图 */
 
   function renderBook(focusSection) {
     var host = $('sx-book'); if (!host || !BT) return;
@@ -1186,7 +1190,13 @@
       targets.map(function (a) { return txEsc(a.name); }).join(' · ') + '</small>';
     $('sx-pop-chart').innerHTML = chart.html;
     var notes = [t('sx_pop_legend')];
-    if (schemaReady(si)) notes.push(t('sx_pop_schema_note'));
+    var schPop = schemaReady(si);
+    if (schPop) notes.push(t('sx_pop_schema_note'));
+    targets.forEach(function (a) {
+      /* 整官未绘于书图（如太微垣郎将）：图中无点可高亮，注里如实说明 */
+      var sa = schPop ? schPop.asterisms[a.name] : null;
+      if (sa && !(sa.stars || []).length) notes.push(tf(t('sx_pop_notplotted'), T(a.name)));
+    });
     targets.forEach(function (a) {
       var plotted = (a.stars || []).filter(function (st) {
         return typeof st.ra_deg === 'number' && typeof st.dec_deg === 'number';
