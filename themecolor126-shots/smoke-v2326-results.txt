@@ -1,0 +1,42 @@
+PASS SW v126 缓存名＋CSS ?v=126 预缓存
+PASS CSS ?v=126＋index 静态版本行 v126
+PASS me_ver 简繁 v126
+PASS 显示版本仍 v2.3.0
+PASS redThemeColor 在位（#080201＋日夜恢复口径）
+PASS redSet 与 redBoot 均调用 redThemeColor
+PASS applyTheme 红光回压在位
+PASS ③日间·红光关 meta=日色 #F5F1E6
+PASS ③日间·红光开 meta=#080201 且 body.sky-red
+PASS ③日间·红光关 meta 恢复 #F5F1E6
+PASS ⑤红光开时切夜间主题（applyTheme 内部路径）meta 不被盖回
+PASS ④夜间·红光关 meta=夜色 #060608
+PASS ④夜间·红光开 meta=#080201
+PASS ④夜间·红光关 meta 恢复 #060608（不写死日色）
+PASS ⑥LS 预置开启·重载后 meta 直接 #080201
+PASS ⑥重载后 body.sky-red 在位
+PASS 零 JS 异常
+PASS ⑦body 底色红光关为宣纸（基线）
+PASS ⑦body 底色红光开 = rgb(5,2,2)（衬底/浅色带同源）
+PASS ⑦底栏红光底在位
+PASS ⑦主标签「首页」代表元素红谱
+PASS ⑦主标签「黄历」代表元素红谱
+PASS ⑦主标签「经文」代表元素红谱
+PASS ⑦主标签「提醒」代表元素红谱
+PASS ⑦主标签「我的」代表元素红谱
+PASS ⑧图鉴列表红化（背景红谱）
+PASS ⑧神祇详情红化（背景红谱）
+PASS ⑧神像图片红移滤镜在位
+PASS ⑧返回后图鉴列表已收起
+PASS ⑩前置：红光仍开（防空过）
+PASS ⑩设置页真点关红光→全局关＋星象开关同步关
+PASS ⑩星象标签页已激活
+PASS ⑩星象页真点开红光→设置开关同步开＋meta 红
+PASS ⑪夜间基底红光仍全域（body 红＋meta 红）
+PASS ⑪夜间关红光全恢复（body 玄黑＋meta 夜色）
+PASS ⑦–⑪后零 JS 异常
+PASS ⑫i18n 简繁改名落齐且无旧名残留
+PASS ⑫AR 面板按钮文案=重置对齐（DOM）
+PASS ⑫AR 面板按钮文案=红光模式（叫法统一，DOM）
+PASS ⑫i18n 红光叫法统一落齐
+PASS 截图存档
+TOTAL 41/41

@@ -1531,6 +1531,9 @@ function applyTheme() {
   try {
     var mc = document.querySelector('meta[name=theme-color]');
     if (mc) mc.setAttribute('content', night ? '#060608' : '#F5F1E6');
+    /* 红光正开时状态栏跟随红光（stars.js WuriRedlight 口径 #080201），
+     * 主题切换不得把红盖回日夜色；红光关时本函数的日夜值即恢复值。 */
+    if (mc && window.WuriRedlight && WuriRedlight.on()) mc.setAttribute('content', '#080201');
   } catch (e) {}
   refreshThemeUI();
 }

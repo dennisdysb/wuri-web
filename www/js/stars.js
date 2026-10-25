@@ -1515,19 +1515,32 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 
-  /* ===== 星象全模块红光模式（v2.1.0 (9)）=====
+  /* ===== 红光模式·全 App 全局开关（v2.1.0 (9) 起，2026-10-25 改全局）=====
    * 一个总开关、两个入口（星象页页首 #sky-red-toggle＋设置页 #sky-red-toggle-me）、AR 页红光钮共用同一状态；
-   * 状态存 localStorage wuri_sky_redlight_v1；呈现走 body.sky-red 的作用域 CSS（星象子视图变量重映射＋图/svg 红处理），
-   * 其余模块不受影响；与日/夜主题正交。 */
+   * 状态存 localStorage wuri_sky_redlight_v1；呈现走 body.sky-red 的全局 CSS（body 级变量重映射＋
+   * 图/svg 全域红处理＋theme-color 联动 #080201，见 redThemeColor）；全 App 一致生效/恢复，与日/夜主题正交。 */
   var RED_KEY = 'wuri_sky_redlight_v1';
   function redOn() { try { return localStorage.getItem(RED_KEY) === '1'; } catch (e) { return false; } }
   function redSyncUI(v) {
     ['sky-red-toggle', 'sky-red-toggle-me'].forEach(function (id) { var el = $(id); if (el) el.checked = !!v; });
   }
+  /* theme-color 联动（2026-10-25 用户报障：红光下系统状态栏一带仍白底）：
+   * 开红光→ #080201（即 tabbar 红光底 rgba(8,2,1) 的实色）；关红光→按当前
+   * 日/夜主题恢复（与 app.js applyTheme 同口径：夜 #060608／日 #F5F1E6，不写死单一值）。
+   * applyTheme 侧亦有同口径回压（系统主题切换时不把红盖掉）。 */
+  function redThemeColor(v) {
+    try {
+      var mc = document.querySelector('meta[name=theme-color]');
+      if (!mc) return;
+      if (v) mc.setAttribute('content', '#080201');
+      else mc.setAttribute('content', document.documentElement.getAttribute('data-theme') === 'night' ? '#060608' : '#F5F1E6');
+    } catch (e) {}
+  }
   function redSet(v) {
     v = !!v;
     try { localStorage.setItem(RED_KEY, v ? '1' : '0'); } catch (e) {}
     document.body.classList.toggle('sky-red', v);
+    redThemeColor(v);
     redSyncUI(v);
     if (window.WuriSkyAR && WuriSkyAR.setRed) WuriSkyAR.setRed(v);
   }
@@ -1535,6 +1548,7 @@
   (function redBoot() {
     var v = redOn();
     document.body.classList.toggle('sky-red', v);
+    redThemeColor(v);
     redSyncUI(v);
     ['sky-red-toggle', 'sky-red-toggle-me'].forEach(function (id) {
       var el = $(id);
