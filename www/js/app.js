@@ -143,7 +143,7 @@ $$('#tabbar button').forEach(function (btn) {
     target.classList.add('active');
     target.style.display = 'block';
     // 切换标签时隐藏六爻/八字/紫微等独立视图，防止内容泄漏
-    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-affinity', 'view-affinity-result', 'view-star-region', 'view-star-detail', 'view-butiange'].forEach(function (vid) {
+    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-settings', 'view-affinity', 'view-affinity-result', 'view-star-region', 'view-star-detail', 'view-butiange'].forEach(function (vid) {
       var v = document.getElementById(vid);
       if (v) v.hidden = true;
     });
@@ -2085,6 +2085,27 @@ function updateFloatingButtons() {
   }
   // 延迟再执行一次（等动态内容）
   setTimeout(hideFree, 1000);
+})();
+
+/* ---------- 设置子页（我的 → 设置；2026-10-25 归组：排盘时区/时间基准/外观主题/红光模式/语言/数据备份/离线音频/图鉴素材 八卡自「我的」页迁入，控件 id 与绑定不变） ---------- */
+(function () {
+  var view = document.getElementById('view-settings');
+  if (!view) return;
+  function open() {
+    view.hidden = false;
+    view.scrollTop = 0;
+    if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
+  }
+  var entry = document.getElementById('settings-open');
+  if (entry) {
+    entry.addEventListener('click', open);
+    entry.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  }
+  var back = document.getElementById('settings-back');
+  if (back) back.addEventListener('click', function () {
+    view.hidden = true;
+    if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
+  });
 })();
 
 /* ---------- 使用说明与免责声明页（我的 → 关于 → 使用说明与免责声明） ---------- */

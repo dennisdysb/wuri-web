@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=126">
+<link rel="stylesheet" href="css/style.css?v=127">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=67">
 </head>
@@ -823,7 +823,44 @@
         <p class="hint small">换手机或换浏览器后，在这里填购买邮箱：系统会给该邮箱发一个新的激活码（旧码同时作废），点邮件里的「一键兑换」即可在新设备解锁，老设备不受影响。</p>
       </div>
     </section>
+    <!-- ============ 设置（入口） ============ -->
+    <section class="card settings-entry" id="settings-open" role="button" tabindex="0">
+      <div class="row-between">
+        <div><div class="row-title" data-i18n="me_settings">设置</div><div class="row-sub" data-i18n="me_settings_sub">排盘时区 · 时间基准 · 外观主题 · 红光模式 · 语言 · 数据备份 · 离线音频 · 图鉴素材</div></div>
+        <span class="entry-arrow" aria-hidden="true">›</span>
+      </div>
+    </section>
+
     <section class="card">
+      <div class="card-title" data-i18n="me_about">关于</div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v127）</span></div>
+      <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
+      <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
+      <details class="about-more">
+        <summary data-i18n="me_about_more">鸣谢与说明</summary>
+        <p class="hint">奇门遁甲排盘功能基于开源项目「掌上乾坤 · 奇门遁甲助手」（作者 qzp001，依 MIT 许可证使用），特此鸣谢。</p>
+      <p class="hint">六爻装卦（纳甲、世应）参照开源项目「liuyao-tool」（作者 1eakkkk，依 MIT 许可证使用）校订，特此鸣谢。</p>
+      <p class="hint">六爻「卦象判读」（用神、旺衰、世应、动爻与格局的结构判读）规则宗《增删卜易》《卜筮正宗》，由本站自写实现。</p>
+      <p class="hint">星象模块的星空推算（岁差、章动与地平坐标变换）基于开源库「Astronomy Engine」（作者 Don Cross，依 MIT 许可证使用），特此鸣谢。</p>
+      <p class="hint">平面星图的投影与大圆路径基于开源库「D3」（d3-geo / d3-array，作者 Mike Bostock 等，依 BSD-3-Clause 许可证使用），特此鸣谢。</p>
+      <p class="hint" data-i18n="me_credit_dingben">星象模块星官体系以《漫步中国星空》（增订版）为定本校订；《步天歌》用该书所本《灵台秘苑》系统。〔定本著者与出版信息待补〕</p>
+      <p class="hint">部分经文诵读音频由温哥华清玄道长提供，特此鸣谢。</p>
+      <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
+      </details>
+      <p class="hint">使用中有问题或建议，欢迎发邮件反馈。</p>
+      <div class="btn-row"><button class="btn" id="disclaimer-open">使用说明与免责声明</button></div>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+  <!-- ============ 设置（子页） ============ -->
+  <main id="view-settings" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('settings-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="settings-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="me_settings">设置</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+<section class="card">
       <div class="card-title" data-i18n="me_tz">排盘时区</div>
       <label class="radio"><input type="radio" name="tz" value="auto" checked> <span data-i18n="tz_auto">跟随手机时区</span></label>
       <label class="radio"><input type="radio" name="tz" value="beijing"> <span data-i18n="tz_beijing">北京时间（东八区）</span></label>
@@ -888,24 +925,9 @@
       <p class="hint" id="deity-dl-status">尚未下载图鉴素材。</p>
       <p class="hint" id="deity-dl-failed" hidden></p>
     </section>
-    <section class="card">
-      <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v126）</span></div>
-      <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
-      <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
-      <p class="hint">奇门遁甲排盘功能基于开源项目「掌上乾坤 · 奇门遁甲助手」（作者 qzp001，依 MIT 许可证使用），特此鸣谢。</p>
-      <p class="hint">六爻装卦（纳甲、世应）参照开源项目「liuyao-tool」（作者 1eakkkk，依 MIT 许可证使用）校订，特此鸣谢。</p>
-      <p class="hint">六爻「卦象判读」（用神、旺衰、世应、动爻与格局的结构判读）规则宗《增删卜易》《卜筮正宗》，由本站自写实现。</p>
-      <p class="hint">星象模块的星空推算（岁差、章动与地平坐标变换）基于开源库「Astronomy Engine」（作者 Don Cross，依 MIT 许可证使用），特此鸣谢。</p>
-      <p class="hint">平面星图的投影与大圆路径基于开源库「D3」（d3-geo / d3-array，作者 Mike Bostock 等，依 BSD-3-Clause 许可证使用），特此鸣谢。</p>
-      <p class="hint" data-i18n="me_credit_dingben">星象模块星官体系以《漫步中国星空》（增订版）为定本校订；《步天歌》用该书所本《灵台秘苑》系统。〔定本著者与出版信息待补〕</p>
-      <p class="hint">部分经文诵读音频由温哥华清玄道长提供，特此鸣谢。</p>
-      <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
-      <p class="hint">使用中有问题或建议，欢迎发邮件反馈。</p>
-      <div class="btn-row"><button class="btn" id="disclaimer-open">使用说明与免责声明</button></div>
-    </section>
     <div class="tab-spacer"></div>
   </main>
+
 
   <!-- ============ 星象页悬浮相机钮（v2.1.0 (3) 方案2）：仅星象标签激活时显示（js/sky-ar.js 同步 hidden），
        右下常驻、标签栏之上；点击带 data-sxar 走既有委托直达相机认星开启流程 ============ -->

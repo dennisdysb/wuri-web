@@ -2042,3 +2042,10 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
   .ar-stage{max-width:none;height:calc(100dvh - 175px)}
   .ar-bar{max-width:640px}
 }
+
+/* 设置入口卡与设置子页（2026-10-25 v127：「我的」页设置类卡片归组） */
+.settings-entry{cursor:pointer}
+.settings-entry:active{filter:brightness(.97)}
+.entry-arrow{margin-left:auto;align-self:center;font-size:1.35rem;line-height:1;color:var(--ink-2)}
+.about-more{margin-top:2px}
+.settings-entry .entry-arrow{flex:none}
