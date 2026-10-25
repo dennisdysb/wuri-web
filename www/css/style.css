@@ -1888,7 +1888,8 @@ body.bugang-open{overflow:hidden}
 .sk-cardinal.minor{font-size:9.5px;font-weight:400;fill:var(--muted)}
 .sk-controls{display:flex;align-items:center;gap:10px;padding:8px 2px 0;font-family:var(--sans);font-size:.8rem;color:var(--ink-2)}
 .sk-controls input[type="range"]{flex:1;min-width:0;accent-color:var(--gold)}
-#sk-time-lab{flex:none;min-width:86px;text-align:right;color:var(--ink)}
+#sk-time-lab{flex:none;min-width:86px;text-align:right;color:var(--ink);white-space:nowrap}
+#sk-play{flex:none;white-space:nowrap}
 .sk-hint{font-family:var(--sans);font-size:.72rem;color:var(--muted);text-align:center;padding:6px 10px 0}
 /* 星图二期追加（v2.1.0 (2)）：搜索定位/播放/星等/线层/信息条/侧栏 */
 .sk-search{display:flex;align-items:center;gap:8px;padding:10px 2px 0;font-family:var(--sans)}
@@ -2012,6 +2013,16 @@ body.sky-red #sx-ar-fab{background:rgba(26,8,6,.55);border-color:rgba(255,96,72,
 body.sky-red #view-sky-tonight .jing-back-fab,body.sky-red #view-star-detail .jing-back-fab,body.sky-red #view-star-region .jing-back-fab,body.sky-red #view-butiange .jing-back-fab{color:#f2c1b2;border-color:rgba(255,96,72,.4)}
 /* 红光下原生滑杆（星图 #sk-mag／今夜 #tn-mag）着红调，不留系统蓝灰亮块 */
 body.sky-red :is(#tab-stars,#view-sky-tonight,#view-sky-chart,#view-sky-ar,#view-star-detail,#view-star-region,#view-butiange) input[type="range"]{accent-color:#a01822}
+/* 全局常驻元素跟随红光（2026-10-25 用户报障：底部导航栏漏红、夜里最毁暗适应）。
+ * #tabbar 在星象视图之外（body 直属），原作用域罩不到——在此按同一红谱给它
+ * 变量重映射＋底色，图标/文字/选中态随之红化；关红光 body 类摘除即恢复原样。
+ * #toast 同理（全局浮层、原白字黑底，红光下闪白光）：底与字一并压红谱。 */
+body.sky-red #tabbar{
+  --paper:#050202;--line:#5a2013;--muted:#a96a52;--teal:#d84f33;--teal-deep:#e0563a;
+  background:rgba(8,2,1,.94);border-top-color:#5a2013}
+body.sky-red #tabbar button{color:#a96a52}
+body.sky-red #tabbar button.active{color:#eda88f}
+body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .ar-stage.red .ar-shutter:active{background:rgba(255,96,72,.16)}
 /* 工具栏 2×2 等宽网格（v2.1.0 (7)：原流式 flex 三挤一孤，用户真机指排版参差）——与舞台同宽同心（同为 max-width:430 居中），四格等宽等高、间距一致 */
 .ar-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:430px;margin:0 auto;padding:10px 0 0;font-family:var(--sans)}

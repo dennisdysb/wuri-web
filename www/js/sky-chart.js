@@ -641,7 +641,16 @@
     chart.uprights.forEach(function (u, i2) { u.el = upEls[i2] || null; });
     applyTransform();
     chart.drawn = true;
-    if (chartEls.lab) chartEls.lab.textContent = fmtTime(date) + (chart.offsetMin ? ' (' + (chart.offsetMin > 0 ? '+' : '') + chart.offsetMin / 60 + 'h)' : '');
+    if (chartEls.lab) {
+      /* 偏移读数收尾：播放时 offsetMin 为分数分钟，/60 直拼会出未收尾浮点长串
+       * （真机实测「+5.35964999999999905h」挤窄同行播放钮）——两位小数去尾零。 */
+      var offH = '';
+      if (chart.offsetMin) {
+        var hv = (Math.round((chart.offsetMin / 60) * 100) / 100).toFixed(2).replace(/\.?0+$/, '');
+        offH = ' (' + (chart.offsetMin > 0 ? '+' : '') + hv + 'h)';
+      }
+      chartEls.lab.textContent = fmtTime(date) + offH;
+    }
   }
 
   function bindChartEvents() {

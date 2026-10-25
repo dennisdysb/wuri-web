@@ -1,0 +1,19 @@
+PASS SW v125 缓存名＋CSS ?v=125 预缓存
+PASS CSS ?v=125＋index 静态版本行 v125
+PASS me_ver 简繁 v125
+PASS 显示版本仍 v2.3.0
+PASS 读数格式化逻辑在位（两位小数去尾零）
+PASS CSS 防挤压：#sk-play flex:none＋nowrap、#sk-time-lab nowrap
+PASS CSS 红光跟随：body.sky-red #tabbar 红谱重映射＋#toast 压红
+PASS 平面星图渲染（连线 ≥100）
+PASS 900× 播放中且偏移已推进（>5 分钟）
+PASS 偏移读数短格式 HH:MM (±X[.YY]h)
+PASS 读数无三位以上小数长串
+PASS 播放钮单行不竖排（高≤34、宽≥40、nowrap、命中本体、无溢出）
+PASS 播放钮文案为暂停（播放态）
+PASS 红光开（日间）：body 类在位＋底栏底色红谱低亮
+PASS 红光开（日间）：底栏选中态亮红、未选态暗红
+PASS 红光开（夜间）：底栏仍红谱（非中性黑）
+PASS 红光关：底栏恢复浅底＋非红选中态
+PASS 全程零 JS 异常
+TOTAL 18/18
