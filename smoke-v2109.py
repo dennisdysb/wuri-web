@@ -3,7 +3,7 @@
 """v2.1.0 (9) 专项冒烟：星象模块全红光模式
 一个总开关（localStorage wuri_sky_redlight_v1）、两入口（星象页页首＋设置页）同步、AR 红光共用同一状态；
 开启后星象子视图整体红谱低亮（变量重映射＋img/svg 红处理滤镜、无亮盘），非星象模块不受影响。
-断言：①静态（四件套 v106/v211、CSS body.sky-red 规则＋滤镜、WuriRedlight、i18n 简繁键、两开关在位、AR setRed 导出）
+断言：①静态（四件套 v107/v211、CSS body.sky-red 规则＋滤镜、WuriRedlight、i18n 简繁键、两开关在位、AR setRed 导出）
 ②运行时：星象页开关真点→body.sky-red＋LS=1＋设置开关同步 checked；采样色（卡面底低亮红谱、题字 R 主导、
 悬浮相机钮暗红低亮、已勾选开关底为暗红）；星君图滤镜在位；星图 svg 滤镜在位＋底低亮；星官详情底红谱（截图）；
 AR 联动（红开进 AR→stage.red 在位＋红光钮 .on；AR 内点红光钮→全模块同步关）；设置页开关开→刷新保持；
@@ -30,7 +30,7 @@ def read(p):
 # ---------- 静态 ----------
 idx, css, i18n, sw = read("index.html"), read("css/style.css"), read("js/i18n.js"), read("sw.js")
 stars_js, ar_js = read("js/stars.js"), read("js/sky-ar.js")
-ok("静态 四件套 v106/v211", "wuri-v106-20261024-v211-1" in sw and "css/style.css?v=106" in idx
+ok("静态 四件套 v107/v211", "wuri-v107-20261024-v211-2" in sw and "css/style.css?v=107" in idx
    and i18n.count("v2.1.1") >= 2 and 'id="sky-red-toggle"' in idx and 'id="sky-red-toggle-me"' in idx)
 ok("静态 CSS 红光作用域（变量重映射＋滤镜＋悬浮钮/横幅覆盖＋页首行样式）",
    "body.sky-red #tab-stars" in css and "--cinnabar:#e0563a" in css

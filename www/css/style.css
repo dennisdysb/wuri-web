@@ -1904,7 +1904,10 @@ body.bugang-open{overflow:hidden}
 #sx-ar-fab[hidden]{display:none}
 #sx-ar-fab:active{transform:scale(.92)}
 /* ============ 星象二期第二步：相机认星 AR（v2.1.0 (2)） ============ */
-.ar-stage{position:relative;margin:10px auto 0;max-width:430px;height:min(72vh,660px);border-radius:14px;overflow:hidden;background:#05060a}
+/* 舞台高 72vh→64vh（v2.1.1 (2)）：工具栏加了整行「对齐」钮后总高 +54px，
+ * 390×844 首屏下工具栏第二行被顶出视口底缘（v2107 真点实证）；舞台让出
+ * 高度，保证工具栏四钮＋对齐钮在首屏内完整可见、免滚动可达 */
+.ar-stage{position:relative;margin:10px auto 0;max-width:430px;height:min(64vh,660px);border-radius:14px;overflow:hidden;background:#05060a}
 #ar-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 #ar-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 .ar-stage.red #ar-video{filter:brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2)}
@@ -1960,6 +1963,17 @@ body.sky-red :is(#tab-stars,#view-sky-tonight,#view-sky-chart,#view-sky-ar,#view
 .ar-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:430px;margin:0 auto;padding:10px 0 0;font-family:var(--sans)}
 .ar-bar .mini-btn{height:44px;padding:6px 8px;display:flex;align-items:center;justify-content:center;white-space:nowrap;text-align:center}
 .ar-bar .mini-btn.on{border-color:var(--gold);color:var(--gold-deep);font-weight:700}
+/* 一键天体对齐整行主钮（v2.1.1 (2)）：主按钮式但走低亮纪律——深色毛玻璃
+ * 底＋淡金细环，夜间不抢暗适应；红光下转暗红调（.red 由 applyRed/shellHTML
+ * 同步、body.sky-red 亦覆盖） */
+.ar-bar .ar-align-btn{grid-column:1/-1;height:46px;border-radius:12px;cursor:pointer;
+  border:1px solid rgba(232,200,119,.55);background:rgba(14,17,24,.55);color:#efdfae;
+  font-size:.98rem;font-family:var(--sans);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ar-bar .ar-align-btn:active{transform:scale(.98)}
+.ar-bar .ar-align-btn.red,body.sky-red .ar-bar .ar-align-btn{border-color:rgba(255,96,72,.55);background:rgba(26,8,6,.5);color:#ff9a7a}
+/* 对齐面板：目标钮整行；指引态 .guide 紧凑底条，不遮准星与实景 */
+.ar-panel .ar-target{display:block;width:100%;max-width:302px}
+.ar-panel.guide{inset:auto;left:12px;right:12px;bottom:12px;border-radius:14px;padding:16px 14px;background:rgba(9,11,19,.86)}
 /* AR 平板全幅（须置于 .ar-stage 基础规则之后以胜出级联） */
 @media (min-width:768px){
   .ar-stage{max-width:none;height:calc(100dvh - 175px)}

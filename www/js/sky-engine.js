@@ -140,6 +140,214 @@
     return { alt: h.altitude, az: h.azimuth, ra: norm360(eq.ra * 15), dec: eq.dec };
   }
 
+
+  /* 磁偏角（v2.1.1 (2)）：WMM2025 世界地磁模型（NOAA/BGS 官方，历元
+   * 2025.0，有效期 2025–2030）。系数为官方 WMM_2025.COF 全 90 项
+   * (n=1..12, m=0..n) 的 [g, h, ġ, ḣ]（nT、nT/年），算法为官方 Geomag
+   * 同路：Schmidt 半正规化 Legendre 球谐展开、WGS84 大地→地心转换、
+   * 高度取 0。验证锚点（与 NCEI 官方测试值逐项对齐，D/X/Y 全合）：
+   * 2025.0 (80,0) D=1.28°、(0,120) D=−0.16°、(−80,240) D=68.78°；
+   * 本地抽查 2026-10：St-Hubert −13.66°、伦敦 +1.22°、悉尼 +12.83°。
+   * 注：蒙特利尔一带磁偏角近年约 −13.7°（民间常引的「约 15°W」是旧值，
+   * 模型两代 WMM2020/2025 在此互差 ≤0.01°）。返回十进制度，东偏为正：
+   * 真方位 = 磁方位 + 磁偏角。纯本地计算，不联网。 */
+  var WMM2025 = [
+    [-29351.8,0,12,0],
+    [-1410.8,4545.4,9.7,-21.5],
+    [-2556.6,0,-11.6,0],
+    [2951.1,-3133.6,-5.2,-27.7],
+    [1649.3,-815.1,-8,-12.1],
+    [1361,0,-1.3,0],
+    [-2404.1,-56.6,-4.2,4],
+    [1243.8,237.5,0.4,-0.3],
+    [453.6,-549.5,-15.6,-4.1],
+    [895,0,-1.6,0],
+    [799.5,278.6,-2.4,-1.1],
+    [55.7,-133.9,-6,4.1],
+    [-281.1,212,5.6,1.6],
+    [12.1,-375.6,-7,-4.4],
+    [-233.2,0,0.6,0],
+    [368.9,45.4,1.4,-0.5],
+    [187.2,220.2,0,2.2],
+    [-138.7,-122.9,0.6,0.4],
+    [-142,43,2.2,1.7],
+    [20.9,106.1,0.9,1.9],
+    [64.4,0,-0.2,0],
+    [63.8,-18.4,-0.4,0.3],
+    [76.9,16.8,0.9,-1.6],
+    [-115.7,48.8,1.2,-0.4],
+    [-40.9,-59.8,-0.9,0.9],
+    [14.9,10.9,0.3,0.7],
+    [-60.7,72.7,0.9,0.9],
+    [79.5,0,-0,0],
+    [-77,-48.9,-0.1,0.6],
+    [-8.8,-14.4,-0.1,0.5],
+    [59.3,-1,0.5,-0.8],
+    [15.8,23.4,-0.1,0],
+    [2.5,-7.4,-0.8,-1],
+    [-11.1,-25.1,-0.8,0.6],
+    [14.2,-2.3,0.8,-0.2],
+    [23.2,0,-0.1,0],
+    [10.8,7.1,0.2,-0.2],
+    [-17.5,-12.6,0,0.5],
+    [2,11.4,0.5,-0.4],
+    [-21.7,-9.7,-0.1,0.4],
+    [16.9,12.7,0.3,-0.5],
+    [15,0.7,0.2,-0.6],
+    [-16.8,-5.2,-0,0.3],
+    [0.9,3.9,0.2,0.2],
+    [4.6,0,-0,0],
+    [7.8,-24.8,-0.1,-0.3],
+    [3,12.2,0.1,0.3],
+    [-0.2,8.3,0.3,-0.3],
+    [-2.5,-3.3,-0.3,0.3],
+    [-13.1,-5.2,0,0.2],
+    [2.4,7.2,0.3,-0.1],
+    [8.6,-0.6,-0.1,-0.2],
+    [-8.7,0.8,0.1,0.4],
+    [-12.9,10,-0.1,0.1],
+    [-1.3,0,0.1,0],
+    [-6.4,3.3,0,0],
+    [0.2,0,0.1,-0],
+    [2,2.4,0.1,-0.2],
+    [-1,5.3,-0,0.1],
+    [-0.6,-9.1,-0.3,-0.1],
+    [-0.9,0.4,0,0.1],
+    [1.5,-4.2,-0.1,0],
+    [0.9,-3.8,-0.1,-0.1],
+    [-2.7,0.9,-0,0.2],
+    [-3.9,-9.1,-0,-0],
+    [2.9,0,0,0],
+    [-1.5,0,-0,-0],
+    [-2.5,2.9,0,0.1],
+    [2.4,-0.6,0,-0],
+    [-0.6,0.2,0,0.1],
+    [-0.1,0.5,-0.1,-0],
+    [-0.6,-0.3,0,-0],
+    [-0.1,-1.2,-0,0.1],
+    [1.1,-1.7,-0.1,-0],
+    [-1,-2.9,-0.1,0],
+    [-0.2,-1.8,-0.1,0],
+    [2.6,-2.3,-0.1,0],
+    [-2,0,0,0],
+    [-0.2,-1.3,0,-0],
+    [0.3,0.7,-0,0],
+    [1.2,1,-0,-0.1],
+    [-1.3,-1.4,-0,0.1],
+    [0.6,-0,-0,-0],
+    [0.6,0.6,0.1,-0],
+    [0.5,-0.1,-0,-0],
+    [-0.1,0.8,0,0],
+    [-0.4,0.1,0,-0],
+    [-0.2,-1,-0.1,-0],
+    [-1.3,0.1,-0,0],
+    [-0.7,0.2,-0.1,-0.1]
+  ];
+  function declination(lat, lon, date) {
+    date = date || new Date();
+    var y = date.getFullYear();
+    var t = y + (date.getTime() - new Date(y, 0, 1).getTime()) /
+      (new Date(y + 1, 0, 1).getTime() - new Date(y, 0, 1).getTime());
+    var dt = t - 2025.0;
+    var N = 12, SZ = N + 1;
+    /* 系数按 (n,m) 展开并做 Schmidt 半正规化（与官方 _load 同递推） */
+    var G = [], DG = [], SN = [], K = [], i, n, m;
+    for (i = 0; i < SZ * SZ; i++) { G.push(0); DG.push(0); SN.push(0); K.push(0); }
+    var idx = function (nn, mm) { return nn + mm * SZ; };
+    var p = 0;
+    for (n = 1; n <= N; n++) for (m = 0; m <= n; m++) {
+      var r = WMM2025[p++];
+      G[idx(m, n)] = r[0]; DG[idx(m, n)] = r[2];
+      if (m > 0) { G[idx(n, m - 1)] = r[1]; DG[idx(n, m - 1)] = r[3]; }
+    }
+    /* h 与 ĥ 存于同一阵的转置位（官方口径），故 c/cd 即 G/DG 本阵 */
+    var c = G, cd = DG;
+    SN[0] = 1;
+    for (n = 1; n <= N; n++) {
+      SN[idx(n, 0)] = SN[idx(n - 1, 0)] * (2 * n - 1) / n;
+      var j = 2;
+      for (m = 0; m <= n; m++) {
+        K[idx(m, n)] = ((n - 1) * (n - 1) - m * m) / ((2 * n - 1) * (2 * n - 3));
+        if (m > 0) {
+          var flnmj = (n - m + 1) * j / (n + m);
+          SN[idx(n, m)] = SN[idx(n, m - 1)] * Math.sqrt(flnmj);
+          j = 1;
+          c[idx(n, m - 1)] *= SN[idx(n, m)]; cd[idx(n, m - 1)] *= SN[idx(n, m)];
+        }
+        c[idx(m, n)] *= SN[idx(n, m)]; cd[idx(m, n)] *= SN[idx(n, m)];
+      }
+    }
+    K[idx(1, 1)] = 0;
+    /* 大地坐标 → 地心球坐标（WGS84） */
+    var a = 6378.137, b = 6356.7523142, re = 6371.2;
+    var a2 = a * a, b2 = b * b, c2 = a2 - b2, a4 = a2 * a2, c4 = a4 - b2 * b2;
+    var alt = 0;
+    var rlon = lon * D2R, rlat = lat * D2R;
+    var srlon = Math.sin(rlon), crlon = Math.cos(rlon);
+    var srlat = Math.sin(rlat), crlat = Math.cos(rlat);
+    var srlat2 = srlat * srlat, crlat2 = crlat * crlat;
+    var q = Math.sqrt(a2 - c2 * srlat2);
+    var q1 = alt * q;
+    var q2 = ((q1 + a2) / (q1 + b2)) * ((q1 + a2) / (q1 + b2));
+    var ct = srlat / Math.sqrt(q2 * crlat2 + srlat2);
+    var st = Math.sqrt(1 - ct * ct);
+    var r2 = alt * alt + 2 * q1 + (a4 - c4 * srlat2) / (q * q);
+    var r = Math.sqrt(r2);
+    var d = Math.sqrt(a2 * crlat2 + b2 * srlat2);
+    var ca = (alt + d) / r, sa = c2 * crlat * srlat / (r * d);
+    /* sin/cos(mλ) 递推 */
+    var sp = [0, srlon], cp = [1, crlon], pp = [1];
+    for (m = 2; m <= N; m++) {
+      sp[m] = sp[1] * cp[m - 1] + cp[1] * sp[m - 1];
+      cp[m] = cp[1] * cp[m - 1] - sp[1] * sp[m - 1];
+    }
+    /* 球谐累加（P 起始 = SN 阵，与官方同布局） */
+    var P = SN.slice(), DP = [];
+    for (i = 0; i < SZ * SZ; i++) DP.push(0);
+    var fn = [], fm = [];
+    for (n = 0; n <= N; n++) { fn[n] = n + 1; fm[n] = n; }
+    var aor = re / r, ar = aor * aor, br = 0, bt = 0, bp = 0, bpp = 0;
+    for (n = 1; n <= N; n++) {
+      ar *= aor;
+      for (m = 0; m <= n; m++) {
+        if (n === m) {
+          P[idx(n, m)] = st * P[idx(n - 1, m - 1)];
+          DP[idx(m, n)] = st * DP[idx(m - 1, n - 1)] + ct * P[idx(n - 1, m - 1)];
+          /* 注：DP/P 在官方实现里随后被覆写为新值，上式右端须用旧值——
+           * JS 里 P[idx(n-1,m-1)] 未被本轮改动，DP 右端第二项官方取的是
+           * 覆写前的 P[n-1][m-1]，此处 P 尚未覆写该位，口径一致 */
+        } else if (n === 1 && m === 0) {
+          P[idx(n, m)] = ct * P[idx(n - 1, m)];
+          DP[idx(m, n)] = ct * DP[idx(m, n - 1)] - st * P[idx(n - 1, m)];
+        } else if (n > 1) {
+          var pnm2 = (m > n - 2) ? 0 : P[idx(n - 2, m)];
+          var dpnm2 = (m > n - 2) ? 0 : DP[idx(m, n - 2)];
+          var pold = P[idx(n - 1, m)];
+          P[idx(n, m)] = ct * pold - K[idx(m, n)] * pnm2;
+          DP[idx(m, n)] = ct * DP[idx(m, n - 1)] - st * pold - K[idx(m, n)] * dpnm2;
+        }
+        var tg = c[idx(m, n)] + dt * cd[idx(m, n)];
+        var th = (m > 0) ? (c[idx(n, m - 1)] + dt * cd[idx(n, m - 1)]) : 0;
+        var temp1, temp2;
+        if (m === 0) { temp1 = tg * cp[m]; temp2 = tg * sp[m]; }
+        else { temp1 = tg * cp[m] + th * sp[m]; temp2 = tg * sp[m] - th * cp[m]; }
+        bt -= ar * temp1 * DP[idx(m, n)];
+        var par = ar * P[idx(n, m)];
+        bp += fm[m] * temp2 * par;
+        br += fn[n] * temp1 * par;
+        if (st === 0 && m === 1) {
+          if (n === 1) pp[n] = pp[n - 1];
+          else pp[n] = ct * pp[n - 1] - K[idx(m, n)] * pp[n - 2];
+          bpp += fm[m] * temp2 * ar * pp[n];
+        }
+      }
+    }
+    if (st === 0) bp = bpp; else bp /= st;
+    var bx = -bt * ca - br * sa;
+    var by = bp;
+    return Math.atan2(by, bx) / D2R;
+  }
+
   global.WuriSky = {
     available: !!A,
     DEFAULT_OBS: DEFAULT_OBS,
@@ -154,6 +362,7 @@
     magLim: magLim,
     setMagLim: setMagLim,
     BODIES: BODIES,
-    bodyPos: bodyPos
+    bodyPos: bodyPos,
+    declination: declination
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -35,11 +35,11 @@ def report(name, ok, extra=""):
 
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v106 缓存名", "wuri-v106-20261024-v211-1" in sw)
+report("SW v107 缓存名", "wuri-v107-20261024-v211-2" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("四件套：CSS ?v=106＋版本 v2.1.1 (1)", "css/style.css?v=106" in html and "v2.1.1 (1)" in html)
+report("四件套：CSS ?v=107＋版本 v2.1.1 (2)", "css/style.css?v=107" in html and "v2.1.1 (2)" in html)
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
-report("me_ver 简繁 v2.1.1 (1)", i18n.count("v2.1.1 (1)") >= 2)
+report("me_ver 简繁 v2.1.1 (2)", i18n.count("v2.1.1 (2)") >= 2)
 report("relnav 文案简繁齐", i18n.count("sx2_ar_relnav") >= 2)
 arjs = open(os.path.join(WWW, "js/sky-ar.js"), encoding="utf-8").read()
 report("绝对事件监听＋信任判定在位",
@@ -130,6 +130,12 @@ try:
     cdp.call("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 2, "mobile": True})
     cdp.call("Page.navigate", {"url": "file://" + os.path.join(WWW, "index.html")})
     assert waitfor("!!window.WuriSkyAR && !!document.querySelector('#tabbar button[data-tab=\"tab-stars\"]')")
+    # 【v2.1.1 (2) 期望调整】磁偏角层上线后，安卓绝对事件的方位期望须带上
+    # 磁偏角 δ：期望 = 旧期望 + δ（δ 由页面 WuriSky.declination 现场取值，
+    # St-Hubert 约 −13.7°）。理由逐条见各断言处注释；高度期望不变。
+    DECL = ev("window.WuriSky.declination(45.5122, -73.4253, new Date())")
+    def angdiff(x, y):
+        return abs((x - y + 180) % 360 - 180)
     open_ar()
 
     # ---- T1 相对事件：绝不产生 pose、relSeen 在位、HUD 明示不可靠 ----
@@ -146,7 +152,9 @@ try:
     ok_lbl = waitfor("window.WuriSkyAR._state().labels.length > 0", timeout=15)
     st = state()
     report("[事件层] 绝对事件产生 pose＋标签", st.get("hasPose") is True and ok_lbl, st.get("labels"))
-    report("[事件层] 对月姿态方位 ≈131（真值）", st.get("centerAz") is not None and abs(st["centerAz"] - 131) <= 1.0, st.get("centerAz"))
+    # 期望调整（v2.1.1 (2)）：绝对事件 α 为磁北口径，ingest 已按 δ 旋至真北，
+    # 对月姿态原始读数 131 是磁方位，真北期望 = 131 + δ
+    report("[事件层] 对月姿态方位 ≈131+δ（磁偏角修正后真值）", st.get("centerAz") is not None and angdiff(st["centerAz"], (131 + DECL) % 360) <= 1.0, (st.get("centerAz"), DECL))
     report("[事件层] 对月姿态高度 ≈43（真值）", st.get("centerAlt") is not None and abs(st["centerAlt"] - 43) <= 1.0, st.get("centerAlt"))
     pole_t2 = st.get("polePoint")
     az_t2 = st.get("centerAz")
@@ -156,21 +164,23 @@ try:
     fire("deviceorientation", 0, 0, 0, abs_=False)
     time.sleep(0.8)
     st = state()
-    report("[事件层] 相对事件不覆盖绝对 pose", st.get("centerAz") is not None and abs(st["centerAz"] - 131) <= 1.0, st.get("centerAz"))
+    report("[事件层] 相对事件不覆盖绝对 pose", st.get("centerAz") is not None and angdiff(st["centerAz"], az_t2) <= 1.0, (st.get("centerAz"), az_t2))
 
     # ---- T4/T5 绝对事件·正北/正东直立 ----
     fire("deviceorientationabsolute", 0, 90, 0, abs_=True)
     time.sleep(0.8)
     st = state()
-    report("[事件层] 正北直立 az≈0/alt≈0",
-           st.get("centerAz") is not None and min(st["centerAz"], 360 - st["centerAz"]) <= 1.0 and abs(st["centerAlt"]) <= 1.0,
-           (st.get("centerAz"), st.get("centerAlt")))
+    # 期望调整（v2.1.1 (2)）：正北姿态 α=0 为磁北，修正后期望 az = δ（≈346.3）
+    report("[事件层] 正北直立 az≈δ/alt≈0（磁偏角修正）",
+           st.get("centerAz") is not None and angdiff(st["centerAz"], DECL % 360) <= 1.0 and abs(st["centerAlt"]) <= 1.0,
+           (st.get("centerAz"), st.get("centerAlt"), DECL))
     fire("deviceorientationabsolute", 270, 90, 0, abs_=True)
     time.sleep(0.8)
     st = state()
-    report("[事件层] 正东直立 az≈90/alt≈0",
-           st.get("centerAz") is not None and abs(st["centerAz"] - 90) <= 1.0 and abs(st["centerAlt"]) <= 1.0,
-           (st.get("centerAz"), st.get("centerAlt")))
+    # 期望调整（v2.1.1 (2)）：正东磁方位 90，修正后期望 az = 90 + δ
+    report("[事件层] 正东直立 az≈90+δ/alt≈0（磁偏角修正）",
+           st.get("centerAz") is not None and angdiff(st["centerAz"], (90 + DECL) % 360) <= 1.0 and abs(st["centerAlt"]) <= 1.0,
+           (st.get("centerAz"), st.get("centerAlt"), DECL))
 
     # ---- T6 横屏：屏幕角 90°，同姿态中心 az/alt 不变、极点偏移转 90° ----
     try:
@@ -189,8 +199,8 @@ try:
     st = state()
     pole_t6 = st.get("polePoint")
     report("[事件层] 横屏同姿态中心 az/alt 不变",
-           st.get("centerAz") is not None and abs(st["centerAz"] - 131) <= 1.0 and abs(st["centerAlt"] - 43) <= 1.0,
-           (st.get("centerAz"), st.get("centerAlt")))
+           st.get("centerAz") is not None and angdiff(st["centerAz"], az_t2) <= 1.0 and abs(st["centerAlt"] - 43) <= 1.0,
+           (st.get("centerAz"), st.get("centerAlt"), az_t2))
     rot_ok = False
     # polePoint 是 drawScene 工作坐标（CSS px），以画布中心为原点比偏移方向角
     dims = ev("(() => { const c = document.getElementById('ar-canvas'); return { w: c.clientWidth, h: c.clientHeight }; })()")
@@ -219,12 +229,13 @@ try:
     time.sleep(0.5)
     heads = ev("window.__heads") or []
     last = heads[-1] if heads else None
-    report("[跟随] 绝对新姿态航向 ≈90（活管线）", len(heads) > n0 and last is not None and abs(last - 90) <= 1.5, (n0, last))
+    # 期望调整（v2.1.1 (2)）：跟随与 AR 共用 ingest，航向同样带磁偏角修正
+    report("[跟随] 绝对新姿态航向 ≈90+δ（活管线＋磁偏角）", len(heads) > n0 and last is not None and angdiff(last, (90 + DECL) % 360) <= 1.5, (n0, last, DECL))
     fire("deviceorientationabsolute", 229, 133, 0, abs_=True)
     time.sleep(0.5)
     heads = ev("window.__heads") or []
     last = heads[-1] if heads else None
-    report("[跟随] 绝对对月姿态航向 ≈131", last is not None and abs(last - 131) <= 1.5, last)
+    report("[跟随] 绝对对月姿态航向 ≈131+δ", last is not None and angdiff(last, (131 + DECL) % 360) <= 1.5, (last, DECL))
     ev("window.WuriSkyAR._unwatchHeading(function () {}); true")  # 退订匿名无效亦无妨，页面将重开
 
     # ---- T8 关闭重开：零点不继承、绝对同值复现 ----
@@ -246,7 +257,8 @@ try:
     fire("deviceorientation", 270, 90, 0, abs_=False, compass=90)
     time.sleep(0.8)
     st = state()
-    report("[事件层] iOS 风格事件被信任并生效（az 转 90）",
+    # 注（v2.1.1 (2)）：iOS 真北口径不得叠加磁偏角——若误叠，az 会偏到 ≈90+δ，本断言兼判此点
+    report("[事件层] iOS 风格事件被信任并生效（az 转 90、无磁偏角叠加）",
            st.get("centerAz") is not None and abs(st["centerAz"] - 90) <= 1.0, st.get("centerAz"))
 
     excs = [e for e in cdp.events if e.get("method") == "Runtime.exceptionThrown"]

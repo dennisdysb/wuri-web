@@ -29,11 +29,11 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v106 缓存名", "wuri-v106-20261024-v211-1" in sw)
+report("SW v107 缓存名", "wuri-v107-20261024-v211-2" in sw)
 report("SW 预缓存含 vendor 与引擎/星图", all(x in assets for x in
        ["js/vendor/astronomy.js", "js/vendor/d3-array.min.js", "js/vendor/d3-geo.min.js", "js/sky-engine.js", "js/sky-chart.js"]))
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("CSS ?v=103 与版本 v2.1.0 (3)", "css/style.css?v=106" in html and "v2.1.1" in html)
+report("CSS ?v=103 与版本 v2.1.0 (3)", "css/style.css?v=107" in html and "v2.1.1" in html)
 report("两新视图在位", 'id="view-sky-tonight"' in html and 'id="view-sky-chart"' in html)
 astr = open(os.path.join(WWW, "js/vendor/astronomy.js"), encoding="utf-8").read()
 report("astronomy.js 原样（MIT 头＋体积）", "MIT License" in astr[:2000] and len(astr) > 400000, len(astr))
@@ -281,8 +281,13 @@ try:
     sp1 = ev("window.WuriSkyChart.state().spin")
     ev("window.dispatchEvent(new DeviceOrientationEvent('deviceorientationabsolute', {alpha: 90, beta: 135, gamma: 0, absolute: true})); true", 0.4)
     sp2 = ev("window.WuriSkyChart.state().spin")
-    report("传感器跟随：姿态 (0,135) 自旋≈0、(90,135) 自旋≈270",
-           abs(sp1) < 4 and abs(sp2 - 270) < 4, (sp1, sp2))
+    # 期望调整（v2.1.1 (2)）：跟随与 AR 共用 ingest，绝对事件航向已带磁偏角
+    # 修正——姿态 α=0 的航向 = δ（≈346.35）、α=90 的航向 = 270+δ（≈256.35），
+    # δ 由页面 declination 现场取值，断言改按角差比对修正后期望
+    decl210 = ev("window.WuriSky.declination(45.5122, -73.4253, new Date())")
+    def angd(x, y): return abs((x - y + 180) % 360 - 180)
+    report("传感器跟随：姿态 (0,135) 自旋≈δ、(90,135) 自旋≈270+δ（磁偏角修正）",
+           angd(sp1, decl210 % 360) < 4 and angd(sp2, (270 + decl210) % 360) < 4, (sp1, sp2, decl210))
     ev("document.getElementById('sk-tg-sensor').click(); true", 0.2)
     ev("window.WuriSkyChart.setSpin(0); true", 0.2)
     report("传感器跟随：关后 state.sensor=false", ev("window.WuriSkyChart.state().sensor") is False)

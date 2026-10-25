@@ -30,6 +30,18 @@
  * 只收到相对事件时不写 pose（不拿相对值冒充罗盘）、HUD 明示方位不可靠。
  * 平面星图「跟随手机」共用同一 ingest 管线，一并修复。
  * 真机手感（跟随延迟、罗盘漂移量级、横屏 φ 符号）沙箱无从验，留真机验收。
+ *
+ * 【v2.1.1 (2) 对齐两层】(1) 修好事件源后真机复测（21:48 对月）HUD 仍偏
+ * +20°/+2°：安卓绝对事件的 α 以磁北为零点、代码按真北用，差一个磁偏角。
+ * 第一层：ingest 时对磁北口径事件（绝对事件类型 / absolute===true 且无
+ * webkitCompassHeading）按观测地＋日期用 WMM2025 磁偏角（引擎
+ * WuriSky.declination）把 α 旋到真北系：pose.a = α − δ（δ 东正西负，
+ * St-Hubert 2026-10 约 −13.7°）；iOS 的 webkitCompassHeading 是真北
+ * 口径（CLHeading），在位时不修正，防二次叠加。第二层：AR 内一键天体
+ * 对齐（工具栏「对齐」钮）：选地平线上的月亮/行星、移到准星正中央点
+ * 「已对准」，以引擎真值与当前中心读数之差（读数已含磁偏角修正）覆写
+ * 共享校准存储 cal（与拖动同一 wuri_sky_ar_cal_v1、后写覆盖）；
+ * |Δaz|>60 或 |Δalt|>30 判罗盘受干扰、拒绝保存并提示先画「8」字。
  */
 (function () {
   'use strict';
@@ -99,20 +111,24 @@
     return { lat: SKY.DEFAULT_OBS.lat, lon: SKY.DEFAULT_OBS.lon };
   }
 
-  /* ---------------- 校准存档 ---------------- */
+  /* ---------------- 校准存档 ----------------
+   * src 记录最近一次写入来源：一键对齐写入 {body, at}，拖动/归零清除。
+   * 旧档无 src 字段 → 读为 null，向后兼容。 */
   var CAL_KEY = 'wuri_sky_ar_cal_v1';
   var cal = (function () {
     try {
       var j = JSON.parse(localStorage.getItem(CAL_KEY) || 'null');
-      if (j) return { az: +j.az || 0, alt: +j.alt || 0, red: !!j.red };
+      if (j) return { az: +j.az || 0, alt: +j.alt || 0, red: !!j.red, src: j.src || null };
     } catch (e) {}
-    return { az: 0, alt: 0, red: false };
+    return { az: 0, alt: 0, red: false, src: null };
   })();
   function saveCal() {
     try { localStorage.setItem(CAL_KEY, JSON.stringify(cal)); } catch (e) {}
   }
   function clampCal() {
-    cal.az = Math.max(-45, Math.min(45, cal.az));
+    /* 方位量程 45→60：一键对齐的合理性上限就是 |Δaz|≤60，拖动钳制须
+     * 覆盖同一包线，否则对齐存下的大偏移会在下一次拖动首帧被削掉 */
+    cal.az = Math.max(-60, Math.min(60, cal.az));
     cal.alt = Math.max(-45, Math.min(45, cal.alt));
   }
 
@@ -122,7 +138,7 @@
     noPose: false, fallback: null, posCache: null, posAt: 0, msgText: '', msgUntil: 0,
     bodyCache: null, bodyAt: 0, bodyPts: [], moonIllum: null, moonWaxing: true,
     labels: [], segments: 0, hudText: '', els: null, oriBound: false,
-    absSeen: false, relSeen: false
+    absSeen: false, relSeen: false, alignTarget: null
   };
 
   /* 姿态事件 ingest（AR 与星图跟随共用，根因与口径见文件头注）：
@@ -130,18 +146,35 @@
    * 或 e.absolute===true、或 iOS Safari 的 webkitCompassHeading 在位
    * （iOS 不发 absolute 事件类型、其 deviceorientation 本就是罗盘参考，
    * 以该字段在位为信任信号，α 用法与旧版一致、不回归）。相对事件只记
-   * relSeen 供 HUD 明示不可靠，绝不写入 pose 冒充罗盘。 */
-  function oriTrusted(e, fromAbsType) {
-    if (fromAbsType) return true;
-    if (e.absolute === true) return true;
-    if (typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0) return true;
-    return false;
+   * relSeen 供 HUD 明示不可靠，绝不写入 pose 冒充罗盘。
+   * 可信事件再分口径（v2.1.1 (2) 磁偏角层）：
+   *   'ios'＝webkitCompassHeading 在位——真北口径，不修正；
+   *   'mag'＝安卓绝对事件——α 以磁北为零点，须按磁偏角旋到真北系。 */
+  function oriSource(e, fromAbsType) {
+    if (typeof e.webkitCompassHeading === 'number' && e.webkitCompassHeading >= 0) return 'ios';
+    if (fromAbsType) return 'mag';
+    if (e.absolute === true) return 'mag';
+    return null;
+  }
+  /* 当前观测地的磁偏角（WMM2025，按月缓存；观测地变更即重算） */
+  var declCache = { key: '', val: 0 };
+  function currentDecl() {
+    var o = getObs(), now = new Date();
+    var key = o.lat.toFixed(3) + ',' + o.lon.toFixed(3) + ',' + now.getFullYear() + '-' + now.getMonth();
+    if (declCache.key !== key) {
+      declCache = { key: key, val: (SKY && SKY.declination) ? SKY.declination(o.lat, o.lon, now) : 0 };
+    }
+    return declCache.val;
   }
   function ingestOri(e, fromAbsType) {
     if (!e || e.alpha == null) return false;
-    if (!oriTrusted(e, fromAbsType)) { if (!S.absSeen) S.relSeen = true; return false; }
+    var src = oriSource(e, fromAbsType);
+    if (!src) { if (!S.absSeen) S.relSeen = true; return false; }
     S.absSeen = true; S.relSeen = false;
-    S.pose = { a: e.alpha, b: e.beta || 0, g: e.gamma || 0 };
+    var a = e.alpha;
+    /* 磁北→真北：绕天顶轴旋 δ（真方位 = 磁方位 + δ），等价于 pose.a = α − δ */
+    if (src === 'mag') a = ((a - currentDecl()) % 360 + 360) % 360;
+    S.pose = { a: a, b: e.beta || 0, g: e.gamma || 0 };
     S.poseAt = performance.now();
     S.noPose = false;
     return true;
@@ -390,6 +423,9 @@
       '<button class="ar-shutter" id="ar-shutter" data-ar="snap" hidden title="' + esc(t('sx2_ar_snap')) + '" aria-label="' + esc(t('sx2_ar_snap')) + '"></button>' +
       '</div>' +
       '<div class="ar-bar">' +
+      /* 一键天体对齐（v2.1.1 (2)）：整行主钮，置于 2×2 网格上方；
+       * 红光时 .red 低亮红谱（applyRed/shellHTML 双路同步 class） */
+      '<button class="ar-align-btn' + (cal.red ? ' red' : '') + '" data-ar="align">' + esc(t('sx2_ar_align')) + '</button>' +
       '<button class="mini-btn tiny" data-ar="snap">' + esc(t('sx2_ar_snap')) + '</button>' +
       '<button class="mini-btn tiny' + (cal.red ? ' on' : '') + '" data-ar="red">' + esc(t('sx2_ar_red')) + '</button>' +
       '<button class="mini-btn tiny" data-ar="calreset">' + esc(t('sx2_ar_cal_reset')) + '</button>' +
@@ -398,11 +434,42 @@
       '<div class="sk-hint">' + esc(t('sx2_ar_drag_hint')) + '</div>' +
       '<div class="sx-caliber">' + esc(t('sx2_ar_caliber')) + '</div>';
   }
+  /* 一键对齐的目标表：月亮（在地平线上时置顶）＋五大行星中在地平线
+   * 上的，按高度降序；位置走引擎 bodyPos、与渲染层同一口径 */
+  function alignTargets() {
+    if (!SKY || !SKY.bodyPos) return [];
+    var obs = getObs(), now = new Date(), out = [];
+    (SKY.BODIES || []).forEach(function (bd) {
+      var pp = SKY.bodyPos(now, obs, bd.id);
+      if (pp && pp.alt > 0) out.push({ id: bd.id, kind: bd.kind, alt: pp.alt, az: pp.az });
+    });
+    out.sort(function (x, y) {
+      if (x.kind === 'moon' && y.kind !== 'moon') return -1;
+      if (y.kind === 'moon' && x.kind !== 'moon') return 1;
+      return y.alt - x.alt;
+    });
+    return out;
+  }
   function panelHTML(kind) {
     if (kind === 'start') {
       return '<div class="ar-msg">' + esc(t('sx2_ar_intro')) + '</div>' +
-        '<div class="ar-msg dim">' + esc(t('sx2_ar_cal_hint1')) + '<br>' + esc(t('sx2_ar_cal_hint2')) + '</div>' +
+        '<div class="ar-msg dim">' + esc(t('sx2_ar_cal_hint1')) + '<br>' + esc(t('sx2_ar_cal_hint2')) + '<br>' + esc(t('sx2_ar_align_hint')) + '</div>' +
         '<button class="btn" data-ar="start">' + esc(t('sx2_ar_start')) + '</button>';
+    }
+    if (kind === 'align') {
+      var tg = alignTargets(), h = '<div class="ar-msg">' + esc(t('sx2_ar_align_title')) + '</div>';
+      if (!tg.length) h += '<div class="ar-msg dim">' + esc(t('sx2_ar_align_none')) + '</div>';
+      tg.forEach(function (bd) {
+        h += '<button class="btn ar-target" data-ar="alignpick" data-id="' + bd.id + '">' +
+          esc(t('sx2_body_' + bd.id)) + ' · ' + esc(tf(t('sx2_info_alt'), bd.alt.toFixed(0))) + '</button>';
+      });
+      return h + '<button class="mini-btn" data-ar="aligncancel">' + esc(t('sx2_ar_cancel')) + '</button>';
+    }
+    if (kind === 'aligning') {
+      /* 指引态面板用 .guide 紧凑底条（见 setPanel），舞台与准星保持可见 */
+      return '<div class="ar-msg">' + esc(tf(t('sx2_ar_align_guide'), S.alignTarget ? t('sx2_body_' + S.alignTarget) : '')) + '</div>' +
+        '<button class="btn" data-ar="alignok">' + esc(t('sx2_ar_align_ok')) + '</button>' +
+        '<button class="mini-btn" data-ar="aligncancel">' + esc(t('sx2_ar_cancel')) + '</button>';
     }
     if (kind === 'starting') return '<div class="ar-msg">' + esc(t('sx2_ar_starting')) + '</div>';
     var msgKey = kind === 'camera' ? 'sx2_ar_cam_fail' : kind === 'orient' ? 'sx2_ar_ori_fail' : 'sx2_ar_nocam';
@@ -415,6 +482,8 @@
     /* 快门钮只在相机运行中（无面板）时露面：开启面板/回落面板在场时藏起，
      * 免得隔着半透明面板误点、也免得在无相机时点了只换来报错 */
     var sh = $('ar-shutter'); if (sh) sh.hidden = !!kind;
+    /* 对齐指引态不用整屏面板（会盖住准星与实景）：改紧凑底条 */
+    S.els.panel.classList.toggle('guide', kind === 'aligning');
     if (!kind) { S.els.panel.hidden = true; S.els.panel.innerHTML = ''; return; }
     S.els.panel.hidden = false;
     S.els.panel.innerHTML = panelHTML(kind);
@@ -427,6 +496,8 @@
     var st = $('ar-stage'); if (st) st.classList.toggle('red', cal.red);
     var rb = document.querySelector('#sx-ar [data-ar="red"]');
     if (rb) rb.classList.toggle('on', cal.red);
+    var ab = document.querySelector('#sx-ar [data-ar="align"]');
+    if (ab) ab.classList.toggle('red', cal.red);
   }
 
   function openAR() {
@@ -483,6 +554,29 @@
     S.running = true; S.startAt = performance.now(); S.noPose = false; S.poseAt = 0;
     setPanel(null);
     frame();
+  }
+
+  /* ---------- 一键天体对齐（v2.1.1 (2)） ----------
+   * 保存值口径：渲染层以「星位 + cal」绘制，故要让被对准的天体标记落回
+   * 准星，cal 须等于「当前中心读数 − 天体真值」（读数出自 drawScene 的
+   * centerAz/centerAlt，已含磁偏角修正）。与拖动共用 cal 与存档、后写
+   * 覆盖；偏差过大（|Δaz|>60 或 |Δalt|>30）判罗盘受干扰、拒存。 */
+  function wrap180(x) { x = ((x % 360) + 360) % 360; return x > 180 ? x - 360 : x; }
+  function fmtSigned(v) { var r = Math.round(v); return r === 0 ? '0' : (r > 0 ? '+' + r : '−' + Math.abs(r)); }
+  function doAlign() {
+    var id = S.alignTarget;
+    S.alignTarget = null;
+    if (!id || !SKY || !SKY.bodyPos) { setPanel(null); return; }
+    if (S.centerAz == null || S.centerAlt == null) { setPanel(null); flashMsg(t('sx2_ar_nopose')); return; }
+    var pos = SKY.bodyPos(new Date(), getObs(), id);
+    if (!pos) { setPanel(null); return; }
+    var dAz = wrap180(S.centerAz - pos.az);
+    var dAlt = S.centerAlt - pos.alt;
+    setPanel(null);
+    if (Math.abs(dAz) > 60 || Math.abs(dAlt) > 30) { flashMsg(t('sx2_ar_align_too_big')); return; }
+    cal.az = dAz; cal.alt = dAlt; cal.src = { body: id, at: Date.now() };
+    saveCal();
+    flashMsg(tf(t('sx2_ar_aligned'), t('sx2_body_' + id), fmtSigned(dAz), fmtSigned(dAlt)));
   }
 
   /* ---------- 拍照合成（v2.1.0 (6) 重做） ----------
@@ -596,6 +690,7 @@
       var focalCss = (S.cssH / 2) / Math.tan(VFOV / 2 * D2R);
       cal.az = drag.az + dx / focalCss / D2R;
       cal.alt = drag.alt - dy / focalCss / D2R;
+      if (drag.moved > 2) cal.src = null;   /* 拖动接管：对齐来源标记作废 */
       clampCal();
     });
     canvas.addEventListener('pointerup', function (e) {
@@ -617,10 +712,14 @@
       var act = b.getAttribute('data-ar');
       if (act === 'start') startAR();
       else if (act === 'snap') snap();
+      else if (act === 'align') { if (S.running) setPanel('align'); }
+      else if (act === 'alignpick') { S.alignTarget = b.getAttribute('data-id'); setPanel('aligning'); }
+      else if (act === 'alignok') doAlign();
+      else if (act === 'aligncancel') { S.alignTarget = null; setPanel(null); }
       else if (act === 'red') {
         if (window.WuriRedlight) window.WuriRedlight.set(!cal.red);
         else applyRed(!cal.red);
-      } else if (act === 'calreset') { cal.az = 0; cal.alt = 0; saveCal(); }
+      } else if (act === 'calreset') { cal.az = 0; cal.alt = 0; cal.src = null; saveCal(); }
       else if (act === 'tochart') {
         stopAR(); hide('view-sky-ar');
         if (window.WuriSkyChart) window.WuriSkyChart.openChart();
@@ -769,7 +868,8 @@
     _state: function () {
       return { running: S.running, hasPose: !!S.pose, noPose: S.noPose, fallback: S.fallback,
         absSeen: !!S.absSeen, relSeen: !!S.relSeen,
-        calAz: cal.az, calAlt: cal.alt, segments: S.segments, labels: S.labels, bodies: S.bodyPts,
+        calAz: cal.az, calAlt: cal.alt, calSrc: cal.src, decl: currentDecl(), alignTarget: S.alignTarget,
+        segments: S.segments, labels: S.labels, bodies: S.bodyPts,
         centerAz: S.centerAz, centerAlt: S.centerAlt, polePoint: S.polePoint };
     },
     _setCal: function (az, alt) { cal.az = az; cal.alt = alt; clampCal(); saveCal(); },

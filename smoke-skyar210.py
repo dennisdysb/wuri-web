@@ -26,7 +26,7 @@ def report(name, ok, extra=""):
 # ---------- 静态断言 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
 assets = sw.split("const ASSETS = [")[1].split("];")[0]
-report("SW v106 缓存名", "wuri-v106-20261024-v211-1" in sw)
+report("SW v107 缓存名", "wuri-v107-20261024-v211-2" in sw)
 report("SW 预缓存含 sky-ar.js", "js/sky-ar.js" in assets)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
 report("AR 视图与脚本在位", 'id="view-sky-ar"' in html and "js/sky-ar.js" in html and "v2.1.1" in html)
@@ -105,8 +105,13 @@ try:
     st = ev("window.WuriSkyAR._state()")
     report("开启成功（相机流已起、面板收起）", ok and ev("document.getElementById('ar-panel').hidden"), st)
 
-    # ---------- 注入姿态：朝北、上抬 45°（α0 β135 γ0） ----------
-    ev("""(() => { const e = new DeviceOrientationEvent('deviceorientationabsolute', {alpha: 0, beta: 135, gamma: 0, absolute: true});
+    # ---------- 注入姿态：朝北、上抬 45°（β135 γ0，α 按磁偏角补偿） ----------
+    # 期望调整（v2.1.1 (2)）：绝对事件 α 为磁北口径、ingest 已按 WMM2025 磁偏角
+    # δ 旋至真北（St-Hubert δ≈−13.65°）。本段意图仍是「相机指向真北 az0/alt45」
+    # ——故注入 α = δ（归一化），使修正后中心恰为 az≈0；下游锚点断言不变。
+    ev("""(() => { const d = window.WuriSky.declination(45.5122, -73.4253, new Date());
+      const e = new DeviceOrientationEvent('deviceorientationabsolute',
+        {alpha: ((d % 360) + 360) % 360, beta: 135, gamma: 0, absolute: true});
       window.dispatchEvent(e); return true; })()""", 1.6)
     st = ev("window.WuriSkyAR._state()")
     report("姿态已收（合成事件路径）", st["hasPose"], st)
