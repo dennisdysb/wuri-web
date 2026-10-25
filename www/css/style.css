@@ -1754,6 +1754,41 @@ details.disc-foot .hint{margin-top:9px}
 .sx-verse-kind{font-family:var(--sans);font-size:.66rem;color:var(--faint);white-space:nowrap}
 .sx-verse.more{font-family:var(--sans);font-size:.76rem;color:var(--muted);letter-spacing:.05em;cursor:pointer}
 .sx-foot{font-family:var(--sans);font-size:.72rem;line-height:1.8;color:var(--muted);margin-top:14px}
+/* 《步天歌》点句浮图（v2.3.0 样张·角宿）：浮层盖当前页不跳页，z 90 在弹窗层级；
+ * 本句星官朱砂高亮（.sx-hl）、余官中性（.sx-dim），主星金环（.sx-principal-ring）。
+ * 颜色全走主题变量：日间朱砂 #B23A2B／夜间 #C8452F，中性色日间深、夜间浅；
+ * 红光模式下浮层在 #view-butiange 内，继承既有 var 重映射＋SVG 红处理滤镜，
+ * 高亮另以线宽（1.8 vs 1.4）＋不透明度与中性组拉开，滤镜下仍可辨。 */
+.sx-verse.pop{cursor:pointer}
+.sx-verse.pop:active{background:var(--cinnabar-wash)}
+.sx-verse.on{background:var(--cinnabar-wash)}
+.sx-verse-pop-hint{font-family:var(--sans);font-size:.66rem;color:var(--gold-deep);border:1px solid var(--gold);border-radius:5px;padding:3px 7px;white-space:nowrap}
+[data-theme="night"] .sx-verse-pop-hint{color:var(--gold)}
+.sx-pop{position:fixed;inset:0;z-index:90;background:rgba(24,18,8,.48);display:flex;align-items:center;justify-content:center;padding:14px}
+.sx-pop[hidden]{display:none}
+.sx-pop-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;width:100%;max-width:432px;max-height:88dvh;overflow-y:auto;padding:14px 14px 12px;box-shadow:0 18px 50px rgba(0,0,0,.38)}
+.sx-pop-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.sx-pop-verse{font-family:var(--serif);font-size:1.18rem;letter-spacing:.1em;color:var(--ink);line-height:1.45}
+.sx-pop-verse small{display:block;font-family:var(--sans);font-size:.72rem;letter-spacing:.06em;color:var(--cinnabar-deep);margin-top:1px}
+[data-theme="night"] .sx-pop-verse small{color:var(--cinnabar)}
+.sx-pop-x{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-size:.85rem;line-height:1;cursor:pointer}
+.sx-pop-x:active{transform:scale(.92)}
+.sx-pop-note{font-family:var(--sans);font-size:.74rem;line-height:1.6;color:var(--muted);margin-top:8px}
+.sx-pop-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sx-pop-link{font-family:var(--sans);font-size:.74rem;color:var(--cinnabar-deep);background:var(--cinnabar-wash);border:1px solid var(--line);border-radius:7px;padding:5px 10px;cursor:pointer}
+[data-theme="night"] .sx-pop-link{color:var(--cinnabar)}
+.sx-pop .sx-dim .sx-star{fill:var(--ink-2);stroke:none;opacity:.45}
+.sx-pop .sx-dim .sx-plot-line{stroke:var(--muted);opacity:.32}
+.sx-pop .sx-dim .sx-plot-dash{stroke:var(--muted);opacity:.32}
+.sx-pop .sx-dim .sx-plot-t{fill:var(--muted);opacity:.8}
+.sx-pop .sx-dim .sx-leader{stroke:var(--muted);opacity:.35}
+.sx-pop .sx-hl .sx-star{fill:var(--cinnabar);stroke:var(--cinnabar-deep);stroke-width:.8}
+.sx-pop .sx-hl .sx-plot-line{stroke:var(--cinnabar);stroke-width:1.9}
+.sx-pop .sx-hl .sx-plot-dash{stroke:var(--cinnabar);stroke-width:1.5}
+.sx-pop .sx-hl .sx-plot-t{fill:var(--cinnabar-deep);font-weight:700}
+.sx-pop .sx-hl .sx-leader{stroke:var(--cinnabar);opacity:.65}
+.sx-principal-ring{fill:none;stroke:var(--gold);stroke-width:1.7}
+.sx-pop .sx-star.sx-principal{fill:var(--gold);stroke:var(--gold-deep);stroke-width:.8;opacity:1}
 /* 经文库「典籍 · 天文」分架（星空带，与经书条目分格） */
 .sx-shelf{margin-top:14px;border-radius:14px;padding:14px;background:linear-gradient(160deg,#101725,#1d2c42 55%,#0c1420);color:#EDE4C8;display:flex;align-items:center;gap:10px;cursor:pointer;position:relative;overflow:hidden}
 .sx-shelf::after{content:"✦ ✧ · ✦";position:absolute;right:10px;top:6px;font-size:.62rem;letter-spacing:.6em;color:rgba(237,228,200,.35)}

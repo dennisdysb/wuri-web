@@ -6035,6 +6035,7 @@
    "stars": [
     {
      "cn_name": "角宿一",
+     "principal": true,
      "designation": "α Vir",
      "HR": 5056,
      "HIP": 65474,
@@ -6167,6 +6168,7 @@
    "stars": [
     {
      "cn_name": "进贤",
+     "principal": true,
      "designation": "44 Vir",
      "HR": 4921,
      "HIP": 63414,

@@ -32,9 +32,9 @@ def report(name, ok, extra=""):
 
 # ---------- ① 四件套 ----------
 sw = open(os.path.join(WWW, "sw.js"), encoding="utf-8").read()
-report("SW v112 缓存名", "wuri-v112-20261025-v230" in sw)
+report("SW v113 缓存名（v113 起顺延，显示版本仍 2.3.0）", "wuri-v113-20261025-v230" in sw)
 html = open(os.path.join(WWW, "index.html"), encoding="utf-8").read()
-report("CSS ?v=112＋显示版本 2.3.0", "css/style.css?v=112" in html and "v2.3.0" in html)
+report("CSS ?v=113＋显示版本 2.3.0", "css/style.css?v=113" in html and "v2.3.0" in html)
 i18n = open(os.path.join(WWW, "js/i18n.js"), encoding="utf-8").read()
 report("me_ver 简繁 2.3.0", i18n.count("v2.3.0") >= 2)
 

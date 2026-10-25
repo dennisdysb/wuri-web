@@ -494,7 +494,12 @@
    * 观天手性顺时针递增；其余区以本区星群质心为心作心射（gnomonic）
    * 投影。两式屏幕朝向均与详情简图同手性（以北斗三星三角形向与详情
    * 简图对表验证，见 smoke-v2113）：赤经大者居左、赤纬高者居上。 */
-  function regionMapHTML(si) {
+  function regionMapHTML(si, opts) {
+    /* opts（浮图样张扩展，区页调用不传＝行为不变）：{pop:true, hl:{key:1}} 时
+     * 本句所指星官组挂 sx-hl、余官挂 sx-dim，不挂命中圈/详情委托（浮层内不跳页），
+     * 数据层 principal 星另绘金环；图下注记由浮层自备，此处不绘。 */
+    var popMode = !!(opts && opts.pop);
+    var hlSet = (opts && opts.hl) || null;
     function has(s) { return typeof s.ra_deg === 'number' && typeof s.dec_deg === 'number'; }
     var entries = [], unplotted = 0, all = [];
     si.list.forEach(function (a) {
@@ -621,7 +626,9 @@
       var le = lineEntry(e.a);
       var cls = le && le.status === 'doubtful' ? 'sx-plot-dash' : 'sx-plot-line';
       var byName = {}; e.pts.forEach(function (p) { byName[p.s.cn_name] = p; });
-      var g = '<g class="sx-rmap-g" data-sx-detail="' + esc(key) + '">';
+      var g = popMode
+        ? '<g class="sx-rmap-g ' + (hlSet && hlSet[key] ? 'sx-hl' : 'sx-dim') + '" data-sx-gkey="' + esc(key) + '">'
+        : '<g class="sx-rmap-g" data-sx-detail="' + esc(key) + '">';
       var es = le && le.edges ? le.edges.filter(function (ed) { return byName[ed[0]] && byName[ed[1]]; }) : null;
       if (es && es.length) {
         es.forEach(function (ed) {
@@ -637,8 +644,15 @@
         g += '<polyline class="' + cls + '" points="' + pts + '" fill="none"/>';
       }
       e.pts.forEach(function (p) {
-        g += '<circle class="sx-star" cx="' + SX(p).toFixed(1) + '" cy="' + SY(p).toFixed(1) +
-          '" r="' + R(p.s.vmag).toFixed(1) + '"/>';
+        var rr = R(p.s.vmag), isPrin = popMode && !!p.s.principal;
+        if (isPrin) {
+          /* 主星常驻标记（数据层 principal 字段，有据才标）：大一号＋外加金环 */
+          g += '<circle class="sx-principal-ring" cx="' + SX(p).toFixed(1) + '" cy="' + SY(p).toFixed(1) +
+            '" r="' + (rr * 1.35 + 3.2).toFixed(1) + '"/>';
+          rr = rr * 1.35 + 0.6;
+        }
+        g += '<circle class="sx-star' + (isPrin ? ' sx-principal' : '') + '" cx="' + SX(p).toFixed(1) +
+          '" cy="' + SY(p).toFixed(1) + '" r="' + rr.toFixed(1) + '"/>';
       });
       var lp = labelPos[key];
       if (lp) {
@@ -653,19 +667,20 @@
         }
         g += '<text class="sx-plot-t" x="' + (lp.x + 1).toFixed(1) + '" y="' + (lp.y + fsT + 1).toFixed(1) + '">' +
           txEsc(e.a.name) + '</text>';
-        g += '<rect class="sx-rmap-hit" x="' + lp.x.toFixed(1) + '" y="' + lp.y.toFixed(1) +
+        if (!popMode) g += '<rect class="sx-rmap-hit" x="' + lp.x.toFixed(1) + '" y="' + lp.y.toFixed(1) +
           '" width="' + lp.w.toFixed(1) + '" height="' + lp.h.toFixed(1) + '"/>';
       }
-      e.pts.forEach(function (p) {
+      if (!popMode) e.pts.forEach(function (p) {
         g += '<circle class="sx-rmap-hit" cx="' + SX(p).toFixed(1) + '" cy="' + SY(p).toFixed(1) + '" r="20"/>';
       });
       body += g + '</g>';
     });
 
-    var note = polar ? t('sx_map_note_polar') : t('sx_map_note');
-    var svg = '<svg class="sx-plot sx-rmap' + (dense ? ' dense' : '') + '" viewBox="0 0 ' + W + ' ' + H +
+    var note = popMode ? '' : (polar ? t('sx_map_note_polar') : t('sx_map_note'));
+    var svg = '<svg class="sx-plot sx-rmap' + (dense ? ' dense' : '') + (popMode ? ' sx-popmap' : '') +
+      '" viewBox="0 0 ' + W + ' ' + H +
       '" role="img" aria-label="' + txEsc(si.name) + '">' + body +
-      '<text class="sx-plot-s" x="8" y="' + (H - 8) + '">' + esc(note) + '</text></svg>';
+      (note ? '<text class="sx-plot-s" x="8" y="' + (H - 8) + '">' + esc(note) + '</text>' : '') + '</svg>';
     return { html: svg, unplotted: unplotted, polar: polar };
   }
 
@@ -1015,9 +1030,11 @@
 
   /* ---------------- s5 《步天歌》典籍页 ---------------- */
   var bookOpen = {}; /* section -> 是否展开 */
+  var POP_SECTION = '角宿'; /* 点句浮图样张作用域（v2.3.0）：仅本段歌诀句可点开浮图 */
 
   function renderBook(focusSection) {
     var host = $('sx-book'); if (!host || !BT) return;
+    closeVersePop(); /* 重渲染（展开他段/切语言）先收浮层，打开状态不残留 */
     if (focusSection) bookOpen[focusSection] = true;
     else if (!Object.keys(bookOpen).length && secOrder.length) bookOpen[secOrder[0]] = true;
     var auth = (BT.authorship || '').split('（')[0];
@@ -1040,9 +1057,12 @@
         '<div class="sx-sec" data-sx-toc="' + esc(s) + '">' + txEsc(s) + ' <small>' + txEsc(tf(t('sx_section_lines'), si.lineCount)) + '</small>' +
         '<span class="sx-toregion" data-sx-region="' + esc(s) + '">' + esc(t('sx_to_region')) + '</span></div>';
       if (open) {
-        si.lines.forEach(function (l) {
+        si.lines.forEach(function (l, li) {
           var isStar = l.kind === '星官句' && l.asterism;
-          h += '<div class="sx-verse' + (isStar ? '' : ' dim') + '"><span class="sx-verse-t">' + txEsc(l.text) + '</span>';
+          var isPop = isStar && s === POP_SECTION;
+          h += '<div class="sx-verse' + (isStar ? '' : ' dim') + (isPop ? ' pop' : '') + '"' +
+            (isPop ? ' data-sx-pop="' + esc(s) + ':' + li + '"' : '') +
+            '><span class="sx-verse-t">' + txEsc(l.text) + '</span>';
           if (isStar) {
             h += '<span class="sx-verse-tags">';
             l.asterism.split('、').forEach(function (nm) {
@@ -1050,6 +1070,7 @@
               if (target) h += '<span class="sx-verse-tag" data-sx-detail="' + esc(astKey(target)) + '">' + txEsc(nm) + '</span>';
               else h += '<span class="sx-verse-tag off">' + txEsc(nm) + '</span>';
             });
+            if (isPop) h += '<span class="sx-verse-pop-hint">' + esc(t('sx_pop_hint')) + '</span>';
             h += '</span>';
           } else if (l.kind) {
             h += '<span class="sx-verse-kind">' + txEsc(l.kind.indexOf('回指') === 0 ? t('sx_kind_ref') : t('sx_kind_struct')) + '</span>';
@@ -1067,6 +1088,60 @@
     if (focusSection) {
       var el = $('sx-sec-' + focusSection);
       if (el) setTimeout(function () { el.scrollIntoView({ block: 'start' }); }, 30);
+    }
+  }
+
+  /* ---------------- s5+ 点句浮图（v2.3.0 样张，作用域：角宿段） ----------------
+   * 点本段歌诀句不跳页：当前页悬浮全区示意图（regionMapHTML pop 模式＝与区页
+   * 总览图同源同渲染），本句所指星官朱砂高亮、余官中性色；主星（数据层
+   * principal 字段）大一号＋金环常驻。浮层内保留「看详情」入口（原签点击
+   * 进详情的能力不丢）。关闭：✕／点图外空白／Esc；关闭后恢复打开前滚动
+   * 位置。样张段内句身与其星官签的点击均开浮图；其余各段维持原行为。 */
+  var popState = null; /* {scroll} 打开前 view-butiange 的滚动位置 */
+  function openVersePop(section, idx) {
+    var si = secInfo[section]; if (!si) return;
+    var line = si.lines[idx]; if (!line || !line.asterism) return;
+    var pop = $('sx-pop'); if (!pop) return;
+    var targets = [];
+    line.asterism.split('、').forEach(function (nm) {
+      var a = si.list.filter(function (x) { return x.name === nm; })[0];
+      if (a) targets.push(a);
+    });
+    if (!targets.length) return;
+    var hl = {}; targets.forEach(function (a) { hl[astKey(a)] = 1; });
+    var chart = regionMapHTML(si, { pop: true, hl: hl });
+    $('sx-pop-verse').innerHTML = txEsc(line.text) + '<small>' +
+      targets.map(function (a) { return txEsc(a.name); }).join(' · ') + '</small>';
+    $('sx-pop-chart').innerHTML = chart.html;
+    var notes = [t('sx_pop_legend')];
+    targets.forEach(function (a) {
+      var plotted = (a.stars || []).filter(function (st) {
+        return typeof st.ra_deg === 'number' && typeof st.dec_deg === 'number';
+      }).length;
+      var miss = (a.star_count_tradition || 0) - plotted;
+      if (miss > 0) notes.push(tf(t('sx_pop_missing'), T(a.name), miss));
+    });
+    $('sx-pop-note').textContent = notes.join(' ');
+    $('sx-pop-links').innerHTML = targets.map(function (a) {
+      return '<span class="sx-pop-link" data-sx-pop-detail="' + esc(astKey(a)) + '">' +
+        txEsc(a.name) + ' · ' + esc(t('sx_pop_detail')) + ' ›</span>';
+    }).join('');
+    var view = $('view-butiange');
+    popState = { scroll: view ? view.scrollTop : 0 };
+    pop.hidden = false;
+    document.querySelectorAll('.sx-verse.on').forEach(function (el) { el.classList.remove('on'); });
+    var row = document.querySelector('[data-sx-pop="' + section + ':' + idx + '"]');
+    if (row) row.classList.add('on');
+  }
+  function closeVersePop() {
+    var pop = $('sx-pop');
+    if (!pop || pop.hidden) { popState = null; return; }
+    pop.hidden = true;
+    document.querySelectorAll('.sx-verse.on').forEach(function (el) { el.classList.remove('on'); });
+    if (popState) {
+      var view = $('view-butiange');
+      if (view) view.scrollTop = popState.scroll;
+      popState = null;
     }
   }
 
@@ -1234,6 +1309,16 @@
 
   /* ---------------- 全局点击委托 ---------------- */
   document.addEventListener('click', function (e) {
+    /* 点句浮图（样张·角宿）优先于通用委托：浮层内「看详情」先收浮层再进详情；
+     * 样张段句行（含行内星官签）整行开浮图，不走签的详情跳转 */
+    var popLink = e.target && e.target.closest ? e.target.closest('[data-sx-pop-detail]') : null;
+    if (popLink) { var pk = popLink.getAttribute('data-sx-pop-detail'); closeVersePop(); openDetail(pk); return; }
+    var popRow = e.target && e.target.closest ? e.target.closest('[data-sx-pop]') : null;
+    if (popRow) {
+      var pv = popRow.getAttribute('data-sx-pop').split(':');
+      openVersePop(pv[0], parseInt(pv[1], 10));
+      return;
+    }
     var el = e.target && e.target.closest ? e.target.closest('[data-sx-region],[data-sx-detail],[data-sx-deity],[data-sx-book],[data-sx-booksec],[data-sx-lords],[data-sx-more],[data-sx-toc],[data-sx-retry]') : null;
     if (!el) return;
     if (el.hasAttribute('data-sx-retry')) {
@@ -1293,7 +1378,12 @@
       }
     });
     if ((b = $('star-detail-back'))) b.addEventListener('click', function () { hide('view-star-detail'); });
-    if ((b = $('butiange-back'))) b.addEventListener('click', function () { hide('view-butiange'); });
+    if ((b = $('butiange-back'))) b.addEventListener('click', function () { closeVersePop(); hide('view-butiange'); });
+    /* 点句浮图关闭路径：✕ 钮／点浮层外空白／Esc；返回手势走上面的 back（已先收浮层） */
+    if ((b = $('sx-pop-x'))) b.addEventListener('click', function () { closeVersePop(); });
+    var popEl = $('sx-pop');
+    if (popEl) popEl.addEventListener('click', function (e) { if (e.target === popEl) closeVersePop(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeVersePop(); });
     var skyHead = $('sx-sky-head');
     if (skyHead) skyHead.addEventListener('click', function () {
       var id = $('today-sky-card').getAttribute('data-sx-lord');
