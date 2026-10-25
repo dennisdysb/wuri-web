@@ -1826,6 +1826,7 @@ details.disc-foot .hint{margin-top:9px}
 .sx-fenye .sx-fenye-src{margin-top:8px;font-size:.8rem;color:var(--muted);opacity:.85;line-height:1.6}
 #bugang-view{position:fixed;inset:0;z-index:70;overflow-y:auto;background:var(--bg);padding:0 14px 40px}
 #bugang-view[hidden]{display:none}
+#bugang-entry-card[hidden]{display:none} /* 2026-10-25 步罡暂时隐藏：入口卡 hidden 不渲染（开关在 js/bugang.js） */
 body.bugang-open{overflow:hidden}
 .bg-card{max-width:560px;margin:14px auto 0}
 .bg-foot-row{display:flex;align-items:center;gap:10px;margin:10px 0 2px}

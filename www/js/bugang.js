@@ -9,6 +9,13 @@
 (function () {
   'use strict';
 
+  /* 步罡踏斗暂时隐藏开关（2026-10-25 用户定：暂时隐藏、不是删除——入口卡片、
+   * 视图本体与步序数据全部保留；恢复时把此常量改回 true 即可，入口卡片由
+   * bind() 自动摘除 hidden。各端写法一致：本文件经 prepare_cn_www.py /
+   * prepare_play_www.py / prepare_ios_www.py 定点移植到国内版、Play 版与
+   * iOS 预览，开关随本文件走、全端同口径。） */
+  var BUGANG_ENABLED = false;
+
   var STARS = [
     { seq: 1, name: '天枢', lord: '贪狼', desig: 'α UMa', ra: 165.93208, dec: 61.75083, mag: 1.79 },
     { seq: 2, name: '天璇', lord: '巨门', desig: 'β UMa', ra: 165.46042, dec: 56.38250, mag: 2.37 },
@@ -134,6 +141,7 @@
     render();
   }
   function open() {
+    if (!BUGANG_ENABLED) return; /* 暂时隐藏期：任何直达调用（入口点击 / window.Bugang.open）一律挡回 */
     var v = $('bugang-view'); if (!v) return;
     idx = 0; stopAuto();
     v.hidden = false;
@@ -149,6 +157,10 @@
   }
 
   function bind() {
+    /* 入口卡片显隐只由开关决定：HTML 里常带 hidden（隐藏态不渲染、无闪烁），
+     * 开关打开时在此摘除。 */
+    var card = $('bugang-entry-card');
+    if (card) card.hidden = !BUGANG_ENABLED;
     var entry = $('bugang-open');
     if (entry) {
       entry.addEventListener('click', open);
@@ -172,5 +184,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 
-  window.Bugang = { open: open, close: close };
+  window.Bugang = { open: open, close: close, enabled: BUGANG_ENABLED };
 })();

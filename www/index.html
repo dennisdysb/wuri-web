@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=115">
+<link rel="stylesheet" href="css/style.css?v=116">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=65">
 </head>
@@ -890,7 +890,7 @@
     </section>
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v115）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v116）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <p class="hint">奇门遁甲排盘功能基于开源项目「掌上乾坤 · 奇门遁甲助手」（作者 qzp001，依 MIT 许可证使用），特此鸣谢。</p>
@@ -1328,7 +1328,8 @@
     </section>
 
     <!-- 步罡踏斗跟练（v2.0.0 (5) 贯通批：《太上助国救民总真秘要》卷八北斗七星纲） -->
-    <section class="card" id="bugang-entry-card">
+    <!-- 2026-10-25 用户定暂时隐藏：卡片带 hidden 不渲染，开关在 js/bugang.js 的 BUGANG_ENABLED；恢复时改开关即可，勿删卡片 -->
+    <section class="card" id="bugang-entry-card" hidden>
       <div class="card-title">步罡踏斗</div>
       <div class="daka-item" id="bugang-open" role="button" tabindex="0">
         <div class="daka-icon">罡</div>
