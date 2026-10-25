@@ -1102,7 +1102,7 @@
 
   /* ---------------- s5 《步天歌》典籍页 ---------------- */
   var bookOpen = {}; /* section -> 是否展开 */
-  var POP_SECTION = '角宿'; /* 点句浮图样张作用域（v2.3.0）：仅本段歌诀句可点开浮图 */
+  var POP_SECTIONS = ['角宿', '亢宿', '氐宿', '房宿', '心宿', '尾宿', '箕宿', '斗宿', '牛宿', '女宿', '虚宿', '危宿', '室宿', '壁宿']; /* 点句浮图作用域（v2.3.0 图式推广）：已落图式层的段歌诀句可点开浮图，随图式分批扩入 */
 
   function renderBook(focusSection) {
     var host = $('sx-book'); if (!host || !BT) return;
@@ -1131,7 +1131,7 @@
       if (open) {
         si.lines.forEach(function (l, li) {
           var isStar = l.kind === '星官句' && l.asterism;
-          var isPop = isStar && s === POP_SECTION;
+          var isPop = isStar && POP_SECTIONS.indexOf(s) >= 0;
           h += '<div class="sx-verse' + (isStar ? '' : ' dim') + (isPop ? ' pop' : '') + '"' +
             (isPop ? ' data-sx-pop="' + esc(s) + ':' + li + '"' : '') +
             '><span class="sx-verse-t">' + txEsc(l.text) + '</span>';
@@ -1163,7 +1163,7 @@
     }
   }
 
-  /* ---------------- s5+ 点句浮图（v2.3.0 样张，作用域：角宿段） ----------------
+  /* ---------------- s5+ 点句浮图（v2.3.0，作用域：POP_SECTIONS 已落图式层的段） ----------------
    * 点本段歌诀句不跳页：当前页悬浮全区示意图（regionMapHTML pop 模式＝与区页
    * 总览图同源同渲染），本句所指星官朱砂高亮、余官中性色；主星（数据层
    * principal 字段）细金环常驻（盘径钳至普通档）。浮层内保留「看详情」入口（原签点击
@@ -1382,8 +1382,8 @@
 
   /* ---------------- 全局点击委托 ---------------- */
   document.addEventListener('click', function (e) {
-    /* 点句浮图（样张·角宿）优先于通用委托：浮层内「看详情」先收浮层再进详情；
-     * 样张段句行（含行内星官签）整行开浮图，不走签的详情跳转 */
+    /* 点句浮图（POP_SECTIONS 段）优先于通用委托：浮层内「看详情」先收浮层再进详情；
+     * 作用域段句行（含行内星官签）整行开浮图，不走签的详情跳转 */
     var popLink = e.target && e.target.closest ? e.target.closest('[data-sx-pop-detail]') : null;
     if (popLink) { var pk = popLink.getAttribute('data-sx-pop-detail'); closeVersePop(); openDetail(pk); return; }
     var popRow = e.target && e.target.closest ? e.target.closest('[data-sx-pop]') : null;
