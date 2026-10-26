@@ -85,6 +85,10 @@
     photos: '++id, houseId, ts',
     guides: 'houseId'
   });
+  /* v2（规格补丁二）：住户表 residents{id,houseId,name,rel,birthYear,birthMonth,
+   * birthDay,gender,note}——rel: head/spouse/child/parent/other；gender: male/female。
+   * 八宅页下批经本表按 houseId 取住户算命卦游年，本批先落表与详情卡。 */
+  db.version(2).stores({ residents: '++id, houseId' });
 
   var ARCH_KEY = 'wuri_fs_house_v1';
   var MIG_KEY = 'wuri_hd_migrated_v1';
@@ -231,7 +235,7 @@
 
   /* ---------------- 视图开关 ---------------- */
   var S = {
-    curHouse: 0, curFloor: 0, cat: 'all', editing: false,
+    curHouse: 0, curFloor: 0, cat: 'all', editing: false, editRes: 0,
     returnToDetail: false, viewerPhoto: 0
   };
   function openList() {
@@ -241,7 +245,7 @@
   }
   function closeList() { var v = $('view-houses'); if (v) v.hidden = true; }
   function openDetail(id, editing) {
-    S.curHouse = id; S.editing = !!editing; S.cat = 'all';
+    S.curHouse = id; S.editing = !!editing; S.cat = 'all'; S.editRes = 0;
     var v = $('view-house'); if (!v) return;
     v.hidden = false; window.scrollTo(0, 0);
     renderDetail();
@@ -411,12 +415,12 @@
     toastMsg(T('hd_exporting'));
     return Promise.all([
       db.houses.toArray(), db.floors.toArray(), db.measurements.toArray(),
-      db.photos.toArray(), db.guides.toArray()
+      db.photos.toArray(), db.guides.toArray(), db.residents.toArray()
     ]).then(function (r) {
       var enc = new TextEncoder();
       var meta = {
         app: 'wuri-house-backup', version: 1, exported: new Date().toISOString(),
-        houses: r[0], floors: r[1], measurements: r[2], guides: r[4],
+        houses: r[0], floors: r[1], measurements: r[2], guides: r[4], residents: r[5],
         photos: r[3].map(function (p) {
           return { id: p.id, houseId: p.houseId, floorId: p.floorId, cat: p.cat, guideKey: p.guideKey, ts: p.ts, file: 'photos/' + p.id + '.jpg' };
         })
@@ -460,11 +464,13 @@
         db.measurements.where('houseId').equals(hid).toArray(),
         db.floors.where('houseId').equals(hid).toArray(),
         db.photos.where('houseId').equals(hid).toArray(),
-        db.guides.get(hid)
+        db.guides.get(hid),
+        db.residents.where('houseId').equals(hid).toArray()
       ]).then(function (r) {
         var ms = r[0].slice().sort(function (a, b) { return b.ts - a.ts; });
         var fls = r[1].slice().sort(function (a, b) { return (a.sort || 0) - (b.sort || 0) || a.id - b.id; });
         if (!fls.length || !fls.some(function (f) { return f.id === S.curFloor; })) S.curFloor = fls.length ? fls[0].id : 0;
+        renderResidents(h, r[4]);
         renderFixed(h, ms.filter(function (m) { return m.fixed; })[0] || null);
         renderMeas(h, ms);
         renderFloors(h, fls);
@@ -517,6 +523,112 @@
         });
       });
     }
+  }
+
+  /* ---------------- 住户（规格补丁二） ---------------- */
+  var RELS = ['head', 'spouse', 'child', 'parent', 'other'];
+  function relName(r) { return T('hd_rel_' + (r || 'other')); }
+  function txs(s) { return window.txPoem ? window.txPoem(s) : s; }
+  function birthText(r) {
+    if (!r.birthYear) return '';
+    if (r.birthMonth && r.birthDay) return TF(T('hd_res_born_full'), r.birthYear, pad2(r.birthMonth), pad2(r.birthDay));
+    if (r.birthMonth) return TF(T('hd_res_born_ym'), r.birthYear, r.birthMonth);
+    return TF(T('hd_res_born_y'), r.birthYear);
+  }
+  function guaHtml(r) {
+    var F = window.WuriSoulFs;
+    if (!F || !r.birthYear || !r.gender) return '';
+    try {
+      var g = F.lifeGua(r.birthYear, r.gender);
+      if (!g || !g.name) return '';
+      return '<span class="hd-res-gua">' + esc(txs(g.name)) + esc(T('fs2_life_suffix')) + '</span>' +
+        '<span class="hd-chip">' + esc(g.group === 'east' ? T('hd_res_east') : T('hd_res_west')) + '</span>';
+    } catch (e) { return ''; }
+  }
+  function renderResidents(h, rs) {
+    var box = $('hd-residents'); if (!box) return;
+    rs = rs.slice().sort(function (a, b) { return a.id - b.id; });
+    var html = '<div class="card-title">' + esc(T('hd_res_title')) + '</div>';
+    if (!rs.length && S.editRes !== -1) html += '<p class="hd-note">' + esc(T('hd_res_empty')) + '</p>';
+    html += rs.map(function (r) {
+      if (S.editRes === r.id) return resFormHtml(r);
+      var meta = [relName(r.rel), r.gender ? T(r.gender === 'male' ? 'fs2_male' : 'fs2_female') : '', birthText(r)]
+        .filter(Boolean).join(' · ');
+      return '<div class="hd-res-row"><div class="hd-log-top">' +
+        '<span class="hd-res-name">' + esc(r.name) + '</span>' + guaHtml(r) +
+        '<span class="hd-res-edit" data-resedit="' + r.id + '">' + esc(T('hd_res_edit')) + '</span></div>' +
+        '<p class="hd-log-meta">' + esc(meta) + (r.note ? ' · ' + esc(r.note) : '') + '</p></div>';
+    }).join('');
+    if (S.editRes === -1) html += resFormHtml(null);
+    else html += '<button class="hd-more" id="hd-res-add">' + esc(T('hd_res_add')) + '</button>';
+    html += '<p class="hd-note" style="margin-top:8px">' + esc(T('hd_res_note')) + '</p>';
+    box.innerHTML = html;
+    var add = $('hd-res-add');
+    if (add) add.addEventListener('click', function () { S.editRes = -1; renderDetail(); });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-resedit]'), function (el) {
+      el.addEventListener('click', function () { S.editRes = +el.getAttribute('data-resedit'); renderDetail(); });
+    });
+    bindResForm(h);
+  }
+  function resFormHtml(r) {
+    var isNew = !r;
+    r = r || { name: '', rel: 'head', birthYear: '', birthMonth: '', birthDay: '', gender: 'male', note: '' };
+    function opts(list, val, lab) {
+      return list.map(function (o) {
+        return '<option value="' + o + '"' + (o === val ? ' selected' : '') + '>' + esc(lab(o)) + '</option>';
+      }).join('');
+    }
+    var row = function (lab, inner) {
+      return '<div class="hd-form-row"><label>' + esc(lab) + '</label>' + inner + '</div>';
+    };
+    var inp = function (id, val, type, ph) {
+      return '<input class="fs2-inp hd-inp" id="' + id + '" type="' + (type || 'text') + '" value="' + esc(val == null ? '' : val) + '"' +
+        (ph ? ' placeholder="' + esc(ph) + '"' : '') + '>';
+    };
+    return '<div class="hd-res-form">' +
+      row(T('hd_f_name'), inp('hd-r-name', r.name)) +
+      row(T('hd_res_rel'), '<select class="fs2-inp hd-inp" id="hd-r-rel">' +
+        opts(RELS, r.rel, relName) + '</select>') +
+      row(T('hd_res_birth'), '<span class="hd-res-birth">' +
+        inp('hd-r-by', r.birthYear, 'number', T('hd_res_year')) +
+        inp('hd-r-bm', r.birthMonth, 'number', T('hd_res_month')) +
+        inp('hd-r-bd', r.birthDay, 'number', T('hd_res_day')) + '</span>') +
+      row(T('fs2_gender'), '<select class="fs2-inp hd-inp" id="hd-r-gender">' +
+        opts(['male', 'female'], r.gender, function (g) { return T(g === 'male' ? 'fs2_male' : 'fs2_female'); }) + '</select>') +
+      row(T('hd_f_note'), inp('hd-r-note', r.note)) +
+      '<div class="hd-actions">' +
+      '<button class="btn primary" id="hd-r-save">' + esc(T('hd_save')) + '</button>' +
+      '<button class="btn" id="hd-r-cancel">' + esc(T('hd_cancel')) + '</button>' +
+      (isNew ? '' : '<button class="btn danger" id="hd-r-del">' + esc(T('hd_del')) + '</button>') +
+      '</div></div>';
+  }
+  function bindResForm(h) {
+    var sv = $('hd-r-save'); if (!sv) return;
+    var editingId = S.editRes;
+    $('hd-r-cancel').addEventListener('click', function () { S.editRes = 0; renderDetail(); });
+    var del = $('hd-r-del');
+    if (del) del.addEventListener('click', function () {
+      if (!window.confirm(T('hd_confirm_del_res'))) return;
+      db.residents.delete(editingId).then(function () { S.editRes = 0; renderDetail(); });
+    });
+    sv.addEventListener('click', function () {
+      var name = $('hd-r-name').value.trim();
+      var by = parseInt($('hd-r-by').value, 10);
+      if (!name || !isFinite(by) || by < 1900 || by > 2100) { toastMsg(T('hd_res_need')); return; }
+      var bm = parseInt($('hd-r-bm').value, 10);
+      var bd = parseInt($('hd-r-bd').value, 10);
+      var data = {
+        houseId: h.id, name: name,
+        rel: $('hd-r-rel').value,
+        birthYear: by,
+        birthMonth: isFinite(bm) && bm >= 1 && bm <= 12 ? bm : null,
+        birthDay: isFinite(bd) && bd >= 1 && bd <= 31 ? bd : null,
+        gender: $('hd-r-gender').value,
+        note: $('hd-r-note').value.trim()
+      };
+      var p = editingId === -1 ? db.residents.add(data) : db.residents.update(editingId, data);
+      Promise.resolve(p).then(function () { S.editRes = 0; toastMsg(T('hd_saved')); renderDetail(); });
+    });
   }
 
   function renderFixed(h, fx) {
@@ -802,6 +914,7 @@
         db.measurements.where('houseId').equals(hid).delete(),
         db.photos.where('houseId').equals(hid).delete(),
         db.floors.where('houseId').equals(hid).delete(),
+        db.residents.where('houseId').equals(hid).delete(),
         db.guides.delete(hid)
       ]).then(function () { return db.houses.delete(hid); })
         .then(function () { return syncMirror(); })

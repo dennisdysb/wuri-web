@@ -2368,3 +2368,14 @@ body.sky-red #hd-viewer-img { filter:brightness(.78) sepia(1) hue-rotate(-52deg)
 #fs-point-row { align-items:center; gap:10px; }
 #fs-point-row .fs2-inp { flex:0 1 180px; }
 #fs-point-row[hidden] { display:none; }
+
+/* 住户（补丁二） */
+.hd-res-row { padding:10px 0; border-top:1px solid var(--line-soft); }
+.hd-res-row:first-of-type { border-top:none; padding-top:2px; }
+.hd-res-name { font-family:var(--serif); font-size:1.05rem; letter-spacing:.08em; color:var(--ink); }
+.hd-res-gua { font-size:.86rem; color:var(--teal-deep); }
+.hd-res-row .hd-chip { margin-left:auto; }
+.hd-res-edit { flex:none; margin-left:10px; font-size:.78rem; color:var(--teal-deep); letter-spacing:.1em; cursor:pointer; }
+.hd-res-form { padding:4px 0 2px; }
+.hd-res-birth { flex:1; display:flex; gap:8px; min-width:0; }
+.hd-res-birth .hd-inp { flex:1; }
