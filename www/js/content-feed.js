@@ -78,6 +78,16 @@
     return true;
   }
 
+  function validDaozang(d) {
+    return !!d && d.section === 'daozang' && Object.prototype.toString.call(d.works) === '[object Array]' && d.works.length > 0;
+  }
+  function applyDaozang(d) {
+    if (!validDaozang(d)) return false;
+    window.DAOZANG_INDEX = d;
+    window.WURI_FEED.applied.daozang = d.version || null;
+    return true;
+  }
+
   function applyPentads(d) {
     if (!validPentads(d)) return false;
     window.WURI_PENTADS_DATA = d;
@@ -94,6 +104,7 @@
     try { if (feed.scriptures && applyScriptures(feed.scriptures)) any = true; } catch (e) {}
     try { if (feed.festivals && applyFestivals(feed.festivals)) any = true; } catch (e) {}
     try { if (feed.pentads && applyPentads(feed.pentads)) any = true; } catch (e) {}
+    try { if (feed.daozang && applyDaozang(feed.daozang)) any = true; } catch (e) {}
     if (any) window.WURI_FEED.source = source;
     return any;
   }
@@ -108,7 +119,7 @@
   if (typeof fetch !== 'function') return;
   fetchJson(FEED_BASE + 'manifest.json').then(function (manifest) {
     if (!manifest || !manifest.sections) return null;
-    var names = ['deities', 'scriptures', 'festivals', 'pentads'];
+    var names = ['deities', 'scriptures', 'festivals', 'pentads', 'daozang'];
     var jobs = names.map(function (name) {
       var sec = manifest.sections[name];
       if (!sec || !sec.file) return Promise.resolve(null);

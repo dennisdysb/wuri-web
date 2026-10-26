@@ -167,11 +167,13 @@ var JingWen = (function () {
         + '</div></div>';
     }
     host.innerHTML = html;
+    /* 道藏全藏入口（daozang.js 挂钩，纯增量；无该脚本时目录不变） */
+    if (window.__wuri_dzCatalog) { try { window.__wuri_dzCatalog(host); } catch (e) {} }
   }
 
   /* ---------- 阅读器 ---------- */
   function rubyPara(p, secIdx, paraIdx) {
-    var t = p.t, py = p.py, out = '';
+    var t = p.t, py = p.py || [], out = '';
     
     // 高亮范围
     var hlKey = (secIdx != null ? secIdx : '_') + '_' + (paraIdx != null ? paraIdx : '_');
@@ -259,9 +261,20 @@ var JingWen = (function () {
         if (d.subtitle) { jsub.textContent = txScript(d.subtitle); jsub.hidden = false; }
         else { jsub.hidden = true; }
       }
-      // 内丹书：隐藏背诵模式按钮
+      // 来源标注（道藏全藏：底本来源＋未校订＋注音口径）
+      var jnote = $('#jing-srcnote');
+      if (jnote) {
+        if (d.note) {
+          jnote.textContent = txScript(d.note + (d.daozang ? '｜底本直出 · 未经校订｜注音为机器标注加审读表校正，多音字可能有误' : ''));
+          jnote.hidden = false;
+        } else { jnote.hidden = true; }
+      }
+      // 内丹书：隐藏背诵模式按钮；全藏无音频亦隐藏背诵
       var rcb2 = $('#jing-recite');
-      if (rcb2) rcb2.hidden = isNeidan(id);
+      if (rcb2) rcb2.hidden = isNeidan(id) || !!d.daozang;
+      // 全藏多卷本：卷体按需填充，「全部展开」不适用（防整部渲染卡死）
+      var fab2 = $('#jing-foldall');
+      if (fab2) fab2.hidden = !!d.lazy;
       // 内丹书强制关闭背诵模式
       if (isNeidan(id) && reciteMode) { reciteMode = false; }
       applyReaderPrefs();
@@ -274,7 +287,7 @@ var JingWen = (function () {
         // 叩磬：在赞/韵/咒/偈类节的末段加（敲磬）
         var h = sec.h || '';
         var isQingSec = /赞|韵|咒|偈|开经|完经/.test(h);
-        var paras = sec.paras.map(function (p, pi) {
+        var paras = (d.lazy && si > 0) ? '' : sec.paras.map(function (p, pi) {
           var txt = reciteMode ? recitePara(p) : rubyPara(p, si, pi);
           if (isQingSec && pi === sec.paras.length - 1) {
             txt += ' <span class="qing-inline" data-qing title="此处叩磬">（敲磬）</span>';
@@ -292,7 +305,7 @@ var JingWen = (function () {
           html += '<div class="jing-sec" data-sec="' + si + '">'
             + '<h3 class="jing-sec-h" data-fold="' + si + '">' + esc(secH)
             + '</h3>'
-            + '<div class="jing-sec-body" hidden>' + paras + '</div>'
+            + '<div class="jing-sec-body"' + ((d.lazy && si > 0) ? ' data-lazy="' + si + '"' : '') + ' hidden>' + paras + '</div>'
             + '</div>';
         }
       });
@@ -300,6 +313,13 @@ var JingWen = (function () {
       updateFoldBtn();
       // 恢复书签位置（如果有）
       var bm = (window.JingMark && window.JingMark.getBookmark(id)) || null;
+      if (bm && bm.expanded && d.lazy) {
+        bm.expanded.forEach(function (sx) {
+          if (window.__wuri_dzFill) { try { window.__wuri_dzFill(sx); } catch (e) {} }
+          var bEl = document.querySelector('#jing-content .jing-sec[data-sec="' + sx + '"] .jing-sec-body');
+          if (bEl) bEl.hidden = false;
+        });
+      }
       if (bm && bm.scrollTop > 50) {
         $('#jing-reader').scrollTop = bm.scrollTop;
       } else {
@@ -323,9 +343,42 @@ var JingWen = (function () {
   }
 
   function toggleSection(si) {
+    if (window.__wuri_dzFill) { try { window.__wuri_dzFill(+si); } catch (e) {} }
     var body = document.querySelector('#jing-content .jing-sec[data-sec="' + si + '"] .jing-sec-body');
     if (body) { body.hidden = !body.hidden; updateFoldBtn(); }
   }
+
+  /* 全藏懒填充：某卷首次展开时才渲染该卷段落（注音/高亮随现行机制） */
+  function dzFillSection(si, force) {
+    var d = window.JINGWEN && window.JINGWEN[currentId];
+    if (!d || !d.lazy) return;
+    var body = document.querySelector('#jing-content .jing-sec[data-sec="' + si + '"] .jing-sec-body');
+    if (!body) return;
+    if (!force && !body.hasAttribute('data-lazy')) return;
+    var sec = d.sections[si];
+    if (!sec) return;
+    if (window.__wuri_dzAnnotate) { try { window.__wuri_dzAnnotate(d, si); } catch (e) {} }
+    body.innerHTML = sec.paras.map(function (p, pi) {
+      return '<p class="jing-para" data-sec="' + si + '" data-para="' + pi + '">' + rubyPara(p, si, pi) + '</p>';
+    }).join('');
+    body.removeAttribute('data-lazy');
+    if (window._jingHlRebuild) { try { window._jingHlRebuild(currentId); } catch (e) {} }
+  }
+  window.__wuri_dzFill = dzFillSection;
+  /* 注音开关切换时：全藏已渲染卷用已加载字典重注并重渲 */
+  window.__wuri_dzOnPyToggle = function () {
+    var d = window.JINGWEN && window.JINGWEN[currentId];
+    if (!d || !d.daozang || !pyOn) return;
+    var refill = function () {
+      document.querySelectorAll('#jing-content .jing-sec-body').forEach(function (b) {
+        if (b.hasAttribute('data-lazy')) return;
+        dzFillSection(+b.parentNode.getAttribute('data-sec'), true);
+      });
+      applyReaderPrefs();
+    };
+    if (window.__wuri_dzEnsureDict) { try { window.__wuri_dzEnsureDict(refill); return; } catch (e) {} }
+    refill();
+  };
 
   function foldAll() {
     var bodies = document.querySelectorAll('#jing-content .jing-sec-body');
@@ -610,6 +663,8 @@ var JingWen = (function () {
       });
       var sp = document.getElementById('jing-speak');
       if (sp) { sp.style.display = ''; sp.hidden = false; }
+      // 道藏全藏一律无音频：免费版口径下亦隐藏系统诵读
+      if (/^KR5/.test(currentId || '') && sp) sp.style.display = 'none';
       // jing-stop 由播放状态控制，这里不动
       return;
     }
@@ -1240,6 +1295,7 @@ var JingWen = (function () {
       pyOn = !pyOn;
       try { localStorage.setItem('wuri_jing_py', pyOn ? '1' : '0'); } catch (e) {}
       applyReaderPrefs();
+      if (window.__wuri_dzOnPyToggle) { try { window.__wuri_dzOnPyToggle(); } catch (e) {} }
     });
     try { reciteMode = localStorage.getItem('wuri_jing_recite') === '1'; } catch (e) {}
     var rcb = $('#jing-recite');
@@ -1250,14 +1306,14 @@ var JingWen = (function () {
     // 注意：点按钮时 iOS 会清掉实时选区，所以用 selectionchange 时缓存的选区（2026-10-11）
     var hlb = $('#jing-highlight-btn');
     if (hlb) hlb.addEventListener('click', function () {
-      if (!currentIsNeidan()) return;
+      if (!(window.JingMark && window.JingMark.marksEnabled(window._jingCurrentId))) return;
       var info = cachedSelInfo;
       if (!info || !info.length) {
         // 缓存没有，尝试取实时选区（桌面端）
         info = getSelOffsets();
         if (!info || !info.length) return;
         var sid0 = window._jingCurrentId;
-        if (!sid0 || !isNeidan(sid0)) return;
+        if (!sid0 || !(window.JingMark && window.JingMark.marksEnabled(sid0))) return;
         info.forEach(function (it) { it.sid = sid0; });
       }
       pendingHl = info;
@@ -1274,17 +1330,23 @@ var JingWen = (function () {
       var p = e.target.closest('.jing-para');
       if (p) { e.stopPropagation(); followSeek(p); }
     });
-    var FONT_SIZES = [17, 28]; /* 两种：正常/大 */
+    var FONT_SIZES = [14, 17, 20, 24, 29]; /* 五档字号，持久化 */
+    function fontIdx() {
+      var best = 1, bd = 1e9;
+      FONT_SIZES.forEach(function (s, i) { var dd = Math.abs(s - fontPx); if (dd < bd) { bd = dd; best = i; } });
+      return best;
+    }
     function setFont(idx) {
+      idx = Math.max(0, Math.min(FONT_SIZES.length - 1, idx));
       fontPx = FONT_SIZES[idx];
       try { localStorage.setItem('wuri_jing_font', fontPx); } catch (e) {}
       applyReaderPrefs();
       // 更新按钮状态
       $('#jing-font-dec').classList.toggle('active', idx === 0);
-      $('#jing-font-inc').classList.toggle('active', idx === 1);
+      $('#jing-font-inc').classList.toggle('active', idx === FONT_SIZES.length - 1);
     }
-    $('#jing-font-inc').addEventListener('click', function () { setFont(1); });
-    $('#jing-font-dec').addEventListener('click', function () { setFont(0); });
+    $('#jing-font-inc').addEventListener('click', function () { setFont(fontIdx() + 1); });
+    $('#jing-font-dec').addEventListener('click', function () { setFont(fontIdx() - 1); });
     $('#jing-speak').addEventListener('click', speakAll);
     var ttsSetBtn = $('#jing-tts-set');
     if (ttsSetBtn) ttsSetBtn.addEventListener('click', function () {
@@ -1338,7 +1400,7 @@ var JingWen = (function () {
       var curId = window._jingCurrentId;
       var isNd = false;
       try {
-        if (curId && window.JingWen && typeof window.JingWen.isNeidan === 'function') isNd = window.JingWen.isNeidan(curId);
+        if (curId && window.JingMark && typeof window.JingMark.marksEnabled === 'function') isNd = window.JingMark.marksEnabled(curId);
       } catch (e) { isNd = false; }
       var showBm = showReader && curId && isNd;
       bmFab.classList.toggle('show', !!showBm);
@@ -1349,7 +1411,7 @@ var JingWen = (function () {
       var curId2 = window._jingCurrentId;
       var isNd2 = false;
       try {
-        if (curId2 && window.JingWen && typeof window.JingWen.isNeidan === 'function') isNd2 = window.JingWen.isNeidan(curId2);
+        if (curId2 && window.JingMark && typeof window.JingMark.marksEnabled === 'function') isNd2 = window.JingMark.marksEnabled(curId2);
       } catch (e) { isNd2 = false; }
       hlBtn.hidden = !(showReader && curId2 && isNd2);
     }
@@ -1380,7 +1442,7 @@ var JingWen = (function () {
     if (bmFab) {
       bmFab.addEventListener('click', function () {
         var sid = window._jingCurrentId;
-        var isNd = window.JingWen && typeof window.JingWen.isNeidan === 'function' ? window.JingWen.isNeidan(sid) : false;
+        var isNd = window.JingMark && typeof window.JingMark.marksEnabled === 'function' ? window.JingMark.marksEnabled(sid) : false;
         if (!sid || !isNd) return;
         // 调用 JingMark 的保存（如果可用），否则用内部的
         if (window.JingMark && window.JingMark.saveBookmark) {
@@ -1427,9 +1489,13 @@ var JingWen = (function () {
     } catch (e) {}
     return false;
   }
+  /* 标记（书签/高亮/心得）适用范围：内丹书籍＋道藏全藏（KR5*） */
+  function marksEnabled(sid) {
+    return isNeidanBook(sid) || /^KR5/.test(sid || '');
+  }
   function currentIsNeidan() {
     var sid = window._jingCurrentId;
-    return sid && isNeidanBook(sid);
+    return sid && marksEnabled(sid);
   }
 
   /* --- 书签 --- */
@@ -1438,7 +1504,7 @@ var JingWen = (function () {
     catch (e) { return {}; }
   }
   function saveBookmark(sid) {
-    if (!isNeidanBook(sid)) return;
+    if (!marksEnabled(sid)) return;
     var reader = $('#jing-reader');
     if (!reader || reader.hidden) return;
     // 保存展开的章节 + 滚动位置
@@ -1807,6 +1873,8 @@ var JingWen = (function () {
   function getBookTitle(sid) {
     var idx = window.JINGWEN_INDEX || [];
     for (var i = 0; i < idx.length; i++) if (idx[i].id === sid) return idx[i].title;
+    var dz = window.DAOZANG_INDEX && window.DAOZANG_INDEX.works;
+    if (dz) for (var j = 0; j < dz.length; j++) if (dz[j].id === sid) return dz[j].title;
     return sid;
   }
   function getSectionTitle(sid, secIdx) {
@@ -1822,6 +1890,8 @@ var JingWen = (function () {
     retryCount = retryCount || 0;
     var hl = getHighlightById(hlId);
     if (!hl) return;
+    // 全藏懒填充：先把目标卷渲染出来
+    if (window.__wuri_dzFill) { try { window.__wuri_dzFill(hl.sec); } catch (e) {} }
     // 先展开目标章节（多章节书默认折叠，高亮可能在隐藏章节里）
     var secBody = document.querySelector('#jing-content .jing-sec[data-sec="' + hl.sec + '"] .jing-sec-body');
     if (secBody && secBody.hidden) {
@@ -1856,7 +1926,7 @@ var JingWen = (function () {
     if (bmBtn) {
       bmBtn.addEventListener('click', function () {
         var sid = window._jingCurrentId;
-        if (!sid || !isNeidanBook(sid)) return;
+        if (!sid || !marksEnabled(sid)) return;
         saveBookmark(sid);
         bmBtn.textContent = '已存✓';
         setTimeout(function () { bmBtn.textContent = '书签'; }, 1500);
@@ -1878,7 +1948,7 @@ var JingWen = (function () {
         try {
           var earlyInfo = getSelOffsets();
           var earlySid = window._jingCurrentId;
-          if (earlyInfo && earlyInfo.length && earlySid && isNeidanBook(earlySid)) {
+          if (earlyInfo && earlyInfo.length && earlySid && marksEnabled(earlySid)) {
             earlyInfo.forEach(function (it) { it.sid = earlySid; });
             cachedSelInfo = earlyInfo;
           }
@@ -1888,7 +1958,7 @@ var JingWen = (function () {
           var info = getSelOffsets();
           if (!info || !info.length) { hideHlPop(); return; }
           var sid = window._jingCurrentId;
-          if (!sid || !isNeidanBook(sid)) return;
+          if (!sid || !marksEnabled(sid)) return;
           // info 是数组（支持跨段落），每条加上 sid
           info.forEach(function (it) { it.sid = sid; });
           pendingHl = info; // 数组
@@ -2002,6 +2072,7 @@ var JingWen = (function () {
         setTimeout(function () {
           // 恢复展开的章节
           expanded.forEach(function (secIdx) {
+            if (window.__wuri_dzFill) { try { window.__wuri_dzFill(+secIdx); } catch (e) {} }
             var body = document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"] .jing-sec-body');
             if (body) body.hidden = false;
           });
@@ -2033,6 +2104,7 @@ var JingWen = (function () {
     showNoteModal: showNoteModal,
     scrollToHighlight: scrollToHighlight,
     isNeidanBook: isNeidanBook,
+    marksEnabled: marksEnabled,
     HL_COLORS: HL_COLORS
   };
 })();
@@ -2057,6 +2129,8 @@ var JingWen = (function () {
   function titleOf(sid) {
     var idx = window.JINGWEN_INDEX || [];
     for (var i = 0; i < idx.length; i++) if (idx[i].id === sid) return idx[i].title;
+    var dz = window.DAOZANG_INDEX && window.DAOZANG_INDEX.works;
+    if (dz) for (var j = 0; j < dz.length; j++) if (dz[j].id === sid) return dz[j].title;
     return sid;
   }
   // 暴露给外部调用（每日经文推荐等）
@@ -2107,7 +2181,7 @@ var JingWen = (function () {
     var bm = {};
     try { bm = JSON.parse(localStorage.getItem('wuri_jing_bookmarks') || '{}'); } catch (e) {}
     // 只显示内丹书的书签（每本书可有多个书签）
-    var keys = Object.keys(bm).filter(function (sid) { return JM.isNeidanBook(sid); });
+    var keys = Object.keys(bm).filter(function (sid) { return JM.marksEnabled(sid); });
     var total = 0;
     keys.forEach(function (sid) {
       var arr = bm[sid];
@@ -2124,7 +2198,7 @@ var JingWen = (function () {
         arr.forEach(function (b) {
           var bmId = b.id || sid;
           html += '<div class="jing-hl-item" data-open-bm="' + bmId + '" data-sid="' + sid + '">'
-            + '<div><span class="jing-book">丹</span> ' + esc(titleOf(sid)) + '</div>'
+            + '<div><span class="jing-book">' + (/^KR5/.test(sid) ? '藏' : '丹') + '</span> ' + esc(titleOf(sid)) + '</div>'
             + '<div class="hl-meta">' + fmtDate(b.ts) + ' · 点击继续阅读</div>'
             + '<span class="hl-del" data-del-bm="' + bmId + '" data-sid="' + sid + '">删除</span>'
             + '</div>';
@@ -2135,7 +2209,7 @@ var JingWen = (function () {
   }
 
   function renderHighlights(JM) {
-    var hls = JM.getHighlights().filter(function (h) { return JM.isNeidanBook(h.sid); });
+    var hls = JM.getHighlights().filter(function (h) { return JM.marksEnabled(h.sid); });
     var colors = JM.HL_COLORS || {};
     var html = '<h3 class="jing-sec-h">高亮（' + hls.length + '）</h3>';
     if (!hls.length) {
@@ -2162,7 +2236,7 @@ var JingWen = (function () {
   }
 
   function renderNotes(JM) {
-    var notes = JM.getNotes().filter(function (n) { return JM.isNeidanBook(n.sid); });
+    var notes = JM.getNotes().filter(function (n) { return JM.marksEnabled(n.sid); });
     // 按更新时间倒序
     notes.sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
     var html = '<h3 class="jing-sec-h">心得（' + notes.length + '）</h3>';
@@ -2272,6 +2346,7 @@ var JingWen = (function () {
               // 先展开保存的章节
               if (bm.expanded && bm.expanded.length) {
                 bm.expanded.forEach(function (secIdx) {
+                  if (window.__wuri_dzFill) { try { window.__wuri_dzFill(secIdx); } catch (e) {} }
                   var body = document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"] .jing-sec-body');
                   if (body) body.hidden = false;
                 });

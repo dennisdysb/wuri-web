@@ -22,6 +22,10 @@
    "version": 1,
    "file": "pentads.json",
    "count": 72
+  },
+  "daozang": {
+   "version": 1,
+   "file": "daozang/index.json"
   }
  }
 }

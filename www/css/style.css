@@ -2072,3 +2072,21 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .entry-arrow{margin-left:auto;align-self:center;font-size:1.35rem;line-height:1;color:var(--ink-2)}
 .about-more{margin-top:2px}
 .settings-entry .entry-arrow{flex:none}
+
+/* 道藏全藏（v135）：来源标注 + 全藏浏览层 */
+.jing-srcnote{font-size:.8em;color:var(--ink-2);line-height:1.55;margin:2px 0 10px;padding:8px 10px;border:1px dashed var(--line-soft);border-radius:8px}
+.dz-body{padding:4px 0 8px}
+.dz-note{font-size:.82em;color:var(--ink-2);margin:4px 0 8px}
+.dz-search input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line-soft);border-radius:10px;background:transparent;color:var(--ink);font-size:.95em}
+.dz-bu{display:flex;align-items:center;gap:10px;padding:13px 6px;border-bottom:1px solid var(--line-soft);cursor:pointer;font-size:1.02em;color:var(--ink)}
+.dz-bu:active{background:var(--teal-wash)}
+.dz-count{margin-left:auto;font-size:.8em;color:var(--ink-2)}
+.dz-bu .jing-go{margin-left:2px}
+.dz-works{border-bottom:1px solid var(--line-soft)}
+.dz-work{display:flex;align-items:baseline;gap:8px;padding:11px 6px 11px 18px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.dz-work:active{background:var(--teal-wash)}
+.dz-wt{flex:1;min-width:0;color:var(--ink);line-height:1.45}
+.dz-lei{flex:none;font-size:.72em;color:var(--gold,#a8823c);border:1px solid currentColor;border-radius:6px;padding:1px 5px}
+.dz-wm{flex:none;font-size:.76em;color:var(--ink-2)}
+.dz-empty{padding:14px 6px;color:var(--ink-2);font-size:.9em}
+.dz-hitn{padding:10px 6px 2px;color:var(--ink-2);font-size:.85em}

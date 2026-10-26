@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=134">
+<link rel="stylesheet" href="css/style.css?v=135">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=69">
 </head>
@@ -221,6 +221,7 @@
         </div>
         <h2 id="jing-title" class="jing-book-title"></h2>
         <div id="jing-subtitle" class="jing-book-subtitle" hidden></div>
+        <div id="jing-srcnote" class="jing-srcnote" hidden></div>
         <div id="jing-content" class="jing-content"></div>
         <!-- 高亮操作浮层（内容由 JS 动态生成：4色+取消，或写心得+换色+删除） -->
         <div id="hl-pop" class="hl-pop" hidden></div>
@@ -850,6 +851,7 @@
       <p class="hint" data-i18n="me_credit_breathly">冥想「呼吸」型态的参数与节奏设计参考开源项目 Breathly（依 MPL-2.0 许可证），本应用只采用参数与节奏选型，呼吸引导由本站自行实现，特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_pentads_a">七十二候数据据《月令七十二候集解》通行系统，由两个开源数据源互校，来源之一：health-calendar（© 2026 nextPage，依 MIT 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_pentads_b">七十二候数据来源之二：Suìshí 岁时（© 2025 PimplesOnNose，依 MIT 许可证使用），特此鸣谢。</p>
+      <p class="hint" data-i18n="me_credit_kanripo">「道藏全藏」经文底本出自 Kanseki Repository（Kanripo，漢字文獻庫）所錄《正統道藏》（涵芬樓版）等影印底本，依 CC BY-SA 4.0 許可證使用；本站清洗稿（去標記、合併斷行）同以 CC BY-SA 4.0 釋出，特此鳴謝。</p>
       <p class="hint">平面星图的投影与大圆路径基于开源库「D3」（d3-geo / d3-array，作者 Mike Bostock 等，依 BSD-3-Clause 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_dingben">星象模块星官体系以《漫步中国星空》（增订版，齐锐、万昊宜著，科学普及出版社）为定本校订；《步天歌》用该书所本《灵台秘苑》系统。</p>
       <p class="hint">部分经文诵读音频由温哥华清玄道长提供，特此鸣谢。</p>
@@ -1706,6 +1708,7 @@
 <script src="js/ics-generator.js"></script>
 <script src="js/t2s.js"></script>
 <script src="js/jingwen.js"></script>
+<script src="js/daozang.js"></script>
 <script src="js/deities-data.js"></script>
 <script src="js/deities.js"></script>
 <script>window.exports = {};</script>
