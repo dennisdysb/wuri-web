@@ -1667,7 +1667,12 @@ details.disc-foot .hint{margin-top:9px}
 .sx-chip i{font-style:normal;font-family:var(--sans);font-size:.68rem;color:var(--gold);margin-left:5px}
 .sx-duo{display:flex;gap:10px;margin-top:6px}
 .sx-entry{flex:1;display:flex;gap:10px;align-items:center;padding:12px;cursor:pointer;min-width:0}
-/* 《步天歌》入口：移植原文库分架按键设计（深蓝夜空渐变＋鎏金字＋星芒饰），2026-10-26 */
+.sx-entry img{width:40px;height:52px;object-fit:cover;border-radius:8px}
+.sx-entry .e1{font-family:var(--serif);font-weight:700;color:var(--ink);font-size:.98rem}
+.sx-entry .e2{font-family:var(--sans);font-size:.7rem;color:var(--muted);margin-top:2px;line-height:1.5}
+/* 《步天歌》入口：移植原文库分架按键设计（深蓝夜空渐变＋鎏金字＋星芒饰），2026-10-26。
+ * 恒深色卡面：文字色与主题脱钩、固定浅金/米白。本块必须排在 .sx-entry .e1/.e2 通用规则之后——
+ * 同权重下后写者胜，此前本块在前，.e1 被 var(--ink) 压过、日间深字压深卡面隐形（2026-10-26 真机修复）。 */
 .sx-entry-book{background:linear-gradient(160deg,#101725,#1d2c42 55%,#0c1420);border-color:rgba(201,168,106,.35);color:#EDE4C8;position:relative;overflow:hidden}
 .sx-entry-book::after{content:"✦ ✧ · ✦";position:absolute;right:8px;top:5px;font-size:.56rem;letter-spacing:.5em;color:rgba(237,228,200,.35)}
 .sx-entry-book .bk-k{font-family:var(--sans);font-size:.6rem;letter-spacing:.3em;color:#c9a86a}
@@ -1675,9 +1680,8 @@ details.disc-foot .hint{margin-top:9px}
 .sx-entry-book .e2{color:rgba(237,228,200,.72)}
 body.sky-red .sx-entry-book{background:linear-gradient(160deg,#0d0303,#1e0603 55%,#070202);color:#eda88f}
 body.sky-red .sx-entry-book .bk-k{color:#e0563a}
-.sx-entry img{width:40px;height:52px;object-fit:cover;border-radius:8px}
-.sx-entry .e1{font-family:var(--serif);font-weight:700;color:var(--ink);font-size:.98rem}
-.sx-entry .e2{font-family:var(--sans);font-size:.7rem;color:var(--muted);margin-top:2px;line-height:1.5}
+body.sky-red .sx-entry-book .e1{color:#f2c1b2}
+body.sky-red .sx-entry-book .e2{color:rgba(242,193,178,.72)}
 .sx-crumb{font-family:var(--sans);font-size:.74rem;color:var(--muted);letter-spacing:.08em}
 .sx-lead{padding:13px 14px;margin:12px 0 14px;font-family:var(--serif);font-size:1rem;line-height:1.9;color:var(--ink);letter-spacing:.05em;cursor:pointer}
 .sx-lead small{display:block;font-family:var(--sans);font-size:.72rem;color:var(--muted);letter-spacing:.1em;margin-top:4px}
