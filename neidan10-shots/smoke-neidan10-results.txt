@@ -1,0 +1,18 @@
+PASS S1 feed v8/44部
+PASS S2 索引10部书名无误
+PASS S3 manifest 同步
+PASS S4 名单接线
+PASS S5 逐部正文与底本逐字一致+分卷+来源标注
+PASS B1 feed 已应用 v8
+PASS B2 内丹区 15 部齐（5旧+10新）
+PASS B3 新部未漏入常见经文区
+PASS B4 非Pro点s40弹付费墙且不开卷
+PASS B4 非Pro点s18弹付费墙且不开卷
+PASS B5 非Pro轮JS异常（点击前0条，须与基线一致）
+PASS B6 Pro逐部开卷（卷数/书名/来源条/正文/无音频钮/标记放行）
+PASS B7 检索「坐忘」命中 s48
+PASS B7 检索「张伯端」命中 s40
+PASS B7 检索「传道集」命中 s22
+PASS B7 检索「规中」命中 s44
+PASS B8 Pro轮零JS异常
+== 17/17 ==
