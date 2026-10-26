@@ -263,6 +263,82 @@ var JingWen = (function () {
     return out;
   }
 
+  /* ---------- 内丹标点版（2026-10-26 内丹优先批） ----------
+   * 精选内丹新 10 部正文与 KR 底本逐字全等（离线核对：字流＋段界全同），
+   * 标点分片与道藏全集共用 content/daozang/texts-punct/<KR 编号>.json。
+   * 接入口径同 v141 全藏：有标点版默认标点版、偏好全局记忆（wuri_dz_punct，
+   * 与全藏共用一个偏好）、标点版标「机器标点 · 未经校订」、排版走 .dz-punct。
+   * 高亮字序投影复用 daozang.js（其入口查找已按 JINGWEN 兜底）。 */
+  var JING_PUNCT_SRC = {
+    s22: 'KR5a0266', s40: 'KR5a0268', s41: 'KR5i0039', s42: 'KR5d0104',
+    s43: 'KR5f0025', s44: 'KR5a0244', s45: 'KR5d0090', s46: 'KR5d0114',
+    s47: 'KR5i0067', s48: 'KR5d0059'
+  };
+  var JP_PUNCT_CHARS = '。，、；：？！·…—「」『』﹝﹞（）《》〈〉“”‘’％';
+  function jpIsPunct(ch) { return JP_PUNCT_CHARS.indexOf(ch) >= 0 || /\s/.test(ch); }
+  function jpStrip(s) {
+    var o = '';
+    for (var i = 0; i < s.length; i++) if (!jpIsPunct(s[i])) o += s[i];
+    return o;
+  }
+  /* 标点版段落排版分类：与 daozang.js punctParaCls 同口径（spec v1.1 §9–12） */
+  function jpParaCls(t, isFirst) {
+    var s = jpStrip(t), L = s.length;
+    if (!L) return '';
+    if (L <= 18 && /第[一二三四五六七八九十百廿卅\d]+$/.test(s) && !/[，。；：？]/.test(t)) return 'dz-cht';
+    if (/^[^，。；？！]{1,14}曰：/.test(t)) return 'dz-dlg';
+    if (isFirst && L <= 20) return 'dz-verse';
+    var nEnd = (t.match(/[，。；]/g) || []).length;
+    if (L <= 17 && /[，。]$/.test(t) && nEnd <= 2) return 'dz-verse';
+    return '';
+  }
+  function jpPunctPref() {
+    try { return localStorage.getItem('wuri_dz_punct') === 'orig' ? 'orig' : 'punct'; } catch (e) { return 'punct'; }
+  }
+  /* 标点版 sections：逐节对位——标点段流去标点后必须与精选正文逐字相等，
+     任一节不符整部回落原文（保真铁律，运行时自检，与离线校验双保险） */
+  function buildJingPunctSections(d, pw) {
+    if (!pw || !pw.volumes || pw.volumes.length !== d.sections.length) return null;
+    var out = [];
+    for (var si = 0; si < d.sections.length; si++) {
+      var sec = d.sections[si], pv = pw.volumes[si];
+      if (!pv || !pv.paras) return null;
+      var oJoin = sec.paras.map(function (p) { return p.t; }).join('');
+      var pJoin = pv.paras.join('');
+      if (jpStrip(pJoin) !== oJoin) return null;
+      out.push({
+        h: sec.h, _punct: true,
+        paras: pv.paras.map(function (t, pi) {
+          var o = { t: t };
+          var cls = jpParaCls(t, pi === 0);
+          if (cls) o.cls = cls;
+          return o;
+        })
+      });
+    }
+    return out;
+  }
+  function applyJingPunctMode(d) {
+    d.punctMode = !!(d.hasPunct && jpPunctPref() === 'punct');
+    d.sections = d.punctMode ? d.sectionsPunct : d.sectionsOrig;
+  }
+  /* 开卷渲染前备好标点版：仅映射内经文触发；拉取/对位失败静默回落原文。
+     只建一次（_punctInit），模式切换由切换钮经 daozang.js 的 applyDzMode 处理 */
+  function prepJingPunct(d, done) {
+    var kr = JING_PUNCT_SRC[d.id];
+    if (!kr || d._punctInit) { done(); return; }
+    d._punctInit = true;
+    d.sectionsOrig = d.sections;
+    fetch('content/daozang/texts-punct/' + kr + '.json')
+      .then(function (r) { return r.json(); })
+      .then(function (pw) {
+        var sp = buildJingPunctSections(d, pw);
+        if (sp) { d.hasPunct = true; d.sectionsPunct = sp; applyJingPunctMode(d); }
+        done();
+      })
+      .catch(function () { done(); });
+  }
+
   function openReader(id, _retry) {
     /* 内丹书籍为高级版（2026-10-14 用户定）：目录、搜索、每日推荐所有入口都经此函数，未解锁弹付费墙 */
     if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
@@ -279,6 +355,11 @@ var JingWen = (function () {
         }
         return;
       }
+      prepJingPunct(d, function () { renderReaderBody(id, d); });
+    });
+  }
+
+  function renderReaderBody(id, d) {
       currentId = id;
       window._jingCurrentId = id;
       $('#jing-home').hidden = true;
@@ -303,21 +384,24 @@ var JingWen = (function () {
             dzSuffix = d.punctMode
               ? '｜机器标点 · 未经校订' + (d.punctPartial ? '（已标 ' + d.punctPartial.done + '/' + d.punctPartial.total + ' 卷）' : '') + '｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : '')
               : '｜底本直出 · 未经校订｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : '');
+          } else if (d.punctMode) {
+            /* 精选内丹标点版：只标标点口径（底本口径已在 note 内） */
+            dzSuffix = '｜机器标点 · 未经校订';
           }
           jnote.textContent = txScript(d.note + dzSuffix);
           jnote.hidden = false;
         } else { jnote.hidden = true; }
       }
-      // 标点版切换钮（仅道藏全集且该部有标点版时显示；文案随当前模式）
+      // 标点版切换钮（该部有标点版时显示：道藏全集或精选内丹；文案随当前模式）
       var pbtn = $('#jing-punctbtn');
       if (pbtn) {
-        var canPunct = !!(d.daozang && d.hasPunct);
+        var canPunct = !!d.hasPunct;
         pbtn.hidden = !canPunct;
         if (canPunct) pbtn.textContent = d.punctMode ? '标点开' : '标点关';
       }
       // 标点版排版容器类（spec v1.1 §12：行高/段距/缩进走 .dz-punct 规则）
       var jcontent = $('#jing-content');
-      if (jcontent) jcontent.classList.toggle('dz-punct', !!(d.daozang && d.punctMode));
+      if (jcontent) jcontent.classList.toggle('dz-punct', !!d.punctMode);
       // 内丹书：隐藏背诵模式按钮；全藏无音频亦隐藏背诵
       var rcb2 = $('#jing-recite');
       if (rcb2) rcb2.hidden = isNeidan(id) || !!d.daozang;
@@ -380,7 +464,6 @@ var JingWen = (function () {
         clearFollowCur();
         buildFollowMap();
       }
-    });
   }
 
   function updateFoldBtn() {

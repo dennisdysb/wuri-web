@@ -290,6 +290,14 @@
    * 标点版与原文内容字逐字同序（保真校验），故以「内容字序号」为中介：
    * 原文段内偏移 → 全卷内容字区间 → 标点段串内下标，反之亦然。
    * 运行时逐卷自检 strip(标点全文)===原文全文，不符则该卷不投影（回退原样）。 */
+  /* 入口查找：全藏走 workCache；精选内丹的标点 entry 挂在 JINGWEN 上
+     （jingwen.js prepJingPunct 建 sectionsOrig/sectionsPunct），投影与切换共用此查找 */
+  function dzFindEntry(id) {
+    if (!id) return null;
+    if (workCache[id]) return workCache[id];
+    var j = window.JINGWEN && window.JINGWEN[id];
+    return (j && j.sectionsPunct) ? j : null;
+  }
   function dzSecMap(entry, si) {
     if (!entry || !entry.sectionsPunct) return null;
     entry._hlMaps = entry._hlMaps || {};
@@ -316,7 +324,7 @@
   }
   /* 原文坐标 → 显示（标点）坐标段数组；非标点模式/无映射返回 null（调用方回退原值） */
   window.__wuri_dzHlToDisp = function (sid, h) {
-    var e = workCache[sid];
+    var e = dzFindEntry(sid);
     if (!e || !e.punctMode || !h) return null;
     var m = dzSecMap(e, h.sec);
     if (!m) return null;
@@ -331,7 +339,7 @@
   };
   /* 显示（标点）选区段 → 原文坐标段数组（可能跨原文段，逐段拆） */
   window.__wuri_dzHlToOrig = function (sid, seg) {
-    var e = workCache[sid];
+    var e = dzFindEntry(sid);
     if (!e || !e.punctMode || !seg) return null;
     var m = dzSecMap(e, seg.sec);
     if (!m) return null;
@@ -353,9 +361,11 @@
      的展开/滚动恢复；门控与 openWork 同源——非 Pro 在此亦弹墙、绝不换版 */
   window.__wuri_dzTogglePunct = function () {
     var id = window._jingCurrentId;
-    var e = id && workCache[id];
+    var e = id && dzFindEntry(id);
     if (!e || !e.hasPunct) return;
-    if (!dzGate()) return;
+    /* 精选内丹：开卷已经内丹 Pro 门控，此处不再走全藏门控（二者同为高级版，
+       但非 Pro 根本进不了内丹阅读器，不存在绕过面） */
+    if (e.daozang && !dzGate()) return;
     try { localStorage.setItem('wuri_dz_punct', e.punctMode ? 'orig' : 'punct'); } catch (err) {}
     applyDzMode(e);
     document.dispatchEvent(new CustomEvent('jing-rerender'));
