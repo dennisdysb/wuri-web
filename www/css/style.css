@@ -2125,3 +2125,91 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .dz-wm{flex:none;font-size:.69em;color:var(--muted)}/* 卷字信息降次级小字（v142）：.76em/12.2px→.69em/11px 并改灰 */
 .dz-empty{padding:14px 6px;color:var(--ink-2);font-size:.9em}
 .dz-hitn{padding:10px 6px 2px;color:var(--ink-2);font-size:.85em}
+
+/* ================= 风水模块（2026-10-26 第一批：入口卡/专页/罗盘） =================
+   底图分工同 heroes 家族：夜间图 img/heroes/<名>.webp，日间图 img/heroes/day/<名>.webp。
+   红光：.h2-bg 与 svg 已被 body.sky-red 全局滤镜链接管，此处不另设红光专用色（铁规）。 */
+.hero2 .h2-bg-fs-luopan { background-image: url('../img/heroes/luopan.webp'); background-position: center 54%; }
+.hero2 .h2-bg-fs-bazhai { background-image: url('../img/heroes/bazhai.webp'); background-position: center 38%; }
+.hero2 .h2-bg-fs-xuankong { background-image: url('../img/heroes/xuankong.webp'); background-position: center 26%; }
+[data-theme="day"] .hero2 .h2-bg-fs-luopan { background-image: url('../img/heroes/day/luopan.webp'); }
+[data-theme="day"] .hero2 .h2-bg-fs-bazhai { background-image: url('../img/heroes/day/bazhai.webp'); }
+[data-theme="day"] .hero2 .h2-bg-fs-xuankong { background-image: url('../img/heroes/day/xuankong.webp'); }
+
+/* 高级版角标：鎏金毛玻璃胶囊（设计稿新定式；红光单独覆写随链） */
+.fs-pro { position: absolute; top: 12px; right: 12px; z-index: 2;
+  padding: 4px 11px 4px 13px; border-radius: 999px;
+  font-family: var(--serif); font-size: .7rem; letter-spacing: .26em;
+  color: #f3df9f; border: 1px solid rgba(232,200,119,.75);
+  background: rgba(12,9,4,.42);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+[data-theme="day"] .fs-pro { color: #84631F; border-color: rgba(150,118,42,.55);
+  background: rgba(245,241,229,.8); }
+body.sky-red .fs-pro { color: #f2c1b2; border-color: rgba(255,96,72,.5);
+  background: rgba(26,8,6,.5); }
+
+/* 专页引言与页脚 */
+.fs-lead-k { font-size: .72rem; letter-spacing: .34em; color: var(--gold); margin-bottom: 7px; }
+.fs-lead { font-family: var(--serif); font-size: 1.02rem; line-height: 1.9; color: var(--ink); margin: 0; }
+.fs-foot { text-align: center; font-size: .76rem; line-height: 1.9; color: var(--faint); margin: 16px 8px 0; }
+
+/* 坐向档案卡（空状态与已存状态共用） */
+.fs-arch-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 0 2px; }
+.fs-arch-state { font-family: var(--serif); font-size: 1.06rem; letter-spacing: .22em; color: var(--ink-2); margin-top: 12px; }
+.fs-arch-line { font-family: var(--serif); font-size: 1.14rem; letter-spacing: .14em; color: var(--ink); margin-top: 12px; }
+.fs-arch-hint { font-size: .84rem; line-height: 1.8; color: var(--muted); margin-top: 6px; }
+.fs-arch-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+.fs-chipbtn { display: inline-block; padding: 8px 20px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--card);
+  color: var(--teal-deep); font-size: .85rem; letter-spacing: .16em; }
+.fs-chipbtn.danger { color: #b23a2b; }
+
+/* 罗盘页 */
+.fs-compass-title { text-align: center; font-family: var(--serif); font-size: 1.08rem;
+  letter-spacing: .44em; text-indent: .44em; color: var(--ink); margin: 10px 0 2px; }
+.fs-compass-sub { text-align: center; font-size: .78rem; letter-spacing: .18em; color: var(--muted); }
+.fs-stage { position: relative; width: min(88vw, 352px); margin: 4px auto 0; touch-action: none; }
+.fs-pointer { text-align: center; color: var(--gold); font-size: 17px; line-height: 1; height: 20px;
+  text-shadow: 0 0 8px rgba(201,168,106,.5); }
+#fs-dial { width: 100%; height: auto; display: block; }
+#fs-dial-rot { will-change: transform; }
+.dl-rim { fill: #2e1c0d; }
+.dl-face { fill: #16120d; }
+.dl-hair { fill: none; stroke: rgba(201,168,106,.38); stroke-width: .8; }
+.dl-tick { stroke: rgba(233,226,207,.45); stroke-width: 1; }
+.dl-tick-l { stroke: #c9a86a; stroke-width: 1.7; }
+.dl-mtn { fill: #E9E2CF; font-family: var(--serif); font-weight: 600; }
+.dl-card { fill: #D1543A; }
+.dl-gua { fill: #C9A86A; }
+.dl-tri { fill: #E9E2CF; }
+.dl-name { fill: #B9AE8E; font-family: var(--serif); }
+.dl-redline { stroke: #C8452F; stroke-width: 1.2; opacity: .5; }
+.dl-center { fill: #1E1811; stroke: rgba(201,168,106,.55); stroke-width: 1; }
+.dl-big { fill: #F0E9D6; font-family: var(--serif); font-weight: 700; }
+.dl-deg { fill: #C9A86A; font-family: var(--serif); }
+.dl-small { fill: #8E8670; font-family: var(--serif); }
+[data-theme="day"] .dl-rim { fill: #6e4a29; }
+[data-theme="day"] .dl-face { fill: #F4EDD8; }
+[data-theme="day"] .dl-hair { stroke: rgba(122,94,40,.45); }
+[data-theme="day"] .dl-tick { stroke: rgba(42,37,27,.5); }
+[data-theme="day"] .dl-tick-l { stroke: #86702E; }
+[data-theme="day"] .dl-mtn { fill: #2A251B; }
+[data-theme="day"] .dl-card { fill: #B23A2B; }
+[data-theme="day"] .dl-gua { fill: #86702E; }
+[data-theme="day"] .dl-tri { fill: #2A251B; }
+[data-theme="day"] .dl-name { fill: #8C8371; }
+[data-theme="day"] .dl-redline { stroke: #B23A2B; }
+[data-theme="day"] .dl-center { fill: #FBF7EA; stroke: rgba(122,94,40,.42); }
+[data-theme="day"] .dl-big { fill: #2A251B; }
+[data-theme="day"] .dl-deg { fill: #86702E; }
+[data-theme="day"] .dl-small { fill: #8C8371; }
+.fs-ori-note { text-align: center; font-size: .8rem; line-height: 1.7; color: var(--muted);
+  min-height: 1.7em; margin: 12px 12px 0; }
+.fs-chips { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+.fs-chip { padding: 7px 13px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--card); font-size: .8rem; color: var(--muted); letter-spacing: .06em; }
+.fs-chip b { color: var(--ink); font-weight: 600; }
+.fs-act { display: flex; justify-content: center; margin-top: 16px; }
+#fs-ori-act[hidden] { display: none; }
+.fs-tips p { line-height: 2.0; font-size: .88rem; color: var(--ink-2); margin: 0; }
+.fs-tips p b { color: var(--ink); font-weight: 600; }

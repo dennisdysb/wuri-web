@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=151">
+<link rel="stylesheet" href="css/style.css?v=152">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=71">
 </head>
@@ -98,6 +98,20 @@
         <div class="h2-gold"><span><span id="deities-count-cn">七十四</span>位尊神</span></div>
       </div>
       <button class="btn primary hero-enter" id="deities-enter" hidden>进入图鉴</button>
+    </section>
+
+    <!-- 风水入口（2026-10-26 立项：主页最下面一张 → #view-fengshui 专页） -->
+    <section class="hero2" id="fengshui-entry-card">
+      <div class="h2-bg h2-bg-fs-luopan" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="fs_home_title">风水</div>
+        <p class="h2-sub" data-i18n="fs_home_sub">罗盘定向，八宅飞星——量一量宅子的坐向与气运。</p>
+        <div class="h2-segs" aria-hidden="true">
+          <span class="h2-seg" data-i18n="fs_compass">罗盘</span>
+          <span class="h2-seg" data-i18n="fs_bazhai">八宅</span>
+          <span class="h2-seg" data-i18n="fs_xuankong">玄空飞星</span>
+        </div>
+      </div>
     </section>
 
     <div class="tab-spacer"></div>
@@ -845,7 +859,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v151）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v152）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -1111,6 +1125,98 @@
       </div>
       <button class="btn primary hero-enter" id="qimen-enter" hidden>开始排盘</button>
     </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 风水专页（2026-10-26 第一批：骨架＋罗盘） ============ -->
+  <main id="view-fengshui" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('fs-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="fs-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="fs_home_title">风水</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card">
+      <div class="fs-lead-k" data-i18n="fs_lead_k">堪舆 · 阳宅</div>
+      <p class="fs-lead"><span data-i18n="fs_lead_1">先量坐向，再排飞星、定八宅。</span><br><span data-i18n="fs_lead_2">坐向一次量好，三处通用。</span></p>
+    </section>
+
+    <section class="card">
+      <div class="card-title centered" data-i18n="fs_arch_title">我的房屋坐向</div>
+      <div id="fs-arch"></div>
+    </section>
+
+    <section class="hero2 mini" id="fs-card-compass">
+      <div class="h2-bg h2-bg-fs-luopan" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="fs_compass">罗盘</div>
+        <p class="h2-sub" data-i18n="fs_compass_sub">二十四山定向 · 真北修正 · 免费</p>
+      </div>
+    </section>
+
+    <section class="hero2 mini" id="fs-card-bazhai">
+      <span class="fs-pro" data-i18n="fs_pro">高级版</span>
+      <div class="h2-bg h2-bg-fs-bazhai" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="fs_bazhai">八宅</div>
+        <p class="h2-sub" data-i18n="fs_bazhai_sub">命卦合宅卦 · 四吉四凶定方位</p>
+      </div>
+    </section>
+
+    <section class="hero2 mini" id="fs-card-xuankong">
+      <span class="fs-pro" data-i18n="fs_pro">高级版</span>
+      <div class="h2-bg h2-bg-fs-xuankong" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="fs_xuankong">玄空飞星</div>
+        <p class="h2-sub" data-i18n="fs_xuankong_sub">三元九运 · 山向飞星排盘</p>
+      </div>
+    </section>
+
+    <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 罗盘页（二十四山 · 传感器定向） ============ -->
+  <main id="view-compass" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('fs-compass-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="fs-compass-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="fs_compass">罗盘</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <div class="fs-compass-title" data-i18n="fs_compass_title">二十四山罗盘</div>
+    <div class="fs-compass-sub" data-i18n="fs_compass_sub2">天心十道 · 真北定向</div>
+
+    <div class="fs-stage" id="fs-stage">
+      <div class="fs-pointer">▼</div>
+      <svg id="fs-dial" viewBox="0 0 380 380" role="img" aria-label="二十四山罗盘"></svg>
+    </div>
+
+    <p class="fs-ori-note" id="fs-ori-note"></p>
+
+    <div class="fs-chips">
+      <span class="fs-chip"><span data-i18n="fs_chip_true">真北向</span> <b id="fs-chip-true">—</b></span>
+      <span class="fs-chip"><span data-i18n="fs_chip_mag">罗盘读数</span> <b id="fs-chip-mag">—</b></span>
+      <span class="fs-chip"><span data-i18n="fs_chip_decl">磁偏角</span> <b id="fs-chip-decl">—</b> · <span data-i18n="fs_decl_done">已修正</span></span>
+    </div>
+
+    <div class="fs-act" id="fs-ori-act" hidden>
+      <button class="btn" id="fs-ori-btn" data-i18n="fs_enable">开启罗盘定向</button>
+    </div>
+
+    <div class="fs-act">
+      <button class="btn primary" id="fs-save" disabled data-i18n="fs_save">存为房屋坐向</button>
+    </div>
+
+    <section class="card fs-tips" style="margin-top:18px">
+      <div class="card-title centered" data-i18n="fs_tips_title">校准与使用</div>
+      <p>· <b data-i18n="fs_tip_1b">水平持握</b><span data-i18n="fs_tip_1">手机，远离金属、磁吸扣与电器，读数更稳。</span></p>
+      <p>· <span data-i18n="fs_tip_2a">指向飘移时，缓慢将手机画「</span><b>8</b><span data-i18n="fs_tip_2b">」字数次即可校准。</span></p>
+      <p>· <span data-i18n="fs_tip_3a">本页读数已按</span><b data-i18n="fs_tip_3b">磁偏角</b><span data-i18n="fs_tip_3c">修正为真北，偏角随所在地自动计算。</span></p>
+    </section>
+
     <div class="tab-spacer"></div>
   </main>
 
@@ -1751,6 +1857,8 @@
 <script src="js/stars.js"></script>
 <script src="js/sky-chart.js"></script>
 <script src="js/sky-ar.js"></script>
+<script src="js/fengshui-data.js"></script>
+<script src="js/fengshui.js"></script>
 <script src="js/affinity-data.js"></script>
 <script src="js/affinity.js"></script>
 <script src="js/content-feed.js"></script>
