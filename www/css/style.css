@@ -2110,10 +2110,10 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .dz-count{margin-left:auto;font-size:.8em;color:var(--ink-2)}
 .dz-bu .jing-go{margin-left:2px}
 .dz-works{border-bottom:1px solid var(--line-soft)}
-.dz-work{display:flex;align-items:baseline;gap:8px;padding:11px 6px 11px 18px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.dz-work{display:flex;align-items:baseline;gap:6px;padding:11px 6px 11px 18px;border-bottom:1px solid var(--line-soft);cursor:pointer}
 .dz-work:active{background:var(--teal-wash)}
 .dz-wt{flex:1;min-width:0;color:var(--ink);font-size:1.35rem}/* 字号对齐精选层书名 .jing-title 的 computed 1.35rem；行高去 1.45 改继承 body 1.65，与精选书名一致（v139） */
-.dz-lei{flex:none;font-size:.72em;color:var(--gold,#a8823c);border:1px solid currentColor;border-radius:6px;padding:1px 5px}
-.dz-wm{flex:none;font-size:.76em;color:var(--ink-2)}
+.dz-lei{flex:none;font-size:.62em;line-height:1.6;color:var(--gold,#a8823c);border:1px solid currentColor;border-radius:5px;padding:0 4px}/* 徽标收小（v142 用户反馈占地大）：.72em/11.5px→.62em/9.9px、内边距 1px5px→0 4px；书名 .dz-wt 不动 */
+.dz-wm{flex:none;font-size:.69em;color:var(--muted)}/* 卷字信息降次级小字（v142）：.76em/12.2px→.69em/11px 并改灰 */
 .dz-empty{padding:14px 6px;color:var(--ink-2);font-size:.9em}
 .dz-hitn{padding:10px 6px 2px;color:var(--ink-2);font-size:.85em}

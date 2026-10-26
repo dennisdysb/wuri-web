@@ -1,0 +1,4 @@
+before 412 cluster=119.5 leiFs=11.52 wmFs=12.16 titleW=220.5 titleFs=21.6
+after  412 cluster=106.5 leiFs=9.92 wmFs=11.04(grey) titleW=237.5 titleFs=21.6
+before 390 cluster=119.5 titleW=198.5 titleFs=21.6
+after  390 cluster=106.5 titleW=215.5 titleFs=21.6
