@@ -1,5 +1,5 @@
-/* 远程内容数据源（content feed）：神祇图鉴 / 经文库 / 神诞节日表
- * 机制：打开时拉取 content/manifest.json 与三个分段文件，校验通过后覆盖包内同名数据；
+/* 远程内容数据源（content feed）：神祇图鉴 / 经文库 / 神诞节日表 / 七十二候
+ * 机制：打开时拉取 content/manifest.json 与各分段文件，校验通过后覆盖包内同名数据；
  *      上次成功的整套数据存 localStorage，断网或拉取失败时先用缓存，最终兜底是包内数据。
  * 原则：任何一步失败都静默回落，绝不让图鉴 / 经文库 / 日历空白。
  * 内容只走数据通道更新（改 content/ 下文件即可），不下载代码、不改功能，合规边界与既有口径一致。 */
@@ -41,6 +41,10 @@
   function validFestivals(d) {
     return !!(d && d.table && typeof d.table === 'object' && Object.keys(d.table).length >= 10);
   }
+  function validPentads(d) {
+    return !!(d && Array.isArray(d.pentads) && d.pentads.length === 72 &&
+      d.pentads[0].term && d.pentads[0].name && d.pentads[0].desc);
+  }
 
   function applyDeities(d) {
     if (!validDeities(d)) return false;
@@ -74,11 +78,22 @@
     return true;
   }
 
+  function applyPentads(d) {
+    if (!validPentads(d)) return false;
+    window.WURI_PENTADS_DATA = d;
+    window.WURI_FEED.applied.pentads = d.version || null;
+    if (typeof window.__wuri_rerender === 'function') {
+      try { window.__wuri_rerender(); } catch (e) {}
+    }
+    return true;
+  }
+
   function applyAll(feed, source) {
     var any = false;
     try { if (feed.deities && applyDeities(feed.deities)) any = true; } catch (e) {}
     try { if (feed.scriptures && applyScriptures(feed.scriptures)) any = true; } catch (e) {}
     try { if (feed.festivals && applyFestivals(feed.festivals)) any = true; } catch (e) {}
+    try { if (feed.pentads && applyPentads(feed.pentads)) any = true; } catch (e) {}
     if (any) window.WURI_FEED.source = source;
     return any;
   }
@@ -93,7 +108,7 @@
   if (typeof fetch !== 'function') return;
   fetchJson(FEED_BASE + 'manifest.json').then(function (manifest) {
     if (!manifest || !manifest.sections) return null;
-    var names = ['deities', 'scriptures', 'festivals'];
+    var names = ['deities', 'scriptures', 'festivals', 'pentads'];
     var jobs = names.map(function (name) {
       var sec = manifest.sections[name];
       if (!sec || !sec.file) return Promise.resolve(null);

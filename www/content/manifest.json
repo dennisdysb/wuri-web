@@ -17,6 +17,11 @@
    "version": 1,
    "file": "festivals.json",
    "count": 59
+  },
+  "pentads": {
+   "version": 1,
+   "file": "pentads.json",
+   "count": 72
   }
  }
 }

@@ -1,0 +1,655 @@
+{
+ "version": 1,
+ "count": 72,
+ "source": "七十二候 · 据《月令七十二候集解》通行系统，两开源数据互校（health-calendar / Suìshí）",
+ "pentads": [
+  {
+   "term": "立春",
+   "termIndex": 0,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "东风解冻",
+   "desc": "东风送暖，大地开始解冻",
+   "startDayOffset": 0
+  },
+  {
+   "term": "立春",
+   "termIndex": 0,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "蛰虫始振",
+   "desc": "蛰居之虫慢慢苏醒蠕动",
+   "startDayOffset": 5
+  },
+  {
+   "term": "立春",
+   "termIndex": 0,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "鱼陟负冰",
+   "desc": "鱼游近水面，似背负薄冰",
+   "startDayOffset": 10
+  },
+  {
+   "term": "雨水",
+   "termIndex": 1,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "獭祭鱼",
+   "desc": "水獭捕鱼陈于岸边，如祭祀之礼",
+   "startDayOffset": 0
+  },
+  {
+   "term": "雨水",
+   "termIndex": 1,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "候雁北",
+   "desc": "大雁自南方陆续北归",
+   "startDayOffset": 5
+  },
+  {
+   "term": "雨水",
+   "termIndex": 1,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "草木萌动",
+   "desc": "草木随阳气升发而萌生抽芽",
+   "startDayOffset": 10
+  },
+  {
+   "term": "惊蛰",
+   "termIndex": 2,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "桃始华",
+   "desc": "桃花感春雷初绽",
+   "startDayOffset": 0
+  },
+  {
+   "term": "惊蛰",
+   "termIndex": 2,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "仓庚鸣",
+   "desc": "黄鹂感阳和而啼鸣",
+   "startDayOffset": 5
+  },
+  {
+   "term": "惊蛰",
+   "termIndex": 2,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "鹰化为鸠",
+   "desc": "鹰渐隐去，斑鸠渐多，古谓鹰化鸠",
+   "startDayOffset": 10
+  },
+  {
+   "term": "春分",
+   "termIndex": 3,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "玄鸟至",
+   "desc": "燕子自南方飞回檐下",
+   "startDayOffset": 0
+  },
+  {
+   "term": "春分",
+   "termIndex": 3,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "雷乃发声",
+   "desc": "春雷始震，阳气奋出",
+   "startDayOffset": 5
+  },
+  {
+   "term": "春分",
+   "termIndex": 3,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "始电",
+   "desc": "天际初现闪电",
+   "startDayOffset": 10
+  },
+  {
+   "term": "清明",
+   "termIndex": 4,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "桐始华",
+   "desc": "桐树绽开淡紫之花",
+   "startDayOffset": 0
+  },
+  {
+   "term": "清明",
+   "termIndex": 4,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "田鼠化为鴽",
+   "desc": "田鼠躲藏，鹌鹑类出没田间",
+   "startDayOffset": 5
+  },
+  {
+   "term": "清明",
+   "termIndex": 4,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "虹始见",
+   "desc": "雨过天清，彩虹始现于空",
+   "startDayOffset": 10
+  },
+  {
+   "term": "谷雨",
+   "termIndex": 5,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "萍始生",
+   "desc": "浮萍得雨而生，点点水面",
+   "startDayOffset": 0
+  },
+  {
+   "term": "谷雨",
+   "termIndex": 5,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "鸣鸠拂其羽",
+   "desc": "布谷鸟梳羽振翅，催人耕种",
+   "startDayOffset": 5
+  },
+  {
+   "term": "谷雨",
+   "termIndex": 5,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "戴胜降于桑",
+   "desc": "戴胜鸟落于桑树，蚕事将起",
+   "startDayOffset": 10
+  },
+  {
+   "term": "立夏",
+   "termIndex": 6,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "蝼蝈鸣",
+   "desc": "蝼蛄感夏阳而鸣",
+   "startDayOffset": 0
+  },
+  {
+   "term": "立夏",
+   "termIndex": 6,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "蚯蚓出",
+   "desc": "蚯蚓钻出润土",
+   "startDayOffset": 5
+  },
+  {
+   "term": "立夏",
+   "termIndex": 6,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "王瓜生",
+   "desc": "王瓜藤蔓攀援而生",
+   "startDayOffset": 10
+  },
+  {
+   "term": "小满",
+   "termIndex": 7,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "苦菜秀",
+   "desc": "苦菜繁茂，可采而食",
+   "startDayOffset": 0
+  },
+  {
+   "term": "小满",
+   "termIndex": 7,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "靡草死",
+   "desc": "喜阴细草因阳盛而枯萎",
+   "startDayOffset": 5
+  },
+  {
+   "term": "小满",
+   "termIndex": 7,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "麦秋至",
+   "desc": "麦类渐趋成熟，近秋收之期",
+   "startDayOffset": 10
+  },
+  {
+   "term": "芒种",
+   "termIndex": 8,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "螳螂生",
+   "desc": "螳螂破卵而出",
+   "startDayOffset": 0
+  },
+  {
+   "term": "芒种",
+   "termIndex": 8,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "鵙始鸣",
+   "desc": "伯劳鸟感阴而鸣",
+   "startDayOffset": 5
+  },
+  {
+   "term": "芒种",
+   "termIndex": 8,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "反舌无声",
+   "desc": "反舌鸟停止啼鸣",
+   "startDayOffset": 10
+  },
+  {
+   "term": "夏至",
+   "termIndex": 9,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "鹿角解",
+   "desc": "鹿角感阴气而脱落",
+   "startDayOffset": 0
+  },
+  {
+   "term": "夏至",
+   "termIndex": 9,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "蜩始鸣",
+   "desc": "蝉鸣始起，声噪绿荫",
+   "startDayOffset": 5
+  },
+  {
+   "term": "夏至",
+   "termIndex": 9,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "半夏生",
+   "desc": "半夏草药应阴而生",
+   "startDayOffset": 10
+  },
+  {
+   "term": "小暑",
+   "termIndex": 10,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "温风至",
+   "desc": "暖热之风渐至，暑气上腾",
+   "startDayOffset": 0
+  },
+  {
+   "term": "小暑",
+   "termIndex": 10,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "蟋蟀居壁",
+   "desc": "蟋蟀避热，栖于墙角阶壁",
+   "startDayOffset": 5
+  },
+  {
+   "term": "小暑",
+   "termIndex": 10,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "鹰始挚",
+   "desc": "鹰雏学飞，搏击长空",
+   "startDayOffset": 10
+  },
+  {
+   "term": "大暑",
+   "termIndex": 11,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "腐草为萤",
+   "desc": "萤火虫自腐草化生，夜舞流光",
+   "startDayOffset": 0
+  },
+  {
+   "term": "大暑",
+   "termIndex": 11,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "土润溽暑",
+   "desc": "土地湿热，闷热难当",
+   "startDayOffset": 5
+  },
+  {
+   "term": "大暑",
+   "termIndex": 11,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "大雨时行",
+   "desc": "时有大雨倾盆，暑气暂消",
+   "startDayOffset": 10
+  },
+  {
+   "term": "立秋",
+   "termIndex": 12,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "凉风至",
+   "desc": "暑气渐退，凉风习习",
+   "startDayOffset": 0
+  },
+  {
+   "term": "立秋",
+   "termIndex": 12,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "白露降",
+   "desc": "清晨草上凝露晶莹",
+   "startDayOffset": 5
+  },
+  {
+   "term": "立秋",
+   "termIndex": 12,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "寒蝉鸣",
+   "desc": "寒蝉感秋而鸣",
+   "startDayOffset": 10
+  },
+  {
+   "term": "处暑",
+   "termIndex": 13,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "鹰乃祭鸟",
+   "desc": "鹰捕鸟陈列，如祭而后食",
+   "startDayOffset": 0
+  },
+  {
+   "term": "处暑",
+   "termIndex": 13,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "天地始肃",
+   "desc": "天地间肃杀之气渐生",
+   "startDayOffset": 5
+  },
+  {
+   "term": "处暑",
+   "termIndex": 13,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "禾乃登",
+   "desc": "五谷成熟，登场入仓",
+   "startDayOffset": 10
+  },
+  {
+   "term": "白露",
+   "termIndex": 14,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "鸿雁来",
+   "desc": "大雁南飞避寒",
+   "startDayOffset": 0
+  },
+  {
+   "term": "白露",
+   "termIndex": 14,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "玄鸟归",
+   "desc": "燕子归去南方",
+   "startDayOffset": 5
+  },
+  {
+   "term": "白露",
+   "termIndex": 14,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "群鸟养羞",
+   "desc": "百鸟储食，以备寒冬",
+   "startDayOffset": 10
+  },
+  {
+   "term": "秋分",
+   "termIndex": 15,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "雷始收声",
+   "desc": "雷声渐止，阳气收敛",
+   "startDayOffset": 0
+  },
+  {
+   "term": "秋分",
+   "termIndex": 15,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "蛰虫坯户",
+   "desc": "蛰虫筑泥封户，准备冬蛰",
+   "startDayOffset": 5
+  },
+  {
+   "term": "秋分",
+   "termIndex": 15,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "水始涸",
+   "desc": "河湖水量渐减",
+   "startDayOffset": 10
+  },
+  {
+   "term": "寒露",
+   "termIndex": 16,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "鸿雁来宾",
+   "desc": "最后一批大雁南迁作客",
+   "startDayOffset": 0
+  },
+  {
+   "term": "寒露",
+   "termIndex": 16,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "雀入大水为蛤",
+   "desc": "雀鸟渐少，古人谓入水化为蛤蜊",
+   "startDayOffset": 5
+  },
+  {
+   "term": "寒露",
+   "termIndex": 16,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "菊有黄华",
+   "desc": "菊花独绽金黄，凌寒不凋",
+   "startDayOffset": 10
+  },
+  {
+   "term": "霜降",
+   "termIndex": 17,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "豺乃祭兽",
+   "desc": "豺捕兽陈列，如祭而后食",
+   "startDayOffset": 0
+  },
+  {
+   "term": "霜降",
+   "termIndex": 17,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "草木黄落",
+   "desc": "草木枯黄，落叶飘零",
+   "startDayOffset": 5
+  },
+  {
+   "term": "霜降",
+   "termIndex": 17,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "蛰虫咸俯",
+   "desc": "蛰虫垂头蛰伏，不动不食",
+   "startDayOffset": 10
+  },
+  {
+   "term": "立冬",
+   "termIndex": 18,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "水始冰",
+   "desc": "水面始结薄冰",
+   "startDayOffset": 0
+  },
+  {
+   "term": "立冬",
+   "termIndex": 18,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "地始冻",
+   "desc": "土地开始冻结",
+   "startDayOffset": 5
+  },
+  {
+   "term": "立冬",
+   "termIndex": 18,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "雉入大水为蜃",
+   "desc": "野鸡渐少见，古人谓化为大蛤",
+   "startDayOffset": 10
+  },
+  {
+   "term": "小雪",
+   "termIndex": 19,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "虹藏不见",
+   "desc": "阴盛阳衰，虹影不现",
+   "startDayOffset": 0
+  },
+  {
+   "term": "小雪",
+   "termIndex": 19,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "天气上升地气下降",
+   "desc": "天地之气不交，阴阳失和",
+   "startDayOffset": 5
+  },
+  {
+   "term": "小雪",
+   "termIndex": 19,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "闭塞而成冬",
+   "desc": "万物闭藏，而成严冬",
+   "startDayOffset": 10
+  },
+  {
+   "term": "大雪",
+   "termIndex": 20,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "鹖鴠不鸣",
+   "desc": "寒号鸟感寒不再鸣叫",
+   "startDayOffset": 0
+  },
+  {
+   "term": "大雪",
+   "termIndex": 20,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "虎始交",
+   "desc": "虎感微阳萌动而求偶",
+   "startDayOffset": 5
+  },
+  {
+   "term": "大雪",
+   "termIndex": 20,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "荔挺出",
+   "desc": "荔挺草抽出新芽",
+   "startDayOffset": 10
+  },
+  {
+   "term": "冬至",
+   "termIndex": 21,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "蚯蚓结",
+   "desc": "蚯蚓蜷曲如结，阳气未伸",
+   "startDayOffset": 0
+  },
+  {
+   "term": "冬至",
+   "termIndex": 21,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "麋角解",
+   "desc": "麋角感阳气而脱落",
+   "startDayOffset": 5
+  },
+  {
+   "term": "冬至",
+   "termIndex": 21,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "水泉动",
+   "desc": "地下泉水暗涌微动，一阳初生",
+   "startDayOffset": 10
+  },
+  {
+   "term": "小寒",
+   "termIndex": 22,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "雁北乡",
+   "desc": "大雁感阳，渐有北归之意",
+   "startDayOffset": 0
+  },
+  {
+   "term": "小寒",
+   "termIndex": 22,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "鹊始巢",
+   "desc": "喜鹊感阳，开始筑巢",
+   "startDayOffset": 5
+  },
+  {
+   "term": "小寒",
+   "termIndex": 22,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "雉始雊",
+   "desc": "野鸡感阳而啼鸣求偶",
+   "startDayOffset": 10
+  },
+  {
+   "term": "大寒",
+   "termIndex": 23,
+   "phase": 1,
+   "phaseName": "初候",
+   "name": "鸡始乳",
+   "desc": "母鸡感阳，开始孵育雏鸡",
+   "startDayOffset": 0
+  },
+  {
+   "term": "大寒",
+   "termIndex": 23,
+   "phase": 2,
+   "phaseName": "二候",
+   "name": "征鸟厉疾",
+   "desc": "鹰隼盘旋，捕食迅猛",
+   "startDayOffset": 5
+  },
+  {
+   "term": "大寒",
+   "termIndex": 23,
+   "phase": 3,
+   "phaseName": "三候",
+   "name": "水泽腹坚",
+   "desc": "水域冰封坚实，寒至极点",
+   "startDayOffset": 10
+  }
+ ]
+}

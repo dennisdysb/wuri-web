@@ -399,6 +399,33 @@ function renderCalendar() {
   }
   renderDetail();
 }
+/* 七十二候：按所选日期落入的节气区间三等分定候（节气日期取归一化节气表，
+ * 日期级口径：交节当日即入新节气；数据为 content feed / 包内回落的 72 候表） */
+function pentadOfSelected() {
+  var d = window.WURI_PENTADS_DATA || window.WURI_PENTADS_BUNDLED;
+  var list = d && Array.isArray(d.pentads) ? d.pentads : null;
+  if (!list || list.length !== 72) return null;
+  var terms = jieqiTableNorm(sel.y).slice().sort(function (a, b) { return a.time - b.time; });
+  var dayMs = new Date(sel.y, sel.m - 1, sel.d).getTime();
+  var cur = null, nxt = null;
+  for (var i = 0; i < terms.length; i++) {
+    var td = new Date(terms[i].time);
+    var tDay = new Date(td.getFullYear(), td.getMonth(), td.getDate()).getTime();
+    if (tDay <= dayMs) cur = { name: terms[i].name, day: tDay };
+    else { nxt = { name: terms[i].name, day: tDay }; break; }
+  }
+  if (!cur || !nxt) return null;
+  var total = Math.round((nxt.day - cur.day) / 86400000);
+  var into = Math.round((dayMs - cur.day) / 86400000);
+  if (!(total > 0) || into < 0) return null;
+  var phase = Math.min(3, Math.floor(into * 3 / total) + 1);
+  var group = list.filter(function (x) { return x.term === cur.name; });
+  if (group.length !== 3) return null;
+  var entry = null;
+  group.forEach(function (x) { if (x.phase === phase) entry = x; });
+  if (!entry) return null;
+  return { term: cur.name, phase: phase, entry: entry, group: group };
+}
 function renderDetail() {
   var l = lunarOf(sel.y, sel.m, sel.d);
   var wu = l.getDayGan() === '戊';
@@ -442,6 +469,20 @@ function renderDetail() {
   $('#detail-gz').textContent = l.getYearGan() + l.getYearZhi() + '年 ' + l.getMonthGan() + l.getMonthZhi() + '月 ' + l.getDayGan() + l.getDayZhi() + '日';
   var jq = l.getJieQi();
   $('#detail-jq').textContent = tx(jq) || '—';
+  var pc = $('#pentad-card');
+  if (pc) {
+    var pd = null;
+    try { pd = pentadOfSelected(); } catch (e) {}
+    if (pd) {
+      pc.hidden = false;
+      $('#pentad-title').textContent = tx(pd.term) + ' · ' + tx(pd.entry.phaseName) + ' · ' + tx(pd.entry.name);
+      $('#pentad-desc').textContent = tx(pd.entry.desc);
+      $('#pentad-phases').innerHTML = pd.group.map(function (x) {
+        return '<span class="pentad-chip' + (x.phase === pd.phase ? ' on' : '') + '">' +
+          escA(tx(x.phaseName)) + ' ' + escA(tx(x.name)) + '</span>';
+      }).join('');
+    } else { pc.hidden = true; }
+  }
   /* 四值神：所选日期的年/月/日值神（含名号＋一句话简介，悬停/长按看简介）；
    * 时值神只对"今日"展示（非今日日期不展示时值神）。 */
   var zsd = $('#detail-zhishen');

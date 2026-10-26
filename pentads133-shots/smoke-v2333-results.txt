@@ -1,0 +1,19 @@
+PASS S1 四件套 v133
+PASS S2 pentads-data 进 SW 预缓存
+PASS S3 feed manifest 含 pentads 段
+PASS S4 数据72候且裁定鹰始挚
+PASS S5 content-feed 接 pentads
+PASS S6 两源 MIT 鸣谢简繁齐
+PASS P1 当前日候卡可见且为霜降初候豺乃祭兽
+PASS P2 三候进度=3 且仅当前候高亮
+PASS P3 交节当日仍入霜降初候
+PASS P4 翻月到 2026年11月
+PASS P5 立冬二候地始冻
+PASS P6 回到 2026年7月
+PASS P7 小暑二候蟋蟀居壁
+PASS P8 回到 2026年2月
+PASS P9 立春当日初候东风解冻
+PASS P10 feed 回落数据已装载
+PASS P11 繁体鸣谢渲染
+PASS Z1 零 JS 异常
+SMOKE v2333: 18/18 passed
