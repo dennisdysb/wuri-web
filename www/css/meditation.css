@@ -53,7 +53,7 @@
 #meditation-view.med-breathing .med-center{top:15%}
 .med-breath{margin:16px auto 0;pointer-events:none}
 .med-breath[hidden]{display:none}
-.med-breath-circle{width:min(41vw,160px);height:min(41vw,160px);margin:0 auto;border-radius:50%;border:1px solid rgba(255,255,255,.5);
+.med-breath-circle{width:min(43vw,176px);height:min(43vw,176px);margin:0 auto;border-radius:50%;border:1px solid rgba(255,255,255,.5);
   background:rgba(12,12,16,.34);color:#fff;display:flex;align-items:center;justify-content:center;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 0 0 8px rgba(255,255,255,.05),0 8px 28px rgba(0,0,0,.28);
   transform-origin:center;will-change:transform}
@@ -61,8 +61,10 @@
 .med-breath-phase{font-size:1.02rem;letter-spacing:.28em;text-indent:.28em;color:rgba(245,241,230,.94)}
 .med-breath-count{font-family:var(--serif,Georgia,serif);font-size:2rem;font-weight:200;line-height:1.15;font-variant-numeric:tabular-nums}
 /* 说明整段居中：原先被塞进 118px 宽的 .med-breath 容器、自身 210px 溢出右偏（2026-10-25 修） */
-.med-breath-note{width:min(320px,84vw);margin:12px auto 0;text-align:center;color:rgba(245,241,230,.78);font-size:.74rem;line-height:1.45;
+/* 说明已移至底部控制层首位（chips 行上方，间距由 .med-controls 的 gap 提供）：圈周留空、更醒目（2026-10-25 v136） */
+.med-breath-note{width:min(320px,84vw);margin:0 auto;text-align:center;color:rgba(245,241,230,.78);font-size:.74rem;line-height:1.45;
   text-shadow:0 1px 6px rgba(0,0,0,.72)}
+.med-breath-note[hidden]{display:none}
 
 /* ---------- 底部浮动控制层（图片全屏铺满，控件悬浮） ---------- */
 .med-controls{position:absolute;left:0;right:0;bottom:0;z-index:4;
@@ -106,9 +108,8 @@
   #meditation-view.med-breathing .med-center{top:9%}
   .med-clock{font-size:3.35rem;margin:6px 0 10px}
   .med-breath{margin-top:10px}
-  .med-breath-circle{width:128px;height:128px}
+  .med-breath-circle{width:140px;height:140px}
   .med-breath-count{font-size:1.55rem}
-  .med-breath-note{margin-top:6px}
   .med-controls{gap:8px;padding-top:10px}
 }
 

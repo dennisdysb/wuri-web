@@ -256,6 +256,9 @@ var Meditation = (function () {
     }
     var box = $('#med-breath');
     if (box) box.hidden = !breathPattern();
+    /* 说明已移至控制层（chips 行上方）：显隐跟随型态选择，纯计时态不占位 */
+    var noteEl = $('#med-breath-note');
+    if (noteEl) noteEl.hidden = !breathPattern();
     /* 呼吸态布局类：中央区上移 + 呼吸圈放大（meditation.css），纯计时态不挂此列 */
     var view = $('#meditation-view');
     if (view) view.classList.toggle('med-breathing', !!breathPattern());
