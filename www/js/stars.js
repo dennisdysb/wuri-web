@@ -23,6 +23,17 @@
   function T(s) { return window.tx ? window.tx(s == null ? '' : s) : (s == null ? '' : String(s)); }
   function t(k) { return window.t ? window.t(k) : k; }
   function tf() { return window.tf ? window.tf.apply(null, arguments) : String(arguments[0]); }
+  /* 星象门控（2026-10-26 用户拍板）：落地页与今日星象卡免费可见，点进任何子功能
+   * （区页/星官详情/步天歌，及 sky-chart 的星图/今夜、sky-ar 的相机认星）皆高级版。
+   * 本文件的内里入口全部收敛于 openRegion/openDetail/openButiange 三函数
+   * （含 __wuri_openStarRegion 跨模块链、值神/太阳躔宿经 openMansionAsterism/
+   * openSunRegion/openBeidouDetail 的落点），在此三处落点门控即全覆盖；
+   * 神祇详情（openDeity）与红光开关不在门控内。 */
+  function starGate() {
+    if (window.WuriPro && WuriPro.isPro()) return true;
+    if (window.WuriPro) WuriPro.requirePro('stars');
+    return false;
+  }
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -223,6 +234,7 @@
 
   function openRegion(section) {
     if (!section) return;
+    if (!starGate()) return;
     if (XG && !secInfo[section] && !lordOfMansion(section)) section = resolveSection(section);
     if (XG && !secInfo[section]) return;
     /* 捕获来处必须在收起其他子视图之前；区页已打开时（失败重试等）保留原来源不覆写 */
@@ -250,6 +262,7 @@
   }
 
   function openDetail(key) {
+    if (!starGate()) return;
     show('view-star-detail');
     var host = $('sx-detail');
     if (XG && BT) { renderDetail(key); scrollTopOf('view-star-detail'); return; }
@@ -259,6 +272,7 @@
   }
 
   function openButiange(section) {
+    if (!starGate()) return;
     hide('view-star-detail'); /* 详情视图 DOM 在典籍页之后，不收起会盖住典籍页 */
     show('view-butiange');
     var host = $('sx-book');

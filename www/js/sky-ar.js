@@ -500,6 +500,9 @@
   }
 
   function openAR() {
+    /* 星象门控（2026-10-26）：相机认星为高级版。入口（悬浮钮 data-sxar 委托、
+     * 神祇页恢复路径 WuriSkyAR.open）全经此函数收口；setRed 等显示设置不门控。 */
+    if (!(window.WuriPro && WuriPro.isPro())) { if (window.WuriPro) WuriPro.requirePro('stars'); return; }
     show('view-sky-ar');
     var host = $('sx-ar'); if (!host) return;
     if (window.WuriRedlight) cal.red = window.WuriRedlight.on();

@@ -158,7 +158,16 @@
   };
 
   /* ---------- 开卷 ---------- */
+  /* 道藏全集门控（2026-10-26 用户拍板）：目录/分类/书名对所有人可见可浏览，
+   * 点开正文为高级版——在取正文之前落点拦截（不发 fetch）。统一检索命中的
+   * 全藏条目点击同经 data-dz-work 委托到此，一并覆盖。 */
+  function dzGate() {
+    if (window.WuriPro && WuriPro.isPro()) return true;
+    if (window.WuriPro) WuriPro.requirePro('daozang');
+    return false;
+  }
   function openWork(id, rowEl) {
+    if (!dzGate()) return;
     if (workCache[id]) { doOpen(workCache[id]); return; }
     var old = rowEl ? rowEl.innerHTML : '';
     if (rowEl) rowEl.innerHTML = '<span class="dz-wt">载入中…</span>';
