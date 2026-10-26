@@ -97,6 +97,9 @@
   var ARCH_KEY = 'wuri_fs_house_v1';
   var MIG_KEY = 'wuri_hd_migrated_v1';
   var TARGET_KEY = 'wuri_hd_target_v1';
+  var RECENT_KEY = 'wuri_hd_recent_v1';
+  function recentId() { try { return parseInt(localStorage.getItem(RECENT_KEY) || '0', 10) || 0; } catch (e) { return 0; } }
+  function setRecent(id) { try { if (id) localStorage.setItem(RECENT_KEY, String(id)); } catch (e) {} }
   function readMirror() {
     try {
       var j = JSON.parse(localStorage.getItem(ARCH_KEY) || 'null');
@@ -203,53 +206,118 @@
       }).then(function () { return syncMirror(); });
   }
 
-  /* 测量入档（罗盘存档动作调用）：无定稿时自动定稿（承旧单档口径） */
-  function recordCompass(r) {
-    var hid = 0;
-    try { hid = parseInt(sessionStorage.getItem(TARGET_KEY) || '0', 10) || 0; } catch (e) {}
-    var ensure = hid
-      ? db.houses.get(hid).then(function (h) { return h ? h.id : primaryHouse().then(function (p) { return p && p.id; }); })
-      : primaryHouse().then(function (p) { return p && p.id; });
-    return ensure.then(function (id) {
-      if (id) return id;
-      return createHouse({ name: T('hd_default_home') }).then(function (h) { return h.id; });
-    }).then(function (id) {
-      return fixedOf(id).then(function (fx) {
-        var gpsP = new Promise(function (res) {
-          if (!navigator.geolocation) { res(null); return; }
-          var to = setTimeout(function () { res(null); }, 2500);
-          navigator.geolocation.getCurrentPosition(function (p) {
-            clearTimeout(to);
-            res({ lat: Math.round(p.coords.latitude * 1e6) / 1e6, lon: Math.round(p.coords.longitude * 1e6) / 1e6, acc: p.coords.accuracy || null });
-          }, function () { clearTimeout(to); res(null); }, { timeout: 2200, maximumAge: 60000 });
-        });
-        return gpsP.then(function (g) {
-          return db.measurements.add({
-            houseId: id, ts: Date.now(),
-            facingDeg: r.facingDeg, facing: r.facing, sitting: r.sitting,
-            point: r.point || '', decl: isFinite(r.decl) ? r.decl : null,
-            gps: g ? { lat: g.lat, lon: g.lon } : null, gpsAcc: g ? g.acc : null,
-            accDeg: isFinite(r.accDeg) ? r.accDeg : null,
-            fixed: !fx
-          }).then(function () { return syncMirror(); }).then(function () { return id; });
-        });
+  /* 测量入指定档案：无定稿时自动定稿（承旧单档口径）；解析为 houseId */
+  function recordInto(id, r) {
+    return fixedOf(id).then(function (fx) {
+      var gpsP = new Promise(function (res) {
+        if (!navigator.geolocation) { res(null); return; }
+        var to = setTimeout(function () { res(null); }, 2500);
+        navigator.geolocation.getCurrentPosition(function (p) {
+          clearTimeout(to);
+          res({ lat: Math.round(p.coords.latitude * 1e6) / 1e6, lon: Math.round(p.coords.longitude * 1e6) / 1e6, acc: p.coords.accuracy || null });
+        }, function () { clearTimeout(to); res(null); }, { timeout: 2200, maximumAge: 60000 });
+      });
+      return gpsP.then(function (g) {
+        return db.measurements.add({
+          houseId: id, ts: Date.now(),
+          facingDeg: r.facingDeg, facing: r.facing, sitting: r.sitting,
+          point: r.point || '', decl: isFinite(r.decl) ? r.decl : null,
+          gps: g ? { lat: g.lat, lon: g.lon } : null, gpsAcc: g ? g.acc : null,
+          accDeg: isFinite(r.accDeg) ? r.accDeg : null,
+          fixed: !fx
+        }).then(function () { return syncMirror(); }).then(function () { setRecent(id); return id; });
       });
     });
   }
 
+  /* 选宅弹层：列全部档案（默认最近编辑一宅），可改选/新建；取消解析 null */
+  function pickHouse(hs) {
+    return new Promise(function (resolve) {
+      var old = document.querySelector('.hd-pick-mask');
+      if (old) old.remove();
+      var mask = document.createElement('div');
+      mask.className = 'hd-pick-mask';
+      var sel = recentId();
+      if (!hs.some(function (h) { return h.id === sel; })) sel = hs[0].id;
+      var rows = hs.map(function (h) {
+        return '<div class="hd-pick-row' + (h.id === sel ? ' on' : '') + '" data-pick="' + h.id + '">' +
+          '<span class="hd-pick-name">' + esc(h.name || T('hd_unnamed')) + '</span>' +
+          '<span class="hd-pick-sub" data-picksub="' + h.id + '"></span></div>';
+      }).join('');
+      mask.innerHTML = '<div class="hd-pick-sheet">' +
+        '<div class="hd-pick-title">' + esc(T('hd_pick_house_title')) + '</div>' +
+        '<div class="hd-pick-list">' + rows +
+        '<div class="hd-pick-row hd-pick-new" id="hd-pick-new">' + esc(T('hd_pick_new')) + '</div></div>' +
+        '<div class="hd-pick-foot">' +
+        '<button class="btn" id="hd-pick-cancel">' + esc(T('hd_cancel')) + '</button>' +
+        '<button class="btn primary" id="hd-pick-ok">' + esc(T('hd_pick_save')) + '</button></div></div>';
+      document.body.appendChild(mask);
+      hs.forEach(function (h) {
+        fixedOf(h.id).then(function (fx) {
+          var el = mask.querySelector('[data-picksub="' + h.id + '"]');
+          if (el) el.textContent = fx ? TF(T('hd_sit_face'), fx.sitting, fx.facing) : T('hd_pending');
+        }).catch(function () {});
+      });
+      function done(v) { mask.remove(); resolve(v); }
+      Array.prototype.forEach.call(mask.querySelectorAll('[data-pick]'), function (el) {
+        el.addEventListener('click', function () {
+          sel = +el.getAttribute('data-pick');
+          Array.prototype.forEach.call(mask.querySelectorAll('[data-pick]'), function (x) {
+            x.classList.toggle('on', +x.getAttribute('data-pick') === sel);
+          });
+        });
+      });
+      mask.querySelector('#hd-pick-new').addEventListener('click', function () {
+        var name = window.prompt(T('hd_house_name_prompt'), '');
+        if (name === null) return; /* 取消命名：留在弹层 */
+        createHouse({ name: name.trim() }).then(function (h) { done(h.id); });
+      });
+      mask.querySelector('#hd-pick-cancel').addEventListener('click', function () { done(null); });
+      mask.addEventListener('click', function (e) { if (e.target === mask) done(null); });
+      mask.querySelector('#hd-pick-ok').addEventListener('click', function () { done(sel); });
+    });
+  }
+
+  /* 罗盘存档总流程（fengshui.js 存档钮调用）：
+   * 有指定目标（详情页进入，目标键在位）→ 直存该宅；
+   * 无指定 → 无档案时自动建第 1 宅，有档案时弹选宅层。解析 houseId 或 null（取消）。 */
+  function saveCompass(r) {
+    var tid = 0;
+    try { tid = parseInt(sessionStorage.getItem(TARGET_KEY) || '0', 10) || 0; } catch (e) {}
+    function chooseTarget() {
+      return db.houses.orderBy('created').toArray().then(function (hs) {
+        if (!hs.length) {
+          return createHouse({ name: T('hd_default_home') }).then(function (h) { return recordInto(h.id, r); });
+        }
+        return pickHouse(hs).then(function (id) { return id ? recordInto(id, r) : null; });
+      });
+    }
+    return migrate().then(function () {
+      if (!tid) return chooseTarget();
+      return db.houses.get(tid).then(function (h) { return h ? recordInto(tid, r) : chooseTarget(); });
+    });
+  }
+  /* 兼容旧名（外部若仍调 recordCompass，走同一流程） */
+  function recordCompass(r) { return saveCompass(r); }
+
   /* ---------------- 视图开关 ---------------- */
   var S = {
     curHouse: 0, curFloor: 0, cat: 'all', editing: false, editRes: 0,
-    returnToDetail: false, viewerPhoto: 0
+    returnToDetail: false, viewerPhoto: 0, pickSit: null
   };
   function openList() {
     var v = $('view-houses'); if (!v) return;
     migrate().then(renderList);
     v.hidden = false; window.scrollTo(0, 0);
   }
-  function closeList() { var v = $('view-houses'); if (v) v.hidden = true; }
+  function closeList() {
+    var v = $('view-houses'); if (v) v.hidden = true;
+    /* 回到专页时入口卡须显当前总数：借 fengshui.js 的 renderArch 入口重绘 */
+    if (window.__wuriFs && __wuriFs.renderArchNow) __wuriFs.renderArchNow();
+  }
   function openDetail(id, editing) {
-    S.curHouse = id; S.editing = !!editing; S.cat = 'all'; S.editRes = 0;
+    S.curHouse = id; S.editing = !!editing; S.cat = 'all'; S.editRes = 0; S.pickSit = null;
+    setRecent(id);
     var v = $('view-house'); if (!v) return;
     v.hidden = false; window.scrollTo(0, 0);
     renderDetail();
@@ -276,44 +344,23 @@
     '<line x1="36" y1="36" x2="36" y2="13" stroke="var(--gold)" stroke-width="2"/>' +
     '<circle cx="36" cy="36" r="3" fill="var(--gold)"/></svg>';
 
+  /* 专页入口卡＝纯入口（2026-10-26 用户定）：多宅之下不挂任何单宅坐向，
+   * 只显档案总数（0 时空状态引导）＋进入钮；量坐向走下方罗盘卡、定稿在各宅详情里 */
   function renderHub(box) {
     migrate().then(function () {
-      return db.houses.orderBy('created').toArray().then(function (hs) {
-        if (!hs.length) {
-          box.innerHTML = '<div class="fs-arch-empty">' + ARCH_ICON +
-            '<div class="fs-arch-state">' + esc(T('hd_none_yet')) + '</div>' +
-            '<p class="fs-arch-hint">' + esc(T('hd_hub_hint')) + '</p>' +
-            '<div class="fs-arch-btns">' +
-            '<span class="fs-chipbtn" id="fs-arch-go">' + esc(T('fs_arch_measure')) + '</span>' +
-            '<span class="fs-chipbtn" id="hd-hub-list">' + esc(T('hd_enter_lib')) + '</span>' +
-            '</div></div>';
-          bindHub(box, 0);
-          return;
-        }
-        var h = hs[0];
-        return fixedOf(h.id).then(function (fx) {
-          var line = fx
-            ? esc(TF(T('fs_arch_line'), fx.sitting, fx.facing, fx.sitting, fx.facing))
-            : esc(T('hd_pending'));
-          var deg = fx ? esc(TF(T('fs_arch_deg'), fmtDeg(fx.facingDeg), fmtDT(fx.ts))) : '';
-          box.innerHTML = '<div class="fs-arch-empty">' + ARCH_ICON +
-            '<div class="fs-arch-line">' + esc(h.name || T('hd_unnamed')) + (fx ? ' · ' + line : '') + '</div>' +
-            '<p class="fs-arch-hint">' + (deg ? deg + ' · ' : '') +
-              esc(TF(T('hd_hub_count'), hs.length)) + '</p>' +
-            '<div class="fs-arch-btns">' +
-            '<span class="fs-chipbtn" id="hd-hub-list">' + esc(T('hd_enter_lib')) + '</span>' +
-            '<span class="fs-chipbtn" id="fs-arch-go">' + esc(T('fs_arch_redo')) + '</span>' +
-            '</div></div>';
-          bindHub(box, h.id);
-        });
+      return db.houses.count().then(function (n) {
+        var body = n
+          ? '<div class="fs-arch-line">' + esc(TF(T('hd_hub_count'), n)) + '</div>'
+          : '<div class="fs-arch-state">' + esc(T('hd_none_yet')) + '</div>' +
+            '<p class="fs-arch-hint">' + esc(T('hd_hub_hint')) + '</p>';
+        box.innerHTML = '<div class="fs-arch-empty">' + ARCH_ICON + body +
+          '<div class="fs-arch-btns">' +
+          '<span class="fs-chipbtn" id="hd-hub-list">' + esc(T('hd_enter_lib')) + '</span>' +
+          '</div></div>';
+        var ls = box.querySelector('#hd-hub-list');
+        if (ls) ls.addEventListener('click', openList);
       });
     }).catch(function () {});
-  }
-  function bindHub(box, hid) {
-    var go = box.querySelector('#fs-arch-go');
-    if (go) go.addEventListener('click', function () { gotoCompassFor(hid, false); });
-    var ls = box.querySelector('#hd-hub-list');
-    if (ls) ls.addEventListener('click', openList);
   }
 
   /* ---------------- 列表页 ---------------- */
@@ -640,25 +687,93 @@
     if (!fx) {
       box.innerHTML = '<div class="card-title centered">' + esc(T('hd_fixed_title')) + '</div>' +
         '<p class="hd-note" style="text-align:center">' + esc(T('hd_no_fixed')) + '</p>' +
-        '<button class="hd-more" id="hd-fix-measure">' + esc(T('fs_arch_measure')) + '</button>';
-      $('hd-fix-measure').addEventListener('click', function () { gotoCompassFor(h.id, true); });
+        '<div class="hd-actions">' +
+        '<button class="btn" id="hd-pick-open">' + esc(T('hd_pick_sitting')) + '</button>' +
+        '<button class="btn" id="hd-fix-measure">' + esc(T('fs_arch_measure')) + '</button></div>' +
+        pickPanelHtml();
+      bindFixed(h, null);
       return;
     }
+    /* 修正链全显：磁偏角/GPS 无值显「—」（手动定稿即此情形），不静默缺项 */
     var meta = [];
     meta.push(esc(TF(T('hd_fix_from'), pointName(fx.point) || T('hd_point_none'), fmtDT(fx.ts))));
-    if (fx.decl != null && isFinite(fx.decl)) meta.push(esc(TF(T('hd_fix_decl'), fmtDecl(fx.decl))));
-    if (fx.gps) meta.push('GPS ' + fx.gps.lat.toFixed(4) + ', ' + fx.gps.lon.toFixed(4));
+    meta.push(fx.decl != null && isFinite(fx.decl)
+      ? esc(TF(T('hd_fix_decl'), fmtDecl(fx.decl))) : esc(T('hd_fix_decl_na')));
+    meta.push(fx.gps ? 'GPS ' + fx.gps.lat.toFixed(4) + ', ' + fx.gps.lon.toFixed(4) : 'GPS —');
     if (fx.accDeg != null && isFinite(fx.accDeg)) meta.push(esc(TF(T('hd_fix_acc'), Math.round(fx.accDeg * 10) / 10)));
     box.innerHTML = '<div class="card-title centered">' + esc(T('hd_fixed_title')) + '</div>' +
       '<div class="hd-fix-main">' +
       '<div class="hd-fix-big">' + esc(TF(T('hd_sit_face_big'), fx.sitting, fx.facing)) + '</div>' +
-      '<div class="hd-fix-deg">' + esc(TF(T('hd_fix_deg'), fx.sitting, fx.facing, fmtDeg(fx.facingDeg), dir8Name(fx.facingDeg))) + '</div>' +
+      '<div class="hd-fix-deg">' + esc(TF(T('hd_fix_deg'), fmtDeg(fx.facingDeg), dir8Name(fx.facingDeg))) + '</div>' +
       '<p class="hd-fix-meta">' + meta.join('<br>') + '</p></div>' +
       '<div class="hd-actions">' +
       '<button class="btn" id="hd-go-xk">' + esc(T('hd_go_xk')) + '</button>' +
-      '<button class="btn" id="hd-go-bz">' + esc(T('hd_go_bz')) + '</button></div>';
+      '<button class="btn" id="hd-go-bz">' + esc(T('hd_go_bz')) + '</button></div>' +
+      '<button class="hd-more" id="hd-pick-open">' + esc(T('hd_pick_sitting')) + '</button>' +
+      pickPanelHtml();
     $('hd-go-xk').addEventListener('click', function () { gotoChart('xk', fx.sitting); });
     $('hd-go-bz').addEventListener('click', function () { gotoChart('bz', fx.sitting); });
+    bindFixed(h, fx);
+  }
+
+  /* 手选坐向面板（展开态存 S.pickSit：null=收起，''=已展开未选，其余=已选坐山名） */
+  function pickPanelHtml() {
+    if (S.pickSit === null || S.pickSit === undefined) return '';
+    var chips = MT.map(function (m) {
+      return '<span class="hd-sit-chip' + (S.pickSit === m.name ? ' on' : '') + '" data-sit="' + esc(m.name) + '">' + esc(m.name) + '</span>';
+    }).join('');
+    var will = '';
+    if (S.pickSit) {
+      var i = MT.map(function (m) { return m.name; }).indexOf(S.pickSit);
+      var f = MT[(i + 12) % 24];
+      will = '<p class="hd-pick-will">' + esc(TF(T('hd_pick_will'), S.pickSit, f.name, fmtDeg(((i + 12) % 24) * 15))) + '</p>';
+    }
+    return '<div class="hd-pick-panel">' +
+      '<p class="hd-note">' + esc(T('hd_pick_sit_lab')) + '</p>' +
+      '<div class="hd-sit-grid">' + chips + '</div>' + will +
+      '<div class="hd-actions"><button class="btn primary" id="hd-pick-confirm"' +
+      (S.pickSit ? '' : ' disabled') + '>' + esc(T('hd_pick_confirm')) + '</button>' +
+      '<button class="btn" id="hd-pick-close">' + esc(T('hd_cancel')) + '</button></div></div>';
+  }
+  function bindFixed(h, fx) {
+    var mo = $('hd-fix-measure');
+    if (mo) mo.addEventListener('click', function () { gotoCompassFor(h.id, true); });
+    var op = $('hd-pick-open');
+    if (op) op.addEventListener('click', function () {
+      S.pickSit = (S.pickSit === null || S.pickSit === undefined)
+        ? (fx ? fx.sitting : '') : null;
+      renderDetail();
+    });
+    if (S.pickSit === null || S.pickSit === undefined) return;
+    Array.prototype.forEach.call(document.querySelectorAll('#hd-fixed [data-sit]'), function (el) {
+      el.addEventListener('click', function () { S.pickSit = el.getAttribute('data-sit'); renderDetail(); });
+    });
+    var cl = $('hd-pick-close');
+    if (cl) cl.addEventListener('click', function () { S.pickSit = null; renderDetail(); });
+    var cf = $('hd-pick-confirm');
+    if (cf) cf.addEventListener('click', function () { if (S.pickSit) applyManualFixed(h, S.pickSit); });
+  }
+  /* 手选定稿：写一条来源「手动」的测量并设为定稿，流水审计链不断
+   *（时间=当下、GPS/磁偏角留空，定稿卡以「—」显） */
+  function applyManualFixed(h, sitName) {
+    var names = MT.map(function (m) { return m.name; });
+    var i = names.indexOf(sitName);
+    if (i < 0) return;
+    var fi = (i + 12) % 24;
+    db.measurements.where('houseId').equals(h.id)
+      .modify(function (m) { m.fixed = false; })
+      .then(function () {
+        return db.measurements.add({
+          houseId: h.id, ts: Date.now(),
+          facingDeg: fi * 15, facing: MT[fi].name, sitting: sitName,
+          point: 'manual', decl: null, gps: null, gpsAcc: null, accDeg: null, fixed: true
+        });
+      })
+      .then(function () { return syncMirror(); })
+      .then(function () {
+        S.pickSit = null; setRecent(h.id);
+        toastMsg(T('hd_pick_done')); renderDetail();
+      });
   }
   function gotoChart(kind, sitting) {
     if (!requirePro()) return;
@@ -958,7 +1073,10 @@
     });
     var lb = $('hd-back'); if (lb) lb.addEventListener('click', closeList);
     var dbk = $('hd-detail-back');
-    if (dbk) dbk.addEventListener('click', function () { closeDetail(); renderList(); });
+    if (dbk) dbk.addEventListener('click', function () {
+      closeDetail(); renderList();
+      var lv = $('view-houses'); if (lv) lv.hidden = false; /* 罗盘回程 closeList 藏过列表，返回须落回列表层 */
+    });
     var eb = $('hd-export'); if (eb) eb.addEventListener('click', exportBackup);
     var del = $('hd-del-house');
     if (del) del.addEventListener('click', function () {
@@ -1004,6 +1122,7 @@
   window.__wuriHouse = {
     renderHub: renderHub,
     recordCompass: recordCompass,
+    saveCompass: saveCompass,
     afterCompass: afterCompass,
     openList: openList,
     openDetail: openDetail,

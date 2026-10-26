@@ -90,7 +90,7 @@
       var when = (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
         String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       box.innerHTML = '<div class="fs-arch-empty">' + ARCH_ICON +
-        '<div class="fs-arch-line">' + esc(TF(T('fs_arch_line'), a.sitting, a.facing, a.sitting, a.facing)) + '</div>' +
+        '<div class="fs-arch-line">' + esc(TF(T('fs_arch_line'), a.sitting, a.facing)) + '</div>' +
         '<p class="fs-arch-hint">' + esc(TF(T('fs_arch_deg'), fmtDeg(a.facingDeg), when)) + '</p>' +
         '<div class="fs-arch-btns">' +
         '<span class="fs-chipbtn" id="fs-arch-go">' + esc(T('fs_arch_redo')) + '</span>' +
@@ -350,7 +350,12 @@
     var back = $('fs-back');
     if (back) back.addEventListener('click', closeHub);
     var cc = $('fs-card-compass');
-    if (cc) cc.addEventListener('click', openCompass);
+    if (cc) cc.addEventListener('click', function () {
+      /* 专页罗盘卡进入＝无指定目标档案：清掉详情页留下的目标键，
+       * 存档时由 house.js 弹选宅层（默认最近编辑的一宅） */
+      try { sessionStorage.removeItem('wuri_hd_target_v1'); } catch (e) {}
+      openCompass();
+    });
     var cb = $('fs-compass-back');
     if (cb) cb.addEventListener('click', closeCompass);
     /* 八宅/玄空飞星（第二批）：过 Pro 门后交 fengshui2.js 开页 */
@@ -385,14 +390,18 @@
         facingDeg: Math.round(h * 10) / 10,
         facing: f.name, sitting: s.name, ts: Date.now()
       };
-      /* 家宅档案层在位：存入当前档案为一条测量流水（测点取罗盘页选择） */
-      if (window.__wuriHouse && __wuriHouse.recordCompass) {
+      /* 家宅档案层在位：存档走 house.js 流程——有指定目标（详情页进入）直存；
+       * 无指定（专页罗盘卡进入）先弹选宅层，取消则留在罗盘页不落档 */
+      if (window.__wuriHouse && (__wuriHouse.saveCompass || __wuriHouse.recordCompass)) {
         var pt = $('fs-point');
-        __wuriHouse.recordCompass({
+        var rec = {
           facingDeg: reading.facingDeg, facing: reading.facing, sitting: reading.sitting,
           decl: CS.declReady ? CS.decl : null, accDeg: CS.accDeg,
           point: pt ? pt.value : ''
-        }).then(function () {
+        };
+        var flow = __wuriHouse.saveCompass ? __wuriHouse.saveCompass(rec) : __wuriHouse.recordCompass(rec);
+        flow.then(function (hid) {
+          if (hid == null) return; /* 选宅取消：不落档、不离页 */
           toastMsg(T('fs_saved'));
           closeCompass();
           renderArch();

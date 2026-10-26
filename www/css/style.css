@@ -2382,6 +2382,36 @@ body.sky-red #hd-viewer-img { filter:brightness(.78) sepia(1) hue-rotate(-52deg)
 .hd-res-birth { flex:1; display:flex; gap:8px; min-width:0; }
 .hd-res-birth .hd-inp { flex:1; }
 
+/* 手选坐向＋罗盘存档选宅层（2026-10-26 小修：定稿可手改/多宅选存） */
+.hd-pick-panel { margin-top:12px; border-top:1px dashed var(--line); padding-top:10px; }
+.hd-sit-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:7px; margin-top:8px; }
+.hd-sit-chip { text-align:center; padding:9px 0; border:1px solid var(--line); border-radius:10px;
+  font-family:var(--serif); font-size:1.02rem; color:var(--ink-2); background:var(--paper-2); cursor:pointer; }
+.hd-sit-chip.on { color:var(--gold-deep); border-color:rgba(162,129,59,.6); background:var(--gold-wash); font-weight:700; }
+[data-theme="night"] .hd-sit-chip.on { color:var(--gold); }
+body.sky-red .hd-sit-chip.on { color:#f2c1b2; border-color:rgba(255,96,72,.5); background:rgba(26,8,6,.4); }
+.hd-pick-will { margin-top:10px; text-align:center; font-family:var(--serif); font-size:1.02rem;
+  letter-spacing:.1em; color:var(--gold-deep); }
+[data-theme="night"] .hd-pick-will { color:var(--gold); }
+body.sky-red .hd-pick-will { color:#f2c1b2; }
+.hd-pick-mask { position:fixed; inset:0; z-index:95; background:rgba(10,8,4,.5);
+  display:flex; align-items:flex-end; justify-content:center; }
+.hd-pick-sheet { width:100%; max-width:560px; max-height:78vh; overflow-y:auto; background:var(--card);
+  border-radius:18px 18px 0 0; padding:18px 18px calc(16px + env(safe-area-inset-bottom)); }
+.hd-pick-title { font-family:var(--serif); font-size:1.08rem; letter-spacing:.16em; text-align:center; color:var(--ink); }
+.hd-pick-list { margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+.hd-pick-row { display:flex; align-items:baseline; gap:10px; padding:12px 14px; border:1px solid var(--line);
+  border-radius:12px; background:var(--paper-2); cursor:pointer; }
+.hd-pick-row.on { border-color:rgba(162,129,59,.6); background:var(--gold-wash); }
+body.sky-red .hd-pick-row.on { border-color:rgba(255,96,72,.5); background:rgba(26,8,6,.4); }
+.hd-pick-name { font-family:var(--serif); font-size:1.02rem; letter-spacing:.08em; color:var(--ink); }
+.hd-pick-sub { margin-left:auto; font-size:.8rem; color:var(--faint); letter-spacing:.08em; }
+.hd-pick-row.on .hd-pick-sub { color:var(--gold-deep); }
+body.sky-red .hd-pick-row.on .hd-pick-sub { color:#f2c1b2; }
+.hd-pick-new { justify-content:center; color:var(--teal-deep); border-style:dashed; font-size:.92rem; letter-spacing:.1em; }
+.hd-pick-foot { display:flex; gap:10px; margin-top:14px; }
+.hd-pick-foot .btn { flex:1; }
+
 /* ===== 户型编辑（第二批 A，house-editor.js） ===== */
 .hpe-card { padding-bottom:14px; }
 .hpe-orow { display:flex; gap:10px; align-items:flex-start; margin-top:10px; }
