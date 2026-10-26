@@ -266,6 +266,9 @@ var JingWen = (function () {
   function openReader(id, _retry) {
     /* 内丹书籍为高级版（2026-10-14 用户定）：目录、搜索、每日推荐所有入口都经此函数，未解锁弹付费墙 */
     if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
+    /* 道藏全集为高级版（2026-10-26 用户定）：正文开卷在 daozang.js openWork 已拦，
+       此处兜底书签/高亮/心得列表跳转等直达路径（KR5* 条目），与内丹同口径 */
+    if (/^KR5/.test(id || '') && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
     ensureLoaded(id, function () {
       var d = window.JINGWEN && JINGWEN[id];
       if (!d) {

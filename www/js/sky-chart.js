@@ -166,8 +166,16 @@
     new MutationObserver(function () { injectEntries(); }).observe(host, { childList: true });
   }
 
+  /* 星象门控（2026-10-26）：平面星图/今夜可见皆高级版，落点在此二函数收口
+   * （data-sx2 委托、AR 内「看星图」回调均经此）。与 stars.js starGate 同口径。 */
+  function skyGate() {
+    if (window.WuriPro && WuriPro.isPro()) return true;
+    if (window.WuriPro) WuriPro.requirePro('stars');
+    return false;
+  }
+
   /* ---------------- 今夜可见 ---------------- */
-  function openTonight() { show('view-sky-tonight'); renderTonight(); }
+  function openTonight() { if (!skyGate()) return; show('view-sky-tonight'); renderTonight(); }
 
   function tonightWindow() {
     var now = new Date();
@@ -338,7 +346,7 @@
     lines: loadLinePrefs() };
   var chartEls = null;
 
-  function openChart() { show('view-sky-chart'); renderChartView(); }
+  function openChart() { if (!skyGate()) return; show('view-sky-chart'); renderChartView(); }
 
   /* 布局（v2.1.0 (2) 平板适配）：.sk-main 星盘主体＋.sk-side 侧栏；
    * 窄屏单列（星盘在前、控制在后），≥768px 并排（CSS 媒体查询切换）。
