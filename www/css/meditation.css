@@ -51,9 +51,14 @@
 .med-dot.on{background:#e8c877;box-shadow:0 0 8px rgba(232,200,119,.8)}
 /* 呼吸态：中央区整体上移，给放大的呼吸圈让位（纯计时态不受影响，2026-10-25 修） */
 #meditation-view.med-breathing .med-center{top:15%}
-.med-breath{margin:16px auto 0;pointer-events:none}
+/* 呼吸圈尺寸/位置（2026-10-26 用户真机反馈改）：圈下移 + 峰值显著放大。
+ * --med-circ 基径带高度项：峰值直径=基径×1.35 必须塞进「圆点行底↔底部说明」之间的可用带
+ * （该带高≈0.85×屏高−459px），故基径≤(63vh−350px) 时峰值恰好两端各留约 6–7px；
+ * margin-top 随基径联动（7px+0.175×基径），使峰值上沿与圆点行的间距恒定。
+ * 412×915 实测：基径 200、峰值 270、圈心下移约 38px（详见 breath-shots 量测）。 */
+.med-breath{--med-circ:min(50vw,200px,calc(63vh - 350px));margin:16px auto 0;margin-top:calc(7px + var(--med-circ)*.175);pointer-events:none}
 .med-breath[hidden]{display:none}
-.med-breath-circle{width:min(43vw,176px);height:min(43vw,176px);margin:0 auto;border-radius:50%;border:1px solid rgba(255,255,255,.5);
+.med-breath-circle{width:var(--med-circ);height:var(--med-circ);margin:0 auto;border-radius:50%;border:1px solid rgba(255,255,255,.5);
   background:rgba(12,12,16,.34);color:#fff;display:flex;align-items:center;justify-content:center;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 0 0 8px rgba(255,255,255,.05),0 8px 28px rgba(0,0,0,.28);
   transform-origin:center;will-change:transform}
@@ -107,7 +112,7 @@
   .med-center{top:23%}
   #meditation-view.med-breathing .med-center{top:9%}
   .med-clock{font-size:3.35rem;margin:6px 0 10px}
-  .med-breath{margin-top:10px}
+  .med-breath{--med-circ:140px;margin-top:30px}
   .med-breath-circle{width:140px;height:140px}
   .med-breath-count{font-size:1.55rem}
   .med-controls{gap:8px;padding-top:10px}

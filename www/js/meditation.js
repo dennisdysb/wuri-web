@@ -41,11 +41,13 @@ var Meditation = (function () {
     { id: 'pranayama', name: '调息法', phases: [7, 4, 8, 4], note: '四相位俱全的进阶慢练习；如感不适，请恢复自然呼吸。' },
     { id: 'awake', name: '清醒提神', phases: [6, 0, 2, 0], note: '吸长呼短，适合晨起，不建议睡前使用。' }
   ];
+  /* 缩放口径（2026-10-26 用户真机反馈改）：峰值 1.35（圈基径同步放大，见 meditation.css
+   * --med-circ 的带高公式），谷值 0.60——基径变大后谷值绝对尺寸与旧版（176×0.68≈120px）基本持平。 */
   var BREATH_PHASE_META = [
-    { key: 'inhale', label: '吸气', from: 0.68, to: 1 },
-    { key: 'holdIn', label: '屏息', from: 1, to: 1 },
-    { key: 'exhale', label: '呼气', from: 1, to: 0.68 },
-    { key: 'holdOut', label: '屏息', from: 0.68, to: 0.68 }
+    { key: 'inhale', label: '吸气', from: 0.6, to: 1.35 },
+    { key: 'holdIn', label: '屏息', from: 1.35, to: 1.35 },
+    { key: 'exhale', label: '呼气', from: 1.35, to: 0.6 },
+    { key: 'holdOut', label: '屏息', from: 0.6, to: 0.6 }
   ];
 
   var SVG_PLAY = '<svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
