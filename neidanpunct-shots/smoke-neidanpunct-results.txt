@@ -1,0 +1,12 @@
+PASS S1 feed index punct=75
+PASS S2 texts-punct 75 片齐
+PASS S3 新标 9 部字数 196082
+PASS S4 接线齐（映射10部/共用偏好键/dzFindEntry）
+PASS P0 Pro 基线
+PASS P1 逐部开卷默认标点版＋切换往返（10部）
+PASS P2 数据级 strip 全等 sectionsPunct≡sectionsOrig（s45/s40/s41）
+PASS P3 截图已存（s45/s40 标点版 412）
+PASS P4 旧部 s18 无切换钮且正常开卷
+PASS P5 Pro 轮零 JS 异常
+PASS N1 非Pro点新内丹弹付费墙且不开卷（s45/s43）
+== 11/11 ==

@@ -305,7 +305,9 @@ var JingWen = (function () {
       if (!pv || !pv.paras) return null;
       var oJoin = sec.paras.map(function (p) { return p.t; }).join('');
       var pJoin = pv.paras.join('');
-      if (jpStrip(pJoin) !== oJoin) return null;
+      /* 两侧同口径剥除后比对：精选原文底本含清洗残留制表符（入药镜 2、天仙正理 22，
+         标点分片未保留），单侧剥除会误判不对位整部回落（2026-10-26 冒烟实证） */
+      if (jpStrip(pJoin) !== jpStrip(oJoin)) return null;
       out.push({
         h: sec.h, _punct: true,
         paras: pv.paras.map(function (t, pi) {
