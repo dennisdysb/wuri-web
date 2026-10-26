@@ -347,11 +347,15 @@
     if (cc) cc.addEventListener('click', openCompass);
     var cb = $('fs-compass-back');
     if (cb) cb.addEventListener('click', closeCompass);
-    [['fs-card-bazhai', 'fs_bazhai_coming'], ['fs-card-xuankong', 'fs_xuankong_coming']].forEach(function (pair) {
+    /* 八宅/玄空飞星（第二批）：过 Pro 门后交 fengshui2.js 开页 */
+    [['fs-card-bazhai', 'openBazhai'], ['fs-card-xuankong', 'openXuankong']].forEach(function (pair) {
       var c = $(pair[0]);
       if (!c) return;
       c.addEventListener('click', function () {
-        if (window.WuriPro && WuriPro.requirePro('fengshui')) toastMsg(T(pair[1]));
+        if (window.WuriPro && WuriPro.requirePro('fengshui') &&
+            window.__wuriFs2 && window.__wuriFs2[pair[1]]) {
+          window.__wuriFs2[pair[1]]();
+        }
       });
     });
     var ob = $('fs-ori-btn');

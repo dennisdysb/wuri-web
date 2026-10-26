@@ -875,6 +875,8 @@
       <p class="hint" data-i18n="me_credit_kanripo">「道藏全集」经文底本出自 Kanseki Repository（Kanripo，漢字文獻庫）所錄《正統道藏》（涵芬樓版）等影印底本，依 CC BY-SA 4.0 許可證使用；本站清洗稿（去標記、合併斷行）同以 CC BY-SA 4.0 釋出，特此鳴謝。</p>
       <p class="hint">平面星图的投影与大圆路径基于开源库「D3」（d3-geo / d3-array，作者 Mike Bostock 等，依 BSD-3-Clause 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_dingben">星象模块星官体系以《漫步中国星空》（增订版，齐锐、万昊宜著，科学普及出版社）为定本校订；《步天歌》用该书所本《灵台秘苑》系统。</p>
+      <p class="hint" data-i18n="me_credit_bazhai">「八宅」排盘引擎采用开源项目 @soul-atelier/bazhai（© Soul Atelier，版本 0.2.1，依 MIT 许可证使用），特此鸣谢。</p>
+      <p class="hint" data-i18n="me_credit_xuankong">「玄空飞星」排盘引擎采用开源项目 @soul-atelier/xuankong（© Soul Atelier，版本 0.3.0，依 MIT 许可证使用），特此鸣谢。</p>
       <p class="hint">部分经文诵读音频由温哥华清玄道长提供，特此鸣谢。</p>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
       </details>
@@ -1217,6 +1219,88 @@
       <p>· <span data-i18n="fs_tip_3a">本页读数已按</span><b data-i18n="fs_tip_3b">磁偏角</b><span data-i18n="fs_tip_3c">修正为真北，偏角随所在地自动计算。</span></p>
     </section>
 
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 八宅页（2026-10-26 第二批：命卦/宅卦/大游年） ============ -->
+  <main id="view-bazhai" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('fs-bazhai-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="fs-bazhai-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="fs_bazhai">八宅</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card">
+      <div class="fs2-row">
+        <label class="fs2-lab" data-i18n="fs2_birth_year">出生年</label>
+        <input class="fs2-inp fs2-year" id="fs2-bz-year" type="number" inputmode="numeric" min="1900" max="2100">
+        <div class="fs2-seg fs2-gender" id="fs2-bz-gender">
+          <button type="button" data-g="male" data-i18n="fs2_male">男</button>
+          <button type="button" data-g="female" data-i18n="fs2_female">女</button>
+        </div>
+      </div>
+      <div class="fs2-row">
+        <label class="fs2-lab" data-i18n="fs2_sitting">房屋坐向</label>
+        <select class="fs2-inp" id="fs2-bz-sitting"></select>
+      </div>
+      <p class="fs2-arch-hint" id="fs2-bz-noarch" hidden><span data-i18n="fs2_noarch">尚未存坐向档案，当前为手选。</span><a id="fs2-bz-measure" data-i18n="fs2_measure">去罗盘量 ›</a></p>
+      <p class="fs2-note" data-i18n="fs2_bz_method">命卦按年份数字根简法推算（通行简法之一）；生于立春之前者，请按上一年输入。</p>
+    </section>
+
+    <section class="card">
+      <div id="fs2-bz-summary"></div>
+      <div class="fs2-seg" id="fs2-bz-viewseg">
+        <button type="button" data-v="house" data-i18n="fs2_view_house">宅卦游年</button>
+        <button type="button" data-v="life" data-i18n="fs2_view_life">命卦游年</button>
+      </div>
+      <div class="fs2-grid" id="fs2-bz-grid"></div>
+      <div class="fs2-list" id="fs2-bz-list"></div>
+    </section>
+
+    <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 玄空飞星页（2026-10-26 第二批：下卦宅盘＋流年流月） ============ -->
+  <main id="view-xuankong" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('fs-xuankong-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="fs-xuankong-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="fs_xuankong">玄空飞星</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card">
+      <div class="fs2-row">
+        <label class="fs2-lab" data-i18n="fs2_sitting">房屋坐向</label>
+        <select class="fs2-inp" id="fs2-xk-sitting"></select>
+      </div>
+      <p class="fs2-arch-hint" id="fs2-xk-noarch" hidden><span data-i18n="fs2_noarch">尚未存坐向档案，当前为手选。</span><a id="fs2-xk-measure" data-i18n="fs2_measure">去罗盘量 ›</a></p>
+      <div class="fs2-row">
+        <label class="fs2-lab" data-i18n="fs2_build_year">建造 / 入伙年份</label>
+        <input class="fs2-inp fs2-year" id="fs2-xk-year" type="number" inputmode="numeric" min="1864" max="2100">
+      </div>
+      <div class="fs2-row">
+        <label class="fs2-lab" data-i18n="fs2_period">元运</label>
+        <select class="fs2-inp" id="fs2-xk-period"></select>
+      </div>
+      <p class="fs2-note" id="fs2-xk-eff"></p>
+    </section>
+
+    <section class="card">
+      <div class="fs2-seg" id="fs2-xk-tabs">
+        <button type="button" data-v="natal" data-i18n="fs2_tab_natal">宅盘</button>
+        <button type="button" data-v="annual" data-i18n="fs2_tab_annual">流年</button>
+        <button type="button" data-v="monthly" data-i18n="fs2_tab_monthly">流月</button>
+      </div>
+      <div class="fs2-xk-head" id="fs2-xk-head"></div>
+      <div class="fs2-grid" id="fs2-xk-grid"></div>
+      <div id="fs2-xk-combos"></div>
+      <p class="fs2-note" data-i18n="fs2_xk_note">本盘为下卦排盘；替卦、兼向不在此盘。流年、流月以立春与节气月为界。</p>
+    </section>
+
+    <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
     <div class="tab-spacer"></div>
   </main>
 
@@ -1702,6 +1786,7 @@
         <li data-i18n="pay_f7">经文诵读音频离线下载：26 部有声经文、男女双声一次下完，断网也能听</li>
         <li data-i18n="pay_f8">道藏全集全文通读：三洞四辅等 1,649 部经典，附拼音标注、书签与高亮</li>
         <li data-i18n="pay_f9">星象全模块：星官图鉴与步天歌、分区星图、平面星图、今夜可见、相机认星</li>
+        <li data-i18n="pay_f10">风水排盘：八宅命卦与大游年、玄空飞星下卦宅盘与流年流月</li>
       </ul>
       <button class="btn primary big" data-pro-act="buy"><span data-i18n="pro_buy">立即解锁</span> · <span data-pro-price>US$4.99</span></button>
       <button class="linklike" data-pro-act="restore" data-i18n="pro_restore">恢复购买</button>
@@ -1858,7 +1943,9 @@
 <script src="js/sky-chart.js"></script>
 <script src="js/sky-ar.js"></script>
 <script src="js/fengshui-data.js"></script>
+<script src="js/vendor/soul-fengshui.js"></script>
 <script src="js/fengshui.js"></script>
+<script src="js/fengshui2.js"></script>
 <script src="js/affinity-data.js"></script>
 <script src="js/affinity.js"></script>
 <script src="js/content-feed.js"></script>
