@@ -2111,6 +2111,9 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .dz-bu{display:flex;align-items:center;gap:10px;padding:13px 6px;border-bottom:1px solid var(--line-soft);cursor:pointer;font-size:1.12em;font-weight:700;color:var(--ink)}/* 字号/字重对齐精选层段头 .jing-sec-h（1.12em/700），行高同为继承 1.65（v139 用户真机反馈：全藏列表字小一号） */
 .dz-bu:active{background:var(--teal-wash)}
 .dz-count{margin-left:auto;font-size:.8em;color:var(--ink-2)}
+/* 分架标题（.jing-sec-h）内计数后缀与 .dz-bu 行内共用 .dz-count 规格（字号/颜色），
+   但标题是居中 flex：取消 margin-left:auto 的吸空，三架计数一律紧贴标题（v147 用户反馈统一） */
+.jing-sec-h .dz-count{margin-left:0}
 .dz-bu .jing-go{margin-left:2px}
 .dz-works{border-bottom:1px solid var(--line-soft)}
 .dz-work{display:flex;align-items:baseline;gap:6px;padding:11px 6px 11px 18px;border-bottom:1px solid var(--line-soft);cursor:pointer}

@@ -406,6 +406,19 @@ function renderCalendar() {
 var POEM_FEST_BY_LUNAR = { '1-15': 'yuanxiao', '7-7': 'qixi', '7-15': 'zhongyuan', '8-15': 'zhongqiu', '9-9': 'chongyang' };
 var POEM_FEST_NAMES = { qixi: '七夕', zhongqiu: '中秋', yuanxiao: '元宵', chongyang: '重阳', zhongyuan: '中元' };
 var POEM_BUCKET_NAMES = { star: '星空', xiudao: '修道游仙', gongguan: '宫观步虚', jingguan: '静观' };
+/* 诗文呈现层简繁：诗底本恒繁体，与经文 txScript 同口径——繁体模式原样，
+ * 简体模式走 t2s 呈现层转换；只动渲染、底本数据一字不改 */
+function txPoem(s) {
+  if (!s) return s;
+  try {
+    var lang = (window.I18N && typeof window.curLang === 'function') ? window.curLang()
+      : (document.documentElement.getAttribute('lang') === 'zh-TW' ? 'zh-TW' : 'zh-CN');
+    if (lang === 'zh-TW') return s;
+    if (typeof window.t2s === 'function') return window.t2s(s);
+  } catch (e) {}
+  return s;
+}
+window.txPoem = txPoem;
 function poemPickFor(y, m, d, lunar) {
   var dd = window.WURI_POEMS_DATA || window.WURI_POEMS_BUNDLED;
   var list = dd && Array.isArray(dd.poems) ? dd.poems : null;
@@ -518,8 +531,8 @@ function renderDetail() {
     try { pm = poemPickFor(sel.y, sel.m, sel.d, l); } catch (e) {}
     if (pm) {
       pmc.hidden = false;
-      $('#poem-card-title').textContent = pm.poem.title + ' · ' + pm.poem.author;
-      $('#poem-card-line').textContent = pm.poem.text[0] || '';
+      $('#poem-card-title').textContent = txPoem(pm.poem.title) + ' · ' + txPoem(pm.poem.author);
+      $('#poem-card-line').textContent = txPoem(pm.poem.text[0] || '');
       var pfb = $('#poem-card-fest');
       if (pm.fest) { pfb.textContent = tx(pm.festName); pfb.style.display = ''; }
       else { pfb.textContent = tx(pm.bucketName); }
@@ -2229,12 +2242,13 @@ function updateFloatingButtons() {
     if (!r) return;
     var p = r.poem;
     var txf = typeof window.tx === 'function' ? window.tx : function (s) { return s; };
+    var txp = typeof window.txPoem === 'function' ? window.txPoem : function (s) { return s; };
     document.getElementById('poem-date').textContent =
       cur.y + '年' + cur.m + '月' + cur.d + '日' + (r.fest ? ' · ' + txf(r.festName) : '') + ' · ' + txf(r.bucketName);
-    document.getElementById('poem-v-title').textContent = p.title;
-    document.getElementById('poem-v-author').textContent = txf(p.dynasty) + ' · ' + p.author;
-    document.getElementById('poem-v-text').innerHTML = p.text.map(function (x) { return '<p>' + esc(x) + '</p>'; }).join('');
-    document.getElementById('poem-v-gloss').textContent = txf(p.gloss);
+    document.getElementById('poem-v-title').textContent = txp(p.title);
+    document.getElementById('poem-v-author').textContent = txp(p.dynasty) + ' · ' + txp(p.author);
+    document.getElementById('poem-v-text').innerHTML = p.text.map(function (x) { return '<p>' + esc(txp(x)) + '</p>'; }).join('');
+    document.getElementById('poem-v-gloss').textContent = txp(p.gloss);
     var note = document.getElementById('poem-v-note');
     if (p.note) { note.hidden = false; note.textContent = p.note; } else { note.hidden = true; note.textContent = ''; }
     view.scrollTop = 0;

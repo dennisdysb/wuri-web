@@ -164,7 +164,7 @@ var JingWen = (function () {
     });
     /* 第一层「常见经文」：置顶、一直展开（无折叠开关） */
     var html = '<div class="jing-sec" data-common-sec>'
-      + '<h3 class="jing-sec-h">' + esc(t('jing_sec_common')) + '（' + sorted.length + '）</h3>'
+      + '<h3 class="jing-sec-h">' + esc(t('jing_sec_common')) + '<span class="dz-count">（' + sorted.length + '）</span></h3>'
       + sorted.map(function (it) {
         return '<div class="jing-item" data-jing="' + it.id + '">'
           + '<span class="jing-book">' + esc(it.cat || '經') + '</span>'
@@ -181,7 +181,7 @@ var JingWen = (function () {
     if (neidanItems.length && !window.IS_FREE_BUILD) {
       var ndPro = isPro();
       html += '<div class="jing-sec" data-neidan-fold>'
-        + '<h3 class="jing-sec-h" data-neidan-toggle>' + esc(t('jing_sec_neidan')) + '（' + neidanItems.length + '）<span class="jing-go">›</span></h3>'
+        + '<h3 class="jing-sec-h" data-neidan-toggle>' + esc(t('jing_sec_neidan')) + '<span class="dz-count">（' + neidanItems.length + '）</span><span class="jing-go">›</span></h3>'
         + '<div class="jing-neidan-body" hidden>'
         + neidanItems.map(function (it) {
           return '<div class="jing-item" data-jing="' + it.id + '">'
