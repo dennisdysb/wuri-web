@@ -1370,34 +1370,45 @@
     <input type="file" id="hd-file-alb" accept="image/*" multiple hidden>
   </main>
 
-  <!-- ============ 户型编辑（家宅档案第二批 A） ============ -->
-  <main id="view-plan" class="view" hidden>
-    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('hpe-back').click()" title="返回">‹</button>
-    <header class="appbar brand">
-      <button class="mini-btn" id="hpe-back">‹ 返回</button>
-      <h1 class="brand-title" data-i18n="hpe_title">户型编辑</h1>
-      <span class="appbar-spacer"></span>
-      <button class="mini-btn" id="hpe-done" data-i18n="hpe_done">完成</button>
-    </header>
-
-    <section class="card hpe-card">
-      <div class="hd-floors-row" id="hpe-floors"></div>
-      <div class="hpe-orow">
-        <p class="hpe-orient" id="hpe-orient"></p>
-        <div class="hpe-north" id="hpe-north"></div>
+  <!-- ============ 户型编辑（家宅档案第二批 A · 全屏测绘外壳） ============ -->
+  <main id="view-plan" class="view hpe-fs" hidden>
+    <div class="hpe-shell">
+      <header class="hpe-topbar">
+        <button class="hpe-tbtn" id="hpe-back">‹ 返回</button>
+        <button class="hpe-fname" id="hpe-floorname"></button>
+        <span class="hpe-topsp"></span>
+        <button class="hpe-tbtn" id="hpe-undo" data-i18n="hpe_undo">撤销</button>
+        <button class="hpe-tbtn" id="hpe-redo" data-i18n="hpe_redo">重做</button>
+        <button class="hpe-tbtn" id="hpe-infobtn" data-i18n="hpe_info">说明</button>
+        <button class="hpe-tbtn" id="hpe-layerbtn" data-i18n="hpe_mode_layers">图层</button>
+      </header>
+      <div class="hpe-mid">
+        <div class="hpe-stage">
+          <div class="hpe-canvas" id="hpe-canvas">
+            <svg id="hpe-svg" xmlns="http://www.w3.org/2000/svg" aria-label="plan"></svg>
+          </div>
+          <div id="hpe-attr"></div>
+        </div>
+        <div class="hpe-scrim" id="hpe-scrim" hidden></div>
+        <div class="hpe-sheet" id="hpe-sheet" hidden>
+          <div class="hpe-sheet-head"><b id="hpe-sheet-title"></b><span class="hpe-sheet-x" id="hpe-sheet-x">✕</span></div>
+          <div class="hpe-sheet-body">
+            <div id="hpe-infobox" hidden>
+              <div class="hpe-orow">
+                <p class="hpe-orient" id="hpe-orient"></p>
+                <div class="hpe-north" id="hpe-north"></div>
+              </div>
+              <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
+            </div>
+            <div id="hpe-panel"></div>
+            <p class="hpe-hint" id="hpe-hint"></p>
+          </div>
+        </div>
       </div>
-      <div class="hpe-seg" id="hpe-seg">
+      <nav class="hpe-seg hpe-botbar" id="hpe-seg">
         <span data-mode="draw" data-i18n="hpe_mode_draw">绘制</span><span data-mode="parts" data-i18n="hpe_mode_parts">构件</span><span data-mode="trace" data-i18n="hpe_mode_trace">描图</span><span data-mode="layers" data-i18n="hpe_mode_layers">图层</span>
-      </div>
-      <div class="hpe-canvas" id="hpe-canvas">
-        <svg id="hpe-svg" xmlns="http://www.w3.org/2000/svg" aria-label="plan"></svg>
-      </div>
-      <div id="hpe-panel"></div>
-      <p class="hpe-hint" id="hpe-hint"></p>
-    </section>
-
-    <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
-    <div class="tab-spacer"></div>
+      </nav>
+    </div>
     <input type="file" id="hpe-file" accept="image/*" hidden>
   </main>
 

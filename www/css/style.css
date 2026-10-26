@@ -2584,3 +2584,56 @@ body.sky-red .hpe-mrow.total b { color:#eda88f; }
 .hpe-hint b { color:var(--gold-deep); font-weight:600; }
 [data-theme="night"] .hpe-hint b { color:var(--gold); }
 body.sky-red .hpe-hint b { color:#eda88f; }
+
+/* ============ 户型编辑 · 全屏测绘外壳（2026-10-26） ============
+ * 进入编辑器＝独立测绘 App：顶栏（返回/楼层名/撤销/重做/说明/图层）＋
+ * 画布占满中段＋底栏模式段常驻；模式面板/楼层/说明为中段内底部上滑层
+ * （模式层非模态，画布上方保持可点；说明/楼层带磨砂罩），属性条浮贴
+ * 舞台底、抽屉开时由 JS 让到抽屉上沿。配色全走主题变量链：日间宣纸/
+ * 夜间玄青自 [data-theme] 级联、红光自 body.sky-red 变量重定义接管，
+ * 本段零写死色。 */
+#view-plan.hpe-fs { padding:0; overflow:hidden; }
+.hpe-shell { position:relative; display:flex; flex-direction:column; height:100%; background:var(--paper); }
+.hpe-topbar { flex:none; display:flex; align-items:center; gap:6px; padding:8px 10px;
+  background:var(--card); border-bottom:1px solid var(--line); z-index:5; }
+.hpe-tbtn { flex:none; padding:6px 10px; border:1px solid var(--line); border-radius:9px;
+  background:var(--card); color:var(--ink-2); font-size:.8rem; letter-spacing:.06em; cursor:pointer; }
+.hpe-tbtn.dim { color:var(--faint); border-color:var(--line-soft); }
+.hpe-fname { flex:none; max-width:32%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  padding:6px 4px; border:none; background:none; color:var(--ink);
+  font-family:var(--serif); font-size:.98rem; letter-spacing:.08em; cursor:pointer; }
+.hpe-fname .hpe-caret { font-style:normal; font-size:.7rem; color:var(--faint); margin-left:3px; }
+.hpe-topsp { flex:1; }
+.hpe-mid { position:relative; flex:1; min-height:0; }
+.hpe-stage { position:absolute; inset:0; }
+.hpe-fs .hpe-canvas { position:absolute; inset:0; margin:0; border:none; border-radius:0; background:var(--card); }
+.hpe-fs #hpe-svg { width:100%; height:100%; }
+#hpe-attr { position:absolute; left:10px; right:10px; bottom:10px; z-index:6; pointer-events:none; }
+#hpe-attr .hpe-attr-form label, #hpe-attr .hpe-attr-form input, #hpe-attr .hpe-attr-form select,
+#hpe-attr .ops .hpe-op { pointer-events:auto; }
+#hpe-attr:empty { display:none; }
+#hpe-attr .hpe-attr { margin-top:0; animation:hpe-rise .16s ease-out; }
+@keyframes hpe-rise { from { transform:translateY(10px); opacity:.3; } to { transform:none; opacity:1; } }
+.hpe-botbar { flex:none; margin:0; border:none; border-top:1px solid var(--line); border-radius:0; background:var(--card); }
+.hpe-botbar span { padding:13px 0; }
+.hpe-scrim { position:absolute; inset:0; z-index:7; background:var(--paper); opacity:.45;
+  backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); }
+.hpe-sheet { position:absolute; left:0; right:0; bottom:0; z-index:8; max-height:78%;
+  display:flex; flex-direction:column; background:var(--card);
+  border-top:1.5px solid var(--line); border-radius:16px 16px 0 0;
+  box-shadow:0 -10px 28px var(--line); animation:hpe-rise .18s ease-out; }
+.hpe-sheet[hidden] { display:none; }
+.hpe-sheet-head { flex:none; display:flex; align-items:center; padding:11px 14px 3px; }
+.hpe-sheet-head b { font-family:var(--serif); font-size:.92rem; letter-spacing:.18em; color:var(--ink); font-weight:600; }
+.hpe-sheet-x { margin-left:auto; flex:none; width:30px; height:30px; line-height:30px; text-align:center;
+  border:1px solid var(--line-soft); border-radius:50%; color:var(--muted); cursor:pointer; font-size:.8rem; }
+.hpe-sheet-body { overflow-y:auto; padding:2px 12px 16px; }
+.hpe-sheet-body .hpe-sub, .hpe-sheet-body .hpe-drawer,
+.hpe-sheet-body .hpe-cal, .hpe-sheet-body .hpe-panel { margin-top:8px; }
+.hpe-sheet-body .hpe-hint { margin-bottom:0; }
+.hpe-flist { margin-top:6px; }
+.hpe-floorrow { display:flex; align-items:center; padding:12px 10px; border-top:1px solid var(--line-soft);
+  font-family:var(--serif); font-size:.95rem; letter-spacing:.1em; color:var(--ink-2); cursor:pointer; }
+.hpe-floorrow:first-child { border-top:none; }
+.hpe-floorrow.on { color:var(--gold-deep); font-weight:600; }
+.hpe-floorrow .ck { margin-left:auto; color:var(--gold-deep); }

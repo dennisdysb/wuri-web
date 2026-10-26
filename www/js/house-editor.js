@@ -71,7 +71,7 @@
   /* ---------------- 状态 ---------------- */
   var E = {
     houseId: 0, floorId: 0, house: null, floors: [], fixed: null,
-    plan: null, mode: 'draw', sel: null, placeType: null, fixCat: 'doorwin',
+    plan: null, mode: 'draw', sheet: null, sel: null, placeType: null, fixCat: 'doorwin',
     snap: true, grid: true, undoStack: [], redoStack: [],
     stage: null, traceURL: '', photoURL: '',
     calibArm: false, calibPts: [], focusSnap: null,
@@ -307,6 +307,7 @@
       s += '<rect class="hpe-temprect" x="' + t.x + '" y="' + t.y + '" width="' + t.w + '" height="' + t.h + '" stroke-width="' + (u * 0.25) + '"/>';
     }
     svg.innerHTML = s;
+    syncTop();
   }
   function renderRoomSel(r, u) {
     var s = '';
@@ -405,15 +406,70 @@
     svg.innerHTML = s;
   }
 
-  /* ---------------- 页头 / 方向行 ---------------- */
+  /* ---------------- 顶栏 / 上滑层 ---------------- */
+  function syncTop() {
+    var un = $('hpe-undo'), re = $('hpe-redo');
+    if (un) un.classList.toggle('dim', !E.undoStack.length);
+    if (re) re.classList.toggle('dim', !E.redoStack.length);
+    var nm = $('hpe-floorname');
+    if (nm) {
+      var cur = E.floors.filter(function (f) { return f.id === E.floorId; })[0];
+      var label = cur ? cur.name : '';
+      if (nm.getAttribute('data-fl') !== label) {
+        nm.setAttribute('data-fl', label);
+        nm.innerHTML = esc(label) + '<i class="hpe-caret">▾</i>';
+      }
+    }
+  }
+  function syncSheet() {
+    var sh = $('hpe-sheet'), sc = $('hpe-scrim'), ib = $('hpe-infobox'), tt = $('hpe-sheet-title');
+    var open = !!E.sheet;
+    if (sh) sh.hidden = !open;
+    /* 遮罩只罩说明/楼层（须先抉择），模式抽屉非模态：画布上方保持可点（选件→点图放置） */
+    if (sc) sc.hidden = !(open && E.sheet !== 'mode');
+    if (ib) ib.hidden = E.sheet !== 'info';
+    if (tt) tt.textContent = E.sheet === 'floors' ? T('hpe_floors')
+      : E.sheet === 'info' ? T('hpe_info')
+      : T('hpe_mode_' + E.mode);
+    layoutAttr();
+  }
+  function showSheet(kind) {
+    E.sheet = kind;
+    if (kind === 'mode') renderPanel();
+    else if (kind === 'floors') renderFloorsBar();
+    else if (kind === 'info') {
+      var p = $('hpe-panel'); if (p) p.innerHTML = '';
+      var h = $('hpe-hint'); if (h) h.textContent = '';
+    }
+    syncSheet();
+  }
+  function closeSheet() { E.sheet = null; syncSheet(); }
+  /* 属性条定位：无抽屉时贴舞台底；抽屉开时让到抽屉上沿之上，不被压住 */
+  function layoutAttr() {
+    var at = $('hpe-attr'); if (!at) return;
+    var sh = $('hpe-sheet'), st = at.parentElement;
+    if (sh && st && E.sheet && !sh.hidden) {
+      var sr = st.getBoundingClientRect(), hr = sh.getBoundingClientRect();
+      if (sr.height > 0 && hr.height > 0) {
+        at.style.bottom = Math.max(10, Math.round(sr.bottom - hr.top) + 8) + 'px';
+        return;
+      }
+    }
+    at.style.bottom = '10px';
+  }
   function renderFloorsBar() {
-    var box = $('hpe-floors'); if (!box) return;
-    box.innerHTML = E.floors.map(function (f) {
-      return '<span class="hd-ftab' + (f.id === E.floorId ? ' on' : '') + '" data-hpefl="' + f.id + '">' + esc(f.name) + '</span>';
-    }).join('');
+    syncTop();
+    if (E.sheet !== 'floors') return;
+    var box = $('hpe-panel'); if (!box) return;
+    box.innerHTML = '<div class="hpe-flist">' + E.floors.map(function (f) {
+      return '<div class="hpe-floorrow' + (f.id === E.floorId ? ' on' : '') + '" data-hpefl="' + f.id + '">' +
+        '<span>' + esc(f.name) + '</span>' + (f.id === E.floorId ? '<span class="ck">✓</span>' : '') + '</div>';
+    }).join('') + '</div>';
+    var hint = $('hpe-hint'); if (hint) hint.textContent = '';
     Array.prototype.forEach.call(box.querySelectorAll('[data-hpefl]'), function (el) {
       el.addEventListener('click', function () {
         var fid = +el.getAttribute('data-hpefl');
+        closeSheet();
         if (fid !== E.floorId) switchFloor(fid);
       });
     });
@@ -444,15 +500,15 @@
     if (seg) Array.prototype.forEach.call(seg.children, function (el) {
       el.classList.toggle('on', el.getAttribute('data-mode') === E.mode);
     });
+    /* 说明/楼层层占着面板区时，模式面板不覆写（属性条在外层、自理） */
+    if (E.sheet === 'floors' || E.sheet === 'info') { renderAttr(); return; }
     var hint = $('hpe-hint');
     if (E.mode === 'draw') {
       box.innerHTML = '<div class="hpe-sub">' +
         chip('hpe-snap', T('hpe_snap'), E.snap) +
         chip('hpe-gridsw', T('hpe_grid'), E.grid) +
-        chip('hpe-undo', T('hpe_undo'), false, !E.undoStack.length) +
-        chip('hpe-redo', T('hpe_redo'), false, !E.redoStack.length) +
         chip('hpe-addroom', T('hpe_add_room'), false) +
-        '<span class="hpe-saved" id="hpe-saved"></span></div><div id="hpe-attr"></div>';
+        '<span class="hpe-saved" id="hpe-saved"></span></div>';
       if (hint) hint.innerHTML = T('hpe_hint_draw');
       bindDrawPanel();
     } else if (E.mode === 'parts') {
@@ -466,7 +522,7 @@
         '<div class="hpe-cats">' + FIX_CATS.map(function (c) {
           return '<span class="hpe-chip' + (E.fixCat === c ? ' on' : '') + '" data-fixcat="' + c + '">' + esc(T('hpe_cat_' + c)) + '</span>';
         }).join('') + '</div>' +
-        '<div class="hpe-tiles">' + tiles + '</div></div><div id="hpe-attr"></div>';
+        '<div class="hpe-tiles">' + tiles + '</div></div>';
       if (hint) hint.innerHTML = T('hpe_hint_parts');
       Array.prototype.forEach.call(box.querySelectorAll('[data-fixcat]'), function (el) {
         el.addEventListener('click', function () { E.fixCat = el.getAttribute('data-fixcat'); renderPanel(); });
@@ -478,7 +534,7 @@
         });
       });
     } else if (E.mode === 'trace') {
-      box.innerHTML = '<div id="hpe-tracebox"></div><div id="hpe-attr"></div>';
+      box.innerHTML = '<div id="hpe-tracebox"></div>';
       if (hint) hint.innerHTML = T('hpe_hint_trace');
       renderTracePanel();
     } else {
@@ -491,8 +547,6 @@
   function bindDrawPanel() {
     var sn = $('hpe-snap'); if (sn) sn.addEventListener('click', function () { E.snap = !E.snap; renderPanel(); render(); });
     var gr = $('hpe-gridsw'); if (gr) gr.addEventListener('click', function () { E.grid = !E.grid; renderPanel(); render(); });
-    var un = $('hpe-undo'); if (un) un.addEventListener('click', undo);
-    var re = $('hpe-redo'); if (re) re.addEventListener('click', redo);
     var ad = $('hpe-addroom'); if (ad) ad.addEventListener('click', addRoom);
   }
   function addRoom() {
@@ -512,9 +566,9 @@
   /* 属性条（房间/构件共用 #hpe-attr） */
   function renderAttr() {
     var box = $('hpe-attr'); if (!box) return;
-    if (E.mode === 'layers') { box.innerHTML = ''; return; }
+    if (E.mode === 'layers') { box.innerHTML = ''; layoutAttr(); return; }
     if (E.sel && E.sel.kind === 'room') {
-      var r = roomById(E.sel.id); if (!r) { box.innerHTML = ''; return; }
+      var r = roomById(E.sel.id); if (!r) { box.innerHTML = ''; layoutAttr(); return; }
       var Lm = toM(r.w), Wm = toM(r.h);
       box.innerHTML = '<div class="hpe-attr"><div class="t"><b>' + esc(r.name || '') + '</b>' +
         '<span>' + esc(T('hpe_len')) + ' <b>' + trimNum(Lm, 2) + ' m</b></span>' +
@@ -557,7 +611,7 @@
         E.sel = null; afterChange();
       });
     } else if (E.sel && E.sel.kind === 'fixture') {
-      var f = fixById(E.sel.id); if (!f) { box.innerHTML = ''; return; }
+      var f = fixById(E.sel.id); if (!f) { box.innerHTML = ''; layoutAttr(); return; }
       var d = FIX[f.type];
       box.innerHTML = '<div class="hpe-attr"><div class="t"><b>' + esc(T('hpe_fix_' + f.type)) + '</b>' +
         '<span>' + trimNum(d.w, 2) + ' × ' + trimNum(d.h, 2) + ' m</span>' +
@@ -575,6 +629,7 @@
     } else {
       box.innerHTML = '';
     }
+    layoutAttr();
   }
 
   /* ---------------- 描图面板 ---------------- */
@@ -1151,6 +1206,7 @@
       E.floors = r[1].slice().sort(function (a, b) { return (a.sort || 0) - (b.sort || 0) || a.id - b.id; });
       E.fixed = r[2].filter(function (m) { return m.fixed; })[0] || null;
       E.mode = 'draw';
+      E.sheet = null; syncSheet();
       var dv = $('view-house'); if (dv) dv.hidden = true;
       var lv = $('view-houses'); if (lv) lv.hidden = true;
       var v = $('view-plan'); if (v) v.hidden = false;
@@ -1161,6 +1217,7 @@
   function close() {
     saveNow();
     if (E.stage) cancelStage();
+    E.sheet = null; syncSheet();
     var v = $('view-plan'); if (v) v.hidden = true;
     if (window.__wuriHouse && __wuriHouse.openDetail) __wuriHouse.openDetail(E.houseId);
   }
@@ -1178,14 +1235,37 @@
     if (seg) seg.addEventListener('click', function (e) {
       var el = e.target.closest ? e.target.closest('[data-mode]') : null;
       if (!el) return;
+      var m = el.getAttribute('data-mode');
       if (E.stage) cancelStage();
-      E.mode = el.getAttribute('data-mode');
+      if (m === E.mode && E.sheet === 'mode') { closeSheet(); renderPanel(); return; }
+      E.mode = m;
       E.placeType = null;
       if (E.mode !== 'trace') { E.calibArm = false; E.calibPts = []; }
-      renderPanel(); render();
+      showSheet('mode');
+      render();
     });
     var bk = $('hpe-back'); if (bk) bk.addEventListener('click', close);
-    var dn = $('hpe-done'); if (dn) dn.addEventListener('click', close);
+    var un = $('hpe-undo'); if (un) un.addEventListener('click', undo);
+    var re = $('hpe-redo'); if (re) re.addEventListener('click', redo);
+    var fn = $('hpe-floorname');
+    if (fn) fn.addEventListener('click', function () {
+      if (E.sheet === 'floors') closeSheet(); else showSheet('floors');
+    });
+    var ib = $('hpe-infobtn');
+    if (ib) ib.addEventListener('click', function () {
+      if (E.sheet === 'info') closeSheet(); else showSheet('info');
+    });
+    var lb = $('hpe-layerbtn');
+    if (lb) lb.addEventListener('click', function () {
+      if (E.stage) cancelStage();
+      if (E.mode === 'layers' && E.sheet === 'mode') { closeSheet(); renderPanel(); return; }
+      E.mode = 'layers';
+      E.placeType = null;
+      showSheet('mode');
+      render();
+    });
+    var sx = $('hpe-sheet-x'); if (sx) sx.addEventListener('click', closeSheet);
+    var sc = $('hpe-scrim'); if (sc) sc.addEventListener('click', closeSheet);
     var fl = $('hpe-file'); if (fl) fl.addEventListener('change', function () { onFilePick(fl); });
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) saveNow();
