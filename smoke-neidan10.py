@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # 专项冒烟：精选层「常见内丹经文」+10 部（底本取自道藏全藏 feed/Kanripo KR5）
-# worktree 本地验证（file://），基线 = HEAD v137（陈列改版批未合入前）
+# 主树本地验证（file://），基线 = v138 已合入 neidan-10 分支（2026-10-26 发版 v139 复跑）
 import importlib.util, json, os, subprocess, sys, time, urllib.request, base64
 spec = importlib.util.spec_from_file_location("smoke_base", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
 base = importlib.util.module_from_spec(spec); sys.modules["smoke_base"] = base; spec.loader.exec_module(base)
 
-WWW = os.path.expanduser("~/workspace/wuri-web-neidan10/www")
-OUT = os.path.expanduser("~/workspace/wuri-web-neidan10/neidan10-shots")
+WWW = os.path.expanduser("~/workspace/wuri-web/www")
+OUT = os.path.expanduser("~/workspace/wuri-web/neidan10-shots")
 os.makedirs(OUT, exist_ok=True)
 results = []
 def report(name, ok, extra=""):
@@ -89,7 +89,7 @@ proc, c = launch(False)
 goto_jing(c)
 feedv = ev(c, "window.WURI_FEED && WURI_FEED.applied && WURI_FEED.applied.scriptures")
 report("B1 feed 已应用 v8", feedv == 8, feedv)
-ev(c, "var t=document.querySelector('[data-neidan-toggle]'); t && t.click()")
+ev(c, "var tg=document.querySelector('[data-neidan-toggle]'); tg && tg.click()")  # 变量名禁用 t：全局 var t 会覆盖 i18n 的 window.t（2026-10-26 假阳性根因）
 time.sleep(0.6)
 ids = ev(c, "Array.from(document.querySelectorAll('.jing-neidan-body .jing-item')).map(function(e){return e.getAttribute('data-jing')})")
 want = sorted(OLD5 + [s for s, _, _, _ in NEW])

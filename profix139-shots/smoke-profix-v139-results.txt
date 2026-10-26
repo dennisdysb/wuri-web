@@ -1,0 +1,12 @@
+PASS P1 非Pro点s18弹付费墙且不开卷
+PASS P2 墙面刷新到位（Stripe说明/找回激活码/价格）
+PASS P3 点关闭钮收墙
+PASS P1 非Pro点s40弹付费墙且不开卷
+PASS P4 非Pro轮零JS异常
+PASS P5 window.t被覆写后 refreshProUI+showPaywall 不抛且墙可开
+PASS P6 覆写下状态文案仍由私有绑定刷新
+PASS P7 敌意轮零JS异常
+PASS P8 Pro点新部s40直接开卷无墙
+PASS P9 Pro状态文案已刷新（已解锁态）
+PASS P10 Pro轮零JS异常
+== 11/11 ==

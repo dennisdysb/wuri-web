@@ -8,6 +8,11 @@ var WuriPro = (function () {
   'use strict';
   var TEST_KEY = 'wuri_pro_test';
   var PRICE_FALLBACK = 'US$4.99';
+  /* i18n 翻译函数：i18n.js 先于本文件加载并暴露 window.t，模块初始化时即绑定为私有引用 T。
+   * t() 每次调用都按当前语言实时取值，绑定函数对象本身不影响语言切换；
+   * 不直用裸全局 t——window.t 可被任意全局同名赋值覆盖，覆盖后 refreshProUI 调用即抛
+   * TypeError: t is not a function（2026-10-26 冒烟实测根因），私有绑定后与覆盖绝缘。 */
+  var T = window.t;
 
   function billing() { return window.WuBridgeBilling || null; }
   function isTestBuild() { return !!window.__wuriTestBuild; }
@@ -77,14 +82,14 @@ var WuriPro = (function () {
       } else if (ev.event === 'price') {
         refreshProUI();
       } else if (ev.event === 'cancelled') {
-        toast(t('pro_buy_cancelled'));
+        toast(T('pro_buy_cancelled'));
       } else if (ev.event === 'error') {
-        toast(t('pro_buy_error') + (ev.message ? ': ' + ev.message : ''));
+        toast(T('pro_buy_error') + (ev.message ? ': ' + ev.message : ''));
       }
     } catch (e) {}
   };
 
-  /* i18n 的全局 t()（i18n.js 暴露的 window.t），这里直接用，不自建 */
+  /* toast 文案走 i18n：用文件头绑定的私有引用 T（即 window.t 的函数对象），不自建词条 */
   function toast(msg) {
     try {
       var el = document.getElementById('toast');
@@ -120,7 +125,7 @@ var WuriPro = (function () {
       location.href = 'redeem.html';
       return;
     }
-    try { b.billingBuy(); } catch (e) { toast(t('pro_buy_error')); }
+    try { b.billingBuy(); } catch (e) { toast(T('pro_buy_error')); }
   }
   function restore() {
     var b = billing();
@@ -138,7 +143,7 @@ var WuriPro = (function () {
       }
       return;
     }
-    try { b.billingRestore(); toast(t('pro_restoring')); } catch (e) {}
+    try { b.billingRestore(); toast(T('pro_restoring')); } catch (e) {}
   }
 
   /* 找回激活码面板绑定（网页版） */
@@ -235,7 +240,7 @@ var WuriPro = (function () {
     var price = st.price || PRICE_FALLBACK;
     document.querySelectorAll('[data-pro-price]').forEach(function (el) { el.textContent = price; });
     document.querySelectorAll('[data-pro-state]').forEach(function (el) {
-      el.textContent = pro ? t('pro_active') : t('pro_locked');
+      el.textContent = pro ? T('pro_active') : T('pro_locked');
       el.classList.toggle('on', pro);
     });
     document.querySelectorAll('[data-pro-buybtn]').forEach(function (el) {
@@ -279,7 +284,7 @@ var WuriPro = (function () {
     if (!isTestBuild()) return;
     try { localStorage.setItem(TEST_KEY, '1'); } catch (e) {}
     refreshProUI();
-    toast(t('pro_test_unlocked'));
+    toast(T('pro_test_unlocked'));
   }
 
   /* 点击委托：data-pro-act=buy|restore|close|testunlock|paywall */
