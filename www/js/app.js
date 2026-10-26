@@ -90,7 +90,7 @@ function saveCfg() { try { localStorage.setItem('wuri_cfg_v1', JSON.stringify(CF
  * 历史教训：此处曾按「排盘时区」CFG.tz 把 now() 整体平移到北京时间，
  * 导致身在海外、排盘时区选北京时，首页此刻干支/四值神/黄历今日/提醒
  * 全按北京时刻计算（多伦多 19:02 显示成 07:02、时柱辰）。排盘时区只
- * 作用于排盘换算（奇门真太阳时基准经线，见 qimen-app.js），严禁再
+ * 作用于排盘输入换算本身（奇门起局已于 v131 改跟设备时区），严禁再
  * 进入任何当下类路径。 */
 function now() { return new Date(); }
 function ymd(d) { return { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() }; }
