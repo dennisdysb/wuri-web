@@ -1,0 +1,50 @@
+PASS S1 四件套 v136
+PASS S2 说明已移入控制层首位
+PASS S3 CSS/JS 改动在位
+PASS B412 纯计时 center 仍在 29%
+PASS B412 纯计时时钟/控制层零位移
+PASS B412 纯计时说明隐藏不占位
+PASS B412 呼吸态类已挂+说明在控制层
+PASS B412 说明大幅下移 (496→627)
+PASS B412 说明贴控制区 (chips 上方常规间距 12px)
+PASS B412 呼吸圈再放大 160→176
+PASS B412 圈底→控制层间距 ≥35 (实测 109)
+PASS B412 说明仍居中
+PASS B412 呼吸态时钟零位移 (v134 上移成果不变)
+PASS B412 呼吸态无 JS 异常
+PASS B412 播放中 (状态+无异常)
+PASS B412 播放→申请常亮锁
+PASS B412 暂停→释放常亮锁
+PASS B412 续播→重新申请
+PASS B412 回前台→自动重申请
+PASS B412 退出→释放常亮锁
+PASS B412 无 WakeLock API 降级无异常
+PASS B390 纯计时 center 仍在 29%
+PASS B390 纯计时时钟/控制层零位移
+PASS B390 纯计时说明隐藏不占位
+PASS B390 呼吸态类已挂+说明在控制层
+PASS B390 说明大幅下移 (485→556)
+PASS B390 说明贴控制区 (chips 上方常规间距 12px)
+PASS B390 呼吸圈再放大 160→168
+PASS B390 圈底→控制层间距 ≥35 (实测 57)
+PASS B390 说明仍居中
+PASS B390 呼吸态时钟零位移 (v134 上移成果不变)
+PASS B390 呼吸态无 JS 异常
+PASS B390 播放中 (状态+无异常)
+PASS B390 播放→申请常亮锁
+PASS B390 暂停→释放常亮锁
+PASS B390s 纯计时 center 仍在 23%
+PASS B390s 纯计时时钟/控制层零位移
+PASS B390s 纯计时说明隐藏不占位
+PASS B390s 呼吸态类已挂+说明在控制层
+PASS B390s 说明大幅下移 (344→432)
+PASS B390s 说明贴控制区 (chips 上方常规间距 8px)
+PASS B390s 呼吸圈再放大 128→140
+PASS B390s 圈底→控制层间距 ≥35 (实测 72)
+PASS B390s 说明仍居中
+PASS B390s 呼吸态时钟零位移 (v134 上移成果不变)
+PASS B390s 呼吸态无 JS 异常
+PASS B390s 播放中 (状态+无异常)
+PASS B390s 播放→申请常亮锁
+PASS B390s 暂停→释放常亮锁
+==== 49/49 PASS
