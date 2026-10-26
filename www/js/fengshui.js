@@ -77,6 +77,8 @@
   function renderArch() {
     var box = $('fs-arch');
     if (!box) return;
+    /* 家宅档案层在位时，专页卡由 house.js 接管（档案库入口）；否则走旧单档口径 */
+    if (window.__wuriHouse && __wuriHouse.renderHub) { __wuriHouse.renderHub(box); return; }
     var a = loadArch();
     if (!a) {
       box.innerHTML = '<div class="fs-arch-empty">' + ARCH_ICON +
@@ -177,6 +179,7 @@
     targetTrue: null, curTrue: null, manTrue: null,
     mode: 'none',           /* none | sensor | manual（手动后本页会话锁定） */
     hasReading: false,
+    accDeg: null,           /* iOS webkitCompassAccuracy（可得时），供家宅档案记录精度 */
     decl: 0, declReady: false,
     watchdog: 0, drag: null
   };
@@ -250,6 +253,9 @@
   function ingest(e, fromAbs) {
     var src = oriSource(e, fromAbs);
     if (!src) return;
+    if (typeof e.webkitCompassAccuracy === 'number' && e.webkitCompassAccuracy >= 0) {
+      CS.accDeg = e.webkitCompassAccuracy;
+    }
     var hTrue;
     if (src === 'ios') {
       hTrue = norm360(e.webkitCompassHeading);
@@ -375,10 +381,31 @@
       var f = mtnAt(h);
       if (!f) return;
       var s = MT[(MT.indexOf(f) + 12) % 24];
-      saveArch({
+      var reading = {
         facingDeg: Math.round(h * 10) / 10,
         facing: f.name, sitting: s.name, ts: Date.now()
-      });
+      };
+      /* 家宅档案层在位：存入当前档案为一条测量流水（测点取罗盘页选择） */
+      if (window.__wuriHouse && __wuriHouse.recordCompass) {
+        var pt = $('fs-point');
+        __wuriHouse.recordCompass({
+          facingDeg: reading.facingDeg, facing: reading.facing, sitting: reading.sitting,
+          decl: CS.declReady ? CS.decl : null, accDeg: CS.accDeg,
+          point: pt ? pt.value : ''
+        }).then(function () {
+          toastMsg(T('fs_saved'));
+          closeCompass();
+          renderArch();
+          if (__wuriHouse.afterCompass) __wuriHouse.afterCompass();
+        }).catch(function () {
+          saveArch(reading);
+          toastMsg(T('fs_saved'));
+          closeCompass();
+          renderArch();
+        });
+        return;
+      }
+      saveArch(reading);
       toastMsg(T('fs_saved'));
       closeCompass();
       renderArch();
@@ -398,11 +425,13 @@
   /* 冒烟/调试面：读当前状态（不写） */
   window.__wuriFs = {
     arch: loadArch,
+    openCompass: openCompass,
+    renderArchNow: renderArch,
     state: function () {
       return {
         mode: CS.mode, hasReading: CS.hasReading,
         heading: CS.hasReading ? displayHeading() : null,
-        display: displayHeading(), decl: CS.decl,
+        display: displayHeading(), decl: CS.decl, accDeg: CS.accDeg,
         mountain: (mtnAt(displayHeading()) || {}).name || null
       };
     }

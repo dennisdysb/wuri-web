@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=156">
+<link rel="stylesheet" href="css/style.css?v=157">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=71">
 </head>
@@ -877,6 +877,7 @@
       <p class="hint" data-i18n="me_credit_dingben">星象模块星官体系以《漫步中国星空》（增订版，齐锐、万昊宜著，科学普及出版社）为定本校订；《步天歌》用该书所本《灵台秘苑》系统。</p>
       <p class="hint" data-i18n="me_credit_bazhai">「八宅」排盘引擎采用开源项目 @soul-atelier/bazhai（© Soul Atelier，版本 0.2.1，依 MIT 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_xuankong">「玄空飞星」排盘引擎采用开源项目 @soul-atelier/xuankong（© Soul Atelier，版本 0.3.0，依 MIT 许可证使用），特此鸣谢。</p>
+      <p class="hint" data-i18n="me_credit_dexie">「房屋档案」本地数据库采用开源库 Dexie.js（版本 4.0.11，依 Apache License 2.0 使用），特此鸣谢。</p>
       <p class="hint">部分经文诵读音频由温哥华清玄道长提供，特此鸣谢。</p>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
       </details>
@@ -1208,6 +1209,18 @@
       <button class="btn" id="fs-ori-btn" data-i18n="fs_enable">开启罗盘定向</button>
     </div>
 
+    <div class="fs-act" id="fs-point-row" hidden>
+      <label class="fs2-lab" for="fs-point" data-i18n="hd_point_lab">测点</label>
+      <select class="fs2-inp" id="fs-point">
+        <option value="" data-i18n="hd_point_none_opt">（未标注）</option>
+        <option value="center" data-i18n="hd_point_center">宅心</option>
+        <option value="door" data-i18n="hd_point_door">大门</option>
+        <option value="balcony" data-i18n="hd_point_balcony">阳台</option>
+        <option value="yard" data-i18n="hd_point_yard">后院</option>
+        <option value="other" data-i18n="hd_point_other">其他</option>
+      </select>
+    </div>
+
     <div class="fs-act">
       <button class="btn primary" id="fs-save" disabled data-i18n="fs_save">存为房屋坐向</button>
     </div>
@@ -1303,6 +1316,69 @@
     <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
     <div class="tab-spacer"></div>
   </main>
+
+  <!-- ============ 房屋档案库（2026-10-26 家宅档案第一批） ============ -->
+  <main id="view-houses" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('hd-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="hd-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="hd_title">房屋档案</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <p class="hd-lead" data-i18n="hd_lead">一宅一档：罗盘量得的坐向、现场照片与户型图都存在这里，给人看完，回来还查得到。</p>
+
+    <button class="hd-new" id="hd-new" data-i18n="hd_new">＋ 新建房屋档案</button>
+
+    <div id="hd-list" style="margin-top:14px"></div>
+
+    <section class="card">
+      <div class="card-title" data-i18n="hd_storage_title">存储与备份</div>
+      <p class="hd-note" id="hd-usage"></p>
+      <p class="hd-note" data-i18n="hd_storage_note">档案与照片只存本机。浏览器存储可能被系统回收，重要档案请定期导出备份留底。</p>
+      <button class="hd-more" id="hd-export" data-i18n="hd_export">导出备份（全部档案）</button>
+    </section>
+
+    <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 房屋档案详情 ============ -->
+  <main id="view-house" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('hd-detail-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="hd-detail-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="hd_title">房屋档案</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card" id="hd-head"></section>
+    <section class="card" id="hd-fixed"></section>
+    <section class="card" id="hd-meas"></section>
+    <section class="card" id="hd-floors"></section>
+    <section class="card" id="hd-photos"></section>
+    <section class="card" id="hd-guide"></section>
+
+    <button class="hd-more danger" id="hd-del-house" data-i18n="hd_del_house">删除本档案</button>
+
+    <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
+    <div class="tab-spacer"></div>
+
+    <input type="file" id="hd-file-cam" accept="image/*" capture="environment" hidden>
+    <input type="file" id="hd-file-alb" accept="image/*" multiple hidden>
+  </main>
+
+  <!-- 照片大图 -->
+  <div id="hd-viewer" hidden>
+    <img id="hd-viewer-img" alt="">
+    <div class="hd-viewer-bar">
+      <span id="hd-viewer-cap"></span>
+      <span class="hd-viewer-btns">
+        <button class="btn danger" id="hd-viewer-del" data-i18n="hd_del">删除</button>
+        <button class="btn" id="hd-viewer-close" data-i18n="hd_close">关闭</button>
+      </span>
+    </div>
+  </div>
 
   <!-- ============ 神祇图鉴（免费） ============ -->
   <main id="view-deities" class="view" hidden>
@@ -1946,6 +2022,8 @@
 <script src="js/vendor/soul-fengshui.js"></script>
 <script src="js/fengshui.js"></script>
 <script src="js/fengshui2.js"></script>
+<script src="js/vendor/dexie.js"></script>
+<script src="js/house.js"></script>
 <script src="js/affinity-data.js"></script>
 <script src="js/affinity.js"></script>
 <script src="js/content-feed.js"></script>
