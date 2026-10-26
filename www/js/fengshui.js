@@ -179,6 +179,7 @@
     targetTrue: null, curTrue: null, manTrue: null,
     mode: 'none',           /* none | sensor | manual（手动后本页会话锁定） */
     hasReading: false,
+    point: '',              /* 测点（存档必选，进页重置、不预选） */
     accDeg: null,           /* iOS webkitCompassAccuracy（可得时），供家宅档案记录精度 */
     decl: 0, declReady: false,
     watchdog: 0, drag: null
@@ -294,9 +295,19 @@
       typeof DeviceOrientationEvent.requestPermission === 'function';
   }
 
+  /* 测点胶囊：每次进罗盘页重置为未选，存档前必须明确点选一次 */
+  function resetPoint() {
+    CS.point = '';
+    Array.prototype.forEach.call(document.querySelectorAll('#fs-point-caps .fs-pt-chip'), function (c) {
+      c.classList.remove('on');
+    });
+    var caps = $('fs-point-caps'); if (caps) caps.classList.remove('need');
+    var hint = $('fs-point-hint'); if (hint) hint.hidden = true;
+  }
   function startCompass() {
     buildDial();
     CS.on = true;
+    resetPoint();
     computeDecl();
     renderDial();
     var act = $('fs-ori-act');
@@ -379,6 +390,16 @@
         } else setNote(T('fs_note_denied'));
       }).catch(function () { setNote(T('fs_note_denied')); });
     });
+    Array.prototype.forEach.call(document.querySelectorAll('#fs-point-caps .fs-pt-chip'), function (c) {
+      c.addEventListener('click', function () {
+        CS.point = c.getAttribute('data-pt') || '';
+        Array.prototype.forEach.call(document.querySelectorAll('#fs-point-caps .fs-pt-chip'), function (x) {
+          x.classList.toggle('on', x === c);
+        });
+        var caps = $('fs-point-caps'); if (caps) caps.classList.remove('need');
+        var hint = $('fs-point-hint'); if (hint) hint.hidden = true;
+      });
+    });
     var sv = $('fs-save');
     if (sv) sv.addEventListener('click', function () {
       if (!CS.hasReading) return;
@@ -393,11 +414,21 @@
       /* 家宅档案层在位：存档走 house.js 流程——有指定目标（详情页进入）直存；
        * 无指定（专页罗盘卡进入）先弹选宅层，取消则留在罗盘页不落档 */
       if (window.__wuriHouse && (__wuriHouse.saveCompass || __wuriHouse.recordCompass)) {
-        var pt = $('fs-point');
+        /* 测点必选（用户 2026-10-26 定）：未选不许存，先标清这是在哪儿测的 */
+        if (!CS.point) {
+          var hint = $('fs-point-hint'); if (hint) hint.hidden = false;
+          var caps = $('fs-point-caps');
+          if (caps) {
+            caps.classList.add('need');
+            if (caps.scrollIntoView) caps.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }
+          toastMsg(T('hd_point_need'));
+          return;
+        }
         var rec = {
           facingDeg: reading.facingDeg, facing: reading.facing, sitting: reading.sitting,
           decl: CS.declReady ? CS.decl : null, accDeg: CS.accDeg,
-          point: pt ? pt.value : ''
+          point: CS.point
         };
         var flow = __wuriHouse.saveCompass ? __wuriHouse.saveCompass(rec) : __wuriHouse.recordCompass(rec);
         flow.then(function (hid) {

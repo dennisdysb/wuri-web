@@ -1210,15 +1210,15 @@
     </div>
 
     <div class="fs-act" id="fs-point-row" hidden>
-      <label class="fs2-lab" for="fs-point" data-i18n="hd_point_lab">测点</label>
-      <select class="fs2-inp" id="fs-point">
-        <option value="" data-i18n="hd_point_none_opt">（未标注）</option>
-        <option value="center" data-i18n="hd_point_center">宅心</option>
-        <option value="door" data-i18n="hd_point_door">大门</option>
-        <option value="balcony" data-i18n="hd_point_balcony">阳台</option>
-        <option value="yard" data-i18n="hd_point_yard">后院</option>
-        <option value="other" data-i18n="hd_point_other">其他</option>
-      </select>
+      <span class="fs2-lab" data-i18n="hd_point_lab">测点</span>
+      <div class="fs-pt-caps" id="fs-point-caps">
+        <button type="button" class="fs-pt-chip" data-pt="center" data-i18n="hd_point_center">宅心</button>
+        <button type="button" class="fs-pt-chip" data-pt="door" data-i18n="hd_point_door">大门</button>
+        <button type="button" class="fs-pt-chip" data-pt="balcony" data-i18n="hd_point_balcony">阳台</button>
+        <button type="button" class="fs-pt-chip" data-pt="yard" data-i18n="hd_point_yard">后院</button>
+        <button type="button" class="fs-pt-chip" data-pt="other" data-i18n="hd_point_other">其他</button>
+      </div>
+      <p class="fs-pt-hint" id="fs-point-hint" hidden data-i18n="hd_point_need">先选测点，再存档</p>
     </div>
 
     <div class="fs-act">

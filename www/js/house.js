@@ -9,7 +9,7 @@
  * 兼容口径：旧单档 localStorage wuri_fs_house_v1 保留为「镜像」——第 1 宅（最早建）
  * 的定稿测量实时同步写入该键，fengshui.js / fengshui2.js 的既有读取零改动；
  * 首次运行把旧单档迁为第 1 宅「自宅」＋一条定稿测量；旧路径（专页卡进罗盘）
- * 存档若改了镜像，档案层在打开列表/专页时按 ts 检出并回收入流水。
+ * 存档若改了镜像，档案层在打开列表/专页时按 ts 检出并回收入记录。
  * 门控：免费档第 1 宅全功能；第 2 宅起新建/进入走 WuriPro.requirePro('fengshui')。
  * 户型编辑器与报告页不在本批（楼层先落数据，照片按层归档）。
  */
@@ -144,7 +144,7 @@
     });
   }
 
-  /* 迁移＋镜像回收（旧路径存档回收入流水）。迁移全程串行化：
+  /* 迁移＋镜像回收（旧路径存档回收入记录）。迁移全程串行化：
    * init/renderHub/openList 多路并发调用只跑一遍，避免竞态重复建测量。 */
   var migP = null;
   function migrate() {
@@ -187,13 +187,13 @@
             return Math.abs((m.ts || 0) - (arch.ts || 0)) < 1500 &&
               Math.abs(m.facingDeg - arch.facingDeg) < 0.051;
           });
-          if (dup) return null; /* 同一条已在流水里（防并发重复收编） */
+          if (dup) return null; /* 同一条已在记录里（防并发重复收编） */
           return addFromMirror(h, arch);
         });
       });
     });
   }
-  /* 旧路径（罗盘存档钮）在档案层之外改了镜像 → 作为新流水收编并定稿 */
+  /* 旧路径（罗盘存档钮）在档案层之外改了镜像 → 作为新记录收编并定稿 */
   function addFromMirror(h, arch) {
     return db.measurements.where('houseId').equals(h.id)
       .modify(function (m) { m.fixed = false; })
@@ -268,13 +268,103 @@
         });
       });
       mask.querySelector('#hd-pick-new').addEventListener('click', function () {
-        var name = window.prompt(T('hd_house_name_prompt'), '');
-        if (name === null) return; /* 取消命名：留在弹层 */
-        createHouse({ name: name.trim() }).then(function (h) { done(h.id); });
+        hdDlgPrompt(T('hd_house_name_prompt'), '', T('hd_save')).then(function (name) {
+          if (name === null) return; /* 取消命名：留在选宅层 */
+          createHouse({ name: name.trim() }).then(function (h) { done(h.id); });
+        });
       });
       mask.querySelector('#hd-pick-cancel').addEventListener('click', function () { done(null); });
       mask.addEventListener('click', function (e) { if (e.target === mask) done(null); });
       mask.querySelector('#hd-pick-ok').addEventListener('click', function () { done(sel); });
+    });
+  }
+
+  /* 自家样式弹层（用户 2026-10-26 定：原生输入/确认弹窗带域名标题、样式裸陋，
+   * 与 App 风格脱节，一律换自家底部层；样式复用选宅层 .hd-pick-* 体系）：
+   * hdDlgPrompt(标题, 默认值, 确认钮文案) → Promise<string|null>（取消=null）；
+   * hdDlgConfirm(文案, 确认钮文案) → Promise<boolean>（红色确认钮）。 */
+  function hdDlgBase(sheetHtml) {
+    var old = document.querySelector('.hd-dlg-mask');
+    if (old) old.remove();
+    var mask = document.createElement('div');
+    mask.className = 'hd-pick-mask hd-dlg-mask';
+    mask.innerHTML = '<div class="hd-pick-sheet">' + sheetHtml + '</div>';
+    document.body.appendChild(mask);
+    return mask;
+  }
+  function hdDlgPrompt(title, defVal, okLabel) {
+    return new Promise(function (resolve) {
+      var mask = hdDlgBase(
+        '<div class="hd-pick-title">' + esc(title) + '</div>' +
+        '<input class="fs2-inp hd-dlg-inp" id="hd-dlg-inp" type="text" value="' + esc(defVal || '') + '">' +
+        '<div class="hd-pick-foot">' +
+        '<button class="btn" id="hd-dlg-cancel">' + esc(T('hd_cancel')) + '</button>' +
+        '<button class="btn primary" id="hd-dlg-ok">' + esc(okLabel || T('hd_save')) + '</button></div>');
+      var inp = mask.querySelector('#hd-dlg-inp');
+      function done(v) {
+        document.removeEventListener('keydown', onKey, true);
+        mask.remove(); resolve(v);
+      }
+      function onKey(e) {
+        if (e.key === 'Enter') { e.preventDefault(); done(inp.value); }
+        else if (e.key === 'Escape') { e.preventDefault(); done(null); }
+      }
+      document.addEventListener('keydown', onKey, true);
+      mask.querySelector('#hd-dlg-ok').addEventListener('click', function () { done(inp.value); });
+      mask.querySelector('#hd-dlg-cancel').addEventListener('click', function () { done(null); });
+      mask.addEventListener('click', function (e) { if (e.target === mask) done(null); });
+      setTimeout(function () { try { inp.focus(); inp.select(); } catch (e) {} }, 60);
+    });
+  }
+  function hdDlgConfirm(text, okLabel) {
+    return new Promise(function (resolve) {
+      var mask = hdDlgBase(
+        '<div class="hd-pick-title hd-dlg-msg">' + esc(text) + '</div>' +
+        '<div class="hd-pick-foot">' +
+        '<button class="btn" id="hd-dlg-cancel">' + esc(T('hd_cancel')) + '</button>' +
+        '<button class="btn hd-dlg-danger" id="hd-dlg-ok">' + esc(okLabel || T('hd_del')) + '</button></div>');
+      function done(v) {
+        document.removeEventListener('keydown', onKey, true);
+        mask.remove(); resolve(v);
+      }
+      function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); done(false); } }
+      document.addEventListener('keydown', onKey, true);
+      mask.querySelector('#hd-dlg-ok').addEventListener('click', function () { done(true); });
+      mask.querySelector('#hd-dlg-cancel').addEventListener('click', function () { done(false); });
+      mask.addEventListener('click', function (e) { if (e.target === mask) done(false); });
+    });
+  }
+
+  /* 补标测点层：给无测点的历史记录选测点，保存即更新该条
+   *（列表的「未标注」签与定稿来源行的「未标注」共用此层） */
+  function pickPoint() {
+    return new Promise(function (resolve) {
+      var old = document.querySelector('.hd-pt-mask');
+      if (old) old.remove();
+      var mask = document.createElement('div');
+      mask.className = 'hd-pick-mask hd-pt-mask';
+      var keys = ['center', 'door', 'balcony', 'yard', 'other'];
+      mask.innerHTML = '<div class="hd-pick-sheet">' +
+        '<div class="hd-pick-title">' + esc(T('hd_point_pick_title')) + '</div>' +
+        '<div class="hd-pick-list">' + keys.map(function (k) {
+          return '<div class="hd-pick-row" data-pt="' + k + '"><span class="hd-pick-name">' +
+            esc(T('hd_point_' + k)) + '</span></div>';
+        }).join('') + '</div>' +
+        '<div class="hd-pick-foot"><button class="btn" id="hd-pt-cancel">' +
+        esc(T('hd_cancel')) + '</button></div></div>';
+      document.body.appendChild(mask);
+      function done(v) { mask.remove(); resolve(v); }
+      Array.prototype.forEach.call(mask.querySelectorAll('[data-pt]'), function (el) {
+        el.addEventListener('click', function () { done(el.getAttribute('data-pt')); });
+      });
+      mask.querySelector('#hd-pt-cancel').addEventListener('click', function () { done(null); });
+      mask.addEventListener('click', function (e) { if (e.target === mask) done(null); });
+    });
+  }
+  function labelPoint(mealId) {
+    pickPoint().then(function (pt) {
+      if (!pt) return;
+      db.measurements.update(mealId, { point: pt }).then(renderDetail);
     });
   }
 
@@ -659,8 +749,10 @@
     $('hd-r-cancel').addEventListener('click', function () { S.editRes = 0; renderDetail(); });
     var del = $('hd-r-del');
     if (del) del.addEventListener('click', function () {
-      if (!window.confirm(T('hd_confirm_del_res'))) return;
-      db.residents.delete(editingId).then(function () { S.editRes = 0; renderDetail(); });
+      hdDlgConfirm(T('hd_confirm_del_res')).then(function (ok) {
+        if (!ok) return;
+        db.residents.delete(editingId).then(function () { S.editRes = 0; renderDetail(); });
+      });
     });
     sv.addEventListener('click', function () {
       var name = $('hd-r-name').value.trim();
@@ -696,7 +788,16 @@
     }
     /* 修正链全显：磁偏角/GPS 无值显「—」（手动定稿即此情形），不静默缺项 */
     var meta = [];
-    meta.push(esc(TF(T('hd_fix_from'), pointName(fx.point) || T('hd_point_none'), fmtDT(fx.ts))));
+    /* 定稿来源行：显测点（定稿自 宅心 测量 · 时间）；手动定稿显「手动选定」；
+     * 历史定稿无测点显「未标注」，点之可补标（补后本行与记录签同步刷新） */
+    if (fx.point === 'manual') {
+      meta.push(esc(TF(T('hd_fix_from_manual'), fmtDT(fx.ts))));
+    } else if (fx.point) {
+      meta.push(esc(TF(T('hd_fix_from'), pointName(fx.point), fmtDT(fx.ts))));
+    } else {
+      meta.push(esc(TF(T('hd_fix_from'), '@@PT@@', fmtDT(fx.ts))).replace('@@PT@@',
+        '<span class="hd-fix-ptnone" data-fixpt="' + fx.id + '">' + esc(T('hd_point_none')) + '</span>'));
+    }
     meta.push(fx.decl != null && isFinite(fx.decl)
       ? esc(TF(T('hd_fix_decl'), fmtDecl(fx.decl))) : esc(T('hd_fix_decl_na')));
     meta.push(fx.gps ? 'GPS ' + fx.gps.lat.toFixed(4) + ', ' + fx.gps.lon.toFixed(4) : 'GPS —');
@@ -713,6 +814,8 @@
       pickPanelHtml();
     $('hd-go-xk').addEventListener('click', function () { gotoChart('xk', fx.sitting); });
     $('hd-go-bz').addEventListener('click', function () { gotoChart('bz', fx.sitting); });
+    var fp = box.querySelector('[data-fixpt]');
+    if (fp) fp.addEventListener('click', function () { labelPoint(fx.id); });
     bindFixed(h, fx);
   }
 
@@ -753,7 +856,7 @@
     var cf = $('hd-pick-confirm');
     if (cf) cf.addEventListener('click', function () { if (S.pickSit) applyManualFixed(h, S.pickSit); });
   }
-  /* 手选定稿：写一条来源「手动」的测量并设为定稿，流水审计链不断
+  /* 手选定稿：写一条来源「手动」的测量并设为定稿，记录审计链不断
    *（时间=当下、GPS/磁偏角留空，定稿卡以「—」显） */
   function applyManualFixed(h, sitName) {
     var names = MT.map(function (m) { return m.name; });
@@ -809,7 +912,8 @@
       return '<div class="hd-log"><div class="hd-log-top">' +
         '<span class="hd-log-deg">' + fmtDeg(m.facingDeg) + '°</span>' +
         '<span class="hd-log-mtn">' + esc(m.facing) + esc(T('hd_mtn_suffix')) + '</span>' +
-        (m.point ? '<span class="hd-log-pt">' + esc(pointName(m.point)) + '</span>' : '') +
+        (m.point ? '<span class="hd-log-pt">' + esc(pointName(m.point)) + '</span>'
+                 : '<span class="hd-log-pt none" data-ptfor="' + m.id + '">' + esc(T('hd_point_none')) + '</span>') +
         (m.fixed ? '<span class="hd-chip done">' + esc(T('hd_fixed_chip')) + '</span>'
                  : '<span class="hd-setfix" data-setfix="' + m.id + '">' + esc(T('hd_set_fixed')) + '</span>') +
         '</div><p class="hd-log-meta">' + meta.join(' · ') +
@@ -826,11 +930,16 @@
           .then(renderDetail);
       });
     });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-ptfor]'), function (el) {
+      el.addEventListener('click', function () { labelPoint(+el.getAttribute('data-ptfor')); });
+    });
     Array.prototype.forEach.call(box.querySelectorAll('[data-delmeas]'), function (el) {
       el.addEventListener('click', function () {
         var id = +el.getAttribute('data-delmeas');
-        if (!window.confirm(T('hd_confirm_del_meas'))) return;
-        db.measurements.delete(id).then(function () { return syncMirror(); }).then(renderDetail);
+        hdDlgConfirm(T('hd_confirm_del_meas')).then(function (ok) {
+          if (!ok) return;
+          db.measurements.delete(id).then(function () { return syncMirror(); }).then(renderDetail);
+        });
       });
     });
   }
@@ -903,26 +1012,30 @@
       el.addEventListener('click', function () { S.curFloor = +el.getAttribute('data-fl'); renderDetail(); });
     });
     $('hd-fl-add').addEventListener('click', function () {
-      var name = window.prompt(T('hd_floor_name_prompt'), '');
-      if (!name || !name.trim()) return;
-      db.floors.add({ houseId: h.id, name: name.trim(), sort: fls.length }).then(function (id) {
-        S.curFloor = id; renderDetail();
+      hdDlgPrompt(T('hd_floor_name_prompt'), '', T('hd_save')).then(function (name) {
+        if (!name || !name.trim()) return;
+        db.floors.add({ houseId: h.id, name: name.trim(), sort: fls.length }).then(function (id) {
+          S.curFloor = id; renderDetail();
+        });
       });
     });
     var rn = $('hd-fl-rename');
     if (rn) rn.addEventListener('click', function () {
-      var name = window.prompt(T('hd_floor_name_prompt'), cur.name);
-      if (!name || !name.trim()) return;
-      db.floors.update(cur.id, { name: name.trim() }).then(renderDetail);
+      hdDlgPrompt(T('hd_floor_name_prompt'), cur.name, T('hd_save')).then(function (name) {
+        if (!name || !name.trim()) return;
+        db.floors.update(cur.id, { name: name.trim() }).then(renderDetail);
+      });
     });
     var dl = $('hd-fl-del');
     if (dl) dl.addEventListener('click', function () {
-      if (!window.confirm(T('hd_confirm_del_floor'))) return;
-      db.photos.where('houseId').equals(h.id).and(function (p) { return p.floorId === cur.id; })
-        .modify(function (p) { p.floorId = null; })
-        .then(function () { return db.plans.delete(cur.id); })
-        .then(function () { return db.floors.delete(cur.id); })
-        .then(function () { S.curFloor = 0; renderDetail(); });
+      hdDlgConfirm(T('hd_confirm_del_floor')).then(function (ok) {
+        if (!ok) return;
+        db.photos.where('houseId').equals(h.id).and(function (p) { return p.floorId === cur.id; })
+          .modify(function (p) { p.floorId = null; })
+          .then(function () { return db.plans.delete(cur.id); })
+          .then(function () { return db.floors.delete(cur.id); })
+          .then(function () { S.curFloor = 0; renderDetail(); });
+      });
     });
   }
 
@@ -1081,24 +1194,28 @@
     var del = $('hd-del-house');
     if (del) del.addEventListener('click', function () {
       var hid = S.curHouse; if (!hid) return;
-      if (!window.confirm(T('hd_confirm_del_house'))) return;
-      Promise.all([
-        db.measurements.where('houseId').equals(hid).delete(),
-        db.photos.where('houseId').equals(hid).delete(),
-        db.floors.where('houseId').equals(hid).delete(),
-        db.residents.where('houseId').equals(hid).delete(),
-        db.plans.where('houseId').equals(hid).delete(),
-        db.guides.delete(hid)
-      ]).then(function () { return db.houses.delete(hid); })
-        .then(function () { return syncMirror(); })
-        .then(function () { S.curHouse = 0; closeDetail(); openList(); });
+      hdDlgConfirm(T('hd_confirm_del_house')).then(function (ok) {
+        if (!ok) return;
+        Promise.all([
+          db.measurements.where('houseId').equals(hid).delete(),
+          db.photos.where('houseId').equals(hid).delete(),
+          db.floors.where('houseId').equals(hid).delete(),
+          db.residents.where('houseId').equals(hid).delete(),
+          db.plans.where('houseId').equals(hid).delete(),
+          db.guides.delete(hid)
+        ]).then(function () { return db.houses.delete(hid); })
+          .then(function () { return syncMirror(); })
+          .then(function () { S.curHouse = 0; closeDetail(); openList(); });
+      });
     });
     var vx = $('hd-viewer-close'); if (vx) vx.addEventListener('click', closeViewer);
     var vd = $('hd-viewer-del');
     if (vd) vd.addEventListener('click', function () {
       if (!S.viewerPhoto) return;
-      if (!window.confirm(T('hd_confirm_del_photo'))) return;
-      db.photos.delete(S.viewerPhoto).then(function () { closeViewer(); renderDetail(); });
+      hdDlgConfirm(T('hd_confirm_del_photo')).then(function (ok) {
+        if (!ok) return;
+        db.photos.delete(S.viewerPhoto).then(function () { closeViewer(); renderDetail(); });
+      });
     });
     bindFileInputs();
     var pr = $('fs-point-row'); if (pr) pr.hidden = false;

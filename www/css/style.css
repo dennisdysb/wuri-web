@@ -2310,6 +2310,8 @@ body.sky-red .hd-fix-deg { color:#eda88f; }
 .hd-log-deg { font-family:var(--serif); font-size:1.06rem; color:var(--ink); letter-spacing:.06em; }
 .hd-log-mtn { font-size:.86rem; color:var(--teal-deep); }
 .hd-log-pt { font-size:.78rem; color:var(--muted); border:1px solid var(--line-soft); border-radius:6px; padding:1px 7px; }
+.hd-log-pt.none { border-style:dashed; color:var(--faint); cursor:pointer; }
+.hd-fix-ptnone { color:var(--cinnabar); border-bottom:1px dashed var(--cinnabar); padding:0 2px; cursor:pointer; }
 .hd-log .hd-chip { margin-left:auto; }
 .hd-setfix { margin-left:auto; font-size:.78rem; color:var(--teal-deep); letter-spacing:.1em; cursor:pointer; }
 .hd-log-meta { font-size:.76rem; line-height:1.75; color:var(--muted); margin-top:4px; }
@@ -2367,9 +2369,17 @@ body.sky-red .hd-cat.on { color:#f2c1b2; border-color:rgba(255,96,72,.5); backgr
 body.sky-red #hd-viewer-img { filter:brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2); }
 .hd-viewer-bar { display:flex; align-items:center; gap:14px; margin-top:14px; color:#e9e2cf; font-size:.84rem; }
 .hd-viewer-btns { display:flex; gap:8px; }
-#fs-point-row { align-items:center; gap:10px; }
-#fs-point-row .fs2-inp { flex:0 1 180px; }
+#fs-point-row { align-items:center; gap:10px; flex-wrap:wrap; }
 #fs-point-row[hidden] { display:none; }
+.fs-pt-caps { display:flex; flex-wrap:wrap; gap:7px; }
+.fs-pt-chip { font-family:var(--serif); font-size:.88rem; letter-spacing:.08em; color:var(--ink-2);
+  border:1px solid var(--line); background:var(--paper-2); border-radius:999px; padding:6px 14px; cursor:pointer; }
+.fs-pt-chip.on { color:var(--gold-deep); border-color:rgba(162,129,59,.6); background:var(--gold-wash); font-weight:700; }
+[data-theme="night"] .fs-pt-chip.on { color:var(--gold); }
+body.sky-red .fs-pt-chip.on { color:#f2c1b2; border-color:rgba(255,96,72,.5); background:rgba(26,8,6,.4); }
+.fs-pt-caps.need .fs-pt-chip { border-color:var(--cinnabar); }
+.fs-pt-hint { flex:0 0 100%; margin:0; font-size:.8rem; color:var(--cinnabar); letter-spacing:.06em; }
+.fs-pt-hint[hidden] { display:none; }
 
 /* 住户（补丁二） */
 .hd-res-row { padding:10px 0; border-top:1px solid var(--line-soft); }
@@ -2411,6 +2421,14 @@ body.sky-red .hd-pick-row.on .hd-pick-sub { color:#f2c1b2; }
 .hd-pick-new { justify-content:center; color:var(--teal-deep); border-style:dashed; font-size:.92rem; letter-spacing:.1em; }
 .hd-pick-foot { display:flex; gap:10px; margin-top:14px; }
 .hd-pick-foot .btn { flex:1; }
+
+/* 自家样式弹层（代原生输入/确认弹窗，复用选宅层体系；z 序须压过照片查看器 300） */
+.hd-dlg-mask { z-index:400; }
+.hd-pt-mask { z-index:150; }
+.hd-dlg-inp { width:100%; margin-top:14px; }
+.hd-dlg-msg { font-size:.98rem; letter-spacing:.05em; line-height:1.75; }
+.hd-dlg-danger { background:var(--cinnabar); border:1px solid var(--cinnabar); color:#fff; }
+body.sky-red .hd-dlg-danger { color:#ffe9e2; }
 
 /* ===== 户型编辑（第二批 A，house-editor.js） ===== */
 .hpe-card { padding-bottom:14px; }
