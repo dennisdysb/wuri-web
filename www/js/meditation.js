@@ -29,6 +29,24 @@ var Meditation = (function () {
   var LS_CUSTOM = 'wuri_med_custom';
   var LS_BELL = 'wuri_med_bell';
   var LS_VOL = 'wuri_med_vol';
+  var LS_BREATH = 'wuri_med_breath';
+
+  /* 呼吸参数只取事实层（相位秒数），名称说明与引导实现均为本站自撰/自写。 */
+  var BREATH_PATTERNS = [
+    { id: 'square', name: '盒式呼吸', phases: [4, 4, 4, 4], note: '四相位等长，平稳安定。' },
+    { id: 'coherent', name: '谐振呼吸', phases: [5.5, 0, 5.5, 0], note: '吸呼等长，缓慢均匀，适合日常定心。' },
+    { id: 'extended-exhale', name: '延长呼气', phases: [4, 0, 6, 0], note: '呼气长于吸气，短时间也可练习。' },
+    { id: 'deep-calm', name: '深度安神（4-7-8）', phases: [4, 7, 8, 0], note: '节奏缓慢，适合打坐收尾或睡前；如感头晕，请恢复自然呼吸。' },
+    { id: 'ujjayi', name: '乌加依呼吸', phases: [7, 0, 7, 0], note: '吸呼缓慢均匀，帮助收摄心神。' },
+    { id: 'pranayama', name: '调息法', phases: [7, 4, 8, 4], note: '四相位俱全的进阶慢练习；如感不适，请恢复自然呼吸。' },
+    { id: 'awake', name: '清醒提神', phases: [6, 0, 2, 0], note: '吸长呼短，适合晨起，不建议睡前使用。' }
+  ];
+  var BREATH_PHASE_META = [
+    { key: 'inhale', label: '吸气', from: 0.68, to: 1 },
+    { key: 'holdIn', label: '屏息', from: 1, to: 1 },
+    { key: 'exhale', label: '呼气', from: 1, to: 0.68 },
+    { key: 'holdOut', label: '屏息', from: 0.68, to: 0.68 }
+  ];
 
   var SVG_PLAY = '<svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
   var SVG_PAUSE = '<svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
@@ -55,6 +73,8 @@ var Meditation = (function () {
   var pollId = 0;
   var bgEls = [], dotEls = [];
   var pagerEl = null, rafPending = false;
+  var breathId = lsGet(LS_BREATH, 'off');
+  var breath = { active: false, phaseIndex: 0, endsAt: 0, durationMs: 0, remainingMs: 0, timer: 0 };
 
   /* 降级播放（非原生） */
   var fb = { ambient: null, endAt: 0, bellTimer: 0, endTimer: 0, paused: false, remainMs: 0, elapsedMs: 0, startedAt: 0 };
@@ -91,6 +111,7 @@ var Meditation = (function () {
         dotEls.push(d);
       })(i);
     }
+    buildBreathOptions();
     /* 滑动切场景：不用原生滚动，直接触摸判断方向，一次只走一页（2026-10-09 重构）
        根因：原生滚动的惯性+吸附+JS控制三方打架，快速连滑必乱 */
     var tsX = 0, tActive = false;
@@ -161,6 +182,137 @@ var Meditation = (function () {
     }
   }
 
+  /* ---------- 呼吸型态 ---------- */
+  function breathPattern() {
+    for (var i = 0; i < BREATH_PATTERNS.length; i++) {
+      if (BREATH_PATTERNS[i].id === breathId) return BREATH_PATTERNS[i];
+    }
+    return null;
+  }
+  function breathPhases(pattern) {
+    var out = [];
+    if (!pattern) return out;
+    for (var i = 0; i < pattern.phases.length; i++) {
+      if (pattern.phases[i] > 0) out.push({ meta: BREATH_PHASE_META[i], seconds: pattern.phases[i] });
+    }
+    return out;
+  }
+  function buildBreathOptions() {
+    var wrap = $('#med-breath-options');
+    if (!wrap || wrap.children.length) return;
+    var choices = [{ id: 'off', name: '关闭' }].concat(BREATH_PATTERNS);
+    choices.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'med-breath-chip';
+      b.setAttribute('data-breath', p.id);
+      b.textContent = p.name;
+      b.addEventListener('click', function () { selectBreath(p.id); });
+      wrap.appendChild(b);
+    });
+  }
+  function selectBreath(id) {
+    breathId = id;
+    lsSet(LS_BREATH, id);
+    renderBreathSelection();
+    if (playing && breathPattern()) startBreath();
+    else resetBreathPreview();
+  }
+  function renderBreathSelection() {
+    var chips = document.querySelectorAll('#med-breath-options .med-breath-chip');
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].classList.toggle('on', chips[i].getAttribute('data-breath') === breathId);
+    }
+    var box = $('#med-breath');
+    if (box) box.hidden = !breathPattern();
+  }
+  function setBreathVisual(phase, scale, remainSec) {
+    var circle = $('#med-breath-circle');
+    if (circle) circle.style.transform = 'scale(' + scale.toFixed(3) + ')';
+    var label = $('#med-breath-phase');
+    if (label) label.textContent = phase ? phase.meta.label : '吸气';
+    var count = $('#med-breath-count');
+    if (count) count.textContent = Math.max(0, remainSec || 0).toFixed(1);
+    var note = $('#med-breath-note');
+    var p = breathPattern();
+    if (note) note.textContent = p ? p.note : '';
+  }
+  function resetBreathPreview() {
+    clearBreathTimer();
+    breath.active = false;
+    breath.phaseIndex = 0;
+    breath.remainingMs = 0;
+    renderBreathSelection();
+    var p = breathPattern(), phases = breathPhases(p);
+    if (p && phases.length) setBreathVisual(phases[0], phases[0].meta.from, phases[0].seconds);
+  }
+  function clearBreathTimer() {
+    if (breath.timer) { clearInterval(breath.timer); breath.timer = 0; }
+  }
+  function beginBreathPhase() {
+    var p = breathPattern(), phases = breathPhases(p);
+    if (!p || !phases.length || !playing) { resetBreathPreview(); return; }
+    if (breath.phaseIndex >= phases.length) breath.phaseIndex = 0;
+    var phase = phases[breath.phaseIndex];
+    breath.active = true;
+    breath.durationMs = phase.seconds * 1000;
+    breath.remainingMs = breath.durationMs;
+    breath.endsAt = Date.now() + breath.durationMs;
+    setBreathVisual(phase, phase.meta.from, phase.seconds);
+    clearBreathTimer();
+    breath.timer = setInterval(updateBreathVisual, 50);
+  }
+  function updateBreathVisual() {
+    if (!breath.active) return;
+    var p = breathPattern(), phases = breathPhases(p);
+    if (!p || !phases.length) { resetBreathPreview(); return; }
+    var phase = phases[breath.phaseIndex % phases.length];
+    var remainMs = breath.endsAt - Date.now();
+    if (remainMs <= 0) {
+      breath.phaseIndex = (breath.phaseIndex + 1) % phases.length;
+      beginBreathPhase();
+      return;
+    }
+    breath.remainingMs = remainMs;
+    var progress = 1 - remainMs / breath.durationMs;
+    progress = Math.max(0, Math.min(1, progress));
+    var scale = phase.meta.from + (phase.meta.to - phase.meta.from) * progress;
+    setBreathVisual(phase, scale, remainMs / 1000);
+  }
+  function startBreath() {
+    breath.phaseIndex = 0;
+    breath.remainingMs = 0;
+    if (breathPattern()) beginBreathPhase();
+    else resetBreathPreview();
+  }
+  function pauseBreath() {
+    if (!breath.active) return;
+    breath.remainingMs = Math.max(0, breath.endsAt - Date.now());
+    breath.active = false;
+    clearBreathTimer();
+  }
+  function resumeBreath() {
+    var p = breathPattern(), phases = breathPhases(p);
+    if (!p || !phases.length || breath.active) return;
+    if (!breath.remainingMs) { startBreath(); return; }
+    var phase = phases[breath.phaseIndex % phases.length];
+    breath.active = true;
+    breath.durationMs = phase.seconds * 1000;
+    breath.endsAt = Date.now() + breath.remainingMs;
+    clearBreathTimer();
+    breath.timer = setInterval(updateBreathVisual, 50);
+    updateBreathVisual();
+  }
+  function stopBreath() {
+    clearBreathTimer();
+    breath.active = false;
+    breath.remainingMs = 0;
+    breath.phaseIndex = 0;
+    var p = breathPattern(), phases = breathPhases(p);
+    renderBreathSelection();
+    if (p && phases.length) setBreathVisual(phases[0], phases[0].meta.from, phases[0].seconds);
+  }
+
   /* ---------- 时长 / 选项 ---------- */
   function getSelectedDuration() {
     var on = document.querySelector('#med-dur-row .med-seg.on');
@@ -191,6 +343,10 @@ var Meditation = (function () {
     $('#med-custom-go').hidden = (dur !== 'custom');
     $('#med-bell-toggle').checked = lsGet(LS_BELL, '1') === '1';
     $('#med-vol').value = lsGet(LS_VOL, '70');
+    breathId = lsGet(LS_BREATH, 'off');
+    if (breathId !== 'off' && !breathPattern()) breathId = 'off';
+    renderBreathSelection();
+    resetBreathPreview();
   }
 
   /* ---------- 播放控制 ---------- */
@@ -232,6 +388,7 @@ var Meditation = (function () {
     updatePlayBtn();
     showTime(totalSec);
     startPoll();
+    startBreath();
   }
 
   function togglePlay() {
@@ -241,6 +398,7 @@ var Meditation = (function () {
       if (b) { try { b.medPause(); } catch (e) {} }
       else fbPause();
       playing = false;
+      pauseBreath();
       updatePlayBtn();
     } else if (expectDone && seenActive) {
       /* 暂停后继续：原生直接 resume；降级恢复计时 */
@@ -250,6 +408,7 @@ var Meditation = (function () {
       playing = true;
       updatePlayBtn();
       startPoll();
+      resumeBreath();
     } else {
       startPlayback(getSelectedDuration());
     }
@@ -274,6 +433,7 @@ var Meditation = (function () {
     seenActive = false;
     playing = false;
     stopPoll();
+    stopBreath();
     showTime(0);
     updatePlayBtn();
     try {
@@ -294,6 +454,7 @@ var Meditation = (function () {
     expectDone = false;
     seenActive = false;
     stopPoll();
+    stopBreath();
     updatePlayBtn();
     $('#med-done').hidden = true;
     $('#meditation-view').hidden = true;
@@ -453,6 +614,7 @@ var Meditation = (function () {
     expectDone = false;
     seenActive = false;
     updatePlayBtn();
+    resetBreathPreview();
   }
 
   var inited = false;
@@ -516,6 +678,12 @@ var Meditation = (function () {
       startPlayback(getSelectedDuration());
     });
     $('#med-done-back').addEventListener('click', back);
+    document.addEventListener('visibilitychange', function () {
+      /* 呼吸圈只是视觉引导：页面隐藏时冻结相位，冥想计时与音频不暂停；
+         回到前台且冥想仍在播放时，从冻结处续跑。 */
+      if (document.hidden) { if (playing) pauseBreath(); }
+      else if (playing) resumeBreath();
+    });
     window.addEventListener('resize', function () {
       // 无滚动方案：resize 无需处理
     });

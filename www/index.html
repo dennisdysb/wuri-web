@@ -12,9 +12,9 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=131">
+<link rel="stylesheet" href="css/style.css?v=132">
 <link rel="stylesheet" href="css/qimen.css?v=78">
-<link rel="stylesheet" href="css/meditation.css?v=67">
+<link rel="stylesheet" href="css/meditation.css?v=68">
 </head>
 <body>
 <div id="app">
@@ -833,7 +833,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v131）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v132）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -842,6 +842,7 @@
       <p class="hint">六爻装卦（纳甲、世应）参照开源项目「liuyao-tool」（作者 1eakkkk，依 MIT 许可证使用）校订，特此鸣谢。</p>
       <p class="hint">六爻「卦象判读」（用神、旺衰、世应、动爻与格局的结构判读）规则宗《增删卜易》《卜筮正宗》，由本站自写实现。</p>
       <p class="hint">星象模块的星空推算（岁差、章动与地平坐标变换）基于开源库「Astronomy Engine」（作者 Don Cross，依 MIT 许可证使用），特此鸣谢。</p>
+      <p class="hint" data-i18n="me_credit_breathly">冥想「呼吸」型态的参数与节奏设计参考开源项目 Breathly（依 MPL-2.0 许可证），本应用只采用参数与节奏选型，呼吸引导由本站自行实现，特此鸣谢。</p>
       <p class="hint">平面星图的投影与大圆路径基于开源库「D3」（d3-geo / d3-array，作者 Mike Bostock 等，依 BSD-3-Clause 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_dingben">星象模块星官体系以《漫步中国星空》（增订版，齐锐、万昊宜著，科学普及出版社）为定本校订；《步天歌》用该书所本《灵台秘苑》系统。</p>
       <p class="hint">部分经文诵读音频由温哥华清玄道长提供，特此鸣谢。</p>
@@ -1626,8 +1627,21 @@
       <div class="med-sound-name" id="med-sound-name">温柔雨声</div>
       <div class="med-clock" id="med-clock">15:00</div>
       <div class="med-dots" id="med-dots"></div>
+      <div class="med-breath" id="med-breath" hidden>
+        <div class="med-breath-circle" id="med-breath-circle">
+          <div class="med-breath-inner">
+            <div class="med-breath-phase" id="med-breath-phase">吸气</div>
+            <div class="med-breath-count" id="med-breath-count">4.0</div>
+          </div>
+        </div>
+        <div class="med-breath-note" id="med-breath-note"></div>
+      </div>
     </div>
     <div class="med-controls">
+      <div class="med-breath-row">
+        <span class="med-breath-title">呼吸</span>
+        <div class="med-breath-options" id="med-breath-options" aria-label="呼吸型态"></div>
+      </div>
       <div class="med-dur-row" id="med-dur-row">
         <button class="med-seg on" data-dur="15">15分钟</button>
         <button class="med-seg" data-dur="30">30分钟</button>

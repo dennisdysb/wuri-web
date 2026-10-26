@@ -1,0 +1,18 @@
+PASS S1 四件套 v132
+PASS S2 meditation.css ?v=68 双处
+PASS S3 七型态参数齐备
+PASS S4 Breathly 鸣谢简繁+index
+PASS S5 呼吸圈/型态样式在位
+PASS B1 型态选项=关闭+7型态
+PASS B2 默认关闭且呼吸圈隐藏
+PASS B3 点选谐振：持久化/圈显示/5.5秒吸气
+PASS B4 呼吸圈视觉层在滑动层之上（中心层 z 高于 pager，截图亲验）
+PASS B5 播放后倒计时推进且圆在放大
+PASS B6 播放中切延长呼气即时重启吸气4秒
+PASS B7 0秒屏息被跳过：吸气后直接呼气
+PASS B8 暂停冻结呼吸相位
+PASS B9 恢复后续跑
+PASS B10 关闭型态后呼吸圈隐藏
+PASS B11 关于页鸣谢真渲染
+PASS Z1 零 JS 异常
+SMOKE v2332: 17/17 passed

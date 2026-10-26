@@ -49,11 +49,29 @@
 .med-dots{display:flex;justify-content:center;gap:8px;pointer-events:none}
 .med-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.32)}
 .med-dot.on{background:#e8c877;box-shadow:0 0 8px rgba(232,200,119,.8)}
+.med-breath{margin:18px auto 0;width:118px;pointer-events:none}
+.med-breath[hidden]{display:none}
+.med-breath-circle{width:112px;height:112px;margin:0 auto;border-radius:50%;border:1px solid rgba(255,255,255,.5);
+  background:rgba(12,12,16,.34);color:#fff;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 0 0 8px rgba(255,255,255,.05),0 8px 28px rgba(0,0,0,.28);
+  transform-origin:center;will-change:transform}
+.med-breath-inner{text-align:center}
+.med-breath-phase{font-size:.92rem;letter-spacing:.28em;text-indent:.28em;color:rgba(245,241,230,.94)}
+.med-breath-count{font-family:var(--serif,Georgia,serif);font-size:1.65rem;font-weight:200;line-height:1.15;font-variant-numeric:tabular-nums}
+.med-breath-note{width:210px;max-width:72vw;margin:10px auto 0;color:rgba(245,241,230,.78);font-size:.74rem;line-height:1.45;
+  text-shadow:0 1px 6px rgba(0,0,0,.72)}
 
 /* ---------- 底部浮动控制层（图片全屏铺满，控件悬浮） ---------- */
 .med-controls{position:absolute;left:0;right:0;bottom:0;z-index:4;
   padding:18px 22px calc(env(safe-area-inset-bottom,0px) + 20px);
   display:flex;flex-direction:column;align-items:center;gap:12px}
+.med-breath-row{width:100%;display:flex;align-items:center;gap:9px}
+.med-breath-title{color:rgba(255,255,255,.86);font-size:.82rem;letter-spacing:.18em;flex:none;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.med-breath-options{display:flex;gap:7px;overflow-x:auto;padding:2px 1px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.med-breath-options::-webkit-scrollbar{display:none}
+.med-breath-chip{border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;
+  padding:6px 11px;font-size:.78rem;white-space:nowrap;flex:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.med-breath-chip.on{background:rgba(255,255,255,.92);border-color:transparent;color:#1a1a1a;font-weight:600}
 .med-dur-row{display:flex;gap:8px;align-items:center}
 .med-seg{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;
   border-radius:999px;padding:7px 16px;font-size:.85rem;white-space:nowrap;flex:none;
@@ -79,6 +97,16 @@
   box-shadow:0 6px 24px rgba(0,0,0,.35)}
 .med-play:active{transform:scale(.96)}
 .med-vol{width:min(64%,260px);accent-color:#fff}
+
+@media (max-height:740px){
+  .med-center{top:23%}
+  .med-clock{font-size:3.35rem;margin:6px 0 10px}
+  .med-breath{margin-top:10px;width:96px}
+  .med-breath-circle{width:88px;height:88px}
+  .med-breath-count{font-size:1.3rem}
+  .med-breath-note{margin-top:6px}
+  .med-controls{gap:8px;padding-top:10px}
+}
 
 /* ---------- 冥想完成 ---------- */
 .med-done{position:absolute;inset:0;background:rgba(5,5,8,.66);
