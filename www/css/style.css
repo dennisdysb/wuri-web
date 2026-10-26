@@ -2170,6 +2170,11 @@ body.sky-red .fs-pro { color: #f2c1b2; border-color: rgba(255,96,72,.5);
 .fs-compass-title { text-align: center; font-family: var(--serif); font-size: 1.08rem;
   letter-spacing: .44em; text-indent: .44em; color: var(--ink); margin: 10px 0 2px; }
 .fs-compass-sub { text-align: center; font-size: .78rem; letter-spacing: .18em; color: var(--muted); }
+/* 罗盘语境条（自某宅详情定向时显「为『X宅』定向」，走主题变量＋三态） */
+.fs-ctx { text-align: center; margin-top: 10px; font-family: var(--serif); font-size: .92rem;
+  letter-spacing: .22em; text-indent: .22em; color: var(--gold-deep); }
+[data-theme="night"] .fs-ctx { color: var(--gold); }
+body.sky-red .fs-ctx { color: #f2c1b2; }
 .fs-stage { position: relative; width: min(88vw, 352px); margin: 4px auto 0; touch-action: none; }
 .fs-pointer { text-align: center; color: var(--gold); font-size: 17px; line-height: 1; height: 20px;
   text-shadow: 0 0 8px rgba(201,168,106,.5); }

@@ -107,7 +107,11 @@
   var hub = $('view-fengshui'), comp = $('view-compass');
   function openHub() { if (hub) { hub.hidden = false; window.scrollTo(0, 0); renderArch(); } }
   function closeHub() { if (hub) hub.hidden = true; }
-  function openCompass() { if (comp) { comp.hidden = false; window.scrollTo(0, 0); startCompass(); } }
+  function openCompass() {
+    if (comp) { comp.hidden = false; window.scrollTo(0, 0); startCompass(); }
+    /* 语境条由家宅层按目标键同步（自详情定向显宅名，通用路径藏） */
+    if (window.__wuriHouse && __wuriHouse.syncCompassCtx) __wuriHouse.syncCompassCtx();
+  }
   function closeCompass() { if (comp) comp.hidden = true; stopCompass(); }
 
   /* ---------------- 罗盘盘面（设计稿同构实绘） ---------------- */
@@ -368,7 +372,11 @@
       openCompass();
     });
     var cb = $('fs-compass-back');
-    if (cb) cb.addEventListener('click', closeCompass);
+    if (cb) cb.addEventListener('click', function () {
+      closeCompass();
+      /* 自某宅详情定向进入时，返回须回该宅详情（不落档） */
+      if (window.__wuriHouse && __wuriHouse.onCompassBack) __wuriHouse.onCompassBack();
+    });
     /* 八宅/玄空飞星（第二批）：过 Pro 门后交 fengshui2.js 开页 */
     [['fs-card-bazhai', 'openBazhai'], ['fs-card-xuankong', 'openXuankong']].forEach(function (pair) {
       var c = $(pair[0]);
@@ -431,9 +439,11 @@
           point: CS.point
         };
         var flow = __wuriHouse.saveCompass ? __wuriHouse.saveCompass(rec) : __wuriHouse.recordCompass(rec);
-        flow.then(function (hid) {
+        flow.then(function (res) {
+          var hid = res && typeof res === 'object' ? res.id : res;
           if (hid == null) return; /* 选宅取消：不落档、不离页 */
-          toastMsg(T('fs_saved'));
+          /* 自定稿卡「罗盘实测」入口保存即定稿，toast 与通用入记录口径分开 */
+          toastMsg(res && res.autoFix ? T('hd_fixed_by_measure') : T('fs_saved'));
           closeCompass();
           renderArch();
           if (__wuriHouse.afterCompass) __wuriHouse.afterCompass();

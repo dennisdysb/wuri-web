@@ -206,9 +206,14 @@
       }).then(function () { return syncMirror(); });
   }
 
-  /* 测量入指定档案：无定稿时自动定稿（承旧单档口径）；解析为 houseId */
-  function recordInto(id, r) {
-    return fixedOf(id).then(function (fx) {
+  /* 测量入指定档案：无定稿时自动定稿（承旧单档口径）；
+   * forceFix（自定稿卡「罗盘实测」入口）＝保存即夺稿：先清旧定稿、新条直接定稿。
+   * 解析为 {id, autoFix}，autoFix 供罗盘页选 toast 文案。 */
+  function recordInto(id, r, forceFix) {
+    var clearP = forceFix
+      ? db.measurements.where('houseId').equals(id).modify(function (m) { m.fixed = false; })
+      : Promise.resolve();
+    return clearP.then(function () { return fixedOf(id); }).then(function (fx) {
       var gpsP = new Promise(function (res) {
         if (!navigator.geolocation) { res(null); return; }
         var to = setTimeout(function () { res(null); }, 2500);
@@ -224,8 +229,10 @@
           point: r.point || '', decl: isFinite(r.decl) ? r.decl : null,
           gps: g ? { lat: g.lat, lon: g.lon } : null, gpsAcc: g ? g.acc : null,
           accDeg: isFinite(r.accDeg) ? r.accDeg : null,
-          fixed: !fx
-        }).then(function () { return syncMirror(); }).then(function () { setRecent(id); return id; });
+          fixed: forceFix ? true : !fx
+        }).then(function () { return syncMirror(); }).then(function () {
+          setRecent(id); return { id: id, autoFix: !!forceFix };
+        });
       });
     });
   }
@@ -369,22 +376,23 @@
   }
 
   /* 罗盘存档总流程（fengshui.js 存档钮调用）：
-   * 有指定目标（详情页进入，目标键在位）→ 直存该宅；
-   * 无指定 → 无档案时自动建第 1 宅，有档案时弹选宅层。解析 houseId 或 null（取消）。 */
+   * 有指定目标（定稿卡「罗盘实测」入口，目标键在位）→ 直存该宅且保存即定稿；
+   * 无指定（专页罗盘卡通用路径）→ 无档案时自动建第 1 宅，有档案时弹选宅层，
+   * 只入记录、不夺稿（多点互校口径）。解析 {id, autoFix} 或 null（选宅取消）。 */
   function saveCompass(r) {
     var tid = 0;
     try { tid = parseInt(sessionStorage.getItem(TARGET_KEY) || '0', 10) || 0; } catch (e) {}
     function chooseTarget() {
       return db.houses.orderBy('created').toArray().then(function (hs) {
         if (!hs.length) {
-          return createHouse({ name: T('hd_default_home') }).then(function (h) { return recordInto(h.id, r); });
+          return createHouse({ name: T('hd_default_home') }).then(function (h) { return recordInto(h.id, r, false); });
         }
-        return pickHouse(hs).then(function (id) { return id ? recordInto(id, r) : null; });
+        return pickHouse(hs).then(function (id) { return id ? recordInto(id, r, false) : null; });
       });
     }
     return migrate().then(function () {
       if (!tid) return chooseTarget();
-      return db.houses.get(tid).then(function (h) { return h ? recordInto(tid, r) : chooseTarget(); });
+      return db.houses.get(tid).then(function (h) { return h ? recordInto(tid, r, true) : chooseTarget(); });
     });
   }
   /* 兼容旧名（外部若仍调 recordCompass，走同一流程） */
@@ -393,7 +401,7 @@
   /* ---------------- 视图开关 ---------------- */
   var S = {
     curHouse: 0, curFloor: 0, cat: 'all', editing: false, editRes: 0,
-    returnToDetail: false, viewerPhoto: 0, pickSit: null
+    returnToDetail: false, viewerPhoto: 0, pickSit: null, measOpen: false
   };
   function openList() {
     var v = $('view-houses'); if (!v) return;
@@ -406,7 +414,7 @@
     if (window.__wuriFs && __wuriFs.renderArchNow) __wuriFs.renderArchNow();
   }
   function openDetail(id, editing) {
-    S.curHouse = id; S.editing = !!editing; S.cat = 'all'; S.editRes = 0; S.pickSit = null;
+    S.curHouse = id; S.editing = !!editing; S.cat = 'all'; S.editRes = 0; S.pickSit = null; S.measOpen = false;
     setRecent(id);
     var v = $('view-house'); if (!v) return;
     v.hidden = false; window.scrollTo(0, 0);
@@ -810,7 +818,9 @@
       '<div class="hd-actions">' +
       '<button class="btn" id="hd-go-xk">' + esc(T('hd_go_xk')) + '</button>' +
       '<button class="btn" id="hd-go-bz">' + esc(T('hd_go_bz')) + '</button></div>' +
-      '<button class="hd-more" id="hd-pick-open">' + esc(T('hd_pick_sitting')) + '</button>' +
+      '<div class="hd-actions">' +
+      '<button class="btn" id="hd-pick-open">' + esc(T('hd_pick_sitting')) + '</button>' +
+      '<button class="btn" id="hd-fix-measure">' + esc(T('hd_measure_fix')) + '</button></div>' +
       pickPanelHtml();
     $('hd-go-xk').addEventListener('click', function () { gotoChart('xk', fx.sitting); });
     $('hd-go-bz').addEventListener('click', function () { gotoChart('bz', fx.sitting); });
@@ -903,7 +913,15 @@
     var fx = ms.filter(function (m) { return m.fixed; })[0] || null;
     var html = '<div class="card-title">' + esc(T('hd_meas_title')) + '</div>';
     if (!ms.length) html += '<p class="hd-note">' + esc(T('hd_no_meas')) + '</p>';
-    html += ms.map(function (m) {
+    /* 折叠口径（2026-10-26 用户定）：默认只显最近 5 条；现行定稿若不在其内，
+     * 置顶常显（全宅基准不能藏）；卡底「展开全部（共 N 条）/收起」切换，N≤5 不显。
+     * 再测入口已收敛到定稿卡「罗盘实测」，本卡不再设测钮。 */
+    var vis = ms;
+    if (!S.measOpen && ms.length > 5) {
+      vis = ms.slice(0, 5);
+      if (fx && vis.indexOf(fx) === -1) vis = [fx].concat(vis);
+    }
+    html += vis.map(function (m) {
       var meta = [fmtDT(m.ts)];
       if (m.decl != null && isFinite(m.decl)) meta.push(esc(TF(T('hd_m_decl'), fmtDecl(m.decl))));
       if (m.gps) meta.push('GPS ' + m.gps.lat.toFixed(4) + ', ' + m.gps.lon.toFixed(4));
@@ -919,9 +937,13 @@
         '</div><p class="hd-log-meta">' + meta.join(' · ') +
         ' <span class="hd-del" data-delmeas="' + m.id + '">' + esc(T('hd_del')) + '</span></p></div>';
     }).join('');
-    html += '<button class="hd-more" id="hd-measure-btn">' + esc(T('hd_measure_more')) + '</button>';
+    if (ms.length > 5) {
+      html += '<button class="hd-more" id="hd-meas-toggle">' +
+        esc(S.measOpen ? T('hd_meas_collapse') : TF(T('hd_meas_expand'), ms.length)) + '</button>';
+    }
     box.innerHTML = html;
-    $('hd-measure-btn').addEventListener('click', function () { gotoCompassFor(h.id, true); });
+    var tg = $('hd-meas-toggle');
+    if (tg) tg.addEventListener('click', function () { S.measOpen = !S.measOpen; renderDetail(); });
     Array.prototype.forEach.call(box.querySelectorAll('[data-setfix]'), function (el) {
       el.addEventListener('click', function () {
         var id = +el.getAttribute('data-setfix');
@@ -1173,7 +1195,29 @@
   }
 
   /* ---------------- 接线 ---------------- */
+  /* 罗盘页顶语境条：目标键在位（自定稿卡定向进入）显「为『X宅』定向」，否则藏。
+   * 由 fengshui.js openCompass 每次进页调用，覆盖专页卡进入（键已清）与详情进入两路。 */
+  function syncCompassCtx() {
+    var bar = $('fs-ctx'); if (!bar) return;
+    var tid = 0;
+    try { tid = parseInt(sessionStorage.getItem(TARGET_KEY) || '0', 10) || 0; } catch (e) {}
+    if (!tid) { bar.hidden = true; bar.textContent = ''; return; }
+    db.houses.get(tid).then(function (h) {
+      /* 异步回来时键可能已被清/换，以最新键为准 */
+      var now = 0;
+      try { now = parseInt(sessionStorage.getItem(TARGET_KEY) || '0', 10) || 0; } catch (e) {}
+      if (!h || now !== tid) { if (!now) { bar.hidden = true; bar.textContent = ''; } return; }
+      bar.textContent = TF(T('hd_ctx_for'), h.name || T('hd_unnamed'));
+      bar.hidden = false;
+    });
+  }
+  /* 罗盘页「返回」：自详情定向进入时不落档、回该宅详情（顺带清目标键防残留夺稿） */
+  function onCompassBack() {
+    try { sessionStorage.removeItem(TARGET_KEY); } catch (e) {}
+    if (S.returnToDetail && S.curHouse) { S.returnToDetail = false; openDetail(S.curHouse); }
+  }
   function afterCompass() {
+    try { sessionStorage.removeItem(TARGET_KEY); } catch (e) {}
     if (S.returnToDetail && S.curHouse) { S.returnToDetail = false; openDetail(S.curHouse); }
   }
   function init() {
@@ -1241,6 +1285,8 @@
     recordCompass: recordCompass,
     saveCompass: saveCompass,
     afterCompass: afterCompass,
+    syncCompassCtx: syncCompassCtx,
+    onCompassBack: onCompassBack,
     openList: openList,
     openDetail: openDetail,
     exportBackup: exportBackup,
