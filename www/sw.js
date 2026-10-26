@@ -68,6 +68,7 @@ const ASSETS = [
   './js/fengshui2.js',
   './js/vendor/dexie.js',
   './js/house.js',
+  './js/house-editor.js',
   './js/i18n.js',
   './js/iztro.min.js',
   './js/jingwen.js',

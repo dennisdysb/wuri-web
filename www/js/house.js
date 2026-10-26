@@ -89,6 +89,10 @@
    * birthDay,gender,note}——rel: head/spouse/child/parent/other；gender: male/female。
    * 八宅页下批经本表按 houseId 取住户算命卦游年，本批先落表与详情卡。 */
   db.version(2).stores({ residents: '++id, houseId' });
+  /* v3（第二批 A）：户型图 plans{floorId,houseId,updated,mPerUnit,rooms[],
+   * fixtures[],trace{photoId,corners,rect,opacity},liji{x,y},layers{}}，
+   * 一层一图、floorId 为主键；编辑器在 js/house-editor.js，共用本 db 实例。 */
+  db.version(3).stores({ plans: 'floorId, houseId' });
 
   var ARCH_KEY = 'wuri_fs_house_v1';
   var MIG_KEY = 'wuri_hd_migrated_v1';
@@ -415,12 +419,12 @@
     toastMsg(T('hd_exporting'));
     return Promise.all([
       db.houses.toArray(), db.floors.toArray(), db.measurements.toArray(),
-      db.photos.toArray(), db.guides.toArray(), db.residents.toArray()
+      db.photos.toArray(), db.guides.toArray(), db.residents.toArray(), db.plans.toArray()
     ]).then(function (r) {
       var enc = new TextEncoder();
       var meta = {
         app: 'wuri-house-backup', version: 1, exported: new Date().toISOString(),
-        houses: r[0], floors: r[1], measurements: r[2], guides: r[4], residents: r[5],
+        houses: r[0], floors: r[1], measurements: r[2], guides: r[4], residents: r[5], plans: r[6],
         photos: r[3].map(function (p) {
           return { id: p.id, houseId: p.houseId, floorId: p.floorId, cat: p.cat, guideKey: p.guideKey, ts: p.ts, file: 'photos/' + p.id + '.jpg' };
         })
@@ -716,6 +720,43 @@
     });
   }
 
+  /* 详情页户型缩略：真实 plan（房间轮廓＋九宫虚线＋立极＋大门标），与编辑器同数据 */
+  function planThumb(plan, fx) {
+    if (!plan) return '';
+    var rooms = plan.rooms || [], tr = plan.trace && plan.trace.rect;
+    if (!rooms.length && !tr) return '';
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    function ext(x, y) { if (x < x0) x0 = x; if (y < y0) y0 = y; if (x > x1) x1 = x; if (y > y1) y1 = y; }
+    rooms.forEach(function (r) { ext(r.x, r.y); ext(r.x + r.w, r.y + r.h); });
+    if (tr) { ext(tr.x, tr.y); ext(tr.x + tr.w, tr.y + tr.h); }
+    if (x1 <= x0 || y1 <= y0) return '';
+    var m = Math.max(x1 - x0, y1 - y0) * 0.06 + 0.2;
+    x0 -= m; y0 -= m; x1 += m; y1 += m;
+    var W = x1 - x0, fs = W / 15;
+    var s = '<svg viewBox="' + x0 + ' ' + y0 + ' ' + W + ' ' + (y1 - y0) + '" width="100%" style="display:block" aria-hidden="true">';
+    if (tr) s += '<rect x="' + tr.x + '" y="' + tr.y + '" width="' + tr.w + '" height="' + tr.h + '" fill="var(--paper-2)" stroke="var(--line-soft)"/>';
+    if (fx && plan.liji) {
+      var lx = plan.liji.x, ly = plan.liji.y;
+      var hw = Math.max(lx - x0, x1 - lx), hh = Math.max(ly - y0, y1 - ly);
+      s += '<g stroke="var(--gold)" stroke-width="' + (W / 300) + '" stroke-dasharray="' + (W / 60) + ' ' + (W / 90) + '" opacity=".55">' +
+        '<line x1="' + (lx - hw / 3) + '" y1="' + (ly - hh) + '" x2="' + (lx - hw / 3) + '" y2="' + (ly + hh) + '"/>' +
+        '<line x1="' + (lx + hw / 3) + '" y1="' + (ly - hh) + '" x2="' + (lx + hw / 3) + '" y2="' + (ly + hh) + '"/>' +
+        '<line x1="' + (lx - hw) + '" y1="' + (ly - hh / 3) + '" x2="' + (lx + hw) + '" y2="' + (ly - hh / 3) + '"/>' +
+        '<line x1="' + (lx - hw) + '" y1="' + (ly + hh / 3) + '" x2="' + (lx + hw) + '" y2="' + (ly + hh / 3) + '"/></g>';
+    }
+    rooms.forEach(function (r) {
+      s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" fill="var(--paper-2)" stroke="var(--line)" stroke-width="' + (W / 260) + '"/>' +
+        '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" fill="var(--ink-2)" font-family="var(--serif)">' + esc(r.name || '') + '</text>';
+    });
+    (plan.fixtures || []).forEach(function (f) {
+      if (f.type !== 'door') return;
+      s += '<circle cx="' + f.x + '" cy="' + f.y + '" r="' + (W / 90) + '" fill="var(--gold)"/>';
+    });
+    if (fx && plan.liji) s += '<circle cx="' + plan.liji.x + '" cy="' + plan.liji.y + '" r="' + (W / 70) + '" fill="none" stroke="var(--gold)" stroke-width="' + (W / 200) + '"/>';
+    if (fx) s += '<text x="' + ((x0 + x1) / 2) + '" y="' + (y0 + fs * 1.15) + '" text-anchor="middle" font-size="' + fs + '" fill="var(--gold-deep)">' + esc(TF(T('hd_plan_facing'), fx.facing)) + '</text>';
+    return s + '</svg>';
+  }
+
   function renderFloors(h, fls) {
     var box = $('hd-floors'); if (!box) return;
     var chips = fls.map(function (f) {
@@ -729,8 +770,20 @@
         '<span class="hd-link" id="hd-fl-rename">' + esc(T('hd_rename')) + '</span>' +
         (fls.length > 1 ? '<span class="hd-link danger" id="hd-fl-del">' + esc(T('hd_del_floor')) + '</span>' : '') +
         '</div>' : '') +
-      '<div class="hd-planprev"><div class="hd-plan-empty">' + esc(T('hd_plan_soon')) + '</div>' +
-      '<div class="hd-plan-cap"><span>' + esc(cur ? cur.name : '') + '</span><span>' + esc(T('hd_plan_cap')) + '</span></div></div>';
+      '<div class="hd-planprev"><div id="hd-plan-box"><div class="hd-plan-empty">' + esc(T('hd_plan_empty')) + '</div></div>' +
+      '<div class="hd-plan-cap"><span>' + esc(cur ? cur.name : '') + '</span><span>' + esc(T('hd_plan_cap')) + '</span></div></div>' +
+      (cur ? '<button class="hd-more" id="hd-plan-edit">' + esc(T('hd_edit_plan')) + '</button>' : '');
+    var pe = $('hd-plan-edit');
+    if (pe && cur) pe.addEventListener('click', function () {
+      if (window.__wuriPlan) __wuriPlan.open(h.id, cur.id);
+    });
+    if (cur) {
+      Promise.all([db.plans.get(cur.id), fixedOf(h.id)]).then(function (r) {
+        var pb = $('hd-plan-box'); if (!pb) return;
+        var svg = planThumb(r[0], r[1]);
+        if (svg) pb.innerHTML = svg;
+      }).catch(function () {});
+    }
     Array.prototype.forEach.call(box.querySelectorAll('[data-fl]'), function (el) {
       el.addEventListener('click', function () { S.curFloor = +el.getAttribute('data-fl'); renderDetail(); });
     });
@@ -752,6 +805,7 @@
       if (!window.confirm(T('hd_confirm_del_floor'))) return;
       db.photos.where('houseId').equals(h.id).and(function (p) { return p.floorId === cur.id; })
         .modify(function (p) { p.floorId = null; })
+        .then(function () { return db.plans.delete(cur.id); })
         .then(function () { return db.floors.delete(cur.id); })
         .then(function () { S.curFloor = 0; renderDetail(); });
     });
@@ -915,6 +969,7 @@
         db.photos.where('houseId').equals(hid).delete(),
         db.floors.where('houseId').equals(hid).delete(),
         db.residents.where('houseId').equals(hid).delete(),
+        db.plans.where('houseId').equals(hid).delete(),
         db.guides.delete(hid)
       ]).then(function () { return db.houses.delete(hid); })
         .then(function () { return syncMirror(); })
