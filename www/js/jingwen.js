@@ -75,6 +75,15 @@ var JingWen = (function () {
     if (window.t2s && typeof window.t2s === 'function') return window.t2s(s);
     return s;
   }
+  /* 当前是否为简体显示模式（与 txScript 同口径） */
+  function isSimpMode() {
+    try {
+      if (window.I18N && typeof window.curLang === 'function') return window.curLang() !== 'zh-TW';
+      return document.documentElement.getAttribute('lang') !== 'zh-TW';
+    } catch (e) { return true; }
+  }
+  /* UI 文案简繁（i18n 的 tx 仅繁体模式动手，简体原样） */
+  function txUi(s) { try { return window.tx ? window.tx(s) : s; } catch (e) { return s; } }
 
   function ensureLoaded(id, cb) {
     if (window.JINGWEN && JINGWEN[id]) { cb && cb(); return; }
@@ -140,12 +149,16 @@ var JingWen = (function () {
     idx.forEach(function (it) {
       if (order.indexOf(it.id) < 0 && !isNeidan(it.id)) sorted.push(it);
     });
-    var html = sorted.map(function (it) {
-      return '<div class="jing-item" data-jing="' + it.id + '">'
-        + '<span class="jing-book">' + esc(it.cat || '經') + '</span>'
-        + '<span class="jing-title">' + esc(it.title) + '</span>'
-        + '<span class="jing-go">›</span></div>';
-    }).join('');
+    /* 第一层「常见经文」：置顶、一直展开（无折叠开关） */
+    var html = '<div class="jing-sec" data-common-sec>'
+      + '<h3 class="jing-sec-h">' + esc(t('jing_sec_common')) + '（' + sorted.length + '）</h3>'
+      + sorted.map(function (it) {
+        return '<div class="jing-item" data-jing="' + it.id + '">'
+          + '<span class="jing-book">' + esc(it.cat || '經') + '</span>'
+          + '<span class="jing-title">' + esc(it.title) + '</span>'
+          + '<span class="jing-go">›</span></div>';
+      }).join('')
+      + '</div>';
     // 内丹书籍折叠区
     var neidanItems = [];
     NEIDAN_IDS.forEach(function (id) {
@@ -155,7 +168,7 @@ var JingWen = (function () {
     if (neidanItems.length && !window.IS_FREE_BUILD) {
       var ndPro = isPro();
       html += '<div class="jing-sec" data-neidan-fold>'
-        + '<h3 class="jing-sec-h" data-neidan-toggle>内丹书籍（' + neidanItems.length + '）<span class="jing-go">›</span></h3>'
+        + '<h3 class="jing-sec-h" data-neidan-toggle>' + esc(t('jing_sec_neidan')) + '（' + neidanItems.length + '）<span class="jing-go">›</span></h3>'
         + '<div class="jing-neidan-body" hidden>'
         + neidanItems.map(function (it) {
           return '<div class="jing-item" data-jing="' + it.id + '">'
@@ -174,6 +187,10 @@ var JingWen = (function () {
   /* ---------- 阅读器 ---------- */
   function rubyPara(p, secIdx, paraIdx) {
     var t = p.t, py = p.py || [], out = '';
+    /* 整段一次转换（短语保护/短语表需上下文）：转换器等长替换，等长才采信，
+       保证下标与拼音 py[]、高亮偏移严格对齐；不等长回落逐字转换（旧行为） */
+    var dt = txScript(t);
+    if (!dt || dt.length !== t.length) dt = null;
     
     // 高亮范围
     var hlKey = (secIdx != null ? secIdx : '_') + '_' + (paraIdx != null ? paraIdx : '_');
@@ -189,7 +206,7 @@ var JingWen = (function () {
     }
     for (var i = 0; i < t.length; i++) {
       var ch = t[i], r = py[i] || '';
-      ch = txScript(ch);
+      ch = dt ? dt[i] : txScript(ch);
       var cell = r ? '<ruby>' + esc(ch) + '<rt>' + esc(r) + '</rt></ruby>' : esc(ch);
       var hr = hlAt(i);
       if (hr) {
@@ -265,7 +282,7 @@ var JingWen = (function () {
       var jnote = $('#jing-srcnote');
       if (jnote) {
         if (d.note) {
-          jnote.textContent = txScript(d.note + (d.daozang ? '｜底本直出 · 未经校订｜注音为机器标注加审读表校正，多音字可能有误' : ''));
+          jnote.textContent = txScript(d.note + (d.daozang ? '｜底本直出 · 未经校订｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : '') : ''));
           jnote.hidden = false;
         } else { jnote.hidden = true; }
       }
@@ -275,8 +292,8 @@ var JingWen = (function () {
       // 全藏多卷本：卷体按需填充，「全部展开」不适用（防整部渲染卡死）
       var fab2 = $('#jing-foldall');
       if (fab2) fab2.hidden = !!d.lazy;
-      // 内丹书强制关闭背诵模式
-      if (isNeidan(id) && reciteMode) { reciteMode = false; }
+      // 内丹书强制关闭背诵模式；全藏同理（背诵走逐字转换、无短语上下文）
+      if ((isNeidan(id) || d.daozang) && reciteMode) { reciteMode = false; }
       applyReaderPrefs();
       // 重建高亮范围
       if (window._jingHlRebuild) window._jingHlRebuild(id);
@@ -606,16 +623,32 @@ var JingWen = (function () {
           });
         });
       });
-      $('#jing-list').hidden = true;
-      box.hidden = false;
-      out = aliasHits.concat(out);
-      box.innerHTML = out.length
-        ? '<div class="jing-res-count">共 ' + out.length + ' 处</div>' + out.slice(0, 200).map(function (r) {
-          return '<div class="jing-res" data-jing="' + r.id + '" data-sec="' + r.si + '">'
-            + '<div class="jing-res-t">' + esc(r.title) + (r.sec ? ' · ' + esc(r.sec) : '') + '</div>'
-            + '<div class="jing-res-s">' + r.snip + '</div></div>';
-        }).join('')
-        : '<p class="hint">未找到「' + esc(q) + '」</p>';
+      /* 统一检索：精选（题名/别名＋全文）＋道藏全集（书名，经 daozang.js 钩子）一处搜全 */
+      var renderResults = function (dzHits) {
+        $('#jing-list').hidden = true;
+        box.hidden = false;
+        var all = aliasHits.concat(dzHits || [], out);
+        box.innerHTML = all.length
+          ? '<div class="jing-res-count">共 ' + all.length + ((dzHits && dzHits.length) ? ' 条' : ' 处') + '</div>' + all.slice(0, 200).map(function (r) {
+            if (r.dz) {
+              return '<div class="jing-res" data-dz-work="' + r.id + '">'
+                + '<div class="jing-res-t">' + esc(txScript(r.title)) + '</div>'
+                + '<div class="jing-res-s">' + esc(txScript(r.snip)) + '</div></div>';
+            }
+            return '<div class="jing-res" data-jing="' + r.id + '" data-sec="' + r.si + '">'
+              + '<div class="jing-res-t">' + esc(r.title) + (r.sec ? ' · ' + esc(r.sec) : '') + '</div>'
+              + '<div class="jing-res-s">' + r.snip + '</div></div>';
+          }).join('')
+          : '<p class="hint">未找到「' + esc(q) + '」</p>';
+      };
+      if (window.__wuri_dzTitleSearch) {
+        var dzDone = false;
+        var dzFinish = function (hits) { if (!dzDone) { dzDone = true; renderResults(hits); } };
+        try { window.__wuri_dzTitleSearch(q, dzFinish); } catch (e) { dzFinish([]); }
+        setTimeout(function () { dzFinish([]); }, 4000);
+      } else {
+        renderResults([]);
+      }
     });
   }
 
@@ -1199,6 +1232,9 @@ var JingWen = (function () {
     fontPx = Math.abs(fontPx - 17) <= Math.abs(fontPx - 28) ? 17 : 28;
     try { pyOn = localStorage.getItem('wuri_jing_py') !== '0'; } catch (e) {}
     renderCatalog();
+    /* 语言切换时目录随之重渲（三段标题简繁、全藏目录显示口径跟随系统语言） */
+    var prevRr = window.__wuri_rerender;
+    window.__wuri_rerender = function () { if (prevRr) prevRr(); renderCatalog(); };
     applyReaderPrefs();
     /* 初始化按钮高亮 */
     var isBig = fontPx === 28;

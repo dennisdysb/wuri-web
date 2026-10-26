@@ -388,7 +388,7 @@
     /* 底部双入口 */
     var lord0 = lordOfMansion('角宿');
     h += '<div class="sx-duo">' +
-      '<div class="sx-card sx-entry" data-sx-book="1"><div><div class="e1">' + esc(t('sx_entry_book')) + '</div>' +
+      '<div class="sx-card sx-entry sx-entry-book" data-sx-book="1"><div><div class="bk-k">' + esc(t('sx_shelf_kicker')) + '</div><div class="e1">' + esc(t('sx_entry_book')) + '</div>' +
       '<div class="e2">' + txEsc(tf(t('sx_entry_book_sub'), BT.total_lines)) + '</div></div></div>' +
       '<div class="sx-card sx-entry" data-sx-lords="1">' +
       (lord0 ? '<img src="' + esc(IMG.full(lord0.image)) + '" onerror="WuriImg.fallback(this,\'' + esc(lord0.image) + '\')" alt="">' : '') +
@@ -1371,24 +1371,8 @@
     if (mSub) mSub.textContent = T(tf(t('sx_moon_age'), moon.ageDays) + ' · ' + tf(t('sx_moon_illum'), moon.illuminationPct));
   }
 
-  /* ---------------- 经文库「典籍 · 天文」分架 ---------------- */
-  function injectShelf() {
-    var list = $('jing-list'); if (!list) return;
-    if ($('sx-jing-shelf')) return;
-    var div = document.createElement('div');
-    div.id = 'sx-jing-shelf';
-    div.className = 'sx-shelf';
-    div.innerHTML = '<div class="sx-shelf-in"><div class="sx-shelf-k">' + esc(t('sx_shelf_kicker')) + '</div>' +
-      '<div class="sx-shelf-t">' + esc(t('sx_shelf_title')) + '</div>' +
-      '<div class="sx-shelf-n">' + esc(t('sx_shelf_note')) + '</div></div><div class="sx-shelf-go">›</div>';
-    div.addEventListener('click', function () { openButiange(); });
-    list.appendChild(div);
-  }
-  function watchShelf() {
-    var list = $('jing-list'); if (!list || !window.MutationObserver) { injectShelf(); return; }
-    injectShelf();
-    new MutationObserver(function () { injectShelf(); }).observe(list, { childList: true });
-  }
+  /* 经文库侧《步天歌》分架已按用户 2026-10-26 指示撤下：步天歌只留星象侧入口，
+     其深蓝鎏金横幅设计已移植到星象页入口卡（.sx-entry-book）。 */
 
   /* ---------------- 全局点击委托 ---------------- */
   document.addEventListener('click', function (e) {
@@ -1489,14 +1473,11 @@
     renderTodaySky();
     setInterval(renderTodaySky, 60000);
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderTodaySky(); });
-    watchShelf();
     /* 语言切换时重绘动态面（app.js 的 __wuri_rerender 链式追加，不覆盖原回调） */
     var prev = window.__wuri_rerender;
     window.__wuri_rerender = function () {
       if (prev) prev();
       renderTodaySky();
-      var sh = $('sx-jing-shelf'); if (sh) sh.remove();
-      injectShelf();
       if (XG && BT) {
         var tsTab = $('tab-stars');
         if (tsTab && tsTab.classList.contains('active')) renderHome();
