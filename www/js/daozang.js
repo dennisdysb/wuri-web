@@ -17,6 +17,37 @@
   var dictLoading = null;
   var workCache = {};       // id -> JINGWEN entry
   var openBu = {};          // bu -> true（重渲目录时恢复展开）
+  var punctSet = null;      // {KR id: true} 有标点版的部（index.punct）
+  var punctPartial = {};    // id -> 已标卷数（部分标点，如度人经前 6 卷）
+
+  /* 标点版偏好：全局记忆（wuri_dz_punct：'orig' 才回原文，缺省标点版——
+     用户诉求就是「读得明白」，有标点版者默认标点版） */
+  function dzPunctPref() {
+    try { return localStorage.getItem('wuri_dz_punct') === 'orig' ? 'orig' : 'punct'; } catch (e) { return 'punct'; }
+  }
+  function hasPunct(id) { return !!(punctSet && punctSet[id]); }
+
+  /* 标点字（与清洗口径一致）：内容字 = 非标点非空白；标点版去标点后与原文
+     逐字相等（离线全量校验 119/119 卷 0 差异），故字序可双向投影 */
+  var DZ_PUNCT_CHARS = '。，、；：？！·…—「」『』﹝﹞（）《》〈〉“”‘’％';
+  function dzIsPunct(ch) { return DZ_PUNCT_CHARS.indexOf(ch) >= 0 || /\s/.test(ch); }
+  function dzStripPunct(s) {
+    var o = '';
+    for (var i = 0; i < s.length; i++) if (!dzIsPunct(s[i])) o += s[i];
+    return o;
+  }
+  /* 标点版段落排版分类（spec v1.1 §9–12）：章题/对话/韵文行在建 entry 时定类，
+     渲染层只挂 class（dz-cht/dz-dlg/dz-verse），散文无类走默认缩进 */
+  function punctParaCls(t, isFirst) {
+    var s = dzStripPunct(t), L = s.length;
+    if (!L) return '';
+    if (L <= 18 && /第[一二三四五六七八九十百廿卅\d]+$/.test(s) && !/[，。；：？]/.test(t)) return 'dz-cht';
+    if (/^[^，。；？！]{1,14}曰：/.test(t)) return 'dz-dlg';
+    if (isFirst && L <= 20) return 'dz-verse';
+    var nEnd = (t.match(/[，。；]/g) || []).length;
+    if (L <= 17 && /[，。]$/.test(t) && nEnd <= 2) return 'dz-verse';
+    return '';
+  }
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -38,13 +69,19 @@
     try { return window.t2s ? window.t2s(s) : s; } catch (e) { return s; }
   }
 
+  function fillPunct(d) {
+    punctSet = {};
+    ((d && d.punct) || []).forEach(function (id) { punctSet[id] = true; });
+    punctPartial = (d && d.punctPartial) || {};
+  }
   function ensureIndex(cb) {
-    if (window.DAOZANG_INDEX && window.DAOZANG_INDEX.works) { idxData = window.DAOZANG_INDEX; cb && cb(idxData); return; }
+    if (window.DAOZANG_INDEX && window.DAOZANG_INDEX.works) { idxData = window.DAOZANG_INDEX; if (!punctSet) fillPunct(idxData); cb && cb(idxData); return; }
     if (idxData) { cb && cb(idxData); return; }
     if (idxLoading) { idxLoading.push(cb); return; }
     idxLoading = [cb];
     fetch(FEED_DIR + 'index.json').then(function (r) { return r.json(); }).then(function (d) {
       idxData = d; window.DAOZANG_INDEX = d;
+      fillPunct(d);
       var cbs = idxLoading; idxLoading = null;
       cbs.forEach(function (f) { try { f && f(d); } catch (e) {} });
     }).catch(function () {
@@ -99,11 +136,28 @@
      「發泄」误注 fà。读音属于词：显示「同时」即注 tóng、「发泄」即注 fā，
      以底本注音对齐呈现，简繁两模式读音逐项一致（离线等价测试 5 部验证）。
      审读表 301 条词组键经转换后 300 键、异读冲突 0 条，两种口径等价。 */
+  /* 标点段注音：先剥标点成内容字流再整体注音（审读表词组按原文字流匹配，
+     不被插入的标点打断），读音再散射回内容字下标，标点位留空。
+     与原文口径一致：读音属于字流，不属于标点。 */
+  function annotateParaPunct(p) {
+    var pos = [], stripped = '';
+    for (var i = 0; i < p.t.length; i++) {
+      if (!dzIsPunct(p.t[i])) { pos.push(i); stripped += p.t[i]; }
+    }
+    var pyC = annotateText(stripped, pyDict, pyOverrides);
+    var py = new Array(p.t.length);
+    for (var j = 0; j < p.t.length; j++) py[j] = '';
+    for (var k = 0; k < pos.length; k++) py[pos[k]] = pyC[k] || '';
+    p.py = py;
+  }
   function annotateSection(entry, si) {
     var sec = entry.sections[si];
     if (!sec) return;
     if (sec._dzDone && (sec._dzWithDict || !pyDict)) return;
-    sec.paras.forEach(function (p) { p.py = annotateText(p.t, pyDict, pyOverrides); });
+    sec.paras.forEach(function (p) {
+      if (sec._punct) annotateParaPunct(p);
+      else p.py = annotateText(p.t, pyDict, pyOverrides);
+    });
     sec._dzDone = true;
     sec._dzWithDict = !!pyDict;
   }
@@ -166,29 +220,146 @@
     if (window.WuriPro) WuriPro.requirePro('daozang');
     return false;
   }
+  function buildOrigSections(w) {
+    return w.volumes.map(function (v) {
+      return { h: v.h, paras: v.paras.map(function (t) { return { t: t }; }) };
+    });
+  }
+  /* 标点版 sections：逐卷对位——有标点卷用标点段（_punct 标＋排版分类），
+     未覆盖卷（如度人经第 7 卷起）回落原文段，两套 sections 卷序恒一致 */
+  function buildPunctSections(w, pw) {
+    return w.volumes.map(function (v, vi) {
+      var pv = pw && pw.volumes && pw.volumes[vi];
+      if (!pv) return { h: v.h, paras: v.paras.map(function (t) { return { t: t }; }) };
+      return {
+        h: pv.h || v.h, _punct: true,
+        paras: pv.paras.map(function (t, pi) {
+          var o = { t: t };
+          var cls = punctParaCls(t, pi === 0);
+          if (cls) o.cls = cls;
+          return o;
+        })
+      };
+    });
+  }
+  function applyDzMode(entry) {
+    entry.punctMode = !!(entry.hasPunct && dzPunctPref() === 'punct');
+    entry.sections = entry.punctMode ? entry.sectionsPunct : entry.sectionsOrig;
+  }
   function openWork(id, rowEl) {
     if (!dzGate()) return;
     if (workCache[id]) { doOpen(workCache[id]); return; }
     var old = rowEl ? rowEl.innerHTML : '';
     if (rowEl) rowEl.innerHTML = '<span class="dz-wt">载入中…</span>';
-    fetch(FEED_DIR + 'texts/' + id + '.json').then(function (r) { return r.json(); }).then(function (w) {
-      var entry = {
-        id: w.id, title: w.title,
-        subtitle: w.bu + (w.lei ? ' · ' + w.lei + '类' : '') + (w.dz ? ' · ' + w.dz : ''),
-        note: w.note, daozang: true, lazy: (w.volumes.length > 1),
-        sections: w.volumes.map(function (v) {
-          return { h: v.h, paras: v.paras.map(function (t) { return { t: t }; }) };
-        })
-      };
-      workCache[id] = entry;
-      window.JINGWEN = window.JINGWEN || {};
-      window.JINGWEN[id] = entry;
-      doOpen(entry);
-    }).catch(function () {
-      if (rowEl) rowEl.innerHTML = old;
-      if (window.showToast) showToast('载入失败，请检查网络后重试');
+    ensureIndex(function () {
+      var pText = fetch(FEED_DIR + 'texts/' + id + '.json').then(function (r) { return r.json(); });
+      var pPunct = hasPunct(id)
+        ? fetch(FEED_DIR + 'texts-punct/' + id + '.json').then(function (r) { return r.json(); }).catch(function () { return null; })
+        : Promise.resolve(null);
+      Promise.all([pText, pPunct]).then(function (res) {
+        var w = res[0], pw = res[1];
+        var entry = {
+          id: w.id, title: w.title,
+          subtitle: w.bu + (w.lei ? ' · ' + w.lei + '类' : '') + (w.dz ? ' · ' + w.dz : ''),
+          note: w.note, daozang: true, lazy: (w.volumes.length > 1),
+          hasPunct: !!(pw && pw.volumes && pw.volumes.length),
+          punctPartial: null,
+          sectionsOrig: buildOrigSections(w),
+          sectionsPunct: null,
+          sections: null
+        };
+        if (entry.hasPunct) {
+          entry.sectionsPunct = buildPunctSections(w, pw);
+          if (pw.volumes.length < w.volumes.length) {
+            entry.punctPartial = { done: pw.volumes.length, total: w.volumes.length };
+          }
+        }
+        applyDzMode(entry);
+        workCache[id] = entry;
+        window.JINGWEN = window.JINGWEN || {};
+        window.JINGWEN[id] = entry;
+        doOpen(entry);
+      }).catch(function () {
+        if (rowEl) rowEl.innerHTML = old;
+        if (window.showToast) showToast('载入失败，请检查网络后重试');
+      });
     });
   }
+
+  /* ---------- 高亮字序投影（存储恒为原文坐标，显示按模式投影） ----------
+   * 标点版与原文内容字逐字同序（保真校验），故以「内容字序号」为中介：
+   * 原文段内偏移 → 全卷内容字区间 → 标点段串内下标，反之亦然。
+   * 运行时逐卷自检 strip(标点全文)===原文全文，不符则该卷不投影（回退原样）。 */
+  function dzSecMap(entry, si) {
+    if (!entry || !entry.sectionsPunct) return null;
+    entry._hlMaps = entry._hlMaps || {};
+    if (entry._hlMaps[si] !== undefined) return entry._hlMaps[si];
+    var oSec = entry.sectionsOrig[si], pSec = entry.sectionsPunct[si];
+    var map = null;
+    if (oSec && pSec && pSec._punct) {
+      var oJoin = oSec.paras.map(function (p) { return p.t; }).join('');
+      var pJoin = pSec.paras.map(function (p) { return p.t; }).join('');
+      if (dzStripPunct(pJoin) === oJoin) {
+        var oCum = [], oc = 0;
+        oSec.paras.forEach(function (p) { oCum.push(oc); oc += p.t.length; });
+        var pCum = [], pPos = [], pc = 0;
+        pSec.paras.forEach(function (p) {
+          var pos = [];
+          for (var i = 0; i < p.t.length; i++) if (!dzIsPunct(p.t[i])) pos.push(i);
+          pCum.push(pc); pPos.push(pos); pc += pos.length;
+        });
+        map = { oCum: oCum, pCum: pCum, pPos: pPos, oLens: oSec.paras.map(function (p) { return p.t.length; }) };
+      }
+    }
+    entry._hlMaps[si] = map;
+    return map;
+  }
+  /* 原文坐标 → 显示（标点）坐标段数组；非标点模式/无映射返回 null（调用方回退原值） */
+  window.__wuri_dzHlToDisp = function (sid, h) {
+    var e = workCache[sid];
+    if (!e || !e.punctMode || !h) return null;
+    var m = dzSecMap(e, h.sec);
+    if (!m) return null;
+    var g0 = m.oCum[h.para] + h.start, g1 = m.oCum[h.para] + h.end;
+    var out = [];
+    for (var j = 0; j < m.pPos.length; j++) {
+      var ps = m.pCum[j], pe = ps + m.pPos[j].length;
+      var a = Math.max(g0, ps), b = Math.min(g1, pe);
+      if (a < b) out.push({ sec: h.sec, para: j, start: m.pPos[j][a - ps], end: m.pPos[j][b - ps - 1] + 1 });
+    }
+    return out.length ? out : null;
+  };
+  /* 显示（标点）选区段 → 原文坐标段数组（可能跨原文段，逐段拆） */
+  window.__wuri_dzHlToOrig = function (sid, seg) {
+    var e = workCache[sid];
+    if (!e || !e.punctMode || !seg) return null;
+    var m = dzSecMap(e, seg.sec);
+    if (!m) return null;
+    var pos = m.pPos[seg.para];
+    if (!pos) return null;
+    var c0 = 0; while (c0 < pos.length && pos[c0] < seg.start) c0++;
+    var c1 = c0; while (c1 < pos.length && pos[c1] < seg.end) c1++;
+    var g0 = m.pCum[seg.para] + c0, g1 = m.pCum[seg.para] + c1;
+    if (g1 <= g0) return null;
+    var out = [];
+    for (var i = 0; i < m.oCum.length; i++) {
+      var os = m.oCum[i], oe = os + m.oLens[i];
+      var a = Math.max(g0, os), b = Math.min(g1, oe);
+      if (a < b) out.push({ sec: seg.sec, para: i, start: a - os, end: b - os });
+    }
+    return out.length ? out : null;
+  };
+  /* 原文／标点版切换（工具栏按钮经此）：偏好全局记忆，复用 jing-rerender
+     的展开/滚动恢复；门控与 openWork 同源——非 Pro 在此亦弹墙、绝不换版 */
+  window.__wuri_dzTogglePunct = function () {
+    var id = window._jingCurrentId;
+    var e = id && workCache[id];
+    if (!e || !e.hasPunct) return;
+    if (!dzGate()) return;
+    try { localStorage.setItem('wuri_dz_punct', e.punctMode ? 'orig' : 'punct'); } catch (err) {}
+    applyDzMode(e);
+    document.dispatchEvent(new CustomEvent('jing-rerender'));
+  };
   function doOpen(entry) {
     var pyOn = true; /* 与阅读器一致：未设置时默认开（LS 为 '0' 才是关） */
     try { pyOn = localStorage.getItem('wuri_jing_py') !== '0'; } catch (e) {}

@@ -294,14 +294,30 @@ var JingWen = (function () {
         if (d.subtitle) { jsub.textContent = txScript(d.subtitle); jsub.hidden = false; }
         else { jsub.hidden = true; }
       }
-      // 来源标注（道藏全藏：底本来源＋未校订＋注音口径）
+      // 来源标注（道藏全藏：底本来源＋未校订＋注音口径；标点版模式换标点口径）
       var jnote = $('#jing-srcnote');
       if (jnote) {
         if (d.note) {
-          jnote.textContent = txScript(d.note + (d.daozang ? '｜底本直出 · 未经校订｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : '') : ''));
+          var dzSuffix = '';
+          if (d.daozang) {
+            dzSuffix = d.punctMode
+              ? '｜机器标点 · 未经校订' + (d.punctPartial ? '（已标 ' + d.punctPartial.done + '/' + d.punctPartial.total + ' 卷）' : '') + '｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : '')
+              : '｜底本直出 · 未经校订｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : '');
+          }
+          jnote.textContent = txScript(d.note + dzSuffix);
           jnote.hidden = false;
         } else { jnote.hidden = true; }
       }
+      // 标点版切换钮（仅道藏全集且该部有标点版时显示；文案随当前模式）
+      var pbtn = $('#jing-punctbtn');
+      if (pbtn) {
+        var canPunct = !!(d.daozang && d.hasPunct);
+        pbtn.hidden = !canPunct;
+        if (canPunct) pbtn.textContent = d.punctMode ? '标点开' : '标点关';
+      }
+      // 标点版排版容器类（spec v1.1 §12：行高/段距/缩进走 .dz-punct 规则）
+      var jcontent = $('#jing-content');
+      if (jcontent) jcontent.classList.toggle('dz-punct', !!(d.daozang && d.punctMode));
       // 内丹书：隐藏背诵模式按钮；全藏无音频亦隐藏背诵
       var rcb2 = $('#jing-recite');
       if (rcb2) rcb2.hidden = isNeidan(id) || !!d.daozang;
@@ -325,7 +341,7 @@ var JingWen = (function () {
           if (isQingSec && pi === sec.paras.length - 1) {
             txt += ' <span class="qing-inline" data-qing title="此处叩磬">（敲磬）</span>';
           }
-          return '<p class="jing-para" data-sec="' + si + '" data-para="' + pi + '">' + txt + '</p>';
+          return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + txt + '</p>';
         }).join('');
         var secH = sec.h || ('第' + (si + 1) + '节');
         secH = txScript(secH);
@@ -392,7 +408,7 @@ var JingWen = (function () {
     if (!sec) return;
     if (window.__wuri_dzAnnotate) { try { window.__wuri_dzAnnotate(d, si); } catch (e) {} }
     body.innerHTML = sec.paras.map(function (p, pi) {
-      return '<p class="jing-para" data-sec="' + si + '" data-para="' + pi + '">' + rubyPara(p, si, pi) + '</p>';
+      return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + rubyPara(p, si, pi) + '</p>';
     }).join('');
     body.removeAttribute('data-lazy');
     if (window._jingHlRebuild) { try { window._jingHlRebuild(currentId); } catch (e) {} }
@@ -1343,6 +1359,10 @@ var JingWen = (function () {
     }
 
     $('#jing-back').addEventListener('click', closeReader);
+    var punctBtn = $('#jing-punctbtn');
+    if (punctBtn) punctBtn.addEventListener('click', function () {
+      if (window.__wuri_dzTogglePunct) { try { window.__wuri_dzTogglePunct(); } catch (e) {} }
+    });
     $('#jing-pybtn').addEventListener('click', function () {
       pyOn = !pyOn;
       try { localStorage.setItem('wuri_jing_py', pyOn ? '1' : '0'); } catch (e) {}
@@ -1358,19 +1378,11 @@ var JingWen = (function () {
     // 注意：点按钮时 iOS 会清掉实时选区，所以用 selectionchange 时缓存的选区（2026-10-11）
     var hlb = $('#jing-highlight-btn');
     if (hlb) hlb.addEventListener('click', function () {
-      if (!(window.JingMark && window.JingMark.marksEnabled(window._jingCurrentId))) return;
-      var info = cachedSelInfo;
-      if (!info || !info.length) {
-        // 缓存没有，尝试取实时选区（桌面端）
-        info = getSelOffsets();
-        if (!info || !info.length) return;
-        var sid0 = window._jingCurrentId;
-        if (!sid0 || !(window.JingMark && window.JingMark.marksEnabled(sid0))) return;
-        info.forEach(function (it) { it.sid = sid0; });
+      /* 选区缓存/偏移/弹窗全在 JingMark 作用域内，此处只委托（旧写法直引
+         cachedSelInfo 等跨作用域名，点击必抛 ReferenceError，2026-10-26 修） */
+      if (window.JingMark && window.JingMark.openHlPopForSelection) {
+        try { window.JingMark.openHlPopForSelection(); } catch (e) {}
       }
-      pendingHl = info;
-      pendingHlId = null;
-      showHlPop(0, 0, false);
     });
     // 跟读模式：点段落从该处开始播
     var jc = $('#jing-content');
@@ -1714,9 +1726,16 @@ var JingWen = (function () {
   function rebuildHlRanges(sid) {
     window._jingHlRanges = {};
     getHighlightsFor(sid).forEach(function (h) {
-      var key = h.sec + '_' + h.para;
-      if (!window._jingHlRanges[key]) window._jingHlRanges[key] = [];
-      window._jingHlRanges[key].push({ start: h.start, end: h.end, color: h.color || 'yellow', id: h.id });
+      /* 存储恒为原文坐标；标点版模式下经 daozang 字序投影换算到显示段
+         （一条原文高亮可横跨多个标点段，逐段同 id 落点） */
+      var segs = null;
+      if (window.__wuri_dzHlToDisp) { try { segs = window.__wuri_dzHlToDisp(sid, h); } catch (e) {} }
+      if (!segs || !segs.length) segs = [{ sec: h.sec, para: h.para, start: h.start, end: h.end }];
+      segs.forEach(function (sg) {
+        var key = sg.sec + '_' + sg.para;
+        if (!window._jingHlRanges[key]) window._jingHlRanges[key] = [];
+        window._jingHlRanges[key].push({ start: sg.start, end: sg.end, color: h.color || 'yellow', id: h.id });
+      });
     });
   }
   window._jingHlRebuild = rebuildHlRanges;
@@ -1814,6 +1833,22 @@ var JingWen = (function () {
     });
 
     if (!results.length) return null;
+
+    /* 标点版模式下选区偏移是标点段坐标，存档前投影回原文坐标
+       （存储口径恒原文；投影失败则整批保留原值，绝不静默写错位） */
+    if (window.__wuri_dzHlToOrig) {
+      try {
+        var conv = [], okAll = true;
+        results.forEach(function (r) {
+          var segs = window.__wuri_dzHlToOrig(window._jingCurrentId, r);
+          if (!segs) { okAll = false; return; }
+          segs.forEach(function (sg) {
+            conv.push({ sec: sg.sec, para: sg.para, start: sg.start, end: sg.end, text: r.text });
+          });
+        });
+        if (okAll && conv.length) results = conv;
+      } catch (e) {}
+    }
 
     // 返回数组（跨段落时多条），兼容旧的单条用法
     var out = results;
@@ -1949,8 +1984,15 @@ var JingWen = (function () {
     if (secBody && secBody.hidden) {
       secBody.hidden = false;
     }
-    // 先按 sec/para 找到段落，再在段内找对应高亮 span
-    var sel = '#jing-content .jing-para[data-sec="' + hl.sec + '"][data-para="' + hl.para + '"] .hl[data-hl-id="' + hlId + '"]';
+    // 先按 sec/para 找到段落，再在段内找对应高亮 span（标点版模式先投影到显示段）
+    var dispPara = hl.para;
+    if (window.__wuri_dzHlToDisp) {
+      try {
+        var dsg = window.__wuri_dzHlToDisp(hl.sid || window._jingCurrentId, hl);
+        if (dsg && dsg.length) dispPara = dsg[0].para;
+      } catch (e) {}
+    }
+    var sel = '#jing-content .jing-para[data-sec="' + hl.sec + '"][data-para="' + dispPara + '"] .hl[data-hl-id="' + hlId + '"]';
     var el = document.querySelector(sel);
     if (el) {
       el.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -1962,7 +2004,7 @@ var JingWen = (function () {
       setTimeout(function () { scrollToHighlight(hlId, retryCount + 1); }, 500);
     } else {
       // 降级：找该段第一处高亮，或滚到该章
-      var para = document.querySelector('#jing-content .jing-para[data-sec="' + hl.sec + '"][data-para="' + hl.para + '"] .hl');
+      var para = document.querySelector('#jing-content .jing-para[data-sec="' + hl.sec + '"][data-para="' + dispPara + '"] .hl');
       if (para) {
         para.scrollIntoView({ block: 'center' });
       } else {
@@ -2139,8 +2181,25 @@ var JingWen = (function () {
     if (_bmBtnTop) _bmBtnTop.hidden = true;
   });
 
+  /* 工具栏高亮钮入口：优先用 selectionchange 缓存的选区（iOS 点钮清选区），
+     无缓存时取实时选区；置 pendingHl 并弹选色层。与自动弹窗同一作用域实现 */
+  function openHlPopForSelection() {
+    var sid = window._jingCurrentId;
+    if (!sid || !marksEnabled(sid)) return;
+    var info = cachedSelInfo;
+    if (!info || !info.length) {
+      info = getSelOffsets();
+      if (!info || !info.length) return;
+      info.forEach(function (it) { it.sid = sid; });
+    }
+    pendingHl = info;
+    pendingHlId = null;
+    showHlPop(0, 0, false);
+  }
+
   // 暴露给外部
   window.JingMark = {
+    openHlPopForSelection: openHlPopForSelection,
     saveBookmark: saveBookmark,
     getBookmark: getBookmark,
     deleteBookmark: deleteBookmark,

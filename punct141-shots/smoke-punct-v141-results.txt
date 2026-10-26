@@ -1,0 +1,26 @@
+PASS S1 feed index v2+punct66
+PASS S2 texts-punct 66 片齐
+PASS S3 四件套 v141
+PASS S4 接线齐
+PASS P0 Pro 基线
+PASS P1 道德真经开卷
+PASS P2 默认标点版
+PASS P3 来源条机器标点
+PASS P4 排版(行高1.9/缩进2em)
+PASS P5 拼音字流对齐
+PASS P6 拼音开关往返
+PASS P7 选区建立
+PASS P8 存档为原文坐标
+PASS P9 原文模式高亮落点
+PASS P10 切回标点高亮一致+偏好
+PASS P11 标点模式存书签
+PASS P12 黄庭开卷
+PASS P13 韵文行(1.8/不缩进)
+PASS P14 度人经开卷
+PASS P15 部分标点注记
+PASS P16 无标点部开卷
+PASS P17 无标点无钮
+PASS P18 Pro 零 JS 异常
+PASS N1 非Pro弹墙不取文
+PASS N2 非Pro 零 JS 异常
+==== 25/25 PASS ====

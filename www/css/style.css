@@ -620,6 +620,12 @@ details.disc-foot .hint{margin-top:9px}
 .jing-content{line-height:2.1;color:var(--ink);font-family:var(--serif)}
 .jing-sec-h{font-size:1.08em;margin:22px 0 8px;color:var(--ink);display:flex;align-items:center;gap:10px}
 .jing-para{margin:0 0 12px;text-align:left}
+/* 道藏标点版排版（spec v1.1 §12）：正文行高1.9、段后.8em、散文首行缩进2em、两端对齐；
+   韵文行（dz-verse）不缩进、行高1.8、无段距；对话段（dz-dlg）不缩进；章题（dz-cht）加粗独立行 */
+#jing-content.dz-punct .jing-para{line-height:1.9;margin:0 0 .8em;text-indent:2em;text-align:justify}
+#jing-content.dz-punct .jing-para.dz-verse{text-indent:0;line-height:1.8;margin:0;text-align:left}
+#jing-content.dz-punct .jing-para.dz-dlg{text-indent:0}
+#jing-content.dz-punct .jing-para.dz-cht{text-indent:0;font-weight:700;font-size:1.06em;margin:1em 0;text-align:left}
 /* 跟读模式 */
 #jing-content.follow-on .jing-para{cursor:pointer;border-radius:6px;padding:4px 6px;margin:0 -6px 8px;transition:background .2s}
 #jing-content.follow-on .jing-para:hover{background:rgba(200,170,90,.12)}
