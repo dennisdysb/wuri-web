@@ -1,6 +1,7 @@
 PASS S1 txPoem 接线（诗卡+诗页）
 PASS S2 三架计数同挂 dz-count
 PASS S3 底本一字未动（p103 仍繁体）
+PASS S4 四件套 v148
 PASS B0 默认简体模式
 PASS B1 诗卡题/首句已简体（与 t2s 期望全等）
 PASS B2 诗页题/作者/正文/点题全简体
@@ -9,4 +10,4 @@ PASS B4 繁体模式复原（正文/题/点题与底本全等）
 PASS B5 三架计数后缀 computed 三项逐项相等
 PASS B5b 三架计数紧贴标题（间隙≤14px）
 PASS B6 零 JS 异常
-TOTAL 11/11
+TOTAL 12/12
