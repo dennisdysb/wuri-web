@@ -47,7 +47,7 @@ MEASURE = """(function(){
   function lum(rgb){ var m=rgb.match(/[\\d.]+/g).map(Number); var a=m.slice(0,3).map(function(v){ v/=255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
     var op = m.length>3? m[3] : 1; return {L:0.2126*a[0]+0.7152*a[1]+0.0722*a[2], op:op}; }
   function lumHex(h){ var n=parseInt(h.slice(1),16); return lum('rgb('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+')').L; }
-  var stops=['#101725','#1d2c42','#0c1420'].map(lumHex);
+  var stops=(window.__stops||['#101725','#1d2c42','#0c1420']).map(lumHex);
   function minContrast(el){ var c=lum(col(el)); var fg=c.L; if(c.op<1){ /* 以最不利站色近似合成 */ }
     return Math.min.apply(null, stops.map(function(bg){ var hi=Math.max(fg,bg), lo=Math.min(fg,bg); return (hi+0.05)/(lo+0.05); })); }
   var r=e1.getBoundingClientRect();
@@ -80,6 +80,12 @@ try:
         time.sleep(0.4)
         m2 = ev(c, MEASURE); print(TAG, "night", json.dumps(m2, ensure_ascii=False)); results.append(("night", m2))
         shot(c, f"{TAG}-night-412.png")
+        ev(c, "document.documentElement.setAttribute('data-theme','day'); document.body.classList.add('sky-red'); window.__stops=['#0d0303','#1e0603','#070202']")
+        time.sleep(0.6)
+        ev(c, "document.querySelector('[data-sx-book]').scrollIntoView({block:'center'})")
+        time.sleep(0.4)
+        m3 = ev(c, MEASURE); print(TAG, "red", json.dumps(m3, ensure_ascii=False)); results.append(("red", m3))
+        shot(c, f"{TAG}-red-412.png")
 finally:
     proc.terminate()
 print("DONE", TAG)
