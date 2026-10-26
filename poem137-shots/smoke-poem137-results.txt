@@ -1,0 +1,12 @@
+PASS A1 四件套 v137
+PASS A2 诗数据接线
+PASS A3 feed 158 首分桶
+PASS A4 节日池
+PASS B1 诗卡渲染+最上层
+PASS B2 同日稳定复现
+PASS B3 全诗页真点击打开+点题注
+PASS B4 连开三日三首不同
+PASS B5 前翻回到原首
+PASS B6 节日映射命中(中秋/七夕)
+PASS B7 零 JS 异常
+TOTAL 11/11

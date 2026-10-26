@@ -26,6 +26,11 @@
   "daozang": {
    "version": 1,
    "file": "daozang/index.json"
+  },
+  "poems": {
+   "version": 1,
+   "file": "poems.json",
+   "count": 158
   }
  }
 }

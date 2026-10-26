@@ -145,7 +145,7 @@ $$('#tabbar button').forEach(function (btn) {
     target.classList.add('active');
     target.style.display = 'block';
     // 切换标签时隐藏六爻/八字/紫微等独立视图，防止内容泄漏
-    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-settings', 'view-affinity', 'view-affinity-result', 'view-star-region', 'view-star-detail', 'view-butiange'].forEach(function (vid) {
+    ['view-liuyao', 'bazi-view', 'view-ziwei', 'view-deities', 'view-deity-detail', 'view-disclaimer', 'view-settings', 'view-affinity', 'view-affinity-result', 'view-star-region', 'view-star-detail', 'view-butiange', 'view-poem'].forEach(function (vid) {
       var v = document.getElementById(vid);
       if (v) v.hidden = true;
     });
@@ -399,6 +399,35 @@ function renderCalendar() {
   }
   renderDetail();
 }
+/* 每日一诗：按日期种子轮换（同日同首、跨日必换：epochDay×37 mod N，
+ * 37 与池长互质性由步长保证相邻日不同）；七夕/中秋/元宵/重阳/中元按农历月日
+ * 优先对题（对题池内按年份轮换）。数据为 content feed / 包内回落 poems 分段，
+ * 底本 chinese-poetry（MIT），四桶：星空/修道游仙/宫观步虚/静观。 */
+var POEM_FEST_BY_LUNAR = { '1-15': 'yuanxiao', '7-7': 'qixi', '7-15': 'zhongyuan', '8-15': 'zhongqiu', '9-9': 'chongyang' };
+var POEM_FEST_NAMES = { qixi: '七夕', zhongqiu: '中秋', yuanxiao: '元宵', chongyang: '重阳', zhongyuan: '中元' };
+var POEM_BUCKET_NAMES = { star: '星空', xiudao: '修道游仙', gongguan: '宫观步虚', jingguan: '静观' };
+function poemPickFor(y, m, d, lunar) {
+  var dd = window.WURI_POEMS_DATA || window.WURI_POEMS_BUNDLED;
+  var list = dd && Array.isArray(dd.poems) ? dd.poems : null;
+  if (!list || list.length < 50) return null;
+  var fest = null;
+  try {
+    if (lunar && !isLeapM(lunar)) fest = POEM_FEST_BY_LUNAR[Math.abs(lunar.getMonth()) + '-' + lunar.getDay()] || null;
+  } catch (e) {}
+  if (fest) {
+    var pool = list.filter(function (p) { return (p.fest || []).indexOf(fest) >= 0; });
+    if (pool.length) {
+      var idx = ((y % pool.length) + pool.length) % pool.length;
+      return { poem: pool[idx], fest: fest, festName: POEM_FEST_NAMES[fest] || '', bucketName: POEM_BUCKET_NAMES[pool[idx].bucket] || '' };
+    }
+    fest = null;
+  }
+  var epoch = Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+  var pos = ((epoch * 37) % list.length + list.length) % list.length;
+  return { poem: list[pos], fest: null, festName: '', bucketName: POEM_BUCKET_NAMES[list[pos].bucket] || '' };
+}
+window.__wuri_poemPick = poemPickFor;
+
 /* 七十二候：按所选日期落入的节气区间三等分定候（节气日期取归一化节气表，
  * 日期级口径：交节当日即入新节气；数据为 content feed / 包内回落的 72 候表） */
 function pentadOfSelected() {
@@ -482,6 +511,21 @@ function renderDetail() {
           escA(tx(x.phaseName)) + ' ' + escA(tx(x.name)) + '</span>';
       }).join('');
     } else { pc.hidden = true; }
+  }
+  var pmc = $('#poem-card');
+  if (pmc) {
+    var pm = null;
+    try { pm = poemPickFor(sel.y, sel.m, sel.d, l); } catch (e) {}
+    if (pm) {
+      pmc.hidden = false;
+      $('#poem-card-title').textContent = pm.poem.title + ' · ' + pm.poem.author;
+      $('#poem-card-line').textContent = pm.poem.text[0] || '';
+      var pfb = $('#poem-card-fest');
+      if (pm.fest) { pfb.textContent = tx(pm.festName); pfb.style.display = ''; }
+      else { pfb.textContent = tx(pm.bucketName); }
+      pmc.onclick = function () { if (typeof window.__wuri_openPoem === 'function') window.__wuri_openPoem(sel.y, sel.m, sel.d); };
+      pmc.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pmc.onclick(); } };
+    } else { pmc.hidden = true; }
   }
   /* 四值神：所选日期的年/月/日值神（含名号＋一句话简介，悬停/长按看简介）；
    * 时值神只对"今日"展示（非今日日期不展示时值神）。 */
@@ -2167,4 +2211,53 @@ function updateFloatingButtons() {
     view.hidden = true;
     if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
   });
+})();
+
+/* ---------- 每日一诗全诗页（黄历详情诗卡点开；可前后翻日） ---------- */
+(function () {
+  var view = document.getElementById('view-poem');
+  if (!view) return;
+  var cur = null;
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function render() {
+    if (!cur || typeof window.__wuri_poemPick !== 'function') return;
+    var l = null;
+    try { l = lunarOf(cur.y, cur.m, cur.d); } catch (e) {}
+    var r = window.__wuri_poemPick(cur.y, cur.m, cur.d, l);
+    if (!r) return;
+    var p = r.poem;
+    var txf = typeof window.tx === 'function' ? window.tx : function (s) { return s; };
+    document.getElementById('poem-date').textContent =
+      cur.y + '年' + cur.m + '月' + cur.d + '日' + (r.fest ? ' · ' + txf(r.festName) : '') + ' · ' + txf(r.bucketName);
+    document.getElementById('poem-v-title').textContent = p.title;
+    document.getElementById('poem-v-author').textContent = txf(p.dynasty) + ' · ' + p.author;
+    document.getElementById('poem-v-text').innerHTML = p.text.map(function (x) { return '<p>' + esc(x) + '</p>'; }).join('');
+    document.getElementById('poem-v-gloss').textContent = txf(p.gloss);
+    var note = document.getElementById('poem-v-note');
+    if (p.note) { note.hidden = false; note.textContent = p.note; } else { note.hidden = true; note.textContent = ''; }
+    view.scrollTop = 0;
+  }
+  function shift(days) {
+    if (!cur) return;
+    var dt = new Date(cur.y, cur.m - 1, cur.d + days);
+    cur = { y: dt.getFullYear(), m: dt.getMonth() + 1, d: dt.getDate() };
+    render();
+  }
+  window.__wuri_openPoem = function (y, m, d) {
+    cur = { y: y, m: m, d: d };
+    view.hidden = false;
+    render();
+    if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
+  };
+  var back = document.getElementById('poem-back');
+  if (back) back.addEventListener('click', function () {
+    view.hidden = true;
+    if (typeof updateFloatingButtons === 'function') updateFloatingButtons();
+  });
+  var prev = document.getElementById('poem-prev');
+  if (prev) prev.addEventListener('click', function () { shift(-1); });
+  var next = document.getElementById('poem-next');
+  if (next) next.addEventListener('click', function () { shift(1); });
 })();

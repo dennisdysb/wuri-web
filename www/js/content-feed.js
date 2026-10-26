@@ -45,6 +45,10 @@
     return !!(d && Array.isArray(d.pentads) && d.pentads.length === 72 &&
       d.pentads[0].term && d.pentads[0].name && d.pentads[0].desc);
   }
+  function validPoems(d) {
+    return !!(d && Array.isArray(d.poems) && d.poems.length >= 50 &&
+      d.poems[0].title && d.poems[0].author && Array.isArray(d.poems[0].text));
+  }
 
   function applyDeities(d) {
     if (!validDeities(d)) return false;
@@ -98,6 +102,16 @@
     return true;
   }
 
+  function applyPoems(d) {
+    if (!validPoems(d)) return false;
+    window.WURI_POEMS_DATA = d;
+    window.WURI_FEED.applied.poems = d.version || null;
+    if (typeof window.__wuri_rerender === 'function') {
+      try { window.__wuri_rerender(); } catch (e) {}
+    }
+    return true;
+  }
+
   function applyAll(feed, source) {
     var any = false;
     try { if (feed.deities && applyDeities(feed.deities)) any = true; } catch (e) {}
@@ -105,6 +119,7 @@
     try { if (feed.festivals && applyFestivals(feed.festivals)) any = true; } catch (e) {}
     try { if (feed.pentads && applyPentads(feed.pentads)) any = true; } catch (e) {}
     try { if (feed.daozang && applyDaozang(feed.daozang)) any = true; } catch (e) {}
+    try { if (feed.poems && applyPoems(feed.poems)) any = true; } catch (e) {}
     if (any) window.WURI_FEED.source = source;
     return any;
   }
@@ -119,7 +134,7 @@
   if (typeof fetch !== 'function') return;
   fetchJson(FEED_BASE + 'manifest.json').then(function (manifest) {
     if (!manifest || !manifest.sections) return null;
-    var names = ['deities', 'scriptures', 'festivals', 'pentads', 'daozang'];
+    var names = ['deities', 'scriptures', 'festivals', 'pentads', 'daozang', 'poems'];
     var jobs = names.map(function (name) {
       var sec = manifest.sections[name];
       if (!sec || !sec.file) return Promise.resolve(null);

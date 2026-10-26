@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=136">
+<link rel="stylesheet" href="css/style.css?v=137">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=70">
 </head>
@@ -162,6 +162,11 @@
         <div class="pentad-head"><span data-i18n="d_pentad">七十二候</span><b id="pentad-title"></b></div>
         <div class="pentad-desc" id="pentad-desc"></div>
         <div class="pentad-phases" id="pentad-phases"></div>
+      </div>
+      <div class="poem-card" id="poem-card" hidden role="button" tabindex="0">
+        <div class="pentad-head"><span data-i18n="d_poem">每日一诗</span><b id="poem-card-fest"></b></div>
+        <div class="poem-card-title" id="poem-card-title"></div>
+        <div class="poem-card-line" id="poem-card-line"></div>
       </div>
       <div class="detail-row"><span class="dl" data-i18n="d_sun">日躔</span><span id="detail-sun">—</span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_chongsha">冲煞</span><span id="detail-chong"></span></div>
@@ -839,7 +844,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v136）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v137）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -851,6 +856,7 @@
       <p class="hint" data-i18n="me_credit_breathly">冥想「呼吸」型态的参数与节奏设计参考开源项目 Breathly（依 MPL-2.0 许可证），本应用只采用参数与节奏选型，呼吸引导由本站自行实现，特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_pentads_a">七十二候数据据《月令七十二候集解》通行系统，由两个开源数据源互校，来源之一：health-calendar（© 2026 nextPage，依 MIT 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_pentads_b">七十二候数据来源之二：Suìshí 岁时（© 2025 PimplesOnNose，依 MIT 许可证使用），特此鸣谢。</p>
+      <p class="hint" data-i18n="me_credit_poems">「每日一诗」底本：chinese-poetry 全唐诗／全宋词语料（© JackeyGao，依 MIT 许可证使用），由本应用按星空、修道游仙、宫观步虚、静观四题精选校对，点题为自撰，特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_kanripo">「道藏全藏」经文底本出自 Kanseki Repository（Kanripo，漢字文獻庫）所錄《正統道藏》（涵芬樓版）等影印底本，依 CC BY-SA 4.0 許可證使用；本站清洗稿（去標記、合併斷行）同以 CC BY-SA 4.0 釋出，特此鳴謝。</p>
       <p class="hint">平面星图的投影与大圆路径基于开源库「D3」（d3-geo / d3-array，作者 Mike Bostock 等，依 BSD-3-Clause 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_dingben">星象模块星官体系以《漫步中国星空》（增订版，齐锐、万昊宜著，科学普及出版社）为定本校订；《步天歌》用该书所本《灵台秘苑》系统。</p>
@@ -956,6 +962,26 @@
   </nav>
 
   <!-- ============ 使用说明与免责声明（全站统一正本） ============ -->
+  <main id="view-poem" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('poem-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="poem-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="d_poem">每日一诗</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div class="poem-wrap">
+      <div class="poem-date" id="poem-date"></div>
+      <h2 class="poem-title" id="poem-v-title"></h2>
+      <div class="poem-author" id="poem-v-author"></div>
+      <div class="poem-text" id="poem-v-text"></div>
+      <div class="poem-gloss"><span class="poem-gloss-label" data-i18n="poem_gloss">点题</span><span id="poem-v-gloss"></span></div>
+      <div class="poem-note" id="poem-v-note" hidden></div>
+      <div class="poem-nav">
+        <button class="mini-btn" id="poem-prev" data-i18n="poem_prev">前一日</button>
+        <button class="mini-btn" id="poem-next" data-i18n="poem_next">后一日</button>
+      </div>
+    </div>
+  </main>
   <main id="view-disclaimer" class="view" hidden>
     <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('disclaimer-back').click()" title="返回">‹</button>
     <header class="appbar brand">
@@ -1684,6 +1710,7 @@
 <script src="js/i18n.js"></script>
 <script src="js/zhishen-data.js"></script>
 <script src="js/pentads-data.js"></script>
+<script src="js/poems-data.js"></script>
 <script src="jing/index.js"></script>
 <script src="js/app.js"></script>
 <script src="js/pro.js"></script>
