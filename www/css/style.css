@@ -74,6 +74,9 @@
   background:rgba(201,168,106,.028);
   padding:24px 20px;
 }
+/* 首页两卡收紧批：夜间通用 .card 留白压过单卡规则，此处同比例收 */
+[data-theme="night"] .status{padding:15px 20px}
+[data-theme="night"] .countdown{padding:14px 20px}
 [data-theme="night"] .brand-title{letter-spacing:.34em;text-indent:.34em}
 [data-theme="night"] .card-title{color:var(--gold);letter-spacing:.36em}
 [data-theme="night"] .status.ok{border-top-color:var(--gold)}
@@ -174,11 +177,11 @@ body::before{
 .card-title.centered::before{content:"";flex:1;height:1px;background:var(--line-soft)}
 
 /* ---------- 首页：今日状态 ---------- */
-.status{position:relative;text-align:center;padding:34px 20px;overflow:hidden}
+.status{position:relative;text-align:center;padding:21px 20px;overflow:hidden}
 .status .status-title{
   font-family:var(--serif);font-size:2.1rem;font-weight:700;letter-spacing:.08em;line-height:1.35;
 }
-.status .status-sub{margin-top:10px;font-size:1rem;color:var(--muted);letter-spacing:.05em}
+.status .status-sub{margin-top:7px;font-size:1rem;color:var(--muted);letter-spacing:.05em}
 /* 非戊日：平静青 */
 .status.ok{background:linear-gradient(180deg,var(--teal-wash),var(--card));border-top:3px solid var(--teal)}
 .status.ok .status-title{color:var(--teal-deep)}
@@ -201,16 +204,16 @@ body::before{
 }
 
 /* ---------- 倒计时 ---------- */
-.countdown{text-align:center;padding:24px 20px}
+.countdown{text-align:center;padding:14px 20px}
 .count-label{color:var(--muted);font-size:.92rem;letter-spacing:.24em}
-.count-main{margin:8px 0 2px}
+.count-main{margin:4px 0 0}
 .count-main #count-days{
   font-family:var(--serif);font-size:3.4rem;font-weight:700;color:var(--teal-deep);
   font-variant-numeric:tabular-nums;line-height:1.1;
 }
 [data-theme="night"] .count-main #count-days{color:var(--teal)}
 .count-unit{font-size:1.05rem;color:var(--muted);margin-left:8px}
-.count-date{color:var(--ink-2);font-size:1rem;margin-top:4px;letter-spacing:.06em}
+.count-date{color:var(--ink-2);font-size:1rem;margin-top:2px;letter-spacing:.06em}
 
 /* ---------- 宜忌：印章式小章 ---------- */
 .yiji{display:flex;gap:12px;margin:10px 0;align-items:flex-start}
@@ -1537,7 +1540,7 @@ details.disc-foot .hint{margin-top:9px}
    ================================================================ */
 .hero2 {
   position: relative; overflow: hidden; border: none; border-radius: 14px;
-  min-height: 302px; margin: 0 0 14px; cursor: pointer; background: #0a0c10;
+  min-height: 151px; margin: 0 0 14px; cursor: pointer; background: #0a0c10;
   -webkit-tap-highlight-color: transparent;
   transition: filter .15s ease;
 }
@@ -1545,22 +1548,22 @@ details.disc-foot .hint{margin-top:9px}
 .hero2 .h2-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
 .hero2 .h2-bg::after { content: ''; position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(8,10,14,.34), rgba(8,10,14,.47) 48%, rgba(8,10,14,.79)); }
-.hero2 .h2-in { position: relative; z-index: 1; min-height: 302px;
+.hero2 .h2-in { position: relative; z-index: 1; min-height: 151px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 32px 22px; }
+  text-align: center; padding: 15px 18px; }
 .hero2 .h2-title { color: #fff; font-family: var(--serif); font-weight: 700;
-  font-size: 2.3rem; letter-spacing: .42em; text-indent: .42em; line-height: 1.2;
+  font-size: 1.58rem; letter-spacing: .36em; text-indent: .36em; line-height: 1.2;
   text-shadow: 0 2px 18px rgba(0,0,0,.55); }
-.hero2 .h2-sub { color: rgba(255,255,255,.88); font-size: .9rem; line-height: 1.8;
-  margin-top: 13px; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+.hero2 .h2-sub { color: rgba(255,255,255,.88); font-size: .85rem; line-height: 1.55;
+  margin-top: 7px; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
 /* 术数四胶囊：恒一行四等分（真机曾排 3+1），字号/字距收紧适配 390 宽 */
-.hero2 .h2-segs { display: flex; gap: 6px; margin-top: 21px; flex-wrap: nowrap; justify-content: center; width: 100%; }
+.hero2 .h2-segs { display: flex; gap: 6px; margin-top: 9px; flex-wrap: nowrap; justify-content: center; width: 100%; }
 .hero2 .h2-seg { flex: 1 1 0; min-width: 0; text-align: center; white-space: nowrap;
-  padding: 7px 2px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px;
-  background: rgba(255,255,255,.14); color: #fff; font-size: .84rem; letter-spacing: .1em; text-indent: .1em;
+  padding: 5px 2px; border: 1px solid rgba(255,255,255,.35); border-radius: 999px;
+  background: rgba(255,255,255,.14); color: #fff; font-size: .82rem; letter-spacing: .1em; text-indent: .1em;
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   text-shadow: 0 1px 6px rgba(0,0,0,.5); }
-.hero2 .h2-gold { display: flex; align-items: center; gap: 14px; margin-top: 21px;
+.hero2 .h2-gold { display: flex; align-items: center; gap: 14px; margin-top: 9px;
   color: #e8c877; font-size: .8rem; letter-spacing: .5em; text-indent: .5em;
   text-shadow: 0 1px 8px rgba(0,0,0,.65); }
 .hero2 .h2-gold::before, .hero2 .h2-gold::after { content: ''; width: 27px; height: 1px; flex: none; }
@@ -1575,8 +1578,8 @@ details.disc-foot .hint{margin-top:9px}
 .hero2 .h2-bg-liuyao   { background-image: url('../img/heroes/liuyao.webp'); }
 .hero2 .h2-bg-qimen    { background-image: url('../img/heroes/qimen.webp'); }
 /* 取景：(0,2,0) 书写压过 center。打坐人物在中下，取景下移。 */
-.hero2 .h2-bg-practice { background-position: center 66%; }
-.hero2 .h2-bg-deity    { background-position: center 20%; }
+.hero2 .h2-bg-practice { background-position: center 63%; }
+.hero2 .h2-bg-deity    { background-position: center 27%; }
 .hero2 .h2-bg-liuyao   { background-position: center 82%; }
 .hero2.mini { min-height: 176px; }
 .hero2.mini .h2-in { min-height: 176px; padding: 24px 20px; }
@@ -1858,7 +1861,6 @@ body.sky-red .sx-entry-book{--bk-k:#e0563a;--bk-ink:#f2c1b2;--bk-sub:rgba(242,19
 .zs-link b{color:var(--gold)}
 .sunline{margin-top:8px;text-align:center;color:var(--muted);font-size:.94rem;line-height:1.6}
 .sunline:empty{display:none}
-.sunline-note{margin-top:2px;font-size:.8rem;color:var(--muted);opacity:.85}
 .sx-sky-links{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;margin:2px 0 10px}
 .sx-sky-links.cell{margin:8px 0 0}
 .sx-sky-link{font-family:var(--sans);font-size:.85rem;color:var(--gold);cursor:pointer;border-bottom:1px dotted var(--gold);padding-bottom:1px}

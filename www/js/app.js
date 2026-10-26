@@ -213,15 +213,14 @@ function pzHTML(g, z) {
 }
 /* 贯通批（v2.0.0 (5)）·太阳躔宿一行：Stars.sunMansion（today-sky.js 引擎，
  * fenye.json 十二次锚定，定位粒度止于宿）异步填充；点按进太阳chr宿的区页。 */
-function fillSunLine(el, date, withNote) {
+function fillSunLine(el, date) {
   if (!el) return;
   if (!window.Stars || !Stars.sunMansion) { el.textContent = ''; return; }
   Stars.sunMansion(date).then(function (sm) {
     if (!sm) { el.textContent = ''; return; }
     var txt = tf(t('sun_line'), tx(sm.mansion), tx(sm.ci), tx(sm.mansion.replace(/宿$/, '')), sm.inDeg);
     var dstr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
-    el.innerHTML = '<span class="zs-link" data-zs="sun" data-zs-date="' + dstr + '" title="' + escA(t('zs_month_hint')) + '">' + escA(txt) + '</span>' +
-      (withNote ? '<div class="sunline-note">' + escA(t('sun_note')) + '</div>' : '');
+    el.innerHTML = '<span class="zs-link" data-zs="sun" data-zs-date="' + dstr + '" title="' + escA(t('zs_month_hint')) + '">' + escA(txt) + '</span>';
   }).catch(function () { el.textContent = ''; });
 }
 /* 值神互链点击委托：日值宿 → 本宿星官详情；月将/太阳行 → 太阳躔宿区页
@@ -312,7 +311,7 @@ function renderHome() {
       '<span class="nw zs-link" data-zs="mansion" data-xiu="' + escA(_zs.day.xiu) + '" title="' + escA(t('zs_day_hint')) + '">' + t('zs_day') + tx(_zs.day.xiu) + '（' + tx(_zs.day.jian) + '） ·</span> ' +
       '<span class="nw">' + t('zs_hour') + tx(_zs.hour ? _zs.hour.name : '—') + '</span>';
   }
-  fillSunLine($('#sun-line'), new Date(td.y, td.m - 1, td.d), true);
+  fillSunLine($('#sun-line'), new Date(td.y, td.m - 1, td.d));
 }
 function tickClock() {
   var n = now(), p = function (x) { return (x < 10 ? '0' : '') + x; };
@@ -564,7 +563,7 @@ function renderDetail() {
       if (i === 2) return '<span class="zs-link" data-zs="mansion" data-xiu="' + escA(_dz.day.xiu) + '" title="' + escA([r[1], t('zs_day_hint')].filter(Boolean).join('；')) + '">' + inner + '</span>';
       return '<span title="' + escA(r[1]) + '">' + inner + '</span>';
     }).join('<br>');
-    fillSunLine($('#detail-sun'), new Date(sel.y, sel.m - 1, sel.d), false);
+    fillSunLine($('#detail-sun'), new Date(sel.y, sel.m - 1, sel.d));
   }
   $('#detail-chong').textContent = tx('冲' + l.getDayChongShengXiao() + '（' + l.getDayChong() + '）煞' + l.getDaySha());
   $('#detail-yi').textContent = l.getDayYi().map(tx).join(' ') || '—';
