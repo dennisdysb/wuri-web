@@ -79,6 +79,37 @@ var Meditation = (function () {
   /* 降级播放（非原生） */
   var fb = { ambient: null, endAt: 0, bellTimer: 0, endTimer: 0, paused: false, remainMs: 0, elapsedMs: 0, startedAt: 0 };
 
+  /* ---------- 屏幕常亮（Wake Lock） ----------
+   * 播放期间（含呼吸跟随）保持屏幕常亮：屏灭则呼吸圈不可见、跟随中断（2026-10-25 修）。
+   * 申请/释放全程静默：API 不支持、被拒、页面不可见时一律降级为系统默认息屏，绝不报错。 */
+  var wakeLock = null;
+  function acquireWakeLock() {
+    if (wakeLock && !wakeLock.released) return;
+    try {
+      if (!navigator.wakeLock || typeof navigator.wakeLock.request !== 'function') return;
+      var p = navigator.wakeLock.request('screen');
+      if (!p || typeof p.then !== 'function') return;
+      p.then(function (wl) {
+        wakeLock = wl;
+        try {
+          wl.addEventListener('release', function () { if (wakeLock === wl) wakeLock = null; });
+        } catch (e) {}
+        /* 申请在途时已暂停/结束：到手的锁立即还掉，不留亮屏 */
+        if (!playing) releaseWakeLock();
+      }).catch(function () { /* 被拒（不可见/省电策略等）：静默降级 */ });
+    } catch (e) {}
+  }
+  function releaseWakeLock() {
+    var wl = wakeLock;
+    wakeLock = null;
+    if (wl) {
+      try {
+        var r = wl.release();
+        if (r && typeof r.catch === 'function') r.catch(function () {});
+      } catch (e) {}
+    }
+  }
+
   /* ---------- 构建 ---------- */
   function build() {
     var stack = $('#med-bg-stack'), pager = $('#med-pager'), dots = $('#med-dots');
@@ -225,6 +256,9 @@ var Meditation = (function () {
     }
     var box = $('#med-breath');
     if (box) box.hidden = !breathPattern();
+    /* 呼吸态布局类：中央区上移 + 呼吸圈放大（meditation.css），纯计时态不挂此列 */
+    var view = $('#meditation-view');
+    if (view) view.classList.toggle('med-breathing', !!breathPattern());
   }
   function setBreathVisual(phase, scale, remainSec) {
     var circle = $('#med-breath-circle');
@@ -389,6 +423,7 @@ var Meditation = (function () {
     showTime(totalSec);
     startPoll();
     startBreath();
+    acquireWakeLock();
   }
 
   function togglePlay() {
@@ -399,6 +434,7 @@ var Meditation = (function () {
       else fbPause();
       playing = false;
       pauseBreath();
+      releaseWakeLock();
       updatePlayBtn();
     } else if (expectDone && seenActive) {
       /* 暂停后继续：原生直接 resume；降级恢复计时 */
@@ -409,6 +445,7 @@ var Meditation = (function () {
       updatePlayBtn();
       startPoll();
       resumeBreath();
+      acquireWakeLock();
     } else {
       startPlayback(getSelectedDuration());
     }
@@ -434,6 +471,7 @@ var Meditation = (function () {
     playing = false;
     stopPoll();
     stopBreath();
+    releaseWakeLock();
     showTime(0);
     updatePlayBtn();
     try {
@@ -455,6 +493,7 @@ var Meditation = (function () {
     seenActive = false;
     stopPoll();
     stopBreath();
+    releaseWakeLock();
     updatePlayBtn();
     $('#med-done').hidden = true;
     $('#meditation-view').hidden = true;
@@ -680,9 +719,10 @@ var Meditation = (function () {
     $('#med-done-back').addEventListener('click', back);
     document.addEventListener('visibilitychange', function () {
       /* 呼吸圈只是视觉引导：页面隐藏时冻结相位，冥想计时与音频不暂停；
-         回到前台且冥想仍在播放时，从冻结处续跑。 */
+         回到前台且冥想仍在播放时，从冻结处续跑。常亮锁会被系统在页面隐藏时
+         自动回收，回前台仍在播放则重新申请（acquireWakeLock）。 */
       if (document.hidden) { if (playing) pauseBreath(); }
-      else if (playing) resumeBreath();
+      else if (playing) { resumeBreath(); acquireWakeLock(); }
     });
     window.addEventListener('resize', function () {
       // 无滚动方案：resize 无需处理

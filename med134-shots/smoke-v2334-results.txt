@@ -1,0 +1,30 @@
+PASS S1 四件套 v134
+PASS S2 CSS 三修在位
+PASS S3 WakeLock 代码路径在位
+PASS B412 纯计时 center 仍在 29%
+PASS B412 呼吸态类已挂
+PASS B412 时钟/圆点上移 center top 29%→15%
+PASS B412 呼吸圈放大 112→160 (≥1.4x)
+PASS B412 说明居中 (align=center, |偏差|≤2px)
+PASS B412 呼吸区不压控制层
+PASS B412 播放中 (状态+无异常)
+PASS B412 播放→申请常亮锁
+PASS B412 暂停→释放常亮锁
+PASS B412 续播→重新申请
+PASS B412 回前台→自动重申请
+PASS B412 退出→释放常亮锁
+PASS B412 无 WakeLock API 降级无异常
+PASS B390 纯计时 center 仍在 29%
+PASS B390 呼吸态类已挂
+PASS B390 时钟/圆点上移 center top 29%→15%
+PASS B390 呼吸圈放大 112→160 (≥1.4x)
+PASS B390 说明居中 (align=center, |偏差|≤2px)
+PASS B390 呼吸区不压控制层
+PASS B390 播放中 (状态+无异常)
+PASS B390 播放→申请常亮锁
+PASS B390 暂停→释放常亮锁
+PASS B390 续播→重新申请
+PASS B390 回前台→自动重申请
+PASS B390 退出→释放常亮锁
+PASS B390 无 WakeLock API 降级无异常
+==== 29/29 PASS

@@ -49,16 +49,19 @@
 .med-dots{display:flex;justify-content:center;gap:8px;pointer-events:none}
 .med-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.32)}
 .med-dot.on{background:#e8c877;box-shadow:0 0 8px rgba(232,200,119,.8)}
-.med-breath{margin:18px auto 0;width:118px;pointer-events:none}
+/* 呼吸态：中央区整体上移，给放大的呼吸圈让位（纯计时态不受影响，2026-10-25 修） */
+#meditation-view.med-breathing .med-center{top:15%}
+.med-breath{margin:16px auto 0;pointer-events:none}
 .med-breath[hidden]{display:none}
-.med-breath-circle{width:112px;height:112px;margin:0 auto;border-radius:50%;border:1px solid rgba(255,255,255,.5);
+.med-breath-circle{width:min(41vw,160px);height:min(41vw,160px);margin:0 auto;border-radius:50%;border:1px solid rgba(255,255,255,.5);
   background:rgba(12,12,16,.34);color:#fff;display:flex;align-items:center;justify-content:center;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 0 0 8px rgba(255,255,255,.05),0 8px 28px rgba(0,0,0,.28);
   transform-origin:center;will-change:transform}
 .med-breath-inner{text-align:center}
-.med-breath-phase{font-size:.92rem;letter-spacing:.28em;text-indent:.28em;color:rgba(245,241,230,.94)}
-.med-breath-count{font-family:var(--serif,Georgia,serif);font-size:1.65rem;font-weight:200;line-height:1.15;font-variant-numeric:tabular-nums}
-.med-breath-note{width:210px;max-width:72vw;margin:10px auto 0;color:rgba(245,241,230,.78);font-size:.74rem;line-height:1.45;
+.med-breath-phase{font-size:1.02rem;letter-spacing:.28em;text-indent:.28em;color:rgba(245,241,230,.94)}
+.med-breath-count{font-family:var(--serif,Georgia,serif);font-size:2rem;font-weight:200;line-height:1.15;font-variant-numeric:tabular-nums}
+/* 说明整段居中：原先被塞进 118px 宽的 .med-breath 容器、自身 210px 溢出右偏（2026-10-25 修） */
+.med-breath-note{width:min(320px,84vw);margin:12px auto 0;text-align:center;color:rgba(245,241,230,.78);font-size:.74rem;line-height:1.45;
   text-shadow:0 1px 6px rgba(0,0,0,.72)}
 
 /* ---------- 底部浮动控制层（图片全屏铺满，控件悬浮） ---------- */
@@ -100,10 +103,11 @@
 
 @media (max-height:740px){
   .med-center{top:23%}
+  #meditation-view.med-breathing .med-center{top:9%}
   .med-clock{font-size:3.35rem;margin:6px 0 10px}
-  .med-breath{margin-top:10px;width:96px}
-  .med-breath-circle{width:88px;height:88px}
-  .med-breath-count{font-size:1.3rem}
+  .med-breath{margin-top:10px}
+  .med-breath-circle{width:128px;height:128px}
+  .med-breath-count{font-size:1.55rem}
   .med-breath-note{margin-top:6px}
   .med-controls{gap:8px;padding-top:10px}
 }
