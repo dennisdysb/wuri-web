@@ -10,9 +10,10 @@ import importlib.util, json, os, subprocess, time, urllib.request
 spec = importlib.util.spec_from_file_location("smoke", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
 smoke = importlib.util.module_from_spec(spec); spec.loader.exec_module(smoke)
 CDP, WS, free_port = smoke.CDP, smoke.WS, smoke.free_port
-WWW = os.path.expanduser("~/workspace/wuri-web-duangua/www")
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WWW = os.environ.get("WURI_WWW", os.path.join(REPO, "www"))
 URL = "file://" + WWW + "/index.html"
-OUT = os.path.expanduser("~/workspace/wuri-web-duangua/qimen-build/shots-dg")
+OUT = os.path.join(REPO, "qimen-build", "shots-dg")
 os.makedirs(OUT, exist_ok=True)
 fails = []
 
@@ -54,6 +55,9 @@ ENGINE_JS = r"""
   // 婚恋取用：讼卦女问官鬼（不上卦走伏神）/男问妻财壬申
   out.hunF = rows(mk([0,1,0,1,1,1], 8), D('2024-12-25T14:00:00'), 'hun', 'f');
   out.hunM = rows(mk([0,1,0,1,1,1], 8), D('2024-12-25T14:00:00'), 'hun', 'm');
+  // 应期·动爻：师(010000)三爻动求财，用神妻财戊午发动；2025-04-10 辰月己酉日，
+  // 午非月破非旬空 → 动爻候选＝逢合(未)/逢值(午)
+  out.dongYq = rows(mk([0,1,0,0,0,0], 4), D('2025-04-10T12:00:00'), 'cai');
   return out;
 })()
 """
@@ -113,6 +117,24 @@ def main():
         check("锚点·讼四爻世自发动+化泄", "自身发动" in R["anchor"]["动爻"] and "泄气化出" in R["anchor"]["动爻"], R["anchor"]["动爻"][:120])
         check("婚恋女问取官鬼（讼卦官鬼走伏神）", "女问" in R["hunF"]["用神"] and "官鬼" in R["hunF"]["用神"], R["hunF"]["用神"][:100])
         check("婚恋男问取妻财壬申", "男问" in R["hunM"]["用神"] and "妻财壬申" in R["hunM"]["用神"], R["hunM"]["用神"][:100])
+        # ---------- Part 1b：应期候选（2026-10-26 新增第 6 步） ----------
+        check("应期·旬空（坤求财妻财癸亥空→亥填实/巳冲实）",
+              "候选地支" in R["xunkong"]["应期"] and "亥（本支：出旬、逢值填实）" in R["xunkong"]["应期"] and "巳（冲支：冲实）" in R["xunkong"]["应期"],
+              R["xunkong"]["应期"][:160])
+        check("应期·月破（师求财妻财戊午破→午填实/未合填+待出月）",
+              "午（本支：逢值填实）" in R["yuepo"]["应期"] and "未（合支：逢合填实）" in R["yuepo"]["应期"] and "待出月" in R["yuepo"]["应期"],
+              R["yuepo"]["应期"][:160])
+        check("应期·伏神（谦求财妻财丁卯伏→冲飞子/逢值卯）",
+              "出伏候选地支为 子（冲开飞神之支）、卯（伏神逢值之支）" in R["bushang"]["应期"],
+              R["bushang"]["应期"][:200])
+        check("应期·动爻（师三爻妻财戊午动→未逢合/午逢值）",
+              "未（合支：逢合）" in R["dongYq"]["应期"] and "午（本支：逢值）" in R["dongYq"]["应期"],
+              R["dongYq"]["应期"][:160])
+        import re as _re
+        _bad_date = [k for k, v in R.items() if _re.search(r"\d{4}年|\d+月\d+日", v.get("应期", ""))]
+        check("应期红线：全部用例无公历日期字样", not _bad_date, _bad_date)
+        _no_cand = [k for k, v in R.items() if "候选" not in v.get("应期", "")]
+        check("应期红线：全部用例均称「候选」", not _no_cand, _no_cand)
 
         # ---------- Part 2：UI 全流程 ----------
         ev("document.getElementById('liuyao-enter').click(); 'ok'"); time.sleep(1.2)
@@ -132,12 +154,14 @@ def main():
         ev("document.getElementById('ly-mode-manual').click(); 'ok'"); time.sleep(0.4)
         ev("""(() => { const d = document.getElementById('ly-dt');
           d.value = '2024-12-25T14:00'; d.dispatchEvent(new Event('change', {bubbles:true})); return d.value; })()""")
-        for c in ["1,0,0", "1,1,0", "1,0,0", "1,1,1", "1,1,0", "1,1,0"]:
+        # 铜钱序列按 2026-10-26 修正后的两书映射取（两花一字=少阴、一花两字=少阳），
+        # 产出与旧序列相同的讼卦 [0,1,0,1,1,1]、四爻动，后续断言口径不变
+        for c in ["1,1,0", "1,0,0", "1,1,0", "1,1,1", "1,0,0", "1,0,0"]:
             ev(f"document.querySelector('.ly-m-btn[data-coins=\"{c}\"]').click(); 'ok'"); time.sleep(0.12)
         ev("document.getElementById('ly-m-cast').click(); 'ok'"); time.sleep(1.0)
         card = ev("document.getElementById('ly-duan') ? document.getElementById('ly-duan').textContent : ''")
         check("判读卡出现", "卦象判读" in card, card[:40])
-        for lab in ("用神", "旺衰", "世应", "动爻", "格局"):
+        for lab in ("用神", "旺衰", "世应", "动爻", "格局", "应期"):
             check(f"判读卡含「{lab}」段", lab in card)
         check("判读卡·求财用神=妻财壬申", "妻财壬申" in card, card[:200])
         check("判读卡·卡尾红线小字（固定文案）", "以上为卦象结构判读，供文化研究参考，不作吉凶断语。" in card)
@@ -173,6 +197,48 @@ def main():
         check("AI文本含【结构判读】段", "【结构判读】" in aitxt, aitxt[-200:])
         check("AI文本判读与卡一致（世爻壬午）", "世爻＝问卦人自身：四爻 兄弟壬午" in aitxt, aitxt[-300:])
         check("AI文本事类=出行", "占问分类：出行" in aitxt, aitxt[:80])
+
+        # ---------- Part 3：2026-10-26 三项裁定修复（硬币映射/变卦本宫/应期） ----------
+        lab110 = ev("Array.from(document.querySelectorAll('.ly-m-btn')).find(b=>b.getAttribute('data-coins')==='1,1,0').querySelector('.ly-m-res').textContent")
+        lab100 = ev("Array.from(document.querySelectorAll('.ly-m-btn')).find(b=>b.getAttribute('data-coins')==='1,0,0').querySelector('.ly-m-res').textContent")
+        check("录入钮标签·两花一字=少阴", "少阴" in lab110, lab110)
+        check("录入钮标签·一花两字=少阳", "少阳" in lab100, lab100)
+        note_ok = ev("document.getElementById('view-liuyao').textContent.includes('2026-10-26 起按《增删卜易》《卜筮正宗》定法修正')")
+        check("六爻页含口径切换注记", note_ok is True, note_ok)
+
+        def manual_cast(topic, dt, coins_list):
+            ev("(() => { const s = document.getElementById('ly-topic-sel'); s.value = '" + topic + "'; s.dispatchEvent(new Event('change', {bubbles:true})); return 1; })()")
+            time.sleep(0.25)
+            ev("(() => { const d = document.getElementById('ly-dt'); d.value = '" + dt + "'; d.dispatchEvent(new Event('change', {bubbles:true})); return 1; })()")
+            ev("document.getElementById('ly-m-clear').click(); 'ok'"); time.sleep(0.2)
+            for c in coins_list:
+                ev("Array.from(document.querySelectorAll('.ly-m-btn')).find(b=>b.getAttribute('data-coins')==='" + c + "').click(); 'ok'"); time.sleep(0.1)
+            ev("document.getElementById('ly-m-cast').click(); 'ok'"); time.sleep(0.9)
+
+        # 3b 铜钱四格逐格：首爻待测组合、余爻皆老阳，读历史首条 lines[0]（含原始 coins 回存）
+        grid_exp = {"1,1,1": (1, True), "0,0,0": (0, True), "1,1,0": (0, False), "1,0,0": (1, False)}
+        for combo, (ey, ed) in grid_exp.items():
+            manual_cast('', '2024-12-25T14:00', [combo] + ["1,1,1"] * 5)
+            h0 = ev("JSON.parse(localStorage.getItem('ly_history') || '[]')[0].lines[0]")
+            check(f"四格映射 {combo}→yao={ey}/dong={ed}",
+                  h0 and h0["yao"] == ey and h0["dong"] == ed and h0.get("coins") == [int(x) for x in combo.split(",")], h0)
+
+        # 3c 蛊之蒙金标准：蛊 [0,1,1,0,0,1] 三爻动→蒙；变爻戊午火按本宫巽木为子孙（按变宫离火则为兄弟）
+        manual_cast('', '2024-12-25T14:00', ["1,1,0", "1,0,0", "1,1,1", "1,1,0", "1,1,0", "1,0,0"])
+        bian_cell = ev("(() => { const trs = document.querySelectorAll('#ly-yao-detail table.lyx tr'); return trs.length > 4 ? trs[4].querySelectorAll('td')[2].textContent : ''; })()")
+        check("蛊之蒙·盘面变卦三爻=孙 戊午（本宫定六亲）", "孙" in bian_cell and "戊午" in bian_cell and "兄" not in bian_cell, bian_cell)
+        bian_marks = ev("(() => { const trs = document.querySelectorAll('#ly-yao-detail table.lyx tr'); let s = ''; trs.forEach((tr, i) => { if (i) { const td = tr.querySelectorAll('td')[2]; if (td) s += td.textContent; } }); return s; })()")
+        check("蛊之蒙·盘面变卦列无世/应标注", "世" not in bian_marks and "应" not in bian_marks, bian_marks[:120])
+        ev("window.LiuYao.buildChartText(); 'ok'")
+        aitxt2 = ev("(window.__wuriChartText || {}).liuyao || ''")
+        check("蛊之蒙·AI变卦名无变宫标注", "变卦：蒙｜" in aitxt2, aitxt2[aitxt2.find("变卦："):aitxt2.find("变卦：") + 30])
+        check("蛊之蒙·AI口径改照本卦宫", "六亲照本卦宫五行取" in aitxt2 and "按变卦宫五行取" not in aitxt2)
+        _bseg = aitxt2.split("【变卦六爻】")[-1].split("互卦")[0] if "【变卦六爻】" in aitxt2 else ""
+        check("蛊之蒙·AI变爻=子孙戊午且变卦段无世应", "子孙" in _bseg and "戊午" in _bseg and "【世】" not in _bseg and "【应】" not in _bseg, _bseg[:200])
+        check("AI文本含应期口径（禁换算公历日期）", "应期口径" in aitxt2 and "严禁换算成公历日期" in aitxt2)
+        card3 = ev("document.getElementById('ly-duan').textContent")
+        check("蛊之蒙·判读卡应期（世爻官鬼酉金动→辰逢合/酉逢值）",
+              "候选地支" in card3 and "辰（合支：逢合）" in card3 and "酉（本支：逢值）" in card3, card3[-220:])
 
         errs = [e for e in cdp.events if e.get("method") == "Runtime.exceptionThrown"]
         check("零 JS 异常", len(errs) == 0, len(errs))

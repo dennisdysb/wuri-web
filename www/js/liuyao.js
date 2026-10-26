@@ -1,7 +1,8 @@
 /* 六爻占卜：铜钱摇卦
  * 三枚铜钱摇六次，自下而上成卦
- * 字为阴（--），花为阳（—）
- * 三花=老阳○（动），三字=老阴×（动）
+ * 铜钱四格宗《增删卜易》〈占卦法〉《卜筮正宗》〈以钱代蓍法〉：
+ * 三花=重·老阳○（动），两花一字=拆·少阴，一花两字=单·少阳，三字=交·老阴×（动）
+ * （中间两档 2026-10-26 按两书修正，详见 coinResult 注释）
  * 装卦核心（纳甲全表、八宫世应）参照开源项目 liuyao-tool
  * （作者 1eakkkk，MIT License，https://github.com/1eakkkk/liuyao-tool）
  * 并以 bopo/najia 的独立实现交叉校验，2026-10-22 校订。
@@ -269,8 +270,9 @@ var LiuYao = (function () {
     return out;
   }
 
-  /* 单爻旺衰：以月建、日辰对该爻地支的生克冲合定力量，
-     旬空、月破等特殊状态只入 tags 单独标注、不与旺衰混算（蓝本第 2 步） */
+  /* 单爻旺衰：以月建、日辰对该爻地支的生克冲合定力量（蓝本第 2 步）。
+     月破并入旺衰评分：逢月建冲破 score −2，同时以「月破」tag 标注；
+     旬空不在本函数内处理，由判读层（wsText）在旺衰文本之后单独标注。 */
   function dgWangShuai(zhi, monthZhi, dayGz) {
     var wx = ZHI_WX[zhi];
     var tags = [], score = 0;
@@ -361,6 +363,8 @@ var LiuYao = (function () {
     /* ---- 第 1 步：定用神 ---- */
     var ty = topicYong(topic, gender);
     var yongIdx = [];
+    var yongRole = {};   // 爻位→用神角色名（应期步标注用）
+    var fuYong = null;   // 首个不上卦的用神（走伏神者），供第 6 步应期出伏候选
     var yItems = [];
     if (!topic) {
       yItems.push('未选择所问之事：不取用神，以下只给出世应、动爻与格局的通用结构判读。');
@@ -368,6 +372,7 @@ var LiuYao = (function () {
       yItems.push('事类：' + topicLabel(topic) + (topic === 'hun' ? '（' + (gender === 'f' ? '女问' : '男问') + '）' : '') + '。' + ty.note);
       if (ty.shiMain) {
         yongIdx.push(sy.shi);
+        yongRole[sy.shi] = '用神（世爻自身）';
         yItems.push('用神（世爻自身）：' + desc(Y[sy.shi]) + (Y[sy.shi].dong ? '，且为动爻' : ''));
       }
       var fuList = null;
@@ -377,6 +382,7 @@ var LiuYao = (function () {
           if (found.length > 1) yItems.push(m.role + '「' + m.qin + '」多现（共 ' + found.length + ' 处）：以发动者为主看，无发动者以先列者为主，其余参看。');
           found.forEach(function (y) {
             yongIdx.push(y.i);
+            yongRole[y.i] = m.role;
             yItems.push(m.role + '：' + desc(y) + (y.dong ? '（发动）' : '')
               + (beasts[y.i] && DG_BEAST_NOTE[beasts[y.i]] ? '，临' + beasts[y.i] + '（六神定性：' + DG_BEAST_NOTE[beasts[y.i]] + '，仅作辅助参考）' : ''));
           });
@@ -385,6 +391,7 @@ var LiuYao = (function () {
           var fus = fuList.filter(function (f) { return f.qin === m.qin; });
           if (fus.length) {
             var f0 = fus[0];
+            if (!fuYong) fuYong = { role: m.role, fu: f0 };
             var fei = Y[f0.pos];
             var fr = dgRel(fei.wx, f0.wx);
             var frTxt = fr === '生' ? '飞神生伏神：伏神得生扶，较易透出起作用'
@@ -477,6 +484,50 @@ var LiuYao = (function () {
     if (!gItems.length) gItems.push('未见反吟、伏吟；用神与世爻亦未逢日辰冲（无暗动、日破）。');
     rows.push({ label: '格局', items: gItems });
 
+    /* ---- 第 6 步：应期候选（两书应期规则：已判状态→候选地支） ----
+       《增删卜易》：静而逢值逢冲、动而逢合逢值、空者冲空实空、破者实破逢合，
+       「各门各类，无不问其应期」；《卜筮正宗》：旬空待出旬/值日/冲实填补，
+       月破待出月/值日/合填，伏神待月建日辰冲开飞神。
+       呈现护栏（与红线一致）：只称「候选地支」，不换算公历日期、不作日期保证；
+       候选只挂在已判定状态（空/破/伏/动静）上产出，不反推事之成败。 */
+    var qItems = ['依《增删卜易》《卜筮正宗》应期规则推导（静逢值冲、动逢合值、空待出旬·值日·冲实、破待出月·值日·合填、伏待冲飞），以下仅为候选地支，不换算公历日期、不作日期保证。'];
+    function yqLine(y, role) {
+      var po = !!(monthZhi && DG_CHONG[monthZhi] === y.zhi);
+      var states = [], cands = [], seenC = {};
+      function addC(z, why) { if (!seenC[z]) { seenC[z] = 1; cands.push(z + '（' + why + '）'); } }
+      if (y.kong) {
+        states.push('逢旬空');
+        addC(y.zhi, '本支：出旬、逢值填实');
+        addC(DG_CHONG[y.zhi], '冲支：冲实');
+      }
+      if (po) {
+        states.push('逢月破');
+        addC(y.zhi, '本支：逢值填实');
+        addC(DG_HE[y.zhi], '合支：逢合填实');
+      }
+      if (!y.kong && !po) {
+        if (y.dong) { states.push('发动'); addC(DG_HE[y.zhi], '合支：逢合'); addC(y.zhi, '本支：逢值'); }
+        else { states.push('安静'); addC(y.zhi, '本支：逢值'); addC(DG_CHONG[y.zhi], '冲支：逢冲'); }
+      }
+      var s = role + '：' + desc(y) + '，状态为' + states.join('、') + '，候选地支为 ' + cands.join('、') + '。';
+      if (po) s += '月破者，另须待出月之后。';
+      return s;
+    }
+    if (fuYong) {
+      var feiY = Y[fuYong.fu.pos];
+      qItems.push(fuYong.role + '「' + fuYong.fu.qin + '」伏藏：伏神 ' + fuYong.fu.qin + fuYong.fu.gan + fuYong.fu.zhi
+        + ' 伏于' + feiY.name + '飞神（' + feiY.qin + feiY.gan + feiY.zhi + '）之下，出伏候选地支为 '
+        + DG_CHONG[feiY.zhi] + '（冲开飞神之支）、' + fuYong.fu.zhi + '（伏神逢值之支）。');
+    }
+    // 锚点：已判用神（含伏神，已在上行）优先；未选事类、或用神全不见且无伏神时，才以世爻为锚
+    var qIdx = yongIdx.length ? yongIdx : (fuYong ? [] : [sy.shi]);
+    var seenQ = {};
+    qIdx.forEach(function (ix) {
+      if (seenQ[ix]) return; seenQ[ix] = 1;
+      qItems.push(yqLine(Y[ix], yongIdx.length ? (yongRole[ix] || '用神') : '世爻'));
+    });
+    rows.push({ label: '应期', items: qItems });
+
     return { rows: rows, topic: topic, topicLabel: topicLabel(topic), yongIdx: yongIdx };
   }
   function dgEsc(s) {
@@ -533,15 +584,18 @@ var LiuYao = (function () {
   var mEditIdx = 0;      // 手动录入当前编辑的爻位（自下而上 0-5；等于 lines.length 表示追加下一爻）
   function effNow() { return castTime ? new Date(castTime.getTime()) : new Date(); }
   /* 铜钱→爻的唯一口径（摇卦与手动录入共用此函数，保证两路产出一致）。
-     coins 取值：0=字(阴), 1=花(阳)；按阳值之和定爻：
-     3→老阳(阳·动) 0→老阴(阴·动) 2→少阳(阳·静) 1→少阴(阴·静) */
+     coins 取值：0=字, 1=花(背)；按花（背）数定爻，宗《增删卜易》〈占卦法〉与
+     《卜筮正宗》〈以钱代蓍法〉四格定法（背值 3、字值 2，值和即 9/8/7/6）：
+     3 花→重·老阳(阳·动)  2 花→拆·少阴(阴·静)  1 花→单·少阳(阳·静)  0 花→交·老阴(阴·动)。
+     2026-10-26 修正：此前中间两档误作「2 花少阳、1 花少阴」（近现代从多定性支），
+     与两书相反，静爻阴阳构成随之偏离；极值两档向来无误，不动。 */
   function coinResult(coins) {
     var yang = coins[0] + coins[1] + coins[2];
     var yao, dong = false;
-    if (yang === 3) { yao = 1; dong = true; }       // 老阳 ○
-    else if (yang === 0) { yao = 0; dong = true; }  // 老阴 ×
-    else if (yang === 2) { yao = 1; }               // 少阳 —
-    else { yao = 0; }                              // 少阴 --
+    if (yang === 3) { yao = 1; dong = true; }       // 重·老阳 ○
+    else if (yang === 0) { yao = 0; dong = true; }  // 交·老阴 ×
+    else if (yang === 2) { yao = 0; }               // 拆·少阴 --
+    else { yao = 1; }                              // 单·少阳 —
     return { yao: yao, dong: dong, coins: coins };
   }
 
@@ -619,7 +673,8 @@ var LiuYao = (function () {
         question: q ? q.value.trim() : '',
         gua: guaName,
         bian: bianName || '',
-        lines: lines.map(function (l) { return { yao: l.yao, dong: l.dong }; })
+        // 存原始铜钱：口径若再修正，历史盘可按新映射重算（2026-10-26 起）
+        lines: lines.map(function (l) { return { yao: l.yao, dong: l.dong, coins: (l.coins && l.coins.length === 3) ? l.coins.slice() : null }; })
       };
       var h = JSON.parse(localStorage.getItem('ly_history') || '[]');
       h.unshift(rec);
@@ -780,7 +835,8 @@ var LiuYao = (function () {
       + '<span>旬空<br>' + (xk || '') + '</span></div>';
     // 本卦/变卦名
     // 变卦名：无动爻时显示本卦名
-    var bianName = (hasDong && bianG) ? bianG[0] + '(' + bianGong.name + ')' : (g ? g[0] + '(' + gong.name + ')' : '?');
+    // 变卦只标卦名，不标变宫（两书：变卦不另安世应、六亲照本卦推，宫名标注亦不取）
+    var bianName = (hasDong && bianG) ? bianG[0] : (g ? g[0] + '(' + gong.name + ')' : '?');
     html += '<div class="ly-gua-names"><div class="ly-gua-name-l">' + (g ? g[0] : '?') + '(' + gong.name + ')</div>'
       + '<div class="ly-gua-name-r">' + bianName + '</div></div>';
     // 主表：六神|伏神|本卦|变卦
@@ -804,17 +860,15 @@ var LiuYao = (function () {
       else if (i === sy.ying) syMark = ' 应';
       // 六神+伏神：伏神改列于六神下方（固定列宽网格的宽度预算所限，2026-10-22 对齐根治）
       var shenFu = beasts[i] + (fuShen[i] ? '<br><span class="ly-fushen">' + fuShen[i] + '</span>' : '');
-      // 变卦
-      var bInfo = info, bBar = yaoBar3(l.yao === 1), bSY = syMark;
+      // 变卦：六亲照本卦宫五行推（《增删卜易》「变出之爻安六亲者仍照正卦而推」），
+      // 变卦不另安世应——只列变爻本身，世应唯在本卦
+      var bInfo = info, bBar = yaoBar3(l.yao === 1), bSY = '';
       if (hasDong && bianNj) {
         var bWx = ZHI_WX[bianNj[i].zhi];
-        var bQinFull = liuqin(bianGong.wx, bWx);
+        var bQinFull = liuqin(gong.wx, bWx);
         var bQin = {'官鬼':'官','父母':'父','兄弟':'兄','妻财':'财','子孙':'孙'}[bQinFull] || bQinFull;
         bInfo = bQin + ' ' + bianNj[i].gan + bianNj[i].zhi;
         bBar = yaoBar3(bianLines[i].yao === 1);
-        bSY = '';
-        if (i === bianSy.shi) bSY = ' 世';
-        else if (i === bianSy.ying) bSY = ' 应';
       }
       var mark = '<span class="lyx-mark">' + dong + (syMark ? '<span class="lyx-sy">' + syMark.trim() + '</span>' : '') + '</span>';
       var bMark = '<span class="lyx-mark">' + (bSY ? '<span class="lyx-sy">' + bSY.trim() + '</span>' : '') + '</span>';
@@ -1132,7 +1186,11 @@ var LiuYao = (function () {
       el.addEventListener('click', function () {
         var r = h[parseInt(el.getAttribute('data-idx'), 10)];
         if (!r || !r.lines) return;
-        lines = r.lines.map(function (l) { return { yao: l.yao, dong: l.dong, coins: [] }; });
+        // 有原始铜钱的记录按现行 coinResult 口径重算；旧记录无 coins，只能按存档爻值呈现
+        lines = r.lines.map(function (l) {
+          if (l.coins && l.coins.length === 3) return coinResult(l.coins.slice());
+          return { yao: l.yao, dong: l.dong, coins: [] };
+        });
         /* 手动记录按其所填时间回放，保证与原盘一致；旧/摇卦记录维持原口径（当前时间） */
         if (r.src === 'manual' && r.time) setCastTime(new Date(r.time), true);
         else setCastTime(null, true);
@@ -1304,13 +1362,12 @@ var LiuYao = (function () {
       var bianSy = getShiYing(bianKey);
       var dongIdx = [];
       lines.forEach(function (x, di) { if (x.dong) dongIdx.push(names[di]); });
-      txt += '\n变卦：' + (bianG ? bianG[0] : '?') + '（' + bianGong.name + '宫）｜动爻：' + dongIdx.join('、') + '\n';
+      txt += '\n变卦：' + (bianG ? bianG[0] : '?') + '｜动爻：' + dongIdx.join('、') + '\n';
       if (bianG && bianG[1]) txt += '变卦卦辞：' + bianG[1] + '\n';
-      txt += '【变卦六爻】（六亲按变卦宫五行取）\n';
+      txt += '【变卦六爻】（六亲照本卦宫五行取——《增删卜易》「六亲须照前卦而按」；变卦不另安世应）\n';
       for (var j = 0; j < 6; j++) {
-        txt += names[j] + '：' + liuqin(bianGong.wx, ZHI_WX[bianNj[j].zhi]) + ' ' + bianNj[j].gan + bianNj[j].zhi + '（' + ZHI_WX[bianNj[j].zhi] + '）'
+        txt += names[j] + '：' + liuqin(gong.wx, ZHI_WX[bianNj[j].zhi]) + ' ' + bianNj[j].gan + bianNj[j].zhi + '（' + ZHI_WX[bianNj[j].zhi] + '）'
           + ' ' + (bianLines[j].yao === 1 ? '阳爻' : '阴爻')
-          + (j === bianSy.shi ? '【世】' : '') + (j === bianSy.ying ? '【应】' : '')
           + (lines[j].dong ? '（由本卦' + names[j] + '变来）' : '')
           + '\n';
       }
@@ -1328,6 +1385,7 @@ var LiuYao = (function () {
       dgAi.rows.forEach(function (r) {
         txt += r.label + '：' + r.items.join(' ') + '\n';
       });
+      txt += '应期口径：上文「应期」一行仅为传统规则对应的【候选地支】，讲时间时只可引用候选地支（如逢某支之日、之月），严禁换算成公历日期或具体某一天。\n';
     } catch (e) {}
     window.__wuriChartText = window.__wuriChartText || {};
     window.__wuriChartText.liuyao = txt;
