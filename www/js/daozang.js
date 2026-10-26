@@ -307,16 +307,24 @@
     if (oSec && pSec && pSec._punct) {
       var oJoin = oSec.paras.map(function (p) { return p.t; }).join('');
       var pJoin = pSec.paras.map(function (p) { return p.t; }).join('');
-      if (dzStripPunct(pJoin) === oJoin) {
-        var oCum = [], oc = 0;
-        oSec.paras.forEach(function (p) { oCum.push(oc); oc += p.t.length; });
+      /* 两侧同口径剥除后比对：原文侧的清洗残留（入药镜 2 处、天仙正理 22 处
+         制表符等空白）同样剥除，否则这类底本永远投影失败、高亮只能走回退
+         （v143 已知尾巴，本批修复）。原文侧同步建内容字位表 oPos，
+         原文坐标（原始下标）与内容字序号经 oPos 互转，残留字符不占内容位。 */
+      if (dzStripPunct(pJoin) === dzStripPunct(oJoin)) {
+        var oCum = [], oPos = [], oc = 0;
+        oSec.paras.forEach(function (p) {
+          var pos = [];
+          for (var i = 0; i < p.t.length; i++) if (!dzIsPunct(p.t[i])) pos.push(i);
+          oCum.push(oc); oPos.push(pos); oc += pos.length;
+        });
         var pCum = [], pPos = [], pc = 0;
         pSec.paras.forEach(function (p) {
           var pos = [];
           for (var i = 0; i < p.t.length; i++) if (!dzIsPunct(p.t[i])) pos.push(i);
           pCum.push(pc); pPos.push(pos); pc += pos.length;
         });
-        map = { oCum: oCum, pCum: pCum, pPos: pPos, oLens: oSec.paras.map(function (p) { return p.t.length; }) };
+        map = { oCum: oCum, pCum: pCum, pPos: pPos, oPos: oPos, oLens: oPos.map(function (x) { return x.length; }) };
       }
     }
     entry._hlMaps[si] = map;
@@ -328,7 +336,12 @@
     if (!e || !e.punctMode || !h) return null;
     var m = dzSecMap(e, h.sec);
     if (!m) return null;
-    var g0 = m.oCum[h.para] + h.start, g1 = m.oCum[h.para] + h.end;
+    /* 存储坐标为原文原始下标，先经 oPos 换算为内容字序号（残留空白不占位） */
+    var oPosH = m.oPos[h.para];
+    if (!oPosH) return null;
+    var c0 = 0; while (c0 < oPosH.length && oPosH[c0] < h.start) c0++;
+    var c1 = c0; while (c1 < oPosH.length && oPosH[c1] < h.end) c1++;
+    var g0 = m.oCum[h.para] + c0, g1 = m.oCum[h.para] + c1;
     var out = [];
     for (var j = 0; j < m.pPos.length; j++) {
       var ps = m.pCum[j], pe = ps + m.pPos[j].length;
@@ -353,7 +366,8 @@
     for (var i = 0; i < m.oCum.length; i++) {
       var os = m.oCum[i], oe = os + m.oLens[i];
       var a = Math.max(g0, os), b = Math.min(g1, oe);
-      if (a < b) out.push({ sec: seg.sec, para: i, start: a - os, end: b - os });
+      /* 内容字序号 → 原文原始下标（与存储坐标口径一致） */
+      if (a < b) out.push({ sec: seg.sec, para: i, start: m.oPos[i][a - os], end: m.oPos[i][b - os - 1] + 1 });
     }
     return out.length ? out : null;
   };
