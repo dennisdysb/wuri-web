@@ -1,0 +1,7 @@
+PASS B1 开度人经
+PASS B2 展开中态
+PASS B2 全展开完成
+PASS B2b 中途可滚动(document)
+PASS B3 全部折叠
+PASS B3b 二次展开存活
+PASS B 零 JS 异常

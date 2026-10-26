@@ -1,0 +1,36 @@
+PASS S1 四件套 v144
+PASS S2 标点钮与偏好全清
+PASS S3 渐进展开接线
+PASS S4 检索令牌+预加载
+PASS P0 Pro 基线
+PASS A1 冷首查首行耗时
+PASS A1b 首行出时全文未加载齐（书名先行）
+PASS A1c 道德经结果齐
+PASS A4 无结果终态未找到
+PASS A3 清空回目录
+PASS A3b 二次查询命中（内存）
+PASS C1 开道德真经（全藏）
+PASS C1 默认标点版+无钮
+PASS C1b 来源条机器标点
+PASS C2 开无标点部 KR5a0002
+PASS C2 原文呈现
+PASS C2b 多卷本全部展开钮在
+PASS B4 开精选道德真经
+PASS B4 全部展开（精选）
+PASS C3 内丹金丹大要默认标点版
+PASS C4 内丹黄庭内景经原文常态
+PASS B1 开度人经
+PASS B1 61卷+钮可见+部分标点注
+PASS B2 展开中态（文案+禁用）
+PASS B2 全展开完成（61/61 无懒卷）
+PASS B2b 中途可滚动
+PASS B3 全部折叠
+PASS B3b 二次展开（已填充直开）
+PASS P1 零 JS 异常
+PASS H1 开道德真经（全藏）
+PASS H1 标点版高亮落点在
+PASS H2 零 JS 异常
+PASS A2 连查不串味
+PASS A2b 首条为度人类
+PASS A2c 零 JS 异常
+==== 35/35 PASS ====

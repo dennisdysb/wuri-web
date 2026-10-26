@@ -1,0 +1,46 @@
+{
+ "label": "BEFORE-v143",
+ "www": "/dev/shm/wuri-base-v143/www",
+ "run1_first_row_ms": 284,
+ "run1_daode_after_first_row_ms": 7,
+ "run1_final": {
+  "hidden": false,
+  "n": 10,
+  "first": "道德真经",
+  "daodeTitle": true,
+  "loading": false,
+  "count": "共 10 条道德真经（道德经、老子、道德真经）元始说先天道德"
+ },
+ "run1_errs": [],
+ "run2_first_duren_ms": 226,
+ "run2_crosstalk_daode_under_duren": true,
+ "run2_settled": {
+  "hidden": false,
+  "n": 5,
+  "first": "灵宝无量度人上品妙经",
+  "daodeTitle": false,
+  "loading": false,
+  "count": "共 5 条灵宝无量度人上品妙经（度人经、度人、灵宝度人经）洞"
+ },
+ "run2_errs": [],
+ "run2_timeline_changes": [
+  [
+   8,
+   "",
+   0,
+   false
+  ],
+  [
+   172,
+   "道德真经",
+   10,
+   true
+  ],
+  [
+   226,
+   "灵宝无量度人上品妙经",
+   5,
+   false
+  ]
+ ]
+}

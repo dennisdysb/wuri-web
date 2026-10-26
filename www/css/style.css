@@ -883,6 +883,9 @@ details.disc-foot .hint{margin-top:9px}
 }
 .jing-sec-h .tiny { flex: none; }
 .jing-sec-body { margin-bottom: 6px; }
+/* 屏外分节跳过布局/绘制：多卷本「全部展开」后 DOM 巨大（度人经 61 卷约 70 万节点），
+   靠 content-visibility 让屏外卷不参与渲染，展开/折叠/滚动才不被全树布局拖死 */
+.jing-sec-body { content-visibility: auto; contain-intrinsic-size: auto 600px; }
 .jing-sec-body[hidden] { display: none; }
 .jing-para {
   margin: 0 0 10px;

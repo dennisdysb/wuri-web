@@ -1,0 +1,40 @@
+{
+ "label": "AFTER-v144",
+ "www": "/home/hatch/workspace/wuri-web/www",
+ "run1_first_row_ms": 185,
+ "run1_daode_after_first_row_ms": 11,
+ "run1_final": {
+  "hidden": false,
+  "n": 10,
+  "first": "道德真经",
+  "daodeTitle": true,
+  "loading": true,
+  "count": "共 10 条（全文检索中…）道德真经（道德经、老子、道德真经"
+ },
+ "run1_errs": [],
+ "run2_first_duren_ms": 168,
+ "run2_crosstalk_daode_under_duren": false,
+ "run2_settled": {
+  "hidden": false,
+  "n": 5,
+  "first": "灵宝无量度人上品妙经",
+  "daodeTitle": false,
+  "loading": false,
+  "count": "共 5 条灵宝无量度人上品妙经（度人经、度人、灵宝度人经）洞"
+ },
+ "run2_errs": [],
+ "run2_timeline_changes": [
+  [
+   6,
+   "",
+   0,
+   false
+  ],
+  [
+   168,
+   "灵宝无量度人上品妙经",
+   5,
+   false
+  ]
+ ]
+}

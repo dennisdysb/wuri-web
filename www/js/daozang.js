@@ -20,11 +20,8 @@
   var punctSet = null;      // {KR id: true} 有标点版的部（index.punct）
   var punctPartial = {};    // id -> 已标卷数（部分标点，如度人经前 6 卷）
 
-  /* 标点版偏好：全局记忆（wuri_dz_punct：'orig' 才回原文，缺省标点版——
-     用户诉求就是「读得明白」，有标点版者默认标点版） */
-  function dzPunctPref() {
-    try { return localStorage.getItem('wuri_dz_punct') === 'orig' ? 'orig' : 'punct'; } catch (e) { return 'punct'; }
-  }
+  /* 标点版（2026-10-26 用户定）：不设切换钮——有标点版者一律标点版呈现，
+     无标点版者原文。旧偏好键 wuri_dz_punct 留尸不读。 */
   function hasPunct(id) { return !!(punctSet && punctSet[id]); }
 
   /* 标点字（与清洗口径一致）：内容字 = 非标点非空白；标点版去标点后与原文
@@ -107,6 +104,9 @@
     });
   }
   window.__wuri_dzEnsureDict = ensureDict;
+  /* 书名索引预加载：进入经文库/聚焦检索框时由 jingwen.js 调用，
+     使统一检索的书名阶段不等临查才拉索引（264K 单文件，解析后驻内存） */
+  window.__wuri_dzPreload = ensureIndex;
 
   /* 逐字注音：审读表词组（最长匹配）优先，其次字典单字默认；无读音留空 */
   function annotateText(t, dict, ovr) {
@@ -243,7 +243,7 @@
     });
   }
   function applyDzMode(entry) {
-    entry.punctMode = !!(entry.hasPunct && dzPunctPref() === 'punct');
+    entry.punctMode = !!entry.hasPunct;
     entry.sections = entry.punctMode ? entry.sectionsPunct : entry.sectionsOrig;
   }
   function openWork(id, rowEl) {
@@ -356,19 +356,6 @@
       if (a < b) out.push({ sec: seg.sec, para: i, start: a - os, end: b - os });
     }
     return out.length ? out : null;
-  };
-  /* 原文／标点版切换（工具栏按钮经此）：偏好全局记忆，复用 jing-rerender
-     的展开/滚动恢复；门控与 openWork 同源——非 Pro 在此亦弹墙、绝不换版 */
-  window.__wuri_dzTogglePunct = function () {
-    var id = window._jingCurrentId;
-    var e = id && dzFindEntry(id);
-    if (!e || !e.hasPunct) return;
-    /* 精选内丹：开卷已经内丹 Pro 门控，此处不再走全藏门控（二者同为高级版，
-       但非 Pro 根本进不了内丹阅读器，不存在绕过面） */
-    if (e.daozang && !dzGate()) return;
-    try { localStorage.setItem('wuri_dz_punct', e.punctMode ? 'orig' : 'punct'); } catch (err) {}
-    applyDzMode(e);
-    document.dispatchEvent(new CustomEvent('jing-rerender'));
   };
   function doOpen(entry) {
     var pyOn = true; /* 与阅读器一致：未设置时默认开（LS 为 '0' 才是关） */
