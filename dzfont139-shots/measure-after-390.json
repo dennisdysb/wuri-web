@@ -1,0 +1,50 @@
+{
+ "refTitle": {
+  "text": "全真早晚功课经",
+  "fontSize": "21.6px",
+  "fontWeight": "400",
+  "lineHeight": "35.64px"
+ },
+ "refHead": {
+  "text": "常见经文（29）",
+  "fontSize": "17.92px",
+  "fontWeight": "700",
+  "lineHeight": "29.568px"
+ },
+ "dzBu": {
+  "text": "洞真部327 部›",
+  "fontSize": "17.92px",
+  "fontWeight": "700",
+  "lineHeight": "29.568px"
+ },
+ "dzBuXuan": {
+  "text": "洞玄部321 部›",
+  "fontSize": "17.92px",
+  "fontWeight": "700",
+  "lineHeight": "29.568px"
+ },
+ "dzWt": {
+  "text": "灵宝天尊说洪恩灵济真君妙经",
+  "fontSize": "21.6px",
+  "fontWeight": "400",
+  "lineHeight": "35.64px"
+ },
+ "dzLei": {
+  "text": "本文",
+  "fontSize": "11.52px",
+  "fontWeight": "400",
+  "lineHeight": "19.008px"
+ },
+ "dzWm": {
+  "text": "1 卷 · 1,187 字",
+  "fontSize": "12.16px",
+  "fontWeight": "400",
+  "lineHeight": "20.064px"
+ },
+ "dzCount": {
+  "text": "327 部",
+  "fontSize": "14.336px",
+  "fontWeight": "700",
+  "lineHeight": "23.6544px"
+ }
+}
