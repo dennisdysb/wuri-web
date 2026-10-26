@@ -1,7 +1,7 @@
 {
  "section": "scriptures",
- "version": 7,
- "updated": "2026-10-22",
+ "version": 8,
+ "updated": "2026-10-26",
  "filesBase": "content/jing/",
  "index": [
   {
@@ -140,6 +140,46 @@
   {
    "id": "s39",
    "title": "太一救苦护身妙经"
+  },
+  {
+   "id": "s40",
+   "title": "悟真篇"
+  },
+  {
+   "id": "s41",
+   "title": "入药镜"
+  },
+  {
+   "id": "s42",
+   "title": "金丹四百字"
+  },
+  {
+   "id": "s22",
+   "title": "钟吕传道集"
+  },
+  {
+   "id": "s43",
+   "title": "灵宝毕法"
+  },
+  {
+   "id": "s44",
+   "title": "规中指南"
+  },
+  {
+   "id": "s45",
+   "title": "金丹大要"
+  },
+  {
+   "id": "s46",
+   "title": "还源篇"
+  },
+  {
+   "id": "s47",
+   "title": "天仙正理"
+  },
+  {
+   "id": "s48",
+   "title": "坐忘论"
   }
  ]
 }

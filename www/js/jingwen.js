@@ -11,10 +11,13 @@ var JingWen = (function () {
     zhengyi: ['s01','s14','s10','s07','s11','s03','s04','s05','s09','s15','s16','s17']
   };
   /* 内丹书籍（单独折叠分类，不用背诵模式） */
-  var NEIDAN_IDS = ['s18','s19','s20','s21','s22','s23','s24','s25'];
+  var NEIDAN_IDS = ['s18','s19','s20','s21','s22','s23','s24','s25',
+    's40','s41','s42','s43','s44','s45','s46','s47','s48'];
   var NEIDAN_TITLES = {
     s18: '黄庭内景经', s19: '周易参同契', s20: '太乙金华宗旨', s21: '太清元道真经',
     s22: '钟吕传道集', s23: '性命圭旨', s24: '伍柳仙宗', s25: '乐育堂语录',
+    s40: '悟真篇', s41: '入药镜', s42: '金丹四百字', s43: '灵宝毕法',
+    s44: '规中指南', s45: '金丹大要', s46: '还源篇', s47: '天仙正理', s48: '坐忘论',
   };
   function isNeidan(id) { return NEIDAN_IDS.indexOf(id) >= 0; }
   var jingFilter = 'all';
@@ -41,6 +44,16 @@ var JingWen = (function () {
     s20: ['金华宗旨', '太乙金华'],
     s21: ['元道真经', '太清元道'],
     s23: ['性命圭旨', '圭旨'],
+    s22: ['钟吕传道', '传道集', '鍾呂傳道集'],
+    s40: ['悟真篇', '紫阳真人', '张伯端'],
+    s41: ['入药镜', '崔公入药镜', '崔希范'],
+    s42: ['金丹四百字', '四百字'],
+    s43: ['灵宝毕法', '毕法'],
+    s44: ['规中指南', '陈虚白'],
+    s45: ['金丹大要', '上阳子', '陈致虚'],
+    s46: ['还源篇', '石泰'],
+    s47: ['天仙正理', '天仙正理直论', '伍守阳'],
+    s48: ['坐忘论', '司马承祯'],
     s26: ['清静经', '清靜經', '常清静经'],
     s27: ['心印经', '心印妙经', '玉皇心印']
   };
@@ -647,7 +660,7 @@ var JingWen = (function () {
   }
   var JING_BASE = 'https://dennisdysb.github.io/wuri-web/www/audio/jing/';
   var JING_HAS_AUDIO = ['s01','s02','s03','s04','s05','s07','s09','s15','s10','s12','s13','s14','s16','s17','s26','s27','s28','s29','s30','s31','s32','s33','s35','s34','s36','s39'];
-  var JING_NEIDAN = ['s18','s19','s20','s21','s23'];
+  var JING_NEIDAN = ['s18','s19','s20','s21','s23','s22','s40','s41','s42','s43','s44','s45','s46','s47','s48'];
   function isNeidan(sid) { return JING_NEIDAN.indexOf(sid) >= 0; }
   function hasAudio(sid) { return JING_HAS_AUDIO.indexOf(sid) >= 0; }
   function updateAudioButtons() {
