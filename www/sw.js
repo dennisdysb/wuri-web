@@ -25,7 +25,10 @@ const MED_ASSETS = [
   './audio/meditation/loop-wind.mp3?v=3',
   './audio/meditation/loop-bowl.mp3?v=3',
   './audio/meditation/bell-interval.mp3?v=3',
-  './audio/meditation/bell-ending.mp3?v=3'
+  './audio/meditation/bell-ending.mp3?v=3',
+  './audio/meditation/cue-xi.mp3?v=1',
+  './audio/meditation/cue-hu.mp3?v=1',
+  './audio/meditation/cue-ting.mp3?v=1'
 ];
 /* 离线下载专用缓存（一键下载的音频/正文/图鉴）：版本更新时绝不清除，
  * 否则用户下好的几百 MB 音频会在每次发版后被 activate 误删（2026-10-21） */
