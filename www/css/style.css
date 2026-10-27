@@ -2542,6 +2542,32 @@ body.sky-red .hpe-hdl { stroke:#eda88f; }
 [data-theme="night"] .hpe-dim rect { fill:var(--gold); }
 .hpe-dim text { fill:var(--paper-2); }
 [data-theme="night"] .hpe-dim text { fill:#060608; }
+
+/* ============ 分切式建房（起始面／切线／点名胶囊／户外块） ============ */
+#hpe-attr .hpe-ncap { pointer-events:auto; } /* 属性条容器 pointer-events:none，胶囊须单独放行 */
+.hpe-roomrect.ex { fill:var(--paper-2); }
+.hpe-roomrect.ex.sel { fill:var(--paper-2); }
+.hpe-hatchrect { fill:url(#hpe-hatch); pointer-events:none; }
+.hpe-hatchbg { fill:var(--paper-2); }
+.hpe-hatchln { stroke:var(--line-soft); }
+.hpe-roomname.ex { fill:var(--faint); }
+.hpe-cutline { stroke:var(--cinnabar); stroke-dasharray:6 4; pointer-events:none; }
+.hpe-cuthit { fill:transparent; cursor:ew-resize; touch-action:none; }
+.hpe-ncaps { display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin:2px 0 8px; }
+.hpe-ncaps .lab { font-size:.74rem; color:var(--faint); }
+.hpe-ncap { font-size:.78rem; padding:3px 10px; border-radius:999px; border:1px solid var(--line); background:var(--paper-2); color:var(--ink-2); cursor:pointer; }
+.hpe-ncap.on { border-color:var(--gold); color:var(--gold-deep); background:var(--gold-soft); }
+.hpe-mglab { font-size:.74rem; color:var(--faint); align-self:center; }
+.hpe-op.primary { border-color:var(--gold); color:var(--gold-deep); background:var(--gold-soft); font-weight:700; }
+.hpe-cuthint { font-size:.74rem; color:var(--faint); }
+.hpe-chip { display:inline-block; font-size:.8rem; padding:4px 10px; border-radius:999px; border:1px solid var(--line); background:var(--paper-2); color:var(--ink-2); cursor:pointer; }
+.hpe-frame { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:8px 0 4px; }
+.hpe-frame label { font-size:.84rem; color:var(--ink-2); }
+.hpe-starts { display:grid; gap:8px; margin-top:4px; }
+.hpe-start { border:1px solid var(--line); border-radius:12px; padding:12px 13px; background:var(--paper-2); cursor:pointer; }
+.hpe-start b { display:block; font-size:.95rem; color:var(--ink); margin-bottom:3px; font-family:var(--serif); }
+.hpe-start span { font-size:.8rem; color:var(--muted); line-height:1.55; display:block; }
+.hpe-start.rec { border-color:var(--gold); background:var(--gold-soft); }
 .hpe-fix { color:var(--ink-2); cursor:pointer; }
 .hpe-fixhit { fill:transparent; }
 .hpe-fixsel { fill:none; stroke:var(--gold); stroke-dasharray:.18 .12; }

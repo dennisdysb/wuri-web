@@ -1003,6 +1003,10 @@
         '<line x1="' + (lx - hw) + '" y1="' + (ly + hh / 3) + '" x2="' + (lx + hw) + '" y2="' + (ly + hh / 3) + '"/></g>';
     }
     rooms.forEach(function (r) {
+      if (r.ex) { /* 户外排除块：虚线淡填、不显名 */
+        s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" fill="var(--paper-2)" fill-opacity="0.4" stroke="var(--faint)" stroke-dasharray="' + (W / 90) + '" stroke-width="' + (W / 260) + '"/>';
+        return;
+      }
       s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" fill="var(--paper-2)" stroke="var(--line)" stroke-width="' + (W / 260) + '"/>' +
         '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" fill="var(--ink-2)" font-family="var(--serif)">' + esc(r.name || '') + '</text>';
     });
@@ -1377,6 +1381,10 @@
       else s += '<rect x="' + tr.x + '" y="' + tr.y + '" width="' + tr.w + '" height="' + tr.h + '" style="fill:var(--paper-2)" stroke="var(--line-soft)"/>';
     }
     if (L.rooms) rooms.forEach(function (r) {
+      if (r.ex) { /* 户外排除块：报告里只留虚线轮廓，无名无面积 */
+        s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" style="fill:none;stroke:var(--faint)" stroke-dasharray="' + (W / 90) + '" stroke-width="' + (W / 260) + '"/>';
+        return;
+      }
       s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" style="fill:var(--paper-2);stroke:var(--line)" stroke-width="' + (W / 260) + '"/>' +
         (L.roomNames && r.name ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" style="fill:var(--ink-2)" font-family="var(--serif)">' + esc(r.name) + '</text>' : '') +
         (L.dims ? '<text x="' + (r.x + r.w - fs * 0.3) + '" y="' + (r.y + r.h - fs * 0.3) + '" text-anchor="end" font-size="' + (fs * 0.62) + '" style="fill:var(--muted)">' + (Math.round(r.w * r.h * mpu * mpu * 10) / 10) + '㎡</text>' : '');
