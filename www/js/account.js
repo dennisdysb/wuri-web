@@ -17,10 +17,11 @@
   var API = 'https://pay.shengboyu.ca';
   function $(id) { return document.getElementById(id); }
   function T(k) { return window.t ? window.t(k) : k; }
-  function TF(fmt) {
-    var a = [fmt], i;
+  function TF(key) {
+    /* i18n.tf 吃的是已译格式串（既有口径 tf(t('key'), …)），先经 T() 取串再套参数 */
+    var a = [T(key)], i;
     for (i = 1; i < arguments.length; i++) a.push(arguments[i]);
-    return window.tf ? window.tf.apply(null, a) : fmt;
+    return window.tf ? window.tf.apply(null, a) : a[0];
   }
   function toastMsg(m) {
     var t = document.getElementById('wuri-ai-toast');
@@ -1188,14 +1189,18 @@
   function init() {
     bind();
     render();
-    /* 后端总开关：关 → 隐藏入口、停同步（令牌保留，恢复后可续） */
-    api('/api/account/config', { auth: false }).then(function (r) {
-      if (r.body && r.body.ok) {
-        state.enabled = !!r.body.enabled;
-        lsSet(K.cfg, state.enabled ? '1' : '0');
-        render();
-      }
-    }).catch(function () {});
+    /* 后端总开关：关 → 隐藏入口、停同步（令牌保留，恢复后可续）。弱网首拉失败 3 秒后重试一次，
+       再失败就等下次打开（曾缓存 enabled 的老用户不受影响，卡片先按缓存显示）。 */
+    var cfgTry = function (again) {
+      api('/api/account/config', { auth: false }).then(function (r) {
+        if (r.body && r.body.ok) {
+          state.enabled = !!r.body.enabled;
+          lsSet(K.cfg, state.enabled ? '1' : '0');
+          render();
+        } else if (again) setTimeout(function () { cfgTry(false); }, 3000);
+      }).catch(function () { if (again) setTimeout(function () { cfgTry(false); }, 3000); });
+    };
+    cfgTry(true);
     if (state.token) {
       refreshEntitlement();
       refreshUsage();
