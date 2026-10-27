@@ -372,12 +372,15 @@ var Meditation = (function () {
    * 本相位口令跳过、不叠响、不延迟补响——间隔磬优先。振动是独立无声通道，
    * 不受让行影响。暂停/停止即停播并回零、不留尾音。
    * 会话已播时长（sess）只为预测间隔磬时刻：开始/重开清零，暂停折算、继续接续，
-   * 与原生服务/降级定时器同口径（两路间隔磬都按已播时长每 INTERVAL_SEC 一鸣）。 */
+   * 与原生服务/降级定时器同口径（两路间隔磬都按已播时长每 INTERVAL_SEC 一鸣）。
+   * 2026-10-27 二次换素材：首版单字（各约 0.54s）真机评「话不自然」，换 C 单字
+   * 改良版（放慢 0.70–0.72＋省略号柔化收尾＋淡入淡出，0.57–0.86s）同名替换，
+   * 引用 ?v=2、MED_CACHE 升 v4 强制全端换新；引擎逻辑零改动。 */
   var CUE_VOICE_SRC = {
-    inhale: 'audio/meditation/cue-xi.mp3?v=1',
-    exhale: 'audio/meditation/cue-hu.mp3?v=1',
-    holdIn: 'audio/meditation/cue-ting.mp3?v=1',
-    holdOut: 'audio/meditation/cue-ting.mp3?v=1'
+    inhale: 'audio/meditation/cue-xi.mp3?v=2',
+    exhale: 'audio/meditation/cue-hu.mp3?v=2',
+    holdIn: 'audio/meditation/cue-ting.mp3?v=2',
+    holdOut: 'audio/meditation/cue-ting.mp3?v=2'
   };
   var CUE_WORD = { inhale: '吸', exhale: '呼', holdIn: '停', holdOut: '停' };
   var cue = { els: {}, last: '', plays: 0, skips: 0 };
