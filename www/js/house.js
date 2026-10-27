@@ -981,11 +981,12 @@
   /* 详情页户型缩略：真实 plan（房间轮廓＋九宫虚线＋立极＋大门标），与编辑器同数据 */
   function planThumb(plan, fx) {
     if (!plan) return '';
-    var rooms = plan.rooms || [], tr = plan.trace && plan.trace.rect;
-    if (!rooms.length && !tr) return '';
+    var rooms = plan.rooms || [], walls = plan.walls || [], tr = plan.trace && plan.trace.rect;
+    if (!rooms.length && !walls.length && !tr) return '';
     var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     function ext(x, y) { if (x < x0) x0 = x; if (y < y0) y0 = y; if (x > x1) x1 = x; if (y > y1) y1 = y; }
     rooms.forEach(function (r) { ext(r.x, r.y); ext(r.x + r.w, r.y + r.h); });
+    walls.forEach(function (w) { ext(w.x1, w.y1); ext(w.x2, w.y2); });
     if (tr) { ext(tr.x, tr.y); ext(tr.x + tr.w, tr.y + tr.h); }
     if (x1 <= x0 || y1 <= y0) return '';
     var m = Math.max(x1 - x0, y1 - y0) * 0.06 + 0.2;
@@ -1009,6 +1010,9 @@
       }
       s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" fill="var(--paper-2)" stroke="var(--line)" stroke-width="' + (W / 260) + '"/>' +
         '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" fill="var(--ink-2)" font-family="var(--serif)">' + esc(r.name || '') + '</text>';
+    });
+    walls.forEach(function (w) {
+      s += '<line x1="' + w.x1 + '" y1="' + w.y1 + '" x2="' + w.x2 + '" y2="' + w.y2 + '" stroke="var(--ink-2)" stroke-width="' + (W / 200) + '" stroke-linecap="round"/>';
     });
     (plan.fixtures || []).forEach(function (f) {
       if (f.type !== 'door') return;
@@ -1368,11 +1372,12 @@
       rooms: true, fixtures: true, dims: true, overlay: 'fx', palNames: true,
       roomNames: true, traceBg: true, ovOpacity: 0.55
     }, plan.layers || {});
-    var rooms = plan.rooms || [], tr = plan.trace && plan.trace.rect;
-    if (!rooms.length && !tr) return '';
+    var rooms = plan.rooms || [], walls = plan.walls || [], tr = plan.trace && plan.trace.rect;
+    if (!rooms.length && !walls.length && !tr) return '';
     var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
     function ext(x, y) { if (x < x0) x0 = x; if (y < y0) y0 = y; if (x > x1) x1 = x; if (y > y1) y1 = y; }
     rooms.forEach(function (r) { ext(r.x, r.y); ext(r.x + r.w, r.y + r.h); });
+    walls.forEach(function (w) { ext(w.x1, w.y1); ext(w.x2, w.y2); });
     if (tr) { ext(tr.x, tr.y); ext(tr.x + tr.w, tr.y + tr.h); }
     var liji = plan.liji || { x: (x0 + x1) / 2, y: (y0 + y1) / 2 };
     ext(liji.x, liji.y);
@@ -1395,6 +1400,9 @@
         return;
       }
       s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" style="fill:var(--paper-2);stroke:var(--line)" stroke-width="' + (W / 260) + '"/>';
+    });
+    if (L.rooms) walls.forEach(function (w) {
+      s += '<line x1="' + w.x1 + '" y1="' + w.y1 + '" x2="' + w.x2 + '" y2="' + w.y2 + '" style="stroke:var(--ink-2)" stroke-width="' + (W / 220) + '" stroke-linecap="round"/>';
     });
     /* 叠盘透明拆分（与编辑器同口径）：胶囊底＝填充层走 ovOpacity，线与字保持清晰 */
     var op = L.ovOpacity == null ? 0.55 : L.ovOpacity;
