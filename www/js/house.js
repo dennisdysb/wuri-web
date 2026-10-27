@@ -401,7 +401,8 @@
   /* ---------------- 视图开关 ---------------- */
   var S = {
     curHouse: 0, curFloor: 0, cat: 'all', editing: false, editRes: 0,
-    returnToDetail: false, viewerPhoto: 0, pickSit: null, measOpen: false
+    returnToDetail: false, viewerPhoto: 0, pickSit: null, measOpen: false,
+    shownPhotos: [], viewerList: [], viewerIdx: 0, viewerURL: '', reportURLs: []
   };
   function openList() {
     var v = $('view-houses'); if (!v) return;
@@ -1125,6 +1126,7 @@
     }).join('');
     var shown = S.cat === 'all' ? photos : photos.filter(function (p) { return p.cat === S.cat; });
     shown = shown.slice().sort(function (a, b) { return b.ts - a.ts; });
+    S.shownPhotos = shown;
     box.innerHTML = '<div class="card-title">' + esc(T('hd_photos_title')) + '</div>' +
       '<div class="hd-cats">' + chips + '</div>' +
       '<div class="hd-wall" id="hd-wall"></div>' +
@@ -1155,19 +1157,48 @@
     $('hd-add-cam').addEventListener('click', function () { pendingGuide = null; var c = $('hd-file-cam'); if (c) c.click(); });
     $('hd-add-alb').addEventListener('click', function () { pendingGuide = null; var a = $('hd-file-alb'); if (a) a.click(); });
   }
+  /* 查看器（第二批 B 补左右切换）：列表＝当前墙面显示顺序（详情分类或报告照片墙），
+   * 左右钮/滑动/方向键翻页，钳制不循环；删除后就近落到相邻张，删空自动关。 */
   function openViewer(p) {
-    S.viewerPhoto = p.id;
+    var list = (S.shownPhotos && S.shownPhotos.length) ? S.shownPhotos : [p];
+    var idx = -1;
+    list.forEach(function (x, i) { if (x.id === p.id) idx = i; });
+    if (idx < 0) { list = [p]; idx = 0; }
+    S.viewerList = list.slice();
+    S.viewerIdx = idx;
     var v = $('hd-viewer'); if (!v) return;
-    var img = $('hd-viewer-img');
-    img.src = URL.createObjectURL(p.blob);
-    $('hd-viewer-cap').textContent = catName(p.cat) + ' · ' + fmtDT(p.ts);
     v.hidden = false;
+    viewerShow();
+  }
+  function viewerShow() {
+    var p = S.viewerList[S.viewerIdx];
+    if (!p) { closeViewer(); return; }
+    S.viewerPhoto = p.id;
+    var img = $('hd-viewer-img'); if (!img) return;
+    if (S.viewerURL) URL.revokeObjectURL(S.viewerURL);
+    S.viewerURL = URL.createObjectURL(p.blob);
+    img.src = S.viewerURL;
+    var n = S.viewerList.length;
+    $('hd-viewer-cap').textContent = catName(p.cat) + ' · ' + fmtDT(p.ts) +
+      (n > 1 ? '（' + (S.viewerIdx + 1) + ' / ' + n + '）' : '');
+    var pv = $('hd-viewer-prev'), nx = $('hd-viewer-next');
+    if (pv) pv.classList.toggle('off', S.viewerIdx <= 0);
+    if (nx) nx.classList.toggle('off', S.viewerIdx >= n - 1);
+  }
+  function viewerNav(d) {
+    var ni = S.viewerIdx + d;
+    if (ni < 0 || ni >= S.viewerList.length) return;
+    S.viewerIdx = ni;
+    viewerShow();
   }
   function closeViewer() {
     var v = $('hd-viewer'); if (v) v.hidden = true;
     var img = $('hd-viewer-img');
-    if (img && img.src) { URL.revokeObjectURL(img.src); img.removeAttribute('src'); }
+    if (img) img.removeAttribute('src');
+    if (S.viewerURL) { URL.revokeObjectURL(S.viewerURL); S.viewerURL = ''; }
     S.viewerPhoto = 0;
+    S.viewerList = [];
+    S.viewerIdx = 0;
   }
 
   function renderGuide(h, photos, guideRec) {
@@ -1192,6 +1223,298 @@
         var c = $('hd-file-cam'); if (c) c.click();
       });
     });
+  }
+
+  /* ---------------- 勘宅报告（第二批 B） ----------------
+   * 结构：档案头＋定稿坐向与来源＋飞星盘图＋住户命卦表＋测量记录要目＋
+   * 各层叠图＋照片墙＋备注＋落款。叠图口径与编辑器同源（定稿投影、九宫以
+   * 立极为心、图层开关从各层 plan.layers 取舍）；导出走系统打印、入 Pro。 */
+  var DIR8 = { '北': 0, '东北': 45, '东': 90, '东南': 135, '南': 180, '西南': 225, '西': 270, '西北': 315 };
+  var DIR8_NAMES = ['北', '东北', '东', '东南', '南', '西南', '西', '西北'];
+  function reportPeriod() {
+    var F = window.WuriSoulFs;
+    try { if (window.__wuriFs2) return __wuriFs2.state().period; } catch (e) {}
+    return F ? F.periodFromYear(new Date().getFullYear()) : 9;
+  }
+  function screenCellOf(dirName, facingDeg) {
+    var th = DIR8[dirName];
+    if (th === undefined || facingDeg == null) return null;
+    var d = (th - facingDeg) * Math.PI / 180;
+    return { col: 1 + Math.round(Math.sin(d)), row: 1 - Math.round(Math.cos(d)) };
+  }
+  function fxChartFor(fx) {
+    var F = window.WuriSoulFs;
+    if (!F || !fx) return null;
+    try {
+      var p = reportPeriod();
+      return { chart: F.buildChart(1864 + (p - 1) * 20 + 10, fx.sitting), period: p };
+    } catch (e) { return null; }
+  }
+  function bzFanFor(fx) {
+    var F = window.WuriSoulFs;
+    if (!F || !fx) return null;
+    try { return F.palacesFor(F.houseGua(fx.sitting)); } catch (e) { return null; }
+  }
+  function fixMetaHtml(fx) {
+    var meta = [];
+    if (fx.point === 'manual') meta.push(esc(TF(T('hd_fix_from_manual'), fmtDT(fx.ts))));
+    else if (fx.point) meta.push(esc(TF(T('hd_fix_from'), pointName(fx.point), fmtDT(fx.ts))));
+    else meta.push(esc(TF(T('hd_fix_from'), T('hd_point_none'), fmtDT(fx.ts))));
+    meta.push(fx.decl != null && isFinite(fx.decl)
+      ? esc(TF(T('hd_fix_decl'), fmtDecl(fx.decl))) : esc(T('hd_fix_decl_na')));
+    meta.push(fx.gps ? 'GPS ' + fx.gps.lat.toFixed(4) + ', ' + fx.gps.lon.toFixed(4) : 'GPS —');
+    if (fx.accDeg != null && isFinite(fx.accDeg)) meta.push(esc(TF(T('hd_fix_acc'), Math.round(fx.accDeg * 10) / 10)));
+    return meta.join('<br>');
+  }
+  function reportChartHtml(fxc, fx) {
+    if (!fxc || !fxc.chart) return '';
+    var chart = fxc.chart, per = fxc.period;
+    var pNames = String(T('fs2_period_name')).split('|');
+    var faceDir = DIR8_NAMES[Math.round(norm360(fx.facingDeg) / 45) % 8];
+    var cells = chart.palaces.map(function (pl) {
+      var isC = pl.key === 'center';
+      var cell = isC ? { col: 1, row: 1 } : screenCellOf(pl.direction, fx.facingDeg);
+      if (!cell) return '';
+      var st = isC
+        ? '<small>' + esc(T('hpe_period')) + '</small>' + pl.period
+        : '<small>' + esc(T('fs2_mtn')) + '</small>' + (pl.mountain === per ? '<span class="w">' + pl.mountain + '</span>' : pl.mountain) +
+          ' <small>' + esc(T('fs2_water')) + '</small>' + (pl.water === per ? '<span class="w">' + pl.water + '</span>' : pl.water);
+      return '<div class="hdr-g9' + (!isC && pl.direction === faceDir ? ' face' : '') +
+        '" style="grid-row:' + (cell.row + 1) + ';grid-column:' + (cell.col + 1) + '">' +
+        '<span class="pg">' + esc(txs(pl.name)) + esc(T('hpe_palace_suffix')) + '</span>' +
+        '<span class="st">' + st + '</span></div>';
+    }).join('');
+    return '<section class="card"><div class="card-title">' + esc(T('hdr_chart_title')) + '</div>' +
+      '<div class="hdr-chart"><div class="hdr-chart-hd">' +
+      '<div class="hdr-chart-t">' + esc(TF(T('hdr_chart_head'), pNames[per - 1] || (per + ''), fx.sitting, fx.facing)) + '</div>' +
+      '<div class="hdr-chart-s">' + esc(T('hdr_chart_sub')) + '</div></div>' +
+      '<div class="hdr-grid9">' + cells + '</div>' +
+      '<div class="hdr-chart-ft">' + esc(txs(chart.label)) + ' · ' + esc(txs(chart.formation)) + '</div>' +
+      '</div></section>';
+  }
+  function reportResHtml(rs) {
+    var F = window.WuriSoulFs;
+    var rows = rs.map(function (r) {
+      var meta = [relName(r.rel), r.gender ? T(r.gender === 'male' ? 'fs2_male' : 'fs2_female') : '', birthText(r)]
+        .filter(Boolean).join(' · ');
+      var lucky = '';
+      if (F && r.birthYear && r.gender) {
+        try {
+          var life = F.lifeGua(r.birthYear, r.gender);
+          var pals = F.palacesFor(life).filter(function (p) { return p.star && p.star.kind === 'auspicious'; });
+          var order = ['生气', '天医', '延年', '伏位'];
+          pals.sort(function (a, b) {
+            var ia = order.indexOf(txs(a.star.name)), ib = order.indexOf(txs(b.star.name));
+            return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib);
+          });
+          if (pals.length) lucky = '<p class="hdr-res-lucky"><b>' + esc(T('hdr_c_lucky')) + '</b>：' +
+            pals.map(function (p) { return esc(txs(p.star.name)) + ' · ' + esc(txs(p.direction)); }).join('　') + '</p>';
+        } catch (e) {}
+      }
+      return '<div class="hdr-res-row"><div class="hdr-res-top">' +
+        '<span class="hdr-res-name">' + esc(r.name) + '</span>' + guaHtml(r) + '</div>' +
+        (meta ? '<p class="hdr-res-meta">' + esc(meta) + (r.note ? ' · ' + esc(r.note) : '') + '</p>' : '') +
+        lucky + '</div>';
+    }).join('');
+    return '<section class="card"><div class="card-title">' + esc(T('hdr_res_title')) + '</div>' +
+      (rs.length ? rows : '<p class="hd-note">' + esc(T('hdr_res_none')) + '</p>') + '</section>';
+  }
+  function reportMeasHtml(ms, fx) {
+    var rows = ms.map(function (m) {
+      var meta = [fmtDT(m.ts)];
+      if (m.decl != null && isFinite(m.decl)) meta.push(esc(TF(T('hd_m_decl'), fmtDecl(m.decl))));
+      if (m.gps) meta.push('GPS ' + m.gps.lat.toFixed(4) + ', ' + m.gps.lon.toFixed(4));
+      if (m.accDeg != null && isFinite(m.accDeg)) meta.push('±' + (Math.round(m.accDeg * 10) / 10) + '°');
+      if (fx && !m.fixed) meta.push(esc(TF(T('hd_m_diff'), Math.round(angDiff(m.facingDeg, fx.facingDeg) * 10) / 10)));
+      return '<div class="hd-log"><div class="hd-log-top">' +
+        '<span class="hd-log-deg">' + fmtDeg(m.facingDeg) + '°</span>' +
+        '<span class="hd-log-mtn">' + esc(m.facing) + esc(T('hd_mtn_suffix')) + '</span>' +
+        (m.point ? '<span class="hd-log-pt">' + esc(pointName(m.point)) + '</span>'
+                  : '<span class="hd-log-pt">' + esc(T('hd_point_none')) + '</span>') +
+        (m.fixed ? '<span class="hd-chip done">' + esc(T('hd_fixed_chip')) + '</span>' : '') +
+        '</div><p class="hd-log-meta">' + meta.join(' · ') + '</p></div>';
+    }).join('');
+    return '<section class="card"><div class="card-title">' + esc(T('hdr_meas_title')) + '</div>' +
+      (ms.length ? rows : '<p class="hd-note">' + esc(T('hd_no_meas')) + '</p>') + '</section>';
+  }
+  /* 报告叠图：与编辑器同几何（extent→立极→九宫格），图层从 plan.layers 取舍 */
+  function planReportSVG(plan, fx, fxc, fan, photos) {
+    if (!plan) return '';
+    var L = Object.assign({
+      rooms: true, fixtures: true, dims: true, overlay: 'fx', palNames: true,
+      roomNames: true, traceBg: true, ovOpacity: 0.92
+    }, plan.layers || {});
+    var rooms = plan.rooms || [], tr = plan.trace && plan.trace.rect;
+    if (!rooms.length && !tr) return '';
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    function ext(x, y) { if (x < x0) x0 = x; if (y < y0) y0 = y; if (x > x1) x1 = x; if (y > y1) y1 = y; }
+    rooms.forEach(function (r) { ext(r.x, r.y); ext(r.x + r.w, r.y + r.h); });
+    if (tr) { ext(tr.x, tr.y); ext(tr.x + tr.w, tr.y + tr.h); }
+    var liji = plan.liji || { x: (x0 + x1) / 2, y: (y0 + y1) / 2 };
+    ext(liji.x, liji.y);
+    var m = Math.max(x1 - x0, y1 - y0) * 0.06 + 0.2;
+    x0 -= m; y0 -= m; x1 += m; y1 += m;
+    var W = x1 - x0, H = y1 - y0, fs = W / 15, mpu = plan.mPerUnit || 1;
+    var s = '<svg viewBox="' + x0 + ' ' + y0 + ' ' + W + ' ' + H + '" width="100%" style="display:block" aria-hidden="true">';
+    if (tr) {
+      var bg = '';
+      if (L.traceBg && plan.trace.photoId && photos) {
+        var tp = photos.filter(function (p) { return p.id === plan.trace.photoId; })[0];
+        if (tp) { bg = URL.createObjectURL(tp.blob); S.reportURLs.push(bg); }
+      }
+      if (bg) s += '<image href="' + bg + '" x="' + tr.x + '" y="' + tr.y + '" width="' + tr.w + '" height="' + tr.h + '" opacity="' + (plan.trace.opacity == null ? 0.62 : plan.trace.opacity) + '" preserveAspectRatio="none"/>';
+      else s += '<rect x="' + tr.x + '" y="' + tr.y + '" width="' + tr.w + '" height="' + tr.h + '" style="fill:var(--paper-2)" stroke="var(--line-soft)"/>';
+    }
+    if (L.rooms) rooms.forEach(function (r) {
+      s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" style="fill:var(--paper-2);stroke:var(--line)" stroke-width="' + (W / 260) + '"/>' +
+        (L.roomNames && r.name ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" style="fill:var(--ink-2)" font-family="var(--serif)">' + esc(r.name) + '</text>' : '') +
+        (L.dims ? '<text x="' + (r.x + r.w - fs * 0.3) + '" y="' + (r.y + r.h - fs * 0.3) + '" text-anchor="end" font-size="' + (fs * 0.62) + '" style="fill:var(--muted)">' + (Math.round(r.w * r.h * mpu * mpu * 10) / 10) + '㎡</text>' : '');
+    });
+    if (fx && L.overlay !== 'none') {
+      var hw = Math.max(liji.x - x0, x1 - liji.x, W * 0.2), hh = Math.max(liji.y - y0, y1 - liji.y, H * 0.2);
+      var gx = liji.x - hw, gy = liji.y - hh, gw = hw * 2, gh = hh * 2, cw = gw / 3, ch = gh / 3;
+      var op = L.ovOpacity == null ? 0.92 : L.ovOpacity;
+      s += '<g opacity="' + op + '"><g style="stroke:var(--gold)" stroke-width="' + (W / 300) + '" stroke-dasharray="' + (W / 60) + ' ' + (W / 90) + '" opacity=".6">' +
+        '<line x1="' + (gx + cw) + '" y1="' + gy + '" x2="' + (gx + cw) + '" y2="' + (gy + gh) + '"/>' +
+        '<line x1="' + (gx + cw * 2) + '" y1="' + gy + '" x2="' + (gx + cw * 2) + '" y2="' + (gy + gh) + '"/>' +
+        '<line x1="' + gx + '" y1="' + (gy + ch) + '" x2="' + (gx + gw) + '" y2="' + (gy + ch) + '"/>' +
+        '<line x1="' + gx + '" y1="' + (gy + ch * 2) + '" x2="' + (gx + gw) + '" y2="' + (gy + ch * 2) + '"/></g>';
+      function capText(px, py, txt, hot) {
+        var fsS = fs * 0.66, capW = txt.length * fsS * 0.62 + fs * 0.55;
+        return '<g><rect x="' + (px + cw - capW - fs * 0.2) + '" y="' + (py + ch - fsS * 1.75) + '" width="' + capW + '" height="' + (fsS * 1.42) + '" rx="' + (fs * 0.24) + '"' +
+          ' style="fill:' + (hot ? 'var(--gold)' : 'var(--card)') + ';stroke:var(--line)" stroke-width="' + (W / 420) + '"/>' +
+          '<text x="' + (px + cw - fs * 0.2 - capW / 2) + '" y="' + (py + ch - fsS * 0.68) + '" text-anchor="middle" font-size="' + fsS + '"' +
+          ' style="fill:' + (hot ? 'var(--card)' : 'var(--ink)') + '">' + esc(txt) + '</text></g>';
+      }
+      if (L.overlay === 'fx' && fxc && fxc.chart) {
+        fxc.chart.palaces.forEach(function (pl) {
+          var isC = pl.key === 'center';
+          var cell = isC ? { col: 1, row: 1 } : screenCellOf(pl.direction, fx.facingDeg);
+          if (!cell) return;
+          var px = gx + cw * cell.col, py = gy + ch * cell.row;
+          if (L.palNames) s += '<text x="' + (px + fs * 0.24) + '" y="' + (py + fs * 0.88) + '" font-size="' + (fs * 0.6) + '" style="fill:var(--gold-deep)">' + esc(txs(pl.name)) + esc(T('hpe_palace_suffix')) + '</text>';
+          var txt = isC ? T('hpe_period') + ' ' + pl.period
+            : T('hpe_mtn_s') + pl.mountain + ' ' + T('hpe_wtr_s') + pl.water;
+          s += capText(px, py, txt, !isC && (pl.mountain === fxc.period || pl.water === fxc.period));
+        });
+      } else if (L.overlay === 'bz' && fan) {
+        fan.forEach(function (pl) {
+          var cell = screenCellOf(pl.direction, fx.facingDeg);
+          if (!cell) return;
+          var px = gx + cw * cell.col, py = gy + ch * cell.row;
+          if (L.palNames) s += '<text x="' + (px + fs * 0.24) + '" y="' + (py + fs * 0.88) + '" font-size="' + (fs * 0.6) + '" style="fill:var(--gold-deep)">' + esc(txs(pl.name)) + esc(T('hpe_palace_suffix')) + '</text>';
+          s += capText(px, py, txs(pl.star.name), pl.star.kind === 'auspicious');
+        });
+      }
+      s += '</g>';
+    }
+    if (L.fixtures) (plan.fixtures || []).forEach(function (f) {
+      var lab = T('hpe_fix_' + f.type);
+      if (lab === 'hpe_fix_' + f.type) lab = f.type;
+      s += '<circle cx="' + f.x + '" cy="' + f.y + '" r="' + (W / 110) + '" style="fill:var(--gold)"/>' +
+        '<text x="' + f.x + '" y="' + (f.y - W / 60) + '" text-anchor="middle" font-size="' + (fs * 0.55) + '" style="fill:var(--ink-2)">' + esc(txs(lab)) + '</text>';
+    });
+    if (fx) {
+      s += '<circle cx="' + liji.x + '" cy="' + liji.y + '" r="' + (W / 70) + '" fill="none" style="stroke:var(--gold)" stroke-width="' + (W / 200) + '"/>' +
+        '<text x="' + liji.x + '" y="' + (liji.y + W / 38) + '" text-anchor="middle" font-size="' + (fs * 0.55) + '" style="fill:var(--gold-deep)">' + esc(T('hpe_liji')) + '</text>' +
+        '<text x="' + ((x0 + x1) / 2) + '" y="' + (y0 + fs * 1.15) + '" text-anchor="middle" font-size="' + fs + '" style="fill:var(--gold-deep)">' + esc(TF(T('hd_plan_facing'), fx.facing)) + '</text>';
+    }
+    return s + '</svg>';
+  }
+  function renderReport(hid) {
+    var body = $('hdr-body'); if (!body) return;
+    S.reportURLs.forEach(function (u) { URL.revokeObjectURL(u); });
+    S.reportURLs = [];
+    Promise.all([
+      db.houses.get(hid),
+      db.measurements.where('houseId').equals(hid).toArray(),
+      db.residents.where('houseId').equals(hid).toArray(),
+      db.floors.where('houseId').equals(hid).toArray(),
+      db.photos.where('houseId').equals(hid).toArray()
+    ]).then(function (r) {
+      var h = r[0]; if (!h) return;
+      var ms = r[1].slice().sort(function (a, b) { return b.ts - a.ts; });
+      var fx = ms.filter(function (m) { return m.fixed; })[0] || null;
+      var rs = r[2].slice().sort(function (a, b) { return a.id - b.id; });
+      var fls = r[3].slice().sort(function (a, b) { return (a.sort || 0) - (b.sort || 0) || a.id - b.id; });
+      var photos = r[4].slice().sort(function (a, b) { return b.ts - a.ts; });
+      var fxc = fxChartFor(fx), fan = bzFanFor(fx);
+      return Promise.all(fls.map(function (f) { return db.plans.get(f.id); })).then(function (plans) {
+        var cli = [h.client, h.phone].filter(Boolean).join(' · ');
+        var html = '<section class="card">' +
+          '<div class="hd-name">' + esc(h.name || T('hd_unnamed')) + '</div>' +
+          (h.address ? '<div class="hd-kv" style="margin-top:8px"><span class="k">' + esc(T('hd_f_address')) + '</span><span>' + esc(h.address) + '</span></div>' : '') +
+          (cli ? '<div class="hd-kv"><span class="k">' + esc(T('hd_f_client')) + '</span><span>' + esc(cli) + '</span></div>' : '') +
+          (h.surveyDate ? '<div class="hd-kv"><span class="k">' + esc(T('hd_f_date')) + '</span><span>' + esc(h.surveyDate) + '</span></div>' : '') +
+          (fx
+            ? '<div class="hd-fix-main"><div class="hd-fix-big">' + esc(TF(T('hd_sit_face_big'), fx.sitting, fx.facing)) + '</div>' +
+              '<div class="hd-fix-deg">' + esc(TF(T('hd_fix_deg'), fmtDeg(fx.facingDeg), dir8Name(fx.facingDeg))) + '</div>' +
+              '<p class="hd-fix-meta">' + fixMetaHtml(fx) + '</p></div>'
+            : '<p class="hd-note" style="margin-top:10px">' + esc(T('hdr_no_fixed')) + '</p>') +
+          '</section>';
+        html += reportChartHtml(fxc, fx);
+        html += reportResHtml(rs);
+        html += reportMeasHtml(ms, fx);
+        html += '<section class="card"><div class="card-title">' + esc(T('hdr_floors_title')) + '</div>' +
+          fls.map(function (f, i) {
+            var svg = planReportSVG(plans[i], fx, fxc, fan, photos);
+            return '<div class="hdr-floor-t">' + esc(f.name) + '</div>' +
+              (svg ? '<div class="hdr-planbox">' + svg + '</div>'
+                   : '<p class="hd-note">' + esc(T('hdr_no_plan')) + '</p>');
+          }).join('') +
+          '<p class="hd-note" style="margin-top:10px">' + esc(T('hdr_floors_note')) + '</p></section>';
+        html += '<section class="card"><div class="card-title">' + esc(T('hdr_photos_title')) + '</div>' +
+          (photos.length ? '<div class="hd-wall" id="hdr-wall"></div>'
+                         : '<p class="hd-note">' + esc(T('hdr_photos_none')) + '</p>') + '</section>';
+        var noteLines = String(h.note || '').split(/\n+/).map(function (x) { return x.trim(); }).filter(Boolean);
+        var spread = '';
+        if (fx && ms.length >= 2) {
+          var mx = 0;
+          ms.forEach(function (a) { ms.forEach(function (b) { mx = Math.max(mx, angDiff(a.facingDeg, b.facingDeg)); }); });
+          spread = TF(T('hdr_spread'), ms.length, Math.round(mx * 10) / 10, fmtDeg(fx.facingDeg));
+        }
+        html += '<section class="card"><div class="card-title">' + esc(T('hdr_note_title')) + '</div>' +
+          (noteLines.length
+            ? '<ul class="hdr-obs">' + noteLines.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'
+            : '<p class="hd-note">' + esc(T('hdr_note_none')) + '</p>') +
+          (spread ? '<p class="hd-note" style="margin-top:8px">' + esc(spread) + '</p>' : '') +
+          '</section>';
+        html += '<div class="hdr-sign"><div class="brand">' + esc(T('hdr_sign_brand')) + '</div>' +
+          '<div class="date">' + esc(TF(T('hdr_sign_line'), fmtYMD(Date.now()))) + '</div></div>' +
+          '<p class="hdr-foot">' + esc(T('fs_foot')) + '</p>';
+        body.innerHTML = html;
+        var wall = $('hdr-wall');
+        if (wall) {
+          photos.forEach(function (p) {
+            var d = document.createElement('div');
+            d.className = 'hd-photo';
+            var img = document.createElement('img');
+            var u = URL.createObjectURL(p.blob);
+            img.src = u; img.alt = '';
+            img.addEventListener('load', function () { setTimeout(function () { URL.revokeObjectURL(u); }, 60000); });
+            var cap = document.createElement('span');
+            cap.textContent = catName(p.cat) + ' · ' + fmtDT(p.ts);
+            d.appendChild(img); d.appendChild(cap);
+            d.addEventListener('click', function () { S.shownPhotos = photos; openViewer(p); });
+            wall.appendChild(d);
+          });
+        }
+      });
+    }).catch(function () {});
+  }
+  function openReport() {
+    if (!S.curHouse) return;
+    closeDetail();
+    var v = $('view-house-report'); if (!v) return;
+    v.hidden = false;
+    window.scrollTo(0, 0);
+    renderReport(S.curHouse);
+  }
+  function closeReport() {
+    var v = $('view-house-report'); if (v) v.hidden = true;
+    S.reportURLs.forEach(function (u) { URL.revokeObjectURL(u); });
+    S.reportURLs = [];
+    if (S.curHouse) openDetail(S.curHouse);
   }
 
   /* ---------------- 接线 ---------------- */
@@ -1256,10 +1579,49 @@
     var vd = $('hd-viewer-del');
     if (vd) vd.addEventListener('click', function () {
       if (!S.viewerPhoto) return;
+      var delId = S.viewerPhoto;
       hdDlgConfirm(T('hd_confirm_del_photo')).then(function (ok) {
         if (!ok) return;
-        db.photos.delete(S.viewerPhoto).then(function () { closeViewer(); renderDetail(); });
+        db.photos.delete(delId).then(function () {
+          S.viewerList = S.viewerList.filter(function (x) { return x.id !== delId; });
+          S.shownPhotos = S.shownPhotos.filter(function (x) { return x.id !== delId; });
+          if (!S.viewerList.length) closeViewer();
+          else { if (S.viewerIdx >= S.viewerList.length) S.viewerIdx = S.viewerList.length - 1; viewerShow(); }
+          renderDetail();
+        });
       });
+    });
+    var vpv = $('hd-viewer-prev'), vnx = $('hd-viewer-next');
+    if (vpv) vpv.addEventListener('click', function () { viewerNav(-1); });
+    if (vnx) vnx.addEventListener('click', function () { viewerNav(1); });
+    var vel = $('hd-viewer');
+    if (vel) {
+      var tx0 = null;
+      vel.addEventListener('touchstart', function (e) {
+        tx0 = e.changedTouches && e.changedTouches.length ? e.changedTouches[0].clientX : null;
+      }, { passive: true });
+      vel.addEventListener('touchend', function (e) {
+        if (tx0 == null || !e.changedTouches || !e.changedTouches.length) return;
+        var dx = e.changedTouches[0].clientX - tx0;
+        tx0 = null;
+        if (Math.abs(dx) > 48) viewerNav(dx < 0 ? 1 : -1);
+      }, { passive: true });
+    }
+    document.addEventListener('keydown', function (e) {
+      var v = $('hd-viewer');
+      if (!v || v.hidden) return;
+      if (e.key === 'ArrowLeft') viewerNav(-1);
+      else if (e.key === 'ArrowRight') viewerNav(1);
+      else if (e.key === 'Escape') closeViewer();
+    });
+    var rop = $('hd-report-open');
+    if (rop) rop.addEventListener('click', function () { openReport(); });
+    var rbk = $('hdr-back');
+    if (rbk) rbk.addEventListener('click', function () { closeReport(); });
+    var rex = $('hdr-export');
+    if (rex) rex.addEventListener('click', function () {
+      if (!isPro()) { requirePro(); return; }
+      window.print();
     });
     bindFileInputs();
     var pr = $('fs-point-row'); if (pr) pr.hidden = false;
@@ -1289,6 +1651,7 @@
     onCompassBack: onCompassBack,
     openList: openList,
     openDetail: openDetail,
+    openReport: openReport,
     exportBackup: exportBackup,
     db: db,
     syncMirror: syncMirror

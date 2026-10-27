@@ -151,11 +151,80 @@
       }).join('');
     }
   }
+  /* 八宅住户直选联动（第二批 B）：选宅→坐向取该宅定稿；选住户→命卦/游年
+   * 按住户生日（birthYear/gender）带入并切「命卦游年」视图；手输路径保留。
+   * 数据源为家宅档案 Dexie（__wuriHouse.db 的 houses/residents/measurements）。 */
+  var BZLINK = { houseId: 0, residents: [] };
+  function houseDb() { return window.__wuriHouse && __wuriHouse.db ? __wuriHouse.db : null; }
+  function bzFillResidents() {
+    var sel = $('fs2-bz-resident');
+    if (!sel) return;
+    var db = houseDb();
+    if (!db || !BZLINK.houseId) {
+      sel.innerHTML = '<option value="">' + esc(T('fs2_pick_manual')) + '</option>';
+      return;
+    }
+    db.residents.where('houseId').equals(BZLINK.houseId).toArray().then(function (rs) {
+      BZLINK.residents = rs.slice().sort(function (a, b) { return a.id - b.id; });
+      if (!BZLINK.residents.length) {
+        sel.innerHTML = '<option value="">' + esc(T('fs2_res_none')) + '</option>';
+        return;
+      }
+      sel.innerHTML = '<option value="">' + esc(T('fs2_pick_manual')) + '</option>' +
+        BZLINK.residents.map(function (r) {
+          return '<option value="' + r.id + '">' + esc(r.name) + '</option>';
+        }).join('');
+    }).catch(function () {});
+  }
+  function bzFillHouses() {
+    var sel = $('fs2-bz-house');
+    if (!sel) return;
+    var db = houseDb();
+    if (!db) { sel.innerHTML = '<option value="">' + esc(T('fs2_house_none')) + '</option>'; return; }
+    db.houses.orderBy('created').toArray().then(function (hs) {
+      sel.innerHTML = '<option value="">' + esc(T('fs2_pick_manual')) + '</option>' +
+        hs.map(function (h) { return '<option value="' + h.id + '">' + esc(h.name || T('hd_unnamed')) + '</option>'; }).join('');
+      sel.value = BZLINK.houseId ? String(BZLINK.houseId) : '';
+      if (BZLINK.houseId && !hs.some(function (h) { return h.id === BZLINK.houseId; })) BZLINK.houseId = 0;
+    }).catch(function () {});
+  }
+  function bzPickHouse(id) {
+    BZLINK.houseId = id || 0;
+    bzFillResidents();
+    if (!BZLINK.houseId) return;
+    var db = houseDb();
+    if (!db) return;
+    db.measurements.where('houseId').equals(BZLINK.houseId).toArray().then(function (ms) {
+      var fx = ms.filter(function (m) { return m.fixed; })[0];
+      if (fx && fx.sitting && MTN_NAMES.indexOf(fx.sitting) >= 0) {
+        BZ.sitting = fx.sitting;
+        BZ.sittingDirty = true;
+        var sel = $('fs2-bz-sitting');
+        if (sel) { fillSittingSelect(sel, BZ.sitting); sel.value = BZ.sitting; }
+        bzSave();
+        renderBazhai();
+      }
+    }).catch(function () {});
+  }
+  function bzPickResident(id) {
+    var r = BZLINK.residents.filter(function (x) { return x.id === id; })[0];
+    if (!r || !r.birthYear || !r.gender) return;
+    BZ.year = Math.min(2100, Math.max(1900, r.birthYear | 0));
+    BZ.gender = r.gender === 'female' ? 'female' : 'male';
+    BZ.view = 'life';
+    var yi = $('fs2-bz-year'); if (yi) yi.value = BZ.year;
+    segSet($('fs2-bz-gender'), BZ.gender, 'data-g');
+    segSet($('fs2-bz-viewseg'), BZ.view, 'data-v');
+    bzSave();
+    renderBazhai();
+  }
   function openBazhai() {
     if (!gated()) { if (window.WuriPro) WuriPro.requirePro('fengshui'); return; }
     var v = $('view-bazhai');
     if (!v) return;
     bzSyncArch();
+    bzFillHouses();
+    bzFillResidents();
     var yi = $('fs2-bz-year'); if (yi) yi.value = BZ.year;
     segSet($('fs2-bz-gender'), BZ.gender, 'data-g');
     segSet($('fs2-bz-viewseg'), BZ.view, 'data-v');
@@ -325,6 +394,10 @@
     bindSeg('fs2-bz-viewseg', 'data-v', function (v2) { BZ.view = v2; bzSave(); renderBazhai(); });
     var bs = $('fs2-bz-sitting');
     if (bs) bs.addEventListener('change', function () { BZ.sitting = bs.value; BZ.sittingDirty = true; bzSave(); renderBazhai(); });
+    var bh = $('fs2-bz-house');
+    if (bh) bh.addEventListener('change', function () { bzPickHouse(parseInt(bh.value, 10) || 0); });
+    var br = $('fs2-bz-resident');
+    if (br) br.addEventListener('change', function () { bzPickResident(parseInt(br.value, 10) || 0); });
     var bm = $('fs2-bz-measure'); if (bm) bm.addEventListener('click', gotoCompass);
 
     var xs = $('fs2-xk-sitting');

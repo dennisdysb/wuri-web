@@ -1258,6 +1258,15 @@
         <label class="fs2-lab" data-i18n="fs2_sitting">房屋坐向</label>
         <select class="fs2-inp" id="fs2-bz-sitting"></select>
       </div>
+      <div class="fs2-row">
+        <label class="fs2-lab" data-i18n="fs2_pick_house">选宅档案</label>
+        <select class="fs2-inp" id="fs2-bz-house"></select>
+      </div>
+      <div class="fs2-row">
+        <label class="fs2-lab" data-i18n="fs2_pick_res">选住户</label>
+        <select class="fs2-inp" id="fs2-bz-resident"></select>
+      </div>
+      <p class="fs2-note" data-i18n="fs2_link_hint">从档案选住户，命卦与游年按住户生日自动带入；坐向取该宅定稿。也可继续手输。</p>
       <p class="fs2-arch-hint" id="fs2-bz-noarch" hidden><span data-i18n="fs2_noarch">尚未存坐向档案，当前为手选。</span><a id="fs2-bz-measure" data-i18n="fs2_measure">去罗盘量 ›</a></p>
       <p class="fs2-note" data-i18n="fs2_bz_method">命卦按年份数字根简法推算（通行简法之一）；生于立春之前者，请按上一年输入。</p>
     </section>
@@ -1361,6 +1370,7 @@
     <section class="card" id="hd-photos"></section>
     <section class="card" id="hd-guide"></section>
 
+    <button class="hd-more" id="hd-report-open" data-i18n="hdr_open">生成勘宅报告 ›</button>
     <button class="hd-more danger" id="hd-del-house" data-i18n="hd_del_house">删除本档案</button>
 
     <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
@@ -1412,9 +1422,27 @@
     <input type="file" id="hpe-file" accept="image/*" hidden>
   </main>
 
+  <!-- ============ 勘宅报告（家宅档案第二批 B：结构化报告页，导出入 Pro） ============ -->
+  <main id="view-house-report" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('hdr-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="hdr-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="hdr_title">勘宅报告</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div class="hdr-acts">
+      <button class="btn primary" id="hdr-export"><span data-i18n="hdr_export">导出完整报告</span><span class="hd-pro" data-i18n="fs_pro">高级版</span></button>
+    </div>
+    <p class="hd-note hdr-print-hint" data-i18n="hdr_export_hint">导出走系统打印：可选「另存为 PDF」，或打印后长图保存。本页排版即出图版式。</p>
+    <div id="hdr-body"></div>
+    <div class="tab-spacer"></div>
+  </main>
+
   <!-- 照片大图 -->
   <div id="hd-viewer" hidden>
     <img id="hd-viewer-img" alt="">
+    <button class="hd-viewer-nav prev" id="hd-viewer-prev" aria-label="上一张">‹</button>
+    <button class="hd-viewer-nav next" id="hd-viewer-next" aria-label="下一张">›</button>
     <div class="hd-viewer-bar">
       <span id="hd-viewer-cap"></span>
       <span class="hd-viewer-btns">
