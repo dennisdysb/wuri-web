@@ -760,7 +760,14 @@
       return api('/api/sync/push', { method: 'POST', body: { items: chunk.map(stripInternal) } }).then(function (r) {
         if (r.status === 401) { on401(); throw new Error('unauthorized'); }
         if (!r.body || !r.body.ok) throw new Error('push_failed');
-        (r.body.applied || []).forEach(function (a) { applied[a.dataset + '|' + a.key] = 1; });
+        if (Array.isArray(r.body.applied)) {
+          r.body.applied.forEach(function (a) { applied[a.dataset + '|' + a.key] = 1; });
+        } else {
+          /* 兼容计数形态：除 rejected 外视为已应用（影子未确认的下轮会经 pull 对齐） */
+          var rej = {};
+          (r.body.rejected || []).forEach(function (x) { rej[(x && x.key) || x] = 1; });
+          chunk.forEach(function (it) { if (!rej[it.key]) applied[stampKey(it.dataset, it.key)] = 1; });
+        }
         return nextChunk();
       });
     }
