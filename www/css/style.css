@@ -2699,8 +2699,7 @@ body.sky-red .hpe-hint b { color:#eda88f; }
 .hpe-floorrow.on { color:var(--gold-deep); font-weight:600; }
 .hpe-floorrow .ck { margin-left:auto; color:var(--gold-deep); }
 
-/* ============ 户型编辑 · 模拟人生式托盘（2026-10-26 操作层重做） ============
- * 零模式：底部横滑托盘（房间地砖预设＋构件＋工具），拖放为主、点选点放兜底；
+/* ============ 户型编辑 · 模拟人生式托盘（2026-10-26 操作层重做） ===== * 零模式：底部横滑托盘（房间地砖预设＋构件＋工具），拖放为主、点选点放兜底；
  * 房间按类型主题色浅染成「地砖」，九宫/罗盘/八宅皆为叠层；构件带砂/水小签。
  * 配色全走主题变量与 color-mix 变量混合，红光自 body.sky-red 变量链与全局
  * svg 滤镜接管，本段零写死色。 */
@@ -2782,3 +2781,27 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 .hpe-tpl b { font-family:var(--serif); font-size:.95rem; letter-spacing:.14em; color:var(--ink); font-weight:600; display:block; }
 .hpe-tpl span { font-size:.7rem; color:var(--faint); }
 .hpe-tpl:active { border-color:var(--gold); background:var(--gold-wash); }
+=======
+/* ================= 账号与云同步（v1） =================
+ * 颜色全走主题变量（日/夜/红光 body.sky-red 覆写变量链自动接管），无写死色。 */
+.acct-card .acct-state { font-family:var(--sans); font-size:12px; letter-spacing:0; color:var(--muted);
+  border:1px solid var(--line); border-radius:999px; padding:2px 10px; }
+.acct-card .acct-state.on { color:var(--teal-deep); background:var(--teal-wash); border-color:transparent; }
+.acct-card .dv { text-align:right; word-break:break-all; }
+.acct-divider { height:1px; background:var(--line-soft); margin:12px 0 2px; }
+.acct-link-danger { color:var(--cinnabar); font-size:13px; background:none; border:none; padding:6px 0 2px; cursor:pointer; font-family:var(--sans); }
+.btn.ghost { border-style:dashed; color:var(--ink-2); background:transparent; }
+.btn.acct-danger { color:var(--cinnabar); border-color:var(--cinnabar); background:transparent; }
+.acct-inp { width:100%; border:1px solid var(--line); background:var(--bg); color:var(--ink);
+  border-radius:10px; padding:12px; font-size:15px; font-family:var(--sans); box-sizing:border-box; }
+.acct-inp::placeholder { color:var(--faint); }
+.acct-code-row { display:flex; gap:10px; margin-top:10px; }
+.acct-code-row .acct-inp { flex:1; min-width:0; }
+.acct-code-row .acct-code { letter-spacing:.35em; font-size:17px; text-align:center; }
+.acct-code-row .btn { flex:none; white-space:nowrap; }
+.acct-warn { background:var(--cinnabar-wash); border:1px solid var(--line-soft); border-radius:10px;
+  padding:10px 12px; font-size:12.5px; line-height:1.6; color:var(--ink-2); margin-top:12px; }
+.acct-consent { display:flex; gap:8px; align-items:flex-start; margin-top:14px; font-size:13px;
+  line-height:1.6; color:var(--ink-2); cursor:pointer; }
+.acct-consent input { margin-top:3px; flex:none; }
+#backup-acct-line { cursor:pointer; }

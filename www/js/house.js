@@ -93,6 +93,17 @@
    * fixtures[],trace{photoId,corners,rect,opacity},liji{x,y},layers{}}，
    * 一层一图、floorId 为主键；编辑器在 js/house-editor.js，共用本 db 实例。 */
   db.version(3).stores({ plans: 'floorId, houseId' });
+  /* v4（账号云同步）：各表加 uuid 索引。同步层（js/account.js）首次运行时给每行
+   * 回写 uuid 作跨设备身份，本地数字 id 永不出设备；本地读写口径不变，uuid 仅附加字段。 */
+  db.version(4).stores({
+    houses: '++id, created, uuid',
+    floors: '++id, houseId, uuid',
+    measurements: '++id, houseId, ts, uuid',
+    photos: '++id, houseId, ts, uuid',
+    residents: '++id, houseId, uuid',
+    guides: 'houseId, uuid',
+    plans: 'floorId, houseId, uuid'
+  });
 
   var ARCH_KEY = 'wuri_fs_house_v1';
   var MIG_KEY = 'wuri_hd_migrated_v1';

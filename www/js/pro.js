@@ -29,6 +29,8 @@ var WuriPro = (function () {
   function isPro() {
     if (window.IS_FREE_BUILD) return false;
     try { if (localStorage.getItem('wuri_pro_redeem') === '1') return true; } catch (e) {}
+    /* 账号权益（js/account.js 登录后按服务端权益回写；与本机兑换态取并集，互不冲掉） */
+    try { if (localStorage.getItem('wuri_acct_pro_v1') === '1') return true; } catch (e) {}
     if (isTestBuild()) {
       try { if (localStorage.getItem(TEST_KEY) === '1') return true; } catch (e) {}
     }

@@ -73,6 +73,7 @@ const ASSETS = [
   './js/iztro.min.js',
   './js/jingwen.js',
   './js/offline-download.js',
+  './js/account.js',
   './js/liuyao.js',
   './js/ln-plugin.js',
   './js/lunar.min.js',
