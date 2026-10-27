@@ -1030,7 +1030,8 @@
       '<span class="hd-ftab add" id="hd-fl-add">' + esc(T('hd_floor_add')) + '</span></div>' +
       (cur ? '<div class="hd-floor-mgmt"><span>' + esc(cur.name) + '</span>' +
         '<span class="hd-link" id="hd-fl-rename">' + esc(T('hd_rename')) + '</span>' +
-        (fls.length > 1 ? '<span class="hd-link danger" id="hd-fl-del">' + esc(T('hd_del_floor')) + '</span>' : '') +
+        (fls.length > 1 ? '<span class="hd-link danger" id="hd-fl-del">' + esc(T('hd_del_floor')) + '</span>'
+                        : '<span class="hd-link danger" id="hd-fl-clear">' + esc(T('hpe_clear_floor')) + '</span>') +
         '</div>' : '') +
       '<div class="hd-planprev"><div id="hd-plan-box"><div class="hd-plan-empty">' + esc(T('hd_plan_empty')) + '</div></div>' +
       '<div class="hd-plan-cap"><span>' + esc(cur ? cur.name : '') + '</span><span>' + esc(T('hd_plan_cap')) + '</span></div></div>' +
@@ -1073,6 +1074,14 @@
           .then(function () { return db.plans.delete(cur.id); })
           .then(function () { return db.floors.delete(cur.id); })
           .then(function () { S.curFloor = 0; renderDetail(); });
+      });
+    });
+    /* 仅剩一层：删不了层，改走清空本层户型（删该层 plan，楼层/测量/照片保留） */
+    var cf = $('hd-fl-clear');
+    if (cf) cf.addEventListener('click', function () {
+      hdDlgConfirm(TF(T('hpe_confirm_clear_floor'), cur.name), T('hpe_clear_btn')).then(function (ok) {
+        if (!ok) return;
+        db.plans.delete(cur.id).then(function () { renderDetail(); });
       });
     });
   }
@@ -1357,7 +1366,7 @@
     if (!plan) return '';
     var L = Object.assign({
       rooms: true, fixtures: true, dims: true, overlay: 'fx', palNames: true,
-      roomNames: true, traceBg: true, ovOpacity: 0.92
+      roomNames: true, traceBg: true, ovOpacity: 0.55
     }, plan.layers || {});
     var rooms = plan.rooms || [], tr = plan.trace && plan.trace.rect;
     if (!rooms.length && !tr) return '';
@@ -1385,25 +1394,25 @@
         s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" style="fill:none;stroke:var(--faint)" stroke-dasharray="' + (W / 90) + '" stroke-width="' + (W / 260) + '"/>';
         return;
       }
-      s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" style="fill:var(--paper-2);stroke:var(--line)" stroke-width="' + (W / 260) + '"/>' +
-        (L.roomNames && r.name ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" style="fill:var(--ink-2)" font-family="var(--serif)">' + esc(r.name) + '</text>' : '') +
-        (L.dims ? '<text x="' + (r.x + r.w - fs * 0.3) + '" y="' + (r.y + r.h - fs * 0.3) + '" text-anchor="end" font-size="' + (fs * 0.62) + '" style="fill:var(--muted)">' + (Math.round(r.w * r.h * mpu * mpu * 10) / 10) + '㎡</text>' : '');
+      s += '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" style="fill:var(--paper-2);stroke:var(--line)" stroke-width="' + (W / 260) + '"/>';
     });
+    /* 叠盘透明拆分（与编辑器同口径）：胶囊底＝填充层走 ovOpacity，线与字保持清晰 */
+    var op = L.ovOpacity == null ? 0.55 : L.ovOpacity;
+    var lineOp = Math.min(1, op + 0.45);
     if (fx && (L.overlay === 'fx' || L.overlay === 'bz')) {
       var hw = Math.max(liji.x - x0, x1 - liji.x, W * 0.2), hh = Math.max(liji.y - y0, y1 - liji.y, H * 0.2);
       var gx = liji.x - hw, gy = liji.y - hh, gw = hw * 2, gh = hh * 2, cw = gw / 3, ch = gh / 3;
-      var op = L.ovOpacity == null ? 0.92 : L.ovOpacity;
-      s += '<g opacity="' + op + '"><g style="stroke:var(--gold)" stroke-width="' + (W / 300) + '" stroke-dasharray="' + (W / 60) + ' ' + (W / 90) + '" opacity=".6">' +
+      s += '<g><g style="stroke:var(--gold)" stroke-width="' + (W / 300) + '" stroke-dasharray="' + (W / 60) + ' ' + (W / 90) + '" opacity="' + (lineOp * 0.65).toFixed(2) + '">' +
         '<line x1="' + (gx + cw) + '" y1="' + gy + '" x2="' + (gx + cw) + '" y2="' + (gy + gh) + '"/>' +
         '<line x1="' + (gx + cw * 2) + '" y1="' + gy + '" x2="' + (gx + cw * 2) + '" y2="' + (gy + gh) + '"/>' +
         '<line x1="' + gx + '" y1="' + (gy + ch) + '" x2="' + (gx + gw) + '" y2="' + (gy + ch) + '"/>' +
         '<line x1="' + gx + '" y1="' + (gy + ch * 2) + '" x2="' + (gx + gw) + '" y2="' + (gy + ch * 2) + '"/></g>';
       function capText(px, py, txt, hot) {
         var fsS = fs * 0.66, capW = txt.length * fsS * 0.62 + fs * 0.55;
-        return '<g><rect x="' + (px + cw - capW - fs * 0.2) + '" y="' + (py + ch - fsS * 1.75) + '" width="' + capW + '" height="' + (fsS * 1.42) + '" rx="' + (fs * 0.24) + '"' +
+        return '<g><rect x="' + (px + cw - capW - fs * 0.2) + '" y="' + (py + ch - fsS * 1.75) + '" width="' + capW + '" height="' + (fsS * 1.42) + '" rx="' + (fs * 0.24) + '" opacity="' + op + '"' +
           ' style="fill:' + (hot ? 'var(--gold)' : 'var(--card)') + ';stroke:var(--line)" stroke-width="' + (W / 420) + '"/>' +
           '<text x="' + (px + cw - fs * 0.2 - capW / 2) + '" y="' + (py + ch - fsS * 0.68) + '" text-anchor="middle" font-size="' + fsS + '"' +
-          ' style="fill:' + (hot ? 'var(--card)' : 'var(--ink)') + '">' + esc(txt) + '</text></g>';
+          ' style="fill:' + (hot ? 'var(--gold-deep)' : 'var(--ink)') + '">' + esc(txt) + '</text></g>';
       }
       if (L.overlay === 'fx' && fxc && fxc.chart) {
         fxc.chart.palaces.forEach(function (pl) {
@@ -1427,6 +1436,12 @@
       }
       s += '</g>';
     }
+    /* 房名/面积最后绘：恒在叠盘之上（与编辑器同口径） */
+    if (L.rooms) rooms.forEach(function (r) {
+      if (r.ex) return;
+      s += (L.roomNames && r.name ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" style="fill:var(--ink-2)" font-family="var(--serif)">' + esc(r.name) + '</text>' : '') +
+        (L.dims ? '<text x="' + (r.x + r.w - fs * 0.3) + '" y="' + (r.y + r.h - fs * 0.3) + '" text-anchor="end" font-size="' + (fs * 0.62) + '" style="fill:var(--muted)">' + (Math.round(r.w * r.h * mpu * mpu * 10) / 10) + '㎡</text>' : '');
+    });
     if (L.fixtures) (plan.fixtures || []).forEach(function (f) {
       var lab = T('hpe_fix_' + f.type);
       if (lab === 'hpe_fix_' + f.type) lab = f.type;
@@ -1660,6 +1675,9 @@
     }
   }
   init();
+
+  /* 编辑器（独立 IIFE）复用自家确认/输入弹层，避免原生弹窗 */
+  window.__wuriDlg = { confirm: hdDlgConfirm, prompt: hdDlgPrompt };
 
   window.__wuriHouse = {
     renderHub: renderHub,

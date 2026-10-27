@@ -2533,8 +2533,9 @@ body.sky-red .hpe-north .cap b { color:#eda88f; }
 .hpe-roomrect.sel { fill:var(--gold-wash); stroke:var(--gold); }
 [data-theme="night"] .hpe-roomrect.sel { fill:#1c1507; }
 .hpe-roomrect.trace { fill:transparent; stroke:var(--teal-deep); }
-.hpe-roomname { font-family:var(--serif); fill:var(--ink-2); letter-spacing:.08em; }
-.hpe-roomarea { fill:var(--faint); }
+.hpe-roomname { font-family:var(--serif); fill:var(--ink-2); letter-spacing:.08em;
+  paint-order:stroke; stroke:var(--card); stroke-width:.16em; }
+.hpe-roomarea { fill:var(--faint); paint-order:stroke; stroke:var(--card); stroke-width:.12em; }
 .hpe-hdl { fill:var(--card); stroke:var(--gold-deep); stroke-width:.09; cursor:pointer; }
 [data-theme="night"] .hpe-hdl { stroke:var(--gold); }
 body.sky-red .hpe-hdl { stroke:#eda88f; }
@@ -2685,12 +2686,12 @@ body.sky-red .hpe-hint b { color:#eda88f; }
  * 本段零写死色。 */
 #view-plan.hpe-fs { padding:0; overflow:hidden; }
 .hpe-shell { position:relative; display:flex; flex-direction:column; height:100%; background:var(--paper); }
-.hpe-topbar { flex:none; display:flex; align-items:center; gap:6px; padding:8px 10px;
+.hpe-topbar { flex:none; display:flex; align-items:center; gap:4px; padding:8px 8px;
   background:var(--card); border-bottom:1px solid var(--line); z-index:5; }
-.hpe-tbtn { flex:none; padding:6px 10px; border:1px solid var(--line); border-radius:9px;
-  background:var(--card); color:var(--ink-2); font-size:.8rem; letter-spacing:.06em; cursor:pointer; }
+.hpe-tbtn { flex:none; padding:6px 7px; border:1px solid var(--line); border-radius:9px;
+  background:var(--card); color:var(--ink-2); font-size:.76rem; letter-spacing:.02em; cursor:pointer; white-space:nowrap; }
 .hpe-tbtn.dim { color:var(--faint); border-color:var(--line-soft); }
-.hpe-fname { flex:none; max-width:32%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+.hpe-fname { flex:0 1 auto; min-width:0; max-width:30%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   padding:6px 4px; border:none; background:none; color:var(--ink);
   font-family:var(--serif); font-size:.98rem; letter-spacing:.08em; cursor:pointer; }
 .hpe-fname .hpe-caret { font-style:normal; font-size:.7rem; color:var(--faint); margin-left:3px; }
@@ -2735,6 +2736,32 @@ body.sky-red .hpe-hint b { color:#eda88f; }
  * 配色全走主题变量与 color-mix 变量混合，红光自 body.sky-red 变量链与全局
  * svg 滤镜接管，本段零写死色。 */
 .hpe-tray { flex:none; position:relative; background:var(--card); border-top:1px solid var(--line); z-index:5; }
+.hpe-tray-row { display:flex; align-items:center; gap:6px; padding-right:8px; }
+.hpe-tray-row .hpe-tray-scroll { flex:1; min-width:0; }
+.hpe-libbtn { flex:none; margin-left:10px; height:54px; min-width:62px; padding:4px 8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  border:1px solid var(--gold); border-radius:10px; background:var(--gold-wash);
+  color:var(--ink-2); font-size:.72rem; letter-spacing:.12em; cursor:pointer; font-family:var(--sans); }
+.hpe-libbtn .gic { font-size:1.05rem; line-height:1; color:var(--gold-deep); font-family:var(--serif); }
+[data-theme="night"] .hpe-libbtn .gic { color:var(--gold); }
+body.sky-red .hpe-libbtn .gic { color:#eda88f; }
+.hpe-modebtn { flex:none; height:54px; min-width:66px; padding:4px 8px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  border:1px solid var(--line); border-radius:10px; background:var(--paper-2);
+  color:var(--ink-2); font-size:.72rem; letter-spacing:.1em; cursor:pointer; font-family:var(--sans); }
+.hpe-modebtn .gic { font-size:1.05rem; line-height:1; color:var(--gold-deep); font-family:var(--serif); }
+[data-theme="night"] .hpe-modebtn .gic { color:var(--gold); }
+body.sky-red .hpe-modebtn .gic { color:#eda88f; }
+.hpe-modebtn.on { border-color:var(--gold); background:var(--gold-soft); color:var(--gold-deep); font-weight:700; }
+/* 库内 tile：touch-action none——拖出面板放件（任意方向）不被面板竖滚接管，
+ * 面板滚动走分类签/间隙与滚动条（托盘同理：其滚动轴外的拖放全归 JS） */
+#hpe-panel .hpe-tile2 { touch-action:none; }
+.hpe-libgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin:2px 0 10px; }
+.hpe-libgrid .hpe-tile2 { width:auto; }
+.hpe-libcat { font-size:.68rem; letter-spacing:.24em; color:var(--faint); margin:10px 0 5px; }
+.hpe-libcat:first-child { margin-top:2px; }
+.hpe-fl-delrow { margin-top:10px; display:flex; }
+.hpe-lrow .hpe-op.danger { margin-left:auto; flex:none; }
 .hpe-armed { padding:5px 12px 0; font-size:.72rem; color:var(--gold-deep); letter-spacing:.06em; }
 [data-theme="night"] .hpe-armed { color:var(--gold); }
 body.sky-red .hpe-armed { color:#eda88f; }
@@ -2790,7 +2817,7 @@ body.sky-red .hpe-fixsw.sha { fill:#eda88f; }
 .hpe-rose-ring { fill:none; stroke:var(--gold); opacity:.75; }
 .hpe-rose-ring.thin { stroke:var(--line); opacity:.9; }
 .hpe-rose-sec { fill:none; stroke:var(--line-soft); }
-.hpe-rose-sec.alt { fill:var(--gold); opacity:.06; stroke:var(--line-soft); }
+.hpe-rose-sec.alt { fill:var(--gold); fill-opacity:.5; stroke:var(--line-soft); }
 .hpe-rose-tick { stroke:var(--gold); opacity:.65; }
 .hpe-rose-mtn { fill:var(--ink-2); font-family:var(--serif); }
 .hpe-rose-mtn.card { fill:var(--cinnabar); font-weight:700; }
