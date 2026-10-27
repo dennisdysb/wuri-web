@@ -321,13 +321,13 @@ body::before{
 }
 .detail-row:last-child{border-bottom:none}
 .dl{color:var(--muted);flex:none}
-.pentad-card{margin:10px 0 2px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:12px;background:var(--paper-2,rgba(0,0,0,.03))}
+.pentad-card{margin:10px 0 2px;padding:10px 8px;border:1px solid var(--line-soft);border-radius:12px;background:var(--paper-2,rgba(0,0,0,.03))}
 .pentad-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
 .pentad-head span{color:var(--muted);flex:none}
 .pentad-head b{font-family:var(--serif);font-weight:700;text-align:right}
 .pentad-desc{margin-top:6px;color:var(--ink-2);line-height:1.55}
-.pentad-phases{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.pentad-chip{padding:3px 8px;border:1px solid var(--line-soft);border-radius:999px;font-size:.82rem;color:var(--muted)}
+.pentad-phases{display:flex;gap:4px;flex-wrap:nowrap;margin-top:8px}
+.pentad-chip{padding:2px 5px;border:1px solid var(--line-soft);border-radius:999px;font-size:min(.8rem,2.65vw);white-space:nowrap;flex:none;color:var(--muted)}
 .pentad-chip.on{border-color:var(--gold);color:var(--ink);background:rgba(176,141,87,.14);font-weight:700}
 .poem-card{margin:10px 0 2px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:12px;background:var(--paper-2,rgba(0,0,0,.03));cursor:pointer}
 .poem-card-title{margin-top:6px;font-family:var(--serif);font-weight:700;font-size:1.02rem}
