@@ -263,7 +263,8 @@
         var w = res[0], pw = res[1];
         var entry = {
           id: w.id, title: w.title,
-          subtitle: w.bu + (w.lei ? ' · ' + w.lei + '类' : '') + (w.dz ? ' · ' + w.dz : ''),
+          /* 分类/编号不在书头显示（2026-10-27 用户定）：随 dzMeta 交阅读器，文末一行小字交代 */
+          dzMeta: { bu: w.bu, lei: w.lei || '', dz: w.dz || '' },
           note: w.note, daozang: true, lazy: (w.volumes.length > 1),
           hasPunct: !!(pw && pw.volumes && pw.volumes.length),
           punctPartial: null,

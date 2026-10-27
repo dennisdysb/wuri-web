@@ -370,16 +370,17 @@ var JingWen = (function () {
       if (followMode && !hasAudio(id)) toggleFollow();
 
       $('#jing-title').textContent = txScript(d.title);
-      // 传本标注（如宝诰的"闾山三奶派传本、非道藏所载"）：有才显示
+      // 传本标注（如宝诰的"闾山三奶派传本、非道藏所载"）：有才显示。
+      // 道藏全集不在书头挂分类行（2026-10-27 用户定）：分类/底本移到文末一行小字
       var jsub = $('#jing-subtitle');
       if (jsub) {
-        if (d.subtitle) { jsub.textContent = txScript(d.subtitle); jsub.hidden = false; }
+        if (d.subtitle && !d.daozang) { jsub.textContent = txScript(d.subtitle); jsub.hidden = false; }
         else { jsub.hidden = true; }
       }
-      // 来源标注（道藏全藏：底本来源＋未校订＋注音口径；标点版模式换标点口径）
+      // 来源标注（精选自家口径，书头显示；道藏全集不在书头显示，文末行交代）
       var jnote = $('#jing-srcnote');
       if (jnote) {
-        if (d.note) {
+        if (d.note && !d.daozang) {
           var dzSuffix = '';
           if (d.daozang) {
             dzSuffix = d.punctMode
@@ -435,6 +436,16 @@ var JingWen = (function () {
             + '</div>';
         }
       });
+      // 道藏全集文末行（2026-10-27 用户定）：分类编号＋底本＋标点口径一行小字，
+      // 书头不再挂；标点版/原文版两形态都在（口径词随形态：机器标点/底本直出）
+      if (d.daozang && d.dzMeta) {
+        var dzm = d.dzMeta;
+        var dzMetaLine = dzm.bu + (dzm.lei ? ' · ' + dzm.lei + '类' : '') + (dzm.dz ? ' · ' + dzm.dz : '');
+        var dzModeLine = d.punctMode
+          ? '机器标点 · 未经校订' + (d.punctPartial ? '（已标 ' + d.punctPartial.done + '/' + d.punctPartial.total + ' 卷）' : '')
+          : '底本直出 · 未经校订';
+        html += '<div class="dz-endnote">' + esc(txScript(dzMetaLine + '｜底本：正统道藏涵芬楼版（Kanripo 转录）｜' + dzModeLine)) + '</div>';
+      }
       $('#jing-content').innerHTML = html;
       updateFoldBtn();
       // 恢复书签位置（如果有）
