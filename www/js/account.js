@@ -3,6 +3,9 @@
  * 用户定版五条：①赠送码/免费期不自动跟账号（服务端归集只认购买码邮箱匹配，客户端无自助绑码入口）；
  * ②无设备概念——不列设备、不设上限，仅「退出全部设备」安全出口；③v1 不做端到端加密，文案如实；
  * ④配额免费 200MB／高级版 2GB，超限只停新照片；⑤身份层只实现邮箱。
+ * v1.1（2026-10-27，用户拍板全端双登录）：在邮箱验证码之外加「用户名＋密码」——同一账号可双持两身份、
+ * 同步数据同一份（owner 键：邮箱身份用邮箱、纯用户名身份用 'user:<用户名>'）；密码只在服务端存
+ * PBKDF2 加盐哈希，客户端从不留存明文；登录方式管理在账号视图「登录方式」区（加绑/改密/加绑邮箱）。
  *
  * 架构口径：
  * - 本地永远是全量主本，云端只是副本；没登录/没网/同步失败，App 与数据都不受影响。
@@ -41,7 +44,8 @@
     pro: 'wuri_acct_pro_v1', shadow: 'wuri_acct_shadow_v1', stamps: 'wuri_acct_stamps_v1',
     last: 'wuri_acct_last_v1', migrated: 'wuri_acct_migrated_v1',
     consent: 'wuri_acct_consent_house_v1', cfg: 'wuri_acct_cfg_v1',
-    photometa: 'wuri_acct_photometa_v1', usage: 'wuri_acct_usage_v1', owner: 'wuri_acct_owner_v1'
+    photometa: 'wuri_acct_photometa_v1', usage: 'wuri_acct_usage_v1', owner: 'wuri_acct_owner_v1',
+    username: 'wuri_acct_username_v1', haspw: 'wuri_acct_haspw_v1'
   };
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
@@ -52,6 +56,8 @@
     enabled: lsGet(K.cfg) === '1',
     token: lsGet(K.token) || '',
     email: lsGet(K.email) || '',
+    username: lsGet(K.username) || '',
+    hasPw: lsGet(K.haspw) === '1',
     syncOn: lsGet(K.sync) === '1',
     running: false,
     lastEnt: 0
@@ -145,22 +151,35 @@
     if (e === 'bad_email') return T('acct_bad_email');
     if (e === 'code_invalid') return T('acct_code_bad');
     if (e === 'unauthorized') return T('acct_session_out');
+    if (e === 'bad_username') return T('acct_bad_username');
+    if (e === 'bad_password') return T('acct_bad_password');
+    if (e === 'username_taken') return T('acct_username_taken');
+    if (e === 'email_taken') return T('acct_email_taken');
+    if (e === 'bad_credentials') return T('acct_bad_credentials');
+    if (e === 'locked') return T('acct_locked');
+    if (e === 'account_not_found') return T('acct_no_account');
+    if (e === 'no_password') return T('acct_no_password');
+    if (e === 'has_username') return T('acct_has_username');
+    if (e === 'email_is_identity') return T('acct_email_identity');
     if (r && r.body && r.body.message) return r.body.message;
     return T(fallbackKey || 'acct_net_err');
   }
 
   /* ---------------- 会话 ---------------- */
-  function saveSession(token, email) {
-    state.token = token; state.email = email;
-    lsSet(K.token, token); lsSet(K.email, email);
+  function saveSession(token, email, username, hasPw) {
+    state.token = token; state.email = email || '';
+    if (username !== undefined) state.username = username || '';
+    if (hasPw !== undefined) state.hasPw = !!hasPw;
+    lsSet(K.token, token); lsSet(K.email, state.email || null);
+    lsSet(K.username, state.username || null); lsSet(K.haspw, state.hasPw ? '1' : null);
   }
   function wipeSyncState() {
     lsSet(K.shadow, null); lsSet(K.stamps, null); lsSet(K.last, null);
     lsSet(K.photometa, null); lsSet(K.usage, null); lsSet(K.migrated, null);
   }
   function clearSession(silent) {
-    state.token = ''; state.email = ''; state.syncOn = false;
-    lsSet(K.token, null); lsSet(K.email, null); lsSet(K.pro, null);
+    state.token = ''; state.email = ''; state.username = ''; state.hasPw = false; state.syncOn = false;
+    lsSet(K.token, null); lsSet(K.email, null); lsSet(K.username, null); lsSet(K.haspw, null); lsSet(K.pro, null);
     if (!silent) render();
   }
   function on401() {
@@ -951,7 +970,12 @@
     if (isLoggedIn()) {
       inEl.hidden = false; outEl.hidden = true;
       stEl.textContent = T('acct_state_in'); stEl.classList.add('on');
-      $('acct-email-mask').textContent = state.email;
+      var emRow = $('acct-email-row');
+      if (state.email) { emRow.hidden = false; $('acct-email-mask').textContent = state.email; }
+      else emRow.hidden = true;
+      var unRow = $('acct-username-row');
+      if (state.username) { unRow.hidden = false; $('acct-username').textContent = state.username; }
+      else unRow.hidden = true;
       $('acct-prow').textContent = lsGet(K.pro) === '1' ? T('acct_prow_bound') : T('acct_prow_none');
       var tg = $('acct-sync-toggle'); if (tg) tg.checked = state.syncOn;
       var usage = lsJSON(K.usage, null);
@@ -968,7 +992,7 @@
     var bs = $('backup-acct-state');
     if (bs) {
       bs.textContent = isLoggedIn()
-        ? state.email + ' · ' + (state.syncOn ? T('acct_on') : T('acct_off'))
+        ? (state.email || state.username) + ' · ' + (state.syncOn ? T('acct_on') : T('acct_off'))
         : T('acct_state_out');
     }
     renderStatus();
@@ -992,8 +1016,65 @@
     }
     render();
   }
-  function openLogin() { showOnly($('view-account-login')); var m = $('acct-login-msg'); if (m) m.textContent = ''; }
-  function openDelete() { showOnly($('view-account-delete')); var m = $('acct-del-msg'); if (m) m.textContent = ''; }
+  function setLoginTab(tab) {
+    var isE = tab === 'email';
+    $('acct-pane-email').hidden = !isE;
+    $('acct-pane-user').hidden = isE;
+    $('acct-tab-email').classList.toggle('on', isE);
+    $('acct-tab-user').classList.toggle('on', !isE);
+    if (!isE) setUserPane('login');
+  }
+  function setUserPane(pane) {
+    $('acct-user-login').hidden = pane !== 'login';
+    $('acct-user-register').hidden = pane !== 'register';
+    $('acct-user-forgot').hidden = pane !== 'forgot';
+    ['acct-user-msg', 'acct-reg-msg', 'acct-fgt-msg'].forEach(function (id) { var m = $(id); if (m) m.textContent = ''; });
+  }
+  function openLogin() {
+    showOnly($('view-account-login'));
+    setLoginTab('email');
+    var m = $('acct-login-msg'); if (m) m.textContent = '';
+    /* 上次用过的用户名带回登录框，省一次输入 */
+    var un = $('acct-uname'); if (un && state.username) un.value = state.username;
+  }
+  function openSecurity() {
+    showOnly($('view-account-security'));
+    renderSecurity();
+    refreshMe();
+  }
+  function refreshMe() {
+    if (!state.token) return;
+    api('/api/account/me').then(function (r) {
+      if (r.status === 401) { on401(); return; }
+      if (r.body && r.body.ok) {
+        state.email = r.body.email || state.email;
+        state.username = r.body.username || '';
+        state.hasPw = !!r.body.hasPassword;
+        lsSet(K.email, state.email || null); lsSet(K.username, state.username || null); lsSet(K.haspw, state.hasPw ? '1' : null);
+        renderSecurity();
+        render();
+      }
+    }).catch(function () {});
+  }
+  function renderSecurity() {
+    var sec = $('view-account-security');
+    if (!sec || sec.hidden) return;
+    $('acct-sec-email').textContent = state.email || T('acct_sec_notset');
+    $('acct-sec-username').textContent = state.username || T('acct_sec_notset');
+    $('acct-sec-binduser').hidden = !!state.username;
+    $('acct-sec-chpw').hidden = !state.hasPw;
+    var alt = $('acct-sec-chpw-alt');
+    if (alt) alt.hidden = !state.email;
+    $('acct-sec-bindemail').hidden = !!state.email;
+  }
+  function openDelete() {
+    showOnly($('view-account-delete'));
+    var emailMode = !!state.email;
+    $('acct-del-email-mode').hidden = !emailMode;
+    $('acct-del-pw-mode').hidden = emailMode;
+    var m = $('acct-del-msg'); if (m) m.textContent = '';
+    var m2 = $('acct-del-pw-msg'); if (m2) m2.textContent = '';
+  }
   function openSyncExplainer() {
     showOnly($('view-account-sync'));
     var row = $('acct-consent-row'), btn = $('acct-sync-enable');
@@ -1050,21 +1131,91 @@
     api('/api/auth/verify', { method: 'POST', auth: false, body: { email: email, code: code, label: 'web' } }).then(function (r) {
       btn.disabled = false;
       if (r.body && r.body.ok && r.body.token) {
-        var prevOwner = lsGet(K.owner);
-        if (prevOwner && prevOwner !== email) {
-          /* 换账号登录：上一账号的影子/戳记/配额账全部作废，防止串号 */
-          wipeSyncState();
-          state.syncOn = false; lsSet(K.sync, '0');
-        }
-        lsSet(K.owner, email);
-        saveSession(r.body.token, email);
-        state.syncOn = lsGet(K.sync) === '1';
-        applyEntitlement({ pro: !!r.body.pro });
-        toastMsg(T('acct_login_ok'));
-        refreshUsage();
-        if (!lsGet(K.migrated) && !state.syncOn) openSyncExplainer();
-        else { closeToMe(); if (state.syncOn) runSync(); }
-        render();
+        afterLogin(r.body, email, r.body.username || '');
+      } else {
+        msg.textContent = errText(r, 'acct_code_bad');
+      }
+    }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
+  }
+
+  /* 登录成功收口（两路共用）：owner 键＝邮箱身份用邮箱、纯用户名身份用 'user:<用户名>'；
+     换账号时上一账号的影子/戳记/配额账全部作废，防止串号（同账号两路登入 owner 相同、数据同一份）。 */
+  function afterLogin(body, email, username) {
+    var ident = email || ('user:' + String(username || '').toLowerCase());
+    var prevOwner = lsGet(K.owner);
+    if (prevOwner && prevOwner !== ident) {
+      wipeSyncState();
+      state.syncOn = false; lsSet(K.sync, '0');
+    }
+    lsSet(K.owner, ident);
+    saveSession(body.token, email || '', username || '', body.hasPassword);
+    state.syncOn = lsGet(K.sync) === '1';
+    applyEntitlement({ pro: !!body.pro });
+    toastMsg(T('acct_login_ok'));
+    refreshUsage();
+    if (!lsGet(K.migrated) && !state.syncOn) openSyncExplainer();
+    else { closeToMe(); if (state.syncOn) runSync(); }
+    render();
+  }
+  function validUsername(s) { return /^[A-Za-z][A-Za-z0-9_]{3,19}$/.test(String(s || '')); }
+
+  function doLoginUser() {
+    var username = ($('acct-uname').value || '').trim();
+    var password = $('acct-upass').value || '';
+    var msg = $('acct-user-msg');
+    if (!validUsername(username)) { msg.textContent = T('acct_bad_username'); return; }
+    if (!password) { msg.textContent = T('acct_bad_password'); return; }
+    var btn = $('acct-do-login-user'); btn.disabled = true;
+    api('/api/auth/login-username', { method: 'POST', auth: false, body: { username: username, password: password, label: 'web' } }).then(function (r) {
+      btn.disabled = false;
+      if (r.body && r.body.ok && r.body.token) {
+        $('acct-upass').value = '';
+        afterLogin(r.body, r.body.email || '', r.body.username || username);
+      } else {
+        msg.textContent = errText(r, 'acct_bad_credentials');
+      }
+    }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
+  }
+
+  function doRegisterUser() {
+    var username = ($('acct-r-uname').value || '').trim();
+    var pw1 = $('acct-r-pass1').value || '';
+    var pw2 = $('acct-r-pass2').value || '';
+    var email = ($('acct-r-email').value || '').trim().toLowerCase();
+    var msg = $('acct-reg-msg');
+    if (!validUsername(username)) { msg.textContent = T('acct_bad_username'); return; }
+    if (pw1.length < 8) { msg.textContent = T('acct_bad_password'); return; }
+    if (pw1 !== pw2) { msg.textContent = T('acct_pass_mismatch'); return; }
+    if (email && !validEmail(email)) { msg.textContent = T('acct_bad_email'); return; }
+    var body = { username: username, password: pw1, label: 'web' };
+    if (email) body.email = email;
+    var btn = $('acct-do-register'); btn.disabled = true;
+    api('/api/auth/register-username', { method: 'POST', auth: false, body: body }).then(function (r) {
+      btn.disabled = false;
+      if (r.body && r.body.ok && r.body.token) {
+        $('acct-r-pass1').value = ''; $('acct-r-pass2').value = '';
+        afterLogin(r.body, r.body.email || '', r.body.username || username);
+      } else {
+        msg.textContent = errText(r);
+      }
+    }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
+  }
+
+  function doResetPassword() {
+    var email = ($('acct-f-email').value || '').trim().toLowerCase();
+    var code = ($('acct-f-code').value || '').trim();
+    var pw = $('acct-f-pass').value || '';
+    var msg = $('acct-fgt-msg');
+    if (!validEmail(email)) { msg.textContent = T('acct_bad_email'); return; }
+    if (!/^\d{6}$/.test(code)) { msg.textContent = T('acct_code_bad'); return; }
+    if (pw.length < 8) { msg.textContent = T('acct_bad_password'); return; }
+    var btn = $('acct-do-reset'); btn.disabled = true;
+    api('/api/auth/reset-password', { method: 'POST', auth: false, body: { email: email, code: code, newPassword: pw } }).then(function (r) {
+      btn.disabled = false;
+      if (r.body && r.body.ok) {
+        $('acct-f-pass').value = ''; $('acct-f-code').value = '';
+        setUserPane('login');
+        $('acct-user-msg').textContent = T('acct_reset_done');
       } else {
         msg.textContent = errText(r, 'acct_code_bad');
       }
@@ -1087,6 +1238,93 @@
         render();
       } else if (r.status === 401) { on401(); closeToMe(); }
       else msg.textContent = errText(r, 'acct_code_bad');
+    }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
+  }
+
+  /* ---------------- 登录方式（加绑 / 改密，v1.1） ---------------- */
+  function doBindUsername() {
+    var username = ($('acct-b-uname').value || '').trim();
+    var pw1 = $('acct-b-pass1').value || '';
+    var pw2 = $('acct-b-pass2').value || '';
+    var msg = $('acct-b-msg');
+    if (!validUsername(username)) { msg.textContent = T('acct_bad_username'); return; }
+    if (pw1.length < 8) { msg.textContent = T('acct_bad_password'); return; }
+    if (pw1 !== pw2) { msg.textContent = T('acct_pass_mismatch'); return; }
+    var btn = $('acct-b-do'); btn.disabled = true;
+    api('/api/account/bind-username', { method: 'POST', body: { username: username, password: pw1 } }).then(function (r) {
+      btn.disabled = false;
+      if (r.status === 401) { on401(); closeToMe(); return; }
+      if (r.body && r.body.ok) {
+        state.username = r.body.username || username;
+        state.hasPw = true;
+        lsSet(K.username, state.username); lsSet(K.haspw, '1');
+        $('acct-b-pass1').value = ''; $('acct-b-pass2').value = '';
+        toastMsg(T('acct_binduser_ok'));
+        renderSecurity(); render();
+      } else msg.textContent = errText(r);
+    }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
+  }
+  function doChangePassword() {
+    var oldPw = $('acct-c-old').value || '';
+    var code = ($('acct-c-code').value || '').trim();
+    var newPw = $('acct-c-new').value || '';
+    var msg = $('acct-c-msg');
+    if (newPw.length < 8) { msg.textContent = T('acct_bad_password'); return; }
+    var body = { newPassword: newPw };
+    if (oldPw) body.oldPassword = oldPw;
+    else if (/^\d{6}$/.test(code)) body.code = code;
+    else { msg.textContent = T('acct_chpw_need'); return; }
+    var btn = $('acct-c-do'); btn.disabled = true;
+    api('/api/account/change-password', { method: 'POST', body: body }).then(function (r) {
+      btn.disabled = false;
+      if (r.status === 401) { on401(); closeToMe(); return; }
+      if (r.body && r.body.ok) {
+        $('acct-c-old').value = ''; $('acct-c-new').value = ''; $('acct-c-code').value = '';
+        toastMsg(T('acct_chpw_ok'));
+      } else msg.textContent = errText(r, 'acct_code_bad');
+    }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
+  }
+  function doBindEmail() {
+    var email = ($('acct-e-email').value || '').trim().toLowerCase();
+    var code = ($('acct-e-code').value || '').trim();
+    var msg = $('acct-e-msg');
+    if (!validEmail(email)) { msg.textContent = T('acct_bad_email'); return; }
+    if (!/^\d{6}$/.test(code)) { msg.textContent = T('acct_code_bad'); return; }
+    var btn = $('acct-e-do'); btn.disabled = true;
+    api('/api/account/bind-email', { method: 'POST', body: { email: email, code: code } }).then(function (r) {
+      btn.disabled = false;
+      if (r.status === 401) { on401(); closeToMe(); return; }
+      if (r.body && r.body.ok) {
+        state.email = email;
+        lsSet(K.email, email);
+        /* 纯用户名账号绑上已验证邮箱后：若该邮箱名下有购买码，权益随之归集 */
+        toastMsg(T('acct_bindemail_ok'));
+        refreshEntitlement();
+        renderSecurity(); render();
+      } else msg.textContent = errText(r, 'acct_code_bad');
+    }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
+  }
+
+  /* 纯用户名账号删号：密码＋打字输「删除」二次确认（无邮箱可发码） */
+  function doDeletePw() {
+    var pw = $('acct-del-pass').value || '';
+    var confirmText = ($('acct-del-confirm').value || '').trim();
+    var msg = $('acct-del-pw-msg');
+    if (!pw) { msg.textContent = T('acct_bad_password'); return; }
+    if (confirmText !== T('acct_del_word')) { msg.textContent = T('acct_del_confirm_bad'); return; }
+    var btn = $('acct-del-pw-btn'); btn.disabled = true;
+    api('/api/account/delete', { method: 'POST', body: { password: pw, confirm: confirmText } }).then(function (r) {
+      btn.disabled = false;
+      if (r.body && r.body.ok) {
+        $('acct-del-pass').value = '';
+        clearSession(true);
+        wipeSyncState();
+        lsSet(K.owner, null); lsSet(K.consent, null); lsSet(K.sync, '0');
+        toastMsg(T('acct_del_done'));
+        closeToMe();
+        render();
+      } else if (r.status === 401) { on401(); closeToMe(); }
+      else msg.textContent = errText(r, 'acct_bad_credentials');
     }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
   }
 
@@ -1123,6 +1361,31 @@
       requestCode(state.email, $('acct-del-get'), $('acct-del-msg'), 'acct_del_get');
     });
     on('acct-del-btn', 'click', doDelete);
+    /* v1.1：用户名密码 */
+    on('acct-tab-email', 'click', function () { setLoginTab('email'); });
+    on('acct-tab-user', 'click', function () { setLoginTab('user'); });
+    on('acct-do-login-user', 'click', doLoginUser);
+    on('acct-to-register', 'click', function () { setUserPane('register'); });
+    on('acct-to-forgot', 'click', function () { setUserPane('forgot'); });
+    on('acct-to-login', 'click', function () { setUserPane('login'); });
+    on('acct-to-login2', 'click', function () { setUserPane('login'); });
+    on('acct-do-register', 'click', doRegisterUser);
+    on('acct-f-get', 'click', function () {
+      requestCode(($('acct-f-email').value || '').trim().toLowerCase(), $('acct-f-get'), $('acct-fgt-msg'), 'acct_get_code');
+    });
+    on('acct-do-reset', 'click', doResetPassword);
+    on('acct-security-open', 'click', openSecurity);
+    on('acct-sec-back', 'click', closeToMe);
+    on('acct-b-do', 'click', doBindUsername);
+    on('acct-c-get', 'click', function () {
+      requestCode(state.email, $('acct-c-get'), $('acct-c-msg'), 'acct_get_code');
+    });
+    on('acct-c-do', 'click', doChangePassword);
+    on('acct-e-get', 'click', function () {
+      requestCode(($('acct-e-email').value || '').trim().toLowerCase(), $('acct-e-get'), $('acct-e-msg'), 'acct_get_code');
+    });
+    on('acct-e-do', 'click', doBindEmail);
+    on('acct-del-pw-btn', 'click', doDeletePw);
     on('acct-sync-toggle', 'change', function () {
       var tg = $('acct-sync-toggle');
       if (tg.checked) {

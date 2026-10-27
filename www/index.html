@@ -855,12 +855,13 @@
       <div id="acct-out">
         <p class="hint" data-i18n="acct_out_hint">登录后可开启云同步：家宅档案、排盘记录、经文书签换设备不丢失。不登录也能照常使用全部本地功能。</p>
         <div class="btn-row">
-          <button class="btn primary" id="acct-login-open" data-i18n="acct_login_btn">邮箱登录 / 注册</button>
+          <button class="btn primary" id="acct-login-open" data-i18n="acct_login_btn">登录 / 注册</button>
         </div>
-        <p class="hint small" data-i18n="acct_out_note">只需邮箱＋验证码，没有密码，不用记。</p>
+        <p class="hint small" data-i18n="acct_out_note">两种登录任选其一：邮箱＋验证码，或用户名＋密码。</p>
       </div>
       <div id="acct-in" hidden>
-        <div class="detail-row"><span class="dl" data-i18n="acct_email">邮箱</span><span class="dv" id="acct-email-mask"></span></div>
+        <div class="detail-row" id="acct-email-row"><span class="dl" data-i18n="acct_email">邮箱</span><span class="dv" id="acct-email-mask"></span></div>
+        <div class="detail-row" id="acct-username-row" hidden><span class="dl" data-i18n="acct_username">用户名</span><span class="dv" id="acct-username"></span></div>
         <div class="detail-row"><span class="dl" data-i18n="acct_prow">高级版</span><span class="dv" id="acct-prow"></span></div>
         <div class="acct-divider"></div>
         <div class="row-between">
@@ -879,6 +880,7 @@
           <button class="btn ghost" id="acct-logout-all" data-i18n="acct_logout_all">退出全部设备</button>
         </div>
         <p class="hint small" data-i18n="acct_warn">退出登录不会删除本机数据；关掉云同步后，新数据只存本机。云端副本可在下方删除。</p>
+        <button class="acct-link" id="acct-security-open" data-i18n="acct_security_link">登录方式（用户名 / 密码 / 邮箱）›</button>
         <button class="acct-link-danger" id="acct-delete-open" data-i18n="acct_delete_link">删除账号与全部云端数据 ›</button>
       </div>
     </section>
@@ -1104,10 +1106,10 @@
     <section class="card">
       <div class="card-title">账号与云同步（可选功能）</div>
       <div class="privacy">
-        <p>本应用可以不用账号使用，全部功能与数据默认只保存在你的设备上。只有当你用邮箱登录、并主动打开「云同步」开关后，以下数据才会经加密连接传到云端保存一份：家宅档案（含住户、测量记录、户型图与照片）、经文书签／高亮／心得、八字／紫微／六爻历史、修行打卡与纪念日、应用设置。</p>
+        <p>本应用可以不用账号使用，全部功能与数据默认只保存在你的设备上。只有当你登录账号、并主动打开「云同步」开关后，以下数据才会经加密连接传到云端保存一份：家宅档案（含住户、测量记录、户型图与照片）、经文书签／高亮／心得、八字／紫微／六爻历史、修行打卡与纪念日、应用设置。</p>
         <p>云同步的用途只有两个：换设备时恢复你的数据；让高级版跟随账号，换设备登录即可使用。我们不把这些数据用于广告、画像或任何与上述无关的用途，不向第三方出售或分享（云服务商仅提供存储与传输，见下）。</p>
         <p>你可以随时：关掉云同步（之后的新数据只存本机）；在账号页导出你的全部云端数据；删除账号并删除全部云端数据（页内操作、立即生效）。退出登录和删除云端数据都不会动你本机上的数据。</p>
-        <p>登录只需邮箱与验证码，本应用不设密码。验证码邮件由邮件服务商 Resend 发送；云端存储与传输由 Cloudflare 提供，数据经加密连接（HTTPS）传输、由服务商静态加密保存，可能存储在加拿大境外。本应用不做端到端加密，即服务商在技术上能够接触所存内容，请知悉。删除账号时，高级版的激活记录会去除绑定邮箱、只保留去标识的记录。</p>
+        <p>登录有两种方式任选其一：邮箱＋验证码（不设密码），或用户名＋密码。选密码方式时，密码在服务器上只保存加盐哈希（PBKDF2 强哈希），我们无法看到、也不会保存你的密码原文；请不要与其他重要网站共用同一密码。验证码邮件由邮件服务商 Resend 发送；云端存储与传输由 Cloudflare 提供，数据经加密连接（HTTPS）传输、由服务商静态加密保存，可能存储在加拿大境外。本应用不做端到端加密，即服务商在技术上能够接触所存内容，请知悉。删除账号时，高级版的激活记录会去除绑定邮箱、只保留去标识的记录。</p>
         <p>家宅档案中包含客户的姓名、电话、住址与照片：将这类档案随云同步上传前，请确认已取得相关客户同意。</p>
       </div>
     </section>
@@ -1129,28 +1131,153 @@
     <div class="tab-spacer"></div>
   </main>
 
-  <!-- ============ 账号 · 登录 ============ -->
+  <!-- ============ 账号 · 登录（双法：邮箱验证码 / 用户名密码） ============ -->
   <main id="view-account-login" class="view" hidden>
     <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('acct-login-back').click()" title="返回">‹</button>
     <header class="appbar brand">
       <button class="mini-btn" id="acct-login-back">‹ 返回</button>
-      <h1 class="brand-title" data-i18n="acct_login_title">邮箱登录</h1>
+      <h1 class="brand-title" data-i18n="acct_login_title">账号登录</h1>
       <span class="appbar-spacer"></span>
     </header>
     <section class="card">
       <div class="card-title" data-i18n="acct_login_card">登录 / 注册</div>
-      <p class="hint" data-i18n="acct_login_hint">输入邮箱，我们发一封带 6 位验证码的邮件给你。第一次登录即自动注册，没有密码这一步。</p>
-      <div style="margin-top:14px">
-        <input class="acct-inp" id="acct-email" type="email" data-i18n-ph="acct_email_ph" placeholder="你的邮箱" autocomplete="email">
+      <div class="acct-tabs">
+        <button class="acct-tab on" id="acct-tab-email" data-i18n="acct_tab_email">邮箱验证码</button>
+        <button class="acct-tab" id="acct-tab-user" data-i18n="acct_tab_user">用户名＋密码</button>
+      </div>
+      <div id="acct-pane-email">
+        <p class="hint" data-i18n="acct_login_hint">输入邮箱，我们发一封带 6 位验证码的邮件给你。第一次登录即自动注册。</p>
+        <div style="margin-top:14px">
+          <input class="acct-inp" id="acct-email" type="email" data-i18n-ph="acct_email_ph" placeholder="你的邮箱" autocomplete="email">
+        </div>
+        <div class="acct-code-row">
+          <input class="acct-inp acct-code" id="acct-code" inputmode="numeric" autocomplete="one-time-code" data-i18n-ph="acct_code_ph" placeholder="验证码" maxlength="6">
+          <button class="btn" id="acct-get-code" data-i18n="acct_get_code">获取验证码</button>
+        </div>
+        <p class="hint small" data-i18n="acct_code_note">验证码 10 分钟内有效。没收到先看垃圾箱，再点重新发送（60 秒后可重发）。</p>
+        <p class="hint" id="acct-login-msg"></p>
+        <div class="btn-row"><button class="btn primary" id="acct-do-login" style="flex:1" data-i18n="acct_do_login">登录</button></div>
+      </div>
+      <div id="acct-pane-user" hidden>
+        <div id="acct-user-login">
+          <div style="margin-top:14px">
+            <input class="acct-inp" id="acct-uname" type="text" data-i18n-ph="acct_username_ph" placeholder="用户名" autocomplete="username" autocapitalize="none">
+          </div>
+          <div style="margin-top:10px">
+            <input class="acct-inp" id="acct-upass" type="password" data-i18n-ph="acct_password_ph" placeholder="密码" autocomplete="current-password">
+          </div>
+          <p class="hint" id="acct-user-msg"></p>
+          <div class="btn-row"><button class="btn primary" id="acct-do-login-user" style="flex:1" data-i18n="acct_do_login">登录</button></div>
+          <div class="acct-linkrow">
+            <button class="acct-textbtn" id="acct-to-register" data-i18n="acct_to_register">没有账号？注册 ›</button>
+            <button class="acct-textbtn" id="acct-to-forgot" data-i18n="acct_forgot">忘记密码</button>
+          </div>
+        </div>
+        <div id="acct-user-register" hidden>
+          <div style="margin-top:14px">
+            <input class="acct-inp" id="acct-r-uname" type="text" data-i18n-ph="acct_username_ph" placeholder="用户名" autocomplete="username" autocapitalize="none">
+          </div>
+          <p class="hint small" data-i18n="acct_reg_user_rule">4–20 位，字母开头，只含字母、数字、下划线</p>
+          <div style="margin-top:10px">
+            <input class="acct-inp" id="acct-r-pass1" type="password" data-i18n-ph="acct_pass_new_ph" placeholder="密码（至少 8 位）" autocomplete="new-password">
+          </div>
+          <div style="margin-top:10px">
+            <input class="acct-inp" id="acct-r-pass2" type="password" data-i18n-ph="acct_pass2_ph" placeholder="再次输入密码" autocomplete="new-password">
+          </div>
+          <div style="margin-top:10px">
+            <input class="acct-inp" id="acct-r-email" type="email" data-i18n-ph="acct_reg_email_ph" placeholder="可选：邮箱（找回密码用，可跳过）" autocomplete="email">
+          </div>
+          <p class="hint small" data-i18n="acct_reg_email_note">填了邮箱，忘记密码时可凭邮箱验证码重置；不填则只能联系开发者人工处理。</p>
+          <p class="hint" id="acct-reg-msg"></p>
+          <div class="btn-row"><button class="btn primary" id="acct-do-register" style="flex:1" data-i18n="acct_do_register">注册并登录</button></div>
+          <div class="acct-linkrow">
+            <button class="acct-textbtn" id="acct-to-login" data-i18n="acct_to_login">已有账号？去登录 ›</button>
+          </div>
+        </div>
+        <div id="acct-user-forgot" hidden>
+          <p class="hint" data-i18n="acct_fgt_hint">输入账号绑定的邮箱，获取验证码后设置新密码。</p>
+          <div style="margin-top:14px">
+            <input class="acct-inp" id="acct-f-email" type="email" data-i18n-ph="acct_email_ph" placeholder="你的邮箱" autocomplete="email">
+          </div>
+          <div class="acct-code-row">
+            <input class="acct-inp acct-code" id="acct-f-code" inputmode="numeric" autocomplete="one-time-code" data-i18n-ph="acct_code_ph" placeholder="验证码" maxlength="6">
+            <button class="btn" id="acct-f-get" data-i18n="acct_get_code">获取验证码</button>
+          </div>
+          <div style="margin-top:10px">
+            <input class="acct-inp" id="acct-f-pass" type="password" data-i18n-ph="acct_fgt_newpass_ph" placeholder="新密码（至少 8 位）" autocomplete="new-password">
+          </div>
+          <p class="hint small" data-i18n="acct_forgot_manual">没有绑定邮箱的账号无法自助找回，请联系开发者人工处理。</p>
+          <p class="hint" id="acct-fgt-msg"></p>
+          <div class="btn-row"><button class="btn primary" id="acct-do-reset" style="flex:1" data-i18n="acct_do_reset">重置密码</button></div>
+          <div class="acct-linkrow">
+            <button class="acct-textbtn" id="acct-to-login2" data-i18n="acct_to_login">已有账号？去登录 ›</button>
+          </div>
+        </div>
+      </div>
+      <div class="acct-warn" data-i18n="acct_login_warn">登录只用于云同步与高级版绑定。本机数据不会因为登录被上传——只有打开「云同步」后，所列数据才会经加密连接上传。你随时可以退出、关同步、删账号。</div>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 账号 · 登录方式（加绑用户名 / 改密码 / 加绑邮箱） ============ -->
+  <main id="view-account-security" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('acct-sec-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="acct-sec-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="acct_security">登录方式</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <section class="card">
+      <div class="card-title" data-i18n="acct_sec_identities">已绑身份</div>
+      <div class="detail-row"><span class="dl" data-i18n="acct_email">邮箱</span><span class="dv" id="acct-sec-email">—</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="acct_username">用户名</span><span class="dv" id="acct-sec-username">—</span></div>
+      <p class="hint small" data-i18n="acct_sec_note">两种方式登入的是同一个账号，云同步数据是同一份。</p>
+    </section>
+    <section class="card" id="acct-sec-binduser" hidden>
+      <div class="card-title" data-i18n="acct_sec_binduser">加绑用户名＋密码</div>
+      <div style="margin-top:12px">
+        <input class="acct-inp" id="acct-b-uname" type="text" data-i18n-ph="acct_username_ph" placeholder="用户名" autocomplete="username" autocapitalize="none">
+      </div>
+      <p class="hint small" data-i18n="acct_reg_user_rule">4–20 位，字母开头，只含字母、数字、下划线</p>
+      <div style="margin-top:10px">
+        <input class="acct-inp" id="acct-b-pass1" type="password" data-i18n-ph="acct_pass_new_ph" placeholder="密码（至少 8 位）" autocomplete="new-password">
+      </div>
+      <div style="margin-top:10px">
+        <input class="acct-inp" id="acct-b-pass2" type="password" data-i18n-ph="acct_pass2_ph" placeholder="再次输入密码" autocomplete="new-password">
+      </div>
+      <p class="hint" id="acct-b-msg"></p>
+      <div class="btn-row"><button class="btn primary" id="acct-b-do" style="flex:1" data-i18n="acct_binduser_do">绑定并设置密码</button></div>
+    </section>
+    <section class="card" id="acct-sec-chpw" hidden>
+      <div class="card-title" data-i18n="acct_sec_chpw">修改密码</div>
+      <div style="margin-top:12px">
+        <input class="acct-inp" id="acct-c-old" type="password" data-i18n-ph="acct_oldpass_ph" placeholder="旧密码" autocomplete="current-password">
+      </div>
+      <div id="acct-sec-chpw-alt">
+        <p class="hint small" data-i18n="acct_chpw_alt">或用账号邮箱的验证码改密（二选一）：</p>
+        <div class="acct-code-row">
+          <input class="acct-inp acct-code" id="acct-c-code" inputmode="numeric" autocomplete="one-time-code" data-i18n-ph="acct_code_ph" placeholder="验证码" maxlength="6">
+          <button class="btn" id="acct-c-get" data-i18n="acct_get_code">获取验证码</button>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <input class="acct-inp" id="acct-c-new" type="password" data-i18n-ph="acct_fgt_newpass_ph" placeholder="新密码（至少 8 位）" autocomplete="new-password">
+      </div>
+      <p class="hint" id="acct-c-msg"></p>
+      <div class="btn-row"><button class="btn primary" id="acct-c-do" style="flex:1" data-i18n="acct_sec_chpw">修改密码</button></div>
+    </section>
+    <section class="card" id="acct-sec-bindemail" hidden>
+      <div class="card-title" data-i18n="acct_sec_bindemail">加绑邮箱</div>
+      <p class="hint" data-i18n="acct_bindemail_note">绑定后：忘记密码可凭邮箱找回；在小铺 / 商店购买的激活码也会按邮箱自动归集到本账号。</p>
+      <div style="margin-top:12px">
+        <input class="acct-inp" id="acct-e-email" type="email" data-i18n-ph="acct_email_ph" placeholder="你的邮箱" autocomplete="email">
       </div>
       <div class="acct-code-row">
-        <input class="acct-inp acct-code" id="acct-code" inputmode="numeric" autocomplete="one-time-code" data-i18n-ph="acct_code_ph" placeholder="验证码" maxlength="6">
-        <button class="btn" id="acct-get-code" data-i18n="acct_get_code">获取验证码</button>
+        <input class="acct-inp acct-code" id="acct-e-code" inputmode="numeric" autocomplete="one-time-code" data-i18n-ph="acct_code_ph" placeholder="验证码" maxlength="6">
+        <button class="btn" id="acct-e-get" data-i18n="acct_get_code">获取验证码</button>
       </div>
-      <p class="hint small" data-i18n="acct_code_note">验证码 10 分钟内有效。没收到先看垃圾箱，再点重新发送（60 秒后可重发）。</p>
-      <p class="hint" id="acct-login-msg"></p>
-      <div class="btn-row"><button class="btn primary" id="acct-do-login" style="flex:1" data-i18n="acct_do_login">登录</button></div>
-      <div class="acct-warn" data-i18n="acct_login_warn">登录只用于云同步与高级版绑定。本机数据不会因为登录被上传——只有打开「云同步」后，所列数据才会经加密连接上传。你随时可以退出、关同步、删账号。</div>
+      <p class="hint" id="acct-e-msg"></p>
+      <div class="btn-row"><button class="btn primary" id="acct-e-do" style="flex:1" data-i18n="acct_bindemail_do">绑定邮箱</button></div>
     </section>
     <div class="tab-spacer"></div>
   </main>
@@ -1192,15 +1319,28 @@
       <div class="card-title" data-i18n="acct_del_card">删除账号与全部云端数据</div>
       <div class="privacy">
         <p data-i18n="acct_del_p1">删除后：云端保存的家宅档案、排盘记录、书签等全部副本会被删除，账号与登录状态一并注销，高级版与账号的绑定同时解除（激活码本身只保留去标识的记录）。</p>
-        <p data-i18n="acct_del_p2">本机 App 里的数据不受影响，仍可照常离线使用。同一个邮箱之后可以重新登录，相当于新账号（云端数据已清空，不可恢复）。</p>
-        <p data-i18n="acct_del_note">为防误触与他人借用手机，需用账号邮箱的新鲜验证码确认。</p>
+        <p data-i18n="acct_del_p2">本机 App 里的数据不受影响，仍可照常离线使用。之后可用同一邮箱或用户名重新注册，相当于新账号（云端数据已清空，不可恢复）。</p>
       </div>
-      <div class="acct-code-row">
-        <input class="acct-inp acct-code" id="acct-del-code" inputmode="numeric" autocomplete="one-time-code" data-i18n-ph="acct_code_ph" placeholder="验证码" maxlength="6">
-        <button class="btn" id="acct-del-get" data-i18n="acct_del_get">发送验证码</button>
+      <div id="acct-del-email-mode">
+        <p class="hint" data-i18n="acct_del_note">为防误触与他人借用手机，需用账号邮箱的新鲜验证码确认。</p>
+        <div class="acct-code-row">
+          <input class="acct-inp acct-code" id="acct-del-code" inputmode="numeric" autocomplete="one-time-code" data-i18n-ph="acct_code_ph" placeholder="验证码" maxlength="6">
+          <button class="btn" id="acct-del-get" data-i18n="acct_del_get">发送验证码</button>
+        </div>
+        <p class="hint" id="acct-del-msg"></p>
+        <div class="btn-row"><button class="btn acct-danger" id="acct-del-btn" style="flex:1" data-i18n="acct_del_btn">确认删除账号</button></div>
       </div>
-      <p class="hint" id="acct-del-msg"></p>
-      <div class="btn-row"><button class="btn acct-danger" id="acct-del-btn" style="flex:1" data-i18n="acct_del_btn">确认删除账号</button></div>
+      <div id="acct-del-pw-mode" hidden>
+        <p class="hint" data-i18n="acct_del_pw_note">本账号没有邮箱，删除需验证当前密码，并输入「删除」二字确认。</p>
+        <div style="margin-top:12px">
+          <input class="acct-inp" id="acct-del-pass" type="password" data-i18n-ph="acct_del_pw_pass_ph" placeholder="当前密码" autocomplete="current-password">
+        </div>
+        <div style="margin-top:10px">
+          <input class="acct-inp" id="acct-del-confirm" type="text" data-i18n-ph="acct_del_confirm_ph" placeholder="输入「删除」确认">
+        </div>
+        <p class="hint" id="acct-del-pw-msg"></p>
+        <div class="btn-row"><button class="btn acct-danger" id="acct-del-pw-btn" style="flex:1" data-i18n="acct_del_btn">确认删除账号</button></div>
+      </div>
     </section>
     <div class="tab-spacer"></div>
   </main>

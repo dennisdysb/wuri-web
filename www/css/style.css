@@ -2836,3 +2836,14 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
   line-height:1.6; color:var(--ink-2); cursor:pointer; }
 .acct-consent input { margin-top:3px; flex:none; }
 #backup-acct-line { cursor:pointer; }
+/* v1.1 双登录：方式页签＋文字按钮＋账号卡「登录方式」链接（颜色同样全走变量链） */
+.acct-tabs { display:flex; gap:8px; margin:12px 0 2px; }
+.acct-tab { flex:1; padding:9px 0; border-radius:10px; border:1px solid var(--line);
+  background:transparent; color:var(--ink-2); font-size:15px; font-family:var(--sans); cursor:pointer; }
+.acct-tab.on { background:var(--gold-wash); color:var(--ink); border-color:var(--gold); font-weight:600; }
+.acct-linkrow { display:flex; justify-content:space-between; margin-top:12px; }
+.acct-textbtn { background:none; border:none; padding:4px 0; color:var(--gold-deep);
+  font-size:14px; font-family:var(--sans); cursor:pointer; }
+.acct-link { color:var(--gold-deep); font-size:13px; background:none; border:none; padding:6px 0 2px; cursor:pointer; font-family:var(--sans); display:block; }
+/* .detail-row 的 display 会盖掉 hidden 属性，身份两行按 hidden 显隐须显式压回 */
+#acct-email-row[hidden], #acct-username-row[hidden] { display:none; }
