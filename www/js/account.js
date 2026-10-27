@@ -906,12 +906,6 @@
     if (n >= 1024) return Math.round(n / 1024) + ' KB';
     return n + ' B';
   }
-  function maskEmail(email) {
-    var at = (email || '').indexOf('@');
-    if (at <= 0) return email || '';
-    var local = email.slice(0, at), dom = email.slice(at + 1);
-    return local.slice(0, Math.min(6, local.length)) + '***@' + dom;
-  }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
   function fmtTime(ts) {
     if (!ts) return T('acct_last_none');
@@ -957,7 +951,7 @@
     if (isLoggedIn()) {
       inEl.hidden = false; outEl.hidden = true;
       stEl.textContent = T('acct_state_in'); stEl.classList.add('on');
-      $('acct-email-mask').textContent = maskEmail(state.email);
+      $('acct-email-mask').textContent = state.email;
       $('acct-prow').textContent = lsGet(K.pro) === '1' ? T('acct_prow_bound') : T('acct_prow_none');
       var tg = $('acct-sync-toggle'); if (tg) tg.checked = state.syncOn;
       var usage = lsJSON(K.usage, null);
@@ -974,7 +968,7 @@
     var bs = $('backup-acct-state');
     if (bs) {
       bs.textContent = isLoggedIn()
-        ? maskEmail(state.email) + ' · ' + (state.syncOn ? T('acct_on') : T('acct_off'))
+        ? state.email + ' · ' + (state.syncOn ? T('acct_on') : T('acct_off'))
         : T('acct_state_out');
     }
     renderStatus();
