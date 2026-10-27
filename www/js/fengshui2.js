@@ -150,30 +150,72 @@
           esc(tx(s.effect)) + '</span><em>' + esc(tx(p.direction)) + '（' + esc(tx(p.name)) + '）</em></div>';
       }).join('');
     }
+    bzRenderLinkNotes();
   }
   /* 八宅住户直选联动（第二批 B）：选宅→坐向取该宅定稿；选住户→命卦/游年
    * 按住户生日（birthYear/gender）带入并切「命卦游年」视图；手输路径保留。
-   * 数据源为家宅档案 Dexie（__wuriHouse.db 的 houses/residents/measurements）。 */
-  var BZLINK = { houseId: 0, residents: [] };
+   * 数据源为家宅档案 Dexie（__wuriHouse.db 的 houses/residents/measurements）。
+   * 单一真相（2026-10-27 小修）：带入即「关联档案」态并出小字注明出处；用户
+   * 手改被带入的项（年份/性别/坐向）即自动解除对应关联，下拉回（手输）、小字
+   * 消失——屏幕所示与实际计算永远一致，不留半关联状态。关联态只存会话内
+   * （BZLINK），不落盘：重进页面一律手输态起步。 */
+  var BZLINK = { houseId: 0, houseName: '', houseLinked: false, residents: [], residentId: 0, residentName: '' };
   function houseDb() { return window.__wuriHouse && __wuriHouse.db ? __wuriHouse.db : null; }
+  function bzRenderLinkNotes() {
+    var hl = $('fs2-bz-houselink');
+    if (hl) {
+      hl.hidden = !BZLINK.houseLinked;
+      if (BZLINK.houseLinked) hl.textContent = TF(T('fs2_link_house'), BZLINK.houseName);
+    }
+    var rl = $('fs2-bz-reslink');
+    if (rl) {
+      rl.hidden = !BZLINK.residentId;
+      if (BZLINK.residentId) rl.textContent = TF(T('fs2_link_res'), BZLINK.residentName);
+    }
+  }
+  function bzUnlinkResident() {
+    if (!BZLINK.residentId) { bzRenderLinkNotes(); return; }
+    BZLINK.residentId = 0;
+    BZLINK.residentName = '';
+    var sel = $('fs2-bz-resident');
+    if (sel) sel.value = '';
+    bzRenderLinkNotes();
+  }
+  function bzUnlinkHouse() {
+    if (BZLINK.houseLinked) BZLINK.houseLinked = false;
+    bzRenderLinkNotes();
+  }
   function bzFillResidents() {
     var sel = $('fs2-bz-resident');
     if (!sel) return;
     var db = houseDb();
     if (!db || !BZLINK.houseId) {
+      BZLINK.residents = [];
+      BZLINK.residentId = 0;
+      BZLINK.residentName = '';
       sel.innerHTML = '<option value="">' + esc(T('fs2_pick_manual')) + '</option>';
+      bzRenderLinkNotes();
       return;
     }
     db.residents.where('houseId').equals(BZLINK.houseId).toArray().then(function (rs) {
       BZLINK.residents = rs.slice().sort(function (a, b) { return a.id - b.id; });
       if (!BZLINK.residents.length) {
+        BZLINK.residentId = 0;
+        BZLINK.residentName = '';
         sel.innerHTML = '<option value="">' + esc(T('fs2_res_none')) + '</option>';
+        bzRenderLinkNotes();
         return;
       }
       sel.innerHTML = '<option value="">' + esc(T('fs2_pick_manual')) + '</option>' +
         BZLINK.residents.map(function (r) {
           return '<option value="' + r.id + '">' + esc(r.name) + '</option>';
         }).join('');
+      if (BZLINK.residentId && !BZLINK.residents.some(function (r) { return r.id === BZLINK.residentId; })) {
+        BZLINK.residentId = 0;
+        BZLINK.residentName = '';
+      }
+      sel.value = BZLINK.residentId ? String(BZLINK.residentId) : '';
+      bzRenderLinkNotes();
     }).catch(function () {});
   }
   function bzFillHouses() {
@@ -190,6 +232,13 @@
   }
   function bzPickHouse(id) {
     BZLINK.houseId = id || 0;
+    var hs = $('fs2-bz-house');
+    BZLINK.houseName = (hs && hs.selectedIndex >= 0) ? hs.options[hs.selectedIndex].textContent : '';
+    /* 换宅即换上下文：坐向关联与住户关联一并解除，待新宅定稿/重选住户再关联 */
+    BZLINK.houseLinked = false;
+    BZLINK.residentId = 0;
+    BZLINK.residentName = '';
+    bzRenderLinkNotes();
     bzFillResidents();
     if (!BZLINK.houseId) return;
     var db = houseDb();
@@ -199,19 +248,24 @@
       if (fx && fx.sitting && MTN_NAMES.indexOf(fx.sitting) >= 0) {
         BZ.sitting = fx.sitting;
         BZ.sittingDirty = true;
+        BZLINK.houseLinked = true;
         var sel = $('fs2-bz-sitting');
         if (sel) { fillSittingSelect(sel, BZ.sitting); sel.value = BZ.sitting; }
         bzSave();
         renderBazhai();
       }
+      bzRenderLinkNotes();
     }).catch(function () {});
   }
   function bzPickResident(id) {
     var r = BZLINK.residents.filter(function (x) { return x.id === id; })[0];
-    if (!r || !r.birthYear || !r.gender) return;
+    if (!r) { bzUnlinkResident(); return; }
+    if (!r.birthYear || !r.gender) return;
     BZ.year = Math.min(2100, Math.max(1900, r.birthYear | 0));
     BZ.gender = r.gender === 'female' ? 'female' : 'male';
     BZ.view = 'life';
+    BZLINK.residentId = r.id;
+    BZLINK.residentName = r.name || '';
     var yi = $('fs2-bz-year'); if (yi) yi.value = BZ.year;
     segSet($('fs2-bz-gender'), BZ.gender, 'data-g');
     segSet($('fs2-bz-viewseg'), BZ.view, 'data-v');
@@ -348,7 +402,9 @@
         ps.appendChild(o0);
         for (var i = 1; i <= 9; i++) {
           var o = document.createElement('option');
-          o.value = String(i); o.textContent = pNames[i - 1] || (i + '');
+          var rg = F.periodYearRange(repYear(i));
+          o.value = String(i);
+          o.textContent = (pNames[i - 1] || (i + '')) + ' ' + rg[0] + '–' + rg[1];
           ps.appendChild(o);
         }
       }
@@ -387,13 +443,15 @@
     var yi = $('fs2-bz-year');
     if (yi) yi.addEventListener('change', function () {
       var v2 = parseInt(yi.value, 10);
-      BZ.year = isFinite(v2) ? Math.min(2100, Math.max(1900, v2)) : BZ.year;
+      var nv = isFinite(v2) ? Math.min(2100, Math.max(1900, v2)) : BZ.year;
+      if (nv !== BZ.year) bzUnlinkResident(); /* 手改年份（值真变了）即解除住户关联（单一真相） */
+      BZ.year = nv;
       yi.value = BZ.year; bzSave(); renderBazhai();
     });
-    bindSeg('fs2-bz-gender', 'data-g', function (g) { BZ.gender = g; bzSave(); renderBazhai(); });
+    bindSeg('fs2-bz-gender', 'data-g', function (g) { if (g !== BZ.gender) bzUnlinkResident(); BZ.gender = g; bzSave(); renderBazhai(); });
     bindSeg('fs2-bz-viewseg', 'data-v', function (v2) { BZ.view = v2; bzSave(); renderBazhai(); });
     var bs = $('fs2-bz-sitting');
-    if (bs) bs.addEventListener('change', function () { BZ.sitting = bs.value; BZ.sittingDirty = true; bzSave(); renderBazhai(); });
+    if (bs) bs.addEventListener('change', function () { bzUnlinkHouse(); BZ.sitting = bs.value; BZ.sittingDirty = true; bzSave(); renderBazhai(); });
     var bh = $('fs2-bz-house');
     if (bh) bh.addEventListener('change', function () { bzPickHouse(parseInt(bh.value, 10) || 0); });
     var br = $('fs2-bz-resident');
