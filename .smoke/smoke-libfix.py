@@ -15,8 +15,8 @@ def rd(p): return open(os.path.join(WWW, p), encoding="utf-8").read()
 idx, sw, i18n = rd("index.html"), rd("sw.js"), rd("js/i18n.js")
 he, css, jw = rd("js/house-editor.js"), rd("css/style.css"), rd("js/jingwen.js")
 
-report("T1 四件套 v209", "wuri-v209-20261027-v230" in sw and "css/style.css?v=208" in idx
-       and "'./css/style.css?v=208'" in sw and i18n.count("（内部 v209）") == 2 and i18n.count("（內部 v209）") == 2
+report("T1 四件套 v209", "wuri-v209-20261027-v230" in sw and "css/style.css?v=209" in idx
+       and "'./css/style.css?v=209'" in sw and i18n.count("（内部 v209）") == 2 and i18n.count("（內部 v209）") == 2
        and "（内部 v209）" in idx)
 fix_keys = re.findall(r"^    (\w+):\s+\{ cat:", he, re.M)
 report("T2 构件总数 43", len(fix_keys) == 43, fix_keys)
