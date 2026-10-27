@@ -21,6 +21,9 @@ var JingWen = (function () {
   };
   function isNeidan(id) { return NEIDAN_IDS.indexOf(id) >= 0; }
   var jingFilter = 'all';
+  /* 「常见经文」区收起状态：仅内存，不持久化——每次进经文页默认展开
+     （resetToCatalog 复位 false；2026-10-27 用户定） */
+  var commonCollapsed = false;
   /* 经文别名：搜简称也能命中 */
   var JING_ALIAS = {
     s01: ['正一功课经', '功课经', '正一早晚功课', '早晚功课经'],
@@ -162,16 +165,24 @@ var JingWen = (function () {
     idx.forEach(function (it) {
       if (order.indexOf(it.id) < 0 && !isNeidan(it.id)) sorted.push(it);
     });
-    /* 第一层「常见经文」：置顶、一直展开（无折叠开关） */
-    var html = '<div class="jing-sec" data-common-sec>'
-      + '<h3 class="jing-sec-h">' + esc(t('jing_sec_common')) + '<span class="dz-count">（' + sorted.length + '）</span></h3>'
+    /* 第一层「常见经文」：置顶、默认展开，可整区收起（不持久化，进页复位展开）；
+       全部/全真/正一筛选自页面顶部移入本区标题下方，随区一同收起（2026-10-27 用户定） */
+    function filterBtn(k, label) {
+      return '<button class="btn small' + (jingFilter === k ? ' active' : '') + '" data-jing-filter="' + k + '">' + label + '</button>';
+    }
+    var html = '<div class="jing-sec' + (commonCollapsed ? ' collapsed' : '') + '" data-common-sec>'
+      + '<h3 class="jing-sec-h" data-common-toggle>' + esc(t('jing_sec_common')) + '<span class="dz-count">（' + sorted.length + '）</span><span class="jing-go jing-sec-arrow">›</span></h3>'
+      + '<div class="jing-common-body"' + (commonCollapsed ? ' hidden' : '') + '>'
+      + '<div class="jing-filter jing-filter-insec">'
+      + filterBtn('all', '全部') + filterBtn('quanzhen', '全真') + filterBtn('zhengyi', '正一')
+      + '</div>'
       + sorted.map(function (it) {
         return '<div class="jing-item" data-jing="' + it.id + '">'
           + '<span class="jing-book">' + esc(it.cat || '經') + '</span>'
           + '<span class="jing-title">' + esc(it.title) + '</span>'
           + '<span class="jing-go">›</span></div>';
       }).join('')
-      + '</div>';
+      + '</div></div>';
     // 内丹书籍折叠区
     var neidanItems = [];
     NEIDAN_IDS.forEach(function (id) {
@@ -636,6 +647,15 @@ var JingWen = (function () {
     if (listEl) listEl.hidden = false;
     if (marksEl) marksEl.hidden = true;
     if (resultsEl) resultsEl.hidden = true;
+    // 「常见经文」每次进页默认展开（收起不持久化）
+    commonCollapsed = false;
+    var csec = document.querySelector('[data-common-sec]');
+    if (csec) {
+      csec.classList.remove('collapsed');
+      var cbody = csec.querySelector('.jing-common-body');
+      if (cbody) cbody.hidden = false;
+    }
+    refreshMarksRow();
     // 清空搜索框
     var q = $('#jing-q');
     if (q) { q.value = ''; }
@@ -1436,27 +1456,60 @@ var JingWen = (function () {
     }
   }
   /* ---------- 初始化 ---------- */
+  var _catalogUiBound = false;
   function bindFilter() {
-    var btns = document.querySelectorAll('[data-jing-filter]');
-    btns.forEach(function (b) {
-      b.addEventListener('click', function () {
-        // 问题2修复：如果在标记页，先回目录再过滤
-        var marksEl = $('#jing-marks');
-        var listEl = $('#jing-list');
-        if (marksEl && !marksEl.hidden) {
-          marksEl.hidden = true;
-          if (listEl) listEl.hidden = false;
-          var resultsEl = $('#jing-results');
-          if (resultsEl) resultsEl.hidden = true;
-          if (window._refreshMarks) window._refreshMarks = null;
+    /* 筛选钮已移入目录渲染内（随 renderCatalog 重建），故改事件委托、只绑一次 */
+    if (_catalogUiBound) return;
+    _catalogUiBound = true;
+    document.addEventListener('click', function (e) {
+      var tg = e.target.closest('[data-common-toggle]');
+      if (tg) {
+        commonCollapsed = !commonCollapsed;
+        var sec = tg.closest('[data-common-sec]');
+        if (sec) {
+          sec.classList.toggle('collapsed', commonCollapsed);
+          var cbody = sec.querySelector('.jing-common-body');
+          if (cbody) cbody.hidden = commonCollapsed;
         }
-        btns.forEach(function (x) { x.classList.remove('active'); });
-        b.classList.add('active');
-        jingFilter = b.getAttribute('data-jing-filter');
-        renderCatalog();
-      });
+        return;
+      }
+      var b = e.target.closest('[data-jing-filter]');
+      if (!b) return;
+      // 问题2修复：如果在标记页，先回目录再过滤
+      var marksEl = $('#jing-marks');
+      var listEl = $('#jing-list');
+      if (marksEl && !marksEl.hidden) {
+        marksEl.hidden = true;
+        if (listEl) listEl.hidden = false;
+        var resultsEl = $('#jing-results');
+        if (resultsEl) resultsEl.hidden = true;
+        if (window._refreshMarks) window._refreshMarks = null;
+      }
+      document.querySelectorAll('[data-jing-filter]').forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      jingFilter = b.getAttribute('data-jing-filter');
+      renderCatalog();
     });
   }
+
+  /* ---------- 我的标记入口行计数（书签＋高亮＋笔记总数） ---------- */
+  function marksTotal() {
+    var n = 0;
+    try {
+      var bm = JSON.parse(localStorage.getItem('wuri_jing_bookmarks') || '{}');
+      Object.keys(bm).forEach(function (k) { var a = bm[k]; n += Array.isArray(a) ? a.length : (a ? 1 : 0); });
+      var hl = JSON.parse(localStorage.getItem('wuri_jing_highlights') || '[]');
+      if (Array.isArray(hl)) n += hl.length;
+      var nt = JSON.parse(localStorage.getItem('wuri_jing_notes') || '[]');
+      if (Array.isArray(nt)) n += nt.length;
+    } catch (e) {}
+    return n;
+  }
+  function refreshMarksRow() {
+    var el = document.getElementById('jing-marks-count');
+    if (el) el.textContent = '（' + marksTotal() + '）';
+  }
+  window.__wuriRefreshMarksRow = refreshMarksRow;
 
   function init() {
     bindDownload();
@@ -1475,6 +1528,14 @@ var JingWen = (function () {
     fontPx = Math.abs(fontPx - 17) <= Math.abs(fontPx - 28) ? 17 : 28;
     try { pyOn = localStorage.getItem('wuri_jing_py') !== '0'; } catch (e) {}
     renderCatalog();
+    refreshMarksRow();
+    /* 我的标记入口行（div 模拟按钮）键盘可达：Enter/空格触发 */
+    document.addEventListener('keydown', function (e) {
+      if (e.target && e.target.id === 'jing-mymarks' && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        e.target.click();
+      }
+    });
     /* 语言切换时目录随之重渲（三段标题简繁、全藏目录显示口径跟随系统语言） */
     var prevRr = window.__wuri_rerender;
     window.__wuri_rerender = function () { if (prevRr) prevRr(); renderCatalog(); };
@@ -2615,7 +2676,7 @@ var JingWen = (function () {
         // 主导航的 data-tab (tab-home/tab-jing等) 不在这里处理，交给 app.js
       }
       // 返回目录
-      if (e.target.closest('#marks-back')) { hideMarks(); return; }
+      if (e.target.closest('#marks-back')) { hideMarks(); if (window.__wuriRefreshMarksRow) window.__wuriRefreshMarksRow(); return; }
       // 删除书签
       var delBm = e.target.closest('[data-del-bm]');
       if (delBm) {

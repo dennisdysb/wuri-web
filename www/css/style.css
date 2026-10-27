@@ -1139,6 +1139,17 @@ details.disc-foot .hint{margin-top:9px}
 .ly-history-empty{color:var(--muted);font-size:.88rem;text-align:center;padding:12px}
 .jing-filter{display:flex;gap:8px;justify-content:center;margin:10px 0}
 .jing-filter .btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+/* 筛选排移入「常见经文」区内（2026-10-27）：区内一排，间距收紧，随区收起 */
+.jing-filter-insec{margin:2px 0 8px}
+/* 「常见经文」收起箭头：展开时 › 转向下，收起时回正（仅本箭头类，不动其他 .jing-go） */
+.jing-sec-arrow{transition:transform .18s ease}
+[data-common-sec]:not(.collapsed) .jing-sec-arrow{transform:rotate(90deg)}
+/* 「我的标记」独立入口行（2026-10-27：自顶部筛选排拆出，置搜索框下方） */
+.jing-marks-row{display:flex;align-items:center;gap:10px;padding:12px 6px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.jing-marks-row:active{background:var(--teal-wash)}
+.jing-marks-row-t{font-family:var(--serif);font-size:1.05rem;color:var(--ink);flex:none}
+.jing-marks-row-s{font-size:.82rem;color:var(--muted);flex:none}
+.jing-marks-row-n{margin-left:auto;font-size:.82rem;color:var(--ink-2);flex:none}
 
 /* 背诵模式 */
 #jing-content.recite-on .jing-para{line-height:2.6}
@@ -2133,22 +2144,23 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .dz-body{padding:4px 0 8px}
 .dz-note{font-size:.82em;color:var(--ink-2);margin:4px 0 8px}
 .dz-search input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line-soft);border-radius:10px;background:transparent;color:var(--ink);font-size:.95em}
-.dz-bu{display:flex;align-items:center;gap:10px;padding:13px 6px;border-bottom:1px solid var(--line-soft);cursor:pointer;font-size:1.12em;font-weight:700;color:var(--ink)}/* 字号/字重对齐精选层段头 .jing-sec-h（1.12em/700），行高同为继承 1.65（v139 用户真机反馈：全藏列表字小一号） */
+.dz-bu{display:flex;align-items:center;gap:10px;padding:13px 6px;border-bottom:1px solid var(--line-soft);cursor:pointer;font-family:var(--serif);font-size:1.35rem;font-weight:400;color:var(--ink)}/* 字体/字号/字重与经文列表书名行（.jing-title computed：serif 1.35rem/400）统一、同一宋体口径（2026-10-27 用户反馈：分类行字体与上面经文不一样；此前 v139 对齐段头 1.12em/700 的口径作废） */
 .dz-bu:active{background:var(--teal-wash)}
-.dz-count{margin-left:auto;font-size:.8em;color:var(--ink-2)}
+.dz-count{margin-left:auto;font-size:.72em;color:var(--ink-2)}/* 部数属右侧信息组，整体再小一号贴右（2026-10-27 用户定：都留，但缩小往右靠给书名让宽） */
 /* 分架标题（.jing-sec-h）内计数后缀与 .dz-bu 行内共用 .dz-count 规格（字号/颜色），
    但标题是居中 flex：取消 margin-left:auto 的吸空，三架计数一律紧贴标题（v147 用户反馈统一） */
 .jing-sec-h .dz-count{margin-left:0}
 .dz-bu .jing-go{margin-left:2px}
+.dz-bu .dz-count{font-size:.62em}/* 部行本体已放大到 1.35rem，其内计数按 .62em 才较旧口径（14.3px）真小一号（≈13.4px） */
 .dz-works{border-bottom:1px solid var(--line-soft)}
-.dz-work{display:flex;align-items:baseline;gap:6px;padding:11px 6px 11px 18px;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.dz-work{display:flex;align-items:baseline;gap:4px;padding:11px 6px 11px 18px;border-bottom:1px solid var(--line-soft);cursor:pointer}/* 行内间距 6→4，配合右侧信息组缩小给书名让宽（2026-10-27） */
 .dz-work:active{background:var(--teal-wash)}
 /* 返回定位高亮（2026-10-27 用户反馈）：从阅读器返回列表时给刚读的那条加短暂金色描边，走 --gold/--gold-wash 变量链（日/夜/红光自适应） */
 @keyframes libRetHl{0%,65%{background:var(--gold-wash);box-shadow:inset 0 0 0 2px var(--gold)}100%{background:transparent;box-shadow:inset 0 0 0 0 rgba(0,0,0,0)}}
 .lib-ret-hl{animation:libRetHl 2.4s ease forwards}
-.dz-wt{flex:1;min-width:0;color:var(--ink);font-size:1.35rem}/* 字号对齐精选层书名 .jing-title 的 computed 1.35rem；行高去 1.45 改继承 body 1.65，与精选书名一致（v139） */
-.dz-lei{flex:none;font-size:.62em;line-height:1.6;color:var(--gold,#a8823c);border:1px solid currentColor;border-radius:5px;padding:0 4px}/* 徽标收小（v142 用户反馈占地大）：.72em/11.5px→.62em/9.9px、内边距 1px5px→0 4px；书名 .dz-wt 不动 */
-.dz-wm{flex:none;font-size:.69em;color:var(--muted)}/* 卷字信息降次级小字（v142）：.76em/12.2px→.69em/11px 并改灰 */
+.dz-wt{flex:1;min-width:0;color:var(--ink);font-family:var(--serif);font-size:1.35rem}/* 字号对齐精选层书名 .jing-title 的 computed 1.35rem；行高去 1.45 改继承 body 1.65，与精选书名一致（v139）；字体补 var(--serif) 与书名行同一宋体口径（2026-10-27，日间 body 为 sans 时原先继承成黑体感） */
+.dz-lei{flex:none;font-size:.56em;line-height:1.6;color:var(--gold,#a8823c);border:1px solid currentColor;border-radius:5px;padding:0 3px}/* 右侧信息组整体再小一号（2026-10-27 用户定）：类签 .62em→.56em、内边距 0 4px→0 3px；v142 曾 .72em→.62em */
+.dz-wm{flex:none;font-size:.62em;color:var(--muted)}/* 右侧信息组整体再小一号（2026-10-27 用户定）：卷·字数 .69em→.62em；v142 曾 .76em→.69em */
 .dz-empty{padding:14px 6px;color:var(--ink-2);font-size:.9em}
 .dz-hitn{padding:10px 6px 2px;color:var(--ink-2);font-size:.85em}
 
