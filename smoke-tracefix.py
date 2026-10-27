@@ -162,8 +162,8 @@ def main():
 
         # ================= A 舞台可达性（夹具 A） =================
         upload(os.path.join(FIX, "fixture-a-portrait.jpg"))
-        # 等检测 settle：出预览（useBtn）或回到可点的角点态（warp 未 disabled）才算稳
-        wait("document.getElementById('hpe-detect-use') || (document.querySelectorAll('.hpe-corner').length === 4 && document.getElementById('hpe-warp') && !document.getElementById('hpe-warp').disabled)", 40)
+        # 等检测 settle：出预览，或角点态且面板不在「正在自动找」、拉正钮未禁用（排除两段忙碌中间态）
+        wait("document.getElementById('hpe-detect-use') || (document.querySelectorAll('.hpe-corner').length === 4 && document.getElementById('hpe-warp') && !document.getElementById('hpe-warp').disabled && !document.getElementById('hpe-tracebox').textContent.includes('正在自动找'))", 40)
         if ev("!!document.getElementById('hpe-detect-use')"):
             tap("#hpe-detect-adjust")
         in_stage = wait("document.querySelectorAll('.hpe-corner').length === 4 && document.getElementById('hpe-warp')", 30)
