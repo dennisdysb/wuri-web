@@ -361,6 +361,8 @@ var JingWen = (function () {
   function renderReaderBody(id, d) {
       currentId = id;
       window._jingCurrentId = id;
+      /* 返回定位武装：确认这部经确实打开了（付费墙拦截/加载失败不武装） */
+      if (libReturn && libReturn.id === id) libReturn.armed = true;
       $('#jing-home').hidden = true;
       $('#jing-reader').hidden = false;
       updateAudioButtons();
@@ -545,6 +547,59 @@ var JingWen = (function () {
     })();
   }
 
+  /* ---------- 返回定位（2026-10-27 用户反馈） ----------
+   * 从目录架/全藏分类/搜索结果点开经文时记下出处（来源面＋条目 id＋
+   * window 滚动位），点「‹ 目录」返回时回到原面原位，并给刚读的那条
+   * 加约 2.4 秒的金色描边便于眼睛落点。阅读器真正渲染（renderReaderBody
+   * 同 id）才武装；标记页/每日推荐等其他入口直达不经捕获，返回不变。 */
+  var libReturn = null;
+  function libCapture(id, el) {
+    if (!id || !el || !el.closest) return;
+    var kind = null;
+    if (el.closest('#jing-results')) kind = 'search';
+    else if (el.closest('#jing-list')) kind = 'catalog';
+    if (!kind) return; /* 标记页等来路不记，维持既有返回 */
+    libReturn = { id: id, kind: kind, scrollY: window.scrollY || window.pageYOffset || 0, armed: false };
+  }
+  window.__wuriLibCapture = libCapture;
+  function libRestore(lr) {
+    if (!lr || !lr.armed) return;
+    var host = document.querySelector(lr.kind === 'search' ? '#jing-results' : '#jing-list');
+    var other = document.querySelector(lr.kind === 'search' ? '#jing-list' : '#jing-results');
+    if (!host) return;
+    /* 来源面恢复（与 search() 的 list/results 互斥口径一致） */
+    host.hidden = false;
+    if (other) other.hidden = true;
+    var marksEl = $('#jing-marks');
+    if (marksEl) marksEl.hidden = true;
+    var el = host.querySelector('[data-jing="' + lr.id + '"],[data-dz-work="' + lr.id + '"]');
+    if (el) {
+      /* 祖先折叠兜底展开：内丹架 / 全藏分类 / 全藏折叠体 */
+      var ndBody = el.closest('.jing-neidan-body');
+      if (ndBody && ndBody.hidden) ndBody.hidden = false;
+      var dzWorks = el.closest('.dz-works');
+      if (dzWorks && dzWorks.hidden) dzWorks.hidden = false;
+      var dzBody = el.closest('[data-dz-body]');
+      if (dzBody && dzBody.hidden) dzBody.hidden = false;
+    }
+    var apply = function () {
+      window.scrollTo(0, lr.scrollY);
+      if (!el) return;
+      /* 高亮守卫：搜索结果会在全文命中到齐时重渲一次（节点被换），
+         2.2 秒内周期复查、节点被换就给新节点补上描边（冒烟实证竞态） */
+      var t0 = Date.now();
+      var tick = function () {
+        var cur = host.querySelector('[data-jing="' + lr.id + '"],[data-dz-work="' + lr.id + '"]');
+        if (cur && !cur.classList.contains('lib-ret-hl')) cur.classList.add('lib-ret-hl');
+        if (Date.now() - t0 < 2200) setTimeout(tick, 350);
+        else if (cur) setTimeout(function () { cur.classList.remove('lib-ret-hl'); }, 600);
+      };
+      tick();
+    };
+    if (window.requestAnimationFrame) requestAnimationFrame(function () { requestAnimationFrame(apply); });
+    else setTimeout(apply, 50);
+  }
+
   function closeReader() {
     stopTtsOnly(); // 只停系统 TTS，后台 MP3 服务交给悬浮岛（回经文 tab 不停播）
     // 跟读模式随阅读器关闭而关闭（避免切经文后映射错乱）
@@ -553,6 +608,8 @@ var JingWen = (function () {
     window._jingCurrentId = null;
     $('#jing-reader').hidden = true;
     $('#jing-home').hidden = false;
+    var lr = libReturn; libReturn = null;
+    libRestore(lr);
   }
 
   /* 重置回目录页（问题1修复：进经文tab时调用） */
@@ -1436,6 +1493,8 @@ var JingWen = (function () {
             if (!$('#jing-loading-tip')) listEl.appendChild(loadingTip);
           }
         }
+        /* 返回定位：记下出处（目录架/搜索结果），返回时回原位 */
+        libCapture(jingId, ji);
         openReader(jingId);
         if (sec != null && sec !== '-1') {
           setTimeout(function () {

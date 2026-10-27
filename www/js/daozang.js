@@ -248,6 +248,9 @@
   }
   function openWork(id, rowEl) {
     if (!dzGate()) return;
+    /* 返回定位：记下出处（全藏分类列表/统一检索命中），jingwen.js 在
+       closeReader 时统一恢复原分类原滚动位（__wuriLibCapture） */
+    if (window.__wuriLibCapture) { try { window.__wuriLibCapture(id, rowEl); } catch (e) {} }
     if (workCache[id]) { doOpen(workCache[id]); return; }
     var old = rowEl ? rowEl.innerHTML : '';
     if (rowEl) rowEl.innerHTML = '<span class="dz-wt">载入中…</span>';
@@ -278,6 +281,9 @@
         workCache[id] = entry;
         window.JINGWEN = window.JINGWEN || {};
         window.JINGWEN[id] = entry;
+        /* 成功也要还原行内容：否则返回列表时刚读的那条永远停在「载入中…」
+           （与返回定位高亮叠加后更显眼，2026-10-27 冒烟截图实证） */
+        if (rowEl) rowEl.innerHTML = old;
         doOpen(entry);
       }).catch(function () {
         if (rowEl) rowEl.innerHTML = old;
