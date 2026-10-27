@@ -1,6 +1,6 @@
 {
  "section": "daozang",
- "version": 40,
+ "version": 41,
  "updated": "2026-10-27",
  "license": {
   "name": "CC BY-SA 4.0",
@@ -16095,6 +16095,12 @@
   "KR5h0011",
   "KR5i0039",
   "KR5i0067",
+  "KR5i0072",
+  "KR5i0073",
+  "KR5i0074",
+  "KR5i0075",
+  "KR5i0076",
+  "KR5i0077",
   "KR5i0078",
   "KR5i0079",
   "KR5i0080",
@@ -16112,5 +16118,5 @@
   "KR5i0092",
   "KR5i0093"
  ],
- "punctPartial": []
+ "punctPartial": {}
 }
