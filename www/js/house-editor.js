@@ -142,7 +142,7 @@
     houseId: 0, floorId: 0, house: null, floors: [], fixed: null,
     plan: null, mode: 'draw', sheet: null, sel: null, placeType: null, fixCat: 'doorwin', uiMode: 'free',
     snap: true, grid: true, undoStack: [], redoStack: [],
-    stage: null, traceURL: '', photoURL: '',
+    stage: null, traceURL: '', photoURL: '', ai: null, stageFallback: false,
     calibArm: false, calibPts: [], focusSnap: null,
     drag: null, saveTm: null, chartCache: null,
     view: null, ptrs: null, pinch: null, spinch: null, justWarped: false,
@@ -448,10 +448,12 @@
         }
         s += '<g data-act="room" data-id="' + r.id + '">' +
           '<rect class="hpe-roomrect hpe-rt-' + (r.type || 'other') + (sel ? ' sel' : '') + (E.mode === 'trace' ? ' trace' : '') + '" x="' + r.x + '" y="' + r.y +
-          '" width="' + r.w + '" height="' + r.h + '" stroke-width="' + (u * (sel ? 0.3 : 0.16)) + '"/>' +
+          '" width="' + r.w + '" height="' + r.h + '" stroke-width="' + (u * (sel ? 0.3 : 0.16)) + '"' +
+          /* AI 低置信房间：虚线描边（不确定签，与 CSS aiq 类同走变量链色） */
+          (r.aiq ? ' stroke-dasharray="' + (u * 0.85) + ' ' + (u * 0.55) + '"' : '') + '/>' +
           '</g>';
         if (L.roomNames && r.name) labs += '<text class="hpe-roomname" x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fsN * 0.37) +
-          '" text-anchor="middle" font-size="' + fsN + '">' + esc(r.name) + '</text>';
+          '" text-anchor="middle" font-size="' + fsN + '">' + esc(r.name) + (r.aiq ? ' ？' : '') + '</text>';
         if (L.dims) labs += '<text class="hpe-roomarea" x="' + (r.x + r.w - u * 0.7) + '" y="' + (r.y + r.h - u * 0.8) +
           '" text-anchor="end" font-size="' + (u * 1.9) + '">' + trimNum(toM(r.w) * toM(r.h)) + '㎡</text>';
       });
@@ -478,6 +480,9 @@
         s += '<g data-act="fixture" data-id="' + f.id + '" class="hpe-fix' + (sel ? ' sel' : '') + '">' +
           '<rect class="hpe-fixhit" x="' + (f.x - wU / 2) + '" y="' + (f.y - hU / 2) + '" width="' + wU + '" height="' + hU + '"/>' +
           (sel ? '<rect class="hpe-fixsel" x="' + (f.x - wU / 2) + '" y="' + (f.y - hU / 2) + '" width="' + wU + '" height="' + hU + '" stroke-width="' + (u * 0.2) + '"/>' : '') +
+          /* AI 低置信构件：虚线框＋左上问号签（不随构件旋转，恒正向可读） */
+          (f.aiq ? '<rect class="hpe-fixaiq" x="' + (f.x - wU / 2) + '" y="' + (f.y - hU / 2) + '" width="' + wU + '" height="' + hU + '" stroke-width="' + (u * 0.18) + '" stroke-dasharray="' + (u * 0.7) + ' ' + (u * 0.45) + '"/>' +
+            '<text class="hpe-aiqmark" x="' + (f.x - wU / 2 - u * 0.2) + '" y="' + (f.y - hU / 2 - u * 0.6) + '" font-size="' + (u * 2.3) + '">？</text>' : '') +
           '<g transform="translate(' + f.x + ' ' + f.y + ') rotate(' + (f.rot || 0) + ') scale(' + (wU / d.box[0] * (f.flip ? -1 : 1)) + ' ' + (hU / d.box[1]) + ') translate(' + (-d.box[0] / 2) + ' ' + (-d.box[1] / 2) + ')">' +
           '<g stroke="currentColor" stroke-width="' + (30 / Math.max(d.box[0], d.box[1]) * 1.1) + '" fill="none" stroke-linecap="round">' + d.art + '</g></g>' +
           (d.sw ? '<text class="hpe-fixsw ' + d.sw + '" x="' + (f.x + wU / 2 + u * 0.4) + '" y="' + (f.y - hU / 2 - u * 0.5) + '" text-anchor="end" font-size="' + (u * 1.8) + '">' + esc(T('hpe_sw_' + d.sw)) + '</text>' : '') +
@@ -1844,10 +1849,20 @@
   }
   function renderTracePanel() {
     var box = $('hpe-tracebox'); if (!box) return;
+    if (E.ai) {
+      box.innerHTML = '<div class="hpe-cal"><div class="r"><b>' + esc(T('hpe_ai_running')) + '</b>' +
+        '<span>' + esc(T(E.ai.stage === 2 ? 'hpe_ai_stage2' : 'hpe_ai_stage1')) + '</span></div>' +
+        '<div class="r" style="margin-top:9px"><span class="hpe-aispin"></span>' +
+        '<button class="btn" id="hpe-ai-cancel">' + esc(T('hpe_ai_cancel')) + '</button></div></div>';
+      var acb = $('hpe-ai-cancel');
+      if (acb) acb.addEventListener('click', cancelAi);
+      return;
+    }
     if (E.stage) {
       var st = E.stage;
+      var fbHtml = E.stageFallback ? '<div class="r" style="margin-bottom:6px"><b>' + esc(T('hpe_ai_fallback')) + '</b></div>' : '';
       if (st.preview) {
-        box.innerHTML = '<div class="hpe-cal"><div class="r"><b>' + esc(T('hpe_detect_found_t')) + '</b></div>' +
+        box.innerHTML = '<div class="hpe-cal">' + fbHtml + '<div class="r"><b>' + esc(T('hpe_detect_found_t')) + '</b></div>' +
           '<div class="r" style="margin-top:4px"><span>' + esc(T('hpe_detect_found')) + '</span></div>' +
           '<div class="r" style="margin-top:9px"><button class="btn primary" id="hpe-detect-use">' + esc(T('hpe_detect_use')) + '</button>' +
           '<button class="btn" id="hpe-detect-adjust">' + esc(T('hpe_detect_adjust')) + '</button>' +
@@ -1869,7 +1884,7 @@
       if (st.detect === 'busy') note = '<div class="r" style="margin-top:6px"><span>' + esc(T('hpe_detecting')) + '</span></div>';
       else if (st.detect === 'miss') note = '<div class="r" style="margin-top:6px"><span>' + esc(T('hpe_detect_miss')) + '</span></div>';
       var errHtml = st.err ? '<div class="r" id="hpe-stage-err" style="margin-top:6px">' + esc(st.err) + '</div>' : '';
-      box.innerHTML = '<div class="hpe-cal"><div class="r"><b>' + esc(T('hpe_stage_title')) + '</b><span>' + esc(T('hpe_stage_hint')) + '</span></div>' +
+      box.innerHTML = '<div class="hpe-cal">' + fbHtml + '<div class="r"><b>' + esc(T('hpe_stage_title')) + '</b><span>' + esc(T('hpe_stage_hint')) + '</span></div>' +
         note + errHtml +
         '<div class="r" style="margin-top:9px"><button class="btn primary" id="hpe-warp"' + (st.busy ? ' disabled' : '') + '>' + esc(st.busy ? T('hpe_warping') : T('hpe_warp')) + '</button>' +
         '<button class="btn" id="hpe-stage-cancel">' + esc(T('hpe_cancel')) + '</button></div></div>';
@@ -1907,12 +1922,12 @@
       var sel = $('hpe-photo-sel');
       if (sel) sel.addEventListener('change', function () {
         var pid = parseInt(sel.value, 10);
-        if (pid) startStage(pid);
+        if (pid) startAiFlow(pid);
       });
       var up = $('hpe-photo-up');
       if (up) up.addEventListener('click', function () { var f = $('hpe-file'); if (f) f.click(); });
       var rc = $('hpe-photo-recorner');
-      if (rc) rc.addEventListener('click', function () { if (E.plan.trace) startStage(E.plan.trace.photoId, true); });
+      if (rc) rc.addEventListener('click', function () { if (E.plan.trace) { E.stageFallback = false; startStage(E.plan.trace.photoId, true); } });
       var cs = $('hpe-calib-start');
       if (cs) cs.addEventListener('click', function () { E.calibArm = true; E.calibPts = []; renderTracePanel(); render(); });
       var cc = $('hpe-calib-cancel');
@@ -2587,6 +2602,7 @@
   function cancelStage() {
     if (E.stage && E.stage.url) URL.revokeObjectURL(E.stage.url);
     E.stage = null;
+    E.stageFallback = false;
     E.spinch = null;
     render(); renderTracePanel();
   }
@@ -2891,7 +2907,7 @@
     };
     E.traceURL = url;
     if (st.url) URL.revokeObjectURL(st.url);
-    E.stage = null; E.spinch = null; E.view = null;
+    E.stage = null; E.stageFallback = false; E.spinch = null; E.view = null;
     E.plan.layers.traceBg = true;
     E.justWarped = true;
     afterChange();
@@ -2945,6 +2961,294 @@
     }).catch(function () {});
   }
 
+  /* ---------------- 照片建房 · AI 自动流（2026-10-27 用户定调：上传后由 AI 自动出草稿，
+   * 手动四角只作识别完全失败的兜底，不再是默认步骤） ----------------
+   * 链路：隐私一次说明 → POST /api/plan/locate 在整图里定位户型图 → 前端裁图放大 →
+   * POST /api/plan/recognize 识别 → applyAiDraft 落草稿（底图按 AI 四角自动拉正、
+   * 房间/门窗/洁具转编辑器对象、低置信项 aiq 虚线＋问号签、比例按读数或用户实测宽标定）。
+   * 任一步失败 → aiFallback：toast 交代 + 进手动舞台并挂「自动识别没成功，手动对齐」签。
+   * 后端：pay.shengboyu.ca src/planai.js（Qwen3-VL-30B，服务端做归一化与假尺寸守卫）。 */
+  var AI_API = 'https://pay.shengboyu.ca';
+  function aiConsent() {
+    var ok = false;
+    try { ok = localStorage.getItem('wuri_ai_plan_ok') === '1'; } catch (e) {}
+    if (ok) return Promise.resolve(true);
+    return dlgConfirm(T('hpe_ai_consent'), T('hpe_ai_consent_ok')).then(function (yes) {
+      if (yes) { try { localStorage.setItem('wuri_ai_plan_ok', '1'); } catch (e) {} }
+      return yes;
+    });
+  }
+  function dlgPromptText(title) {
+    if (window.__wuriDlg && __wuriDlg.prompt) return __wuriDlg.prompt(title, '', T('hpe_calib_ok'));
+    return Promise.resolve(null);
+  }
+  function blobToB64(blob) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () { res(String(fr.result).replace(/^data:[^,]*,/, '')); };
+      fr.onerror = function () { rej(new Error('read')); };
+      fr.readAsDataURL(blob);
+    });
+  }
+  function cropToB64(img, box) {
+    var iw = img.naturalWidth, ih = img.naturalHeight;
+    var cw = Math.max(2, Math.round((box.x1 - box.x0) * iw)), ch = Math.max(2, Math.round((box.y1 - box.y0) * ih));
+    var sc = Math.min(1, 1600 / Math.max(cw, ch));
+    var cv = document.createElement('canvas');
+    cv.width = Math.round(cw * sc); cv.height = Math.round(ch * sc);
+    cv.getContext('2d').drawImage(img, box.x0 * iw, box.y0 * ih, cw, ch, 0, 0, cv.width, cv.height);
+    return cv.toDataURL('image/jpeg', 0.85).replace(/^data:[^,]*,/, '');
+  }
+  function aiPost(path, b64, ac) {
+    return fetch(AI_API + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: b64 }),
+      signal: ac ? ac.signal : undefined
+    }).then(function (r) {
+      return r.json().catch(function () { return null; }).then(function (j) {
+        if (j) return j;
+        throw { code: r.status === 429 ? 'rate' : 'ai_fail' };
+      });
+    }).catch(function (e) {
+      if (e && e.code) throw e;
+      if (e && e.name === 'AbortError') throw { code: 'abort' };
+      throw { code: 'ai_fail' };
+    });
+  }
+  function startAiFlow(photoId) {
+    if (E.ai || E.stage) return;
+    aiConsent().then(function (ok) {
+      if (!ok) { startStage(photoId); return; }
+      runAiFlow(photoId);
+    });
+  }
+  function cancelAi() {
+    if (E.ai && E.ai.ac) { try { E.ai.ac.abort(); } catch (e) {} }
+    E.ai = null;
+    renderTracePanel();
+  }
+  function aiFallback(photoId, code) {
+    var key = code === 'not_found' ? 'hpe_ai_fail_find'
+      : code === 'rate' ? 'hpe_ai_fail_rate'
+      : code === 'bad_image' ? 'hpe_photo_fail' : 'hpe_ai_fail_net';
+    toastMsg(T(key));
+    E.stageFallback = true;
+    startStage(photoId);
+  }
+  function runAiFlow(photoId) {
+    var ac = ('AbortController' in window) ? new AbortController() : null;
+    E.ai = { photoId: photoId, stage: 1, ac: ac };
+    renderTracePanel();
+    var photo = null, loaded = null;
+    db.photos.get(photoId).then(function (p) {
+      photo = p;
+      if (!p) throw { code: 'bad_image' };
+      return loadPhotoImg(p);
+    }).then(function (r) {
+      loaded = r;
+      if (!E.ai) throw { code: 'abort' };
+      return blobToB64(photo.blob).then(function (b64) { return aiPost('/api/plan/locate', b64, ac); });
+    }).then(function (loc) {
+      if (!E.ai) throw { code: 'abort' };
+      if (!loc) throw { code: 'ai_fail' };
+      if (!loc.ok) throw { code: loc.code || 'ai_fail' };
+      if (!loc.bbox) throw { code: 'not_found' };
+      var bb = loc.bbox;
+      var x0 = bb[0] / 1000, y0 = bb[1] / 1000, x1 = bb[2] / 1000, y1 = bb[3] / 1000;
+      var mx = (x1 - x0) * 0.07, my = (y1 - y0) * 0.07;
+      var box = {
+        x0: Math.max(0, x0 - mx), y0: Math.max(0, y0 - my),
+        x1: Math.min(1, x1 + mx), y1: Math.min(1, y1 + my)
+      };
+      E.ai.stage = 2;
+      renderTracePanel();
+      return aiPost('/api/plan/recognize', cropToB64(loaded.img, box), ac).then(function (rec) {
+        return { rec: rec, box: box };
+      });
+    }).then(function (out) {
+      if (!E.ai) throw { code: 'abort' };
+      var rec = out.rec;
+      if (!rec) throw { code: 'ai_fail' };
+      if (!rec.ok || !rec.result) throw { code: rec.code || 'ai_fail' };
+      var fr = rec.result.frame, box = out.box;
+      function conv(p) {
+        return { x: box.x0 + p[0] / 1000 * (box.x1 - box.x0), y: box.y0 + p[1] / 1000 * (box.y1 - box.y0) };
+      }
+      var corners = [conv(fr.tl), conv(fr.tr), conv(fr.br), conv(fr.bl)];
+      var keep = { img: loaded.img, url: loaded.url };
+      E.ai = null;
+      return applyAiDraft(photoId, keep, corners, rec.result).then(function () {
+        URL.revokeObjectURL(keep.url);
+      });
+    }).catch(function (e) {
+      if (loaded && loaded.url) URL.revokeObjectURL(loaded.url);
+      var code = e && e.code;
+      if (code === 'abort' || !E.ai) { E.ai = null; renderTracePanel(); return; }
+      E.ai = null;
+      aiFallback(photoId, code || 'ai_fail');
+    });
+  }
+  /* 正交多边形 → 矩形分解（AI 非矩形房间轮廓）：按顶点坐标栅格化逐行并段。
+   * 含斜边/过碎时返回 []，调用方回落外接矩形。 */
+  function orthoSplit(poly) {
+    var xs = {}, ys = {}, i;
+    for (i = 0; i < poly.length; i++) {
+      xs[Math.round(poly[i][0] * 20) / 20] = 1;
+      ys[Math.round(poly[i][1] * 20) / 20] = 1;
+    }
+    var X = Object.keys(xs).map(Number).sort(function (a, b) { return a - b; });
+    var Y = Object.keys(ys).map(Number).sort(function (a, b) { return a - b; });
+    if (X.length < 2 || Y.length < 2 || X.length > 14 || Y.length > 14) return [];
+    function inside(cx, cy) {
+      var c = false;
+      for (var a = 0, b = poly.length - 1; a < poly.length; b = a++) {
+        var xa = poly[a][0], ya = poly[a][1], xb = poly[b][0], yb = poly[b][1];
+        if ((ya > cy) !== (yb > cy) && cx < (xb - xa) * (cy - ya) / (yb - ya) + xa) c = !c;
+      }
+      return c;
+    }
+    var out = [];
+    for (var r = 0; r < Y.length - 1; r++) {
+      var run = null;
+      for (var ci = 0; ci < X.length - 1; ci++) {
+        if (inside((X[ci] + X[ci + 1]) / 2, (Y[r] + Y[r + 1]) / 2)) {
+          if (!run) run = { x: X[ci], y: Y[r], w: 0, h: Y[r + 1] - Y[r] };
+          run.w = X[ci + 1] - run.x;
+        } else if (run) { out.push(run); run = null; }
+      }
+      if (run) out.push(run);
+    }
+    return out.filter(function (q) { return q.w >= 0.3 && q.h >= 0.3; });
+  }
+  /* AI 结果（平面坐标 0-1000）→ 编辑器房间/构件（计划单位，0.05 吸附） */
+  function buildAiRooms(res, RW, RH) {
+    var rooms = [], fixtures = [], nQ = 0;
+    function snapU(x) { return Math.round(x * 20) / 20; }
+    function px(v) { return snapU(v / 1000 * RW); }
+    function py(v) { return snapU(v / 1000 * RH); }
+    (res.rooms || []).forEach(function (rm) {
+      var parts = [];
+      if (rm.poly && rm.poly.length >= 4) {
+        parts = orthoSplit(rm.poly.map(function (p) { return [p[0] / 1000 * RW, p[1] / 1000 * RH]; }));
+      }
+      if (!parts.length) {
+        var r = rm.rect;
+        parts = [{ x: px(r[0]), y: py(r[1]), w: Math.max(0, px(r[2]) - px(r[0])), h: Math.max(0, py(r[3]) - py(r[1])) }];
+      }
+      var low = rm.confidence === 'low';
+      parts.forEach(function (pt, ix) {
+        if (pt.w < 0.3 || pt.h < 0.3) return;
+        rooms.push({
+          id: uid(), x: pt.x, y: pt.y, w: pt.w, h: pt.h,
+          name: rm.name || T('hpe_room_def'),
+          type: ROOM_TYPES.indexOf(rm.type) >= 0 ? rm.type : 'other',
+          aiq: low ? 1 : 0
+        });
+        if (low && ix === 0) nQ++;
+      });
+    });
+    /* 门窗：线段中点落位、主方向定朝向（构件尺寸用库内默认，线段长仅作参考） */
+    var OKIND = { door: 'door', sliding_door: 'sdoor', double_door: 'ddoor', window: 'window' };
+    (res.openings || []).forEach(function (o) {
+      var t = OKIND[o.kind]; if (!t) return;
+      var s = o.segment;
+      var x0 = s[0] / 1000 * RW, y0 = s[1] / 1000 * RH, x1 = s[2] / 1000 * RW, y1 = s[3] / 1000 * RH;
+      var low = o.confidence === 'low';
+      fixtures.push({
+        id: uid(), type: t, x: snapU((x0 + x1) / 2), y: snapU((y0 + y1) / 2),
+        rot: Math.abs(x1 - x0) >= Math.abs(y1 - y0) ? 0 : 90, flip: false, aiq: low ? 1 : 0
+      });
+      if (low) nQ++;
+    });
+    /* 洁具/厨电：rect 中心落件（尺寸走构件库默认） */
+    (res.fixtures || []).forEach(function (f) {
+      if (!FIX[f.kind]) return;
+      var r = f.rect, low = f.confidence === 'low';
+      fixtures.push({
+        id: uid(), type: f.kind, x: snapU((r[0] + r[2]) / 2000 * RW), y: snapU((r[1] + r[3]) / 2000 * RH),
+        rot: 0, flip: false, aiq: low ? 1 : 0
+      });
+      if (low) nQ++;
+    });
+    return { rooms: rooms, fixtures: fixtures, nQ: nQ };
+  }
+  /* AI 草稿落地：底图 warp（四角复用手动链的校验/尺寸口径）＋房间构件＋比例标定 */
+  function applyAiDraft(photoId, keep, corners, res) {
+    var img = keep.img;
+    var fakeSt = { photoId: photoId, img: img, natW: img.naturalWidth, natH: img.naturalHeight, corners: corners };
+    var warped = null;
+    if (!quadProblem(fakeSt)) {
+      try {
+        var sz = warpOutSize(fakeSt);
+        warped = { url: warpImage(img, corners, sz.w, sz.h), w: sz.w, h: sz.h };
+      } catch (e) { warped = null; }
+    }
+    function proceed(replace) {
+      pushUndo();
+      var oldTrace = E.plan.trace;
+      if (warped) {
+        var rect = (oldTrace && oldTrace.photoId === photoId && oldTrace.rect) ? oldTrace.rect
+          : { x: 0, y: 0, w: 10, h: Math.round(10 * warped.h / warped.w * 10) / 10 };
+        E.plan.trace = {
+          photoId: photoId, corners: clone(corners), rect: rect,
+          opacity: oldTrace && oldTrace.opacity != null ? oldTrace.opacity : 0.62
+        };
+        E.traceURL = warped.url;
+        E.plan.layers.traceBg = true;
+      }
+      var tr = E.plan.trace;
+      var RW = tr && tr.rect ? tr.rect.w : 10, RH = tr && tr.rect ? tr.rect.h : 10;
+      /* 比例标定：总宽读数优先；只有总面积时按底图长宽比反推宽。
+       * 服务端已滤无原文的假读数；此处标定说明写进 calibNote 请用户核对。 */
+      var hasScale = false;
+      if (res.scale && (res.scale.overall_width_m || res.scale.total_area_m2)) {
+        var wM = res.scale.overall_width_m || Math.sqrt(res.scale.total_area_m2 * RW / RH);
+        if (wM > 0) {
+          E.plan.mPerUnit = wM / RW;
+          E.plan.calibNote = trimNum(wM, 2) + ' m';
+          hasScale = true;
+          setTimeout(function () {
+            toastMsg(TF(T('hpe_ai_scale_note'), res.scale.quote || res.scale.basis || ''));
+          }, 2900);
+        }
+      }
+      var built = null;
+      if (replace) {
+        built = buildAiRooms(res, RW, RH);
+        E.plan.rooms = built.rooms;
+        E.plan.fixtures = built.fixtures;
+        E.plan.liji = null; E.plan.lijiLock = false;
+      }
+      E.view = null; E.sel = null; E.justWarped = false; E.stageFallback = false;
+      afterChange();
+      renderTracePanel();
+      if (!built) { toastMsg(T('hpe_warped')); return Promise.resolve(); }
+      toastMsg(built.nQ ? TF(T('hpe_ai_done'), built.rooms.length, built.nQ) : TF(T('hpe_ai_done0'), built.rooms.length));
+      /* 读数缺失 → 请用户给一个实测总宽度定比例；跳过则先相对比例、后补标定 */
+      if (!hasScale) {
+        return dlgPromptText(T('hpe_ai_scale_q')).then(function (v) {
+          var wv = parseFloat(v);
+          if (v && isFinite(wv) && wv >= 2 && wv <= 60) {
+            pushUndo();
+            E.plan.mPerUnit = wv / RW;
+            E.plan.calibNote = trimNum(wv, 2) + ' m';
+            afterChange();
+            renderTracePanel();
+            toastMsg(TF(T('hpe_ai_scale_user'), trimNum(wv, 2)));
+          }
+        });
+      }
+      return Promise.resolve();
+    }
+    if (E.plan.rooms.length || E.plan.fixtures.length) {
+      return dlgConfirm(T('hpe_ai_replace_warn'), T('hpe_ai_consent_ok')).then(function (yes) {
+        return proceed(yes);
+      });
+    }
+    return proceed(true);
+  }
+
   /* ---------------- 照片上传（编辑器内） ---------------- */
   function compressPhoto(file) {
     var url = URL.createObjectURL(file);
@@ -2973,7 +3277,7 @@
         houseId: E.houseId, floorId: E.floorId,
         cat: 'qita', guideKey: null, blob: blob, ts: Date.now()
       });
-    }).then(function (pid) { startStage(pid); }).catch(function () { toastMsg(T('hpe_photo_fail')); });
+    }).then(function (pid) { startAiFlow(pid); }).catch(function () { toastMsg(T('hpe_photo_fail')); });
   }
 
   /* ---------------- 开关页 ---------------- */

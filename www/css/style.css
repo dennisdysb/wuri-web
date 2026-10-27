@@ -2593,6 +2593,17 @@ body.sky-red .hpe-wall.sel { stroke:#eda88f; }
 .hpe-fix { color:var(--ink-2); cursor:pointer; }
 .hpe-fixhit { fill:transparent; }
 .hpe-fixsel { fill:none; stroke:var(--gold); stroke-dasharray:.18 .12; }
+/* AI 识别：进度转圈＋低置信虚线签（色走变量链；红光另给亮红口径，与 fixsw 同例） */
+.hpe-aispin { display:inline-block; width:15px; height:15px; margin-right:9px; vertical-align:-2px;
+  border:2px solid var(--line); border-top-color:var(--gold-deep); border-radius:50%;
+  animation:hpe-aispin .8s linear infinite; }
+@keyframes hpe-aispin { to { transform:rotate(360deg); } }
+[data-theme="night"] .hpe-aispin { border-top-color:var(--gold); }
+.hpe-fixaiq { fill:none; stroke:var(--cinnabar); }
+.hpe-aiqmark { fill:var(--cinnabar); font-family:var(--serif); font-weight:700; pointer-events:none; }
+body.sky-red .hpe-aispin { border-top-color:#eda88f; }
+body.sky-red .hpe-fixaiq { stroke:#eda88f; }
+body.sky-red .hpe-aiqmark { fill:#eda88f; }
 .hpe-gridln, .hpe-fanln { stroke:var(--gold); opacity:.45; }
 .hpe-cross { stroke:var(--gold); opacity:.5; stroke-dasharray:.22 .16; }
 .hpe-palname { fill:var(--gold-deep); letter-spacing:.1em; }
