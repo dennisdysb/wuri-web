@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# 专项冒烟：编辑器构件库二批九项（内部 v208）
+# 专项冒烟：编辑器构件库二批九项（内部 v209）
 import importlib.util, json, os, re, subprocess, sys, time, urllib.request, base64
 spec = importlib.util.spec_from_file_location("smoke_base", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
 base = importlib.util.module_from_spec(spec); sys.modules["smoke_base"] = base; spec.loader.exec_module(base)
@@ -15,9 +15,9 @@ def rd(p): return open(os.path.join(WWW, p), encoding="utf-8").read()
 idx, sw, i18n = rd("index.html"), rd("sw.js"), rd("js/i18n.js")
 he, css, jw = rd("js/house-editor.js"), rd("css/style.css"), rd("js/jingwen.js")
 
-report("T1 四件套 v208", "wuri-v208-20261027-v230" in sw and "css/style.css?v=208" in idx
-       and "'./css/style.css?v=208'" in sw and i18n.count("（内部 v208）") == 2 and i18n.count("（內部 v208）") == 2
-       and "（内部 v208）" in idx)
+report("T1 四件套 v209", "wuri-v209-20261027-v230" in sw and "css/style.css?v=208" in idx
+       and "'./css/style.css?v=208'" in sw and i18n.count("（内部 v209）") == 2 and i18n.count("（內部 v209）") == 2
+       and "（内部 v209）" in idx)
 fix_keys = re.findall(r"^    (\w+):\s+\{ cat:", he, re.M)
 report("T2 构件总数 43", len(fix_keys) == 43, fix_keys)
 NEW = ["dresser","sideboard","piano","treadmill","ofdesk","kidbed","bunk","ddoor","baldoor","baywin",
