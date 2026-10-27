@@ -49,8 +49,16 @@
 .med-dots{display:flex;justify-content:center;gap:8px;pointer-events:none}
 .med-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.32)}
 .med-dot.on{background:#e8c877;box-shadow:0 0 8px rgba(232,200,119,.8)}
-/* 呼吸态：中央区整体上移，给放大的呼吸圈让位（纯计时态不受影响，2026-10-25 修） */
-#meditation-view.med-breathing .med-center{top:15%}
+/* 呼吸态：中央区整体上移，给放大的呼吸圈让位（纯计时态不受影响，2026-10-25 修）。
+ * 2026-10-26 声音引导设置块加入控制层（呼吸态 +49px），中央区再上移至 10.8%
+ * 补偿，峰值圈底↔说明行间隙保持正值（412×915/390×844 量测 +40/+1.5px）；
+ * 圈径公式（v146 真机定版）不动。 */
+#meditation-view.med-breathing .med-center{top:10.8%}
+#meditation-view.med-breathing .med-controls{gap:9px}
+/* 中高带（741–900px）：圈径由 63vh 项绑定、基线间隙最薄，中央区再上移 0.6% 补足 */
+@media (min-height:741px) and (max-height:900px){
+  #meditation-view.med-breathing .med-center{top:10.2%}
+}
 /* 呼吸圈尺寸/位置（2026-10-26 用户真机反馈改）：圈下移 + 峰值显著放大。
  * --med-circ 基径带高度项：峰值直径=基径×1.35 必须塞进「圆点行底↔底部说明」之间的可用带
  * （该带高≈0.85×屏高−459px），故基径≤(63vh−350px) 时峰值恰好两端各留约 6–7px；
@@ -93,6 +101,17 @@
 .med-custom-go{white-space:nowrap;flex:none}
 .med-bell-row{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.92);font-size:.85rem;
   text-shadow:0 1px 6px rgba(0,0,0,.6)}
+/* 呼吸声音引导设置（闭眼跟随）：仅呼吸态出现，行式与间隔磬行同族 */
+.med-cue-block{width:100%;display:flex;flex-direction:column;align-items:center;gap:5px}
+.med-cue-block[hidden]{display:none}
+.med-cue-row{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+.med-cue-item{display:flex;align-items:center;gap:7px}
+.med-cue-item .med-switch{width:38px;height:22px}
+.med-cue-item .med-switch-ui:before{width:16px;height:16px}
+.med-cue-item .med-switch input:checked+.med-switch-ui:before{transform:translateX(16px)}
+.med-cue-label{color:rgba(255,255,255,.92);font-size:.82rem;text-shadow:0 1px 6px rgba(0,0,0,.6);white-space:nowrap}
+.med-cue-vol{width:min(46%,170px)}
+.med-cue-volrow.off{opacity:.38}
 .med-switch{position:relative;display:inline-block;width:44px;height:25px;flex:none}
 .med-switch input{opacity:0;width:0;height:0}
 .med-switch-ui{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.25);transition:.25s;

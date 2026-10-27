@@ -2019,6 +2019,17 @@
         <span class="med-breath-title">呼吸</span>
         <div class="med-breath-options" id="med-breath-options" aria-label="呼吸型态"></div>
       </div>
+      <div class="med-cue-block" id="med-cue-block" hidden>
+        <div class="med-cue-row">
+          <span class="med-cue-item"><label class="med-switch"><input type="checkbox" id="med-cue-toggle"><span class="med-switch-ui"></span></label><span class="med-cue-label">声音引导</span></span>
+          <span class="med-cue-item"><label class="med-switch"><input type="checkbox" id="med-cue-pad" checked><span class="med-switch-ui"></span></label><span class="med-cue-label">屏息垫音</span></span>
+          <span class="med-cue-item" id="med-cue-vib-item"><label class="med-switch"><input type="checkbox" id="med-cue-vib"><span class="med-switch-ui"></span></label><span class="med-cue-label">振动</span></span>
+        </div>
+        <div class="med-cue-row med-cue-volrow" id="med-cue-volrow">
+          <span class="med-cue-label">引导音量</span>
+          <input type="range" id="med-cue-vol" class="med-vol med-cue-vol" min="0" max="100" value="45" aria-label="引导音量">
+        </div>
+      </div>
       <div class="med-dur-row" id="med-dur-row">
         <button class="med-seg on" data-dur="15">15分钟</button>
         <button class="med-seg" data-dur="30">30分钟</button>

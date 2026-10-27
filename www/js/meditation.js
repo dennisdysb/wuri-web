@@ -30,6 +30,10 @@ var Meditation = (function () {
   var LS_BELL = 'wuri_med_bell';
   var LS_VOL = 'wuri_med_vol';
   var LS_BREATH = 'wuri_med_breath';
+  var LS_CUE = 'wuri_med_cue';
+  var LS_CUE_VOL = 'wuri_med_cuevol';
+  var LS_CUE_PAD = 'wuri_med_cuepad';
+  var LS_CUE_VIB = 'wuri_med_cuevib';
 
   /* 呼吸参数只取事实层（相位秒数），名称说明与引导实现均为本站自撰/自写。 */
   var BREATH_PATTERNS = [
@@ -258,6 +262,9 @@ var Meditation = (function () {
     }
     var box = $('#med-breath');
     if (box) box.hidden = !breathPattern();
+    /* 声音引导设置块同属呼吸区：无型态时不占位 */
+    var cueBlk = $('#med-cue-block');
+    if (cueBlk) cueBlk.hidden = !breathPattern();
     /* 说明已移至控制层（chips 行上方）：显隐跟随型态选择，纯计时态不占位 */
     var noteEl = $('#med-breath-note');
     if (noteEl) noteEl.hidden = !breathPattern();
@@ -298,6 +305,7 @@ var Meditation = (function () {
     breath.remainingMs = breath.durationMs;
     breath.endsAt = Date.now() + breath.durationMs;
     setBreathVisual(phase, phase.meta.from, phase.seconds);
+    cuePhase(phase);
     clearBreathTimer();
     breath.timer = setInterval(updateBreathVisual, 50);
   }
@@ -329,6 +337,7 @@ var Meditation = (function () {
     breath.remainingMs = Math.max(0, breath.endsAt - Date.now());
     breath.active = false;
     clearBreathTimer();
+    cueStopAll();
   }
   function resumeBreath() {
     var p = breathPattern(), phases = breathPhases(p);
@@ -347,9 +356,153 @@ var Meditation = (function () {
     breath.active = false;
     breath.remainingMs = 0;
     breath.phaseIndex = 0;
+    cueStopAll();
     var p = breathPattern(), phases = breathPhases(p);
     renderBreathSelection();
     if (p && phases.length) setBreathVisual(phases[0], phases[0].meta.from, phases[0].seconds);
+  }
+
+  /* ---------- 呼吸声音引导（闭眼跟随） ----------
+   * 相位提示音：WebAudio 合成低音滑音（正弦基频＋二/三谐波＋极轻带通气声，
+   * 柔起柔收），与间隔磬（高音区单下清磬、长衰减）在音区/时长/轮廓三重拉开。
+   * 由相位调度同点触发（beginBreathPhase），不另起时钟；滑音时长随相位缩放、
+   * 封顶 1.2s 且不超过相位长。提示默认音量明显低于间隔磬（独立滑杆）。
+   * 让行：间隔磬将落在提示发声窗口内（或刚鸣 <400ms）时，本相位提示音跳过、
+   * 不叠响、不延迟补响——间隔磬优先。振动是独立无声通道，不受让行影响。
+   * 会话已播时长（sess）只为预测间隔磬时刻：开始/重开清零，暂停折算、继续接续，
+   * 与原生服务/降级定时器同口径（两路间隔磬都按已播时长每 INTERVAL_SEC 一鸣）。 */
+  var CUE_F_LO = 196, CUE_F_HI = 293.66, CUE_F_MID = 246.94;
+  var cue = { ctx: null, master: null, live: [], noiseBuf: null };
+  var sess = { base: 0, since: 0 };
+  function sessElapsedMs() { return sess.since ? sess.base + (Date.now() - sess.since) : sess.base; }
+  function sessReset() { sess.base = 0; sess.since = 0; }
+  function cueOn() { var t = $('#med-cue-toggle'); return t ? t.checked : false; }
+  function cuePadOn() { var t = $('#med-cue-pad'); return t ? t.checked : true; }
+  function cueVibOn() { var t = $('#med-cue-vib'); return t ? t.checked : false; }
+  function cueVol() {
+    var el = $('#med-cue-vol');
+    var v = parseInt((el ? el.value : '45'), 10);
+    return Math.max(0, Math.min(100, isNaN(v) ? 45 : v)) / 100;
+  }
+  function cueMasterGain() { return cueVol() * 0.24; }
+  function cueEnsureCtx() {
+    if (cue.ctx) {
+      if (cue.ctx.state === 'suspended') { try { cue.ctx.resume(); } catch (e) {} }
+      return cue.ctx;
+    }
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    try {
+      cue.ctx = new AC();
+      var lp = cue.ctx.createBiquadFilter();
+      lp.type = 'lowpass'; lp.frequency.value = 1050; lp.Q.value = 0.3;
+      cue.master = cue.ctx.createGain();
+      cue.master.gain.value = cueMasterGain();
+      cue.master.connect(lp); lp.connect(cue.ctx.destination);
+    } catch (e) { cue.ctx = null; cue.master = null; return null; }
+    return cue.ctx;
+  }
+  function cueBellClash(durMs) {
+    if (!bellOn() || !sess.since) return false;
+    var iv = INTERVAL_SEC * 1000, el = sessElapsedMs();
+    var into = el % iv, until = iv - into;
+    if (until <= durMs + 150) return true;      /* 磬将落在提示窗口内 */
+    if (into <= 400 && el >= iv) return true;   /* 磬刚鸣，衰减最响段不叠 */
+    return false;
+  }
+  function cueDurFor(sec) {
+    var d = Math.min(1.2, Math.max(0.45, sec * 0.3));
+    return Math.min(d, sec * 0.95);
+  }
+  function cueTone(kind, sec) {
+    var ctx = cueEnsureCtx();
+    if (!ctx || !cue.master) return;
+    var dur = cueDurFor(sec);
+    if (cueBellClash(dur * 1000)) return;
+    var f0, f1, peak;
+    if (kind === 'inhale') { f0 = CUE_F_LO; f1 = CUE_F_HI; peak = 1; }
+    else if (kind === 'exhale') { f0 = CUE_F_HI; f1 = CUE_F_LO; peak = 1; }
+    else if (kind === 'holdIn') { f0 = f1 = CUE_F_MID; peak = 0.5; }
+    else { f0 = f1 = CUE_F_LO; peak = 0.12; }   /* 呼后屏息：近无声垫音 */
+    var t0 = ctx.currentTime + 0.02;
+    var g = ctx.createGain();
+    var atk = dur * 0.3, relStart = dur * 0.6;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t0 + atk);
+    g.gain.setValueAtTime(Math.max(0.0002, peak), t0 + relStart);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    g.connect(cue.master);
+    var nodes = [];
+    var parts = [[1, 1], [2, 0.32], [3, 0.1]];
+    for (var i = 0; i < parts.length; i++) {
+      var o = ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f0 * parts[i][0], t0);
+      if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1 * parts[i][0], t0 + dur * 0.9);
+      var og = ctx.createGain(); og.gain.value = parts[i][1];
+      o.connect(og); og.connect(g);
+      o.start(t0); o.stop(t0 + dur + 0.05);
+      nodes.push(o);
+    }
+    /* 气声层：带通噪声随滑音频率走，极轻，取埙/箫的气感 */
+    try {
+      if (!cue.noiseBuf) {
+        var len = Math.floor(ctx.sampleRate * 1.5);
+        cue.noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+        var ch = cue.noiseBuf.getChannelData(0);
+        for (var n = 0; n < len; n++) ch[n] = Math.random() * 2 - 1;
+      }
+      var ns = ctx.createBufferSource(); ns.buffer = cue.noiseBuf; ns.loop = true;
+      var bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.1;
+      bp.frequency.setValueAtTime(f0 * 2, t0);
+      if (f1 !== f0) bp.frequency.exponentialRampToValueAtTime(f1 * 2, t0 + dur * 0.9);
+      var ng = ctx.createGain(); ng.gain.value = 0.05;
+      ns.connect(bp); bp.connect(ng); ng.connect(g);
+      ns.start(t0); ns.stop(t0 + dur + 0.05);
+      nodes.push(ns);
+    } catch (e) {}
+    var rec = { g: g, nodes: nodes };
+    cue.live.push(rec);
+    nodes[0].onended = function () {
+      var ix = cue.live.indexOf(rec);
+      if (ix >= 0) cue.live.splice(ix, 1);
+      try { g.disconnect(); } catch (e) {}
+    };
+  }
+  function cueStopAll() {
+    for (var i = 0; i < cue.live.length; i++) {
+      var rec = cue.live[i];
+      for (var j = 0; j < rec.nodes.length; j++) { try { rec.nodes[j].stop(); } catch (e) {} }
+      try { rec.g.disconnect(); } catch (e) {}
+    }
+    cue.live = [];
+    if (navigator.vibrate) { try { navigator.vibrate(0); } catch (e) {} }
+  }
+  function cueVibrate(kind, sec) {
+    if (!navigator.vibrate) return;
+    if (kind === 'holdIn') { try { navigator.vibrate(45); } catch (e) {} return; }
+    if (kind === 'holdOut') return;
+    var total = Math.round(sec * 1000 * 0.85), n = 5, pause = 110, i;
+    var wsum = n * (n + 1) / 2, unit = (total - (n - 1) * pause) / wsum;
+    if (unit < 25) { try { navigator.vibrate(Math.min(220, total)); } catch (e) {} return; }
+    var pat = [];
+    for (i = 0; i < n; i++) {
+      pat.push(Math.round(unit * ((kind === 'inhale') ? (i + 1) : (n - i))));
+      if (i < n - 1) pat.push(pause);
+    }
+    try { navigator.vibrate(pat); } catch (e) {}
+  }
+  function cuePhase(phase) {
+    if (!playing || !phase || !phase.meta) return;
+    var key = phase.meta.key, sec = phase.seconds;
+    if (cueVibOn()) cueVibrate(key, sec);
+    if (!cueOn()) return;
+    if ((key === 'holdIn' || key === 'holdOut') && !cuePadOn()) return;
+    cueTone(key, sec);
+  }
+  function renderCueVolState() {
+    var vr = $('#med-cue-volrow');
+    if (vr) vr.classList.toggle('off', !cueOn());
   }
 
   /* ---------- 时长 / 选项 ---------- */
@@ -382,6 +535,13 @@ var Meditation = (function () {
     $('#med-custom-go').hidden = (dur !== 'custom');
     $('#med-bell-toggle').checked = lsGet(LS_BELL, '1') === '1';
     $('#med-vol').value = lsGet(LS_VOL, '70');
+    var cueT = $('#med-cue-toggle'); if (cueT) cueT.checked = lsGet(LS_CUE, '0') === '1';
+    var cueV = $('#med-cue-vol'); if (cueV) cueV.value = lsGet(LS_CUE_VOL, '45');
+    var cueP = $('#med-cue-pad'); if (cueP) cueP.checked = lsGet(LS_CUE_PAD, '1') === '1';
+    var cueVb = $('#med-cue-vib'); if (cueVb) cueVb.checked = lsGet(LS_CUE_VIB, '0') === '1';
+    var vibItem = $('#med-cue-vib-item');
+    if (vibItem && !navigator.vibrate) vibItem.style.display = 'none';
+    renderCueVolState();
     breathId = lsGet(LS_BREATH, 'off');
     if (breathId !== 'off' && !breathPattern()) breathId = 'off';
     renderBreathSelection();
@@ -424,6 +584,7 @@ var Meditation = (function () {
       fbStart(s, totalSec);
     }
     playing = true;
+    sess.base = 0; sess.since = Date.now();
     updatePlayBtn();
     showTime(totalSec);
     startPoll();
@@ -438,6 +599,7 @@ var Meditation = (function () {
       if (b) { try { b.medPause(); } catch (e) {} }
       else fbPause();
       playing = false;
+      if (sess.since) { sess.base += Date.now() - sess.since; sess.since = 0; }
       pauseBreath();
       releaseWakeLock();
       updatePlayBtn();
@@ -447,6 +609,7 @@ var Meditation = (function () {
       if (b2) { try { b2.medResume(); } catch (e) {} }
       else fbResume();
       playing = true;
+      sess.since = Date.now();
       updatePlayBtn();
       startPoll();
       resumeBreath();
@@ -474,6 +637,7 @@ var Meditation = (function () {
     expectDone = false;
     seenActive = false;
     playing = false;
+    sessReset();
     stopPoll();
     stopBreath();
     releaseWakeLock();
@@ -494,6 +658,7 @@ var Meditation = (function () {
     if (b) { try { b.medStop(); } catch (e) {} }
     else fbStop();
     playing = false;
+    sessReset();
     expectDone = false;
     seenActive = false;
     stopPoll();
@@ -717,6 +882,25 @@ var Meditation = (function () {
       }
       if (fb.ambient) { try { fb.ambient.volume = v; } catch (e) {} }
     });
+    $('#med-cue-toggle').addEventListener('change', function () {
+      lsSet(LS_CUE, this.checked ? '1' : '0');
+      renderCueVolState();
+      if (this.checked) cueEnsureCtx();
+      else cueStopAll();
+    });
+    $('#med-cue-vol').addEventListener('input', function () {
+      lsSet(LS_CUE_VOL, this.value);
+      if (cue.master && cue.ctx) {
+        try { cue.master.gain.setTargetAtTime(cueMasterGain(), cue.ctx.currentTime, 0.03); } catch (e) {}
+      }
+    });
+    $('#med-cue-pad').addEventListener('change', function () {
+      lsSet(LS_CUE_PAD, this.checked ? '1' : '0');
+    });
+    $('#med-cue-vib').addEventListener('change', function () {
+      lsSet(LS_CUE_VIB, this.checked ? '1' : '0');
+      if (!this.checked && navigator.vibrate) { try { navigator.vibrate(0); } catch (e) {} }
+    });
     $('#med-again').addEventListener('click', function () {
       $('#med-done').hidden = true;
       startPlayback(getSelectedDuration());
@@ -733,6 +917,19 @@ var Meditation = (function () {
       // 无滚动方案：resize 无需处理
     });
   }
+
+  /* 冒烟专用钩子（非产品 API）：缩短间隔磬周期以构造提示让行场景 + 读引导引擎状态 */
+  window.__medTest = {
+    setBellIntervalSec: function (s) { if (s && s > 0) INTERVAL_SEC = s; },
+    cueState: function () {
+      return {
+        on: cueOn(), pad: cuePadOn(), vib: cueVibOn(), vol: cueVol(),
+        ctx: cue.ctx ? cue.ctx.state : 'none',
+        master: (cue.master ? cue.master.gain.value : -1),
+        live: cue.live.length, elapsedMs: Math.round(sessElapsedMs())
+      };
+    }
+  };
 
   /* 物理返回键（MainActivity 经 evaluateJavascript 调用） */
   window.__wuriOnBack = function () {
