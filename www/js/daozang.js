@@ -206,6 +206,7 @@
       if (body && !body.hidden) renderCats(body);
     });
   }
+  window.__wuri_dzOpenWork = openWork;
   window.__wuri_dzCatalog = function (host) {
     if (!host || host.querySelector('[data-dz-fold]')) return;
     renderFold(host);

@@ -369,6 +369,83 @@ var JingWen = (function () {
     });
   }
 
+  /* 打开阅读器并定位到指定节（每日一经直达卷/章锚点）：门控与 openReader 同口径，
+   * 渲染后展开目标节并滚到节首。secIdx 为底本节序（与池内 n、书签 data-sec 同一坐标）。 */
+  /* 内容字计数（与 daozang.js 高亮投影同口径：剥标点与空白后的字数）。
+   * 标点版/原文版内容字逐字同序，故段锚偏移跨模式恒定。 */
+  var DZ_STRIP_RE = /[\s。，、；：？！·…—「」『』﹝﹞（）《》〈〉“”‘’％\/().,;:?!%]/g;
+  function dzContentLen(el) {
+    var c = el.cloneNode(true);
+    var kill = c.querySelectorAll('rt, rp');
+    for (var i = 0; i < kill.length; i++) kill[i].remove();
+    return c.textContent.replace(DZ_STRIP_RE, '').length;
+  }
+  /* 在某节正文内按内容字偏移找目标段（卷内分段单位的段锚） */
+  function paraAtContentOff(body, off) {
+    var ps = body.querySelectorAll('p.jing-para');
+    var acc = 0, target = null;
+    for (var i = 0; i < ps.length; i++) {
+      target = ps[i];
+      acc += dzContentLen(ps[i]);
+      if (acc > off) break;
+    }
+    return target;
+  }
+  /* 跳到第 secIdx 节并展开（懒填充卷先填后展）；charOff>0 时再定位到节内对应段 */
+  function jumpToSec(secIdx, charOff) {
+    if (secIdx == null) return;
+    var sec = document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"]');
+    if (!sec) return;
+    var body = sec.querySelector('.jing-sec-body');
+    if (body) {
+      if (body.hasAttribute('data-lazy') && window.__wuri_dzFill) { try { window.__wuri_dzFill(secIdx); } catch (e) {} }
+      if (body.hidden) toggleSection(secIdx);
+    }
+    setTimeout(function () {
+      var target = sec;
+      if (charOff > 0 && body) target = paraAtContentOff(body, charOff) || sec;
+      target.scrollIntoView({ block: 'start' });
+    }, 120);
+  }
+  /* 全藏开卷是异步取文：轮询等阅读器就绪后跳锚 */
+  function dzPollJump(id, secIdx, charOff, tries) {
+    if (window._jingCurrentId === id &&
+        document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"]')) {
+      jumpToSec(secIdx, charOff);
+      return;
+    }
+    if (tries > 0) setTimeout(function () { dzPollJump(id, secIdx, charOff, tries - 1); }, 200);
+  }
+  function openReaderAt(id, secIdx, charOff, _retry) {
+    if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
+    if (/^KR5/.test(id || '')) {
+      /* 全藏正文走 daozang.js 的取文/开卷路径（其内另有一道门控），开卷后跳锚 */
+      if (!isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
+      if (typeof window.__wuri_dzOpenWork === 'function') {
+        window.__wuri_dzOpenWork(id);
+        dzPollJump(id, secIdx, charOff || 0, 40);
+      } else if (typeof openReader === 'function') {
+        openReader(id);
+        dzPollJump(id, secIdx, charOff || 0, 40);
+      }
+      return;
+    }
+    ensureLoaded(id, function () {
+      var d = window.JINGWEN && JINGWEN[id];
+      if (!d) {
+        if (!_retry) {
+          loaded[id] = null;
+          setTimeout(function () { openReaderAt(id, secIdx, charOff, true); }, 300);
+        }
+        return;
+      }
+      prepJingPunct(d, function () {
+        renderReaderBody(id, d);
+        jumpToSec(secIdx, charOff || 0);
+      });
+    });
+  }
+
   function renderReaderBody(id, d) {
       currentId = id;
       window._jingCurrentId = id;
@@ -1715,7 +1792,7 @@ var JingWen = (function () {
 
   document.addEventListener('DOMContentLoaded', init);
   window.closeReader = closeReader; // 供 Android 系统返回键调用
-  return { openReader: openReader, search: search, closeReader: closeReader, isNeidan: isNeidan, resetToCatalog: resetToCatalog };
+  return { openReader: openReader, openReaderAt: openReaderAt, search: search, closeReader: closeReader, isNeidan: isNeidan, resetToCatalog: resetToCatalog };
 })();
 
 /* ---------- 敲磬 ---------- */
@@ -1816,6 +1893,7 @@ var JingWen = (function () {
   });
   // 暴露给外部调用（每日经文推荐等）
   window.JingOpenReader = (typeof JingWen !== 'undefined' && JingWen.openReader) ? JingWen.openReader : null;
+  window.JingOpenReaderAt = (typeof JingWen !== 'undefined' && JingWen.openReaderAt) ? JingWen.openReaderAt : null;
 })();
 
 /* ---------- 书签·高亮·心得（仅内丹书籍） ---------- */

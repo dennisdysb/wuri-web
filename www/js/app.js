@@ -747,10 +747,18 @@ var JING_RECOMMEND_BY_DATE = {
   '12-8':'s10', '12-16':'s09', '12-22':'s13', '12-24':'s10',
   'dongzhi':'s09', 'xiazhi':'s09' // 冬至元始天尊圣诞、夏至灵宝天尊圣诞
 };
-/* 无神诞对应时的通用经轮推：按（经文,章节）轮推，一天一章 */
-var JING_RECOMMEND_FALLBACK = ['s07', 's26', 's10', 's01', 's02', 's11', 's14'];
-/* 各经章节数（2026-10-09 实测）：多章节的按天轮章 */
-var JING_CHAPTER_COUNT = { s07: 81, s26: 1, s10: 1, s01: 67, s02: 19, s11: 33, s14: 1 };
+/* 每日一经轮换池（2026-10-27 用户批准方案，取代旧 7 部兜底轮推）：
+ * 主池＝常见经文 29 部按节拆 296 单位＋副池＝道藏全集正选 202 部拆 540 单位，
+ * 合计 836 个单位（js/daily-jing.js，由 gen-daily-jing.py 生成，副池名单见
+ * wuri-app/daily-pool/SUBPOOL-DRAFT.md 用户批准稿；题解主池人工表、副池源出草案入选理由）。
+ * 按本地日期序号（epoch 天数）在池内顺序轮换：所有用户同日同经、池尽才重样。 */
+function dailyJingUnitForDay(dayNum) {
+  var pool = window.DAILY_JING_POOL || [];
+  if (!pool.length) return null;
+  var idx = ((dayNum % pool.length) + pool.length) % pool.length;
+  return pool[idx];
+}
+window.__dailyJingUnitForDay = dailyJingUnitForDay; /* 冒烟/调试探针 */
 function recommendJing(l) {
   var sdn = shendanName(l);
   var reason = '日常熏修', sid = null;
@@ -778,23 +786,25 @@ function recommendJing(l) {
     if (!sid) reason = sdn.split('、')[0];
   }
   if (!sid) {
-    // 兜底：按日期轮推（一部经内按章节轮，一天一章）
-    var doy = 0;
+    // 每日一经：按日期序号在 836 单位池内顺序轮换（同日同经）
+    var dayNum = 0;
     try {
       var s = l.getSolar();
-      var start = new Date(s.getYear(), 0, 1);
-      var cur = new Date(s.getYear(), s.getMonth() - 1, s.getDay());
-      doy = Math.floor((cur - start) / 86400000);
+      dayNum = Math.floor(Date.UTC(s.getYear(), s.getMonth() - 1, s.getDay()) / 86400000);
     } catch (e) {}
-    // 先选经（7部轮），再在该经内按天轮章节
-    var fSid = JING_RECOMMEND_FALLBACK[doy % JING_RECOMMEND_FALLBACK.length];
-    var chCount = JING_CHAPTER_COUNT[fSid] || 1;
-    // 用 doy 除以 7 的商来轮章节，保证同一部经连续多天推不同章节
-    var secIdx = chCount > 1 ? Math.floor(doy / JING_RECOMMEND_FALLBACK.length) % chCount : 0;
-    return { sid: fSid, reason: reason, secIdx: chCount > 1 ? secIdx : null };
+    var u = dailyJingUnitForDay(dayNum);
+    if (u) {
+      return {
+        sid: u.s, reason: reason === '日常熏修' ? '每日一经' : reason,
+        secIdx: u.n, secTitle: u.h || '全文', gloss: u.g, minutes: u.m, unitTitle: u.t,
+        charOff: u.p || 0
+      };
+    }
+    // 池数据缺失时的最后兜底（不应发生）
+    return { sid: 's26', reason: reason, secIdx: null, secTitle: null };
   }
   // 神诞日：推整部经文（不指定章节）
-  return { sid: sid, reason: reason, secIdx: null };
+  return { sid: sid, reason: reason, secIdx: null, secTitle: null };
 }
 function jingTitleById(sid) {
   try {
@@ -1244,9 +1254,11 @@ function buildNotifications() {
       try {
         var rec = recommendJing(l);
         var recTitle = jingTitleById(rec.sid);
-        // 章节信息：日常轮推精确到章，神诞日推整部
+        // 章节信息：每日一经精确到卷/章（用池内卷章题），神诞日推整部
         var chapStr = '';
-        if (rec.secIdx != null) {
+        if (rec.secTitle) {
+          chapStr = ' · ' + rec.secTitle;
+        } else if (rec.secIdx != null) {
           chapStr = ' · 第' + (rec.secIdx + 1) + '章';
         }
         pushNotif(list, nidJingRec(o.y, o.m, o.d),
@@ -1586,6 +1598,21 @@ function bindKindTiming(ns, cfg) {
   syncKind();
 }
 
+/* 每日一经直达：切到经文页并打开阅读器、定位到当日卷/章锚点 */
+function openJingRec(rec) {
+  var tabBtn = document.querySelector('[data-tab="tab-jing"]');
+  if (tabBtn) tabBtn.click();
+  setTimeout(function () {
+    try {
+      if (rec.secIdx != null && typeof window.JingOpenReaderAt === 'function') {
+        window.JingOpenReaderAt(rec.sid, rec.secIdx, rec.charOff || 0);
+      } else if (typeof window.JingOpenReader === 'function') {
+        window.JingOpenReader(rec.sid);
+      }
+    } catch (e) {}
+  }, 300);
+}
+
 /* 提醒页控件绑定 */
 function bindRemind() {
   /* 2026-10-11: 提醒页已改为 ICS 生成 UI，此处只绑定每日经文推荐 */
@@ -1594,33 +1621,38 @@ function bindRemind() {
     var l = lunarOf(td.y, td.m, td.d);
     var rec = recommendJing(l);
     var titleEl = $('#jingrec-title');
+    var unitEl = $('#jingrec-unit');
+    var glossEl = $('#jingrec-gloss');
     var reasonEl = $('#jingrec-reason');
     var goBtn = $('#jingrec-go');
+    var card = $('#jingrec-card');
     if (rec && rec.sid) {
-      // 直接查 JINGWEN_INDEX，不依赖 JingTitleOf（v1.2.9 fix：JingTitleOf 可能未定义）
-      var jt = rec.sid;
-      try {
-        if (typeof window.JingTitleOf === 'function') {
-          jt = window.JingTitleOf(rec.sid);
-        } else if (window.JINGWEN_INDEX) {
-          for (var i = 0; i < window.JINGWEN_INDEX.length; i++) {
-            if (window.JINGWEN_INDEX[i].id === rec.sid) { jt = window.JINGWEN_INDEX[i].title; break; }
+      // 池内单位自带经名；神诞直配走索引查名（v1.2.9 口径：不依赖 JingTitleOf）
+      var jt = rec.unitTitle || rec.sid;
+      if (!rec.unitTitle) {
+        try {
+          if (typeof window.JingTitleOf === 'function') {
+            jt = window.JingTitleOf(rec.sid);
+          } else if (window.JINGWEN_INDEX) {
+            for (var i = 0; i < window.JINGWEN_INDEX.length; i++) {
+              if (window.JINGWEN_INDEX[i].id === rec.sid) { jt = window.JINGWEN_INDEX[i].title; break; }
+            }
           }
-        }
-      } catch (e) {}
-      if (titleEl) titleEl.textContent = jt;
-      if (reasonEl) reasonEl.textContent = rec.reason || '';
-      if (goBtn) {
-        goBtn.onclick = function () {
-          var tabBtn = document.querySelector('[data-tab="tab-jing"]');
-          if (tabBtn) tabBtn.click();
-          setTimeout(function () {
-            try {
-              if (typeof window.JingOpenReader === 'function') window.JingOpenReader(rec.sid);
-            } catch (e) {}
-          }, 300);
-        };
+        } catch (e) {}
       }
+      if (titleEl) titleEl.textContent = jt;
+      if (unitEl) {
+        unitEl.textContent = rec.secTitle
+          ? txPoem(rec.secTitle) + (rec.minutes ? ' · 约' + rec.minutes + '分钟' : '')
+          : '';
+      }
+      if (glossEl) glossEl.textContent = rec.gloss ? txPoem(rec.gloss) : '';
+      if (reasonEl) reasonEl.textContent = rec.reason || '';
+      var open = function () { openJingRec(rec); };
+      if (goBtn) {
+        goBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); open(); };
+      }
+      if (card) card.onclick = open; /* 整卡可点，与按钮同效 */
     } else {
       if (titleEl) titleEl.textContent = '暂无推荐';
     }

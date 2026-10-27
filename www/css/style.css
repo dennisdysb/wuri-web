@@ -357,10 +357,18 @@ body::before{
 
 /* ---------- 提醒 ---------- */
 .row-between{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0}
-/* 每日经文推荐：标题整行、按钮移到文字下方靠右（2026-10-14 长经名不再被按钮挤成孤字换行） */
-#jingrec-card .row-between{flex-direction:column;align-items:stretch;gap:10px}
-#jingrec-card .row-between>div{flex:1;min-width:0}
-#jingrec-go{flex:none;white-space:nowrap;padding:9px 16px;font-size:.95rem;border-radius:999px;align-self:flex-end}
+/* 每日一经卡（2026-10-27 重排）：经名/卷章题/题解三行文本＋底行。
+ * 「去读经」固定在底行左侧——右下角是悬浮置顶钮（.to-top，fixed right:18px bottom:118px）的
+ * 地盘，按钮靠右必被压（2026-10-27 用户实测反馈）；底行右侧只放 reason 小字（非点击区）。
+ * 整卡可点（bindRemind 绑 card.onclick），与按钮同效直达当日卷章锚点。 */
+#jingrec-card{cursor:pointer}
+.jingrec-book{font-family:var(--serif);font-size:1.12rem;font-weight:700;color:var(--ink);line-height:1.45}
+.jingrec-unit{margin-top:2px;font-size:.92rem;color:var(--gold-deep)}
+[data-theme="night"] .jingrec-unit{color:var(--gold)}
+.jingrec-gloss{margin-top:6px;font-size:.9rem;line-height:1.6;color:var(--ink-2)}
+.jingrec-foot{display:flex;align-items:center;gap:12px;margin-top:12px}
+#jingrec-go{flex:none;white-space:nowrap;padding:9px 16px;font-size:.95rem;border-radius:999px}
+.jingrec-reason{flex:1;min-width:0;text-align:right;font-size:.82rem;color:var(--ink-2)}
 /* 卡片紧凑头：标题左、按钮同行靠右（2026-10-14 我的日子） */
 .card-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .card-head-t{font-family:var(--serif);color:var(--ink-2);font-size:1.02rem;letter-spacing:.28em;font-weight:700;flex:none;white-space:nowrap}
