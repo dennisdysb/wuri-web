@@ -2698,3 +2698,87 @@ body.sky-red .hpe-hint b { color:#eda88f; }
 .hpe-floorrow:first-child { border-top:none; }
 .hpe-floorrow.on { color:var(--gold-deep); font-weight:600; }
 .hpe-floorrow .ck { margin-left:auto; color:var(--gold-deep); }
+
+/* ============ 户型编辑 · 模拟人生式托盘（2026-10-26 操作层重做） ============
+ * 零模式：底部横滑托盘（房间地砖预设＋构件＋工具），拖放为主、点选点放兜底；
+ * 房间按类型主题色浅染成「地砖」，九宫/罗盘/八宅皆为叠层；构件带砂/水小签。
+ * 配色全走主题变量与 color-mix 变量混合，红光自 body.sky-red 变量链与全局
+ * svg 滤镜接管，本段零写死色。 */
+.hpe-tray { flex:none; position:relative; background:var(--card); border-top:1px solid var(--line); z-index:5; }
+.hpe-armed { padding:5px 12px 0; font-size:.72rem; color:var(--gold-deep); letter-spacing:.06em; }
+[data-theme="night"] .hpe-armed { color:var(--gold); }
+body.sky-red .hpe-armed { color:#eda88f; }
+.hpe-armed[hidden] { display:none; }
+.hpe-tray-scroll { display:flex; gap:14px; overflow-x:auto; overflow-y:hidden; padding:7px 10px 9px;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.hpe-tray-scroll::-webkit-scrollbar { display:none; }
+.hpe-tgroup { flex:none; display:flex; flex-direction:column; gap:4px; }
+.hpe-tgname { font-size:.62rem; letter-spacing:.24em; color:var(--faint); padding-left:2px; }
+.hpe-tgrow { display:flex; gap:7px; }
+.hpe-tile2 { flex:none; width:62px; border:1px solid var(--line-soft); border-radius:10px; background:var(--paper-2);
+  padding:5px 2px 4px; text-align:center; cursor:grab; color:var(--ink-2); position:relative;
+  touch-action:pan-x; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+[data-theme="night"] .hpe-tile2 { background:var(--paper-2); }
+.hpe-tile2 .sw { display:block; width:34px; height:24px; margin:0 auto; border-radius:5px; border:1px solid var(--line); }
+.hpe-tile2 svg { margin:0 auto; display:block; }
+.hpe-tile2 .n { margin-top:3px; font-size:.66rem; letter-spacing:.08em; color:var(--ink-2); line-height:1.25; white-space:nowrap; overflow:hidden; }
+.hpe-tile2 .d { font-size:.56rem; color:var(--faint); line-height:1.2; white-space:nowrap; }
+.hpe-tile2.hot { border-color:var(--gold); background:var(--gold-wash); box-shadow:0 0 0 1px var(--gold) inset; }
+.hpe-tile2.act { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:52px; gap:2px; }
+.hpe-tile2.act .n { font-size:.72rem; letter-spacing:.16em; }
+.hpe-tile2 .gic { font-size:1rem; line-height:1; color:var(--gold-deep); font-family:var(--serif); }
+[data-theme="night"] .hpe-tile2 .gic { color:var(--gold); }
+body.sky-red .hpe-tile2 .gic { color:#eda88f; }
+.hpe-swbdg { position:absolute; top:3px; right:3px; min-width:15px; height:15px; line-height:15px; padding:0 3px;
+  border-radius:8px; font-size:.56rem; text-align:center; color:var(--card); background:var(--gold); }
+.hpe-swbdg.shui { background:var(--teal); }
+.hpe-ghost { position:fixed; z-index:99; pointer-events:none; opacity:.82; transform:translate(-50%,-50%) scale(1.12);
+  filter:drop-shadow(0 6px 14px var(--line)); }
+.hpe-ghost .hpe-tile2 { cursor:grabbing; }
+/* 房间地砖：按类型浅染（color-mix 变量×卡面，不支持时回落宣纸深） */
+.hpe-roomrect { fill:var(--paper-2); }
+.hpe-rt-living   { fill:var(--gold-wash); fill:color-mix(in srgb, var(--gold) 17%, var(--card)); }
+.hpe-rt-dining   { fill:var(--gold-wash); fill:color-mix(in srgb, var(--gold) 10%, var(--card)); }
+.hpe-rt-master   { fill:var(--teal-wash); fill:color-mix(in srgb, var(--teal) 16%, var(--card)); }
+.hpe-rt-bedroom  { fill:var(--teal-wash); fill:color-mix(in srgb, var(--teal) 10%, var(--card)); }
+.hpe-rt-study    { fill:var(--teal-wash); fill:color-mix(in srgb, var(--teal) 13%, var(--card)); }
+.hpe-rt-kitchen  { fill:var(--gold-wash); fill:color-mix(in srgb, var(--cinnabar) 8%, var(--card)); }
+.hpe-rt-bath     { fill:var(--teal-wash); fill:color-mix(in srgb, var(--teal) 22%, var(--card)); }
+.hpe-rt-balcony  { fill:var(--paper-2);  fill:color-mix(in srgb, var(--gold) 6%, var(--card)); }
+.hpe-rt-entry    { fill:var(--paper-2); }
+.hpe-rt-hall     { fill:var(--paper-2);  fill:color-mix(in srgb, var(--ink) 4%, var(--card)); }
+.hpe-rt-storage  { fill:var(--paper-2);  fill:color-mix(in srgb, var(--ink) 7%, var(--card)); }
+.hpe-rt-other    { fill:var(--paper-2); }
+.hpe-roomrect.sel { stroke:var(--gold); }
+/* 构件砂/水小签（图内） */
+.hpe-fixsw { pointer-events:none; paint-order:stroke; stroke:var(--card); stroke-width:.14em; }
+.hpe-fixsw.sha { fill:var(--gold-deep); }
+.hpe-fixsw.shui { fill:var(--teal); }
+[data-theme="night"] .hpe-fixsw.sha { fill:var(--gold); }
+body.sky-red .hpe-fixsw.sha { fill:#eda88f; }
+/* 罗盘叠图 */
+.hpe-rose-ring { fill:none; stroke:var(--gold); opacity:.75; }
+.hpe-rose-ring.thin { stroke:var(--line); opacity:.9; }
+.hpe-rose-sec { fill:none; stroke:var(--line-soft); }
+.hpe-rose-sec.alt { fill:var(--gold); opacity:.06; stroke:var(--line-soft); }
+.hpe-rose-tick { stroke:var(--gold); opacity:.65; }
+.hpe-rose-mtn { fill:var(--ink-2); font-family:var(--serif); }
+.hpe-rose-mtn.card { fill:var(--cinnabar); font-weight:700; }
+.hpe-rose-mtn.gua { fill:var(--gold-deep); font-weight:700; }
+[data-theme="night"] .hpe-rose-mtn.gua { fill:var(--gold); }
+body.sky-red .hpe-rose-mtn.gua { fill:#eda88f; }
+.hpe-rose-gua { fill:var(--gold-deep); font-family:var(--serif); font-weight:600; }
+[data-theme="night"] .hpe-rose-gua { fill:var(--gold); }
+body.sky-red .hpe-rose-gua { fill:#eda88f; }
+.hpe-rose-mark { fill:var(--cinnabar); }
+.hpe-rose-marktxt { fill:var(--cinnabar); font-family:var(--serif); font-weight:700; }
+/* 补角法提示签 */
+.hpe-bujiao { cursor:pointer; }
+.hpe-bujiao rect { fill:var(--card); stroke:var(--cinnabar); stroke-width:.05; stroke-dasharray:.16 .1; }
+.hpe-bujiao text { fill:var(--cinnabar); letter-spacing:.04em; }
+/* 模板选择 */
+.hpe-tpls { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:10px; }
+.hpe-tpl { border:1px solid var(--line); border-radius:12px; background:var(--paper-2); padding:11px 12px; cursor:pointer; }
+.hpe-tpl b { font-family:var(--serif); font-size:.95rem; letter-spacing:.14em; color:var(--ink); font-weight:600; display:block; }
+.hpe-tpl span { font-size:.7rem; color:var(--faint); }
+.hpe-tpl:active { border-color:var(--gold); background:var(--gold-wash); }

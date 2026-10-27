@@ -48,21 +48,44 @@
 
   /* ---------------- 构件符号库（12+2 件，风水敏感优先，单色线刻） ----------------
    * art 为 bw×bh 盒内路径（stroke currentColor 口径），渲染时按 w×h 米缩放。 */
+  /* sw＝金锁玉关内五行砂/水属性（本批只落数据与标识，逐宫判定下批）：
+   * 砂 sha＝床位/锅灶/神位/办公桌/电器/橱柜（高、实）；水 shui＝门/窗/楼梯/厕/浴/鱼缸（低、空、动）。 */
   var FIX = {
-    door:     { cat: 'doorwin', w: 0.9, h: 0.9, box: [30, 30], wall: 1, art: '<path d="M3 27 V3 A24 24 0 0 1 27 27" fill="none" stroke-dasharray="2.5 2.5"/><path d="M3 27 V4" stroke-width="2.6" fill="none"/>' },
-    sdoor:    { cat: 'doorwin', w: 1.5, h: 0.3, box: [30, 6], wall: 1, art: '<path d="M1 1.5 H29 M1 4.5 H29 M8 0 V6 M22 0 V6" fill="none"/>' },
-    window:   { cat: 'doorwin', w: 1.5, h: 0.3, box: [30, 7], wall: 1, art: '<path d="M1 1 H29 M1 3.5 H29 M1 6 H29 M15 1 V6" fill="none"/>' },
-    stairs:   { cat: 'stairs', w: 1.0, h: 2.8, box: [30, 84], art: '<path d="M3 6 H27 M3 18 H27 M3 30 H27 M3 42 H27 M3 54 H27 M3 66 H27 M3 78 H27" fill="none"/><path d="M15 80 V10 M11.5 16 L15 8 L18.5 16" fill="none"/>' },
-    bed:      { cat: 'furn', w: 1.5, h: 2.0, box: [30, 40], art: '<rect x="2" y="2" width="26" height="36" fill="none"/><path d="M2 11 H28 M15 2 V11" fill="none"/>' },
-    sofa:     { cat: 'furn', w: 1.8, h: 0.9, box: [36, 18], art: '<rect x="3" y="3" width="30" height="12" rx="4" fill="none"/><path d="M3 9 H0 M33 9 H36 M9 15 v3 M27 15 v3" fill="none"/>' },
-    desk:     { cat: 'furn', w: 1.2, h: 0.6, box: [30, 15], art: '<rect x="2" y="2" width="26" height="11" fill="none"/><path d="M2 9 H28" fill="none"/>' },
-    wardrobe: { cat: 'furn', w: 1.2, h: 0.6, box: [30, 15], art: '<rect x="2" y="2" width="26" height="11" fill="none"/><path d="M15 2 V13" fill="none"/>' },
-    stove:    { cat: 'kitchen', w: 0.62, h: 0.62, box: [30, 30], art: '<rect x="2" y="2" width="26" height="26" fill="none"/><circle cx="10" cy="10" r="3.6" fill="none"/><circle cx="21" cy="10" r="2.5" fill="none"/><circle cx="10" cy="21" r="2.5" fill="none"/><circle cx="21" cy="21" r="3.6" fill="none"/>' },
-    toilet:   { cat: 'kitchen', w: 0.46, h: 0.72, box: [20, 30], art: '<rect x="3" y="1" width="14" height="6" fill="none"/><ellipse cx="10" cy="19" rx="7" ry="9" fill="none"/>' },
-    tub:      { cat: 'kitchen', w: 1.7, h: 0.78, box: [34, 16], art: '<rect x="2" y="2" width="30" height="12" rx="6" fill="none"/><circle cx="8" cy="8" r="2.4" fill="none"/>' },
-    fridge:   { cat: 'kitchen', w: 0.7, h: 0.7, box: [30, 30], art: '<rect x="4" y="2" width="22" height="26" fill="none"/><path d="M4 11 H26" fill="none"/>' },
-    shrine:   { cat: 'feng', w: 0.6, h: 0.34, box: [30, 17], art: '<path d="M3 15 V7 L15 2 L27 7 V15 Z" fill="none"/><circle cx="15" cy="10.5" r="2.4" fill="none"/>' },
-    tank:     { cat: 'feng', w: 1.2, h: 0.5, box: [30, 12], art: '<rect x="2" y="2" width="26" height="9" fill="none"/><path d="M6 8 q3 -3 6 0 q3 3 6 0 q3 -3 6 0" fill="none"/>' }
+    door:     { cat: 'doorwin', sw: 'shui', w: 0.9, h: 0.9, box: [30, 30], wall: 1, art: '<path d="M3 27 V3 A24 24 0 0 1 27 27" fill="none" stroke-dasharray="2.5 2.5"/><path d="M3 27 V4" stroke-width="2.6" fill="none"/>' },
+    sdoor:    { cat: 'doorwin', sw: 'shui', w: 1.5, h: 0.3, box: [30, 6], wall: 1, art: '<path d="M1 1.5 H29 M1 4.5 H29 M8 0 V6 M22 0 V6" fill="none"/>' },
+    window:   { cat: 'doorwin', sw: 'shui', w: 1.5, h: 0.3, box: [30, 7], wall: 1, art: '<path d="M1 1 H29 M1 3.5 H29 M1 6 H29 M15 1 V6" fill="none"/>' },
+    stairs:   { cat: 'stairs', sw: 'shui', w: 1.0, h: 2.8, box: [30, 84], art: '<path d="M3 6 H27 M3 18 H27 M3 30 H27 M3 42 H27 M3 54 H27 M3 66 H27 M3 78 H27" fill="none"/><path d="M15 80 V10 M11.5 16 L15 8 L18.5 16" fill="none"/>' },
+    bed:      { cat: 'furn', sw: 'sha', w: 1.5, h: 2.0, box: [30, 40], art: '<rect x="2" y="2" width="26" height="36" fill="none"/><path d="M2 11 H28 M15 2 V11" fill="none"/>' },
+    sofa:     { cat: 'furn', sw: null, w: 1.8, h: 0.9, box: [36, 18], art: '<rect x="3" y="3" width="30" height="12" rx="4" fill="none"/><path d="M3 9 H0 M33 9 H36 M9 15 v3 M27 15 v3" fill="none"/>' },
+    desk:     { cat: 'furn', sw: 'sha', w: 1.2, h: 0.6, box: [30, 15], art: '<rect x="2" y="2" width="26" height="11" fill="none"/><path d="M2 9 H28" fill="none"/>' },
+    wardrobe: { cat: 'furn', sw: 'sha', w: 1.2, h: 0.6, box: [30, 15], art: '<rect x="2" y="2" width="26" height="11" fill="none"/><path d="M15 2 V13" fill="none"/>' },
+    stove:    { cat: 'kitchen', sw: 'sha', w: 0.62, h: 0.62, box: [30, 30], art: '<rect x="2" y="2" width="26" height="26" fill="none"/><circle cx="10" cy="10" r="3.6" fill="none"/><circle cx="21" cy="10" r="2.5" fill="none"/><circle cx="10" cy="21" r="2.5" fill="none"/><circle cx="21" cy="21" r="3.6" fill="none"/>' },
+    toilet:   { cat: 'kitchen', sw: 'shui', w: 0.46, h: 0.72, box: [20, 30], art: '<rect x="3" y="1" width="14" height="6" fill="none"/><ellipse cx="10" cy="19" rx="7" ry="9" fill="none"/>' },
+    tub:      { cat: 'kitchen', sw: 'shui', w: 1.7, h: 0.78, box: [34, 16], art: '<rect x="2" y="2" width="30" height="12" rx="6" fill="none"/><circle cx="8" cy="8" r="2.4" fill="none"/>' },
+    fridge:   { cat: 'kitchen', sw: 'sha', w: 0.7, h: 0.7, box: [30, 30], art: '<rect x="4" y="2" width="22" height="26" fill="none"/><path d="M4 11 H26" fill="none"/>' },
+    shrine:   { cat: 'feng', sw: 'sha', w: 0.6, h: 0.34, box: [30, 17], art: '<path d="M3 15 V7 L15 2 L27 7 V15 Z" fill="none"/><circle cx="15" cy="10.5" r="2.4" fill="none"/>' },
+    tank:     { cat: 'feng', sw: 'shui', w: 1.2, h: 0.5, box: [30, 12], art: '<rect x="2" y="2" width="26" height="9" fill="none"/><path d="M6 8 q3 -3 6 0 q3 3 6 0 q3 -3 6 0" fill="none"/>' }
+  };
+  /* 托盘房间预设（地砖）：类型＋默认尺寸（米），名取类型名 */
+  var ROOM_PRESETS = [
+    { type: 'living', w: 4.4, h: 3.6 }, { type: 'master', w: 3.8, h: 3.4 },
+    { type: 'bedroom', w: 3.2, h: 3.0 }, { type: 'kitchen', w: 2.6, h: 2.4 },
+    { type: 'dining', w: 3.0, h: 2.6 }, { type: 'bath', w: 2.2, h: 1.7 },
+    { type: 'study', w: 2.8, h: 2.6 }, { type: 'balcony', w: 3.2, h: 1.3 },
+    { type: 'entry', w: 1.8, h: 1.5 }, { type: 'hall', w: 3.0, h: 1.1 },
+    { type: 'storage', w: 1.6, h: 1.4 }, { type: 'other', w: 3.0, h: 3.0 }
+  ];
+  /* 户型模板（蒙特利尔常见公寓型；尺寸近似、单位米，[type,x,y,w,h]，原点为外框左上） */
+  var TEMPLATES = {
+    t1: { lab: 'hpe_tpl_1', rooms: [
+      ['kitchen', 0, 0, 2.2, 2.2], ['dining', 2.2, 0, 2.6, 2.2], ['bath', 4.8, 0, 2.0, 2.2], ['balcony', 6.8, 0, 2.2, 2.2],
+      ['living', 0, 2.2, 4.8, 3.2], ['master', 4.8, 2.2, 4.2, 3.2]] },
+    t2: { lab: 'hpe_tpl_2', rooms: [
+      ['kitchen', 0, 0, 2.4, 2.2], ['dining', 2.4, 0, 2.4, 2.2], ['bath', 4.8, 0, 2.0, 2.2], ['bath', 6.8, 0, 1.8, 2.2], ['balcony', 8.6, 0, 1.8, 2.2],
+      ['living', 0, 2.2, 4.8, 4.2], ['master', 4.8, 2.2, 2.8, 4.2], ['bedroom', 7.6, 2.2, 2.8, 4.2]] },
+    t3: { lab: 'hpe_tpl_3', rooms: [
+      ['kitchen', 0, 0, 2.4, 2.3], ['dining', 2.4, 0, 2.6, 2.3], ['bath', 5.0, 0, 2.0, 2.3], ['bath', 7.0, 0, 1.9, 2.3], ['study', 8.9, 0, 2.7, 2.3],
+      ['living', 0, 2.3, 5.0, 4.7], ['master', 5.0, 2.3, 3.3, 4.7], ['bedroom', 8.3, 2.3, 3.3, 4.7]] }
   };
   var FIX_CATS = ['doorwin', 'stairs', 'furn', 'kitchen', 'feng'];
   var ROOM_TYPES = ['living', 'master', 'bedroom', 'kitchen', 'dining', 'bath', 'study', 'balcony', 'entry', 'hall', 'storage', 'other'];
@@ -87,7 +110,7 @@
     return {
       floorId: floorId, houseId: houseId, updated: 0, mPerUnit: 1,
       rooms: [], fixtures: [], trace: null, liji: null, calibNote: '',
-      layers: { rooms: true, fixtures: true, dims: true, overlay: 'fx', palNames: true, roomNames: true, traceBg: true, ovOpacity: 0.92 }
+      layers: { rooms: true, fixtures: true, dims: true, overlay: 'fx', palNames: true, roomNames: true, traceBg: true, ovOpacity: 0.92, compRadius: 0 }
     };
   }
   function normalizePlan(p) {
@@ -260,7 +283,7 @@
         var sel = E.sel && E.sel.kind === 'room' && E.sel.id === r.id;
         var fsN = Math.max(u * 2.6, Math.min(r.w, r.h) * 0.16);
         s += '<g data-act="room" data-id="' + r.id + '">' +
-          '<rect class="hpe-roomrect' + (sel ? ' sel' : '') + (E.mode === 'trace' ? ' trace' : '') + '" x="' + r.x + '" y="' + r.y +
+          '<rect class="hpe-roomrect hpe-rt-' + (r.type || 'other') + (sel ? ' sel' : '') + (E.mode === 'trace' ? ' trace' : '') + '" x="' + r.x + '" y="' + r.y +
           '" width="' + r.w + '" height="' + r.h + '" stroke-width="' + (u * (sel ? 0.3 : 0.16)) + '"/>' +
           (L.roomNames && r.name ? '<text class="hpe-roomname" x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fsN * 0.37) +
             '" text-anchor="middle" font-size="' + fsN + '">' + esc(r.name) + '</text>' : '') +
@@ -281,7 +304,9 @@
           '<rect class="hpe-fixhit" x="' + (f.x - wU / 2) + '" y="' + (f.y - hU / 2) + '" width="' + wU + '" height="' + hU + '"/>' +
           (sel ? '<rect class="hpe-fixsel" x="' + (f.x - wU / 2) + '" y="' + (f.y - hU / 2) + '" width="' + wU + '" height="' + hU + '" stroke-width="' + (u * 0.2) + '"/>' : '') +
           '<g transform="translate(' + f.x + ' ' + f.y + ') rotate(' + (f.rot || 0) + ') scale(' + (wU / d.box[0] * (f.flip ? -1 : 1)) + ' ' + (hU / d.box[1]) + ') translate(' + (-d.box[0] / 2) + ' ' + (-d.box[1] / 2) + ')">' +
-          '<g stroke="currentColor" stroke-width="' + (30 / Math.max(d.box[0], d.box[1]) * 1.1) + '" fill="none" stroke-linecap="round">' + d.art + '</g></g></g>';
+          '<g stroke="currentColor" stroke-width="' + (30 / Math.max(d.box[0], d.box[1]) * 1.1) + '" fill="none" stroke-linecap="round">' + d.art + '</g></g>' +
+          (d.sw ? '<text class="hpe-fixsw ' + d.sw + '" x="' + (f.x + wU / 2 + u * 0.4) + '" y="' + (f.y - hU / 2 - u * 0.5) + '" text-anchor="end" font-size="' + (u * 1.8) + '">' + esc(T('hpe_sw_' + d.sw)) + '</text>' : '') +
+          '</g>';
       });
     }
     /* 选中房间：手柄＋尺寸胶囊 */
@@ -291,6 +316,16 @@
     }
     /* 立极 */
     s += renderLiji(u);
+    /* 补角法提示：房间轮廓明显缺角时在立极旁给签（课件补齐方正法一系） */
+    var bj = missingCornerInfo();
+    if (bj && L.rooms) {
+      var lp = lijiPoint();
+      var bjTxt = T('hpe_bujiao_tag');
+      var bjFs = u * 1.8, bjW = bjTxt.length * bjFs * 0.98 + u * 2.2, bjH = bjFs * 1.7;
+      var bx = Math.min(Math.max(lp.x - bjW / 2, vx + u), vx + vw - bjW - u);
+      s += '<g class="hpe-bujiao" data-act="bujiao"><rect x="' + bx + '" y="' + (lp.y + u * 6.6) + '" width="' + bjW + '" height="' + bjH + '" rx="' + (u * 0.8) + '"/>' +
+        '<text x="' + (bx + bjW / 2) + '" y="' + (lp.y + u * 6.6 + bjFs * 1.24) + '" text-anchor="middle" font-size="' + bjFs + '">' + esc(bjTxt) + '</text></g>';
+    }
     /* 校准标记 */
     if (E.calibPts.length) {
       s += E.calibPts.map(function (pt, i) {
@@ -379,12 +414,86 @@
             '<text class="hpe-fandir" x="' + (g.cx + v.x) + '" y="' + (g.cy + v.y + u * 3.4) + '" text-anchor="middle" font-size="' + (u * 1.7) + '">' + esc(txs(pl.name)) + '</text>';
         });
       }
+    } else if (L.overlay === 'compass') {
+      s += compassRose(u, g);
     }
     return s + '</g>';
   }
+  /* 罗盘叠图：以立极（太极点）为圆心，八卦扇区＋24 山环；方向锁死定稿坐向
+   * （屏幕正上＝向首，山位按 bearing−facing 投影，与 gridRect/screenVec 同一口径，
+   * 图内不可旋转，改向回档案定稿）。24 山/八卦数据取 FS24/FS_TRI（fengshui-data.js）。 */
+  function compassRadius(g) {
+    var L = E.plan.layers;
+    if (L.compRadius > 0) return L.compRadius;
+    return Math.min(g.w, g.h) / 2 * 0.96;
+  }
+  function compassRose(u, g) {
+    var R = compassRadius(g);
+    var cx = g.cx, cy = g.cy, fd = E.fixed.facingDeg;
+    function pt(bearing, r) {
+      var d = (bearing - fd) * Math.PI / 180;
+      return [cx + Math.sin(d) * r, cy - Math.cos(d) * r];
+    }
+    var s = '';
+    /* 八卦扇区：每卦 45°，隔卦浅染 */
+    if (window.FS_TRI) FS_TRI.forEach(function (tr, i) {
+      var a0 = tr[1] - 22.5, a1 = tr[1] + 22.5;
+      var p0 = pt(a0, R), p1 = pt(a1, R);
+      s += '<path class="hpe-rose-sec' + (i % 2 ? ' alt' : '') + '" d="M' + cx + ' ' + cy + ' L' + p0[0].toFixed(2) + ' ' + p0[1].toFixed(2) +
+        ' A' + R + ' ' + R + ' 0 0 1 ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2) + ' Z"/>';
+    });
+    /* 圈环 */
+    s += '<circle class="hpe-rose-ring" cx="' + cx + '" cy="' + cy + '" r="' + R + '" stroke-width="' + (u * 0.22) + '"/>' +
+      '<circle class="hpe-rose-ring thin" cx="' + cx + '" cy="' + cy + '" r="' + (R * 0.84) + '" stroke-width="' + (u * 0.12) + '"/>' +
+      '<circle class="hpe-rose-ring thin" cx="' + cx + '" cy="' + cy + '" r="' + (R * 0.62) + '" stroke-width="' + (u * 0.12) + '"/>' +
+      '<circle class="hpe-rose-ring thin" cx="' + cx + '" cy="' + cy + '" r="' + (R * 0.2) + '" stroke-width="' + (u * 0.12) + '"/>';
+    /* 刻度：每山一格，卦界加长 */
+    if (window.FS24) FS24.forEach(function (m) {
+      var lon = (m.angle % 45 === 0);
+      var q0 = pt(m.angle, R * (lon ? 0.94 : 0.965)), q1 = pt(m.angle, R);
+      s += '<line class="hpe-rose-tick" x1="' + q0[0].toFixed(2) + '" y1="' + q0[1].toFixed(2) + '" x2="' + q1[0].toFixed(2) + '" y2="' + q1[1].toFixed(2) + '" stroke-width="' + (u * 0.14) + '"/>';
+      var mp = pt(m.angle, R * 0.9);
+      var cls = 'hpe-rose-mtn' + ((window.FS_CARDINAL && FS_CARDINAL[m.name]) ? ' card' : '') + ((window.FS_GUA_MTN && FS_GUA_MTN[m.name]) ? ' gua' : '');
+      s += '<text class="' + cls + '" x="' + mp[0].toFixed(2) + '" y="' + mp[1].toFixed(2) + '" text-anchor="middle" dominant-baseline="central" font-size="' + (R * 0.062) + '">' + esc(m.name) + '</text>';
+    });
+    /* 八卦名（卦位中半径） */
+    if (window.FS_TRI) FS_TRI.forEach(function (tr) {
+      var gp = pt(tr[1], R * 0.42);
+      s += '<text class="hpe-rose-gua" x="' + gp[0].toFixed(2) + '" y="' + gp[1].toFixed(2) + '" text-anchor="middle" dominant-baseline="central" font-size="' + (R * 0.11) + '">' + esc(tr[0]) + '</text>';
+    });
+    /* 向首标记（屏幕正上＝向，朱砂三角＋「向」字） */
+    s += '<path class="hpe-rose-mark" d="M' + cx + ' ' + (cy - R - u * 1.1) + ' l' + (u * 1.1) + ' ' + (u * 1.9) + ' h' + (-u * 2.2) + ' Z"/>' +
+      '<text class="hpe-rose-marktxt" x="' + cx + '" y="' + (cy - R - u * 2.6) + '" text-anchor="middle" font-size="' + (u * 2.2) + '">' + esc(T('hpe_facing_mark')) + '</text>';
+    return s;
+  }
+  /* 缺角检测：房间并集对外框四角的覆盖——任一角区（外框 32% 见方）无房面，
+   * 且并集覆盖率 <92%，判为明显缺角（与课件「补角法」触发口径一致，只提示不改盘）。 */
+  function missingCornerInfo() {
+    var p = E.plan;
+    if (!p || !p.rooms.length) return null;
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, area = 0;
+    p.rooms.forEach(function (r) {
+      x0 = Math.min(x0, r.x); y0 = Math.min(y0, r.y);
+      x1 = Math.max(x1, r.x + r.w); y1 = Math.max(y1, r.y + r.h);
+      area += r.w * r.h;
+    });
+    var W = x1 - x0, H = y1 - y0;
+    if (W <= 0 || H <= 0) return null;
+    var cover = area / (W * H);
+    var cw = W * 0.32, chh = H * 0.32;
+    var corners = [
+      { x: x0, y: y0 }, { x: x1 - cw, y: y0 }, { x: x0, y: y1 - chh }, { x: x1 - cw, y: y1 - chh }
+    ];
+    var miss = corners.some(function (c) {
+      return !p.rooms.some(function (r) {
+        return r.x < c.x + cw && r.x + r.w > c.x && r.y < c.y + chh && r.y + r.h > c.y;
+      });
+    });
+    return (miss && cover < 0.92) ? { cover: cover } : null;
+  }
   function renderLiji(u) {
     var l = lijiPoint();
-    var drag = E.mode === 'layers';
+    var drag = true; /* 模拟人生式：立极随时可拖（旧版仅图层页可拖），叠层圆心随之 */
     return '<g ' + (drag ? 'data-act="liji"' : '') + ' class="hpe-liji' + (drag ? ' drag' : '') + '">' +
       '<line class="hpe-cross" x1="' + l.x + '" y1="' + (l.y - u * 4.4) + '" x2="' + l.x + '" y2="' + (l.y + u * 4.4) + '" stroke-width="' + (u * 0.12) + '"/>' +
       '<line class="hpe-cross" x1="' + (l.x - u * 4.4) + '" y1="' + l.y + '" x2="' + (l.x + u * 4.4) + '" y2="' + l.y + '" stroke-width="' + (u * 0.12) + '"/>' +
@@ -425,25 +534,34 @@
     var sh = $('hpe-sheet'), sc = $('hpe-scrim'), ib = $('hpe-infobox'), tt = $('hpe-sheet-title');
     var open = !!E.sheet;
     if (sh) sh.hidden = !open;
-    /* 遮罩只罩说明/楼层（须先抉择），模式抽屉非模态：画布上方保持可点（选件→点图放置） */
-    if (sc) sc.hidden = !(open && E.sheet !== 'mode');
+    /* 遮罩只罩须先抉择的层（楼层/说明/模板），图层/描图抽屉非模态：画布保持可点 */
+    if (sc) sc.hidden = !(open && (E.sheet === 'floors' || E.sheet === 'info' || E.sheet === 'tpl'));
     if (ib) ib.hidden = E.sheet !== 'info';
     if (tt) tt.textContent = E.sheet === 'floors' ? T('hpe_floors')
       : E.sheet === 'info' ? T('hpe_info')
-      : T('hpe_mode_' + E.mode);
+      : E.sheet === 'layers' ? T('hpe_mode_layers')
+      : E.sheet === 'trace' ? T('hpe_mode_trace')
+      : E.sheet === 'tpl' ? T('hpe_tpl_title')
+      : '';
     layoutAttr();
   }
   function showSheet(kind) {
     E.sheet = kind;
-    if (kind === 'mode') renderPanel();
-    else if (kind === 'floors') renderFloorsBar();
+    /* 描图层开合驱动 E.mode（onDown 拉框/校准与房间 trace 描边样式仍按 mode 走） */
+    if (kind === 'trace') E.mode = 'trace';
+    else if (E.mode === 'trace') { E.mode = 'draw'; E.calibArm = false; E.calibPts = []; }
+    if (kind === 'floors') renderFloorsBar();
     else if (kind === 'info') {
       var p = $('hpe-panel'); if (p) p.innerHTML = '';
       var h = $('hpe-hint'); if (h) h.textContent = '';
-    }
+    } else if (kind === 'layers' || kind === 'trace' || kind === 'tpl') renderPanel();
     syncSheet();
   }
-  function closeSheet() { E.sheet = null; syncSheet(); }
+  function closeSheet() {
+    E.sheet = null;
+    if (E.mode === 'trace') { E.mode = 'draw'; E.calibArm = false; E.calibPts = []; render(); }
+    syncSheet();
+  }
   /* 属性条定位：无抽屉时贴舞台底；抽屉开时让到抽屉上沿之上，不被压住 */
   function layoutAttr() {
     var at = $('hpe-attr'); if (!at) return;
@@ -496,77 +614,208 @@
   }
   function renderPanel() {
     var box = $('hpe-panel'); if (!box) return;
-    var seg = $('hpe-seg');
-    if (seg) Array.prototype.forEach.call(seg.children, function (el) {
-      el.classList.toggle('on', el.getAttribute('data-mode') === E.mode);
-    });
-    /* 说明/楼层层占着面板区时，模式面板不覆写（属性条在外层、自理） */
+    /* 楼层/说明层占着面板区时不覆写（属性条在外层、自理） */
     if (E.sheet === 'floors' || E.sheet === 'info') { renderAttr(); return; }
     var hint = $('hpe-hint');
-    if (E.mode === 'draw') {
-      box.innerHTML = '<div class="hpe-sub">' +
-        chip('hpe-snap', T('hpe_snap'), E.snap) +
-        chip('hpe-gridsw', T('hpe_grid'), E.grid) +
-        chip('hpe-addroom', T('hpe_add_room'), false) +
-        '<span class="hpe-saved" id="hpe-saved"></span></div>';
-      if (hint) hint.innerHTML = T('hpe_hint_draw');
-      bindDrawPanel();
-    } else if (E.mode === 'parts') {
-      var tiles = Object.keys(FIX).filter(function (k) { return FIX[k].cat === E.fixCat; }).map(function (k) {
-        return '<div class="hpe-tile' + (E.placeType === k ? ' hot' : '') + '" data-fix="' + k + '">' +
-          '<svg width="27" height="27" viewBox="0 0 ' + FIX[k].box[0] + ' ' + FIX[k].box[1] + '" preserveAspectRatio="xMidYMid meet">' +
-          '<g stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round">' + FIX[k].art + '</g></svg>' +
-          '<div class="n">' + esc(T('hpe_fix_' + k)) + '</div></div>';
-      }).join('');
-      box.innerHTML = '<div class="hpe-drawer"><div class="dt"><b>' + esc(T('hpe_lib')) + '</b><span>' + esc(T('hpe_lib_hint')) + '</span></div>' +
-        '<div class="hpe-cats">' + FIX_CATS.map(function (c) {
-          return '<span class="hpe-chip' + (E.fixCat === c ? ' on' : '') + '" data-fixcat="' + c + '">' + esc(T('hpe_cat_' + c)) + '</span>';
-        }).join('') + '</div>' +
-        '<div class="hpe-tiles">' + tiles + '</div></div>';
-      if (hint) hint.innerHTML = T('hpe_hint_parts');
-      Array.prototype.forEach.call(box.querySelectorAll('[data-fixcat]'), function (el) {
-        el.addEventListener('click', function () { E.fixCat = el.getAttribute('data-fixcat'); renderPanel(); });
-      });
-      Array.prototype.forEach.call(box.querySelectorAll('[data-fix]'), function (el) {
-        el.addEventListener('click', function () {
-          E.placeType = E.placeType === el.getAttribute('data-fix') ? null : el.getAttribute('data-fix');
-          renderPanel();
-        });
-      });
-    } else if (E.mode === 'trace') {
+    if (E.sheet === 'trace') {
       box.innerHTML = '<div id="hpe-tracebox"></div>';
       if (hint) hint.innerHTML = T('hpe_hint_trace');
       renderTracePanel();
-    } else {
+    } else if (E.sheet === 'layers') {
       box.innerHTML = '<div id="hpe-layerbox"></div>';
       if (hint) hint.innerHTML = T('hpe_hint_layers');
       renderLayersPanel();
+    } else if (E.sheet === 'tpl') {
+      box.innerHTML = '<div id="hpe-tplbox"></div>';
+      if (hint) hint.innerHTML = '';
+      renderTplPanel();
+    } else {
+      box.innerHTML = '';
+      if (hint) hint.innerHTML = '';
     }
     renderAttr();
   }
-  function bindDrawPanel() {
-    var sn = $('hpe-snap'); if (sn) sn.addEventListener('click', function () { E.snap = !E.snap; renderPanel(); render(); });
-    var gr = $('hpe-gridsw'); if (gr) gr.addEventListener('click', function () { E.grid = !E.grid; renderPanel(); render(); });
-    var ad = $('hpe-addroom'); if (ad) ad.addEventListener('click', addRoom);
+  /* 模板面板：空层自动弹；已有房间时亦可从托盘「模板」再开（只替换房间块） */
+  function renderTplPanel() {
+    var box = $('hpe-tplbox'); if (!box) return;
+    var empty = !E.plan.rooms.length && !(E.plan.trace && E.plan.trace.rect);
+    box.innerHTML = '<p class="hpe-note" style="margin-top:2px">' + esc(empty ? T('hpe_tpl_empty') : T('hpe_tpl_note')) + '</p>' +
+      '<div class="hpe-tpls">' +
+      Object.keys(TEMPLATES).map(function (k) {
+        var tp = TEMPLATES[k];
+        return '<div class="hpe-tpl" data-tpl="' + k + '"><b>' + esc(T(tp.lab)) + '</b><span>' + esc(TF(T('hpe_tpl_rooms_n'), tp.rooms.length)) + '</span></div>';
+      }).join('') +
+      '<div class="hpe-tpl" data-tpl="blank"><b>' + esc(T('hpe_tpl_blank')) + '</b><span>0</span></div>' +
+      '</div>' + (empty ? '' : '<p class="hpe-note">' + esc(T('hpe_tpl_note')) + '</p>');
+    Array.prototype.forEach.call(box.querySelectorAll('[data-tpl]'), function (el) {
+      el.addEventListener('click', function () {
+        var k = el.getAttribute('data-tpl');
+        closeSheet();
+        if (k !== 'blank') applyTemplate(k);
+      });
+    });
   }
-  function addRoom() {
+  function applyTemplate(key) {
+    var tp = TEMPLATES[key]; if (!tp) return;
     pushUndo();
-    var b = extent();
-    var w = toU(3.6), h = toU(3.0);
-    var n = E.plan.rooms.length + 1;
-    var r = {
-      id: uid(), x: (b.x0 + b.x1) / 2 - w / 2 + n * 0.3, y: (b.y0 + b.y1) / 2 - h / 2 + n * 0.3,
-      w: w, h: h, name: TF(T('hpe_room_n'), n), type: 'other'
-    };
+    var counts = {};
+    var rooms = tp.rooms.map(function (rr) {
+      var type = rr[0];
+      counts[type] = (counts[type] || 0) + 1;
+      var nm = T('hpe_rt_' + type) + (counts[type] > 1 ? counts[type] : '');
+      return { id: uid(), x: toU(rr[1]), y: toU(rr[2]), w: toU(rr[3]), h: toU(rr[4]), name: nm, type: type };
+    });
+    /* 居中到原点附近，与手绘默认范围对齐 */
+    var mx = 0, my = 0;
+    tp.rooms.forEach(function (rr) { mx = Math.max(mx, rr[1] + rr[3]); my = Math.max(my, rr[2] + rr[4]); });
+    var ox = toU(mx) / 2, oy = toU(my) / 2;
+    rooms.forEach(function (r) { r.x -= ox; r.y -= oy; });
+    E.plan.rooms = rooms;
+    E.plan.liji = null;
+    E.sel = null; E.vb = null;
+    afterChange();
+  }
+
+  /* ---------------- 托盘（模拟人生式目录条） ----------------
+   * 拖放为主：tile 上 pointer 拖影跟随、松手落位；点选→点放为兜底
+   * （房间单发、构件连发，与旧构件库手感一致）。 */
+  function placeRoomAt(type, pt) {
+    var pr = null;
+    ROOM_PRESETS.forEach(function (x) { if (x.type === type) pr = x; });
+    if (!pr) return;
+    pushUndo();
+    var w = toU(pr.w), h = toU(pr.h);
+    var x = pt.x - w / 2, y = pt.y - h / 2;
+    if (E.grid) { var stp = toU(0.1); x = snapVal(x, stp); y = snapVal(y, stp); }
+    var r = { id: uid(), x: x, y: y, w: w, h: h, name: T('hpe_rt_' + type), type: type };
     E.plan.rooms.push(r);
     E.sel = { kind: 'room', id: r.id };
+    E.arm = null; syncTray();
     afterChange();
+  }
+  function placeFixAt(type, pt) {
+    if (!FIX[type]) return;
+    pushUndo();
+    var nf = { id: uid(), type: type, x: pt.x, y: pt.y, rot: 0, flip: false };
+    wallSnap(nf, pt);
+    E.plan.fixtures.push(nf);
+    E.sel = { kind: 'fixture', id: nf.id };
+    afterChange();
+  }
+  function cycleOverlay() {
+    if (!E.plan) return;
+    var seq = ['fx', 'compass', 'bz', 'none'];
+    var i = seq.indexOf(E.plan.layers.overlay);
+    E.plan.layers.overlay = seq[(i + 1) % seq.length];
+    E.chartCache = null;
+    save(); render(); renderTray();
+    if (E.sheet === 'layers') renderLayersPanel();
+  }
+  function renderTray() {
+    var sc = $('hpe-tray-scroll'); if (!sc) return;
+    var h = '<div class="hpe-tgroup"><div class="hpe-tgname">' + esc(T('hpe_tray_rooms')) + '</div><div class="hpe-tgrow">' +
+      ROOM_PRESETS.map(function (pr) {
+        return '<div class="hpe-tile2" data-tile="room" data-key="' + pr.type + '">' +
+          '<svg class="sw" width="34" height="24" viewBox="0 0 34 24"><rect class="hpe-rt-' + pr.type + '" style="stroke:var(--line)" x="0.5" y="0.5" width="33" height="23" rx="5"/></svg>' +
+          '<div class="n">' + esc(T('hpe_rt_' + pr.type)) + '</div><div class="d">' + trimNum(pr.w, 1) + '×' + trimNum(pr.h, 1) + ' m</div></div>';
+      }).join('') + '</div></div>';
+    FIX_CATS.forEach(function (c) {
+      var ks = Object.keys(FIX).filter(function (k) { return FIX[k].cat === c; });
+      h += '<div class="hpe-tgroup"><div class="hpe-tgname">' + esc(T('hpe_cat_' + c)) + '</div><div class="hpe-tgrow">' +
+        ks.map(function (k) {
+          var d = FIX[k];
+          return '<div class="hpe-tile2" data-tile="fix" data-key="' + k + '">' +
+            (d.sw ? '<span class="hpe-swbdg ' + d.sw + '">' + esc(T('hpe_sw_' + d.sw)) + '</span>' : '') +
+            '<svg width="30" height="27" viewBox="0 0 ' + d.box[0] + ' ' + d.box[1] + '" preserveAspectRatio="xMidYMid meet">' +
+            '<g stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round">' + d.art + '</g></svg>' +
+            '<div class="n">' + esc(T('hpe_fix_' + k)) + '</div><div class="d">' + trimNum(d.w, 2) + '×' + trimNum(d.h, 2) + ' m</div></div>';
+        }).join('') + '</div></div>';
+    });
+    var ovLab = E.plan ? T('hpe_ov_' + E.plan.layers.overlay) : '';
+    h += '<div class="hpe-tgroup"><div class="hpe-tgname">' + esc(T('hpe_tray_actions')) + '</div><div class="hpe-tgrow">' +
+      '<div class="hpe-tile2 act" data-tile="tpl"><span class="gic">▦</span><div class="n">' + esc(T('hpe_tpl')) + '</div></div>' +
+      '<div class="hpe-tile2 act" data-tile="trace"><span class="gic">✎</span><div class="n">' + esc(T('hpe_mode_trace')) + '</div></div>' +
+      '<div class="hpe-tile2 act" data-tile="ovcycle"><span class="gic">◎</span><div class="n">' + esc(T('hpe_lay_overlay')) + (ovLab ? '·' + esc(ovLab) : '') + '</div></div>' +
+      '</div></div>';
+    sc.innerHTML = h;
+    syncTray();
+  }
+  function syncTray() {
+    var bar = $('hpe-armed');
+    var name = null;
+    if (E.arm && E.arm.kind === 'room') name = T('hpe_rt_' + E.arm.key);
+    else if (E.placeType) name = T('hpe_fix_' + E.placeType);
+    if (bar) {
+      if (name) { bar.hidden = false; bar.textContent = TF(T('hpe_armed'), name); }
+      else { bar.hidden = true; bar.textContent = ''; }
+    }
+    var sc = $('hpe-tray-scroll');
+    if (sc) Array.prototype.forEach.call(sc.querySelectorAll('[data-tile]'), function (el) {
+      var k = el.getAttribute('data-tile'), key = el.getAttribute('data-key');
+      var hot = (k === 'room' && E.arm && E.arm.kind === 'room' && E.arm.key === key) ||
+        (k === 'fix' && E.placeType === key);
+      el.classList.toggle('hot', !!hot);
+    });
+  }
+  function trayDown(e) {
+    var el = e.target.closest ? e.target.closest('[data-tile]') : null;
+    if (!el) return;
+    var kind = el.getAttribute('data-tile');
+    if (kind === 'tpl') { if (E.sheet === 'tpl') closeSheet(); else showSheet('tpl'); return; }
+    if (kind === 'trace') {
+      if (E.stage) cancelStage();
+      if (E.sheet === 'trace') closeSheet(); else showSheet('trace');
+      return;
+    }
+    if (kind === 'ovcycle') { cycleOverlay(); return; }
+    E.trayDrag = { kind: kind, key: el.getAttribute('data-key'), sx: e.clientX, sy: e.clientY, ghost: null, el: el };
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+  }
+  function trayMove(e) {
+    var td = E.trayDrag; if (!td) return;
+    if (!td.ghost) {
+      if (Math.abs(e.clientX - td.sx) + Math.abs(e.clientY - td.sy) < 9) return;
+      var g = document.createElement('div');
+      g.className = 'hpe-ghost';
+      g.innerHTML = td.el.outerHTML;
+      document.body.appendChild(g);
+      td.ghost = g;
+    }
+    td.ghost.style.left = e.clientX + 'px';
+    td.ghost.style.top = e.clientY + 'px';
+  }
+  function trayUp(e) {
+    var td = E.trayDrag; if (!td) return;
+    E.trayDrag = null;
+    var wasDrag = !!td.ghost;
+    if (td.ghost && td.ghost.parentNode) td.ghost.parentNode.removeChild(td.ghost);
+    if (e.type === 'pointercancel') return; /* 横滑托盘被浏览器接管：只清理，不当点选 */
+    if (wasDrag) {
+      var svg = $('hpe-svg');
+      if (svg && E.plan && !E.stage) {
+        var r = svg.getBoundingClientRect();
+        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+          var pt = svgPoint(e);
+          if (td.kind === 'room') placeRoomAt(td.key, pt);
+          else placeFixAt(td.key, pt);
+        }
+      }
+      return;
+    }
+    /* 点选切换待放 */
+    if (td.kind === 'room') {
+      E.arm = (E.arm && E.arm.kind === 'room' && E.arm.key === td.key) ? null : { kind: 'room', key: td.key };
+      E.placeType = null;
+    } else {
+      E.placeType = E.placeType === td.key ? null : td.key;
+      E.arm = null;
+    }
+    syncTray();
   }
 
   /* 属性条（房间/构件共用 #hpe-attr） */
   function renderAttr() {
     var box = $('hpe-attr'); if (!box) return;
-    if (E.mode === 'layers') { box.innerHTML = ''; layoutAttr(); return; }
     if (E.sel && E.sel.kind === 'room') {
       var r = roomById(E.sel.id); if (!r) { box.innerHTML = ''; layoutAttr(); return; }
       var Lm = toM(r.w), Wm = toM(r.h);
@@ -615,6 +864,7 @@
       var d = FIX[f.type];
       box.innerHTML = '<div class="hpe-attr"><div class="t"><b>' + esc(T('hpe_fix_' + f.type)) + '</b>' +
         '<span>' + trimNum(d.w, 2) + ' × ' + trimNum(d.h, 2) + ' m</span>' +
+        (d.sw ? '<span>' + esc(T('hpe_sw_' + d.sw)) + '</span>' : '') +
         '<span>' + esc(T('hpe_rot_lab')) + ' ' + (f.rot || 0) + '°</span></div>' +
         '<div class="ops"><span class="hpe-op" id="hpe-f-rot">' + esc(T('hpe_rotate')) + '</span>' +
         '<span class="hpe-op" id="hpe-f-flip">' + esc(T('hpe_flip')) + '</span>' +
@@ -723,17 +973,24 @@
   function renderLayersPanel() {
     var box = $('hpe-layerbox'); if (!box) return;
     var L = E.plan.layers;
-    box.innerHTML = '<div class="hpe-panel"><h4>' + esc(T('hpe_layers')) + '</h4>' +
+    var gR = gridRect();
+    var defR = Math.min(gR.w, gR.h) / 2 * 0.96;
+    var curPct = L.compRadius > 0 ? Math.round(L.compRadius / defR * 100) : 100;
+    box.innerHTML = '<div class="hpe-panel"><div class="hpe-sub" style="margin-bottom:8px">' +
+      chip('hpe-snap', T('hpe_snap'), E.snap) + chip('hpe-gridsw', T('hpe_grid'), E.grid) +
+      '<span class="hpe-saved" id="hpe-saved"></span></div><h4>' + esc(T('hpe_layers')) + '</h4>' +
       swRow('rooms', T('hpe_lay_rooms')) +
       swRow('fixtures', T('hpe_lay_fixtures')) +
       swRow('dims', T('hpe_lay_dims')) +
       swRow('traceBg', T('hpe_lay_photo'), T('hpe_lay_photo_note')) +
       '<div class="hpe-lrow"><span>' + esc(T('hpe_lay_overlay')) + '</span>' +
       '<span class="hpe-ovseg">' +
-      ['fx', 'bz', 'none'].map(function (k) {
+      ['fx', 'compass', 'bz', 'none'].map(function (k) {
         return '<span class="hpe-ovchip' + (L.overlay === k ? ' on' : '') + '" data-ov="' + k + '">' + esc(T('hpe_ov_' + k)) + '</span>';
       }).join('') + '</span></div>' +
-      (L.overlay !== 'none' ? swRow('palNames', T('hpe_lay_palnames')) : '') +
+      (L.overlay === 'compass' ? '<div class="hpe-lrow"><span>' + esc(T('hpe_compass_radius')) + '</span>' +
+        '<input type="range" class="hpe-range grow" id="hpe-compradius" min="40" max="160" value="' + curPct + '"></div>' : '') +
+      (L.overlay === 'fx' ? swRow('palNames', T('hpe_lay_palnames')) : '') +
       (L.overlay !== 'none' && !E.fixed ? '<p class="hpe-note">' + esc(T('hpe_ov_nofixed')) + '</p>' : '') +
       (L.overlay !== 'none' ? '<div class="hpe-lrow"><span>' + esc(T('hpe_ov_opacity')) + '</span>' +
         '<input type="range" class="hpe-range grow" id="hpe-ovopacity" min="30" max="100" value="' + Math.round((L.ovOpacity == null ? 0.92 : L.ovOpacity) * 100) + '"></div>' : '') +
@@ -750,9 +1007,16 @@
       el.addEventListener('click', function () {
         E.plan.layers.overlay = el.getAttribute('data-ov');
         E.chartCache = null;
-        save(); render(); renderLayersPanel();
+        save(); render(); renderLayersPanel(); renderTray();
       });
     });
+    var cr = $('hpe-compradius');
+    if (cr) cr.addEventListener('input', function () {
+      E.plan.layers.compRadius = defR * parseInt(cr.value, 10) / 100;
+      save(); render();
+    });
+    var snw = $('hpe-snap'); if (snw) snw.addEventListener('click', function () { E.snap = !E.snap; renderLayersPanel(); });
+    var grw = $('hpe-gridsw'); if (grw) grw.addEventListener('click', function () { E.grid = !E.grid; renderLayersPanel(); render(); });
     var ov = $('hpe-ovopacity');
     if (ov) ov.addEventListener('input', function () {
       E.plan.layers.ovOpacity = parseInt(ov.value, 10) / 100;
@@ -845,13 +1109,15 @@
       return;
     }
     /* 校准取点优先 */
-    if (E.calibArm && E.mode === 'trace') {
+    if (E.calibArm) {
       if (E.calibPts.length < 2) {
         E.calibPts.push({ x: pt.x, y: pt.y });
         render(); renderTracePanel();
       }
       return;
     }
+    /* 补角法签：点开说明（toast），不落任何编辑 */
+    if (act === 'bujiao') { toastMsg(T('hpe_bujiao_toast')); return; }
     /* 描图态：拖框成间优先于一切命中（压在已有房间上也要能描新间，房间编辑回绘制态） */
     if (E.mode === 'trace') {
       E.drag = { kind: 'create', start: pt, id: null };
@@ -867,14 +1133,19 @@
       }
       return;
     }
-    if (act === 'liji' && E.mode === 'layers') {
+    if (act === 'liji') {
       pushUndo();
       E.drag = { kind: 'liji', start: pt, orig: clone(lijiPoint()) };
       svg.setPointerCapture(evt.pointerId);
       return;
     }
-    /* 构件态放置优先于房间选择（点房间上也要能落件），点中已有构件仍为选中 */
-    if (E.mode === 'parts' && E.placeType && act !== 'fixture') {
+    /* 托盘待放·房间（点放兜底）：以点为中心落间，单发（拖放/再点托盘续放） */
+    if (E.arm && E.arm.kind === 'room' && act !== 'fixture') {
+      placeRoomAt(E.arm.key, pt);
+      return;
+    }
+    /* 托盘待放·构件优先于房间选择（点房间上也要能落件），点中已有构件仍为选中 */
+    if (E.placeType && act !== 'fixture') {
       pushUndo();
       var nf2 = { id: uid(), type: E.placeType, x: pt.x, y: pt.y, rot: 0, flip: false };
       wallSnap(nf2, pt);
@@ -887,11 +1158,10 @@
       var f0 = fixById(actEl.getAttribute('data-id'));
       if (f0) {
         E.sel = { kind: 'fixture', id: f0.id };
-        if (E.mode === 'draw' || E.mode === 'parts' || E.mode === 'trace') {
-          pushUndo();
-          E.drag = { kind: 'fixture', id: f0.id, start: pt, orig: clone(f0), moved: false };
-          svg.setPointerCapture(evt.pointerId);
-        }
+        if (E.arm) { E.arm = null; syncTray(); }
+        pushUndo();
+        E.drag = { kind: 'fixture', id: f0.id, start: pt, orig: clone(f0), moved: false };
+        svg.setPointerCapture(evt.pointerId);
         render(); renderAttr();
       }
       return;
@@ -900,17 +1170,20 @@
       var rr = roomById(actEl.getAttribute('data-id'));
       if (rr) {
         E.sel = { kind: 'room', id: rr.id };
-        if (E.mode !== 'layers') {
-          pushUndo();
-          E.drag = { kind: 'room', id: rr.id, start: pt, orig: clone(rr), moved: false };
-          svg.setPointerCapture(evt.pointerId);
-        }
+        pushUndo();
+        E.drag = { kind: 'room', id: rr.id, start: pt, orig: clone(rr), moved: false };
+        svg.setPointerCapture(evt.pointerId);
         render(); renderAttr();
+        /* 点房名＝改名：聚焦属性条姓名框并全选 */
+        if (tgt.classList && tgt.classList.contains('hpe-roomname')) {
+          var nIn = $('hpe-a-name');
+          if (nIn) { nIn.focus(); nIn.select(); }
+        }
       }
       return;
     }
     /* 空白处 */
-    if (E.mode === 'parts' && E.placeType) {
+    if (E.placeType) {
       pushUndo();
       var nf = { id: uid(), type: E.placeType, x: pt.x, y: pt.y, rot: 0, flip: false };
       wallSnap(nf, pt);
@@ -1186,13 +1459,17 @@
   function switchFloor(fid) {
     saveNow();
     E.floorId = fid;
-    E.sel = null; E.placeType = null; E.undoStack = []; E.redoStack = [];
+    E.sel = null; E.placeType = null; E.arm = null; E.undoStack = []; E.redoStack = [];
     E.calibArm = false; E.calibPts = []; E.chartCache = null; E.stage = null; E.vb = null;
     loadPlan(fid, E.houseId).then(function (p) {
       E.plan = p;
       return regenTraceURL();
     }).then(function () {
-      renderFloorsBar(); renderOrient(); renderPanel(); render();
+      renderFloorsBar(); renderOrient(); render(); renderTray();
+      /* 空层先选模板起步（新建楼层路径） */
+      var empty = !E.plan.rooms.length && !(E.plan.trace && E.plan.trace.rect);
+      if (empty) showSheet('tpl');
+      else { if (E.sheet === 'tpl') closeSheet(); renderPanel(); }
     });
   }
   function open(houseId, floorId) {
@@ -1231,19 +1508,6 @@
       svg.addEventListener('pointerup', onUp);
       svg.addEventListener('pointercancel', onUp);
     }
-    var seg = $('hpe-seg');
-    if (seg) seg.addEventListener('click', function (e) {
-      var el = e.target.closest ? e.target.closest('[data-mode]') : null;
-      if (!el) return;
-      var m = el.getAttribute('data-mode');
-      if (E.stage) cancelStage();
-      if (m === E.mode && E.sheet === 'mode') { closeSheet(); renderPanel(); return; }
-      E.mode = m;
-      E.placeType = null;
-      if (E.mode !== 'trace') { E.calibArm = false; E.calibPts = []; }
-      showSheet('mode');
-      render();
-    });
     var bk = $('hpe-back'); if (bk) bk.addEventListener('click', close);
     var un = $('hpe-undo'); if (un) un.addEventListener('click', undo);
     var re = $('hpe-redo'); if (re) re.addEventListener('click', redo);
@@ -1258,12 +1522,20 @@
     var lb = $('hpe-layerbtn');
     if (lb) lb.addEventListener('click', function () {
       if (E.stage) cancelStage();
-      if (E.mode === 'layers' && E.sheet === 'mode') { closeSheet(); renderPanel(); return; }
-      E.mode = 'layers';
-      E.placeType = null;
-      showSheet('mode');
+      if (E.sheet === 'layers') { closeSheet(); return; }
+      E.placeType = null; E.arm = null; syncTray();
+      showSheet('layers');
       render();
     });
+    var tsc = $('hpe-tray-scroll');
+    if (tsc) {
+      tsc.addEventListener('pointerdown', trayDown);
+      tsc.addEventListener('pointermove', trayMove);
+      tsc.addEventListener('pointerup', trayUp);
+      tsc.addEventListener('pointercancel', trayUp);
+    }
+    var ab = $('hpe-armed'); if (ab) ab.addEventListener('click', function () { E.arm = null; E.placeType = null; syncTray(); });
+    renderTray();
     var sx = $('hpe-sheet-x'); if (sx) sx.addEventListener('click', closeSheet);
     var sc = $('hpe-scrim'); if (sc) sc.addEventListener('click', closeSheet);
     var fl = $('hpe-file'); if (fl) fl.addEventListener('change', function () { onFilePick(fl); });
@@ -1275,7 +1547,7 @@
       window.__wuri_rerender = function () {
         prev();
         var v = $('view-plan');
-        if (v && !v.hidden && E.plan) { renderOrient(); renderPanel(); render(); }
+        if (v && !v.hidden && E.plan) { renderOrient(); renderPanel(); render(); renderTray(); }
       };
     }
   }

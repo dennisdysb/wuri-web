@@ -1370,7 +1370,7 @@
         (L.roomNames && r.name ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fs * 0.36) + '" text-anchor="middle" font-size="' + fs + '" style="fill:var(--ink-2)" font-family="var(--serif)">' + esc(r.name) + '</text>' : '') +
         (L.dims ? '<text x="' + (r.x + r.w - fs * 0.3) + '" y="' + (r.y + r.h - fs * 0.3) + '" text-anchor="end" font-size="' + (fs * 0.62) + '" style="fill:var(--muted)">' + (Math.round(r.w * r.h * mpu * mpu * 10) / 10) + '㎡</text>' : '');
     });
-    if (fx && L.overlay !== 'none') {
+    if (fx && (L.overlay === 'fx' || L.overlay === 'bz')) {
       var hw = Math.max(liji.x - x0, x1 - liji.x, W * 0.2), hh = Math.max(liji.y - y0, y1 - liji.y, H * 0.2);
       var gx = liji.x - hw, gy = liji.y - hh, gw = hw * 2, gh = hh * 2, cw = gw / 3, ch = gh / 3;
       var op = L.ovOpacity == null ? 0.92 : L.ovOpacity;
