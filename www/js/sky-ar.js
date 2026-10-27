@@ -61,6 +61,31 @@
   function magLabel() { return SKY.magLim ? SKY.magLim() : 6; }
   function magStar() { return (SKY.magLim ? SKY.magLim() : 6) + 0.5; }
 
+  /* ---------------- 标签密度三档（2026-10-27 用户批准） ----------------
+   * 状态键 wuri_sky_label_mode_v1：将来平面星图「图层面板」上线时共用
+   * 同一键读档（两边一个口径），本批只在相机认星落地，键名勿改。
+   *   smart＝智能（现行规则：星官最亮星 ≤ 当前星等阈值才标）；
+   *   all ＝全标（所有在视场内的星官都标，不限星等、允许重叠）；
+   *   major＝精简（只标二十八宿本官＋三垣六墙，共 34 个大星官）。
+   * 月亮/行星标签不受档位约束、三档恒显。默认 smart。 */
+  var LABEL_KEY = 'wuri_sky_label_mode_v1';
+  var LABEL_MODES = ['smart', 'all', 'major'];
+  var labelMode = (function () {
+    try {
+      var v = localStorage.getItem(LABEL_KEY);
+      if (LABEL_MODES.indexOf(v) >= 0) return v;
+    } catch (e) {}
+    return 'smart';
+  })();
+  function saveLabelMode() {
+    try { localStorage.setItem(LABEL_KEY, labelMode); } catch (e) {}
+  }
+  var MAJOR_LABELS = {};
+  ['角', '亢', '氐', '房', '心', '尾', '箕', '斗', '牛', '女', '虚', '危', '室', '壁',
+   '奎', '娄', '胃', '昴', '毕', '觜', '参', '井', '鬼', '柳', '星', '张', '翼', '轸',
+   '紫微左垣', '紫微右垣', '太微左垣', '太微右垣', '天市左垣', '天市右垣']
+    .forEach(function (n) { MAJOR_LABELS[n] = 1; });
+
   /* ---------------- 数据（与 stars/sky-chart 共享同一份加载结果） ----------------
    * 走 WuriSky.starData()（v2.1.1 (4) 双通道 fetch→XHR），不得另起
    * fetch 读包内 data/*.json（原生 WebView 下 fetch 读 file:// 必失败） */
@@ -216,8 +241,12 @@
 
   /* 场景绘制：ctx 已按工作尺寸设好变换；w/h 为工作单位（显示时 = CSS px）。
    * keepBase=true 时不 clearRect——拍照合成的底图已画在同一画布上，
-   * 清屏会把实景帧整张擦掉（v2.1.0 (6) 修的黑底合成图根因） */
-  function drawScene(ctx, w, h, keepBase) {
+   * 清屏会把实景帧整张擦掉（v2.1.0 (6) 修的黑底合成图根因）。
+   * forPhoto=true 时不出中心十字——拍照成品只许含环境＋星点＋连线＋
+   * 星官名（用户 2026-10-27 硬口径），任何界面元素不得烧入照片；
+   * HUD/按钮/标签胶囊都是 DOM、本就不入合成画布，画布内唯一的界面
+   * 元素就是这枚准星，故只在此处分流。 */
+  function drawScene(ctx, w, h, keepBase, forPhoto) {
     S.labels = []; S.segments = 0;
     if (!keepBase) ctx.clearRect(0, 0, w, h);
     if (!S.pose || !S.posCache) return;
@@ -332,8 +361,12 @@
     ctx.textAlign = 'center';
     ASTS.forEach(function (ast) {
       if (ast.brightest < 0) return;
+      /* 标签密度三档（键 wuri_sky_label_mode_v1）：smart 走星等阈值
+       * 现行口径；all 不设阈值全标；major 只标 MAJOR_LABELS 大星官 */
+      if (labelMode === 'major' && !MAJOR_LABELS[ast.name]) return;
       var bs = ALLSTARS[ast.brightest], pb = P[ast.brightest];
-      if (!pb || bs.mag > mLabel || pb.alt <= 0) return;
+      if (!pb || pb.alt <= 0) return;
+      if (labelMode === 'smart' && bs.mag > mLabel) return;
       if (pb.x < 16 || pb.x > w - 16 || pb.y < 20 || pb.y > h - 6) return;
       var name = T(ast.name);
       ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(8,8,14,0.65)';
@@ -342,15 +375,17 @@
       ctx.fillText(name, pb.x, pb.y - 11);
       S.labels.push({ key: ast.key, x: pb.x, y: pb.y - 11 });
     });
-    /* 中心十字（校准参照） */
-    ctx.strokeStyle = red ? 'rgba(255,84,60,0.8)' : 'rgba(255,246,218,0.8)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(w / 2 - 9, h / 2); ctx.lineTo(w / 2 - 3, h / 2);
-    ctx.moveTo(w / 2 + 3, h / 2); ctx.lineTo(w / 2 + 9, h / 2);
-    ctx.moveTo(w / 2, h / 2 - 9); ctx.lineTo(w / 2, h / 2 - 3);
-    ctx.moveTo(w / 2, h / 2 + 3); ctx.lineTo(w / 2, h / 2 + 9);
-    ctx.stroke();
+    /* 中心十字（校准参照）：仅预览绘制，拍照合成禁入（见函数头注） */
+    if (!forPhoto) {
+      ctx.strokeStyle = red ? 'rgba(255,84,60,0.8)' : 'rgba(255,246,218,0.8)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(w / 2 - 9, h / 2); ctx.lineTo(w / 2 - 3, h / 2);
+      ctx.moveTo(w / 2 + 3, h / 2); ctx.lineTo(w / 2 + 9, h / 2);
+      ctx.moveTo(w / 2, h / 2 - 9); ctx.lineTo(w / 2, h / 2 - 3);
+      ctx.moveTo(w / 2, h / 2 + 3); ctx.lineTo(w / 2, h / 2 + 9);
+      ctx.stroke();
+    }
     S.centerAz = (Math.atan2(ax.f[0], ax.f[1]) / D2R + 360) % 360;
     S.centerAlt = Math.asin(Math.max(-1, Math.min(1, ax.f[2]))) / D2R;
     /* 天北极投影点（冒烟锚点：极点 alt＝纬度、az＝0，任意时刻恒定，
@@ -414,6 +449,9 @@
       '<video id="ar-video" playsinline muted autoplay></video>' +
       '<canvas id="ar-canvas"></canvas>' +
       '<div class="ar-hud" id="ar-hud"></div>' +
+      /* 标签密度胶囊（画面右上角，点一下循环三档；DOM 元素不入拍照
+       * 合成，见 drawScene 头注。显隐与快门同规：仅相机运行且无面板时露面） */
+      '<button class="ar-labelchip" id="ar-labelchip" data-ar="labelmode" hidden></button>' +
       '<div class="ar-panel" id="ar-panel"></div>' +
       /* 舞台内快门钮（v2.1.0 (8)：取代原视图级悬浮返回键——它悬在舞台外
        * 左下、压工具栏「拍照」钮。快门收进舞台框内左下，与工具栏拍照钮
@@ -476,6 +514,13 @@
       '<button class="btn" data-ar="tochart">' + esc(t('sx2_ar_tochart')) + '</button>' +
       '<button class="mini-btn" data-ar="start">' + esc(t('sx2_ar_retry')) + '</button>';
   }
+  /* 标签胶囊刷新：文案＝当前档，显隐＝相机运行中且面板不在场 */
+  function refreshLabelChip() {
+    var chip = $('ar-labelchip'); if (!chip) return;
+    chip.textContent = t('sx2_ar_label') + '：' + t('sx2_ar_label_' + labelMode);
+    chip.hidden = !(S.running && S.els && S.els.panel && S.els.panel.hidden);
+  }
+
   function setPanel(kind) {
     if (!S.els || !S.els.panel) return;
     /* 快门钮只在相机运行中（无面板）时露面：开启面板/回落面板在场时藏起，
@@ -483,9 +528,10 @@
     var sh = $('ar-shutter'); if (sh) sh.hidden = !!kind;
     /* 对齐指引态不用整屏面板（会盖住准星与实景）：改紧凑底条 */
     S.els.panel.classList.toggle('guide', kind === 'aligning');
-    if (!kind) { S.els.panel.hidden = true; S.els.panel.innerHTML = ''; return; }
+    if (!kind) { S.els.panel.hidden = true; S.els.panel.innerHTML = ''; refreshLabelChip(); return; }
     S.els.panel.hidden = false;
     S.els.panel.innerHTML = panelHTML(kind);
+    refreshLabelChip();
   }
 
   /* 红光与星象全模块总开关共用同一状态（v2.1.0 (9)，stars.js WuriRedlight）：
@@ -651,7 +697,7 @@
         if (fr.bmp && fr.bmp.close) fr.bmp.close();
         if (frameAlive(c)) {
           ctx.setTransform(scale, 0, 0, scale, 0, 0);
-          drawScene(ctx, W, H, true);
+          drawScene(ctx, W, H, true, true);
           return c;
         }
       }
@@ -713,6 +759,11 @@
       if (!b) return;
       var act = b.getAttribute('data-ar');
       if (act === 'start') startAR();
+      else if (act === 'labelmode') {
+        labelMode = LABEL_MODES[(LABEL_MODES.indexOf(labelMode) + 1) % LABEL_MODES.length];
+        saveLabelMode();
+        refreshLabelChip();
+      }
       else if (act === 'snap') snap();
       else if (act === 'align') { if (S.running) setPanel('align'); }
       else if (act === 'alignpick') { S.alignTarget = b.getAttribute('data-id'); setPanel('aligning'); }
@@ -871,6 +922,7 @@
       return { running: S.running, hasPose: !!S.pose, noPose: S.noPose, fallback: S.fallback,
         absSeen: !!S.absSeen, relSeen: !!S.relSeen,
         calAz: cal.az, calAlt: cal.alt, calSrc: cal.src, decl: currentDecl(), alignTarget: S.alignTarget,
+        labelMode: labelMode,
         segments: S.segments, labels: S.labels, bodies: S.bodyPts,
         centerAz: S.centerAz, centerAlt: S.centerAlt, polePoint: S.polePoint };
     },

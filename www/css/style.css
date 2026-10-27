@@ -2036,6 +2036,14 @@ body.bugang-open{overflow:hidden}
 .ar-shutter::after{content:'';position:absolute;inset:9px;border-radius:50%;
   border:2px solid rgba(255,233,176,.8);background:transparent}
 .ar-shutter[hidden]{display:none}
+/* 标签密度胶囊（2026-10-27）：舞台右上角、HUD 读数行下方，点按循环
+ * 智能/全标/精简；与快门同套夜间低亮毛玻璃语言。DOM 元素、不入拍照合成 */
+.ar-labelchip{position:absolute;top:36px;right:10px;z-index:3;padding:5px 11px;border-radius:999px;
+  background:rgba(10,14,20,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border:1px solid rgba(255,233,176,.55);color:#ffe9b0;font-family:var(--sans);font-size:.72rem;
+  line-height:1.4;cursor:pointer;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.ar-labelchip[hidden]{display:none}
+.ar-stage.red .ar-labelchip{border-color:rgba(255,96,72,.55);background:rgba(26,8,6,.5);color:#ff9a80}
 .ar-shutter:active{transform:scale(.93);background:rgba(255,233,176,.16)}
 .ar-stage.red .ar-shutter{border-color:rgba(255,96,72,.55);background:rgba(26,8,6,.5)}
 .ar-stage.red .ar-shutter::after{border-color:rgba(255,96,72,.85)}
