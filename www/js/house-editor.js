@@ -98,7 +98,9 @@
     snap: true, grid: true, undoStack: [], redoStack: [],
     stage: null, traceURL: '', photoURL: '',
     calibArm: false, calibPts: [], focusSnap: null,
-    drag: null, saveTm: null, chartCache: null
+    drag: null, saveTm: null, chartCache: null,
+    view: null, ptrs: null, pinch: null,
+    attrFull: false, lastTap: null, _attrKey: ''
   };
   function F() { return window.WuriSoulFs; }
   function planOf() { return E.plan; }
@@ -199,6 +201,79 @@
     var hh = Math.max(l.y - b.y0, b.y1 - l.y, toU(1.5));
     return { x: l.x - hw, y: l.y - hh, w: hw * 2, h: hh * 2, cx: l.x, cy: l.y };
   }
+  /* ---------------- 视图（viewBox 平移/缩放） ---------------- */
+  function stageAspect() {
+    var cv = $('hpe-canvas');
+    if (cv && cv.clientWidth > 0 && cv.clientHeight > 0) return cv.clientWidth / cv.clientHeight;
+    return 0.72;
+  }
+  /* 适应全图：extent＋边距，按舞台长宽比扩够短边，全部内容入镜 */
+  function fitView() {
+    var b = extent();
+    var pad = Math.max(b.x1 - b.x0, b.y1 - b.y0) * 0.07 + 0.3;
+    var x0 = b.x0 - pad, y0 = b.y0 - pad, x1 = b.x1 + pad, y1 = b.y1 + pad;
+    var w = x1 - x0, h = y1 - y0, asp = stageAspect();
+    if (w / h < asp) { var nw = h * asp, cx = (x0 + x1) / 2; x0 = cx - nw / 2; x1 = cx + nw / 2; w = nw; }
+    else { var nh = w / asp, cy = (y0 + y1) / 2; y0 = cy - nh / 2; y1 = cy + nh / 2; h = nh; }
+    return { x: x0, y: y0, w: w, h: h };
+  }
+  /* 缩放限幅（宽不小于 1.6 m、不大于全图 3.5 倍＋8 m）＋平移限幅（与内容至少 15% 交叠，拖不丢） */
+  function clampView() {
+    var v = E.view; if (!v) return;
+    var asp = stageAspect();
+    v.h = v.w / asp;
+    var b = extent();
+    var ew = Math.max(b.x1 - b.x0, toU(2)), eh = Math.max(b.y1 - b.y0, toU(2));
+    var minW = toU(1.6), maxW = Math.max(ew, eh) * 3.5 + toU(8), cx;
+    if (v.w < minW) { cx = v.x + v.w / 2; v.w = minW; v.x = cx - v.w / 2; v.h = v.w / asp; }
+    if (v.w > maxW) { cx = v.x + v.w / 2; v.w = maxW; v.x = cx - v.w / 2; v.h = v.w / asp; }
+    v.x = Math.max(b.x0 - v.w * 0.85, Math.min(v.x, b.x1 - v.w * 0.15));
+    v.y = Math.max(b.y0 - v.h * 0.85, Math.min(v.y, b.y1 - v.h * 0.15));
+  }
+  function clientToPlan(cx, cy, v) {
+    var svg = $('hpe-svg'); if (!svg) return { x: v.x, y: v.y };
+    var rc = svg.getBoundingClientRect();
+    if (!rc.width) return { x: v.x, y: v.y };
+    return { x: v.x + (cx - rc.left) / rc.width * v.w, y: v.y + (cy - rc.top) / rc.height * v.h };
+  }
+  /* 以锚点（客户区坐标）为心缩放到新宽 */
+  function zoomViewAt(nw, cx, cy) {
+    var v = E.view; if (!v) return;
+    var a = clientToPlan(cx, cy, v);
+    var svg = $('hpe-svg'), rc = svg.getBoundingClientRect();
+    v.w = nw; v.h = nw / stageAspect();
+    v.x = a.x - (cx - rc.left) / rc.width * v.w;
+    v.y = a.y - (cy - rc.top) / rc.height * v.h;
+    clampView(); render();
+  }
+  /* 让某矩形完整入镜：能平移则最小平移，不够大才放大视图；底部属性条遮带一并让开 */
+  function revealRect(rct) {
+    if (!rct) return;
+    if (!E.view) E.view = fitView();
+    var v = E.view, asp = stageAspect();
+    v.h = v.w / asp;
+    var svg = $('hpe-svg'), at = $('hpe-attr');
+    function bandUnits() {
+      if (!at || !svg || !at.offsetHeight) return 0;
+      var rc = svg.getBoundingClientRect();
+      return rc.height > 0 ? (at.offsetHeight + 18) / rc.height * v.h : 0;
+    }
+    var mx = v.w * 0.04, my = v.h * 0.04;
+    var visH = v.h - bandUnits();
+    var needW = rct.w + mx * 2, needH = rct.h + my * 2;
+    if (needW > v.w || needH > visH) {
+      var nw = Math.max(needW, needH * asp);
+      v.w = nw; v.h = nw / asp;
+      v.x = rct.x + rct.w / 2 - v.w / 2;
+      v.y = rct.y + rct.h / 2 - (v.h - bandUnits()) / 2;
+    } else {
+      if (rct.x - mx < v.x) v.x = rct.x - mx;
+      if (rct.x + rct.w + mx > v.x + v.w) v.x = rct.x + rct.w + mx - v.w;
+      if (rct.y - my < v.y) v.y = rct.y - my;
+      if (rct.y + rct.h + my > v.y + visH) v.y = rct.y + rct.h + my - visH;
+    }
+    clampView(); render();
+  }
   function roomById(id) { return E.plan.rooms.filter(function (r) { return r.id === id; })[0] || null; }
   function fixById(id) { return E.plan.fixtures.filter(function (f) { return f.id === id; })[0] || null; }
   function snapVal(v, step) { return Math.round(v / step) * step; }
@@ -251,15 +326,12 @@
     var svg = $('hpe-svg'); if (!svg || !E.plan) return;
     var p = E.plan, L = p.layers;
     if (E.stage) { renderStage(svg); return; }
-    /* 拖动中冻结 viewBox：extent 随拖动变化会改 CTM、坐标反馈放大（实测移房多走数倍） */
-    var vb;
-    if (E.drag && E.vb) vb = E.vb;
-    else {
-      var b = extent();
-      var pad = Math.max(b.x1 - b.x0, b.y1 - b.y0) * 0.07 + 0.3;
-      vb = { x: b.x0 - pad, y: b.y0 - pad, w: (b.x1 - b.x0) + pad * 2, h: (b.y1 - b.y0) + pad * 2 };
-      E.vb = vb;
-    }
+    /* 视图持久：E.view 即当前 viewBox（空白拖平移／双指捏合缩放／顶栏「全图」改之），
+     * 未定（开页/换层/套模板/描图成图）时才按 extent 自适应一次；拖动中不重算，
+     * 杜绝旧版 extent 实时重拟合的坐标反馈放大。 */
+    if (!E.view) E.view = fitView();
+    clampView();
+    var vb = E.view;
     var vx = vb.x, vy = vb.y, vw = vb.w, vh = vb.h;
     svg.setAttribute('viewBox', vx + ' ' + vy + ' ' + vw + ' ' + vh);
     var u = vw / 100; /* 约 1% 宽，供字号/线宽参照 */
@@ -672,7 +744,7 @@
     rooms.forEach(function (r) { r.x -= ox; r.y -= oy; });
     E.plan.rooms = rooms;
     E.plan.liji = null;
-    E.sel = null; E.vb = null;
+    E.sel = null; E.view = null;
     afterChange();
   }
 
@@ -813,12 +885,39 @@
     syncTray();
   }
 
-  /* 属性条（房间/构件共用 #hpe-attr） */
+  /* 属性条（房间/构件共用 #hpe-attr）：选中默认只出薄条（不遮画布），
+   * 点「编辑」/点薄条/点房名/双击才展开完整面板；换选中自动回薄条。 */
   function renderAttr() {
     var box = $('hpe-attr'); if (!box) return;
+    var selKey = E.sel ? E.sel.kind + ':' + E.sel.id : '';
+    if (selKey !== E._attrKey) { E._attrKey = selKey; E.attrFull = false; }
     if (E.sel && E.sel.kind === 'room') {
       var r = roomById(E.sel.id); if (!r) { box.innerHTML = ''; layoutAttr(); return; }
       var Lm = toM(r.w), Wm = toM(r.h);
+      if (!E.attrFull) {
+        box.innerHTML = '<div class="hpe-attr thin" id="hpe-a-thin"><b>' + esc(r.name || '') + '</b>' +
+          '<span>' + trimNum(Lm, 2) + ' × ' + trimNum(Wm, 2) + ' m · ' + trimNum(Lm * Wm) + '㎡</span>' +
+          '<span class="ops"><span class="hpe-op" id="hpe-a-edit">' + esc(T('hpe_edit')) + '</span>' +
+          '<span class="hpe-op" id="hpe-a-copy">' + esc(T('hpe_copy')) + '</span>' +
+          '<span class="hpe-op danger" id="hpe-a-del">' + esc(T('hpe_del')) + '</span></span></div>';
+        $('hpe-a-edit').addEventListener('click', function () { E.attrFull = true; renderAttr(); revealRect(r); });
+        $('hpe-a-thin').addEventListener('click', function (e) {
+          if (e.target.closest && e.target.closest('.hpe-op')) return;
+          E.attrFull = true; renderAttr(); revealRect(r);
+        });
+        $('hpe-a-copy').addEventListener('click', function () {
+          pushUndo();
+          var c = clone(r); c.id = uid(); c.x += toU(0.4); c.y += toU(0.4);
+          E.plan.rooms.push(c); E.sel = { kind: 'room', id: c.id }; afterChange();
+        });
+        $('hpe-a-del').addEventListener('click', function () {
+          pushUndo();
+          E.plan.rooms = E.plan.rooms.filter(function (x) { return x.id !== r.id; });
+          E.sel = null; afterChange();
+        });
+        layoutAttr();
+        return;
+      }
       box.innerHTML = '<div class="hpe-attr"><div class="t"><b>' + esc(r.name || '') + '</b>' +
         '<span>' + esc(T('hpe_len')) + ' <b>' + trimNum(Lm, 2) + ' m</b></span>' +
         '<span>' + esc(T('hpe_wid')) + ' <b>' + trimNum(Wm, 2) + ' m</b></span>' +
@@ -862,6 +961,23 @@
     } else if (E.sel && E.sel.kind === 'fixture') {
       var f = fixById(E.sel.id); if (!f) { box.innerHTML = ''; layoutAttr(); return; }
       var d = FIX[f.type];
+      if (!E.attrFull) {
+        box.innerHTML = '<div class="hpe-attr thin" id="hpe-a-thin"><b>' + esc(T('hpe_fix_' + f.type)) + '</b>' +
+          '<span>' + trimNum(d.w, 2) + ' × ' + trimNum(d.h, 2) + ' m' + (d.sw ? ' · ' + esc(T('hpe_sw_' + d.sw)) : '') + '</span>' +
+          '<span class="ops"><span class="hpe-op" id="hpe-a-edit">' + esc(T('hpe_edit')) + '</span>' +
+          '<span class="hpe-op danger" id="hpe-f-del">' + esc(T('hpe_del')) + '</span></span></div>';
+        $('hpe-a-edit').addEventListener('click', function () {
+          E.attrFull = true; renderAttr();
+          revealRect({ x: f.x - toU(d.w) / 2, y: f.y - toU(d.h) / 2, w: toU(d.w), h: toU(d.h) });
+        });
+        $('hpe-f-del').addEventListener('click', function () {
+          pushUndo();
+          E.plan.fixtures = E.plan.fixtures.filter(function (x) { return x.id !== f.id; });
+          E.sel = null; afterChange();
+        });
+        layoutAttr();
+        return;
+      }
       box.innerHTML = '<div class="hpe-attr"><div class="t"><b>' + esc(T('hpe_fix_' + f.type)) + '</b>' +
         '<span>' + trimNum(d.w, 2) + ' × ' + trimNum(d.h, 2) + ' m</span>' +
         (d.sw ? '<span>' + esc(T('hpe_sw_' + d.sw)) + '</span>' : '') +
@@ -1174,8 +1290,13 @@
         E.drag = { kind: 'room', id: rr.id, start: pt, orig: clone(rr), moved: false };
         svg.setPointerCapture(evt.pointerId);
         render(); renderAttr();
-        /* 点房名＝改名：聚焦属性条姓名框并全选 */
-        if (tgt.classList && tgt.classList.contains('hpe-roomname')) {
+        /* 展开完整面板只认两条路：薄条「编辑」与双击（此处以 400ms 内同房双点代触屏双击，
+         * 房名单点不展开——房名正在房间正中、最易误触，展开走薄条或双击后在面板里改名） */
+        var nowT = Date.now();
+        var expandIt = !!(E.lastTap && E.lastTap.id === rr.id && nowT - E.lastTap.t < 400);
+        E.lastTap = { id: rr.id, t: nowT };
+        if (expandIt) {
+          E.attrFull = true; renderAttr(); revealRect(rr);
           var nIn = $('hpe-a-name');
           if (nIn) { nIn.focus(); nIn.select(); }
         }
@@ -1197,7 +1318,14 @@
       svg.setPointerCapture(evt.pointerId);
       return;
     }
-    if (E.mode === 'draw') { E.sel = null; render(); renderAttr(); }
+    if (E.mode === 'draw') {
+      /* 空白处单指拖动＝平移画布（压在房间上才是移房，两者不冲突）；点而不拖仍是取消选中 */
+      E.sel = null;
+      if (!E.view) E.view = fitView();
+      E.drag = { kind: 'pan', sx: evt.clientX, sy: evt.clientY, vx: E.view.x, vy: E.view.y };
+      svg.setPointerCapture(evt.pointerId);
+      render(); renderAttr();
+    }
   }
   function onMove(evt) {
     var d = E.drag; if (!d) return;
@@ -1209,6 +1337,15 @@
         y: Math.max(0, Math.min(1, pt.y / Hh))
       };
       render();
+      return;
+    }
+    if (d.kind === 'pan') {
+      var svgP = $('hpe-svg'), rcP = svgP ? svgP.getBoundingClientRect() : null;
+      if (rcP && rcP.width > 0 && E.view) {
+        E.view.x = d.vx - (evt.clientX - d.sx) / rcP.width * E.view.w;
+        E.view.y = d.vy - (evt.clientY - d.sy) / rcP.height * E.view.h;
+        clampView(); render();
+      }
       return;
     }
     var step = E.grid ? toU(0.1) : 0;
@@ -1270,6 +1407,7 @@
   function onUp(evt) {
     var d = E.drag; if (!d) return;
     E.drag = null;
+    if (d.kind === 'pan') return;
     if (d.kind === 'corner') { render(); return; }
     if (d.kind === 'create') {
       var t = E.tempRect; E.tempRect = null;
@@ -1292,6 +1430,79 @@
     }
     if ((d.kind === 'room' || d.kind === 'resize' || d.kind === 'liji') && !d.moved) E.undoStack.pop();
     if (d.kind === 'liji' || d.kind === 'room' || d.kind === 'resize') { save(); render(); renderAttr(); }
+  }
+
+  /* ---------------- 多指手势层（双指捏合缩放＋双指平移） ----------------
+   * svg 指针事件先过此层：单指走原 onDown/onMove/onUp；第二指落下即转手势，
+   * 进行中的单指拖动先还原（防误移），两指全抬前不把后续事件漏给单指逻辑。 */
+  function cancelActiveDrag() {
+    var d = E.drag; if (!d) return;
+    E.drag = null;
+    if (d.kind === 'room' || d.kind === 'resize') {
+      var rid = d.id || (E.sel && E.sel.id), r = rid ? roomById(rid) : null;
+      if (r && d.orig) { r.x = d.orig.x; r.y = d.orig.y; r.w = d.orig.w; r.h = d.orig.h; }
+      E.undoStack.pop();
+    } else if (d.kind === 'fixture') {
+      var f = fixById(d.id);
+      if (f && d.orig) { f.x = d.orig.x; f.y = d.orig.y; }
+      E.undoStack.pop();
+    } else if (d.kind === 'liji') {
+      if (d.orig) E.plan.liji = { x: d.orig.x, y: d.orig.y };
+      E.undoStack.pop();
+    } else if (d.kind === 'create') {
+      E.tempRect = null;
+    }
+    render();
+  }
+  function beginPinch() {
+    cancelActiveDrag();
+    var ps = Object.keys(E.ptrs).map(function (k) { return E.ptrs[k]; });
+    var mid = { x: (ps[0].x + ps[1].x) / 2, y: (ps[0].y + ps[1].y) / 2 };
+    var d0 = Math.sqrt(Math.pow(ps[0].x - ps[1].x, 2) + Math.pow(ps[0].y - ps[1].y, 2)) || 1;
+    if (!E.view) E.view = fitView();
+    E.pinch = { d0: d0, w0: E.view.w, anchor: clientToPlan(mid.x, mid.y, E.view) };
+  }
+  function ptDown(evt) {
+    if (!E.ptrs) E.ptrs = {};
+    E.ptrs[evt.pointerId] = { x: evt.clientX, y: evt.clientY };
+    var n = Object.keys(E.ptrs).length;
+    if (!E.stage && n === 2) { beginPinch(); return; }
+    if (n > 1) return; /* 其余指（含描图舞台第二指）忽略 */
+    E.dragPtr = evt.pointerId;
+    onDown(evt);
+  }
+  function ptMove(evt) {
+    if (E.ptrs && E.ptrs[evt.pointerId]) { E.ptrs[evt.pointerId].x = evt.clientX; E.ptrs[evt.pointerId].y = evt.clientY; }
+    if (E.pinch) {
+      var ps = Object.keys(E.ptrs).map(function (k) { return E.ptrs[k]; });
+      if (ps.length >= 2 && E.view) {
+        var svg = $('hpe-svg'), rc = svg.getBoundingClientRect();
+        if (rc.width > 0) {
+          var d = Math.sqrt(Math.pow(ps[0].x - ps[1].x, 2) + Math.pow(ps[0].y - ps[1].y, 2)) || 1;
+          var mid = { x: (ps[0].x + ps[1].x) / 2, y: (ps[0].y + ps[1].y) / 2 };
+          var v = E.view;
+          v.w = E.pinch.w0 * E.pinch.d0 / d;
+          v.h = v.w / stageAspect();
+          v.x = E.pinch.anchor.x - (mid.x - rc.left) / rc.width * v.w;
+          v.y = E.pinch.anchor.y - (mid.y - rc.top) / rc.height * v.h;
+          clampView(); render();
+        }
+      }
+      return;
+    }
+    if (E.ptrs && Object.keys(E.ptrs).length > 1) return; /* 手势收尾残指不喂单指逻辑 */
+    onMove(evt);
+  }
+  function ptUp(evt) {
+    if (E.ptrs) delete E.ptrs[evt.pointerId];
+    if (E.pinch) {
+      if (!E.ptrs || Object.keys(E.ptrs).length < 2) E.pinch = null;
+      return;
+    }
+    var own = (E.dragPtr == null || evt.pointerId === E.dragPtr);
+    if (E.ptrs && !Object.keys(E.ptrs).length) E.dragPtr = null;
+    if (!own) return; /* 非拖动主指抬起不结束主指的拖动 */
+    onUp(evt);
   }
 
   /* ---------------- 描图：四角舞台与 warp ---------------- */
@@ -1323,7 +1534,7 @@
   }
   function cancelStage() {
     if (E.stage && E.stage.url) URL.revokeObjectURL(E.stage.url);
-    E.stage = null; E.vb = null;
+    E.stage = null;
     render(); renderTracePanel();
   }
   function warpImage(img, corners, outW, outH) {
@@ -1398,7 +1609,7 @@
     };
     E.traceURL = url;
     if (E.stage.url) URL.revokeObjectURL(E.stage.url);
-    E.stage = null; E.vb = null;
+    E.stage = null; E.view = null;
     E.plan.layers.traceBg = true;
     afterChange();
     renderTracePanel();
@@ -1460,7 +1671,7 @@
     saveNow();
     E.floorId = fid;
     E.sel = null; E.placeType = null; E.arm = null; E.undoStack = []; E.redoStack = [];
-    E.calibArm = false; E.calibPts = []; E.chartCache = null; E.stage = null; E.vb = null;
+    E.calibArm = false; E.calibPts = []; E.chartCache = null; E.stage = null; E.view = null; E.ptrs = null; E.pinch = null;
     loadPlan(fid, E.houseId).then(function (p) {
       E.plan = p;
       return regenTraceURL();
@@ -1503,11 +1714,29 @@
   function init() {
     var svg = $('hpe-svg');
     if (svg) {
-      svg.addEventListener('pointerdown', onDown);
-      svg.addEventListener('pointermove', onMove);
-      svg.addEventListener('pointerup', onUp);
-      svg.addEventListener('pointercancel', onUp);
+      svg.addEventListener('pointerdown', ptDown);
+      svg.addEventListener('pointermove', ptMove);
+      svg.addEventListener('pointerup', ptUp);
+      svg.addEventListener('pointercancel', ptUp);
+      svg.addEventListener('wheel', function (e) {
+        if (E.stage || !E.plan) return;
+        e.preventDefault();
+        if (!E.view) E.view = fitView();
+        zoomViewAt(E.view.w * (e.deltaY > 0 ? 1.13 : 1 / 1.13), e.clientX, e.clientY);
+      }, { passive: false });
+      svg.addEventListener('dblclick', function (evt) {
+        var el = evt.target && evt.target.closest ? evt.target.closest('[data-act="room"]') : null;
+        if (!el || !E.plan) return;
+        var r = roomById(el.getAttribute('data-id')); if (!r) return;
+        E.sel = { kind: 'room', id: r.id }; E.attrFull = true;
+        render(); renderAttr(); revealRect(r);
+      });
     }
+    var fb = $('hpe-fitbtn');
+    if (fb) fb.addEventListener('click', function () {
+      if (E.stage || !E.plan) return;
+      E.view = fitView(); render();
+    });
     var bk = $('hpe-back'); if (bk) bk.addEventListener('click', close);
     var un = $('hpe-undo'); if (un) un.addEventListener('click', undo);
     var re = $('hpe-redo'); if (re) re.addEventListener('click', redo);

@@ -2598,6 +2598,10 @@ body.sky-red .hpe-attr .t span b { color:#eda88f; }
   color:var(--ink); font-size:.84rem; min-width:0; }
 .hpe-inp.sm { width:76px; }
 .hpe-attr .ops { display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; }
+.hpe-attr.thin { display:flex; align-items:center; gap:10px; padding:8px 12px; cursor:pointer; }
+.hpe-attr.thin b { font-family:var(--serif); font-size:.95rem; letter-spacing:.08em; color:var(--ink); white-space:nowrap; }
+.hpe-attr.thin > span { font-size:.78rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hpe-attr.thin .ops { margin-top:0; margin-left:auto; flex:none; flex-wrap:nowrap; }
 .hpe-op { padding:6px 13px; border-radius:9px; border:1px solid var(--line); background:var(--card);
   font-size:.8rem; letter-spacing:.08em; color:var(--ink-2); cursor:pointer; }
 .hpe-op.danger { color:var(--cinnabar); }
@@ -2674,6 +2678,7 @@ body.sky-red .hpe-hint b { color:#eda88f; }
 #hpe-attr .ops .hpe-op { pointer-events:auto; }
 #hpe-attr:empty { display:none; }
 #hpe-attr .hpe-attr { margin-top:0; animation:hpe-rise .16s ease-out; }
+#hpe-attr .hpe-attr.thin { pointer-events:auto; }
 @keyframes hpe-rise { from { transform:translateY(10px); opacity:.3; } to { transform:none; opacity:1; } }
 .hpe-botbar { flex:none; margin:0; border:none; border-top:1px solid var(--line); border-radius:0; background:var(--card); }
 .hpe-botbar span { padding:13px 0; }
