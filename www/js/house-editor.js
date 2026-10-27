@@ -138,7 +138,7 @@
     stage: null, traceURL: '', photoURL: '',
     calibArm: false, calibPts: [], focusSnap: null,
     drag: null, saveTm: null, chartCache: null,
-    view: null, ptrs: null, pinch: null,
+    view: null, ptrs: null, pinch: null, spinch: null, justWarped: false,
     attrFull: false, lastTap: null, _attrKey: '',
     cut: null, startPhase: 'pick'
   };
@@ -674,17 +674,86 @@
       '<text class="hpe-lijitxt" x="' + l.x + '" y="' + (l.y + u * 0.75) + '" text-anchor="middle" font-size="' + (u * 2.2) + '">✥</text>' +
       '<text class="hpe-lijilab" x="' + l.x + '" y="' + (l.y + u * 5.6) + '" text-anchor="middle" font-size="' + (u * 1.9) + '">' + esc(T('hpe_liji')) + '</text></g>';
   }
+  /* ---------------- 照片建房舞台视口（viewBox 平移/缩放，与画布同构） ----------------
+   * 舞台坐标：照片占 (0,0)-(1000,Hh)。旧版 viewBox 钉死整图且抽屉压住下沿，
+   * 长图下两角永远够不着；改走 st.view：初始 fit 把整图收进「抽屉之上」的可视带，
+   * 双指捏合/单指拖空白/滚轮/全图钮都可动，四角任何时候够得着。 */
+  function stageDims() { var st = E.stage; return { W: 1000, H: 1000 * st.natH / st.natW }; }
+  function stageBand() {
+    /* 抽屉盖住画布下沿的比例：fit 时只用抽屉以上的带子安放整图 */
+    var cv = $('hpe-canvas'), sh = $('hpe-sheet');
+    if (!cv || !cv.clientHeight) return 1;
+    if (sh && !sh.hidden && E.sheet) {
+      var cr = cv.getBoundingClientRect(), sr = sh.getBoundingClientRect();
+      var covered = Math.max(0, Math.min(cr.height, cr.bottom - sr.top));
+      return Math.max(0.3, (cr.height - covered) / cr.height);
+    }
+    return 1;
+  }
+  function stageFit() {
+    var d = stageDims(), asp = stageAspect(), band = stageBand(), m = 1.05;
+    var w = Math.max(d.W * m, d.H * m / band * asp);
+    var bandH = w / asp * band;
+    return { x: (d.W - w) / 2, y: -(bandH - d.H) / 2, w: w };
+  }
+  function clampSview() {
+    var st = E.stage; if (!st || !st.view) return;
+    var d = stageDims(), asp = stageAspect(), v = st.view;
+    var cx = v.x + v.w / 2, cy = v.y + v.w / asp / 2;
+    var maxW = Math.max(d.W, d.H * asp) * 2.4;
+    v.w = Math.max(120, Math.min(maxW, v.w));
+    v.x = cx - v.w / 2; v.y = cy - v.w / asp / 2;
+    var h = v.w / asp;
+    v.x = Math.max(0 - v.w * 0.85, Math.min(v.x, d.W - v.w * 0.15));
+    v.y = Math.max(0 - h * 0.85, Math.min(v.y, d.H - h * 0.15));
+  }
+  function clientToStage(cx, cy) {
+    var st = E.stage, v = st.view, svg = $('hpe-svg');
+    if (!svg || !v) return { x: 0, y: 0 };
+    var rc = svg.getBoundingClientRect();
+    if (!rc.width) return { x: v.x, y: v.y };
+    return { x: v.x + (cx - rc.left) / rc.width * v.w, y: v.y + (cy - rc.top) / rc.height * (v.w / stageAspect()) };
+  }
+  function zoomStageAt(nw, cx, cy) {
+    var st = E.stage; if (!st || st.preview) return;
+    if (!st.view) st.view = stageFit();
+    var a = clientToStage(cx, cy);
+    var svg = $('hpe-svg'); if (!svg) return;
+    var rc = svg.getBoundingClientRect(); if (!rc.width) return;
+    st.view.w = nw;
+    st.view.x = a.x - (cx - rc.left) / rc.width * nw;
+    st.view.y = a.y - (cy - rc.top) / rc.height * (nw / stageAspect());
+    clampSview(); render();
+  }
   function renderStage(svg) {
     var st = E.stage;
     var Hh = 1000 * st.natH / st.natW;
-    svg.setAttribute('viewBox', '0 0 1000 ' + Hh);
-    var s = '<image href="' + st.url + '" x="0" y="0" width="1000" height="' + Hh + '" preserveAspectRatio="none"/>';
+    if (st.preview) {
+      svg.setAttribute('viewBox', '0 0 ' + st.preview.w + ' ' + st.preview.h);
+      svg.innerHTML = '<image class="hpe-stage-preview-img" href="' + st.preview.url + '" x="0" y="0" width="' + st.preview.w + '" height="' + st.preview.h + '" preserveAspectRatio="none"/>';
+      return;
+    }
+    if (!st.view) st.view = stageFit();
+    clampSview();
+    var v = st.view;
+    svg.setAttribute('viewBox', v.x + ' ' + v.y + ' ' + v.w + ' ' + (v.w / stageAspect()));
+    var s = '<image href="' + st.url + '" x="0" y="0" width="1000" height="' + Hh + '" preserveAspectRatio="none" draggable="false"/>';
     var pts = st.corners.map(function (c) { return (c.x * 1000) + ',' + (c.y * Hh); }).join(' ');
     s += '<polygon class="hpe-quad" points="' + pts + '"/>';
+    /* 命中圈随缩放长大：半径约视口宽 6%，手指好捏；坏角描红 */
+    var rHit = Math.max(30, Math.min(110, v.w * 0.062));
+    var rDot = Math.max(5, Math.min(12, v.w * 0.010));
     st.corners.forEach(function (c, i) {
-      s += '<circle class="hpe-corner" data-act="corner" data-i="' + i + '" cx="' + (c.x * 1000) + '" cy="' + (c.y * Hh) + '" r="30"/>' +
-        '<circle class="hpe-cornerdot" cx="' + (c.x * 1000) + '" cy="' + (c.y * Hh) + '" r="7"/>';
+      s += '<circle class="hpe-corner' + (st.bad === i ? ' bad' : '') + '" data-act="corner" data-i="' + i + '" cx="' + (c.x * 1000) + '" cy="' + (c.y * Hh) + '" r="' + rHit + '"/>' +
+        '<circle class="hpe-cornerdot" cx="' + (c.x * 1000) + '" cy="' + (c.y * Hh) + '" r="' + rDot + '"/>';
     });
+    /* 拖动中在手指上方约一指高处画影点：真角不被手指盖住，落点看得见 */
+    if (st.dragI != null && st.dragI >= 0 && st.corners[st.dragI]) {
+      var dc = st.corners[st.dragI], gx = dc.x * 1000, gy = dc.y * Hh - v.w * 0.115;
+      s += '<line class="hpe-corner-ghostln" x1="' + (dc.x * 1000) + '" y1="' + (dc.y * Hh) + '" x2="' + gx + '" y2="' + gy + '"/>' +
+        '<circle class="hpe-corner-ghost" cx="' + gx + '" cy="' + gy + '" r="' + (rHit * 0.62) + '"/>' +
+        '<circle class="hpe-corner-ghostdot" cx="' + gx + '" cy="' + gy + '" r="' + rDot + '"/>';
+    }
     svg.innerHTML = s;
   }
 
@@ -1434,8 +1503,33 @@
   function renderTracePanel() {
     var box = $('hpe-tracebox'); if (!box) return;
     if (E.stage) {
+      var st = E.stage;
+      if (st.preview) {
+        box.innerHTML = '<div class="hpe-cal"><div class="r"><b>' + esc(T('hpe_detect_found_t')) + '</b></div>' +
+          '<div class="r" style="margin-top:4px"><span>' + esc(T('hpe_detect_found')) + '</span></div>' +
+          '<div class="r" style="margin-top:9px"><button class="btn primary" id="hpe-detect-use">' + esc(T('hpe_detect_use')) + '</button>' +
+          '<button class="btn" id="hpe-detect-adjust">' + esc(T('hpe_detect_adjust')) + '</button>' +
+          '<button class="btn" id="hpe-stage-cancel">' + esc(T('hpe_cancel')) + '</button></div></div>';
+        $('hpe-detect-use').addEventListener('click', function () {
+          var pv = E.stage && E.stage.preview; if (!pv) return;
+          E.stage.preview = null;
+          commitWarp(pv.url, pv.w, pv.h);
+        });
+        $('hpe-detect-adjust').addEventListener('click', function () {
+          if (!E.stage) return;
+          E.stage.preview = null; E.stage.view = null; E.stage.detect = 'idle';
+          render(); renderTracePanel();
+        });
+        $('hpe-stage-cancel').addEventListener('click', function () { cancelStage(); });
+        return;
+      }
+      var note = '';
+      if (st.detect === 'busy') note = '<div class="r" style="margin-top:6px"><span>' + esc(T('hpe_detecting')) + '</span></div>';
+      else if (st.detect === 'miss') note = '<div class="r" style="margin-top:6px"><span>' + esc(T('hpe_detect_miss')) + '</span></div>';
+      var errHtml = st.err ? '<div class="r" id="hpe-stage-err" style="margin-top:6px">' + esc(st.err) + '</div>' : '';
       box.innerHTML = '<div class="hpe-cal"><div class="r"><b>' + esc(T('hpe_stage_title')) + '</b><span>' + esc(T('hpe_stage_hint')) + '</span></div>' +
-        '<div class="r" style="margin-top:9px"><button class="btn primary" id="hpe-warp">' + esc(T('hpe_warp')) + '</button>' +
+        note + errHtml +
+        '<div class="r" style="margin-top:9px"><button class="btn primary" id="hpe-warp"' + (st.busy ? ' disabled' : '') + '>' + esc(st.busy ? T('hpe_warping') : T('hpe_warp')) + '</button>' +
         '<button class="btn" id="hpe-stage-cancel">' + esc(T('hpe_cancel')) + '</button></div></div>';
       $('hpe-warp').addEventListener('click', doWarp);
       $('hpe-stage-cancel').addEventListener('click', function () { cancelStage(); });
@@ -1450,14 +1544,16 @@
       }).join('');
       var cal = E.plan.calibNote || '';
       box.innerHTML = '<div class="hpe-cal">' +
-        '<div class="r"><span>' + esc(T('hpe_photo_lab')) + '</span>' +
+        (E.justWarped ? '<div class="r"><b>' + esc(T('hpe_warp_done_t')) + '</b></div>' +
+          '<div class="r" style="margin-top:4px"><span>' + esc(T('hpe_warp_ok_hint')) + '</span></div>' : '') +
+        '<div class="r"' + (E.justWarped ? ' style="margin-top:9px"' : '') + '><span>' + esc(T('hpe_photo_lab')) + '</span>' +
         '<select class="hpe-inp" id="hpe-photo-sel">' + opts + '</select>' +
         '<button class="btn" id="hpe-photo-up">' + esc(T('hpe_upload')) + '</button>' +
         (cur ? '<button class="btn" id="hpe-photo-recorner">' + esc(T('hpe_recorner')) + '</button>' : '') + '</div>' +
         '<div class="r" style="margin-top:9px"><span>' + esc(T('hpe_calib_lab')) + '</span>' +
         (E.calibArm
           ? '<b>' + esc(TF(T('hpe_calib_armed'), E.calibPts.length)) + '</b><button class="btn" id="hpe-calib-cancel">' + esc(T('hpe_cancel')) + '</button>'
-          : '<button class="btn" id="hpe-calib-start">' + esc(T('hpe_calib_start')) + '</button>' +
+          : '<button class="btn' + (E.justWarped ? ' primary' : '') + '" id="hpe-calib-start">' + esc(T('hpe_calib_start')) + '</button>' +
             '<span>' + esc(cal ? TF(T('hpe_calib_done'), cal) : T('hpe_calib_none')) + '</span>') + '</div>' +
         (E.calibPts.length === 2 ? '<div class="r" style="margin-top:9px"><span>' + esc(T('hpe_calib_len')) + '</span>' +
           '<input class="hpe-inp sm" id="hpe-calib-val" type="number" step="0.05" min="0.1" placeholder="0.9"> m' +
@@ -1500,6 +1596,7 @@
     E.plan.mPerUnit = v / distU;
     E.plan.calibNote = trimNum(v, 2) + ' m';
     E.calibArm = false; E.calibPts = [];
+    E.justWarped = false;
     toastMsg(T('hpe_calib_set'));
     afterChange();
     renderTracePanel();
@@ -1670,8 +1767,20 @@
     var actEl = tgt && tgt.closest ? tgt.closest('[data-act]') : null;
     var act = actEl ? actEl.getAttribute('data-act') : null;
     if (E.stage) {
+      if (E.stage.preview || E.stage.busy) return;
       if (act === 'corner') {
-        E.drag = { kind: 'corner', i: +actEl.getAttribute('data-i'), pushed: false };
+        var ci = +actEl.getAttribute('data-i');
+        var cpt = E.stage.corners[ci];
+        var HhD = 1000 * E.stage.natH / E.stage.natW;
+        /* 记抓取偏移：按下点与角心的差，拖动时角不跳到手指正下方被盖住 */
+        E.drag = { kind: 'corner', i: ci, dx: cpt.x * 1000 - pt.x, dy: cpt.y * HhD - pt.y, pushed: false };
+        E.stage.dragI = ci;
+        svg.setPointerCapture(evt.pointerId);
+        render();
+      } else {
+        /* 空白处单指拖动＝平移舞台画面（够不着的角拖进可视带） */
+        if (!E.stage.view) E.stage.view = stageFit();
+        E.drag = { kind: 'span', sx: evt.clientX, sy: evt.clientY, vx: E.stage.view.x, vy: E.stage.view.y };
         svg.setPointerCapture(evt.pointerId);
       }
       return;
@@ -1803,10 +1912,25 @@
     if (d.kind === 'corner') {
       var st = E.stage, Hh = 1000 * st.natH / st.natW;
       st.corners[d.i] = {
-        x: Math.max(0, Math.min(1, pt.x / 1000)),
-        y: Math.max(0, Math.min(1, pt.y / Hh))
+        x: Math.max(0, Math.min(1, (pt.x + (d.dx || 0)) / 1000)),
+        y: Math.max(0, Math.min(1, (pt.y + (d.dy || 0)) / Hh))
       };
+      if (st.err) { /* 一动手改角就撤下旧错误，免得误会没改对 */
+        st.err = null; st.bad = -1;
+        var eb = $('hpe-stage-err'); if (eb) eb.parentNode.removeChild(eb);
+      }
+      if (st.detect === 'miss') st.detect = 'idle';
       render();
+      return;
+    }
+    if (d.kind === 'span') {
+      var svgS = $('hpe-svg'), rcS = svgS ? svgS.getBoundingClientRect() : null;
+      if (rcS && rcS.width > 0 && E.stage && E.stage.view) {
+        var svv = E.stage.view;
+        svv.x = d.vx - (evt.clientX - d.sx) / rcS.width * svv.w;
+        svv.y = d.vy - (evt.clientY - d.sy) / rcS.height * (svv.w / stageAspect());
+        clampSview(); render();
+      }
       return;
     }
     if (d.kind === 'pan') {
@@ -1878,8 +2002,9 @@
     var d = E.drag; if (!d) return;
     E.drag = null;
     if (d.kind === 'pan') return;
+    if (d.kind === 'span') return;
     if (d.kind === 'cutline') { render(); syncCutBar(); return; }
-    if (d.kind === 'corner') { render(); return; }
+    if (d.kind === 'corner') { if (E.stage) E.stage.dragI = -1; render(); return; }
     if (d.kind === 'create') {
       var t = E.tempRect; E.tempRect = null;
       if (t && toM(t.w) > 0.3 && toM(t.h) > 0.3) {
@@ -1935,17 +2060,45 @@
     if (!E.view) E.view = fitView();
     E.pinch = { d0: d0, w0: E.view.w, anchor: clientToPlan(mid.x, mid.y, E.view) };
   }
+  function beginStagePinch() {
+    E.drag = null;
+    if (E.stage) E.stage.dragI = -1;
+    var ps = Object.keys(E.ptrs).map(function (k) { return E.ptrs[k]; });
+    var mid = { x: (ps[0].x + ps[1].x) / 2, y: (ps[0].y + ps[1].y) / 2 };
+    var d0 = Math.sqrt(Math.pow(ps[0].x - ps[1].x, 2) + Math.pow(ps[0].y - ps[1].y, 2)) || 1;
+    if (!E.stage.view) E.stage.view = stageFit();
+    E.spinch = { d0: d0, w0: E.stage.view.w, anchor: clientToStage(mid.x, mid.y) };
+  }
   function ptDown(evt) {
     if (!E.ptrs) E.ptrs = {};
     E.ptrs[evt.pointerId] = { x: evt.clientX, y: evt.clientY };
     var n = Object.keys(E.ptrs).length;
-    if (!E.stage && n === 2) { beginPinch(); return; }
-    if (n > 1) return; /* 其余指（含描图舞台第二指）忽略 */
+    if (n === 2) {
+      if (E.stage && !E.stage.preview && !E.stage.busy) { beginStagePinch(); return; }
+      if (!E.stage) { beginPinch(); return; }
+    }
+    if (n > 1) return; /* 其余指忽略 */
     E.dragPtr = evt.pointerId;
     onDown(evt);
   }
   function ptMove(evt) {
     if (E.ptrs && E.ptrs[evt.pointerId]) { E.ptrs[evt.pointerId].x = evt.clientX; E.ptrs[evt.pointerId].y = evt.clientY; }
+    if (E.spinch) {
+      var sps = Object.keys(E.ptrs).map(function (k) { return E.ptrs[k]; });
+      if (sps.length >= 2 && E.stage && E.stage.view) {
+        var ssvg = $('hpe-svg'), src = ssvg.getBoundingClientRect();
+        if (src.width > 0) {
+          var sd = Math.sqrt(Math.pow(sps[0].x - sps[1].x, 2) + Math.pow(sps[0].y - sps[1].y, 2)) || 1;
+          var smid = { x: (sps[0].x + sps[1].x) / 2, y: (sps[0].y + sps[1].y) / 2 };
+          var sv = E.stage.view;
+          sv.w = E.spinch.w0 * E.spinch.d0 / sd;
+          sv.x = E.spinch.anchor.x - (smid.x - src.left) / src.width * sv.w;
+          sv.y = E.spinch.anchor.y - (smid.y - src.top) / src.height * (sv.w / stageAspect());
+          clampSview(); render();
+        }
+      }
+      return;
+    }
     if (E.pinch) {
       var ps = Object.keys(E.ptrs).map(function (k) { return E.ptrs[k]; });
       if (ps.length >= 2 && E.view) {
@@ -1968,6 +2121,10 @@
   }
   function ptUp(evt) {
     if (E.ptrs) delete E.ptrs[evt.pointerId];
+    if (E.spinch) {
+      if (!E.ptrs || Object.keys(E.ptrs).length < 2) E.spinch = null;
+      return;
+    }
     if (E.pinch) {
       if (!E.ptrs || Object.keys(E.ptrs).length < 2) E.pinch = null;
       return;
@@ -1999,16 +2156,207 @@
         E.stage = {
           photoId: photoId, url: r.url, img: r.img,
           natW: r.img.naturalWidth, natH: r.img.naturalHeight,
-          corners: corners || [{ x: 0.06, y: 0.06 }, { x: 0.94, y: 0.06 }, { x: 0.94, y: 0.94 }, { x: 0.06, y: 0.94 }]
+          corners: corners || [{ x: 0.06, y: 0.06 }, { x: 0.94, y: 0.06 }, { x: 0.94, y: 0.94 }, { x: 0.06, y: 0.94 }],
+          view: null, dragI: -1, err: null, bad: -1, busy: false,
+          preview: null, detect: 'idle'
         };
+        E.spinch = null;
+        E.justWarped = false;
         render(); renderTracePanel();
+        /* 新照片（非重调旧角）先自动找外框：命中直接出拉正预览，漏检回落手动四角 */
+        if (!keepCorners) runDetect();
       });
     }).catch(function () { toastMsg(T('hpe_photo_fail')); });
   }
   function cancelStage() {
     if (E.stage && E.stage.url) URL.revokeObjectURL(E.stage.url);
     E.stage = null;
+    E.spinch = null;
     render(); renderTracePanel();
+  }
+
+  /* ---------------- 自动找外框（上传后先扫一遍，宁漏检不误检） ----------------
+   * 缩小副本（长边 480）→ 灰度 → Otsu 取亮区（纸面/屏幕通常是画面里的大亮块）
+   * → 最大连通域 → 凸包 → 逐点削角逼到四边形 → 面积/内角/四边梯度支持三重校验，
+   * 任一不过即判漏检、回落手动四角。命中后自动拉正出预览，用户确认或再调角。 */
+  function convexHull(pts) {
+    pts = pts.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    if (pts.length < 3) return pts;
+    function cross(o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); }
+    var lo = [], hi = [], i, t;
+    for (i = 0; i < pts.length; i++) {
+      while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], pts[i]) <= 0) lo.pop();
+      lo.push(pts[i]);
+    }
+    for (i = pts.length - 1; i >= 0; i--) {
+      while (hi.length >= 2 && cross(hi[hi.length - 2], hi[hi.length - 1], pts[i]) <= 0) hi.pop();
+      hi.push(pts[i]);
+    }
+    lo.pop(); hi.pop();
+    return lo.concat(hi);
+  }
+  function approxQuad(hull) {
+    /* 迭代削掉「三角面积最小」的顶点，削到剩 4 个——近矩形凸包上稳且快 */
+    var ring = hull.slice();
+    function triArea(a, b, c) { return Math.abs((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) / 2; }
+    var guard = 0;
+    while (ring.length > 4 && guard++ < 400) {
+      var bi = -1, ba = Infinity;
+      for (var i = 0; i < ring.length; i++) {
+        var ar = triArea(ring[(i + ring.length - 1) % ring.length], ring[i], ring[(i + 1) % ring.length]);
+        if (ar < ba) { ba = ar; bi = i; }
+      }
+      ring.splice(bi, 1);
+    }
+    return ring.length === 4 ? ring : null;
+  }
+  function orderQuad(q) {
+    var cx = (q[0].x + q[1].x + q[2].x + q[3].x) / 4, cy = (q[0].y + q[1].y + q[2].y + q[3].y) / 4;
+    var tl = null, tr = null, br = null, bl = null;
+    q.forEach(function (p) {
+      if (p.x <= cx && p.y <= cy) tl = p; else if (p.x > cx && p.y <= cy) tr = p;
+      else if (p.x > cx && p.y > cy) br = p; else bl = p;
+    });
+    if (!tl || !tr || !br || !bl) return null;
+    return [tl, tr, br, bl];
+  }
+  function detectFrame(img) {
+    return new Promise(function (res) {
+      try {
+        var iw = img.naturalWidth, ih = img.naturalHeight;
+        var sc = Math.min(1, 480 / Math.max(iw, ih));
+        var w = Math.max(2, Math.round(iw * sc)), h = Math.max(2, Math.round(ih * sc));
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        var ctx = cv.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, w, h);
+        var data = ctx.getImageData(0, 0, w, h).data;
+        var total = w * h, gray = new Float32Array(total), i;
+        for (i = 0; i < total; i++) gray[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2];
+        var hist = new Array(256).fill(0);
+        for (i = 0; i < total; i++) hist[Math.max(0, Math.min(255, gray[i] | 0))]++;
+        var sum = 0; for (i = 0; i < 256; i++) sum += i * hist[i];
+        var sumB = 0, wB = 0, maxVar = 0, thr = 127;
+        for (i = 0; i < 256; i++) {
+          wB += hist[i]; if (!wB) continue;
+          var wF = total - wB; if (!wF) break;
+          sumB += i * hist[i];
+          var dM = sumB / wB - (sum - sumB) / wF;
+          var between = wB * wF * dM * dM;
+          if (between > maxVar) { maxVar = between; thr = i; }
+        }
+        /* 单个阈值走完全程：掩膜→最大连通域→凸包→四边形→三重校验，全过才返回四角。
+         * 背景是渐变墙面时 Otsu 阈值会把墙面亮部与纸面连成一片（凸包顶边跑到画面边、
+         * 被边支持校验毙掉）；故再逐级抬高阈值重试——纸面通常比环境更亮、抬高后能
+         * 干净分离。每级关卡一字不松，宁漏检不误检。 */
+        function tryThr(th) {
+          var bright = new Uint8Array(total), nb = 0, i2;
+          for (i2 = 0; i2 < total; i2++) { bright[i2] = gray[i2] > th ? 1 : 0; nb += bright[i2]; }
+          var frac = nb / total;
+          if (frac < 0.08 || frac > 0.92) return null;
+          var label = new Int32Array(total).fill(-1);
+          var bestLab = -1, bestSize = 0, cur = 0, stack = [];
+          for (var s0 = 0; s0 < total; s0++) {
+            if (!bright[s0] || label[s0] >= 0) continue;
+            var size = 0; stack.length = 0; stack.push(s0); label[s0] = cur;
+            while (stack.length) {
+              var p = stack.pop(); size++;
+              var px = p % w, py = (p / w) | 0;
+              if (px > 0 && bright[p - 1] && label[p - 1] < 0) { label[p - 1] = cur; stack.push(p - 1); }
+              if (px < w - 1 && bright[p + 1] && label[p + 1] < 0) { label[p + 1] = cur; stack.push(p + 1); }
+              if (py > 0 && bright[p - w] && label[p - w] < 0) { label[p - w] = cur; stack.push(p - w); }
+              if (py < h - 1 && bright[p + w] && label[p + w] < 0) { label[p + w] = cur; stack.push(p + w); }
+            }
+            if (size > bestSize) { bestSize = size; bestLab = cur; }
+            cur++;
+          }
+          if (bestLab < 0 || bestSize / total < 0.15) return null;
+          var bpts = [];
+          for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+            var idx = y * w + x;
+            if (label[idx] !== bestLab) continue;
+            if (x === 0 || y === 0 || x === w - 1 || y === h - 1 || label[idx - 1] !== bestLab || label[idx + 1] !== bestLab || label[idx - w] !== bestLab || label[idx + w] !== bestLab) bpts.push([x, y]);
+          }
+          var quad = approxQuad(convexHull(bpts));
+          if (!quad) return null;
+          var q = orderQuad(quad.map(function (p) { return { x: p[0] / w, y: p[1] / h }; }));
+          if (!q) return null;
+          /* 校验一：面积 ≥ 画面 18% */
+          var a2 = 0, k;
+          for (k = 0; k < 4; k++) { var pa = q[k], pb = q[(k + 1) % 4]; a2 += pa.x * pb.y - pb.x * pa.y; }
+          if (Math.abs(a2) / 2 < 0.18) return null;
+          /* 校验二：内角 50°–130°（像素空间计角，免归一化拉伸误判） */
+          for (k = 0; k < 4; k++) {
+            var p0 = q[(k + 3) % 4], p1 = q[k], p2 = q[(k + 1) % 4];
+            var v1x = (p0.x - p1.x) * w, v1y = (p0.y - p1.y) * h, v2x = (p2.x - p1.x) * w, v2y = (p2.y - p1.y) * h;
+            var cos = (v1x * v2x + v1y * v2y) / (Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y) || 1);
+            var ang = Math.acos(Math.max(-1, Math.min(1, cos))) * 180 / Math.PI;
+            if (ang < 50 || ang > 130) return null;
+          }
+          /* 校验三：四边梯度支持——沿每边取样，两侧亮度差够大才算这条边是真的 */
+          function gAt(gx, gy) {
+            gx = Math.max(0, Math.min(w - 1, Math.round(gx))); gy = Math.max(0, Math.min(h - 1, Math.round(gy)));
+            return gray[gy * w + gx];
+          }
+          var edgesOk = 0, supSum = 0;
+          for (k = 0; k < 4; k++) {
+            var e0 = q[k], e1 = q[(k + 1) % 4];
+            var ex = (e1.x - e0.x) * w, ey = (e1.y - e0.y) * h, el = Math.hypot(ex, ey) || 1;
+            var nx = -ey / el, ny = ex / el, sup = 0, smp = 20;
+            for (var sI = 0; sI < smp; sI++) {
+              var t = 0.08 + 0.84 * sI / (smp - 1);
+              var sx = (e0.x + (e1.x - e0.x) * t) * w, sy = (e0.y + (e1.y - e0.y) * t) * h;
+              if (Math.abs(gAt(sx + nx * 2.5, sy + ny * 2.5) - gAt(sx - nx * 2.5, sy - ny * 2.5)) >= 20) sup++;
+            }
+            supSum += sup / smp;
+            if (sup / smp >= 0.5) edgesOk++;
+          }
+          if (edgesOk < 3 || supSum / 4 < 0.55) return null;
+          return q;
+        }
+        var ths = [thr, thr + 24, thr + 48].filter(function (t, ix, arr) { return t <= 250 && arr.indexOf(t) === ix; });
+        for (var ti = 0; ti < ths.length; ti++) {
+          var got = tryThr(ths[ti]);
+          if (got) { res(got); return; }
+        }
+        res(null);
+      } catch (e) { res(null); }
+    });
+  }
+  function runDetect() {
+    var st = E.stage; if (!st) return;
+    st.detect = 'busy';
+    renderTracePanel();
+    /* 让「正在自动找外框」先画出来，检测在下一帧跑（480px 副本，约百毫秒级） */
+    requestAnimationFrame(function () {
+      setTimeout(function () {
+        if (E.stage !== st) return;
+        detectFrame(st.img).then(function (q) {
+          if (E.stage !== st) return;
+          if (!q) { st.detect = 'miss'; renderTracePanel(); return; }
+          st.corners = q;
+          st.detect = 'hit';
+          var prob = quadProblem(st);
+          if (prob) { st.detect = 'miss'; render(); renderTracePanel(); return; }
+          st.busy = true;
+          renderTracePanel();
+          requestAnimationFrame(function () {
+            setTimeout(function () {
+              if (E.stage !== st) return;
+              try {
+                var sz = warpOutSize(st);
+                var url = warpImage(st.img, st.corners, sz.w, sz.h);
+                st.busy = false;
+                st.preview = { url: url, w: sz.w, h: sz.h };
+              } catch (e) {
+                st.busy = false;
+                st.preview = null;
+              }
+              render(); renderTracePanel();
+            }, 30);
+          });
+        });
+      }, 30);
+    });
   }
   function warpImage(img, corners, outW, outH) {
     var cv = document.createElement('canvas');
@@ -2050,7 +2398,12 @@
       ctx.moveTo(u0, v0); ctx.lineTo(u1, v1); ctx.lineTo(u2, v2);
       ctx.closePath(); ctx.clip();
       ctx.setTransform(Bv[0], Bv[3], Bv[1], Bv[4], Bv[2], Bv[5]);
-      ctx.drawImage(img, 0, 0);
+      /* 只画源三角的外接矩形（9 参同位绘制，与整图绘制在覆盖区逐像素等价）：
+       * 旧版每三角整图重绘 800 次，真机上同步阻塞数秒、点「拉正」像没反应 */
+      var bx = Math.max(0, Math.floor(Math.min(x0, x1, x2)) - 1), by = Math.max(0, Math.floor(Math.min(y0, y1, y2)) - 1);
+      var bw = Math.min(img.naturalWidth - bx, Math.ceil(Math.max(x0, x1, x2)) + 1 - bx);
+      var bh = Math.min(img.naturalHeight - by, Math.ceil(Math.max(y0, y1, y2)) + 1 - by);
+      if (bw > 0 && bh > 0) ctx.drawImage(img, bx, by, bw, bh, bx, by, bw, bh);
       ctx.restore();
     }
     var N = 20;
@@ -2065,14 +2418,54 @@
     }
     return cv.toDataURL('image/jpeg', 0.85);
   }
-  function doWarp() {
-    var st = E.stage; if (!st) return;
+  /* 四角合理性校验：旧版零校验——自交/重合的框也「拉正成功」落盘成废图，
+   * 用户只看到点了没动静。返回 null＝合格；否则 {msg, i}（i＝出问题的角，-1＝整体）。 */
+  function quadProblem(st) {
+    var cs = st.corners, Hh = 1000 * st.natH / st.natW;
+    var P = cs.map(function (c) { return { x: c.x * 1000, y: c.y * Hh }; });
+    var names = [T('hpe_corner_tl'), T('hpe_corner_tr'), T('hpe_corner_br'), T('hpe_corner_bl')];
+    function d2(a, b) { return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2); }
+    var minD = 0.035 * Math.min(1000, Hh); /* 相邻/相对角至少拉开短边 3.5% */
+    for (var i = 0; i < 4; i++) for (var j = i + 1; j < 4; j++) {
+      if (d2(P[i], P[j]) < minD * minD) return { msg: TF(T('hpe_warp_err_close'), names[i]), i: i };
+    }
+    var area2 = 0;
+    for (i = 0; i < 4; i++) { var a = P[i], b = P[(i + 1) % 4]; area2 += a.x * b.y - b.x * a.y; }
+    if (Math.abs(area2) / 2 < 0.02 * 1000 * Hh) return { msg: T('hpe_warp_err_small'), i: -1 };
+    function cross(o, p, q) { return (p.x - o.x) * (q.y - o.y) - (p.y - o.y) * (q.x - o.x); }
+    function segInt(p1, p2, p3, p4) {
+      var d1 = cross(p3, p4, p1), d2 = cross(p3, p4, p2), d3 = cross(p1, p2, p3), d4 = cross(p1, p2, p4);
+      return d1 !== 0 && d2 !== 0 && d3 !== 0 && d4 !== 0 && ((d1 > 0) !== (d2 > 0)) && ((d3 > 0) !== (d4 > 0));
+    }
+    /* 对边相交（打叉）或绕序反转（对角互换，面积变号）都算框打叉 */
+    if (area2 <= 0 || segInt(P[0], P[1], P[2], P[3]) || segInt(P[1], P[2], P[3], P[0])) {
+      return { msg: T('hpe_warp_err_cross'), i: -1 };
+    }
+    var sgn = [];
+    for (i = 0; i < 4; i++) {
+      var e1 = { x: P[(i + 1) % 4].x - P[i].x, y: P[(i + 1) % 4].y - P[i].y };
+      var e2 = { x: P[(i + 2) % 4].x - P[(i + 1) % 4].x, y: P[(i + 2) % 4].y - P[(i + 1) % 4].y };
+      sgn.push(Math.sign(e1.x * e2.y - e1.y * e2.x));
+    }
+    var pos = sgn.filter(function (s) { return s > 0; }).length;
+    if (pos !== 0 && pos !== 4) {
+      var badV = sgn.indexOf(pos >= 2 ? -1 : 1);
+      return { msg: TF(T('hpe_warp_err_concave'), names[(badV + 1) % 4]), i: (badV + 1) % 4 };
+    }
+    return null;
+  }
+  function warpOutSize(st) {
     var cs = st.corners;
     function elen(a, b) { return Math.sqrt(Math.pow((a.x - b.x) * st.natW, 2) + Math.pow((a.y - b.y) * st.natH, 2)); }
     var topLen = (elen(cs[0], cs[1]) + elen(cs[3], cs[2])) / 2;
     var sideLen = (elen(cs[0], cs[3]) + elen(cs[1], cs[2])) / 2;
-    var outW = 1100, outH = Math.max(300, Math.min(1600, Math.round(outW * sideLen / topLen)));
-    var url = warpImage(st.img, cs, outW, outH);
+    var outW = 1100, outH = Math.max(300, Math.min(1600, Math.round(outW * sideLen / Math.max(1, topLen))));
+    return { w: outW, h: outH };
+  }
+  /* 拉正结果落盘（手动拉正与自动预览确认共用）：清舞台、回画布自动 fit、校准步推到台前 */
+  function commitWarp(url, outW, outH) {
+    var st = E.stage; if (!st) return;
+    var cs = st.corners;
     pushUndo();
     var rect = (E.plan.trace && E.plan.trace.rect) ? E.plan.trace.rect
       : { x: 0, y: 0, w: 10, h: Math.round(10 * outH / outW * 10) / 10 };
@@ -2081,12 +2474,40 @@
       opacity: E.plan.trace && E.plan.trace.opacity != null ? E.plan.trace.opacity : 0.62
     };
     E.traceURL = url;
-    if (E.stage.url) URL.revokeObjectURL(E.stage.url);
-    E.stage = null; E.view = null;
+    if (st.url) URL.revokeObjectURL(st.url);
+    E.stage = null; E.spinch = null; E.view = null;
     E.plan.layers.traceBg = true;
+    E.justWarped = true;
     afterChange();
     renderTracePanel();
     toastMsg(T('hpe_warped'));
+  }
+  function doWarp() {
+    var st = E.stage; if (!st || st.busy || st.preview) return;
+    var prob = quadProblem(st);
+    if (prob) {
+      st.err = prob.msg; st.bad = prob.i;
+      render(); renderTracePanel();
+      return;
+    }
+    st.err = null; st.bad = -1; st.busy = true;
+    renderTracePanel();
+    /* 先让「正在拉正…」画出来再跑重活，避免同步阻塞下点了像没反应 */
+    requestAnimationFrame(function () {
+      setTimeout(function () {
+        if (E.stage !== st) return;
+        try {
+          var sz = warpOutSize(st);
+          var url = warpImage(st.img, st.corners, sz.w, sz.h);
+          st.busy = false;
+          commitWarp(url, sz.w, sz.h);
+        } catch (e) {
+          st.busy = false;
+          st.err = T('hpe_warp_err_fail');
+          render(); renderTracePanel();
+        }
+      }, 30);
+    });
   }
   function regenTraceURL() {
     E.traceURL = '';
@@ -2193,7 +2614,14 @@
       svg.addEventListener('pointerup', ptUp);
       svg.addEventListener('pointercancel', ptUp);
       svg.addEventListener('wheel', function (e) {
-        if (E.stage || !E.plan) return;
+        if (E.stage) {
+          if (E.stage.preview || E.stage.busy) return;
+          e.preventDefault();
+          if (!E.stage.view) E.stage.view = stageFit();
+          zoomStageAt(E.stage.view.w * (e.deltaY > 0 ? 1.13 : 1 / 1.13), e.clientX, e.clientY);
+          return;
+        }
+        if (!E.plan) return;
         e.preventDefault();
         if (!E.view) E.view = fitView();
         zoomViewAt(E.view.w * (e.deltaY > 0 ? 1.13 : 1 / 1.13), e.clientX, e.clientY);
@@ -2218,9 +2646,13 @@
     }
     var fb = $('hpe-fitbtn');
     if (fb) fb.addEventListener('click', function () {
-      if (E.stage || !E.plan) return;
+      if (E.stage) { if (!E.stage.preview) { E.stage.view = stageFit(); render(); } return; }
+      if (!E.plan) return;
       E.view = fitView(); render();
     });
+    /* 编辑器全程禁掉系统菜单：长按拖角点绝不弹「复制/下载/分享图片」 */
+    var vp = $('view-plan');
+    if (vp) vp.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     var bk = $('hpe-back'); if (bk) bk.addEventListener('click', close);
     var un = $('hpe-undo'); if (un) un.addEventListener('click', undo);
     var re = $('hpe-redo'); if (re) re.addEventListener('click', redo);

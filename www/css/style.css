@@ -2610,7 +2610,16 @@ body.sky-red .hpe-lijilab { fill:#eda88f; }
 .hpe-temprect { fill:rgba(162,129,59,.12); stroke:var(--teal-deep); stroke-dasharray:.22 .14; }
 .hpe-quad { fill:rgba(162,129,59,.08); stroke:var(--gold); stroke-width:2.5; }
 .hpe-corner { fill:rgba(252,250,242,.25); stroke:var(--gold-deep); stroke-width:3; cursor:grab; }
+.hpe-corner.bad { stroke:var(--cinnabar); stroke-width:5; fill:rgba(176,58,46,.22); }
 .hpe-cornerdot { fill:var(--cinnabar); pointer-events:none; }
+.hpe-corner-ghost { fill:rgba(252,250,242,.3); stroke:var(--cinnabar); stroke-width:2.5; stroke-dasharray:6 5; pointer-events:none; }
+.hpe-corner-ghostdot { fill:var(--cinnabar); pointer-events:none; }
+.hpe-corner-ghostln { stroke:var(--cinnabar); stroke-width:1.6; stroke-dasharray:4 4; pointer-events:none; }
+/* 照片建房全程禁系统长按菜单（复制/下载/分享图片），长按只能拖角点 */
+#view-plan { -webkit-touch-callout:none; }
+#view-plan img { -webkit-user-drag:none; user-select:none; -webkit-user-select:none; }
+#hpe-stage-err { color:var(--cinnabar); font-weight:600; }
+.hpe-cal .btn[disabled] { opacity:.55; }
 .hpe-sub { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; align-items:center; }
 .hpe-chip { padding:5px 12px; border-radius:999px; border:1px solid var(--line-soft); font-size:.76rem; color:var(--muted); background:var(--card); cursor:pointer; }
 .hpe-chip.on { color:var(--gold-deep); border-color:rgba(162,129,59,.55); background:var(--gold-wash); }
