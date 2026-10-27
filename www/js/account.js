@@ -555,6 +555,7 @@
         var prow = JSON.parse(JSON.stringify(v));
         delete prow.house; delete prow.floor;
         prow.houseId = phid; prow.floorId = fid;
+        prow.uuid = uuid; /* 2026-10-27 修复：落地行必须带回云端 uuid，否则下轮快照被 fillUuids 分配新 uuid，同一户型在服务端反复「旧 uuid 墓碑＋新 uuid 新行」乒乓、待同步永不清零（其余表经 finish/显式赋值都有此步，plans 独缺） */
         if (prow.trace) {
           if (prow.trace.photoUuid && maps.photos[prow.trace.photoUuid] != null) {
             prow.trace.photoId = maps.photos[prow.trace.photoUuid];
