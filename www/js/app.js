@@ -518,10 +518,13 @@ function renderDetail() {
       pc.hidden = false;
       $('#pentad-title').textContent = tx(pd.term) + ' · ' + tx(pd.entry.phaseName) + ' · ' + tx(pd.entry.name);
       $('#pentad-desc').textContent = tx(pd.entry.desc);
-      $('#pentad-phases').innerHTML = pd.group.map(function (x) {
-        return '<span class="pentad-chip' + (x.phase === pd.phase ? ' on' : '') + '">' +
-          escA(tx(x.phaseName)) + ' ' + escA(tx(x.name)) + '</span>';
+      var pRow = $('#pentad-phases');
+      pRow.innerHTML = pd.group.map(function (x) {
+        return '<span class="pentad-chip' + (x.phase === pd.phase ? ' on' : '') + '"><span class="ph">' +
+          escA(tx(x.phaseName)) + '</span><span class="nm">' + escA(tx(x.name)) + '</span></span>';
       }).join('');
+      // 极长候名（如小雪二候「天气上升地气下降」8 字）整行降一档字号防溢出
+      pRow.classList.toggle('plen-long', pd.group.some(function (x) { return (x.name || '').length >= 7; }));
     } else { pc.hidden = true; }
   }
   var pmc = $('#poem-card');
