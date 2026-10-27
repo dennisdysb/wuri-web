@@ -45,7 +45,8 @@
     last: 'wuri_acct_last_v1', migrated: 'wuri_acct_migrated_v1',
     consent: 'wuri_acct_consent_house_v1', cfg: 'wuri_acct_cfg_v1',
     photometa: 'wuri_acct_photometa_v1', usage: 'wuri_acct_usage_v1', owner: 'wuri_acct_owner_v1',
-    username: 'wuri_acct_username_v1', haspw: 'wuri_acct_haspw_v1'
+    username: 'wuri_acct_username_v1', haspw: 'wuri_acct_haspw_v1',
+    delintent: 'wuri_acct_delintent_v1'
   };
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
@@ -176,6 +177,7 @@
   function wipeSyncState() {
     lsSet(K.shadow, null); lsSet(K.stamps, null); lsSet(K.last, null);
     lsSet(K.photometa, null); lsSet(K.usage, null); lsSet(K.migrated, null);
+    lsSet(K.delintent, null);
   }
   function clearSession(silent) {
     state.token = ''; state.email = ''; state.username = ''; state.hasPw = false; state.syncOn = false;
@@ -362,10 +364,48 @@
   function saveStamps(s) { lsSetJSON(K.stamps, s); }
   function stampKey(ds, key) { return ds + '|' + key; }
 
+  /* ---------------- 删除意图（防删后复活·同步侧） ----------------
+   * 场景：本地删掉一条（典型是详情页清空户型删 plans 行），本轮同步先拉后推——
+   * 拉取阶段若把云端旧值落地回来，diff 就看不到「删过」，墓碑永不生成、删除被
+   * 静默湮灭。对策：每轮同步拉取前先扫「影子有、本地快照无」的条目记下删除
+   * 意图（键＝dataset|uuid，值＝记录时刻）；落地时带意图且远端版本不比上次已
+   * 应用的 stamp 更新（即只是旧值重发）→ 跳过落地，本轮墓碑照常发出；远端若
+   * 确有更新的版本（他端在我们上次同步后改过），按既有「后存为准」正常落地
+   * 并撤销意图。墓碑确认发出或远端删除落地后清意图。 */
+  var curDelIntents = {};
+  function loadDelIntents() { return lsJSON(K.delintent, {}); }
+  function saveDelIntents(m) { lsSetJSON(K.delintent, m); }
+  function clearDelIntent(fk) {
+    if (curDelIntents[fk]) delete curDelIntents[fk];
+    var m = loadDelIntents();
+    if (m[fk]) { delete m[fk]; saveDelIntents(m); }
+  }
+  function recordDelIntents(snap) {
+    var shadow = loadShadow();
+    var m = loadDelIntents();
+    var now = nowISO(), changed = false;
+    Object.keys(shadow.ls || {}).forEach(function (key) {
+      var fk = stampKey('ls', key);
+      if (!snap.ls[key]) { if (!m[fk]) { m[fk] = now; changed = true; } }
+      else if (m[fk]) { delete m[fk]; changed = true; }
+    });
+    Object.keys(shadow.house || {}).forEach(function (fk) {
+      var cut = fk.indexOf('|');
+      var ds = fk.slice(0, cut), uuid = fk.slice(cut + 1);
+      var cur = snap.house[ds] && snap.house[ds][uuid];
+      if (!cur) { if (!m[fk]) { m[fk] = now; changed = true; } }
+      else if (m[fk]) { delete m[fk]; changed = true; }
+    });
+    if (changed) saveDelIntents(m);
+    curDelIntents = m;
+    return m;
+  }
+
   /* 把云端条目落回本地。返回 {houseChanged, pulledUuids:Set式对象}；照片二进制失败的条目跳过（不推进 stamp，下轮重试） */
   function applyItems(items) {
     var stamps = loadStamps();
     var shadow = loadShadow();
+    curDelIntents = loadDelIntents();
     var pulledUuids = {};
     var houseChanged = false;
     var db = houseDb();
@@ -375,9 +415,17 @@
     /* 先处理 ls */
     items.forEach(function (it) {
       if (it.dataset !== 'ls') return;
+      var lfk = stampKey('ls', it.key);
+      if (!it.deleted && it.value != null && curDelIntents[lfk]) {
+        /* 本地已删：远端只是旧值重发（不比已应用 stamp 新）→ 不落地，保墓碑；
+         * 远端确有更新版本 → 后存为准，撤销意图正常落地 */
+        if (!(stamps[lfk] && it.updated_at > stamps[lfk])) return;
+        clearDelIntent(lfk);
+      }
       if (it.deleted || it.value == null) {
         lsSet(it.key, null);
         delete shadow.ls[it.key];
+        clearDelIntent(lfk);
       } else {
         lsSet(it.key, it.value);
         shadow.ls[it.key] = hashStr(it.value);
@@ -476,6 +524,7 @@
     var uuid = it.key;
     var localPk = maps[table][uuid];
     if (it.deleted) {
+      clearDelIntent(stampKey(ds, uuid));
       if (localPk == null) { stamps[stampKey(ds, uuid)] = it.updated_at; delete shadow.house[stampKey(ds, uuid)]; return Promise.resolve(false); }
       var delP = table === 'plans' ? db.plans.delete(localPk)
         : table === 'guides' ? db.guides.delete(localPk)
@@ -486,6 +535,13 @@
         if (table === 'photos') delete shadow.photo[uuid];
         return true;
       }).catch(function () { return false; });
+    }
+    /* 删除意图拦截：本地已删此条，远端发来的若不比已应用 stamp 更新，
+     * 只是旧值重发——跳过落地（也不记 pulledUuids），让本轮 diff 照常产墓碑 */
+    var ifk = stampKey(ds, uuid);
+    if (curDelIntents[ifk]) {
+      if (!(stamps[ifk] && it.updated_at > stamps[ifk])) return Promise.resolve(false);
+      clearDelIntent(ifk); /* 远端有更新的版本：后存为准，撤销意图 */
     }
     var v;
     try { v = JSON.parse(it.value || '{}'); } catch (e) { return Promise.resolve(false); }
@@ -817,6 +873,7 @@
     planItems.forEach(function (it) {
       var fk = stampKey(it.dataset, it.key);
       if (!appliedMap[fk]) return;
+      if (it.deleted) clearDelIntent(fk); /* 墓碑已发出：删除意图完成使命 */
       stamps[fk] = it.updated_at;
       if (it.dataset === 'ls') {
         if (it.deleted) delete shadow.ls[it.key]; else shadow.ls[it.key] = it._hash;
@@ -836,7 +893,11 @@
     renderStatus();
     var houseChanged = false, pushedHouse = false, plan = null, blocked = 0, failed = false;
     var stamps = loadStamps();
-    return api('/api/sync/pull', { method: 'POST', body: { stamps: stamps } })
+    /* 拉取前先记删除意图：影子有、当前快照无的条目＝本地已删未同步，
+     * 拉取落地阶段据此拦下旧值重发，保本轮墓碑能生成 */
+    return snapshot()
+      .then(function (preSnap) { recordDelIntents(preSnap); })
+      .then(function () { return api('/api/sync/pull', { method: 'POST', body: { stamps: stamps } }); })
       .then(function (r) {
         if (r.status === 401) { on401(); throw new Error('unauthorized'); }
         if (!r.body || !r.body.ok) throw new Error('pull_failed');

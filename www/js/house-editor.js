@@ -147,7 +147,13 @@
     drag: null, saveTm: null, chartCache: null,
     view: null, ptrs: null, pinch: null, spinch: null, justWarped: false,
     attrFull: false, lastTap: null, _attrKey: '',
-    cut: null, startPhase: 'pick', wallPrev: null
+    cut: null, startPhase: 'pick', wallPrev: null,
+    /* planDirty：E.plan 自载入后是否被改过——未改动的内存稿禁止 saveNow 回写，
+     * 防详情页已删的行被编辑器旧稿「复活」（见 close/invalidate/switchFloor） */
+    planDirty: false,
+    /* 「选择」键多选：multi＝{room:{},fix:{},wall:{}} 以 id 记选中；boxMode 框选开关；
+     * boxRect＝正在拉的框（坐标单位），null＝未在拉框 */
+    multi: null, boxMode: false, boxRect: null
   };
   function F() { return window.WuriSoulFs; }
   function planOf() { return E.plan; }
@@ -181,20 +187,35 @@
   var saveTm = null;
   function save() {
     if (!E.plan) return;
+    E.planDirty = true;
     E.plan.updated = Date.now();
     ensureLiji();
     clearTimeout(saveTm);
     var snap = clone(E.plan);
-    saveTm = setTimeout(function () { db.plans.put(snap).catch(function () {}); }, 200);
+    saveTm = setTimeout(function () {
+      db.plans.put(snap).then(function () { if (E.plan === snap || (E.plan && E.plan.floorId === snap.floorId && E.plan.updated === snap.updated)) E.planDirty = false; }).catch(function () {});
+    }, 200);
     var sv = $('hpe-saved');
     if (sv) sv.textContent = T('hpe_saved');
   }
   function saveNow() {
-    if (!E.plan) return;
+    if (!E.plan) return Promise.resolve();
+    /* 身份守卫：内存稿与当前层对不上（已被 invalidate 作废或切层途中）绝不回写，
+     * 否则详情页删掉的户型行会被旧稿 put 回库复活并当普通更新推云 */
+    if (E.floorId && E.plan.floorId !== E.floorId) return Promise.resolve();
     clearTimeout(saveTm);
     E.plan.updated = Date.now();
     ensureLiji();
-    return db.plans.put(clone(E.plan)).catch(function () {});
+    return db.plans.put(clone(E.plan)).then(function () { E.planDirty = false; }).catch(function () {});
+  }
+  /* 外部删层/清空后作废内存稿（house.js 详情页删 plans 行时调用）：
+   * 命中本层才动手——弃稿、停防抖待写、清撤销栈，编辑器再无从把旧稿写回 */
+  function invalidate(fid) {
+    if (!fid || !E.plan || E.plan.floorId !== fid) return;
+    clearTimeout(saveTm);
+    E.plan = null; E.planDirty = false;
+    E.sel = null; E.multi = null; E.boxRect = null;
+    E.undoStack = []; E.redoStack = []; E.drag = null;
   }
   /* 撤销栈：变更前快照 */
   function pushUndo() {
@@ -207,7 +228,7 @@
     if (!E.undoStack.length) return;
     E.redoStack.push(clone(E.plan));
     E.plan = E.undoStack.pop();
-    E.sel = null; E.chartCache = null; E.cut = null;
+    E.sel = null; E.chartCache = null; E.cut = null; E.multi = null; E.planDirty = true;
     /* 清空后撤销把房间找回时，空层起始面须让位回画布 */
     if (E.sheet === 'start' && hasContent()) closeSheet();
     afterChange(true);
@@ -216,7 +237,7 @@
     if (!E.redoStack.length) return;
     E.undoStack.push(clone(E.plan));
     E.plan = E.redoStack.pop();
-    E.sel = null; E.chartCache = null; E.cut = null;
+    E.sel = null; E.chartCache = null; E.cut = null; E.multi = null; E.planDirty = true;
     if (E.sheet === 'start' && hasContent()) closeSheet();
     afterChange(true);
   }
@@ -434,7 +455,7 @@
     var labs = '';
     if (L.rooms) {
       p.rooms.forEach(function (r) {
-        var sel = E.sel && E.sel.kind === 'room' && E.sel.id === r.id;
+        var sel = (E.sel && E.sel.kind === 'room' && E.sel.id === r.id) || !!(E.multi && E.multi.room[r.id]);
         var fsN = Math.max(u * 2.6, Math.min(r.w, r.h) * 0.16);
         if (r.ex) {
           s += '<g data-act="room" data-id="' + r.id + '">' +
@@ -463,7 +484,7 @@
      * 命中另设加宽透明线（pointer-events:stroke），细线本身不接命中。 */
     if (L.rooms) {
       (p.walls || []).forEach(function (w) {
-        var selW = E.sel && E.sel.kind === 'wall' && E.sel.id === w.id;
+        var selW = (E.sel && E.sel.kind === 'wall' && E.sel.id === w.id) || !!(E.multi && E.multi.wall[w.id]);
         s += '<line class="hpe-wall' + (selW ? ' sel' : '') + '" x1="' + w.x1 + '" y1="' + w.y1 + '" x2="' + w.x2 + '" y2="' + w.y2 + '" stroke-width="' + Math.max(toU(0.12), u * 0.24) + '"/>' +
           '<line class="hpe-wallhit" data-act="wall" data-id="' + w.id + '" x1="' + w.x1 + '" y1="' + w.y1 + '" x2="' + w.x2 + '" y2="' + w.y2 + '" stroke-width="' + (u * 3.2) + '"/>';
       });
@@ -475,7 +496,7 @@
     if (L.fixtures) {
       p.fixtures.forEach(function (f) {
         var d = FIX[f.type]; if (!d) return;
-        var sel = E.sel && E.sel.kind === 'fixture' && E.sel.id === f.id;
+        var sel = (E.sel && E.sel.kind === 'fixture' && E.sel.id === f.id) || !!(E.multi && E.multi.fix[f.id]);
         var wU = toU(d.w), hU = toU(d.h);
         s += '<g data-act="fixture" data-id="' + f.id + '" class="hpe-fix' + (sel ? ' sel' : '') + '">' +
           '<rect class="hpe-fixhit" x="' + (f.x - wU / 2) + '" y="' + (f.y - hU / 2) + '" width="' + wU + '" height="' + hU + '"/>' +
@@ -510,11 +531,13 @@
     }
     /* 分切预览：虚线切线＋两侧尺寸胶囊 */
     if (E.cut) s += renderCut(u);
-    /* 立极：空层不渲染（无户型无从立极），切出第一间/定下外框后才出现 */
-    if (hasContent()) s += renderLiji(u);
+    /* 立极：空层不渲染（无户型无从立极），切出第一间/定下外框后才出现；
+     * 绘制态一并隐藏（与盘面叠层同口径收起，防十字＋字签挡作图区） */
+    var drawing = drawingActive();
+    if (hasContent() && !drawing) s += renderLiji(u);
     /* 补角法提示：房间轮廓明显缺角时在立极旁给签（课件补齐方正法一系） */
     var bj = missingCornerInfo();
-    if (bj && L.rooms) {
+    if (bj && L.rooms && !drawing) {
       var lp = lijiPoint();
       var bjTxt = T('hpe_bujiao_tag');
       var bjFs = u * 1.8, bjW = bjTxt.length * bjFs * 0.98 + u * 2.2, bjH = bjFs * 1.7;
@@ -536,6 +559,11 @@
     if (E.tempRect) {
       var t = E.tempRect;
       s += '<rect class="hpe-temprect" x="' + t.x + '" y="' + t.y + '" width="' + t.w + '" height="' + t.h + '" stroke-width="' + (u * 0.25) + '"/>';
+    }
+    /* 框选拉框预览 */
+    if (E.boxRect) {
+      var br2 = E.boxRect;
+      s += '<rect class="hpe-boxrect" x="' + br2.x + '" y="' + br2.y + '" width="' + br2.w + '" height="' + br2.h + '" stroke-width="' + (u * 0.25) + '"/>';
     }
     svg.innerHTML = s;
     syncTop();
@@ -838,6 +866,7 @@
       : E.sheet === 'tpl' ? T('hpe_tpl_title')
       : E.sheet === 'start' ? T('hpe_start_title')
       : E.sheet === 'lib' ? T('hpe_lib')
+      : E.sheet === 'select' ? T('hpe_select')
       : '';
     layoutAttr();
   }
@@ -846,11 +875,12 @@
     /* 描图层开合驱动 E.mode（onDown 拉框/校准与房间 trace 描边样式仍按 mode 走） */
     if (kind === 'trace') E.mode = 'trace';
     else if (E.mode === 'trace') { E.mode = 'draw'; E.calibArm = false; E.calibPts = []; }
+    if (kind === 'trace') suppressOverlay(); /* 描图亦是绘制态：叠层先收起 */
     if (kind === 'floors') renderFloorsBar();
     else if (kind === 'info') {
       var p = $('hpe-panel'); if (p) p.innerHTML = '';
       var h = $('hpe-hint'); if (h) h.textContent = '';
-    } else if (kind === 'layers' || kind === 'trace' || kind === 'tpl' || kind === 'start' || kind === 'lib') renderPanel();
+    } else if (kind === 'layers' || kind === 'trace' || kind === 'tpl' || kind === 'start' || kind === 'lib' || kind === 'select') renderPanel();
     syncSheet();
   }
   function closeSheet() {
@@ -906,7 +936,7 @@
     db.photos.where('houseId').equals(hid).and(function (p) { return p.floorId === fid; })
       .modify(function (p) { p.floorId = null; })
       .then(function () { return db.plans.delete(fid); })
-      .then(function () { return db.floors.delete(fid); })
+      .then(function () { invalidate(fid); return db.floors.delete(fid); })
       .then(function () {
         E.floors = E.floors.filter(function (f) { return f.id !== fid; });
         closeSheet();
@@ -956,6 +986,10 @@
     } else if (E.sheet === 'lib') {
       box.innerHTML = '';
       renderLibPanel();
+    } else if (E.sheet === 'select') {
+      box.innerHTML = '<div id="hpe-selbox"></div>';
+      if (hint) hint.innerHTML = '';
+      renderSelectPanel();
     } else {
       box.innerHTML = '';
       if (hint) hint.innerHTML = '';
@@ -1026,6 +1060,7 @@
     var dim = dir === 'v' ? toM(r.w) : toM(r.h);
     if (dim < MINCUT * 2 + 0.05) { toastMsg(T('hpe_cut_small')); return; }
     E.cut = { id: r.id, dir: dir, pos: dir === 'v' ? r.x + r.w / 2 : r.y + r.h / 2 };
+    suppressOverlay();
     render(); renderAttr();
   }
   function cancelCut() { E.cut = null; render(); renderAttr(); }
@@ -1207,6 +1242,7 @@
     E.attrFull = true; E._attrKey = 'room:' + r.id; /* 外框生成后直接展开完整条，横/竖切就在手边 */
     E.view = null;
     E.uiMode = 'split'; syncModeBtn(); /* 定外框即进入分切态，模式钮翻「去摆家具」 */
+    suppressOverlay();
     closeSheet();
     afterChange();
     toastMsg(T('hpe_split_hint'));
@@ -1214,11 +1250,12 @@
 
   /* ---------------- 托盘（模拟人生式目录条） ----------------
    * 拖放为主：tile 上 pointer 拖影跟随、松手落位；点选→点放为兜底
-   * （房间单发、构件连发，与旧构件库手感一致）。 */
+   * （房间与构件均为一次性放置：落位即卸待放、保持选中，2026-10-27 改）。 */
   function placeRoomAt(type, pt) {
     var pr = null;
     ROOM_PRESETS.forEach(function (x) { if (x.type === type) pr = x; });
     if (!pr) return;
+    suppressOverlay();
     pushUndo();
     var w = toU(pr.w), h = toU(pr.h);
     var x = pt.x - w / 2, y = pt.y - h / 2;
@@ -1231,12 +1268,16 @@
   }
   function placeFixAt(type, pt) {
     if (!FIX[type]) return;
+    suppressOverlay();
     if (FIX[type].wallSeg) { placeWallItem(type, pt); return; }
     pushUndo();
     var nf = { id: uid(), type: type, x: pt.x, y: pt.y, rot: 0, flip: false };
     wallSnap(nf, pt);
     E.plan.fixtures.push(nf);
     E.sel = { kind: 'fixture', id: nf.id };
+    /* 一次性放置：放下即卸待放态并保持选中——再点是选中、拖是移动，
+     * 不再「想拖却又生一个」（用户 2026-10-27 实测痛点） */
+    E.placeType = null; syncTray();
     afterChange();
   }
   function cycleOverlay() {
@@ -1248,6 +1289,20 @@
     save(); render(); renderTray();
     if (E.sheet === 'layers') renderLayersPanel();
   }
+  /* 绘制态判定：画墙/分切/待放/切刀/描图/框选任一在进行，盘面就不该抢视线 */
+  function drawingActive() {
+    return !!(E.uiMode === 'wall' || E.uiMode === 'split' || E.arm || E.placeType || E.cut || E.mode === 'trace' || E.boxMode);
+  }
+  /* 进绘制态时把盘面叠层（飞星/罗盘/八宅判定层）收起：直接落盘为 none，
+   * 退出绘制态不自动恢复——用户经「图层」面板或托盘叠盘钮手动再开（口径 2026-10-27） */
+  function suppressOverlay() {
+    if (!E.plan) return;
+    if (E.plan.layers.overlay === 'none') return;
+    E.plan.layers.overlay = 'none';
+    E.chartCache = null;
+    save(); renderTray();
+    if (E.sheet === 'layers') renderLayersPanel();
+  }
   /* 托盘只剩工具组（模板/描图/叠盘）：房间与构件全收进「构件库」面板（▦ 钮），
    * 分切⇄摆家具走托盘右端固定模式钮——两者都不再随横滑移走、不会半截露屏外 */
   function renderTray() {
@@ -1257,6 +1312,7 @@
       '<div class="hpe-tile2 act" data-tile="tpl"><span class="gic">▦</span><div class="n">' + esc(T('hpe_tpl')) + '</div></div>' +
       '<div class="hpe-tile2 act" data-tile="trace"><span class="gic">✎</span><div class="n">' + esc(T('hpe_mode_trace')) + '</div></div>' +
       '<div class="hpe-tile2 act" data-tile="wall"><span class="gic">✐</span><div class="n">' + esc(T('hpe_wall_tile')) + '</div></div>' +
+      '<div class="hpe-tile2 act" data-tile="select"><span class="gic">⌖</span><div class="n">' + esc(T('hpe_select')) + '</div></div>' +
       '<div class="hpe-tile2 act" data-tile="ovcycle"><span class="gic">◎</span><div class="n">' + esc(T('hpe_lay_overlay')) + '</div>' +
       (ovLab ? '<span class="hpe-ovpill' + (E.plan.layers.overlay === 'none' ? ' off' : '') + '">' + esc(ovLab) + '</span>' : '') + '</div>' +
       '</div></div>';
@@ -1280,6 +1336,8 @@
     var empty = !hasContent();
     if (empty) { E.startPhase = 'pick'; showSheet('start'); return; }
     E.uiMode = 'split';
+    E.boxMode = false;
+    suppressOverlay();
     if (E.sheet) closeSheet();
     syncModeBtn(); renderTray(); render(); renderAttr();
     if (E.sel && E.sel.kind === 'room') { var sr = roomById(E.sel.id); if (sr) revealRect(sr); }
@@ -1333,7 +1391,8 @@
       var k = el.getAttribute('data-tile'), key = el.getAttribute('data-key');
       var hot = (k === 'room' && E.arm && E.arm.kind === 'room' && E.arm.key === key) ||
         (k === 'fix' && E.placeType === key) ||
-        (k === 'wall' && E.uiMode === 'wall');
+        (k === 'wall' && E.uiMode === 'wall') ||
+        (k === 'select' && E.boxMode);
       el.classList.toggle('hot', !!hot);
     });
   }
@@ -1348,6 +1407,7 @@
       return;
     }
     if (kind === 'ovcycle') { cycleOverlay(); return; }
+    if (kind === 'select') { if (E.sheet === 'select') closeSheet(); else showSheet('select'); return; }
     if (kind === 'wall') { if (E.uiMode === 'wall') exitWallMode(); else enterWallMode(); return; }
     E.trayDrag = { kind: kind, key: el.getAttribute('data-key'), sx: e.clientX, sy: e.clientY, ghost: null, el: el,
       fromLib: !!(e.target.closest && e.target.closest('#hpe-panel')) };
@@ -1393,6 +1453,7 @@
       E.placeType = E.placeType === td.key ? null : td.key;
       E.arm = null;
     }
+    if (E.arm || E.placeType) suppressOverlay(); /* 待放＝绘制态：盘面叠层先收起 */
     syncTray();
     /* 构件库里点选待放：收起面板回画布，待放条（#hpe-armed）会指明放法 */
     if (td.fromLib && E.sheet === 'lib') closeSheet();
@@ -1421,6 +1482,20 @@
         '<span class="ops"><span class="hpe-op" id="hpe-wall-x">' + esc(T('hpe_wall_done')) + '</span></span></div>';
       var wxb = $('hpe-wall-x');
       if (wxb) wxb.addEventListener('click', exitWallMode);
+      layoutAttr();
+      return;
+    }
+    /* 框选模式指引条：计数＋删除所选＋退出常驻（「选择」面板收起时也能收尾） */
+    if (E.boxMode) {
+      var bn = multiCount();
+      box.innerHTML = '<div class="hpe-attr thin"><b>' + esc(T('hpe_boxmode')) + '</b>' +
+        '<span>' + esc(TF(T('hpe_sel_count'), bn)) + '</span>' +
+        '<span class="ops">' + (bn ? '<span class="hpe-op danger" id="hpe-b-del">' + esc(T('hpe_sel_del')) + '</span>' : '') +
+        '<span class="hpe-op" id="hpe-b-x">' + esc(T('hpe_wall_done')) + '</span></span></div>';
+      var bd = $('hpe-b-del');
+      if (bd) bd.addEventListener('click', function () { deleteMulti(); });
+      var bx2 = $('hpe-b-x');
+      if (bx2) bx2.addEventListener('click', function () { setBoxMode(false); });
       layoutAttr();
       return;
     }
@@ -1458,7 +1533,7 @@
         });
         $('hpe-a-del').addEventListener('click', function () {
           pushUndo();
-          E.plan.rooms = E.plan.rooms.filter(function (x) { return x.id !== r.id; });
+          deleteRoomCascade(r.id); /* 挂附构件（门窗/家具）随房级联删，不留孤儿 */
           E.sel = null; afterChange();
         });
         layoutAttr();
@@ -1514,7 +1589,7 @@
       });
       $('hpe-a-del').addEventListener('click', function () {
         pushUndo();
-        E.plan.rooms = E.plan.rooms.filter(function (x) { return x.id !== r.id; });
+        deleteRoomCascade(r.id); /* 挂附构件随房级联删（同薄条口径） */
         E.sel = null; afterChange();
       });
       var chB = $('hpe-a-cuth'), cvB = $('hpe-a-cutv');
@@ -1720,6 +1795,9 @@
     }
     afterChange();
     if (room) toastMsg(T('hpe_wall_room_toast'));
+    /* 画完一段自动卸下画墙态：新墙/新房保持选中可立即拖改；要续画点托盘「画墙」
+     * 再入（入态后点已有墙端点仍可接续围合）。防「想拖却又生一段」 */
+    exitWallMode();
   }
   /* 构件库墙件落位：不进 fixtures，直接生成 plan.walls 段（与手划同账） */
   function placeWallItem(type, pt) {
@@ -1745,6 +1823,8 @@
       if (!first) first = w;
     });
     if (first) E.sel = { kind: 'wall', id: first.id };
+    /* 墙件同为一次性放置：落位即卸待放、保持选中可直接拖 */
+    E.placeType = null; syncTray();
     afterChange();
   }
   function enterWallMode() {
@@ -1752,6 +1832,8 @@
     E.cut = null;
     E.uiMode = 'wall';
     E.sel = null; E.arm = null; E.placeType = null;
+    E.boxMode = false;
+    suppressOverlay();
     if (E.sheet) closeSheet();
     syncModeBtn(); renderTray(); render(); renderAttr();
   }
@@ -2039,11 +2121,129 @@
     E.plan.rooms = []; E.plan.fixtures = []; E.plan.walls = []; E.plan.trace = null;
     E.plan.calibNote = ''; E.plan.mPerUnit = 1; E.plan.liji = null;
     E.sel = null; E.cut = null; E.wallPrev = null; E.view = null; E.traceURL = ''; E.chartCache = null;
+    E.multi = null; E.boxMode = false; E.boxRect = null;
     E.calibArm = false; E.calibPts = [];
+    E.planDirty = true; /* 直接改字段未走 save：显式标脏，saveNow 才落盘 */
     saveNow();
     E.startPhase = 'pick';
     render(); renderTray();
     showSheet('start');
+  }
+
+  /* ---------------- 「选择」键：框选多选＋批量删＋清空收纳 ----------------
+   * 用户口径（2026-10-27）：一个键收纳，别散放。框选开时拖动＝拉框，
+   * 关时拖动＝平移画布，两者互斥不打架。 */
+  function multiCount() {
+    var m = E.multi; if (!m) return 0;
+    return Object.keys(m.room || {}).length + Object.keys(m.fix || {}).length + Object.keys(m.wall || {}).length;
+  }
+  function rectsOverlap(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+  function ptInRect(x, y, rc) { return x >= rc.x && x <= rc.x + rc.w && y >= rc.y && y <= rc.y + rc.h; }
+  function segsCross(ax, ay, bx, by, cx, cy, dx, dy) {
+    function o(px, py, qx, qy, rx, ry) { var v = (qx - px) * (ry - py) - (qy - py) * (rx - px); return v > 0 ? 1 : v < 0 ? -1 : 0; }
+    var o1 = o(ax, ay, bx, by, cx, cy), o2 = o(ax, ay, bx, by, dx, dy);
+    var o3 = o(cx, cy, dx, dy, ax, ay), o4 = o(cx, cy, dx, dy, bx, by);
+    return o1 !== o2 && o3 !== o4;
+  }
+  function segHitsRect(w, rc) {
+    if (ptInRect(w.x1, w.y1, rc) || ptInRect(w.x2, w.y2, rc)) return true;
+    var x0 = rc.x, y0 = rc.y, x1 = rc.x + rc.w, y1 = rc.y + rc.h;
+    return segsCross(w.x1, w.y1, w.x2, w.y2, x0, y0, x1, y0) ||
+      segsCross(w.x1, w.y1, w.x2, w.y2, x1, y0, x1, y1) ||
+      segsCross(w.x1, w.y1, w.x2, w.y2, x1, y1, x0, y1) ||
+      segsCross(w.x1, w.y1, w.x2, w.y2, x0, y1, x0, y0);
+  }
+  function applyBoxSelect(rc) {
+    var m = { room: {}, fix: {}, wall: {} };
+    if (rc && E.plan) {
+      E.plan.rooms.forEach(function (r) { if (rectsOverlap(rc, r)) m.room[r.id] = 1; });
+      E.plan.fixtures.forEach(function (f) {
+        var d = FIX[f.type]; if (!d) return;
+        var fb = { x: f.x - toU(d.w) / 2, y: f.y - toU(d.h) / 2, w: toU(d.w), h: toU(d.h) };
+        if (rectsOverlap(rc, fb)) m.fix[f.id] = 1;
+      });
+      (E.plan.walls || []).forEach(function (w) { if (segHitsRect(w, rc)) m.wall[w.id] = 1; });
+    }
+    E.multi = m;
+  }
+  function setBoxMode(on) {
+    E.boxMode = !!on;
+    E.boxRect = null;
+    if (E.boxMode) {
+      /* 框选只在自由态：画墙/分切先退场，待放卸下，旧单选清掉，叠层收起 */
+      if (E.uiMode === 'wall') { E.uiMode = 'free'; E.wallPrev = null; syncModeBtn(); }
+      if (E.uiMode === 'split') { E.uiMode = 'free'; if (E.cut) E.cut = null; syncModeBtn(); }
+      E.arm = null; E.placeType = null; E.sel = null;
+      suppressOverlay();
+    }
+    syncTray(); render(); renderAttr();
+    if (E.sheet === 'select') renderSelectPanel();
+  }
+  function renderSelectPanel() {
+    var box = $('hpe-selbox'); if (!box) return;
+    var n = multiCount();
+    box.innerHTML = '<div class="hpe-panel"><div class="hpe-sub" style="margin-bottom:8px">' +
+      chip('hpe-boxmode', T('hpe_boxmode'), E.boxMode) +
+      '<span class="hpe-saved" id="hpe-saved"></span></div>' +
+      '<p class="hpe-note">' + esc(T('hpe_box_hint')) + '</p>' +
+      '<div class="hpe-lrow"><span>' + esc(T('hpe_sel_count_lab')) + '</span><b>' + esc(TF(T('hpe_sel_count'), n)) + '</b></div>' +
+      '<div class="hpe-lrow"><span>' + esc(T('hpe_sel_del')) + '</span>' +
+      '<span class="hpe-op danger' + (n ? '' : ' dim') + '" id="hpe-seldel">' + esc(T('hpe_del')) + '</span></div>' +
+      '<div class="hpe-lrow"><span>' + esc(T('hpe_clear_floor')) + '</span>' +
+      '<span class="note">' + esc(T('hpe_clear_floor_note')) + '</span>' +
+      '<span class="hpe-op danger" id="hpe-selclear">' + esc(T('hpe_clear_btn')) + '</span></div></div>';
+    var bm = $('hpe-boxmode');
+    if (bm) bm.addEventListener('click', function () { setBoxMode(!E.boxMode); });
+    var sd = $('hpe-seldel');
+    if (sd) sd.addEventListener('click', function () { if (multiCount()) deleteMulti(); });
+    var cf = $('hpe-selclear');
+    if (cf) cf.addEventListener('click', function () {
+      var fl = E.floors.filter(function (f) { return f.id === E.floorId; })[0];
+      dlgConfirm(TF(T('hpe_confirm_clear_floor'), fl ? fl.name : ''), T('hpe_clear_btn')).then(function (ok) {
+        if (ok) { clearFloorPlan(); }
+      });
+    });
+  }
+  /* 删房级联：构件是自由坐标、无 roomId 归属——中心落在房间矩形外扩 0.45 m
+   * （与 wallSnap 贴墙吸附阈同口径）内的构件视为挂附该房（门窗贴墙、家具在房内），
+   * 随房一并删除，不留用户清不掉的孤儿残件（水签/门弧） */
+  function cascadeFixtures(rects) {
+    if (!rects.length || !E.plan) return;
+    var mg = toU(0.45);
+    E.plan.fixtures = E.plan.fixtures.filter(function (f) {
+      for (var i = 0; i < rects.length; i++) {
+        var r = rects[i];
+        if (f.x >= r.x - mg && f.x <= r.x + r.w + mg && f.y >= r.y - mg && f.y <= r.y + r.h + mg) return false;
+      }
+      return true;
+    });
+  }
+  function deleteRoomCascade(rid) {
+    var r = roomById(rid); if (!r) return;
+    var rect = { x: r.x, y: r.y, w: r.w, h: r.h };
+    E.plan.rooms = E.plan.rooms.filter(function (x) { return x.id !== rid; });
+    cascadeFixtures([rect]);
+  }
+  function deleteMulti() {
+    var m = E.multi; if (!m || !multiCount()) return;
+    pushUndo();
+    var rects = [];
+    E.plan.rooms = E.plan.rooms.filter(function (r) {
+      if (m.room[r.id]) { rects.push({ x: r.x, y: r.y, w: r.w, h: r.h }); return false; }
+      return true;
+    });
+    cascadeFixtures(rects);
+    E.plan.fixtures = E.plan.fixtures.filter(function (f) { return !m.fix[f.id]; });
+    if (E.plan.walls) E.plan.walls = E.plan.walls.filter(function (w) { return !m.wall[w.id]; });
+    if (E.sel) {
+      var mk = E.sel.kind === 'room' ? 'room' : E.sel.kind === 'fixture' ? 'fix' : 'wall';
+      if (m[mk] && m[mk][E.sel.id]) E.sel = null;
+    }
+    E.multi = null;
+    afterChange();
+    if (E.sheet === 'select') renderSelectPanel();
   }
   function renderMetrics() {
     var title = $('hpe-metric-title'), box = $('hpe-metrics');
@@ -2160,6 +2360,13 @@
       }
       return;
     }
+    /* 框选模式：画布按下即拉框——平移与点选一律让位（模式外拖动才是平移） */
+    if (E.boxMode && E.mode !== 'trace') {
+      E.drag = { kind: 'box', start: pt };
+      E.boxRect = { x: pt.x, y: pt.y, w: 0, h: 0 };
+      svg.setPointerCapture(evt.pointerId);
+      return;
+    }
     /* 画墙态：点墙身走选中/拖移，其余落笔即划墙；
      * 端点手柄在此态是「接续画墙」的起点——刚画完的墙保持选中，从它端点
      * 串下一面墙围成房是主路径，若先被拖端点截走，闭合永远画不出来；
@@ -2222,6 +2429,7 @@
       wallSnap(nf2, pt);
       E.plan.fixtures.push(nf2);
       E.sel = { kind: 'fixture', id: nf2.id };
+      E.placeType = null; syncTray(); /* 一次性放置（同 placeFixAt） */
       afterChange();
       return;
     }
@@ -2269,6 +2477,7 @@
       wallSnap(nf, pt);
       E.plan.fixtures.push(nf);
       E.sel = { kind: 'fixture', id: nf.id };
+      E.placeType = null; syncTray(); /* 一次性放置（同 placeFixAt） */
       afterChange();
       return;
     }
@@ -2289,6 +2498,14 @@
   function onMove(evt) {
     var d = E.drag; if (!d) return;
     var pt = svgPoint(evt);
+    if (d.kind === 'box') {
+      E.boxRect = {
+        x: Math.min(d.start.x, pt.x), y: Math.min(d.start.y, pt.y),
+        w: Math.abs(pt.x - d.start.x), h: Math.abs(pt.y - d.start.y)
+      };
+      render();
+      return;
+    }
     if (d.kind === 'cutline') {
       if (!cutRoom()) return;
       if (E.cut.dir === 'v') E.cut.pos = pt.x; else E.cut.pos = pt.y;
@@ -2420,6 +2637,15 @@
      * 墙头会停在半路、端点吸附落空（闭合查无此环）——以 up 点为准 */
     if (d.kind === 'walldraw' || d.kind === 'wallend' || d.kind === 'wallmove') onMove(evt);
     E.drag = null;
+    if (d.kind === 'box') {
+      var brc = E.boxRect; E.boxRect = null;
+      /* 几乎没拉动＝点按：清掉多选；拉出实框才按框选 */
+      if (brc && toM(brc.w) > 0.15 && toM(brc.h) > 0.15) applyBoxSelect(brc);
+      else E.multi = null;
+      render(); renderAttr();
+      if (E.sheet === 'select') renderSelectPanel();
+      return;
+    }
     if (d.kind === 'pan') return;
     if (d.kind === 'span') return;
     if (d.kind === 'cutline') { render(); syncCutBar(); return; }
@@ -2480,6 +2706,8 @@
       E.wallPrev = null;
     } else if (d.kind === 'create') {
       E.tempRect = null;
+    } else if (d.kind === 'box') {
+      E.boxRect = null;
     }
     render();
   }
@@ -3282,13 +3510,16 @@
 
   /* ---------------- 开关页 ---------------- */
   function switchFloor(fid) {
-    saveNow();
+    /* 只回写「本层且真改过」的稿：未改动的内存稿回写会把详情页刚删的行复活 */
+    if (E.plan && E.planDirty && E.plan.floorId === E.floorId) saveNow();
     E.floorId = fid;
+    E.planDirty = false;
     E.sel = null; E.placeType = null; E.arm = null; E.undoStack = []; E.redoStack = [];
     E.calibArm = false; E.calibPts = []; E.chartCache = null; E.stage = null; E.view = null; E.ptrs = null; E.pinch = null;
     E.cut = null; E.wallPrev = null; E.startPhase = 'pick'; E.uiMode = 'free'; syncModeBtn();
+    E.multi = null; E.boxMode = false; E.boxRect = null;
     loadPlan(fid, E.houseId).then(function (p) {
-      E.plan = p;
+      E.plan = p; E.planDirty = false;
       return regenTraceURL();
     }).then(function () {
       renderFloorsBar(); renderOrient(); render(); renderTray();
@@ -3299,6 +3530,11 @@
     });
   }
   function open(houseId, floorId) {
+    /* 入口先作废上一会话的内存稿：编辑器是模块单例，E.plan 跨开关页存活；
+     * 正常退出走 close() 已落盘并置空，此处兜底防残稿在 switchFloor 里被写回 */
+    clearTimeout(saveTm);
+    E.plan = null; E.planDirty = false; E.drag = null;
+    E.multi = null; E.boxMode = false; E.boxRect = null;
     Promise.all([
       db.houses.get(houseId),
       db.floors.where('houseId').equals(houseId).toArray(),
@@ -3318,11 +3554,19 @@
     }).catch(function () {});
   }
   function close() {
-    saveNow();
+    var hid = E.houseId;
+    /* 只落真改过的稿：只看一眼就退出不写库——否则空层会被写出一条空 plan 行，
+     * 详情页刚清掉的层也会以空行形态留在库里/同步里（云端 346B 空行事件同源） */
+    if (E.planDirty) saveNow();
     if (E.stage) cancelStage();
     E.sheet = null; syncSheet();
+    /* 退出即置空内存稿：此后详情页删层/清空才不会被残稿复活（复活 bug 根因） */
+    clearTimeout(saveTm);
+    E.plan = null; E.planDirty = false; E.floorId = 0;
+    E.sel = null; E.drag = null; E.multi = null; E.boxMode = false; E.boxRect = null;
+    E.undoStack = []; E.redoStack = [];
     var v = $('view-plan'); if (v) v.hidden = true;
-    if (window.__wuriHouse && __wuriHouse.openDetail) __wuriHouse.openDetail(E.houseId);
+    if (window.__wuriHouse && __wuriHouse.openDetail) __wuriHouse.openDetail(hid);
   }
 
   /* ---------------- 接线 ---------------- */
@@ -3425,6 +3669,7 @@
         E.placeType = E.placeType === lt.key ? null : lt.key;
         E.arm = null;
       } else return;
+      if (E.arm || E.placeType) suppressOverlay(); /* 待放＝绘制态：盘面叠层先收起 */
       syncTray();
       /* 点选待放后收起面板回画布，待放条（#hpe-armed）会指明放法 */
       if (E.sheet === 'lib') closeSheet();
@@ -3454,7 +3699,7 @@
     var sc = $('hpe-scrim'); if (sc) sc.addEventListener('click', closeSheet);
     var fl = $('hpe-file'); if (fl) fl.addEventListener('change', function () { onFilePick(fl); });
     document.addEventListener('visibilitychange', function () {
-      if (document.hidden) saveNow();
+      if (document.hidden && E.planDirty) saveNow();
     });
     if (window.__wuri_rerender) {
       var prev = window.__wuri_rerender;
@@ -3467,5 +3712,5 @@
   }
   init();
 
-  window.__wuriPlan = { open: open, close: close };
+  window.__wuriPlan = { open: open, close: close, invalidate: invalidate };
 })();

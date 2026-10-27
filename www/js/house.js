@@ -1076,16 +1076,24 @@
         db.photos.where('houseId').equals(h.id).and(function (p) { return p.floorId === cur.id; })
           .modify(function (p) { p.floorId = null; })
           .then(function () { return db.plans.delete(cur.id); })
-          .then(function () { return db.floors.delete(cur.id); })
+          .then(function () {
+            /* 作废编辑器里该层的内存稿：不清掉，下次进编辑器会被旧稿写回复活 */
+            if (window.__wuriPlan && __wuriPlan.invalidate) __wuriPlan.invalidate(cur.id);
+            return db.floors.delete(cur.id);
+          })
           .then(function () { S.curFloor = 0; renderDetail(); });
       });
     });
-    /* 仅剩一层：删不了层，改走清空本层户型（删该层 plan，楼层/测量/照片保留） */
+    /* 仅剩一层：删不了层，改走清空本层户型（删该层 plan，楼层/测量/照片保留）；
+     * 文案用详情页专用键：此处无撤销栈、不可撤销，与编辑器内清空（可撤销）分开写明 */
     var cf = $('hd-fl-clear');
     if (cf) cf.addEventListener('click', function () {
-      hdDlgConfirm(TF(T('hpe_confirm_clear_floor'), cur.name), T('hpe_clear_btn')).then(function (ok) {
+      hdDlgConfirm(TF(T('hd_confirm_clear_floor'), cur.name), T('hpe_clear_btn')).then(function (ok) {
         if (!ok) return;
-        db.plans.delete(cur.id).then(function () { renderDetail(); });
+        db.plans.delete(cur.id).then(function () {
+          if (window.__wuriPlan && __wuriPlan.invalidate) __wuriPlan.invalidate(cur.id);
+          renderDetail();
+        });
       });
     });
   }

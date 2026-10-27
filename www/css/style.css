@@ -2668,6 +2668,8 @@ body.sky-red .hpe-lijilab { fill:#eda88f; }
 .hpe-calibpt text { fill:var(--cinnabar); font-weight:700; }
 .hpe-calibline { stroke:var(--cinnabar); stroke-dasharray:.2 .14; }
 .hpe-temprect { fill:rgba(162,129,59,.12); stroke:var(--teal-deep); stroke-dasharray:.22 .14; }
+.hpe-boxrect { fill:rgba(43,94,90,.10); stroke:var(--teal-deep); stroke-dasharray:.22 .14; pointer-events:none; }
+.hpe-op.dim { opacity:.45; }
 .hpe-quad { fill:rgba(162,129,59,.08); stroke:var(--gold); stroke-width:2.5; }
 .hpe-corner { fill:rgba(252,250,242,.25); stroke:var(--gold-deep); stroke-width:3; cursor:grab; }
 .hpe-corner.bad { stroke:var(--cinnabar); stroke-width:5; fill:rgba(176,58,46,.22); }
