@@ -76,7 +76,7 @@
     'wuri_affinity_progress', 'wuri_affinity_result',
     'wuri_cfg_v1', 'wuri_lang_v1', 'wuri_bazi_sect',
     'wuri_sky_obs_v1', 'wuri_sky_lines_v1', 'wuri_sky_maglim_v1', 'wuri_sky_ar_cal_v1', 'wuri_sky_redlight_v1',
-    'wuri_fs_bazhai_v1', 'wuri_fs_xk_v1'
+    'wuri_fs_bazhai_v1', 'wuri_fs_xk_v1', 'wuri_js_waiju_v1'
   ];
   var LS_PREFIXES = ['wuri_jing_pos_'];
   function enumLsKeys() {

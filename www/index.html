@@ -1437,6 +1437,15 @@
       </div>
     </section>
 
+    <section class="hero2 mini" id="fs-card-jinsuo">
+      <span class="fs-pro" data-i18n="fs_pro">高级版</span>
+      <div class="h2-bg h2-bg-fs-jinsuo" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="fs_jinsuo">金锁玉关</div>
+        <p class="h2-sub" data-i18n="fs_jinsuo_sub">过路阴阳 · 砂水得位失位断宅</p>
+      </div>
+    </section>
+
     <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
     <div class="tab-spacer"></div>
   </main>
@@ -1587,6 +1596,42 @@
     </section>
 
     <p class="fs-foot" data-i18n="fs_foot">风水诸式为传统文化学习与研究工具，各家口径并陈，不作吉凶断言。</p>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <!-- ============ 金锁玉关（过路阴阳 · 砂水判定/外局勘宅/住户联动） ============ -->
+  <main id="view-jinsuo" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('js-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="js-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="fs_jinsuo">金锁玉关</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card">
+      <div class="card-title" data-i18n="js_house">选择住宅</div>
+      <div class="fs2-row">
+        <span class="fs2-lab" data-i18n="js_house_lab">住宅档案</span>
+        <select id="js-house" class="fs2-inp"></select>
+      </div>
+      <p class="fs2-note" id="js-sit-note"></p>
+      <div class="fs2-row">
+        <span class="fs2-lab" data-i18n="js_floor_lab">楼层户型</span>
+        <select id="js-floor" class="fs2-inp"></select>
+      </div>
+    </section>
+
+    <div class="fs2-seg" id="js-tabs">
+      <button data-v="nei" class="on" data-i18n="js_tab_nei">户型砂水</button>
+      <button data-v="wai" data-i18n="js_tab_wai">外局勘宅</button>
+      <button data-v="ren" data-i18n="js_tab_ren">住户联动</button>
+    </div>
+
+    <div id="js-panel-nei"></div>
+    <div id="js-panel-wai" hidden></div>
+    <div id="js-panel-ren" hidden></div>
+
+    <p class="fs-foot" data-i18n="js_foot">金锁玉关（过路阴阳）为传统堪舆一派，本页断语录自课程课件，仅供传统文化学习研究；化解只列方法参考，不售物件。</p>
     <div class="tab-spacer"></div>
   </main>
 
@@ -2373,6 +2418,8 @@
 <script src="js/vendor/soul-fengshui.js"></script>
 <script src="js/fengshui.js"></script>
 <script src="js/fengshui2.js"></script>
+<script src="js/jinsuo-data.js"></script>
+<script src="js/jinsuo.js"></script>
 <script src="js/vendor/dexie.js"></script>
 <script src="js/house.js"></script>
 <script src="js/house-editor.js"></script>

@@ -377,6 +377,14 @@
       /* 自某宅详情定向进入时，返回须回该宅详情（不落档） */
       if (window.__wuriHouse && __wuriHouse.onCompassBack) __wuriHouse.onCompassBack();
     });
+    /* 金锁玉关（第三个标派工具）：过 Pro 门后交 jinsuo.js 开页 */
+    var cj = $('fs-card-jinsuo');
+    if (cj) cj.addEventListener('click', function () {
+      if (window.WuriPro && WuriPro.requirePro('fengshui') &&
+          window.__wuriJinsuo && window.__wuriJinsuo.open) {
+        window.__wuriJinsuo.open();
+      }
+    });
     /* 八宅/玄空飞星（第二批）：过 Pro 门后交 fengshui2.js 开页 */
     [['fs-card-bazhai', 'openBazhai'], ['fs-card-xuankong', 'openXuankong']].forEach(function (pair) {
       var c = $(pair[0]);

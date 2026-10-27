@@ -2143,9 +2143,11 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .hero2 .h2-bg-fs-luopan { background-image: url('../img/heroes/luopan.webp'); background-position: center 54%; }
 .hero2 .h2-bg-fs-bazhai { background-image: url('../img/heroes/bazhai.webp'); background-position: center 38%; }
 .hero2 .h2-bg-fs-xuankong { background-image: url('../img/heroes/xuankong.webp'); background-position: center 26%; }
+.hero2 .h2-bg-fs-jinsuo { background-image: url('../img/heroes/jinsuo.webp'); background-position: center 62%; }
 [data-theme="day"] .hero2 .h2-bg-fs-luopan { background-image: url('../img/heroes/day/luopan.webp'); }
 [data-theme="day"] .hero2 .h2-bg-fs-bazhai { background-image: url('../img/heroes/day/bazhai.webp'); }
 [data-theme="day"] .hero2 .h2-bg-fs-xuankong { background-image: url('../img/heroes/day/xuankong.webp'); }
+[data-theme="day"] .hero2 .h2-bg-fs-jinsuo { background-image: url('../img/heroes/day/jinsuo.webp'); }
 
 /* 高级版角标：鎏金毛玻璃胶囊（设计稿新定式；红光单独覆写随链） */
 .fs-pro { position: absolute; top: 12px; right: 12px; z-index: 2;
@@ -2900,3 +2902,55 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 .acct-link { color:var(--gold-deep); font-size:13px; background:none; border:none; padding:6px 0 2px; cursor:pointer; font-family:var(--sans); display:block; }
 /* .detail-row 的 display 会盖掉 hidden 属性，身份两行按 hidden 显隐须显式压回 */
 #acct-email-row[hidden], #acct-username-row[hidden] { display:none; }
+
+/* ===== 金锁玉关（jinsuo.js）· 颜色全走变量链（日/夜/红光三态） ===== */
+#js-tabs{margin:4px 0 12px}
+.js-link{color:var(--gold-deep);cursor:pointer}
+.js-sum{font-size:.95rem;color:var(--ink);margin:2px 0 6px}
+.js-center-warn{font-size:.86rem;line-height:1.7;color:var(--cinnabar-deep);background:var(--cinnabar-wash);border-radius:10px;padding:8px 10px;margin:6px 0}
+.js-pal-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.js-pal-head b{font-family:var(--serif);font-size:1.06rem;color:var(--ink);letter-spacing:.05em}
+.js-pal-sub{font-size:.78rem;color:var(--faint)}
+.js-chip{margin-left:auto;font-size:.72rem;letter-spacing:.08em;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.js-chip.ok{border-color:var(--gold);color:var(--gold-deep);background:var(--gold-wash)}
+.js-chip.bad{border-color:var(--cinnabar);color:var(--cinnabar-deep);background:var(--cinnabar-wash)}
+.js-chip.mut{color:var(--faint)}
+.js-meta{font-size:.78rem;color:var(--muted);margin:5px 0 2px;line-height:1.6}
+.js-ledger{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;color:var(--ink-2);margin:3px 0;line-height:1.6}
+.js-need{color:var(--gold-deep);font-weight:600}
+.js-duan{border-left:3px solid var(--line);padding:2px 0 2px 10px;margin:9px 0}
+.js-duan.k-ji{border-left-color:var(--gold)}
+.js-duan.k-xiong{border-left-color:var(--cinnabar)}
+.js-zhuan{border:1px dashed var(--cinnabar);border-radius:10px;padding:8px 10px;margin:9px 0;background:var(--cinnabar-wash)}
+.js-duan-h{font-size:.86rem;font-weight:600;color:var(--ink);display:flex;gap:8px;align-items:baseline}
+.js-duan-h span{font-size:.7rem;font-weight:400;color:var(--muted);letter-spacing:.1em}
+.js-duan-t{font-size:.9rem;line-height:1.75;color:var(--ink-2);margin:3px 0}
+.js-facts{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:.78rem;color:var(--muted);margin:2px 0;line-height:1.6}
+.js-facts i{font-style:normal;color:var(--faint);margin-right:4px}
+.js-method{font-size:.8rem;line-height:1.7;color:var(--ink-2);margin:6px 0}
+.js-method i{font-style:normal;color:var(--gold-deep);margin-right:4px}
+.js-dir-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line-soft)}
+.js-dir-row:last-child{border-bottom:none}
+.js-dir-name{min-width:104px;font-size:.9rem;color:var(--ink)}
+.js-dir-name i{display:block;font-style:normal;font-size:.7rem;color:var(--faint)}
+.js-dir-seg{flex:1}
+.js-dir-seg button{padding:6px 2px;font-size:.8rem}
+.js-dir-row .js-chip{margin-left:0;flex:none}
+.js-det{margin-top:10px;border-top:1px solid var(--line-soft);padding-top:8px}
+.js-det summary{font-size:.88rem;color:var(--gold-deep);cursor:pointer;padding:4px 0}
+.js-ref-lab{font-size:.8rem;color:var(--muted);letter-spacing:.06em;margin:10px 0 3px}
+.js-chips{display:flex;flex-wrap:wrap;gap:5px;margin:2px 0}
+.js-chips span{font-size:.76rem;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:2px 9px;background:var(--card)}
+.js-combo-title{font-size:.82rem;color:var(--muted);letter-spacing:.1em;margin:12px 0 2px}
+.js-sha{border-bottom:1px dashed var(--line-soft);padding:6px 0}
+.js-sha-head{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.92rem;color:var(--ink)}
+.js-sha-head input{width:17px;height:17px;accent-color:var(--gold-deep);flex:none}
+.js-sha-body{padding:2px 0 6px 25px}
+.js-sha-li{font-size:.86rem;line-height:1.7;color:var(--ink-2);margin:1px 0}
+.js-mtags em{font-style:normal;font-size:.7rem;border:1px solid var(--gold);color:var(--gold-deep);border-radius:999px;padding:1px 7px;margin-right:4px}
+.js-digest{display:flex;gap:8px;align-items:flex-start;font-size:.84rem;line-height:1.65;color:var(--ink-2);margin:2px 0 8px}
+.js-digest .js-chip{margin-left:0;flex:none;margin-top:1px}
+.js-ren-row{display:flex;gap:10px;align-items:baseline;margin-top:8px}
+.js-ren-lab{min-width:64px;font-size:.8rem;color:var(--muted)}
+.js-ren-pal{font-family:var(--serif);font-size:.98rem;color:var(--ink)}
+.js-advice{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}

@@ -1,0 +1,28 @@
+PASS 模块就绪（jinsuo/house/db/数据）
+PASS 种子写入 | {'hid': 1, 'fid': 1, 'rid': 1}
+PASS 引擎·震宫得位 | {'kan': 'xiong', 'kun': 'xiong', 'zhen': 'ji', 'xun': 'ji', 'qian': 'xiong', 'dui': 'xiong', 'gen': 'missing', 'li': 'xiong'}
+PASS 引擎·艮宫缺角
+PASS 引擎·乾宫厨房专条触发
+PASS 引擎·坤宫厕所专条触发
+PASS 引擎·兑宫见砂失位
+PASS 引擎·汇总 ji2/xiong5/missing1 | {'kan': 'xiong', 'kun': 'xiong', 'zhen': 'ji', 'xun': 'ji', 'qian': 'xiong', 'dui': 'xiong', 'gen': 'missing', 'li': 'xiong'}
+PASS 金锁页打开
+PASS 汇总行计数
+PASS 乾宫卡含火烧天门
+PASS 坤宫卡含厕所落宫专条
+PASS 艮宫卡含缺角断语
+PASS 先天叠断出现
+PASS 坐向定稿小字（卯山酉向）
+PASS 红光 computed：得位签随变量变红 | rgb(194, 67, 42)
+PASS 外局·形煞清单含路冲煞
+PASS 外局·拍照向导衔接卡
+PASS 外局·勾选展开危害/化解
+PASS 外局·坎方标砂→得位 | 正北 · 坎宫 应砂 砂 水 未标 得位
+PASS 外局·标记落盘（含同步键） | {"seed-js-1":{"dirs":{"kan":"sha"},"shas":{"luchong":1},"ts":1793129260989}}
+PASS 住户·于伊一卡
+PASS 住户·六亲宫兑（少女）
+PASS 住户·属相本宫坎（鼠）
+PASS 住户·属相对宫离
+PASS 住户·选房首选兑次选艮 | ['首选 兑（正西），次选 艮（东北）']
+PASS 全程无 JS 错误
+TOTAL 27/27 PASS
