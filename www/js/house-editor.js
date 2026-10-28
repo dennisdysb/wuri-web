@@ -35,7 +35,16 @@
   function txs(s) { return window.txPoem ? window.txPoem(s) : s; }
   function toastMsg(m) {
     var t = document.getElementById('wuri-ai-toast');
-    if (t) { t.textContent = m; t.style.display = 'block'; clearTimeout(t._tm); t._tm = setTimeout(function () { t.style.display = 'none'; }, 2600); }
+    if (!t) {
+      /* 与 house.js/account.js 同款：元素不存在则自建（此前编辑器内 toast
+       * 在元素未被其他模块建出时静默失效，锁定/输数反馈会看不见） */
+      t = document.createElement('div');
+      t.id = 'wuri-ai-toast';
+      t.style.cssText = 'position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:12px 22px;border-radius:8px;font-size:14px;z-index:10000;max-width:80%;text-align:center;';
+      document.body.appendChild(t);
+    }
+    t.textContent = m; t.style.display = 'block';
+    clearTimeout(t._tm); t._tm = setTimeout(function () { t.style.display = 'none'; }, 2600);
   }
   /* 确认弹层走 house.js 自家 hdDlg（原生 confirm 样式裸陋且带域名标题，全站已禁用） */
   function dlgConfirm(text, okLabel) {
@@ -503,6 +512,7 @@
             '<rect class="hpe-roomrect ex' + (sel ? ' sel' : '') + '" x="' + r.x + '" y="' + r.y +
             '" width="' + r.w + '" height="' + r.h + '" stroke-width="' + (u * (sel ? 0.3 : 0.16)) + '"/>' +
             '<rect class="hpe-hatchrect" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '"/>' +
+            (r.lock ? lockBadge(r.x + u * 0.5, r.y + u * 0.5, u * 0.30) : '') +
             '</g>';
           if (L.roomNames) labs += '<text class="hpe-roomname ex" x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fsN * 0.37) +
             '" text-anchor="middle" font-size="' + fsN + '">' + esc(T('hpe_out_name')) + '</text>';
@@ -513,6 +523,7 @@
           '" width="' + r.w + '" height="' + r.h + '" stroke-width="' + (u * (sel ? 0.3 : 0.16)) + '"' +
           /* AI 低置信房间：虚线描边（不确定签，与 CSS aiq 类同走变量链色） */
           (r.aiq ? ' stroke-dasharray="' + (u * 0.85) + ' ' + (u * 0.55) + '"' : '') + '/>' +
+          (r.lock ? lockBadge(r.x + u * 0.5, r.y + u * 0.5, u * 0.30) : '') +
           '</g>';
         if (L.roomNames && r.name) labs += '<text class="hpe-roomname" x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h / 2 + fsN * 0.37) +
           '" text-anchor="middle" font-size="' + fsN + '">' + esc(r.name) + (r.aiq ? ' ？' : '') + '</text>';
@@ -527,7 +538,8 @@
       (p.walls || []).forEach(function (w) {
         var selW = (E.sel && E.sel.kind === 'wall' && E.sel.id === w.id) || !!(E.multi && E.multi.wall[w.id]);
         s += '<line class="hpe-wall' + (selW ? ' sel' : '') + '" x1="' + w.x1 + '" y1="' + w.y1 + '" x2="' + w.x2 + '" y2="' + w.y2 + '" stroke-width="' + Math.max(toU(0.12), u * 0.24) + '"/>' +
-          '<line class="hpe-wallhit" data-act="wall" data-id="' + w.id + '" x1="' + w.x1 + '" y1="' + w.y1 + '" x2="' + w.x2 + '" y2="' + w.y2 + '" stroke-width="' + (u * 3.2) + '"/>';
+          '<line class="hpe-wallhit" data-act="wall" data-id="' + w.id + '" x1="' + w.x1 + '" y1="' + w.y1 + '" x2="' + w.x2 + '" y2="' + w.y2 + '" stroke-width="' + (u * 3.2) + '"/>' +
+          (w.lock ? lockBadge((w.x1 + w.x2) / 2, (w.y1 + w.y2) / 2 - u * 1.5, u * 0.26) : '');
       });
     }
     /* 叠盘：空层（无房间无描图）不画任何盘/九宫格，哪怕存档叠盘是开——
@@ -548,6 +560,7 @@
           '<g transform="translate(' + f.x + ' ' + f.y + ') rotate(' + (f.rot || 0) + ') scale(' + (wU / d.box[0] * (f.flip ? -1 : 1)) + ' ' + (hU / d.box[1]) + ') translate(' + (-d.box[0] / 2) + ' ' + (-d.box[1] / 2) + ')">' +
           '<g stroke="currentColor" stroke-width="' + (30 / Math.max(d.box[0], d.box[1]) * 1.1) + '" fill="none" stroke-linecap="round">' + d.art + '</g></g>' +
           (d.sw ? '<text class="hpe-fixsw ' + d.sw + '" x="' + (f.x + wU / 2 + u * 0.4) + '" y="' + (f.y - hU / 2 - u * 0.5) + '" text-anchor="end" font-size="' + (u * 1.8) + '">' + esc(T('hpe_sw_' + d.sw)) + '</text>' : '') +
+          (f.lock ? lockBadge(f.x - wU / 2 + u * 0.3, f.y - hU / 2 + u * 0.3, u * 0.22) : '') +
           '</g>';
       });
     }
@@ -620,8 +633,79 @@
     svg.innerHTML = s;
     syncTop();
   }
+  /* ---------------- 元素锁定（2026-10-28 对标 magicplan 锁定语义） ----------------
+   * lock=true 存元素自身（房间/构件/墙段），随 plan 整行同步、导出 JSON 原样带。
+   * 锁定后：拖动、缩放（手柄＋尺寸输数）、删除（单删/框选批量/级联）全停用；
+   * 仍可选中查看与解锁。盘面左上小锁签为标记（走变量链色，三态同步）。 */
+  function lockBadge(x, y, sc) {
+    return '<g class="hpe-lockmark" pointer-events="none" transform="translate(' + x + ' ' + y + ') scale(' + sc + ')">' +
+      '<path d="M-3.1 0.4 V-1.4 a3.1 3.1 0 0 1 6.2 0 V0.4" fill="none"/>' +
+      '<rect x="-4.3" y="0.4" width="8.6" height="6.6" rx="1.3"/></g>';
+  }
+  function elByKind(kind, id) {
+    return kind === 'room' ? roomById(id) : kind === 'fixture' ? fixById(id) : kind === 'wall' ? wallById(id) : null;
+  }
+  function toggleLock(kind, id) {
+    var el = elByKind(kind, id); if (!el) return;
+    pushUndo();
+    if (el.lock) delete el.lock; else el.lock = true;
+    afterChange();
+  }
+  function lockOpHtml(el) {
+    return '<span class="hpe-op" id="hpe-a-lock">' + esc(el.lock ? T('hpe_unlock') : T('hpe_lock')) + '</span>';
+  }
+  function bindLockOp(kind, id) {
+    var b = $('hpe-a-lock');
+    if (b) b.addEventListener('click', function () { toggleLock(kind, id); });
+  }
+  function dlgPromptVal(title, defVal) {
+    if (window.__wuriDlg && __wuriDlg.prompt) return __wuriDlg.prompt(title, defVal, T('hpe_calib_ok'));
+    return Promise.resolve(null);
+  }
+  /* 尺寸标直改（对标 magicplan 点尺寸输数字）：点选中房间的宽/高胶囊或
+   * 墙段长度胶囊 → 输米数 → 几何联动。锚定口径与属性条输数一致：房间保
+   * 左/上边（x/y 不动改 w/h）；墙段保端点 1、沿原方向改端点 2。 */
+  function openDimEdit(dim) {
+    if (!E.sel) return;
+    var kind = E.sel.kind;
+    if (kind !== 'room' && kind !== 'wall') return;
+    var el = elByKind(kind, E.sel.id);
+    if (!el) return;
+    if (el.lock) { toastMsg(T('hpe_locked_toast')); return; }
+    var cur, label, name;
+    if (kind === 'room') {
+      name = el.name || T('hpe_rt_' + (el.type || 'other'));
+      if (dim === 'w') { cur = toM(el.w); label = T('hpe_len'); }
+      else if (dim === 'h') { cur = toM(el.h); label = T('hpe_wid'); }
+      else return;
+    } else {
+      name = T('hpe_wall_name'); cur = wallLenM(el); label = T('hpe_len');
+      if (dim !== 'len') return;
+    }
+    var id = el.id;
+    dlgPromptVal(TF(T('hpe_dim_title'), name, label), trimNum(cur, 2)).then(function (v) {
+      if (v == null) return;
+      var nv = parseFloat(String(v).replace(/[,，]/g, '.'));
+      if (!isFinite(nv) || nv < 0.3 || nv > 60) { toastMsg(T('hpe_dim_bad')); return; }
+      var cur2 = elByKind(kind, id);
+      if (!cur2 || cur2.lock) return;
+      pushUndo();
+      if (kind === 'room') {
+        if (dim === 'w') cur2.w = toU(nv); else cur2.h = toU(nv);
+      } else {
+        var len0 = Math.hypot(cur2.x2 - cur2.x1, cur2.y2 - cur2.y1);
+        if (len0 < 1e-9) return;
+        var nl = toU(nv), ux = (cur2.x2 - cur2.x1) / len0, uy = (cur2.y2 - cur2.y1) / len0;
+        cur2.x2 = cur2.x1 + ux * nl; cur2.y2 = cur2.y1 + uy * nl;
+      }
+      afterChange();
+    });
+  }
+
   function renderRoomSel(r, u) {
     var s = '';
+    /* 已锁定：不画手柄与尺寸标（拖动/缩放/改数三路都已停用，画了只会误导） */
+    if (r.lock) return s;
     var cx = [r.x, r.x + r.w / 2, r.x + r.w], cy = [r.y, r.y + r.h / 2, r.y + r.h];
     var names = ['nw', 'n', 'ne', 'w', null, 'e', 'sw', 's', 'se'];
     for (var j = 0; j < 3; j++) for (var i = 0; i < 3; i++) {
@@ -633,9 +717,9 @@
       var fsD = u * 2.1;
       var wTxt = trimNum(toM(r.w), 2) + ' m', hTxt = trimNum(toM(r.h), 2) + ' m';
       var wW = wTxt.length * fsD * 0.62 + u * 1.6, hW = hTxt.length * fsD * 0.62 + u * 1.6;
-      s += '<g class="hpe-dim"><rect x="' + (r.x + r.w / 2 - wW / 2) + '" y="' + (r.y - fsD * 2.1) + '" width="' + wW + '" height="' + (fsD * 1.55) + '" rx="' + (u * 0.6) + '"/>' +
+      s += '<g class="hpe-dim tap" data-act="dim" data-dim="w"><rect x="' + (r.x + r.w / 2 - wW / 2) + '" y="' + (r.y - fsD * 2.1) + '" width="' + wW + '" height="' + (fsD * 1.55) + '" rx="' + (u * 0.6) + '"/>' +
         '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y - fsD * 0.92) + '" text-anchor="middle" font-size="' + fsD + '">' + esc(wTxt) + '</text></g>';
-      s += '<g class="hpe-dim"><g transform="translate(' + (r.x - fsD * 1.3) + ' ' + (r.y + r.h / 2) + ') rotate(-90)">' +
+      s += '<g class="hpe-dim tap" data-act="dim" data-dim="h"><g transform="translate(' + (r.x - fsD * 1.3) + ' ' + (r.y + r.h / 2) + ') rotate(-90)">' +
         '<rect x="' + (-hW / 2) + '" y="' + (-fsD * 0.78) + '" width="' + hW + '" height="' + (fsD * 1.55) + '" rx="' + (u * 0.6) + '"/>' +
         '<text x="0" y="' + (fsD * 0.36) + '" text-anchor="middle" font-size="' + fsD + '">' + esc(hTxt) + '</text></g></g>';
     }
@@ -645,6 +729,7 @@
   function wallLenM(w) { return toM(Math.hypot(w.x2 - w.x1, w.y2 - w.y1)); }
   function renderWallSel(w, u) {
     var s = '';
+    if (w.lock) return s; /* 已锁定：不画端点手柄与长度标（同房间口径） */
     [[w.x1, w.y1, 0], [w.x2, w.y2, 1]].forEach(function (e) {
       s += '<circle class="hpe-hdl" data-act="wallh" data-e="' + e[2] + '" cx="' + e[0] + '" cy="' + e[1] + '" r="' + (u * 1.6) + '"/>';
     });
@@ -652,7 +737,7 @@
       var fsD = u * 2.1, txt = trimNum(wallLenM(w), 2) + ' m';
       var capW = txt.length * fsD * 0.62 + u * 1.6;
       var mx = (w.x1 + w.x2) / 2, my = (w.y1 + w.y2) / 2;
-      s += '<g class="hpe-dim"><rect x="' + (mx - capW / 2) + '" y="' + (my - fsD * 1.9) + '" width="' + capW + '" height="' + (fsD * 1.55) + '" rx="' + (u * 0.6) + '"/>' +
+      s += '<g class="hpe-dim tap" data-act="dim" data-dim="len"><rect x="' + (mx - capW / 2) + '" y="' + (my - fsD * 1.9) + '" width="' + capW + '" height="' + (fsD * 1.55) + '" rx="' + (u * 0.6) + '"/>' +
         '<text x="' + mx + '" y="' + (my - fsD * 0.72) + '" text-anchor="middle" font-size="' + fsD + '">' + esc(txt) + '</text></g>';
     }
     return s;
@@ -1572,7 +1657,9 @@
                 : '<span>' + trimNum(Lm, 2) + ' × ' + trimNum(Wm, 2) + ' m · ' + trimNum(Lm * Wm) + '㎡</span>') +
           '<span class="ops"><span class="hpe-op" id="hpe-a-edit">' + esc(T('hpe_edit')) + '</span>' +
           '<span class="hpe-op" id="hpe-a-copy">' + esc(T('hpe_copy')) + '</span>' +
+          lockOpHtml(r) +
           '<span class="hpe-op danger" id="hpe-a-del">' + esc(T('hpe_del')) + '</span></span></div>';
+        bindLockOp('room', r.id);
         $('hpe-a-edit').addEventListener('click', function () { E.attrFull = true; renderAttr(); revealRect(r); });
         $('hpe-a-thin').addEventListener('click', function (e) {
           if (e.target.closest && e.target.closest('.hpe-op')) return;
@@ -1580,10 +1667,11 @@
         });
         $('hpe-a-copy').addEventListener('click', function () {
           pushUndo();
-          var c = clone(r); c.id = uid(); c.x += toU(0.4); c.y += toU(0.4);
+          var c = clone(r); c.id = uid(); c.x += toU(0.4); c.y += toU(0.4); delete c.lock;
           E.plan.rooms.push(c); E.sel = { kind: 'room', id: c.id }; afterChange();
         });
         $('hpe-a-del').addEventListener('click', function () {
+          if (r.lock) { toastMsg(T('hpe_locked_toast')); return; }
           pushUndo();
           deleteRoomCascade(r.id); /* 挂附构件（门窗/家具）随房级联删，不留孤儿 */
           E.sel = null; afterChange();
@@ -1597,12 +1685,16 @@
           return '<span class="hpe-ncap' + (r.type === tp ? ' on' : '') + '" data-ncap="' + tp + '">' + esc(T('hpe_rt_' + tp)) + '</span>';
         }).join('') + '</div>';
       var opsHtml = '';
-      if (!r.ex) opsHtml += '<span class="hpe-op" id="hpe-a-cuth">' + esc(T('hpe_cut_h')) + '</span>' +
-        '<span class="hpe-op" id="hpe-a-cutv">' + esc(T('hpe_cut_v')) + '</span>';
-      if (mg.length) opsHtml += '<span class="hpe-mglab">' + esc(T('hpe_merge_to')) + '</span>' + mg.map(function (m) {
-        return '<span class="hpe-op" data-mg="' + m.dir + '">' + esc(TF(T('hpe_merge_dir'), T('hpe_dir_' + m.dir))) + '</span>';
-      }).join('');
-      opsHtml += '<span class="hpe-op" id="hpe-a-out">' + esc(r.ex ? T('hpe_out_restore') : T('hpe_out')) + '</span>';
+      /* 已锁定：切/并/标户外等改形操作一律不渲染（与拖动/缩放/删除同停用） */
+      if (!r.lock) {
+        if (!r.ex) opsHtml += '<span class="hpe-op" id="hpe-a-cuth">' + esc(T('hpe_cut_h')) + '</span>' +
+          '<span class="hpe-op" id="hpe-a-cutv">' + esc(T('hpe_cut_v')) + '</span>';
+        if (mg.length) opsHtml += '<span class="hpe-mglab">' + esc(T('hpe_merge_to')) + '</span>' + mg.map(function (m) {
+          return '<span class="hpe-op" data-mg="' + m.dir + '">' + esc(TF(T('hpe_merge_dir'), T('hpe_dir_' + m.dir))) + '</span>';
+        }).join('');
+        opsHtml += '<span class="hpe-op" id="hpe-a-out">' + esc(r.ex ? T('hpe_out_restore') : T('hpe_out')) + '</span>';
+      }
+      var disA = r.lock ? ' disabled' : '';
       box.innerHTML = '<div class="hpe-attr"><div class="t"><b>' + esc(r.ex ? T('hpe_out_name') : (r.name || '')) + '</b>' +
         '<span>' + esc(T('hpe_len')) + ' <b>' + trimNum(Lm, 2) + ' m</b></span>' +
         '<span>' + esc(T('hpe_wid')) + ' <b>' + trimNum(Wm, 2) + ' m</b></span>' +
@@ -1610,22 +1702,26 @@
         '<span>' + esc(T('hpe_peri')) + ' ' + trimNum(2 * (Lm + Wm)) + ' m</span></div>' +
         capsHtml +
         '<div class="hpe-attr-form">' +
-        '<label>' + esc(T('hpe_name')) + '<input class="hpe-inp" id="hpe-a-name" value="' + esc(r.name || '') + '"></label>' +
-        '<label>' + esc(T('hpe_type')) + '<select class="hpe-inp" id="hpe-a-type">' +
+        '<label>' + esc(T('hpe_name')) + '<input class="hpe-inp" id="hpe-a-name" value="' + esc(r.name || '') + '"' + disA + '></label>' +
+        '<label>' + esc(T('hpe_type')) + '<select class="hpe-inp" id="hpe-a-type"' + disA + '>' +
         ROOM_TYPES.map(function (tp) { return '<option value="' + tp + '"' + (r.type === tp ? ' selected' : '') + '>' + esc(T('hpe_rt_' + tp)) + '</option>'; }).join('') +
         '</select></label>' +
-        '<label>' + esc(T('hpe_len')) + '<input class="hpe-inp sm" id="hpe-a-len" type="number" step="0.1" min="0.3" value="' + trimNum(Lm, 2) + '"></label>' +
-        '<label>' + esc(T('hpe_wid')) + '<input class="hpe-inp sm" id="hpe-a-wid" type="number" step="0.1" min="0.3" value="' + trimNum(Wm, 2) + '"></label>' +
+        '<label>' + esc(T('hpe_len')) + '<input class="hpe-inp sm" id="hpe-a-len" type="number" step="0.1" min="0.3" value="' + trimNum(Lm, 2) + '"' + disA + '></label>' +
+        '<label>' + esc(T('hpe_wid')) + '<input class="hpe-inp sm" id="hpe-a-wid" type="number" step="0.1" min="0.3" value="' + trimNum(Wm, 2) + '"' + disA + '></label>' +
         '</div>' +
-        '<div class="ops">' + opsHtml + '<span class="hpe-op" id="hpe-a-copy">' + esc(T('hpe_copy')) + '</span>' +
+        '<div class="ops">' + opsHtml +
+        (r.lock ? '<span class="hpe-locknote">' + esc(T('hpe_locked_note')) + '</span>' : '') +
+        lockOpHtml(r) +
+        '<span class="hpe-op" id="hpe-a-copy">' + esc(T('hpe_copy')) + '</span>' +
         '<span class="hpe-op danger" id="hpe-a-del">' + esc(T('hpe_del')) + '</span></div></div>';
+      bindLockOp('room', r.id);
       var nm = $('hpe-a-name'), tp = $('hpe-a-type'), ln = $('hpe-a-len'), wd = $('hpe-a-wid');
       [nm, tp, ln, wd].forEach(function (el) {
         if (el) el.addEventListener('focus', function () { E.focusSnap = clone(E.plan); });
       });
       function applyFromInputs() {
         if (E.focusSnap) { E.undoStack.push(E.focusSnap); E.focusSnap = null; E.redoStack.length = 0; }
-        var rr = roomById(E.sel.id); if (!rr) return;
+        var rr = roomById(E.sel.id); if (!rr || rr.lock) return;
         rr.name = nm.value.trim();
         rr.type = tp.value;
         var lv = parseFloat(ln.value), wv = parseFloat(wd.value);
@@ -1636,10 +1732,11 @@
       [nm, tp, ln, wd].forEach(function (el) { if (el) el.addEventListener('change', applyFromInputs); });
       $('hpe-a-copy').addEventListener('click', function () {
         pushUndo();
-        var c = clone(r); c.id = uid(); c.x += toU(0.4); c.y += toU(0.4);
+        var c = clone(r); c.id = uid(); c.x += toU(0.4); c.y += toU(0.4); delete c.lock;
         E.plan.rooms.push(c); E.sel = { kind: 'room', id: c.id }; afterChange();
       });
       $('hpe-a-del').addEventListener('click', function () {
+        if (r.lock) { toastMsg(T('hpe_locked_toast')); return; }
         pushUndo();
         deleteRoomCascade(r.id); /* 挂附构件随房级联删（同薄条口径） */
         E.sel = null; afterChange();
@@ -1666,12 +1763,15 @@
         box.innerHTML = '<div class="hpe-attr thin" id="hpe-a-thin"><b>' + esc(T('hpe_fix_' + f.type)) + '</b>' +
           '<span>' + trimNum(d.w, 2) + ' × ' + trimNum(d.h, 2) + ' m' + (d.sw ? ' · ' + esc(T('hpe_sw_' + d.sw)) : '') + '</span>' +
           '<span class="ops"><span class="hpe-op" id="hpe-a-edit">' + esc(T('hpe_edit')) + '</span>' +
+          lockOpHtml(f) +
           '<span class="hpe-op danger" id="hpe-f-del">' + esc(T('hpe_del')) + '</span></span></div>';
+        bindLockOp('fixture', f.id);
         $('hpe-a-edit').addEventListener('click', function () {
           E.attrFull = true; renderAttr();
           revealRect({ x: f.x - toU(d.w) / 2, y: f.y - toU(d.h) / 2, w: toU(d.w), h: toU(d.h) });
         });
         $('hpe-f-del').addEventListener('click', function () {
+          if (f.lock) { toastMsg(T('hpe_locked_toast')); return; }
           pushUndo();
           E.plan.fixtures = E.plan.fixtures.filter(function (x) { return x.id !== f.id; });
           E.sel = null; afterChange();
@@ -1683,12 +1783,16 @@
         '<span>' + trimNum(d.w, 2) + ' × ' + trimNum(d.h, 2) + ' m</span>' +
         (d.sw ? '<span>' + esc(T('hpe_sw_' + d.sw)) + '</span>' : '') +
         '<span>' + esc(T('hpe_rot_lab')) + ' ' + (f.rot || 0) + '°</span></div>' +
-        '<div class="ops"><span class="hpe-op" id="hpe-f-rot">' + esc(T('hpe_rotate')) + '</span>' +
-        '<span class="hpe-op" id="hpe-f-flip">' + esc(T('hpe_flip')) + '</span>' +
+        '<div class="ops">' +
+        (f.lock ? '<span class="hpe-locknote">' + esc(T('hpe_locked_note')) + '</span>' : '<span class="hpe-op" id="hpe-f-rot">' + esc(T('hpe_rotate')) + '</span>' +
+        '<span class="hpe-op" id="hpe-f-flip">' + esc(T('hpe_flip')) + '</span>') +
+        lockOpHtml(f) +
         '<span class="hpe-op danger" id="hpe-f-del">' + esc(T('hpe_del')) + '</span></div></div>';
-      $('hpe-f-rot').addEventListener('click', function () { pushUndo(); f.rot = ((f.rot || 0) + 90) % 360; afterChange(); });
-      $('hpe-f-flip').addEventListener('click', function () { pushUndo(); f.flip = !f.flip; afterChange(); });
+      bindLockOp('fixture', f.id);
+      var frB = $('hpe-f-rot'); if (frB) frB.addEventListener('click', function () { pushUndo(); f.rot = ((f.rot || 0) + 90) % 360; afterChange(); });
+      var ffB = $('hpe-f-flip'); if (ffB) ffB.addEventListener('click', function () { pushUndo(); f.flip = !f.flip; afterChange(); });
       $('hpe-f-del').addEventListener('click', function () {
+        if (f.lock) { toastMsg(T('hpe_locked_toast')); return; }
         pushUndo();
         E.plan.fixtures = E.plan.fixtures.filter(function (x) { return x.id !== f.id; });
         E.sel = null; afterChange();
@@ -1920,6 +2024,7 @@
     if (act === 'wallh' && E.sel && E.sel.kind === 'wall') {
       var w = wallById(E.sel.id);
       if (!w) return false;
+      if (w.lock) { toastMsg(T('hpe_locked_toast')); return true; }
       pushUndo();
       E.drag = { kind: 'wallend', id: w.id, e: +actEl.getAttribute('data-e'), orig: clone(w), moved: false };
       svg.setPointerCapture(evt.pointerId);
@@ -1929,6 +2034,8 @@
       var wm = wallById(actEl.getAttribute('data-id'));
       if (!wm) return false;
       E.sel = { kind: 'wall', id: wm.id };
+      /* 已锁定：只选中查看，不起拖 */
+      if (wm.lock) { render(); renderAttr(); return true; }
       pushUndo();
       E.drag = { kind: 'wallmove', id: wm.id, start: pt, orig: clone(wm), moved: false };
       svg.setPointerCapture(evt.pointerId);
@@ -1944,13 +2051,16 @@
       box.innerHTML = '<div class="hpe-attr thin" id="hpe-a-thin"><b>' + esc(T('hpe_wall_name')) + '</b>' +
         '<span>' + esc(T('hpe_len')) + ' ' + trimNum(Lm, 2) + ' m</span>' +
         '<span class="ops"><span class="hpe-op" id="hpe-a-edit">' + esc(T('hpe_edit')) + '</span>' +
+        lockOpHtml(w) +
         '<span class="hpe-op danger" id="hpe-w-del">' + esc(T('hpe_del')) + '</span></span></div>';
+      bindLockOp('wall', w.id);
       $('hpe-a-edit').addEventListener('click', function () { E.attrFull = true; renderAttr(); });
       $('hpe-a-thin').addEventListener('click', function (e) {
         if (e.target.closest && e.target.closest('.hpe-op')) return;
         E.attrFull = true; renderAttr();
       });
       $('hpe-w-del').addEventListener('click', function () {
+        if (w.lock) { toastMsg(T('hpe_locked_toast')); return; }
         pushUndo();
         E.plan.walls = E.plan.walls.filter(function (x) { return x.id !== w.id; });
         E.sel = null; afterChange();
@@ -1960,10 +2070,13 @@
     box.innerHTML = '<div class="hpe-attr"><div class="t"><b>' + esc(T('hpe_wall_name')) + '</b>' +
       '<span>' + esc(T('hpe_len')) + ' <b>' + trimNum(Lm, 2) + ' m</b></span></div>' +
       '<div class="hpe-attr-form"><label>' + esc(T('hpe_len')) +
-      '<input class="hpe-inp sm" id="hpe-w-len" type="number" step="0.1" min="0.3" value="' + trimNum(Lm, 2) + '"></label>' +
+      '<input class="hpe-inp sm" id="hpe-w-len" type="number" step="0.1" min="0.3" value="' + trimNum(Lm, 2) + '"' + (w.lock ? ' disabled' : '') + '></label>' +
       '<span class="hpe-cuthint">' + esc(T('hpe_wall_end_hint')) + '</span></div>' +
-      '<div class="ops"><span class="hpe-op" id="hpe-w-rot">' + esc(T('hpe_rotate')) + '</span>' +
+      '<div class="ops">' +
+      (w.lock ? '<span class="hpe-locknote">' + esc(T('hpe_locked_note')) + '</span>' : '<span class="hpe-op" id="hpe-w-rot">' + esc(T('hpe_rotate')) + '</span>') +
+      lockOpHtml(w) +
       '<span class="hpe-op danger" id="hpe-w-del">' + esc(T('hpe_del')) + '</span></div></div>';
+    bindLockOp('wall', w.id);
     var ln = $('hpe-w-len');
     if (ln) {
       ln.addEventListener('focus', function () { E.focusSnap = clone(E.plan); });
@@ -1971,7 +2084,7 @@
         var v = parseFloat(ln.value);
         if (!isFinite(v) || v < 0.3) return;
         if (E.focusSnap) { E.undoStack.push(E.focusSnap); E.focusSnap = null; E.redoStack.length = 0; }
-        var ww = wallById(w.id); if (!ww) return;
+        var ww = wallById(w.id); if (!ww || ww.lock) return;
         var cur = Math.hypot(ww.x2 - ww.x1, ww.y2 - ww.y1);
         if (cur < 1e-9) return;
         var nl = toU(v), ux = (ww.x2 - ww.x1) / cur, uy = (ww.y2 - ww.y1) / cur;
@@ -1979,7 +2092,8 @@
         afterChange();
       });
     }
-    $('hpe-w-rot').addEventListener('click', function () {
+    var wrB = $('hpe-w-rot');
+    if (wrB) wrB.addEventListener('click', function () {
       pushUndo();
       var ww = wallById(w.id); if (!ww) return;
       var cx = (ww.x1 + ww.x2) / 2, cy = (ww.y1 + ww.y2) / 2;
@@ -1988,6 +2102,7 @@
       afterChange();
     });
     $('hpe-w-del').addEventListener('click', function () {
+      if (w.lock) { toastMsg(T('hpe_locked_toast')); return; }
       pushUndo();
       E.plan.walls = E.plan.walls.filter(function (x) { return x.id !== w.id; });
       E.sel = null; afterChange();
@@ -2289,6 +2404,7 @@
     if (!rects.length || !E.plan) return;
     var mg = toU(0.45);
     E.plan.fixtures = E.plan.fixtures.filter(function (f) {
+      if (f.lock) return true; /* 已锁定构件不随房级联删（锁定优先于级联口径） */
       for (var i = 0; i < rects.length; i++) {
         var r = rects[i];
         if (f.x >= r.x - mg && f.x <= r.x + r.w + mg && f.y >= r.y - mg && f.y <= r.y + r.h + mg) return false;
@@ -2297,7 +2413,7 @@
     });
   }
   function deleteRoomCascade(rid) {
-    var r = roomById(rid); if (!r) return;
+    var r = roomById(rid); if (!r || r.lock) return;
     var rect = { x: r.x, y: r.y, w: r.w, h: r.h };
     E.plan.rooms = E.plan.rooms.filter(function (x) { return x.id !== rid; });
     cascadeFixtures([rect]);
@@ -2305,22 +2421,33 @@
   function deleteMulti() {
     var m = E.multi; if (!m || !multiCount()) return;
     pushUndo();
-    var rects = [];
+    var rects = [], skipped = 0;
     E.plan.rooms = E.plan.rooms.filter(function (r) {
-      if (m.room[r.id]) { rects.push({ x: r.x, y: r.y, w: r.w, h: r.h }); return false; }
+      if (m.room[r.id]) {
+        if (r.lock) { skipped++; return true; }
+        rects.push({ x: r.x, y: r.y, w: r.w, h: r.h }); return false;
+      }
       return true;
     });
     cascadeFixtures(rects);
-    E.plan.fixtures = E.plan.fixtures.filter(function (f) { return !m.fix[f.id]; });
-    if (E.plan.walls) E.plan.walls = E.plan.walls.filter(function (w) { return !m.wall[w.id]; });
+    E.plan.fixtures = E.plan.fixtures.filter(function (f) {
+      if (m.fix[f.id] && f.lock) { skipped++; return true; }
+      return !m.fix[f.id];
+    });
+    if (E.plan.walls) E.plan.walls = E.plan.walls.filter(function (w) {
+      if (m.wall[w.id] && w.lock) { skipped++; return true; }
+      return !m.wall[w.id];
+    });
     if (E.sel) {
       var mk = E.sel.kind === 'room' ? 'room' : E.sel.kind === 'fixture' ? 'fix' : 'wall';
-      if (m[mk] && m[mk][E.sel.id]) E.sel = null;
+      if (m[mk] && m[mk][E.sel.id] && !isLockedEl(E.sel.kind, E.sel.id)) E.sel = null;
     }
     E.multi = null;
     afterChange();
+    if (skipped) toastMsg(TF(T('hpe_lock_skipped'), skipped));
     if (E.sheet === 'select') renderSelectPanel();
   }
+  function isLockedEl(kind, id) { var el = elByKind(kind, id); return !!(el && el.lock); }
   function renderMetrics() {
     var title = $('hpe-metric-title'), box = $('hpe-metrics');
     if (!box) return;
@@ -2332,6 +2459,25 @@
     }).join('');
     var tot = E.plan.rooms.reduce(function (s, r) { return s + (r.ex ? 0 : toM(r.w) * toM(r.h)); }, 0);
     rows += '<div class="hpe-mrow total"><span>' + esc(T('hpe_floor_total')) + '</span><b>' + trimNum(tot) + '㎡</b></div>';
+    /* 各宫面积占比（定稿坐向＋立极扇形分宫，精确几何；与金锁判定/报告同源
+     * WuriPalaceAreas。无定稿或无房面则整块不出） */
+    if (E.fixed && window.WuriPalaceAreas) {
+      var pa = null;
+      try { pa = window.WuriPalaceAreas(E.fixed, E.plan); } catch (e) {}
+      if (pa && pa.total > 0) {
+        var palNames = {};
+        if (window.JINSUO_DATA && JINSUO_DATA.duanyu) {
+          JINSUO_DATA.duanyu.palaces.forEach(function (p) { palNames[p.id] = txs(p.gua) + T('hpe_palace_suffix') + ' · ' + txs(p.fangwei); });
+        }
+        var dirFallback = ['北', '东北', '东', '东南', '南', '西南', '西', '西北'];
+        rows += '<div class="hpe-mrow total" style="margin-top:8px"><span>' + esc(T('hpe_palace_area')) + '</span><b>' + trimNum(pa.totalM2) + '㎡</b></div>';
+        ['kan', 'gen', 'zhen', 'xun', 'li', 'kun', 'dui', 'qian'].forEach(function (pid, i) {
+          var A = pa.palaces[pid]; if (!A) return;
+          rows += '<div class="hpe-mrow"><span>' + esc(palNames[pid] || dirFallback[i]) + '</span><b>' +
+            trimNum(A.areaM2) + '㎡ · ' + trimNum(A.share * 100, 1) + '%</b></div>';
+        });
+      }
+    }
     box.innerHTML = rows + '<div class="hpe-mrow total"><span>' + esc(T('hpe_house_total')) + '</span><b id="hpe-house-total">…</b></div>';
     db.plans.where('houseId').equals(E.houseId).toArray().then(function (ps) {
       var sum = 0;
@@ -2482,6 +2628,8 @@
       svg.setPointerCapture(evt.pointerId);
       return;
     }
+    /* 尺寸标直改：点选中元素的尺寸胶囊输数字（优先于画墙落笔等一切编辑命中） */
+    if (act === 'dim') { openDimEdit(actEl.getAttribute('data-dim')); return; }
     /* 画墙态：点墙身走选中/拖移，其余落笔即划墙；
      * 端点手柄在此态是「接续画墙」的起点——刚画完的墙保持选中，从它端点
      * 串下一面墙围成房是主路径，若先被拖端点截走，闭合永远画不出来；
@@ -2517,6 +2665,7 @@
     if (act === 'handle' && E.sel && E.sel.kind === 'room') {
       var r0 = roomById(E.sel.id);
       if (r0) {
+        if (r0.lock) { toastMsg(T('hpe_locked_toast')); return; }
         pushUndo();
         E.drag = { kind: 'resize', h: actEl.getAttribute('data-h'), orig: clone(r0), start: pt };
         svg.setPointerCapture(evt.pointerId);
@@ -2553,6 +2702,8 @@
       if (f0) {
         E.sel = { kind: 'fixture', id: f0.id };
         if (E.arm) { E.arm = null; syncTray(); }
+        /* 已锁定：只选中查看，不起拖（拖动已停用） */
+        if (f0.lock) { render(); renderAttr(); return; }
         pushUndo();
         E.drag = { kind: 'fixture', id: f0.id, start: pt, orig: clone(f0), moved: false };
         svg.setPointerCapture(evt.pointerId);
@@ -2564,6 +2715,8 @@
       var rr = roomById(actEl.getAttribute('data-id'));
       if (rr) {
         E.sel = { kind: 'room', id: rr.id };
+        /* 已锁定：只选中查看，不起拖 */
+        if (rr.lock) { render(); renderAttr(); return; }
         pushUndo();
         E.drag = { kind: 'room', id: rr.id, start: pt, orig: clone(rr), moved: false };
         svg.setPointerCapture(evt.pointerId);

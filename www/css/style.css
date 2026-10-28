@@ -2480,8 +2480,12 @@ body.sky-red .hd-viewer-nav { color:#f2c1b2; border-color:rgba(255,96,72,.5); }
 
 /* ===== 勘宅报告（2026-10-26 第二批 B：hdr- · 结构化报告页，版式从审定稿） ===== */
 #view-house-report .hd-kv .k { width:5.2em; }
-.hdr-acts { display:flex; gap:10px; margin-bottom:10px; }
-.hdr-acts .btn { flex:1; text-align:center; }
+.hdr-acts { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+.hdr-acts .btn { flex:1 1 30%; text-align:center; }
+.hdr-pal { width:100%; border-collapse:collapse; font-size:.82rem; margin:4px 0 10px; }
+.hdr-pal th, .hdr-pal td { padding:5px 6px; border-bottom:1px solid var(--line, rgba(120,110,90,.25)); text-align:left; }
+.hdr-pal th { color:var(--faint); font-weight:500; }
+.hdr-pal td:nth-child(2), .hdr-pal td:nth-child(3), .hdr-pal td:nth-child(4) { font-variant-numeric:tabular-nums; }
 .hdr-res-row { padding:11px 0; border-top:1px solid var(--line-soft); }
 .hdr-res-row:first-of-type { border-top:none; padding-top:2px; }
 .hdr-res-top { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
@@ -2642,6 +2646,10 @@ body.sky-red .hpe-hdl { stroke:#eda88f; }
 [data-theme="night"] .hpe-dim rect { fill:var(--gold); }
 .hpe-dim text { fill:var(--paper-2); }
 [data-theme="night"] .hpe-dim text { fill:#060608; }
+.hpe-dim.tap { cursor:pointer; }
+.hpe-lockmark rect { fill:var(--gold-deep); }
+.hpe-lockmark path { stroke:var(--gold-deep); stroke-width:1.1; }
+.hpe-locknote { font-size:.74rem; color:var(--faint); align-self:center; }
 
 /* ============ 分切式建房（起始面／切线／点名胶囊／户外块） ============ */
 #hpe-attr .hpe-ncap { pointer-events:auto; } /* 属性条容器 pointer-events:none，胶囊须单独放行 */

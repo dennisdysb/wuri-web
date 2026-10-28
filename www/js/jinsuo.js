@@ -36,6 +36,7 @@
     return s;
   }
   function txa(a) { return (a || []).map(tx); }
+  function pct1(v) { return String(Math.round((v || 0) * 1000) / 10); }
   function gated() { return !window.WuriPro || WuriPro.isPro(); }
 
   var DATA = window.JINSUO_DATA || null;
@@ -86,6 +87,85 @@
     return { shaItems: [], shuiItems: [], roomsHere: [], hasFixture: false,
              cesuo: false, chufang: false, hasSha: false, hasShui: false, status: 'noplan' };
   }
+  /* ---------------- 每宫面积占比（精确几何，与 palaceAt 同一 bearing 口径） ----------------
+   * 房间矩形 ∩ 立极扇区（±22.5°）多边形裁剪求面积，不用采样估算。
+   * window.WuriPalaceAreas 供编辑器度量面板与勘宅报告共用：
+   *   (fixed, plan) -> { total, totalM2, palaces: {id: {areaM2, share, cover}} } | null
+   * share＝该宫内房面占全宅房面（户外块不计入分子分母）；
+   * cover＝该宫扇区在外框（房间并集外接框）内被房面覆盖的比例——缺角判读数：
+   * 零覆盖＝缺角与 computeJudge 采样口径同向。只报数、不设占比阈值
+   * （金锁原典无缺角比例阈值，判定仍以零覆盖为准）。 */
+  function clipHalfPlane(poly, cx, cy, phi, keepPos) {
+    if (!poly.length) return poly;
+    var dx = Math.sin(phi), dy = -Math.cos(phi);
+    function f(x, y) { return dx * (y - cy) - dy * (x - cx); }
+    var out = [];
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length];
+      var fa = f(a[0], a[1]), fb = f(b[0], b[1]);
+      var ina = keepPos ? fa >= -1e-12 : fa <= 1e-12;
+      var inb = keepPos ? fb >= -1e-12 : fb <= 1e-12;
+      if (ina) out.push(a);
+      if (ina !== inb) {
+        var t = fa / (fa - fb);
+        out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+      }
+    }
+    return out;
+  }
+  function polyArea(poly) {
+    var s = 0;
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length];
+      s += a[0] * b[1] - b[0] * a[1];
+    }
+    return Math.abs(s) / 2;
+  }
+  function palaceAreas(fixed, plan) {
+    if (!fixed || !plan || !plan.rooms || !plan.rooms.length) return null;
+    var facing = fixed.facingDeg;
+    if (!isFinite(facing)) return null;
+    var liji = lijiOf(plan);
+    var mp = isFinite(plan.mPerUnit) && plan.mPerUnit > 0 ? plan.mPerUnit : 1;
+    var all = plan.rooms;
+    var rooms = all.filter(function (r) { return !r.ex; });
+    var total = 0;
+    rooms.forEach(function (r) { total += r.w * r.h; });
+    if (total <= 0) return null;
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    all.forEach(function (r) {
+      x0 = Math.min(x0, r.x); y0 = Math.min(y0, r.y);
+      x1 = Math.max(x1, r.x + r.w); y1 = Math.max(y1, r.y + r.h);
+    });
+    if (plan.trace && plan.trace.rect) {
+      var tr = plan.trace.rect;
+      x0 = Math.min(x0, tr.x); y0 = Math.min(y0, tr.y);
+      x1 = Math.max(x1, tr.x + tr.w); y1 = Math.max(y1, tr.y + tr.h);
+    }
+    var frame = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+    var m2 = mp * mp; /* 单位² → m²（口径同编辑器：米＝单位 × mPerUnit） */
+    var out = { total: total, totalM2: total * m2, palaces: {} };
+    SECTOR.forEach(function (pid, i) {
+      var B = i * 45;
+      var lo = (B - 22.5 - facing) * Math.PI / 180, hi = (B + 22.5 - facing) * Math.PI / 180;
+      function wedge(poly) {
+        return clipHalfPlane(clipHalfPlane(poly, liji.x, liji.y, lo, true), liji.x, liji.y, hi, false);
+      }
+      var area = 0;
+      rooms.forEach(function (r) {
+        area += polyArea(wedge([[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h]]));
+      });
+      var terr = polyArea(wedge(frame));
+      out.palaces[pid] = {
+        areaM2: area * m2,
+        share: area / total,
+        cover: terr > 1e-9 ? area / terr : 0
+      };
+    });
+    return out;
+  }
+  window.WuriPalaceAreas = palaceAreas;
+
   /* 纯函数：compute(fixed, plan) -> {palaces:{id:result}, center:{cesuo,chufang}, liji} */
   function computeJudge(fixed, plan) {
     var out = { palaces: {}, center: { cesuo: false, chufang: false }, liji: null };
@@ -160,6 +240,13 @@
       var wrong = (p.yingxu === '砂' && R.hasShui) || (p.yingxu === '水' && R.hasSha);
       var right = (p.yingxu === '砂' && R.hasSha) || (p.yingxu === '水' && R.hasShui);
       R.status = wrong ? 'xiong' : (right ? 'ji' : 'none');
+    });
+    /* 每宫面积占比（精确几何）：挂到判定结果供宫卡注明——缺角文案带占比，
+     * 只报数不改判定（零覆盖口径不变、无自创阈值） */
+    var pa = palaceAreas(fixed, plan);
+    if (pa) PAL_LS.forEach(function (p) {
+      var A = pa.palaces[p.id], R = out.palaces[p.id];
+      if (A && R) { R.areaShare = A.share; R.areaCover = A.cover; R.areaM2 = A.areaM2; }
     });
     return out;
   }
@@ -361,11 +448,14 @@
       '<span>' + esc(T('js_seen_sha')) + (R.shaItems.length ? esc(txa(R.shaItems).join('、')) : '—') + '</span>' +
       '<span>' + esc(T('js_seen_shui')) + (R.shuiItems.length ? esc(txa(R.shuiItems).join('、')) : '—') + '</span></p>';
     if (R.roomsHere.length) ledger += '<p class="js-ledger"><span>' + esc(T('js_rooms')) + esc(txa(R.roomsHere).join('、')) + '</span></p>';
+    if (R.areaShare != null) ledger += '<p class="js-ledger"><span>' +
+      esc(TF(T('js_area_line'), pct1(R.areaShare), pct1(R.areaCover))) + '</span></p>';
     var body = '';
     if (R.status === 'missing') {
       var qj = p.neiju.quejiao;
       body += '<div class="js-duan k-xiong"><div class="js-duan-h">' + esc(T('js_quejiao')) + '<span>' + esc(T('js_xiong')) + '</span></div>' +
         '<p class="js-duan-t">' + esc(tx(qj.text)) + '</p>' +
+        (R.areaShare != null ? '<p class="js-duan-t">' + esc(TF(T('js_missing_area'), pct1(R.areaShare), pct1(R.areaCover))) + '</p>' : '') +
         factsLine([fact(T('js_f_qi'), qj.yingqi)]) + '</div>';
       body += methodRef(RF.shinei_checklists.quejiao_chuwei_tongyong.quejiao_huajie);
     } else if (R.status !== 'noplan') {

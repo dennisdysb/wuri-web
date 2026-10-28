@@ -1373,6 +1373,114 @@
     return '<section class="card"><div class="card-title">' + esc(T('hdr_meas_title')) + '</div>' +
       (ms.length ? rows : '<p class="hd-note">' + esc(T('hd_no_meas')) + '</p>') + '</section>';
   }
+  /* 各宫面积占比（报告节）：逐层小表——宫名/面积/占全宅/本宫覆盖。
+   * 与金锁判定、编辑器度量同源（WuriPalaceAreas：定稿坐向＋立极扇形分宫
+   * 精确几何）；无定稿或无房面的层不出。占比只报数，本节不断吉凶、
+   * 不设阈值（金锁原典无缺角比例阈值，缺角仍以零覆盖为准）。 */
+  function palNum(v) { return String(Math.round((v || 0) * 100) / 100); }
+  function palPct(v) { return (Math.round((v || 0) * 1000) / 10) + '%'; }
+  function reportPalaceHtml(fls, plans, fx) {
+    if (!fx || !window.WuriPalaceAreas) return '';
+    var palMeta = {};
+    if (window.JINSUO_DATA && JINSUO_DATA.duanyu) {
+      JINSUO_DATA.duanyu.palaces.forEach(function (p) { palMeta[p.id] = p; });
+    }
+    var order = ['kan', 'gen', 'zhen', 'xun', 'li', 'kun', 'dui', 'qian'];
+    var blocks = '';
+    fls.forEach(function (f, i) {
+      var plan = plans[i]; if (!plan) return;
+      var pa = null;
+      try { pa = window.WuriPalaceAreas(fx, plan); } catch (e) {}
+      if (!pa || pa.total <= 0) return;
+      var rows = order.map(function (pid) {
+        var A = pa.palaces[pid]; if (!A) return '';
+        var pm = palMeta[pid];
+        var nm = pm ? esc(txs(pm.gua)) + esc(T('hpe_palace_suffix')) + ' · ' + esc(txs(pm.fangwei)) : pid;
+        return '<tr><td>' + nm + '</td><td>' + palNum(A.areaM2) + '㎡</td><td>' + palPct(A.share) + '</td><td>' + palPct(A.cover) + '</td></tr>';
+      }).join('');
+      blocks += '<div class="hdr-floor-t">' + esc(f.name) + '</div>' +
+        '<table class="hdr-pal"><thead><tr><th>' + esc(T('hdr_palace_gong')) + '</th><th>' + esc(T('hdr_palace_area')) + '</th><th>' + esc(T('hdr_palace_share')) + '</th><th>' + esc(T('hdr_palace_cover')) + '</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    });
+    if (!blocks) return '';
+    return '<section class="card"><div class="card-title">' + esc(T('hdr_palace_title')) + '</div>' + blocks +
+      '<p class="hd-note" style="margin-top:8px">' + esc(T('hdr_palace_note')) + '</p></section>';
+  }
+  /* 户型 JSON 导出/导入（报告工具）：导出本宅各层 plan 全量（房间/构件/
+   * 墙段/立极/坐向/校准/图层），导入按楼层名优先、同名缺失按顺序匹配回
+   * 本宅楼层覆盖写入，往返一致。导出与打印同门控（高级版）；导入不设
+   * 门控（恢复自家数据）。导入后编辑器内存稿逐层作废，防旧稿回写复活。 */
+  function exportPlanJson() {
+    if (!S.curHouse) return;
+    var hid = S.curHouse;
+    Promise.all([
+      db.houses.get(hid),
+      db.floors.where('houseId').equals(hid).toArray(),
+      db.measurements.where('houseId').equals(hid).toArray()
+    ]).then(function (r) {
+      var h = r[0]; if (!h) return;
+      var fls = r[1].slice().sort(function (a, b) { return (a.sort || 0) - (b.sort || 0) || a.id - b.id; });
+      var fx = r[2].filter(function (m) { return m.fixed; })[0] || null;
+      return Promise.all(fls.map(function (f) { return db.plans.get(f.id); })).then(function (plans) {
+        var payload = {
+          app: 'wuri-house-plan', version: 1, exportedAt: new Date().toISOString(),
+          house: { name: h.name || '', address: h.address || '', client: h.client || '', phone: h.phone || '', surveyDate: h.surveyDate || '', note: h.note || '' },
+          fixed: fx ? { sitting: fx.sitting, facing: fx.facing, facingDeg: fx.facingDeg, ts: fx.ts, point: fx.point || null, decl: fx.decl != null ? fx.decl : null, gps: fx.gps || null, accDeg: fx.accDeg != null ? fx.accDeg : null } : null,
+          floors: fls.map(function (f, i) { return { name: f.name || '', sort: f.sort || 0, plan: plans[i] || null }; })
+        };
+        var blob = new Blob([JSON.stringify(payload, null, 1)], { type: 'application/json' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'wuri-plan-' + (h.name || 'house') + '-' + fmtYMD(Date.now()).replace(/-/g, '') + '.json';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+      });
+    }).catch(function () { toastMsg(T('hdr_json_bad')); });
+  }
+  function importPlanJson(file) {
+    if (!file || !S.curHouse) return;
+    var hid = S.curHouse;
+    file.text().then(function (txt) {
+      var obj = null;
+      try { obj = JSON.parse(txt); } catch (e) {}
+      if (!obj || obj.app !== 'wuri-house-plan' || !Array.isArray(obj.floors)) { toastMsg(T('hdr_json_bad')); return; }
+      var entries = obj.floors.filter(function (e) { return e && e.plan && typeof e.plan === 'object'; });
+      if (!entries.length) { toastMsg(T('hdr_json_none')); return; }
+      db.floors.where('houseId').equals(hid).toArray().then(function (fls0) {
+        var fls = fls0.slice().sort(function (a, b) { return (a.sort || 0) - (b.sort || 0) || a.id - b.id; });
+        if (!fls.length) { toastMsg(T('hdr_json_none')); return; }
+        hdDlgConfirm(TF(T('hdr_json_confirm'), Math.min(entries.length, fls.length)), T('hdr_json_import')).then(function (ok) {
+          if (!ok) return;
+          var used = {}, jobs = [];
+          entries.forEach(function (e) {
+            var tgt = fls.filter(function (f) { return !used[f.id] && f.name === e.name; })[0] ||
+                      fls.filter(function (f) { return !used[f.id]; })[0];
+            if (!tgt) return;
+            used[tgt.id] = 1;
+            var p = JSON.parse(JSON.stringify(e.plan));
+            p.floorId = tgt.id; p.houseId = hid;
+            if (!Array.isArray(p.rooms)) p.rooms = [];
+            if (!Array.isArray(p.fixtures)) p.fixtures = [];
+            if (!Array.isArray(p.walls)) p.walls = [];
+            if (!isFinite(p.mPerUnit) || p.mPerUnit <= 0) p.mPerUnit = 1;
+            if (!p.layers || typeof p.layers !== 'object') {
+              p.layers = { rooms: true, fixtures: true, dims: true, overlay: 'none', palNames: true,
+                roomNames: true, traceBg: true, ovOpacity: 0.55, compRadius: 0 };
+            }
+            p.updated = Date.now();
+            delete p.uuid; /* 同步身份归本机同步层重新对齐（同编辑器新建稿无 uuid 口径） */
+            jobs.push(db.plans.put(p).then(function () {
+              if (window.__wuriPlan && __wuriPlan.invalidate) __wuriPlan.invalidate(tgt.id);
+            }));
+          });
+          return Promise.all(jobs).then(function () {
+            toastMsg(TF(T('hdr_json_ok'), jobs.length));
+            renderReport(hid);
+          });
+        });
+      });
+    }).catch(function () { toastMsg(T('hdr_json_bad')); });
+  }
+
   /* 报告叠图：与编辑器同几何（extent→立极→九宫格），图层从 plan.layers 取舍 */
   function planReportSVG(plan, fx, fxc, fan, photos) {
     if (!plan) return '';
@@ -1513,6 +1621,7 @@
                    : '<p class="hd-note">' + esc(T('hdr_no_plan')) + '</p>');
           }).join('') +
           '<p class="hd-note" style="margin-top:10px">' + esc(T('hdr_floors_note')) + '</p></section>';
+        html += reportPalaceHtml(fls, plans, fx);
         html += '<section class="card"><div class="card-title">' + esc(T('hdr_photos_title')) + '</div>' +
           (photos.length ? '<div class="hd-wall" id="hdr-wall"></div>'
                          : '<p class="hd-note">' + esc(T('hdr_photos_none')) + '</p>') + '</section>';
@@ -1672,6 +1781,17 @@
     if (rex) rex.addEventListener('click', function () {
       if (!isPro()) { requirePro(); return; }
       window.print();
+    });
+    var jex = $('hdr-export-json');
+    if (jex) jex.addEventListener('click', function () {
+      if (!isPro()) { requirePro(); return; }
+      exportPlanJson();
+    });
+    var jim = $('hdr-import-json'), jfl = $('hdr-json-file');
+    if (jim && jfl) jim.addEventListener('click', function () { jfl.click(); });
+    if (jfl) jfl.addEventListener('change', function () {
+      if (jfl.files && jfl.files[0]) importPlanJson(jfl.files[0]);
+      jfl.value = '';
     });
     bindFileInputs();
     var pr = $('fs-point-row'); if (pr) pr.hidden = false;
