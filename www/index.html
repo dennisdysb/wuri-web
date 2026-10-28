@@ -228,9 +228,27 @@
             <button class="mini-btn tiny" id="jing-font-dec">字小</button>
             <button class="mini-btn tiny" id="jing-font-inc">字大</button>
             <button class="mini-btn tiny" id="jing-foldall">展开</button>
+            <button class="mini-btn tiny" id="jing-toc-btn">目录</button>
             <button class="mini-btn tiny" id="jing-recite" data-i18n="jing_recite">背诵</button>
             <button class="mini-btn tiny" id="jing-follow">跟读</button>
             <button class="mini-btn tiny" id="jing-highlight-btn" hidden>高亮</button>
+          </div>
+          <div class="jing-prog-track" aria-hidden="true"><i id="jing-prog-fill"></i></div>
+        </div>
+        <div id="jing-statusbar" hidden><span id="jing-status-text"></span></div>
+        <div id="jing-toc" hidden>
+          <div class="jing-toc-backdrop" data-toc-close></div>
+          <div class="jing-toc-panel">
+            <div class="jing-toc-head"><span id="jing-toc-title"></span><button class="mini-btn tiny" data-toc-close>关闭</button></div>
+            <div class="jing-toc-list" id="jing-toc-list"></div>
+          </div>
+        </div>
+        <button id="dict-fab" class="dict-fab" hidden>查字</button>
+        <div id="dict-card" hidden>
+          <div class="dict-backdrop" data-dict-close></div>
+          <div class="dict-sheet">
+            <div class="dict-head"><span id="dict-word"></span><button class="mini-btn tiny" data-dict-close>关闭</button></div>
+            <div class="dict-body" id="dict-body"></div>
           </div>
         </div>
         <h2 id="jing-title" class="jing-book-title"></h2>
@@ -2484,6 +2502,7 @@
 <script src="js/ics-generator.js"></script>
 <script src="js/t2s.js"></script>
 <script src="js/jingwen.js"></script>
+<script src="js/dict.js"></script>
 <script src="js/daozang.js"></script>
 <script src="js/deities-data.js"></script>
 <script src="js/deities.js"></script>

@@ -1,0 +1,65 @@
+{
+ "name": "戊日不上香阅读器辞书",
+ "version": 1,
+ "generated": "2026-10-28",
+ "charCount": 12260,
+ "wordCount": 577,
+ "shuowenCount": 6180,
+ "coverage": {
+  "selectedCorpusChars": 6278,
+  "selectedCovered": 6249,
+  "selectedCoverageRate": 0.9954
+ },
+ "charShards": [
+  {
+   "file": "chars-3400.json",
+   "from": 13312,
+   "to": 25381,
+   "count": 3734
+  },
+  {
+   "file": "chars-6328.json",
+   "from": 25384,
+   "to": 32406,
+   "count": 3823
+  },
+  {
+   "file": "chars-7e97.json",
+   "from": 32407,
+   "to": 39729,
+   "count": 3917
+  },
+  {
+   "file": "chars-9b32.json",
+   "from": 39730,
+   "to": 173465,
+   "count": 786
+  }
+ ],
+ "files": {
+  "words": "words.json",
+  "shuowen": "shuowen.json"
+ },
+ "sources": [
+  {
+   "part": "单字拼音/英文简释/部首/笔画",
+   "name": "Unihan Database (Unicode UCD)",
+   "license": "Unicode License — 免费使用、复制、修改与再发布，保留版权声明",
+   "url": "https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip",
+   "note": "字段 kMandarin、kDefinition、kRSUnicode、kTotalStrokes；精选经文已有审读拼音者以经文拼音校正"
+  },
+  {
+   "part": "古义（说文原文）",
+   "name": "《说文解字》东汉·许慎（公版原文）",
+   "license": "原书为公有领域；转录底本为维基文库公版文本，本项目自行解析条目",
+   "url": "https://zh.wikisource.org/wiki/說文解字",
+   "note": "未使用 shuowen.org 数据集，未使用汉典/ctext 现代释义"
+  },
+  {
+   "part": "词语今义/经文义",
+   "name": "本项目自编经文词表",
+   "license": "本项目自有内容",
+   "note": "据精选经文与道藏高频词自编简明释义，每词均校验在语料中实际出现"
+  }
+ ]
+}

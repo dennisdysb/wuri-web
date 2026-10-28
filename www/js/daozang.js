@@ -345,6 +345,7 @@
     }).join('');
     dzPreloadAssets();
     pfWatch(cats);
+    if (window.__wuriDecorateProgress) { try { window.__wuriDecorateProgress(); } catch (e) {} }
   }
   function renderFold(host) {
     var fold = document.createElement('div');
@@ -624,7 +625,7 @@
       var wrap = bu.parentNode.querySelector('[data-dz-works="' + name + '"]');
       if (wrap) {
         var willOpen = wrap.hidden;
-        if (willOpen && !wrap.innerHTML) wrap.innerHTML = worksOfBu(name).map(workRow).join('');
+        if (willOpen && !wrap.innerHTML) { wrap.innerHTML = worksOfBu(name).map(workRow).join(''); if (window.__wuriDecorateProgress) { try { window.__wuriDecorateProgress(); } catch (e) {} } }
         wrap.hidden = !willOpen;
         openBu[name] = willOpen;
         if (willOpen) pfWatch(bu.parentNode); /* 重挂全目录观察（pfWatch 内 disconnect 旧观察） */

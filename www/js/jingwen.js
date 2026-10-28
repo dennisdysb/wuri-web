@@ -256,6 +256,7 @@ var JingWen = (function () {
     host.innerHTML = html;
     /* 道藏全藏入口（daozang.js 挂钩，纯增量；无该脚本时目录不变） */
     if (window.__wuri_dzCatalog) { try { window.__wuri_dzCatalog(host); } catch (e) {} }
+    decorateReadProgress();
   }
 
   /* ---------- 阅读器 ---------- */
@@ -582,6 +583,351 @@ var JingWen = (function () {
   }
   window.__wuriInsistPos = insistReaderPos;
 
+  /* ---------- 阅读进度/目录抽屉/查字（稳态第一批，2026-10-28） ----------
+   * 进度口径：内容字坐标（DZ_STRIP_RE 剥标点空白，与高亮投影/段锚同口径），
+   * 按「视口顶线以上已读内容字数 ÷ 全书内容字数」计，与展开/折叠状态无关、
+   * 跨设备一致；存入既有 autopos 条目（frac/done 字段），不另建存储。
+   * 剩余分钟：按本人实测速度（会话内采样 EMA，存 wuri_jing_speed）估算，
+   * 无样本回落 300 字/分钟。 */
+  var _metrics = null; /* {secLens:[], paraLens:[[]], cum:[], total} */
+  var _statusMode = 'vol';
+  var _lastOff = -1, _lastOffT = 0, _lastProgSave = 0, _readUiT = null, _doneSavedFor = null;
+  var SPEED_KEY = 'wuri_jing_speed';
+  function readSpeed() {
+    try { var v = +localStorage.getItem(SPEED_KEY); if (v >= 60 && v <= 1500) return v; } catch (e) {}
+    return 300;
+  }
+  function stripContent(s) { return String(s || '').replace(DZ_STRIP_RE, ''); }
+  function buildReaderMetrics(d) {
+    _metrics = null; _lastOff = -1; _lastOffT = 0;
+    if (!d || !d.sections) return;
+    var secLens = [], paraLens = [], cum = [], total = 0;
+    d.sections.forEach(function (sec) {
+      cum.push(total);
+      var pl = [], sl = 0;
+      (sec.paras || []).forEach(function (p) {
+        var L = p.img ? 0 : stripContent(p.t).length;
+        pl.push(L); sl += L;
+      });
+      paraLens.push(pl); secLens.push(sl); total += sl;
+    });
+    _metrics = { secLens: secLens, paraLens: paraLens, cum: cum, total: total };
+  }
+  function contentOffsetNow() {
+    if (!_metrics || !_metrics.total) return 0;
+    var LINE = 120, passed = 0;
+    var secs = document.querySelectorAll('#jing-content .jing-sec');
+    for (var k = 0; k < secs.length; k++) {
+      var secEl = secs[k], si = +secEl.getAttribute('data-sec');
+      var secRect = secEl.getBoundingClientRect();
+      if (secRect.bottom <= LINE) { passed += _metrics.secLens[si] || 0; continue; }
+      if (secRect.top > LINE) break;
+      var body = secEl.querySelector('.jing-sec-body');
+      if (!body || body.hidden) break;
+      var ps = body.querySelectorAll('p.jing-para');
+      for (var i = 0; i < ps.length; i++) {
+        var pi = +ps[i].getAttribute('data-para');
+        var len = (_metrics.paraLens[si] || [])[pi] || 0;
+        var r = ps[i].getBoundingClientRect();
+        if (r.bottom <= LINE) { passed += len; continue; }
+        if (r.top < LINE) {
+          var ratio = (LINE - r.top) / Math.max(1, r.height);
+          passed += len * Math.min(1, Math.max(0, ratio));
+        }
+        break;
+      }
+      break;
+    }
+    return Math.min(Math.round(passed), _metrics.total);
+  }
+  /* 有效已读偏移：已滚到文档底部时，最后一屏（顶线以下）必然已在目——计全书读完。
+     否则末卷较长的书会卡在 98–99%（实测 KR5g0030 末屏约占全书 1.5%），「已读完」永不可达。
+     守卫 scrollY>0：整屏装得下的短经打开瞬间不自动判完。 */
+  function effContentOffset() {
+    if (!_metrics || !_metrics.total) return 0;
+    if (window.scrollY > 0 && (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 2)) return _metrics.total;
+    return contentOffsetNow();
+  }
+  function saveProgressNow() {
+    if (!currentId || !_metrics || !_metrics.total) return;
+    var off = effContentOffset(), frac = off / _metrics.total;
+    try {
+      var m = JSON.parse(localStorage.getItem(AUTOPOS_KEY) || '{}');
+      var e = m[currentId] || {};
+      e.frac = Math.round(frac * 10000) / 10000;
+      if (frac >= 0.995 && !e.done) { e.done = true; e.doneTs = Date.now(); }
+      e.ts = Date.now();
+      m[currentId] = e;
+      var keys = Object.keys(m);
+      if (keys.length > 40) {
+        keys.sort(function (a, b) { return (m[a].ts || 0) - (m[b].ts || 0); });
+        keys.slice(0, keys.length - 40).forEach(function (kk) { delete m[kk]; });
+      }
+      localStorage.setItem(AUTOPOS_KEY, JSON.stringify(m));
+    } catch (err) {}
+  }
+  function secIdxAtOffset(off) {
+    if (!_metrics) return 0;
+    var si = 0;
+    for (var i = 0; i < _metrics.cum.length; i++) { if (_metrics.cum[i] <= off) si = i; else break; }
+    return si;
+  }
+  function fmtRemain(chars) {
+    if (chars <= 0) return '已读完';
+    var mins = chars / readSpeed();
+    return mins < 1 ? '余不足 1 分钟' : '余约 ' + Math.round(mins) + ' 分钟';
+  }
+  function updateReadUI() {
+    var fill = $('#jing-prog-fill'), bar = $('#jing-statusbar'), txt = $('#jing-status-text');
+    var reader = $('#jing-reader');
+    if (!reader || reader.hidden || !currentId || !_metrics || !_metrics.total) {
+      if (bar) bar.hidden = true;
+      return;
+    }
+    var off = effContentOffset(), frac = off / _metrics.total;
+    if (fill) fill.style.width = (frac * 100).toFixed(1) + '%';
+    /* 速度采样：间隔 >2.5s 且确有推进才计，EMA 平滑后落盘 */
+    var now = Date.now();
+    if (_lastOff >= 0 && off > _lastOff && now - _lastOffT > 2500) {
+      var inst = (off - _lastOff) / ((now - _lastOffT) / 60000);
+      if (inst > 40 && inst < 1500) {
+        try { localStorage.setItem(SPEED_KEY, String(Math.round(readSpeed() * 0.7 + inst * 0.3))); } catch (e) {}
+      }
+    }
+    if (off !== _lastOff) { _lastOff = off; _lastOffT = now; }
+    if (bar && txt) {
+      bar.hidden = false;
+      var d = window.JINGWEN && JINGWEN[currentId];
+      var si = secIdxAtOffset(off);
+      var secH = (d && d.sections && d.sections[si] && d.sections[si].h) || '';
+      /* 口径（2026-10-28 用户钉死）：百分比恒以本经为单位——全经已读内容字数
+         ÷ 全经总内容字数（多卷经跨卷合并计算）；本卷进度与本卷剩余作并列小字，
+         不做任何跨经聚合 */
+      var pct = frac >= 0.995 ? 100 : Math.floor(frac * 100);
+      var slNow = _metrics.secLens[si] || 0;
+      var volPct = slNow ? Math.min(100, Math.floor(Math.min(1, Math.max(0, (off - _metrics.cum[si]) / slNow)) * 100)) : 100;
+      var tail;
+      if (frac >= 0.995) tail = '已读完';
+      else if (_statusMode === 'book') tail = '本书' + fmtRemain(_metrics.total - off);
+      else tail = '本卷' + fmtRemain((_metrics.cum[si] + _metrics.secLens[si]) - off);
+      txt.innerHTML = (secH ? '<b>' + esc(txScript(secH)) + '</b> · ' : '') + '本书 ' + pct + '% · 本卷 ' + volPct + '% · ' + tail;
+    }
+    if (now - _lastProgSave > 2500) { _lastProgSave = now; saveProgressNow(); }
+    /* 读完瞬间立即落盘一次：滚到底后不再有滚动事件触发节流保存，
+       否则 done 只停在状态栏、存档仍是 98.x%（实测 KR5g0030）。 */
+    if (frac >= 0.995 && _doneSavedFor !== currentId) { _doneSavedFor = currentId; _lastProgSave = now; saveProgressNow(); }
+  }
+  function scheduleReadUI() {
+    if (_readUiT) return;
+    _readUiT = setTimeout(function () { _readUiT = null; updateReadUI(); }, 300);
+  }
+  window.addEventListener('scroll', function () {
+    var reader = $('#jing-reader');
+    if (reader && !reader.hidden && currentId) scheduleReadUI();
+  }, { passive: true });
+  /* 列表行进度：读 autopos 的 frac/done 装饰目录行（精选架＋全藏行共用） */
+  function decorateReadProgress() {
+    var m;
+    try { m = JSON.parse(localStorage.getItem(AUTOPOS_KEY) || '{}'); } catch (e) { return; }
+    document.querySelectorAll('#jing-list .jing-item[data-jing], #jing-list [data-dz-work]').forEach(function (row) {
+      var id = row.getAttribute('data-jing') || row.getAttribute('data-dz-work');
+      var e = m[id];
+      var old = row.querySelector('.read-prog');
+      if (!e || (e.frac == null && !e.done)) { if (old) old.remove(); return; }
+      if (!old) {
+        old = document.createElement('span');
+        old.className = 'read-prog';
+        var go = row.querySelector('.jing-go');
+        if (go) row.insertBefore(old, go); else row.appendChild(old);
+      }
+      old.textContent = e.done ? '已读完' : ('读 ' + Math.floor((e.frac || 0) * 100) + '%');
+      old.classList.toggle('done', !!e.done);
+    });
+  }
+  window.__wuriDecorateProgress = decorateReadProgress;
+  window.__wuriReadFrac = function (id) {
+    var e = loadAutoPos(id);
+    return (e && (e.frac != null || e.done)) ? { frac: e.frac || 0, done: !!e.done } : null;
+  };
+
+  /* ---------- 卷次目录抽屉：卷→章二级（章＝卷内 dz-cht 类题/第X题式段） ---------- */
+  function tocChapters(d, si) {
+    var sec = d.sections[si];
+    if (!sec || !sec.paras) return [];
+    var out = [], acc = 0;
+    sec.paras.forEach(function (p) {
+      if (p.img) return;
+      var s = jpStrip(p.t || '');
+      var isCh = p.cls === 'dz-cht' ||
+        (s.length >= 2 && s.length <= 18 && /第[一二三四五六七八九十百廿卅\d]+$/.test(s) && !/[，。；：？]/.test(p.t || ''));
+      if (isCh) out.push({ name: String(p.t || '').trim(), off: acc });
+      acc += stripContent(p.t).length;
+    });
+    return out.length >= 2 ? out : [];
+  }
+  function openToc() {
+    var d = window.JINGWEN && JINGWEN[currentId];
+    var toc = $('#jing-toc'), list = $('#jing-toc-list'), title = $('#jing-toc-title');
+    if (!d || !toc || !list) return;
+    if (!_metrics) buildReaderMetrics(d);
+    var off = effContentOffset();
+    var curSi = secIdxAtOffset(off);
+    var frac = _metrics && _metrics.total ? off / _metrics.total : 0;
+    if (title) title.textContent = txScript(d.title || '');
+    var html = '<div class="jing-toc-all">本书进度 ' + (frac >= 0.995 ? '已读完' : Math.floor(frac * 100) + '%') + ' · 共 ' + d.sections.length + ' 卷</div>';
+    d.sections.forEach(function (sec, si) {
+      var sl = _metrics ? _metrics.secLens[si] : 0;
+      var sb = _metrics ? _metrics.cum[si] : 0;
+      var sp = sl ? Math.min(1, Math.max(0, (off - sb) / sl)) : 0;
+      var spct = off >= sb + sl && sl ? 100 : Math.floor(sp * 100);
+      html += '<div class="jing-toc-vol' + (si === curSi ? ' cur' : '') + '" data-toc-sec="' + si + '">'
+        + '<span class="tv-name">' + esc(txScript(sec.h || ('第' + (si + 1) + '卷'))) + '</span>'
+        + '<span class="tv-pct">' + (spct >= 100 ? '已读完' : spct + '%') + '</span></div>';
+      tocChapters(d, si).forEach(function (ch) {
+        html += '<div class="jing-toc-ch" data-toc-sec="' + si + '" data-toc-off="' + ch.off + '">' + esc(txScript(ch.name)) + '</div>';
+      });
+    });
+    list.innerHTML = html;
+    toc.hidden = false;
+    var cur = list.querySelector('.jing-toc-vol.cur');
+    if (cur) setTimeout(function () { cur.scrollIntoView({ block: 'center' }); }, 30);
+  }
+  function closeToc() { var toc = $('#jing-toc'); if (toc) toc.hidden = true; }
+
+  /* ---------- 长按查字（数据层 js/dict.js：__wuriDict，全书可用） ---------- */
+  var _dictSel = null; /* {text, paraText, start, end} */
+  function plainTextOfFrag(frag) {
+    var c = frag.cloneNode ? frag.cloneNode(true) : frag;
+    if (c.querySelectorAll) c.querySelectorAll('rt, rp').forEach(function (n) { n.remove(); });
+    return c.textContent || '';
+  }
+  function captureDictSel() {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+    var range = sel.getRangeAt(0);
+    var content = $('#jing-content');
+    if (!content || !content.contains(range.startContainer)) return null;
+    var para = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+    para = para && para.closest ? para.closest('.jing-para') : null;
+    if (!para) return null;
+    var selText = plainTextOfFrag(range.cloneContents()).trim();
+    if (!selText || selText.length > 20) return null;
+    var pre = document.createRange();
+    pre.selectNodeContents(para);
+    pre.setEnd(range.startContainer, range.startOffset);
+    var start = plainTextOfFrag(pre.cloneContents()).length;
+    var paraText = plainTextOfFrag((function () { var r = document.createRange(); r.selectNodeContents(para); return r.cloneContents(); })());
+    return { text: selText, paraText: paraText, start: start, end: start + selText.length };
+  }
+  function showDictCard(word, wordEntry, charEntries) {
+    var card = $('#dict-card'), wEl = $('#dict-word'), body = $('#dict-body');
+    if (!card || !wEl || !body) return;
+    wEl.textContent = txScript(word);
+    var html = '';
+    if (wordEntry) {
+      if (wordEntry.py) html += '<div class="dict-py">' + esc(wordEntry.py) + '</div>';
+      if (wordEntry.def) html += '<div class="dict-sec"><h4>今义</h4><p>' + esc(wordEntry.def) + '</p></div>';
+      if (wordEntry.jingDef) html += '<div class="dict-sec"><h4>经文义</h4><p>' + esc(wordEntry.jingDef) + '</p></div>';
+    }
+    (charEntries || []).forEach(function (ce) {
+      if (!ce) return;
+      html += '<div class="dict-char"><span class="dc-head">' + esc(txScript(ce.ch)) + '</span>'
+        + (ce.py ? '<span class="dc-py">' + esc(ce.py) + '</span>' : '')
+        + (ce.radical ? '<span class="dc-py">' + esc(ce.radical) + '部' + (ce.strokes ? ' · ' + ce.strokes + '画' : '') + '</span>' : '')
+        + (ce.def ? '<p>' + esc(ce.def) + '</p>' : '')
+        + (ce.sw ? '<p class="sw">《说文》：' + esc(txScript(ce.sw)) + '</p>' : '')
+        + '</div>';
+    });
+    if (!html) html = '<p class="hint">辞书暂未收录此字/词。</p>';
+    body.innerHTML = html;
+    card.hidden = false;
+  }
+  function runDictLookup() {
+    var fab = $('#dict-fab');
+    if (fab) fab.hidden = true;
+    var info = _dictSel || captureDictSel();
+    _dictSel = null;
+    if (!info) return;
+    var D = window.__wuriDict;
+    var word = info.text;
+    if (!D) { showDictCard(word, null, []); return; }
+    var doLookup = function () {
+      var ex = null;
+      try { ex = D.expandWord ? D.expandWord(info.paraText, info.start, info.end) : null; } catch (e) {}
+      if (ex && ex.text && ex.text.length <= 8) word = ex.text;
+      var pWord = D.lookupWord ? D.lookupWord(word) : Promise.resolve(null);
+      var chars = [];
+      var seen = {};
+      for (var i = 0; i < word.length && chars.length < 6; i++) {
+        var ch = word[i];
+        if (!seen[ch] && /[一-鿿]/.test(ch)) { seen[ch] = 1; chars.push(ch); }
+      }
+      var pChars = Promise.all(chars.map(function (ch) { return D.lookupChar ? D.lookupChar(ch) : Promise.resolve(null); }));
+      Promise.all([pWord, pChars]).then(function (rs) {
+        showDictCard(word, rs[0], rs[1]);
+      }).catch(function () { showDictCard(word, null, []); });
+    };
+    if (D.ready) { D.ready().then(doLookup).catch(doLookup); } else doLookup();
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var tocBtn = $('#jing-toc-btn');
+    if (tocBtn) tocBtn.addEventListener('click', openToc);
+    var toc = $('#jing-toc');
+    if (toc) toc.addEventListener('click', function (e) {
+      if (e.target.closest('[data-toc-close]')) { closeToc(); return; }
+      var vol = e.target.closest('[data-toc-sec]');
+      if (vol) {
+        var si = +vol.getAttribute('data-toc-sec');
+        var off = +(vol.getAttribute('data-toc-off') || 0);
+        closeToc();
+        jumpToSec(si, off);
+        setTimeout(updateReadUI, 500);
+      }
+    });
+    var bar = $('#jing-statusbar');
+    if (bar) bar.addEventListener('click', function () {
+      _statusMode = _statusMode === 'vol' ? 'book' : 'vol';
+      updateReadUI();
+    });
+    var fab = $('#dict-fab');
+    if (fab) fab.addEventListener('click', runDictLookup);
+    /* 沉浸态：点正文（非高亮/叩磬/图版/卷题、无选区、非跟读）切换 */
+    var contentEl = $('#jing-content');
+    if (contentEl) contentEl.addEventListener('click', function (e) {
+      if (!currentId || followMode) return;
+      if (e.target.closest('.hl, .qing-inline, .dz-fig, a, button, .jing-sec-h')) return;
+      var sel = window.getSelection();
+      if (sel && !sel.isCollapsed) return;
+      document.body.classList.toggle('jing-immersive');
+    });
+    var rszT = null;
+    window.addEventListener('resize', function () {
+      if (rszT) clearTimeout(rszT);
+      rszT = setTimeout(function () {
+        var reader = $('#jing-reader');
+        if (reader && !reader.hidden && currentId) { applyReaderPrefs(); scheduleReadUI(); }
+      }, 250);
+    });
+    var dcard = $('#dict-card');
+    if (dcard) dcard.addEventListener('click', function (e) {
+      if (e.target.closest('[data-dict-close]')) dcard.hidden = true;
+    });
+    var dictDeb = null;
+    document.addEventListener('selectionchange', function () {
+      var reader = $('#jing-reader');
+      if (!reader || reader.hidden || !currentId) return;
+      if (dictDeb) clearTimeout(dictDeb);
+      dictDeb = setTimeout(function () {
+        var info = null;
+        try { info = captureDictSel(); } catch (e) {}
+        _dictSel = info;
+        var fb = $('#dict-fab');
+        if (fb) fb.hidden = !info;
+      }, 500);
+    });
+  });
+
   function openReaderAt(id, secIdx, charOff, _retry) {
     _posSuppressUntil = Date.now() + 12000; /* 直达锚点优先：时限内不恢复书签/自动位置 */
     if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
@@ -704,6 +1050,10 @@ var JingWen = (function () {
         html += '<div class="dz-endnote">' + esc(txScript(dzMetaLine + '｜底本：正统道藏涵芬楼版（Kanripo 转录）｜' + dzModeLine)) + '</div>';
       }
       $('#jing-content').innerHTML = html;
+      buildReaderMetrics(d);
+      _lastProgSave = 0; _doneSavedFor = null;
+      setTimeout(updateReadUI, 700);
+      setTimeout(updateReadUI, 2000);
       updateFoldBtn();
       // 恢复书签位置（如果有）
       var bm = (window.JingMark && window.JingMark.getBookmark(id)) || null;
@@ -961,13 +1311,21 @@ var JingWen = (function () {
     // 自动位置记忆：退出时存当前落点＋展开卷次，重进回到此处（与书签分开存）
     if (currentId && !$('#jing-reader').hidden) {
       saveAutoPos(currentId, window.scrollY || window.pageYOffset || 0, collectExpandedSecs());
+      saveProgressNow();
     }
+    var _sb = $('#jing-statusbar'); if (_sb) _sb.hidden = true;
+    document.body.classList.remove('jing-immersive');
+    closeToc();
+    var _dc = $('#dict-card'); if (_dc) _dc.hidden = true;
+    var _df = $('#dict-fab'); if (_df) _df.hidden = true;
     currentId = null;
     window._jingCurrentId = null;
     $('#jing-reader').hidden = true;
     $('#jing-home').hidden = false;
     var lr = libReturn; libReturn = null;
     libRestore(lr);
+    /* 回列表即刷新行进度徽标（刚读的书立刻见新进度） */
+    try { decorateReadProgress(); } catch (e) {}
   }
 
   /* 重置回目录页（问题1修复：进经文tab时调用）
@@ -1005,7 +1363,9 @@ var JingWen = (function () {
   }
 
   function applyReaderPrefs() {
-    $('#jing-content').style.fontSize = fontPx + 'px';
+    /* 平板/宽屏（≥768）：同档位字号 +2px 联动（版心限宽见 style.css 媒体查询） */
+    var effPx = fontPx + ((window.innerWidth || 0) >= 768 ? 2 : 0);
+    $('#jing-content').style.fontSize = effPx + 'px';
     // 问题8修复：内丹书不显示拼音，隐藏拼音按钮
     var isNd = currentId && isNeidan(currentId);
     var pyBtn = $('#jing-pybtn');
@@ -2920,17 +3280,21 @@ var JingWen = (function () {
       + '<button class="marks-tab' + (activeTab === 'bookmark' ? ' active' : '') + '" data-tab="bookmark">书签</button>'
       + '<button class="marks-tab' + (activeTab === 'highlight' ? ' active' : '') + '" data-tab="highlight">高亮</button>'
       + '<button class="marks-tab' + (activeTab === 'note' ? ' active' : '') + '" data-tab="note">心得</button>'
+      + '<button class="marks-tab' + (activeTab === 'lines' ? ' active' : '') + '" data-tab="lines">划线</button>'
       + '</div>';
 
     if (activeTab === 'bookmark') {
       html += renderBookmarks(JM);
     } else if (activeTab === 'highlight') {
       html += renderHighlights(JM);
+    } else if (activeTab === 'lines') {
+      html += renderLines(JM);
     } else {
       html += renderNotes(JM);
     }
 
     marksEl.innerHTML = html;
+    if (activeTab === 'lines') bindLinesTools(JM);
     window._refreshMarks = function () { showMarks(); };
     } catch (e) {
       var me = $('#jing-marks');
@@ -3017,6 +3381,166 @@ var JingWen = (function () {
     return html;
   }
 
+  /* ---------- 我的划线汇总（跨书聚合高亮＋心得：可检索/导出/随机回顾） ---------- */
+  var linesQ = '', linesScope = 'all';
+  var HL_DOT = { yellow: '#d9a916', green: '#5da463', blue: '#5b8dd6', red: '#d65b5b' };
+  /* 「本书」上下文：阅读器开着时为当前书，否则取 autopos 最近读过的一部 */
+  function linesBookSid() {
+    if (window._jingCurrentId) return window._jingCurrentId;
+    try {
+      var m = JSON.parse(localStorage.getItem('wuri_jing_autopos') || '{}');
+      var best = null, bt = 0;
+      Object.keys(m).forEach(function (k) { if ((m[k].ts || 0) > bt) { bt = m[k].ts; best = k; } });
+      return best;
+    } catch (e) { return null; }
+  }
+  function linesData(JM) {
+    var bookSid = linesBookSid();
+    var hls = JM.getHighlights().filter(function (h) { return JM.marksEnabled(h.sid); });
+    if (linesScope === 'book' && bookSid) hls = hls.filter(function (h) { return h.sid === bookSid; });
+    if (linesQ) {
+      var q = linesQ;
+      hls = hls.filter(function (h) {
+        var note = JM.getNoteForHighlight(h.id);
+        return (h.text || '').indexOf(q) >= 0 || titleOf(h.sid).indexOf(q) >= 0 ||
+          (note && note.text.indexOf(q) >= 0);
+      });
+    }
+    var bySid = {}, order = [];
+    hls.forEach(function (h) {
+      if (!bySid[h.sid]) { bySid[h.sid] = []; order.push(h.sid); }
+      bySid[h.sid].push(h);
+    });
+    order.sort(function (a, b) {
+      var ta = Math.max.apply(null, bySid[a].map(function (h) { return h.ts || 0; }));
+      var tb = Math.max.apply(null, bySid[b].map(function (h) { return h.ts || 0; }));
+      return tb - ta;
+    });
+    order.forEach(function (sid) {
+      bySid[sid].sort(function (a, b) {
+        return (a.sec - b.sec) || (a.para - b.para) || (a.start - b.start);
+      });
+    });
+    return { bySid: bySid, order: order, total: hls.length };
+  }
+  function linesSecLabel(h) {
+    var dz = window.DAOZANG_INDEX && window.DAOZANG_INDEX.works;
+    if (dz) for (var j = 0; j < dz.length; j++) if (dz[j].id === h.sid) return dz[j].juan > 1 ? '第 ' + (h.sec + 1) + ' 卷 · ' : '';
+    return h.sec > 0 ? '第 ' + (h.sec + 1) + ' 卷 · ' : '';
+  }
+  function renderLinesList(JM) {
+    var data = linesData(JM);
+    var colors = JM.HL_COLORS || {};
+    if (!data.total) return '<p class="hint">没有符合条件的划线。</p>';
+    var html = '';
+    data.order.forEach(function (sid) {
+      html += '<div class="hl-meta" style="padding:10px 14px 0;font-size:.95rem;color:var(--ink)">' + esc(titleOf(sid)) + '（' + data.bySid[sid].length + '）</div>';
+      data.bySid[sid].forEach(function (h) {
+        var c = colors[h.color] || colors.yellow || {};
+        var note = JM.getNoteForHighlight(h.id);
+        html += '<div class="jing-hl-item" data-open-hl="' + h.id + '" data-sid="' + h.sid + '">'
+          + '<div><span class="hl-dot" style="background:' + (HL_DOT[h.color] || HL_DOT.yellow) + '"></span>'
+          + '<span class="hl-text hl-' + (h.color || 'yellow') + '">' + esc(h.text) + '</span></div>'
+          + (note ? '<div class="note-preview" style="margin-top:4px">✎ ' + esc(note.text.length > 80 ? note.text.slice(0, 80) + '…' : note.text) + '</div>' : '')
+          + '<div class="hl-meta">' + esc(c.label || '') + ' · ' + linesSecLabel(h) + fmtDate(h.ts) + ' · 点击定位原文</div>'
+          + '<span class="hl-del" data-del-hl="' + h.id + '">删除</span>'
+          + '</div>';
+      });
+    });
+    return html;
+  }
+  function renderLines(JM) {
+    var data = linesData(JM);
+    var bookSid = linesBookSid();
+    var html = '<h3 class="jing-sec-h">我的划线（' + data.total + '）</h3>'
+      + '<div class="lines-tools">'
+      + '<input class="lines-search" id="lines-q" type="search" placeholder="搜索划线、心得、书名…" value="' + esc(linesQ) + '">'
+      + '<span class="lines-seg">'
+      + '<button data-lines-scope="all"' + (linesScope === 'all' ? ' class="active"' : '') + '>全部</button>'
+      + '<button data-lines-scope="book"' + (linesScope === 'book' ? ' class="active"' : '') + (bookSid ? '' : ' disabled style="opacity:.4"') + '>本书</button>'
+      + '</span></div>'
+      + '<div class="lines-tools">'
+      + '<button class="mini-btn" id="lines-random">随机回顾</button>'
+      + '<button class="mini-btn" id="lines-export-md">导出 Markdown</button>'
+      + '<button class="mini-btn" id="lines-export-txt">导出 TXT</button>'
+      + '</div>'
+      + '<div class="lines-note">跨书汇总全部划线与心得，点任一条跳回原文。</div>'
+      + '<div id="lines-list">' + renderLinesList(JM) + '</div>';
+    return html;
+  }
+  function linesExportText(JM, md) {
+    var data = linesData(JM);
+    var out = [];
+    var stamp = new Date();
+    var ds = stamp.getFullYear() + '-' + ('0' + (stamp.getMonth() + 1)).slice(-2) + '-' + ('0' + stamp.getDate()).slice(-2);
+    out.push(md ? '# 我的划线' : '我的划线');
+    out.push((md ? '' : '') + '导出于 ' + ds + '，共 ' + data.total + ' 条');
+    data.order.forEach(function (sid) {
+      out.push('');
+      out.push(md ? '## ' + titleOf(sid) : '【' + titleOf(sid) + '】');
+      data.bySid[sid].forEach(function (h) {
+        var c = (JM.HL_COLORS || {})[h.color] || {};
+        var d = new Date(h.ts || 0);
+        var dstr = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+        out.push((md ? '- ' : '· ') + '「' + (h.text || '') + '」（' + (c.label || '') + ' · ' + linesSecLabel(h).replace(/ · $/, '') + (linesSecLabel(h) ? ' · ' : '') + dstr + '）');
+        var note = JM.getNoteForHighlight(h.id);
+        if (note) out.push((md ? '  - 心得：' : '  心得：') + note.text);
+      });
+    });
+    return out.join('\n') + '\n';
+  }
+  function downloadTextFile(name, text) {
+    var b = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    var u = URL.createObjectURL(b);
+    var a = document.createElement('a');
+    a.href = u; a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(u); a.remove(); }, 500);
+  }
+  function bindLinesTools(JM) {
+    var q = document.getElementById('lines-q');
+    if (q) {
+      var deb = null;
+      q.addEventListener('input', function () {
+        if (deb) clearTimeout(deb);
+        deb = setTimeout(function () {
+          linesQ = q.value.trim();
+          var host = document.getElementById('lines-list');
+          if (host) host.innerHTML = renderLinesList(JM);
+          var head = document.querySelector('#jing-marks .jing-sec-h');
+          if (head) head.textContent = '我的划线（' + linesData(JM).total + '）';
+        }, 250);
+      });
+    }
+    document.querySelectorAll('[data-lines-scope]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        linesScope = btn.getAttribute('data-lines-scope');
+        showMarks('lines');
+      });
+    });
+    var rnd = document.getElementById('lines-random');
+    if (rnd) rnd.addEventListener('click', function () {
+      var all = JM.getHighlights().filter(function (h) { return JM.marksEnabled(h.sid); });
+      if (!all.length) return;
+      var h = all[Math.floor(Math.random() * all.length)];
+      hideMarks();
+      if (window.JingWen) {
+        JingWen.openReader(h.sid);
+        setTimeout(function () { if (window.JingMark) window.JingMark.scrollToHighlight(h.id); }, 600);
+      }
+    });
+    var exMd = document.getElementById('lines-export-md');
+    if (exMd) exMd.addEventListener('click', function () {
+      var d = new Date();
+      downloadTextFile('wuri-lines-' + d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.md', linesExportText(JM, true));
+    });
+    var exTxt = document.getElementById('lines-export-txt');
+    if (exTxt) exTxt.addEventListener('click', function () {
+      var d = new Date();
+      downloadTextFile('wuri-lines-' + d.getFullYear() + ('0' + (d.getMonth() + 1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.txt', linesExportText(JM, false));
+    });
+  }
+
   function hideMarks() {
     var listEl = $('#jing-list');
     var marksEl = $('#jing-marks');
@@ -3041,7 +3565,7 @@ var JingWen = (function () {
       var tab = e.target.closest('[data-tab]');
       if (tab) {
         var tabName = tab.getAttribute('data-tab');
-        if (tabName === 'bookmark' || tabName === 'highlight' || tabName === 'note') {
+        if (tabName === 'bookmark' || tabName === 'highlight' || tabName === 'note' || tabName === 'lines') {
           showMarks(tabName);
           return;
         }

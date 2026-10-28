@@ -3079,3 +3079,80 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 .js-ren-lab{min-width:64px;font-size:.8rem;color:var(--muted)}
 .js-ren-pal{font-family:var(--serif);font-size:.98rem;color:var(--ink)}
 .js-advice{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}
+
+/* ===== 阅读器批 v253：进度/目录抽屉/划线汇总/查字 ===== */
+/* 阅读进度条：嵌阅读器 sticky 头部底沿 */
+.jing-prog-track{height:3px;background:var(--line-soft);border-radius:2px;margin-top:6px;overflow:hidden}
+.jing-prog-track i{display:block;height:100%;width:0;background:var(--gold);border-radius:2px;transition:width .25s ease}
+/* 阅读状态栏：固定底栏（标签栏之上），常显 卷名·百分比·剩余 */
+#jing-statusbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(66px + env(safe-area-inset-bottom));width:100%;max-width:560px;z-index:900;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line-soft);padding:6px 14px;font-size:.8rem;color:var(--muted);text-align:center;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#jing-statusbar[hidden]{display:none}
+#jing-status-text b{color:var(--ink);font-weight:600}
+/* 目录行进度徽标 */
+.read-prog{flex:none;font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 7px;margin-left:8px;font-family:var(--sans,inherit)}
+.read-prog.done{color:var(--gold-deep,#8a6d1f);border-color:var(--gold)}
+/* 卷次目录抽屉 */
+#jing-toc{position:fixed;inset:0;z-index:10002}
+#jing-toc[hidden]{display:none}
+.jing-toc-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.jing-toc-panel{position:absolute;top:0;right:0;bottom:0;width:min(84vw,340px);background:var(--paper);color:var(--ink);box-shadow:-4px 0 18px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.jing-toc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 10px;border-bottom:1px solid var(--line);font-family:var(--serif);font-size:1.02rem;font-weight:700}
+.jing-toc-list{overflow-y:auto;padding:6px 0 calc(20px + env(safe-area-inset-bottom))}
+.jing-toc-all{padding:8px 14px;font-size:.8rem;color:var(--muted);border-bottom:1px dashed var(--line-soft)}
+.jing-toc-vol{display:flex;align-items:baseline;gap:8px;padding:10px 14px;cursor:pointer;font-family:var(--serif);font-size:.98rem}
+.jing-toc-vol:active{background:var(--line-soft)}
+.jing-toc-vol .tv-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jing-toc-vol .tv-pct{flex:none;font-size:.76rem;color:var(--muted)}
+.jing-toc-vol.cur .tv-name{color:var(--gold-deep,#8a6d1f);font-weight:700}
+.jing-toc-vol.cur .tv-pct{color:var(--gold-deep,#8a6d1f)}
+.jing-toc-ch{padding:7px 14px 7px 30px;cursor:pointer;font-size:.88rem;color:var(--muted);font-family:var(--serif)}
+.jing-toc-ch:active{background:var(--line-soft)}
+/* 查字悬浮钮（右下、磬钮之上） */
+.dict-fab{position:fixed;right:18px;bottom:160px;z-index:950;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 88%,transparent);color:var(--gold-deep,#8a6d1f);font-family:var(--serif);font-size:1rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.22);cursor:pointer}
+.dict-fab[hidden]{display:none}
+.dict-fab:active{transform:scale(.92)}
+/* 查字弹卡（底部 sheet） */
+#dict-card{position:fixed;inset:0;z-index:10003}
+#dict-card[hidden]{display:none}
+.dict-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.dict-sheet{position:absolute;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;max-height:62vh;overflow-y:auto;background:var(--paper);color:var(--ink);border-radius:16px 16px 0 0;padding:16px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(0,0,0,.25)}
+.dict-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+#dict-word{font-family:var(--serif);font-size:1.7rem;font-weight:700;letter-spacing:.06em}
+.dict-py{font-size:.95rem;color:var(--gold-deep,#8a6d1f);margin:2px 0 8px}
+.dict-sec{margin-top:10px}
+.dict-sec h4{margin:0 0 4px;font-size:.78rem;color:var(--muted);font-weight:600;letter-spacing:.12em}
+.dict-sec p{margin:0;font-family:var(--serif);font-size:1rem;line-height:1.75}
+.dict-char{border-top:1px dashed var(--line-soft);padding-top:8px;margin-top:10px}
+.dict-char .dc-head{font-family:var(--serif);font-size:1.25rem;font-weight:700}
+.dict-char .dc-py{color:var(--gold-deep,#8a6d1f);font-size:.88rem;margin-left:8px}
+.dict-char p{margin:2px 0 0;font-size:.92rem;line-height:1.7;color:var(--ink)}
+.dict-char p.sw{color:var(--muted);font-size:.88rem}
+/* 我的划线页工具行 */
+.lines-tools{display:flex;gap:8px;align-items:center;padding:10px 14px 2px;flex-wrap:wrap}
+.lines-search{flex:1;min-width:130px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--ink);padding:7px 12px;font-size:.9rem}
+.lines-seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lines-seg button{border:none;background:transparent;color:var(--muted);padding:6px 12px;font-size:.85rem;cursor:pointer}
+.lines-seg button.active{background:var(--gold);color:#fff}
+.lines-note{font-size:.78rem;color:var(--muted);padding:2px 14px 6px}
+.hl-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+
+/* ===== 沉浸态＋平板适配（2026-10-28 追加） ===== */
+/* 沉浸：点正文切换——顶栏工具/状态栏/悬浮钮/标签栏全收，只剩正文＋顶部极简进度线 */
+body.jing-immersive #tabbar{display:none}
+body.jing-immersive #jing-statusbar{display:none}
+body.jing-immersive .jing-back-fab,
+body.jing-immersive .jing-bookmark-fab,
+body.jing-immersive .qing-fab,
+body.jing-immersive #dict-fab{display:none !important}
+body.jing-immersive #jing-reader .jing-rhead{padding-top:0;padding-bottom:0}
+body.jing-immersive #jing-reader .jing-rhead > *:not(.jing-prog-track){display:none}
+body.jing-immersive .jing-prog-track{margin-top:0}
+/* 平板/宽屏：版心限宽居中、两侧留白加大（字号联动在 applyReaderPrefs） */
+@media (min-width:768px){
+  #jing-reader{padding-left:24px;padding-right:24px}
+  #jing-reader .jing-content,
+  #jing-reader .jing-book-title,
+  #jing-reader .jing-subtitle,
+  #jing-reader .jing-srcnote{max-width:680px;margin-left:auto;margin-right:auto}
+  #jing-statusbar{max-width:680px}
+}
