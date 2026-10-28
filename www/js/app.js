@@ -1647,7 +1647,9 @@ function bindRemind() {
           : '';
       }
       if (glossEl) glossEl.textContent = rec.gloss ? txPoem(rec.gloss) : '';
-      if (reasonEl) reasonEl.textContent = rec.reason || '';
+      /* 2026-10-27 用户反馈：卡右下「每日一经」小签与卡标题「每日经文推荐」重复，删此栏目签；
+         神诞直配/神诞日的理由（如「五路财神圣诞」）是推荐缘由、非栏目签，保留显示 */
+      if (reasonEl) reasonEl.textContent = (rec.reason && rec.reason !== '每日一经') ? rec.reason : '';
       var open = function () { openJingRec(rec); };
       if (goBtn) {
         goBtn.onclick = function (ev) { if (ev) ev.stopPropagation(); open(); };

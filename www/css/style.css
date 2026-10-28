@@ -394,6 +394,10 @@ body::before{
 /* 提醒时间行：左对齐＋固定间距，标签不折行（(24) 初版被 space-between 挤折行，(25) 修） */
 .ics-time-row{justify-content:flex-start;gap:14px}
 .ics-time-label{flex:0 0 auto;white-space:nowrap}
+/* 2026-10-27 用户真机反馈：提醒时间框略大，宽高收约一成（实测生效规则是上方
+   .form-row input[type=time] 的 min-width:9.5em／1.04rem／padding 10px 14px，
+   本行同特异性、源序在后，只收提醒页这一处，不动其他 .form-row 时间框） */
+.ics-time-row input[type=time]{min-width:8.8em;font-size:.97rem;padding:8px 12px}
 /* 当天早上 / 提前1天早上 快捷选项 */
 .preset-row{justify-content:flex-start;gap:20px}
 .preset{display:flex;align-items:center;gap:8px;font-size:1rem;cursor:pointer;color:var(--ink)}
