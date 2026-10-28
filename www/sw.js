@@ -45,7 +45,7 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=264',
+  './css/style.css?v=265',
   './css/qimen.css?v=78',
   './css/meditation.css?v=73',
   './icon-192.png',
