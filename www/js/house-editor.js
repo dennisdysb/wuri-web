@@ -471,7 +471,7 @@
   function render() {
     var svg = $('hpe-svg'); if (!svg || !E.plan) return;
     var p = E.plan, L = p.layers;
-    if (E.stage) { renderStage(svg); return; }
+    if (E.stage) { hideJsBar(); renderStage(svg); return; }
     /* 视图持久：E.view 即当前 viewBox（空白拖平移／双指捏合缩放／顶栏「全图」改之），
      * 未定（开页/换层/套模板/描图成图）时才按 extent 自适应一次；拖动中不重算，
      * 杜绝旧版 extent 实时重拟合的坐标反馈放大。 */
@@ -632,6 +632,7 @@
     }
     svg.innerHTML = s;
     syncTop();
+    refreshJsBar();
   }
   /* ---------------- 元素锁定（2026-10-28 对标 magicplan 锁定语义） ----------------
    * lock=true 存元素自身（房间/构件/墙段），随 plan 整行同步、导出 JSON 原样带。
@@ -2489,6 +2490,154 @@
       var el = $('hpe-house-total');
       if (el) el.textContent = trimNum(sum + tot) + '㎡';
     }).catch(function () {});
+  }
+
+  /* ---------------- 金锁逐宫判定·编辑器实时联动（对标批中期项） ----------------
+   * 编辑器舞台顶部内嵌判定条（JS 建 DOM，不动 index 结构）：拖入构件、拖动
+   * 房间/构件、改房型尺寸后，逐宫判定（得位/失位/缺角＋每宫面积占比）随手
+   * 刷新。与金锁页同源同数——判定只走 jinsuo.js 的 __wuriJinsuo.compute
+   * 唯一引擎，本处不另算；立极点传编辑器当前 lijiPoint()（与落盘/金锁页
+   * 读档口径一致），定稿坐向传 E.fixed 原行。刷新挂 render() 末尾：几何
+   * 签名未变不重算；拖动中节流 140ms＋尾随补刷，松手必达终态。
+   * 门控同金锁页：金锁为 Pro 工具——非 Pro 只出锁定行、点按走
+   * requirePro('fengshui')；未定稿坐向出提示行；空层不出条。
+   * 判定口径守原典：只报占比、不设阈值（同 compute 注释）。 */
+  var jsOpen = false, jsSig = null, jsPaintTm = 0, jsTrail = null;
+  var JS_PALS = ['kan', 'kun', 'zhen', 'xun', 'qian', 'dui', 'gen', 'li']; /* 洛书序，同金锁页宫卡序 */
+  var JS_STCLS = { ji: 'ok', xiong: 'bad', missing: 'bad', none: 'mut', noplan: 'mut' };
+  var JS_STDOT = { ji: 'st-ok', xiong: 'st-bad', missing: 'st-miss', none: 'st-mut', noplan: 'st-mut' };
+  function jsTT(k, fb) { var v = T(k); return v === k ? fb : v; }
+  function jsPct(v) { return String(Math.round((v || 0) * 1000) / 10); }
+  function jsSigOf() {
+    var lj = lijiPoint();
+    function n(v) { return Math.round((+v || 0) * 1000) / 1000; }
+    var s = (E.fixed ? E.fixed.facingDeg : '') + '|' + n(lj.x) + ',' + n(lj.y) + '|' + (E.plan.mPerUnit || 1) + '|';
+    E.plan.rooms.forEach(function (r) { s += 'r' + n(r.x) + ',' + n(r.y) + ',' + n(r.w) + ',' + n(r.h) + ',' + (r.type || '') + (r.ex ? 'x' : '') + ';'; });
+    E.plan.fixtures.forEach(function (f) { s += 'f' + (f.type || '') + '@' + n(f.x) + ',' + n(f.y) + ';'; });
+    return s;
+  }
+  function ensureJsBar() {
+    var bar = $('hpe-jsbar');
+    if (bar) return bar;
+    var stage = document.querySelector('#view-plan .hpe-stage');
+    if (!stage) return null;
+    if (!document.getElementById('hpe-jsbar-css')) {
+      var st = document.createElement('style');
+      st.id = 'hpe-jsbar-css';
+      st.textContent =
+        '#hpe-jsbar{position:absolute;top:8px;left:8px;right:8px;z-index:9;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 10px 7px;font-size:.78rem;color:var(--ink-2);box-shadow:0 4px 14px var(--line-soft);cursor:pointer}' +
+        '#hpe-jsbar[hidden]{display:none}' +
+        '.hpejs-row1{display:flex;align-items:center;gap:7px;min-height:22px}' +
+        '.hpejs-row1 b{font-family:var(--serif);letter-spacing:.12em;color:var(--ink);font-size:.82rem;flex:none}' +
+        '.hpejs-chips{display:flex;gap:4px;overflow-x:auto;flex:1;padding:1px 0;touch-action:pan-x;scrollbar-width:none}' +
+        '.hpejs-chips::-webkit-scrollbar{display:none}' +
+        '.hpejs-chip{flex:none;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:1px 8px 1px 6px;color:var(--muted);background:var(--card)}' +
+        '.hpejs-chip i{width:7px;height:7px;border-radius:50%;background:var(--faint);display:block;flex:none}' +
+        '.hpejs-chip.st-ok{border-color:var(--gold);color:var(--gold-deep);background:var(--gold-wash)}.hpejs-chip.st-ok i{background:var(--gold)}' +
+        '.hpejs-chip.st-bad{border-color:var(--cinnabar);color:var(--cinnabar-deep);background:var(--cinnabar-wash)}.hpejs-chip.st-bad i{background:var(--cinnabar)}' +
+        '.hpejs-chip.st-miss{border-style:dashed;border-color:var(--cinnabar);color:var(--cinnabar-deep)}.hpejs-chip.st-miss i{background:var(--cinnabar)}' +
+        '.hpejs-chev{flex:none;color:var(--faint);font-size:.72rem}' +
+        '.hpejs-warnico{flex:none;color:var(--cinnabar-deep)}' +
+        '.hpejs-hint{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.76rem}' +
+        '.hpejs-body{margin-top:6px;border-top:1px solid var(--line-soft);padding-top:6px;max-height:38vh;overflow-y:auto;cursor:default}' +
+        '.hpejs-sum{color:var(--ink);margin-bottom:2px}' +
+        '.hpejs-warn{color:var(--cinnabar-deep);margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+        '.hpejs-prow{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;padding:4px 0;border-top:1px dashed var(--line-soft)}' +
+        '.hpejs-prow b{color:var(--ink);font-weight:600}' +
+        '.hpejs-need{color:var(--gold-deep)}' +
+        '.hpejs-seen{color:var(--muted)}' +
+        '.hpejs-area{color:var(--faint);margin-left:auto}' +
+        '.hpejs-prow .js-chip{margin-left:0;flex:none}';
+      document.head.appendChild(st);
+    }
+    bar = document.createElement('div');
+    bar.id = 'hpe-jsbar';
+    bar.hidden = true;
+    stage.appendChild(bar);
+    bar.addEventListener('click', function (e) {
+      var mode = bar.getAttribute('data-mode');
+      if (mode === 'locked') { if (window.WuriPro) WuriPro.requirePro('fengshui'); return; }
+      if (mode !== 'judge') return;
+      if (e.target && e.target.closest && e.target.closest('.hpejs-body')) return; /* 展开区内点按（滚动/选字）不收起 */
+      jsOpen = !jsOpen;
+      jsSig = null;
+      refreshJsBar(true);
+    });
+    return bar;
+  }
+  function hideJsBar() { var b = $('hpe-jsbar'); if (b) b.hidden = true; }
+  function refreshJsBar(force) {
+    var bar = ensureJsBar(); if (!bar) return;
+    var view = $('view-plan');
+    if (!E.plan || E.stage || !view || view.hidden) { bar.hidden = true; return; }
+    var hasRoom = E.plan.rooms.some(function (r) { return !r.ex; });
+    if (!hasRoom && !E.plan.fixtures.length) { bar.hidden = true; jsSig = null; return; }
+    if (!E.fixed || !isFinite(E.fixed.facingDeg)) {
+      bar.hidden = false; bar.setAttribute('data-mode', 'hint');
+      if (jsSig !== '__hint') {
+        bar.innerHTML = '<div class="hpejs-row1"><b>' + esc(T('fs_jinsuo')) + '</b>' +
+          '<span class="hpejs-hint">' + esc(T('js_need_fixed')) + '</span></div>';
+        jsSig = '__hint';
+      }
+      return;
+    }
+    if (!(!window.WuriPro || WuriPro.isPro())) {
+      bar.hidden = false; bar.setAttribute('data-mode', 'locked');
+      if (jsSig !== '__locked') {
+        bar.innerHTML = '<div class="hpejs-row1"><b>' + esc(T('fs_jinsuo')) + '</b>' +
+          '<span class="hpejs-hint">' + esc(jsTT('hpejs_pro_hint', '逐宫判定（得位/失位/缺角）为高级版功能，点此了解')) + '</span></div>';
+        jsSig = '__locked';
+      }
+      return;
+    }
+    if (!window.__wuriJinsuo || !window.JINSUO_DATA) { bar.hidden = true; return; }
+    var sig = jsSigOf();
+    if (!force && sig === jsSig) { bar.hidden = false; return; }
+    var interacting = !!E.drag || (E.ptrs && Object.keys(E.ptrs).length > 0);
+    if (!force && interacting && Date.now() - jsPaintTm < 140) {
+      if (!jsTrail) jsTrail = setTimeout(function () { jsTrail = null; refreshJsBar(true); }, 160);
+      return;
+    }
+    var J = null;
+    try {
+      var plan2 = clone(E.plan);
+      plan2.liji = lijiPoint();
+      J = __wuriJinsuo.compute(E.fixed, plan2);
+    } catch (e) {}
+    if (!J) { bar.hidden = true; return; }
+    jsSig = sig; jsPaintTm = Date.now();
+    bar.hidden = false; bar.setAttribute('data-mode', 'judge');
+    var palMeta = {};
+    JINSUO_DATA.duanyu.palaces.forEach(function (p) { palMeta[p.id] = p; });
+    var cnt = { ji: 0, xiong: 0, missing: 0, none: 0 };
+    JS_PALS.forEach(function (pid) { var st = J.palaces[pid].status; if (cnt[st] != null) cnt[st]++; });
+    var chips = JS_PALS.map(function (pid) {
+      var R = J.palaces[pid], p = palMeta[pid];
+      return '<span class="hpejs-chip ' + (JS_STDOT[R.status] || 'st-mut') + '"><i></i>' +
+        esc(p ? txs(p.gua) : pid) + '</span>';
+    }).join('');
+    var html = '<div class="hpejs-row1"><b>' + esc(T('fs_jinsuo')) + '</b>' +
+      '<span class="hpejs-chips">' + chips + '</span>' +
+      ((J.center.cesuo || J.center.chufang) ? '<span class="hpejs-warnico">⚠</span>' : '') +
+      '<span class="hpejs-chev">' + (jsOpen ? '▾' : '▸') + '</span></div>';
+    if (jsOpen) {
+      var body = '<div class="hpejs-body"><div class="hpejs-sum">' +
+        esc(TF(T('js_sum_line'), cnt.ji, cnt.xiong, cnt.missing, cnt.none)) + '</div>';
+      var notes = (JINSUO_DATA.duanyu.zhonggong && JINSUO_DATA.duanyu.zhonggong.neiju_note) || [];
+      if (J.center.cesuo && notes[0]) body += '<p class="hpejs-warn">⚠ ' + esc(txs(String(notes[0]).split('。')[0])) + '。</p>';
+      if (J.center.chufang && notes[2]) body += '<p class="hpejs-warn">⚠ ' + esc(txs(String(notes[2]).split('。')[0])) + '。</p>';
+      JS_PALS.forEach(function (pid) {
+        var R = J.palaces[pid], p = palMeta[pid]; if (!p) return;
+        body += '<div class="hpejs-prow"><b>' + esc(txs(p.gua)) + esc(T('js_gong')) + ' · ' + esc(txs(p.fangwei)) + '</b>' +
+          '<span class="hpejs-need">' + esc(TF(T('js_need'), txs(p.yingxu))) + '</span>' +
+          '<span class="hpejs-seen">' + esc(T('js_seen_sha')) + (R.shaItems.length ? esc(R.shaItems.map(txs).join('、')) : '—') + '</span>' +
+          '<span class="hpejs-seen">' + esc(T('js_seen_shui')) + (R.shuiItems.length ? esc(R.shuiItems.map(txs).join('、')) : '—') + '</span>' +
+          (R.areaShare != null ? '<span class="hpejs-area">' + esc(TF(T('js_area_line'), jsPct(R.areaShare), jsPct(R.areaCover))) + '</span>' : '') +
+          '<span class="js-chip ' + (JS_STCLS[R.status] || 'mut') + '">' + esc(jsTT('js_st_' + R.status, R.status)) + '</span></div>';
+      });
+      html += body + '</div>';
+    }
+    bar.innerHTML = html;
   }
 
   /* ---------------- 指针交互 ---------------- */
