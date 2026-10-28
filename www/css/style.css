@@ -3235,7 +3235,7 @@ body.reader-open #tab-jing .appbar{display:none}
 .jd-qing{font-family:var(--serif);min-width:40px;padding:7px 8px}
 .jd-qing:active{transform:scale(.92)}
 /* 设置面板：栏内向上展开，按播放/显示/本书分节带小标题 */
-#jing-dock .jing-more-panel{border-top:1px dashed var(--line-soft);padding:9px 12px 3px;max-height:46vh;overflow-y:auto}
+#jing-dock .jing-more-panel{display:block;border-top:1px dashed var(--line-soft);padding:9px 12px 3px;max-height:46vh;overflow-y:auto}
 #jing-dock .jing-more-panel[hidden]{display:none}
 .jmp-sec{margin-bottom:8px}
 .jmp-h{font-size:.72rem;color:var(--muted);letter-spacing:.14em;margin-bottom:5px}
