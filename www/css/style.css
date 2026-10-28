@@ -2153,6 +2153,19 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .jing-srcnote{font-size:.8em;color:var(--ink-2);line-height:1.55;margin:2px 0 10px;padding:8px 10px;border:1px dashed var(--line-soft);border-radius:8px}
 /* 道藏全集文末行：分类编号＋底本＋标点口径（书头已撤，2026-10-27） */
 .dz-endnote{font-size:.78em;color:var(--muted);text-align:center;line-height:1.6;margin:28px 0 8px;padding-top:12px;border-top:1px dashed var(--line-soft)}
+/* 道藏图版（原书插图按原文位置内嵌）：居中、与上下文段落留呼吸间距；
+   图题小字居中走变量色（日/夜随主题变量）。红光：不另设规则——
+   body.sky-red img 全局滤镜（brightness(.78) sepia(1) hue-rotate(-52deg)
+   saturate(3.2)，与神祇图鉴图片同一条链）自动接管 .dz-fig img 与灯箱图；
+   夜间：既有图片口径无亮度滤镜（图鉴图片同），此处同样不加、只靠变量色。 */
+.dz-fig{margin:1.2em auto;text-align:center}
+.dz-fig img{max-width:100%;height:auto;display:block;margin:0 auto;border:1px solid var(--line-soft);border-radius:8px;cursor:zoom-in}
+.dz-fig figcaption{margin-top:.5em;font-size:.78em;color:var(--muted);text-align:center;line-height:1.5}
+#dz-lightbox{position:fixed;inset:0;z-index:300;background:rgba(5,5,8,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;cursor:zoom-out}
+#dz-lightbox[hidden]{display:none}
+#dz-lightbox img{max-width:100%;max-height:82vh;object-fit:contain;border-radius:8px}
+#dz-lightbox .dz-lightbox-cap{margin-top:12px;color:#e9e2cf;font-size:.84rem;text-align:center}
+body.sky-red #dz-lightbox .dz-lightbox-cap{color:#f2c1b2}
 .dz-body{padding:4px 0 8px}
 .dz-note{font-size:.82em;color:var(--ink-2);margin:4px 0 8px}
 .dz-search input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line-soft);border-radius:10px;background:transparent;color:var(--ink);font-size:.95em}

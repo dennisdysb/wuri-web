@@ -16,6 +16,8 @@
   var pyOverrides = null;   // {word: [py,...]}
   var dictLoading = null;
   var workCache = {};       // id -> JINGWEN entry
+  var imgData = null;       // images.json 解析结果 {version, works:{KRID:[锚点]}}
+  var imgLoading = null;    // images.json 在途回调队列
   var openBu = {};          // bu -> true（重渲目录时恢复展开）
   var dzOpen = false;       // 道藏全集折叠体展开态（文库视图记忆 wuri_lib_view_v1）
   /* 视图记忆回灌：模块载入时先读存档展开态，renderFold 首渲即按存档展开——
@@ -115,6 +117,91 @@
     });
   }
   window.__wuri_dzEnsureDict = ensureDict;
+
+  /* ---------- 图版（images.json） ----------
+   * 清单契约：{version, works:{<KRID>:[{vol,char,src,caption,w,h}]}}；
+   * vol＝0 起卷序，char＝该卷内容字序偏移（dzIsPunct 口径剥标点/空白后的
+   * 字流下标，0＝卷首），src 相对 FEED_DIR。懒加载一次缓存；
+   * 失败静默当无图（不缓存失败，下次开卷重试）。 */
+  function ensureImages(cb) {
+    if (imgData) { cb && cb(imgData); return; }
+    if (imgLoading) { imgLoading.push(cb); return; }
+    imgLoading = [cb];
+    fetch(FEED_DIR + 'images.json').then(function (r) { return r.json(); }).then(function (d) {
+      imgData = (d && d.works) ? d : { version: 1, works: {} };
+      var cbs = imgLoading; imgLoading = null;
+      cbs.forEach(function (f) { try { f && f(imgData); } catch (e) {} });
+    }).catch(function () {
+      var cbs = imgLoading; imgLoading = null;
+      cbs.forEach(function (f) { try { f && f({ version: 1, works: {} }); } catch (e) {} });
+    });
+  }
+  /* 段串内切点：内容字偏移 k（第 k 个内容字之前切）→ 串内下标。
+     标点版段内标点不计内容字，逐字跳过即得该模式自己的切点。 */
+  function dzCutIndex(t, k) {
+    if (k <= 0) return 0;
+    var c = 0;
+    for (var i = 0; i < t.length; i++) {
+      if (!dzIsPunct(t[i])) { if (c === k) return i; c++; }
+    }
+    return t.length;
+  }
+  /* 把一卷 paras 按锚点预切分：锚点段中时原段切成前后两段文字段，
+     图以 {img:{src,caption,w,h}} 特殊段插入。图段无 .t、不参与字序计数
+     （注音/高亮投影/内容字累计均按 .t 遍历，图段贡献 0 内容字）。
+     切分只改段界不改字流顺序与内容：注音逐段 annotate，两半各自成段；
+     审读表词组恰跨切分点时该词组退回单字读音（极罕见，可接受）。 */
+  function dzSpliceImages(paras, anchors) {
+    var list = anchors.slice().sort(function (a, b) { return a.char - b.char; });
+    var out = [], ai = 0, cum = 0;
+    function pushImg(a) {
+      out.push({ img: { src: a.src, caption: a.caption || '原書圖版', w: a.w || 0, h: a.h || 0 } });
+    }
+    paras.forEach(function (p, pi) {
+      if (p.img || p.t == null) { out.push(p); return; }
+      var t = p.t, len = 0;
+      for (var i = 0; i < t.length; i++) if (!dzIsPunct(t[i])) len++;
+      var isLast = pi === paras.length - 1;
+      var here = [];
+      while (ai < list.length && (list[ai].char < cum + len || (isLast && list[ai].char <= cum + len))) {
+        here.push(list[ai]); ai++;
+      }
+      if (!here.length) { out.push(p); cum += len; return; }
+      var pos = 0; /* 串内已切下标 */
+      here.forEach(function (a, hi) {
+        var cut = dzCutIndex(t, a.char - cum);
+        if (cut > pos) {
+          var chunk = { t: t.slice(pos, cut) };
+          if (hi === 0 && p.cls) chunk.cls = p.cls; /* 排版分类只留首块 */
+          if (p.py) chunk.py = p.py.slice(pos, cut);
+          out.push(chunk);
+        }
+        pushImg(a);
+        pos = cut;
+      });
+      if (pos < t.length) {
+        var rest = { t: t.slice(pos) };
+        if (p.py) rest.py = p.py.slice(pos);
+        out.push(rest);
+      }
+      cum += len;
+    });
+    while (ai < list.length) { pushImg(list[ai]); ai++; } /* 偏移越界兜底：卷末 */
+    return out;
+  }
+  /* 按 vol 分组把锚点切进一整套 sections（orig/punct 共用：两套字流剥标点
+     后逐字相同，各自按本套段界换算切点，落点文字位置恒一致） */
+  function dzApplyImages(sections, anchors) {
+    var byVol = {};
+    anchors.forEach(function (a) { (byVol[a.vol] = byVol[a.vol] || []).push(a); });
+    return sections.map(function (sec, vi) {
+      var list = byVol[vi];
+      if (!list || !list.length) return sec;
+      var ns = { h: sec.h, paras: dzSpliceImages(sec.paras, list) };
+      if (sec._punct) ns._punct = true;
+      return ns;
+    });
+  }
   /* 书名索引预加载：进入经文库/聚焦检索框时由 jingwen.js 调用，
      使统一检索的书名阶段不等临查才拉索引（264K 单文件，解析后驻内存） */
   window.__wuri_dzPreload = ensureIndex;
@@ -166,6 +253,7 @@
     if (!sec) return;
     if (sec._dzDone && (sec._dzWithDict || !pyDict)) return;
     sec.paras.forEach(function (p) {
+      if (p.img || p.t == null) return; /* 图段不注音、不占字序 */
       if (sec._punct) annotateParaPunct(p);
       else p.py = annotateText(p.t, pyDict, pyOverrides);
     });
@@ -300,8 +388,11 @@
       var pPunct = hasPunct(id)
         ? fetch(FEED_DIR + 'texts-punct/' + id + '.json').then(function (r) { return r.json(); }).catch(function () { return null; })
         : Promise.resolve(null);
-      Promise.all([pText, pPunct]).then(function (res) {
-        var w = res[0], pw = res[1];
+      var pImg = new Promise(function (res) {
+        ensureImages(function (d) { res((d && d.works && d.works[id]) || null); });
+      });
+      Promise.all([pText, pPunct, pImg]).then(function (res) {
+        var w = res[0], pw = res[1], anchors = res[2];
         var entry = {
           id: w.id, title: w.title,
           /* 分类/编号不在书头显示（2026-10-27 用户定）：随 dzMeta 交阅读器，文末一行小字交代 */
@@ -318,6 +409,12 @@
           if (pw.volumes.length < w.volumes.length) {
             entry.punctPartial = { done: pw.volumes.length, total: w.volumes.length };
           }
+        }
+        /* 图版预切分：orig/punct 两套段落各按本套字流换算同一锚点，
+           落点文字位置恒一致；无图部零改动 */
+        if (anchors && anchors.length) {
+          entry.sectionsOrig = dzApplyImages(entry.sectionsOrig, anchors);
+          if (entry.sectionsPunct) entry.sectionsPunct = dzApplyImages(entry.sectionsPunct, anchors);
         }
         applyDzMode(entry);
         workCache[id] = entry;
@@ -353,8 +450,8 @@
     var oSec = entry.sectionsOrig[si], pSec = entry.sectionsPunct[si];
     var map = null;
     if (oSec && pSec && pSec._punct) {
-      var oJoin = oSec.paras.map(function (p) { return p.t; }).join('');
-      var pJoin = pSec.paras.map(function (p) { return p.t; }).join('');
+      var oJoin = oSec.paras.map(function (p) { return p.t || ''; }).join('');
+      var pJoin = pSec.paras.map(function (p) { return p.t || ''; }).join('');
       /* 两侧同口径剥除后比对：原文侧的清洗残留（入药镜 2 处、天仙正理 22 处
          制表符等空白）同样剥除，否则这类底本永远投影失败、高亮只能走回退
          （v143 已知尾巴，本批修复）。原文侧同步建内容字位表 oPos，
@@ -362,14 +459,14 @@
       if (dzStripPunct(pJoin) === dzStripPunct(oJoin)) {
         var oCum = [], oPos = [], oc = 0;
         oSec.paras.forEach(function (p) {
-          var pos = [];
-          for (var i = 0; i < p.t.length; i++) if (!dzIsPunct(p.t[i])) pos.push(i);
+          var pos = [], pt = p.t || ''; /* 图段 pt='' → pos 空、不占内容字序 */
+          for (var i = 0; i < pt.length; i++) if (!dzIsPunct(pt[i])) pos.push(i);
           oCum.push(oc); oPos.push(pos); oc += pos.length;
         });
         var pCum = [], pPos = [], pc = 0;
         pSec.paras.forEach(function (p) {
-          var pos = [];
-          for (var i = 0; i < p.t.length; i++) if (!dzIsPunct(p.t[i])) pos.push(i);
+          var pos = [], pt = p.t || '';
+          for (var i = 0; i < pt.length; i++) if (!dzIsPunct(pt[i])) pos.push(i);
           pCum.push(pc); pPos.push(pos); pc += pos.length;
         });
         map = { oCum: oCum, pCum: pCum, pPos: pPos, oPos: oPos, oLens: oPos.map(function (x) { return x.length; }) };

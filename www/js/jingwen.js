@@ -259,7 +259,42 @@ var JingWen = (function () {
   }
 
   /* ---------- 阅读器 ---------- */
+  /* 道藏图版段（daozang.js 预切分出的 {img} 段）：渲染为图片块而非文字段。
+     src 在清单里相对 content/daozang/（FEED_DIR），此处拼全；
+     不带 data-sec/data-para、不进 .jing-para 集合——注音/高亮选区/
+     内容字偏移（paraAtContentOff 按 p.jing-para 计）天然跳过图段。 */
+  function dzFigHtml(p) {
+    var im = p.img || {};
+    var cap = im.caption || '原書圖版';
+    return '<figure class="dz-fig"><img src="' + esc('content/daozang/' + (im.src || ''))
+      + '" alt="' + esc(txScript(cap)) + '" loading="lazy" data-dz-fig'
+      + (im.w && im.h ? ' width="' + (+im.w) + '" height="' + (+im.h) + '"' : '')
+      + '><figcaption>' + esc(txScript(cap)) + '</figcaption></figure>';
+  }
+  /* 图版点击放大：App 内无通用灯箱（#hd-viewer 是勘宅照片专用、带删除钮），
+     故自带最简全屏 overlay——点图打开、点任意处关闭、深色底；
+     overlay 内 img 同受 body.sky-red 全局图片滤镜链接管（见 style.css）。 */
+  function dzFigZoom(src, cap) {
+    var ov = document.getElementById('dz-lightbox');
+    if (!ov) {
+      ov = document.createElement('div');
+      ov.id = 'dz-lightbox';
+      ov.innerHTML = '<img alt=""><div class="dz-lightbox-cap"></div>';
+      ov.addEventListener('click', function () { ov.hidden = true; });
+      document.body.appendChild(ov);
+    }
+    var img = ov.querySelector('img');
+    img.src = src; img.alt = cap || '';
+    ov.querySelector('.dz-lightbox-cap').textContent = cap || '';
+    ov.hidden = false;
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target && e.target.closest ? e.target.closest('[data-dz-fig]') : null;
+    if (t) dzFigZoom(t.getAttribute('src'), t.getAttribute('alt'));
+  });
+
   function rubyPara(p, secIdx, paraIdx) {
+    if (!p || p.img || p.t == null) return '';
     var t = p.t, py = p.py || [], out = '';
     /* 整段一次转换（短语保护/短语表需上下文）：转换器等长替换，等长才采信，
        保证下标与拼音 py[]、高亮偏移严格对齐；不等长回落逐字转换（旧行为） */
@@ -294,6 +329,7 @@ var JingWen = (function () {
   }
   /* 背诵模式：按句切分，每句只显示首字，点击展开全文 */
   function recitePara(p) {
+    if (!p || p.img || p.t == null) return '';
     var t = p.t, py = p.py;
     
     // 按 。！？；切句，保留标点
@@ -635,6 +671,7 @@ var JingWen = (function () {
         var h = sec.h || '';
         var isQingSec = /赞|韵|咒|偈|开经|完经/.test(h);
         var paras = (d.lazy && si > 0) ? '' : sec.paras.map(function (p, pi) {
+          if (p.img) return dzFigHtml(p); /* 图版段：不套 .jing-para、不挂叩磬 */
           var txt = reciteMode ? recitePara(p) : rubyPara(p, si, pi);
           if (isQingSec && pi === sec.paras.length - 1) {
             txt += ' <span class="qing-inline" data-qing title="此处叩磬">（敲磬）</span>';
@@ -726,6 +763,7 @@ var JingWen = (function () {
     if (!sec) return;
     if (window.__wuri_dzAnnotate) { try { window.__wuri_dzAnnotate(d, si); } catch (e) {} }
     body.innerHTML = sec.paras.map(function (p, pi) {
+      if (p.img) return dzFigHtml(p);
       return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + rubyPara(p, si, pi) + '</p>';
     }).join('');
     body.removeAttribute('data-lazy');
@@ -1158,6 +1196,7 @@ var JingWen = (function () {
       if (!d) return;
       d.sections.forEach(function (sec, si) {
         sec.paras.forEach(function (p, pi) {
+          if (!p.t) return; /* 图版段无正文不参与全文检索 */
           var i = p.t.indexOf(q);
           if (i >= 0) {
             var s = Math.max(0, i - 14), e = Math.min(p.t.length, i + q.length + 14);
