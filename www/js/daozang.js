@@ -17,6 +17,17 @@
   var dictLoading = null;
   var workCache = {};       // id -> JINGWEN entry
   var openBu = {};          // bu -> true（重渲目录时恢复展开）
+  var dzOpen = false;       // 道藏全集折叠体展开态（文库视图记忆 wuri_lib_view_v1）
+  /* 视图记忆回灌：模块载入时先读存档展开态，renderFold 首渲即按存档展开——
+     切页回来/冷启动都不必再从收起态点开。存档由 jingwen.js 统一写入，本处只读。 */
+  try {
+    var _lvDz = JSON.parse(localStorage.getItem('wuri_lib_view_v1') || 'null');
+    if (_lvDz && _lvDz.dz) {
+      dzOpen = !!_lvDz.dz.open;
+      if (_lvDz.dz.bu) { for (var _bk in _lvDz.dz.bu) if (_lvDz.dz.bu[_bk]) openBu[_bk] = true; }
+    }
+  } catch (e) {}
+  function dzNotifySave() { if (window.__wuriLibSaveView) { try { window.__wuriLibSaveView(); } catch (e) {} } }
   var punctSet = null;      // {KR id: true} 有标点版的部（index.punct）
   var punctPartial = {};    // id -> 已标卷数（部分标点，如度人经前 6 卷）
 
@@ -196,7 +207,7 @@
     fold.innerHTML =
       '<h3 class="jing-sec-h" data-dz-toggle>' + txUi('道藏全集')
       + '<span class="dz-count" data-dz-total></span><span class="jing-go">›</span></h3>'
-      + '<div class="dz-body" data-dz-body hidden>'
+      + '<div class="dz-body" data-dz-body' + (dzOpen ? '' : ' hidden') + '>'
       + '<div class="dz-cats"><div class="dz-empty">目录加载中…</div></div>'
       + '</div>';
     host.appendChild(fold);
@@ -211,6 +222,30 @@
   window.__wuri_dzCatalog = function (host) {
     if (!host || host.querySelector('[data-dz-fold]')) return;
     renderFold(host);
+  };
+  /* 文库视图记忆接口（jingwen.js 调用）：读/写道藏侧展开态（折叠体＋各部） */
+  window.__wuri_dzGetState = function () {
+    var bu = {};
+    for (var k in openBu) if (openBu[k]) bu[k] = true;
+    return { open: dzOpen, bu: bu };
+  };
+  window.__wuri_dzSetState = function (st) {
+    if (!st) return;
+    dzOpen = !!st.open;
+    if (st.bu) {
+      openBu = {};
+      for (var k in st.bu) if (st.bu[k]) openBu[k] = true;
+    }
+    var body = document.querySelector('[data-dz-body]');
+    if (!body) return;
+    body.hidden = !dzOpen;
+    if (dzOpen) {
+      if (idxData) renderCats(body);
+      else ensureIndex(function () {
+        var b = document.querySelector('[data-dz-body]');
+        if (b && !b.hidden) renderCats(b);
+      });
+    }
   };
 
   /* ---------- 开卷 ---------- */
@@ -408,7 +443,9 @@
       var body = tgl.parentNode.querySelector('[data-dz-body]');
       if (body) {
         body.hidden = !body.hidden;
+        dzOpen = !body.hidden;
         if (!body.hidden) renderCats(body);
+        dzNotifySave();
       }
       return;
     }
@@ -421,6 +458,7 @@
         if (willOpen && !wrap.innerHTML) wrap.innerHTML = worksOfBu(name).map(workRow).join('');
         wrap.hidden = !willOpen;
         openBu[name] = willOpen;
+        dzNotifySave();
       }
       return;
     }

@@ -135,6 +135,11 @@ function nativePerms() {
 /* ---------------- Tab 切换 ---------------- */
 $$('#tabbar button').forEach(function (btn) {
   btn.addEventListener('click', function () {
+    /* 经文库视图记忆：离开经文 tab 前先存当下视图（滚动位＋展开态），回来复原 */
+    var prevActive = document.querySelector('#tabbar button.active');
+    if (prevActive && prevActive !== btn && prevActive.getAttribute('data-tab') === 'tab-jing'
+        && window.__wuriLibSaveView) { try { window.__wuriLibSaveView(); } catch (e) {} }
+    var jingScrollHandled = false;
     $$('#tabbar button').forEach(function (b) { b.classList.remove('active'); });
     btn.classList.add('active');
     $$('.tab').forEach(function (t) {
@@ -159,7 +164,7 @@ $$('#tabbar button').forEach(function (btn) {
     }
     if (btn.getAttribute('data-tab') === 'tab-jing') {
       if (window.JingWen && window.JingWen.resetToCatalog) {
-        window.JingWen.resetToCatalog();
+        jingScrollHandled = !!window.JingWen.resetToCatalog();
       } else {
         // 降级：直接操作 DOM
         var listEl = document.getElementById('jing-list');
@@ -170,7 +175,8 @@ $$('#tabbar button').forEach(function (btn) {
         if (resultsEl) resultsEl.hidden = true;
       }
     }
-    window.scrollTo(0, 0);
+    /* 经文 tab 的滚动由返回定位/视图记忆接管时不再归零，其余 tab 照旧回顶 */
+    if (!jingScrollHandled) window.scrollTo(0, 0);
   });
 });
 

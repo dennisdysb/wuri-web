@@ -243,7 +243,7 @@ var JingWen = (function () {
       var ndPro = isPro();
       html += '<div class="jing-sec" data-neidan-fold>'
         + '<h3 class="jing-sec-h" data-neidan-toggle>' + esc(t('jing_sec_neidan')) + '<span class="dz-count">（' + neidanItems.length + '）</span><span class="jing-go">›</span></h3>'
-        + '<div class="jing-neidan-body" hidden>'
+        + '<div class="jing-neidan-body"' + (libViewLoad().nd ? '' : ' hidden') + '>'
         + neidanItems.map(function (it) {
           return '<div class="jing-item" data-jing="' + it.id + '">'
             + '<span class="jing-book">丹</span>'
@@ -719,6 +719,10 @@ var JingWen = (function () {
     else if (el.closest('#jing-list')) kind = 'catalog';
     if (!kind) return; /* 标记页等来路不记，维持既有返回 */
     libReturn = { id: id, kind: kind, scrollY: window.scrollY || window.pageYOffset || 0, armed: false };
+    /* 与文库视图记忆统一：目录来路的滚动位同步入存档，切 Tab 回来落点与读完返回一致 */
+    if (kind === 'catalog') {
+      var lv = libViewLoad(); lv.y = libReturn.scrollY; libView = lv; libViewPersist();
+    }
   }
   window.__wuriLibCapture = libCapture;
   function libRestore(lr) {
@@ -760,6 +764,77 @@ var JingWen = (function () {
     else setTimeout(apply, 50);
   }
 
+  /* ---------- 文库视图记忆（2026-10-27 用户诉求） ----------
+   * 在道藏里展开某部、滚到深处，切去别的页再回经文页，不再被重置回
+   * 常见经文最上方：记住离开时的整页滚动位＋道藏折叠/各部展开态＋内丹架
+   * 展开态，回来自动复原。存档 localStorage wuri_lib_view_v1，冷启动同样
+   * 恢复（daozang.js 载入时回灌展开态，滚动位于进经文 tab 时复原）。
+   * 分工：从阅读器返回走上面的 v211 libRestore；切 Tab 返回走本节——两条
+   * 路径落点一致。不入存：常见经文区收起态（进页默认展开，用户定）、
+   * 搜索结果/标记页（临时面，resetToCatalog 仍回目录面）。 */
+  var LIB_VIEW_KEY = 'wuri_lib_view_v1';
+  var libView = null;
+  function libViewLoad() {
+    if (libView) return libView;
+    try { libView = JSON.parse(localStorage.getItem(LIB_VIEW_KEY) || 'null'); } catch (e) { libView = null; }
+    if (!libView || typeof libView !== 'object') libView = {};
+    return libView;
+  }
+  function libViewPersist() {
+    try { localStorage.setItem(LIB_VIEW_KEY, JSON.stringify(libViewLoad())); } catch (e) {}
+  }
+  function libListVisible() {
+    var tab = document.getElementById('tab-jing');
+    var list = document.getElementById('jing-list');
+    var reader = document.getElementById('jing-reader');
+    return !!(tab && tab.classList.contains('active') && list && !list.hidden
+      && reader && reader.hidden);
+  }
+  /* 采集当前视图并落盘（app.js 离开经文 tab 时调用＋滚动/展开变化时自存） */
+  function libSaveView() {
+    var st = libViewLoad();
+    if (libListVisible()) st.y = window.scrollY || window.pageYOffset || 0;
+    try { var dz = window.__wuri_dzGetState && window.__wuri_dzGetState(); if (dz) st.dz = dz; } catch (e) {}
+    var nd = document.querySelector('.jing-neidan-body');
+    if (nd) st.nd = !nd.hidden;
+    libView = st; libViewPersist();
+  }
+  window.__wuriLibSaveView = libSaveView;
+  /* 复原视图；返回 true 表示滚动有人接管（app.js 不再 scrollTo(0,0)） */
+  function libApplyView() {
+    var st = libViewLoad();
+    var has = (typeof st.y === 'number' && st.y > 0)
+      || !!(st.dz && (st.dz.open || (st.dz.bu && Object.keys(st.dz.bu).length)))
+      || !!st.nd;
+    if (st.nd) {
+      var nd = document.querySelector('.jing-neidan-body');
+      if (nd) nd.hidden = false;
+    }
+    if (st.dz && window.__wuri_dzSetState) { try { window.__wuri_dzSetState(st.dz); } catch (e) {} }
+    if (typeof st.y === 'number' && st.y > 0) {
+      var target = st.y, tries = 0, cancelled = false;
+      var cancel = function () { cancelled = true; };
+      window.addEventListener('wheel', cancel, { passive: true, once: true });
+      window.addEventListener('touchmove', cancel, { passive: true, once: true });
+      var apply = function () {
+        if (cancelled) return;
+        window.scrollTo(0, target);
+        /* 道藏目录异步加载会继续长高，短时内复断言直至落位（用户手动滚动即让路） */
+        if (Math.abs((window.scrollY || 0) - target) > 4 && tries++ < 8) setTimeout(apply, 250);
+      };
+      if (window.requestAnimationFrame) requestAnimationFrame(function () { requestAnimationFrame(apply); });
+      else setTimeout(apply, 50);
+    }
+    return has;
+  }
+  /* 列表面滚动时节流自存（切页/冷启回来都有最新落点） */
+  var libSaveT = null;
+  window.addEventListener('scroll', function () {
+    if (!libListVisible() || libSaveT) return;
+    libSaveT = setTimeout(function () { libSaveT = null; libSaveView(); }, 250);
+  }, { passive: true });
+  window.addEventListener('pagehide', function () { if (libListVisible()) libSaveView(); });
+
   function closeReader() {
     stopTtsOnly(); // 只停系统 TTS，后台 MP3 服务交给悬浮岛（回经文 tab 不停播）
     // 跟读模式随阅读器关闭而关闭（避免切经文后映射错乱）
@@ -772,9 +847,11 @@ var JingWen = (function () {
     libRestore(lr);
   }
 
-  /* 重置回目录页（问题1修复：进经文tab时调用） */
+  /* 重置回目录页（问题1修复：进经文tab时调用）
+     返回值：true＝滚动已由 v211 返回定位或视图记忆接管，app.js 不再归零 */
   function resetToCatalog() {
     dzPreload(); /* 进文库即预加载全藏书名索引，检索书名阶段不等临查现拉 */
+    var lrArmed = !!(libReturn && libReturn.armed);
     closeReader();
     // 阻止待处理的标记页刷新
     if (window._refreshMarks) window._refreshMarks = null;
@@ -799,6 +876,9 @@ var JingWen = (function () {
     if (q) { q.value = ''; }
     var qClear = $('#jing-q-clear');
     if (qClear) qClear.hidden = true;
+    /* 视图记忆复原：v211 已武装时以其为准（closeReader 内 libRestore），不叠加 */
+    if (lrArmed) return true;
+    return libApplyView();
   }
 
   function applyReaderPrefs() {
@@ -1744,6 +1824,7 @@ var JingWen = (function () {
         var body = nd.parentNode.querySelector('.jing-neidan-body');
         if (body) {
           body.hidden = !body.hidden;
+          libSaveView(); /* 视图记忆：内丹架展开态入存（收起时未必有滚动事件可借） */
           // 问题6修复：展开后滚到可见位置
           if (!body.hidden) {
             setTimeout(function () {
