@@ -69,10 +69,11 @@ def click1(c, sel):
     return ev(c, "(function(){var e=document.querySelector(%s); if(!e) return false; e.click(); return true;})()" % json.dumps(sel))
 
 def goto_jing(c):
-    for _ in range(6):
-        click1(c, '[data-tab="tab-jing"]'); time.sleep(1.5)
-        if ev(c, "(function(){var t=document.getElementById('tab-jing'); return t? !t.hidden : null;})()"):
+    # 注意：视图显隐靠 class（computed display），hidden 属性恒 false，不能当信号（曾因此误判通过）
+    for _ in range(8):
+        if ev(c, "(function(){var t=document.getElementById('tab-jing'); return t? getComputedStyle(t).display!=='none' : null;})()"):
             return True
+        click1(c, '[data-tab="tab-jing"]'); time.sleep(1.2)
     return False
 
 def open_dz(c):
