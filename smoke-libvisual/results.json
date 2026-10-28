@@ -1,0 +1,87 @@
+[
+ {
+  "name": "S0 目录已渲染",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "项1 主标题字号加大（≥19px，约1.22rem）",
+  "ok": true,
+  "detail": "{'t': 19.52, 's': 14.72, 'n': 14.72, 'tTxt': '我的标记', 'sTxt': '书签 · 高亮 · 笔记', 'overflow': False, 'rowH': 67.21875}"
+ },
+ {
+  "name": "项1 副字/计数协调放大（≥14px）且小于主标题",
+  "ok": true,
+  "detail": "{'t': 19.52, 's': 14.72, 'n': 14.72, 'tTxt': '我的标记', 'sTxt': '书签 · 高亮 · 笔记', 'overflow': False, 'rowH': 67.21875}"
+ },
+ {
+  "name": "项1 入口行不挤行（无横向溢出）",
+  "ok": true,
+  "detail": "{'t': 19.52, 's': 14.72, 'n': 14.72, 'tTxt': '我的标记', 'sTxt': '书签 · 高亮 · 笔记', 'overflow': False, 'rowH': 67.21875}"
+ },
+ {
+  "name": "项3 道藏分类已渲染（部行>0）",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "项3 部行共 9 行",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "name": "项3 每部行均带「藏」宝盒且 computed 与精选行宝盒全等",
+  "ok": true,
+  "detail": "{\"n\": 9, \"refSpec\": {\"w\": \"44px\", \"h\": \"44px\", \"fs\": \"20.8px\", \"color\": \"rgb(134, 112, 46)\", \"btw\": \"1px\", \"br\": \"8px\", \"lh\": \"42px\", \"ff\": \"\\\"Noto Serif SC\\\", \\\"Songti SC\\\", STSong, SimSun, serif\"}, \"buInfo\": [{\"bu\": \"洞真部\", \"has\": true, \"txt\": \"藏\", \"spec\": {\"w\": \"44px\", \"h\": \"44px\", \"fs\": \"20.8px\","
+ },
+ {
+  "name": "项3 部内书行已渲染",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "项3 书行均带「藏」宝盒且规格同精选行",
+  "ok": true,
+  "detail": "[{'has': True, 'txt': '藏', 'same': True}, {'has': True, 'txt': '藏', 'same': True}, {'has': True, 'txt': '藏', 'same': True}, {'has': True, 'txt': '藏', 'same': True}, {'has': True, 'txt': '藏', 'same': True}, {'has': True, 'txt': '藏', 'same': True}]"
+ },
+ {
+  "name": "项3 长题行右组仍贴右在行内（未被宝盒挤出）",
+  "ok": true,
+  "detail": "{'len': 17, 'title': '元始无量度人上品妙经四注（附释音）', 'wmInside': True, 'wtH': 71.25, 'rowH': 94.25}"
+ },
+ {
+  "name": "项3 ≤8 字书名单行不折且无书名超过两行（宝盒占位代价已如实测）",
+  "ok": true,
+  "detail": "{'short': [], 'over': []}"
+ },
+ {
+  "name": "项2 阅读器已打开",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "name": "项2 返回后刚读条目带 lib-ret-hl 且动画时长=1.5s（原 2.4s）",
+  "ok": true,
+  "detail": "{'nCls': 11, 'sample': [{'has': True, 'dur': '1.5s', 'animT': 83.33000000000013, 'bgA': 0.5, 'ringA': 0.5, 'bgRaw': 'oklab(0.933822 -0.00144544 0.0381215 / 0.5)', 'bsRaw': 'oklab(0.620558 0.0103585 0.0964972 / 0.5) 0px 0px 0px 1.5px inset'}]}"
+ },
+ {
+  "name": "项2 动画实跑至≈1.5s 末端（max currentTime ≥1300ms）",
+  "ok": true,
+  "detail": "{'maxAnimT': 1616.6320000000028}"
+ },
+ {
+  "name": "项2 描边已改淡（保持段底色/描边 alpha ≤0.75，原为不透明全色）",
+  "ok": true,
+  "detail": "{'holdAlphas': [0.5, 0.5, 0.5, 0.5, 0.5, 0.5], 'raw': [(83.33000000000013, 'oklab(0.933822 -0.00144544 0.0381215 / 0.5)', 'oklab(0.620558 0.0103585 0.0964972 / 0.5) 0px 0px 0px 1.5px inset'), (199.9980000000008, 'oklab(0.933822 -0.00144544 0.0381215 / 0.5)', 'oklab(0.620558 0.0103585 0.0964972 / 0.5"
+ },
+ {
+  "name": "三态 红光 class 生效（截图 05 目检变红）",
+  "ok": true,
+  "detail": "{'bodyRed': True, 'badgeColor': 'rgb(194, 67, 42)', 'badgeBorder': 'rgb(224, 86, 58)'}"
+ },
+ {
+  "name": "全程无 JS 异常",
+  "ok": true,
+  "detail": ""
+ }
+]

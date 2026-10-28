@@ -169,6 +169,7 @@
   }
   function workRow(w) {
     return '<div class="dz-work" data-dz-work="' + w.id + '">'
+      + '<span class="jing-book">藏</span>'
       + '<span class="dz-wt">' + esc(dzTx(w.title)) + '</span>'
       + (w.lei ? '<span class="dz-lei">' + esc(dzTx(w.lei)) + '</span>' : '')
       + '<span class="dz-wm">' + w.juan + ' ' + txUi('卷') + ' · ' + fmtNum(w.chars) + ' ' + txUi('字') + '</span></div>';
@@ -182,7 +183,7 @@
     var bus = BU_ORDER.filter(function (b) { return present[b]; });
     Object.keys(present).forEach(function (b) { if (bus.indexOf(b) < 0) bus.push(b); });
     cats.innerHTML = bus.map(function (bu) {
-      return '<div class="dz-bu" data-dz-bu="' + esc(bu) + '">' + esc(dzTx(bu))
+      return '<div class="dz-bu" data-dz-bu="' + esc(bu) + '"><span class="jing-book">藏</span>' + esc(dzTx(bu))
         + '<span class="dz-count">' + present[bu] + ' ' + txUi('部') + '</span><span class="jing-go">›</span></div>'
         + '<div class="dz-works" data-dz-works="' + esc(bu) + '"' + (openBu[bu] ? '' : ' hidden') + '>'
         + (openBu[bu] ? worksOfBu(bu).map(workRow).join('') : '') + '</div>';

@@ -649,7 +649,7 @@ var JingWen = (function () {
   /* ---------- 返回定位（2026-10-27 用户反馈） ----------
    * 从目录架/全藏分类/搜索结果点开经文时记下出处（来源面＋条目 id＋
    * window 滚动位），点「‹ 目录」返回时回到原面原位，并给刚读的那条
-   * 加约 2.4 秒的金色描边便于眼睛落点。阅读器真正渲染（renderReaderBody
+   * 加约 1.5 秒的淡金色描边便于眼睛落点（初版 2.4 秒全金太突兀，同日晚改淡＋缩短）。阅读器真正渲染（renderReaderBody
    * 同 id）才武装；标记页/每日推荐等其他入口直达不经捕获，返回不变。 */
   var libReturn = null;
   function libCapture(id, el) {
@@ -685,13 +685,14 @@ var JingWen = (function () {
       window.scrollTo(0, lr.scrollY);
       if (!el) return;
       /* 高亮守卫：搜索结果会在全文命中到齐时重渲一次（节点被换），
-         2.2 秒内周期复查、节点被换就给新节点补上描边（冒烟实证竞态） */
+         1.0 秒内周期复查、节点被换就给新节点补上描边（冒烟实证竞态）；
+         描边动画本体 1.5 秒（CSS libRetHl），复查窗＋移除延时与之对齐（合计 1.5 秒收尾） */
       var t0 = Date.now();
       var tick = function () {
         var cur = host.querySelector('[data-jing="' + lr.id + '"],[data-dz-work="' + lr.id + '"]');
         if (cur && !cur.classList.contains('lib-ret-hl')) cur.classList.add('lib-ret-hl');
-        if (Date.now() - t0 < 2200) setTimeout(tick, 350);
-        else if (cur) setTimeout(function () { cur.classList.remove('lib-ret-hl'); }, 600);
+        if (Date.now() - t0 < 1000) setTimeout(tick, 250);
+        else if (cur) setTimeout(function () { cur.classList.remove('lib-ret-hl'); }, 500);
       };
       tick();
     };
