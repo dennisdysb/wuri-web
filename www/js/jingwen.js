@@ -938,8 +938,12 @@ var JingWen = (function () {
       if (!old) {
         old = document.createElement('span');
         old.className = 'read-prog';
-        var go = row.querySelector('.jing-go');
-        if (go) row.insertBefore(old, go); else row.appendChild(old);
+        var meta = row.querySelector('.dz-wmeta');
+        if (meta) { meta.appendChild(old); } /* 道藏书行：胶囊进眷属小字流（2026-10-28 排版定版） */
+        else {
+          var go = row.querySelector('.jing-go');
+          if (go) row.insertBefore(old, go); else row.appendChild(old);
+        }
       }
       old.textContent = e.done ? '已读完' : ('读 ' + Math.floor((e.frac || 0) * 100) + '%');
       old.classList.toggle('done', !!e.done);
