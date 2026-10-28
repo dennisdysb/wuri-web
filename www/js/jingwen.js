@@ -927,20 +927,28 @@ var JingWen = (function () {
     var w = sc.clientWidth - pad;
     if (w > 40) { sc.style.columnWidth = w + 'px'; sc.style.columnGap = pad + 'px'; _pagedW = sc.clientWidth; }
   }
-  /* 几何自检：所有段落的左缘必须落在页宽整数倍网格上（±3px），且总宽与
-     页数自洽。真机上量测时刻视口与实际可见宽分家时列步进≠页步进，段落
-     左缘会整体离格——这是「宽列跑出屏幕/逐页错位」的机器判据 */
+  /* 几何自检：所有段落的外边距盒（margin box）左缘必须落在页宽整数倍网格
+     上（±3px），且总宽与页数自洽。真机上量测时刻视口与实际可见宽分家时
+     列步进≠页步进，段落左缘会整体离格——这是「宽列跑出屏幕/逐页错位」的
+     机器判据。量外边距盒而非边框盒：多栏布局里占格的是外边距盒，边框盒会
+     被 margin 平移——跟读高亮给段落加 margin:0 -6px（.follow-on .jing-para）
+     时边框盒整体左移 6px，若按边框盒判，全段离格（mod=页宽-6）误触发保险
+     丝把用户打回滚动（2026-10-28 真机实报、探针复现定罪）。原点取滚动容器
+     的内容盒左缘（边框+内边距之内），与列的排布原点一致 */
   function pagedGeometryOK() {
     var sc = pageScroller(); if (!sc || !isPaged()) return false;
     var w = pageW(); if (!w || w <= 40) return false;
     if (!sc.scrollWidth || sc.scrollWidth < w - 1) return false;
     var sr = sc.getBoundingClientRect();
+    var scs = window.getComputedStyle(sc);
+    var originX = sr.left + (parseFloat(scs.borderLeftWidth) || 0) + (parseFloat(scs.paddingLeft) || 0);
     var ps = sc.querySelectorAll('.jing-para');
     var checked = 0;
     for (var i = 0; i < ps.length && checked < 60; i++) {
       var r = ps[i].getBoundingClientRect();
       if (!r.width) continue;
-      var cx = r.left - sr.left + sc.scrollLeft;
+      var ml = parseFloat(window.getComputedStyle(ps[i]).marginLeft) || 0;
+      var cx = (r.left - ml) - originX + sc.scrollLeft;
       var m = ((cx % w) + w) % w;
       if (m > 3 && m < w - 3) return false;
       checked++;
@@ -954,7 +962,7 @@ var JingWen = (function () {
     /* 先把分页锚点交给模式切换落位，回落滚动后停在同一内容位置 */
     _turnSwitchOff = _metrics ? Math.max(0, Math.min(_pageAnchorOff, _metrics.total)) : 0;
     _pagedFuseOff = true; _restoreOff = null; _jumpInsist = null;
-    if (window.showToast) showToast('翻页排版异常，已自动切回上下滚动');
+    if (window.showToast) showToast('翻页暂不可用，已切回滚动');
     applyTurnMode();
   }
   function pagedGeoCheckSoon() {
@@ -2813,6 +2821,20 @@ var JingWen = (function () {
     fontPx = Math.abs(fontPx - 17) <= Math.abs(fontPx - 28) ? 17 : 28;
     try { pyOn = localStorage.getItem('wuri_jing_py') !== '0'; } catch (e) {}
     try { turnMode = localStorage.getItem('wuri_jing_turn') === 'page' ? 'page' : 'scroll'; } catch (e) {}
+    /* 恢复链对账（2026-10-28）：偏好在此才载入；若开书抢在 init 之前（首页
+       每日一经深链/快点），renderReaderBody 当时按默认 scroll 分支走、从未挂
+       reader-paged 类，书会停在「逻辑=左右、物理=滚动」的空壳态（各节正文
+       还带着 hidden）。这里补一次对账：书开着且偏好是左右、类却没挂上时，
+       按存档位置补落分页 */
+    if (turnMode === 'page' && currentId) {
+      var rd0 = $('#jing-reader');
+      if (rd0 && !rd0.hidden && !rd0.classList.contains('reader-paged')) {
+        var ap0 = loadAutoPos(currentId);
+        _turnSwitchOff = (ap0 && ap0.off != null) ? ap0.off
+          : (ap0 && ap0.frac && _metrics ? Math.round(ap0.frac * _metrics.total) : 0);
+        applyTurnMode();
+      }
+    }
     renderCatalog();
     refreshMarksRow();
     /* 我的标记入口行（div 模拟按钮）键盘可达：Enter/空格触发 */
