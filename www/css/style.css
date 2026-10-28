@@ -3152,6 +3152,10 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 /* ===== 沉浸态＋平板适配（2026-10-28 追加） ===== */
 /* 沉浸：点正文切换——顶栏工具/状态栏/悬浮钮/标签栏全收，只剩正文＋顶部极简进度线 */
 body.jing-immersive #tabbar{display:none}
+/* 冥想沉浸（2026-10-28 用户口径：重要模块打开期间隐藏底部导航、退出恢复）：
+ * 与阅读器同一外壳机制——body 类控 #tabbar 显隐；冥想 open() 显视图前挂
+ * med-open、back() 隐视图时摘除，腾出的底部高度归冥想舞台（圈径按实测取）。 */
+body.med-open #tabbar{display:none}
 body.jing-immersive #jing-statusbar{display:none}
 body.jing-immersive .jing-back-fab,
 body.jing-immersive .jing-bookmark-fab,
