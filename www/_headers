@@ -1,0 +1,9 @@
+# 缓存根治（2026-10-28）：sw.js 是浏览器检查 SW 更新的唯一入口，i18n.js 载「内部版本号」字样，
+# 两者此前被 Cloudflare 默认头 Cache-Control: public, max-age=14400 压住——4 小时内浏览器连查都不查，
+# 用户刷新多少遍都停在旧版。改 no-cache 后每次先问服务器（有 ETag，未变回 304，成本低）。
+# CSS 已带 ?v= 版本参数，不在此列。
+/sw.js
+  Cache-Control: no-cache, must-revalidate
+
+/js/*
+  Cache-Control: no-cache, must-revalidate
