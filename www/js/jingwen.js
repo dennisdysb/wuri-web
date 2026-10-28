@@ -475,7 +475,79 @@ var JingWen = (function () {
     }
     if (tries > 0) setTimeout(function () { dzPollJump(id, secIdx, charOff, tries - 1); }, 200);
   }
+  /* ---------- 阅读落点：自动位置记忆＋落点轮询（2026-10-27 跳顶修复） ----------
+   * 旧实现两处坏死：renderReaderBody 尾部把并不滚动的 #jing-reader 当容器赋
+   * scrollTop（页面实为 window 滚动、赋值无效），且尾随无条件 scrollTo(0,0)，
+   * 每次重渲必跳顶；落色后的回位又只靠 400ms 一次性定时器，与异步渲染/展开/
+   * 注音赛跑、页高未稳时被钳制，真机必败（实测目标 25678 落成 18451）。
+   * 现行口径：落点优先级＝重渲锚点（落色/改色/删高亮前的位置）＞书签＞自动
+   * 位置记忆（closeReader 退出时存，独立键不污染用户书签）；openReaderAt
+   * 直达锚点在时限内压制后两级。落位一律走 insistReaderPos 轮询坚持到稳定。 */
+  var _posSuppressUntil = 0;
+  var AUTOPOS_KEY = 'wuri_jing_autopos';
+  function loadAutoPos(id) {
+    try { var m = JSON.parse(localStorage.getItem(AUTOPOS_KEY) || '{}'); return m[id] || null; }
+    catch (e) { return null; }
+  }
+  function saveAutoPos(id, y, expanded) {
+    if (!id) return;
+    try {
+      var m = JSON.parse(localStorage.getItem(AUTOPOS_KEY) || '{}');
+      m[id] = { y: Math.round(y || 0), expanded: expanded || [], ts: Date.now() };
+      var keys = Object.keys(m);
+      if (keys.length > 40) {
+        keys.sort(function (a, b) { return (m[a].ts || 0) - (m[b].ts || 0); });
+        keys.slice(0, keys.length - 40).forEach(function (k) { delete m[k]; });
+      }
+      localStorage.setItem(AUTOPOS_KEY, JSON.stringify(m));
+    } catch (e) {}
+  }
+  function collectExpandedSecs() {
+    var out = [];
+    document.querySelectorAll('#jing-content .jing-sec-body').forEach(function (b) {
+      if (!b.hidden) {
+        var sec = b.closest('.jing-sec');
+        if (sec) out.push(+sec.getAttribute('data-sec'));
+      }
+    });
+    return out;
+  }
+  /* 落点轮询：每拍先补展开（懒填充卷先填后展），再 scrollTo 目标；连续两拍
+     命中（±2px）才收工，最多 25 拍（约 3 秒）。已命中后视图被外部稳定拖离
+     >48px（用户接管/直达跳转）即停手不抢；命中前若已有稳定的外来落点
+     （>200 且偏离 >48px）同样停手。当前书已切换则立即作废。 */
+  function insistReaderPos(sid, y, expanded) {
+    var tries = 0, hits = 0, lastCur = -1, stableTicks = 0, t0 = Date.now();
+    var iv = setInterval(function () {
+      tries++;
+      if (window._jingCurrentId !== sid) { clearInterval(iv); return; }
+      var reader = $('#jing-reader');
+      if (!reader || reader.hidden) { if (tries >= 30) clearInterval(iv); return; }
+      if (expanded && expanded.length) {
+        expanded.forEach(function (secIdx) {
+          if (window.__wuri_dzFill) { try { window.__wuri_dzFill(+secIdx); } catch (e) {} }
+          var body = document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"] .jing-sec-body');
+          if (body && body.hidden) body.hidden = false;
+        });
+      }
+      var cur = window.scrollY || window.pageYOffset || 0;
+      if (Math.abs(cur - lastCur) <= 2) stableTicks++; else stableTicks = 0;
+      /* 放弃条件：重渲后浏览器滚动锚定会把视图短暂泊在错误偏移且看似稳定，
+       * 2.8s 内不因「稳定外来落点」收手（多半是锚定风暴，不是用户接管）；
+       * 已命中后被稳定拖离 >48px 则立即放手给用户。 */
+      if (Math.abs(cur - y) > 48 && stableTicks >= 3 && hits > 0) { clearInterval(iv); return; }
+      if (Math.abs(cur - y) > 48 && stableTicks >= 10 && cur > 200 && (Date.now() - t0) > 2800) { clearInterval(iv); return; }
+      window.scrollTo(0, y);
+      cur = window.scrollY || window.pageYOffset || 0;
+      if (Math.abs(cur - y) <= 2) { hits++; if (hits >= 2) { clearInterval(iv); return; } }
+      lastCur = cur;
+      if (tries >= 30) clearInterval(iv);
+    }, 120);
+  }
+  window.__wuriInsistPos = insistReaderPos;
+
   function openReaderAt(id, secIdx, charOff, _retry) {
+    _posSuppressUntil = Date.now() + 12000; /* 直达锚点优先：时限内不恢复书签/自动位置 */
     if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
     if (/^KR5/.test(id || '')) {
       /* 全藏正文走 daozang.js 的取文/开卷路径（其内另有一道门控），开卷后跳锚；
@@ -605,12 +677,21 @@ var JingWen = (function () {
           if (bEl) bEl.hidden = false;
         });
       }
-      if (bm && bm.scrollTop > 50) {
-        $('#jing-reader').scrollTop = bm.scrollTop;
-      } else {
-        $('#jing-reader').scrollTop = 0;
+      /* 滚动落点：锚点（落色等重渲前位置，5 秒内有效）＞书签＞自动位置记忆；
+         openReaderAt 直达时限内只认锚点。命中走 insistReaderPos 轮询落位
+         （展开＋等页高长够）；无命中维持旧行为回顶。 */
+      var posY = 0, posExp = null, posHit = false;
+      if (window._jingAnchorY != null && (Date.now() - (window._jingAnchorTs || 0)) < 5000) {
+        posY = window._jingAnchorY; posExp = window._jingAnchorExp || null; posHit = true;
+      } else if (bm && bm.scrollTop != null) {
+        posY = bm.scrollTop; posExp = bm.expanded || null; posHit = true;
+      } else if (Date.now() > _posSuppressUntil) {
+        var ap = loadAutoPos(id);
+        if (ap && ap.y > 50) { posY = ap.y; posExp = ap.expanded || null; posHit = true; }
       }
-      window.scrollTo(0, 0);
+      window._jingAnchorY = null; window._jingAnchorExp = null;
+      if (posHit) insistReaderPos(id, posY, posExp);
+      else window.scrollTo(0, 0);
       // 跟读模式开着时重渲染了内容：重建段落映射
       if (followMode) {
         clearFollowCur();
@@ -839,6 +920,10 @@ var JingWen = (function () {
     stopTtsOnly(); // 只停系统 TTS，后台 MP3 服务交给悬浮岛（回经文 tab 不停播）
     // 跟读模式随阅读器关闭而关闭（避免切经文后映射错乱）
     if (followMode) toggleFollow();
+    // 自动位置记忆：退出时存当前落点＋展开卷次，重进回到此处（与书签分开存）
+    if (currentId && !$('#jing-reader').hidden) {
+      saveAutoPos(currentId, window.scrollY || window.pageYOffset || 0, collectExpandedSecs());
+    }
     currentId = null;
     window._jingCurrentId = null;
     $('#jing-reader').hidden = true;
@@ -2682,17 +2767,21 @@ var JingWen = (function () {
             if (sec) expanded.push(sec.getAttribute('data-sec'));
           }
         });
+        /* 落点交给 renderReaderBody 的锚点恢复（insistReaderPos 轮询落位）：
+           旧实现渲染后 400ms 一次性展开＋scrollTo，与异步渲染/展开/注音赛跑、
+           页高未稳时被钳制，真机落色必跳顶（2026-10-27 用户真机报） */
+        window._jingAnchorY = st;
+        window._jingAnchorExp = expanded;
+        window._jingAnchorTs = Date.now();
         JingWen.openReader(sid);
+        // 兜底：900ms 后锚点仍未被渲染消费（如重入被拦未走渲染），直接轮询落位
         setTimeout(function () {
-          // 恢复展开的章节
-          expanded.forEach(function (secIdx) {
-            if (window.__wuri_dzFill) { try { window.__wuri_dzFill(+secIdx); } catch (e) {} }
-            var body = document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"] .jing-sec-body');
-            if (body) body.hidden = false;
-          });
-          // 恢复滚动位置（页面是window滚动，不是#jing-reader）
-          window.scrollTo(0, st);
-        }, 400);
+          if (window._jingAnchorY != null && window.__wuriInsistPos) {
+            var ay = window._jingAnchorY, ae = window._jingAnchorExp;
+            window._jingAnchorY = null; window._jingAnchorExp = null;
+            window.__wuriInsistPos(sid, ay, ae);
+          }
+        }, 900);
       }
     });
 
