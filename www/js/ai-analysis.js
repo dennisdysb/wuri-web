@@ -74,6 +74,9 @@ var ZIWEI_CHECK = '【先核对，再解读】\n'
   + '核对无误再按下面的顺序解读；若发现哪一项对不上，以给出的数据为准，在结论开头用一句话点明「盘面此处按所给数据讲」，不许自行改盘圆场。\n\n';
 var QUESTION = '\n\n————\n我的问题：（粘贴后可以把最想问的问题写在这一行后面再发送；留空也可以，会按上面维度全面讲）';
 var ASK_RULE = '数据末尾有一行「我的问题」：冒号后面如果写了内容，讲完分项后请再专门回答它；留空就跳过这一条。';
+/* 免责收尾（三套统一，2026-10-28 对齐全站免责两层：工具页脚简版「仅供文化参考」
+ * ＋关于页正本「不作医疗、投资、法律等重大决策的依据」）。 */
+var DISCLAIMER_TAIL = '最后一句提醒即可：以上是传统文化角度的解读，仅供文化参考，不作医疗、投资、法律等重大决策的依据，决定还要结合现实情况。';
 var heads = {
   liuyao: '你是一位精通六爻的老师傅，熟悉《增删卜易》《卜筮正宗》《易隐》。下面是我用排盘工具起好的一卦，六爻、纳甲、世应、六神、变卦都已装好，你只管断卦，不要重新起卦或改动卦象。\n\n',
   bazi: '你是一位精通子平八字的老师傅，熟悉《滴天髓》《穷通宝鉴》《子平真诠》《三命通会》。下面是我用排盘工具排好的一个八字，四柱、十神、藏干、五行力量、大运都已排好，你只管解读，不要重新排盘。\n\n',
@@ -90,7 +93,7 @@ var tails = {
     + '5. 时间参考：事情大致在什么时间段内见分晓，只给大致窗口和倾向，不下死断。数据「结构判读」里若给了「应期」候选地支，讲时间时只引用候选地支（逢某支之日、之月），严禁把候选地支换算成公历日期或具体某一天。\n'
     + '三、给建议：2 到 3 条具体、能落地的，针对所问之事说怎么做更稳妥。\n'
     + '四、' + ASK_RULE + '\n'
-    + '最后一句提醒即可：以上是传统文化角度的解读，仅供参考，决定还要结合现实情况。',
+    + DISCLAIMER_TAIL,
   bazi: '\n\n请按这个顺序讲：\n'
     + '一、先说结论：用 3 到 5 句白话把这个八字最要紧的特点和总体倾向说清——日主强弱、格局路子、人生大致的节奏感。\n'
     + '二、分项展开（每一项先给一句结论，再讲依据）：\n'
@@ -103,7 +106,7 @@ var tails = {
     + '7. 需要留意的地方：容易吃亏的模式；身体方面只谈作息和生活习惯层面，不谈病名。\n'
     + '三、给建议：2 到 3 条具体、能落地的，结合这个盘的特点说。\n'
     + '四、' + ASK_RULE + '\n'
-    + '最后一句提醒即可：以上是传统文化角度的解读，仅供参考。',
+    + DISCLAIMER_TAIL,
   ziwei: '\n\n请按这个顺序讲：\n'
     + '一、先说结论：用 3 到 5 句白话把这张命盘最要紧的特点说清——命宫主星的气质、身宫落点的人生重心、整体格局的高低走向。\n'
     + '二、分项展开（每一项先给一句结论，再讲依据）：\n'
@@ -115,7 +118,7 @@ var tails = {
     + '6. 当前大限与流年：现在走的大限落在哪一宫、这十年的主题是什么；今年流年命宫落点和流年四化，提示今年的重点与要留意的方面。\n'
     + '三、给建议：2 到 3 条具体、能落地的，结合命盘特点说。\n'
     + '四、' + ASK_RULE + '\n'
-    + '最后一句提醒即可：以上是传统文化角度的解读，仅供参考。'
+    + DISCLAIMER_TAIL
 };
 var head = heads[type] || heads.liuyao;
 var tail = tails[type] || tails.liuyao;
@@ -183,7 +186,12 @@ window.WuriAI.analyze(type);
 /* 按钮正下方说明（2026-10-22）：不少用户以为点了按钮还要自己手动输入，
  * 在此明说自动复制＋粘贴发送。运行时注入，不动 index.html 标记；
  * 显隐与按钮本体同步（八字按钮按页签 hidden 切换，MutationObserver 镜像）。 */
-var AI_HINT_TEXT = '点按此按钮，盘面信息会自动复制；跳转到 DeepSeek 后，直接粘贴发送即可，无需手动输入。';
+var AI_HINT_FALLBACK = '点按此按钮，盘面信息会自动复制；跳转到 DeepSeek 后，直接粘贴发送即可，无需手动输入。';
+function aiHintText() {
+/* 说明文案走 i18n 的 ai_hint 键（简/繁手写对照）；i18n 未就绪时回落简体原文。 */
+try { if (window.t) { var s = window.t('ai_hint'); if (s) return s; } } catch (e) {}
+return AI_HINT_FALLBACK;
+}
 function addAiHint(btn) {
 if (!btn || btn.getAttribute('data-ai-hint')) return;
 btn.setAttribute('data-ai-hint', '1');
@@ -191,7 +199,8 @@ var row = btn.closest ? (btn.closest('.btn-row') || btn.parentNode) : btn.parent
 if (!row || !row.parentNode) return;
 var hint = document.createElement('p');
 hint.className = 'hint small';
-hint.textContent = AI_HINT_TEXT;
+hint.setAttribute('data-i18n', 'ai_hint');
+hint.textContent = aiHintText();
 hint.style.marginTop = '6px';
 try {
 var rs = window.getComputedStyle(row);

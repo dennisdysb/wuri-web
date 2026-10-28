@@ -9,6 +9,7 @@ var I18N = {
 'zh-CN': {
 app_title: '戊日不上香',
 tab_home: '首页', tab_cal: '黄历', tab_jing: '经文', tab_stars: '星象', tab_remind: '提醒', tab_me: '我的',
+ai_hint: '点按此按钮，盘面信息会自动复制；跳转到 DeepSeek 后，直接粘贴发送即可，无需手动输入。',
 pro_title: '高级版', pro_locked: '未解锁', pro_active: '已激活 ✓',
 pro_unlock: '解锁高级版', pro_restore: '恢复购买', pro_buy: '立即解锁',
 pro_card_hint: '内丹经十五部、道藏全集、星象全模块、八字排盘、紫微斗数、六爻排盘、奇门遁甲、年历总览、诵读音频离线下载，一次买断，永久使用。',
@@ -667,6 +668,7 @@ sx2_info_best: '今晚最佳 %s', sx2_side_tonight: '今夜可见 · 摘要'
 'zh-TW': {
 app_title: '戊日不上香',
 tab_home: '首頁', tab_cal: '黃曆', tab_jing: '經文', tab_stars: '星象', tab_remind: '提醒', tab_me: '我的',
+ai_hint: '點按此按鈕，盤面資訊會自動複製；跳轉到 DeepSeek 後，直接貼上傳送即可，無需手動輸入。',
 pro_title: '高級版', pro_locked: '未解鎖', pro_active: '已激活 ✓',
 pro_unlock: '解鎖高級版', pro_restore: '恢復購買', pro_buy: '立即解鎖',
 pro_card_hint: '內丹經十五部、道藏全集、星象全模塊、八字排盤、紫微斗數、六爻排盤、奇門遁甲、年曆總覽、誦讀音頻離線下載，一次買斷，永久使用。',

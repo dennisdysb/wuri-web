@@ -57,6 +57,7 @@ HINT_PROBE = """((id) => {
   const h = row.nextElementSibling;
   if (!h) return { found: false };
   return { found: true, tag: h.tagName, cls: h.className, text: h.textContent,
+           i18nKey: h.getAttribute('data-i18n'),
            hidden: h.hidden, isHint: h.textContent.indexOf('自动复制') >= 0,
            color: getComputedStyle(h).color, fs: getComputedStyle(h).fontSize };
 })"""
@@ -120,6 +121,21 @@ def main():
             if info and info.get("found"):
                 check("说明文案精确 %s" % bid, info.get("text") == HINT_TEXT, info.get("text"))
 
+        for bid in ("bz-ai-btn", "zw-ai-btn", "ly-ai-btn"):
+            info = cdp.ev("%s(%r)" % (HINT_PROBE, bid))
+            check("说明挂 i18n 键 %s" % bid, bool(info and info.get("i18nKey") == "ai_hint"), info)
+        cdp.ev("window.setLangPref('zh-TW'); 'tw'")
+        time.sleep(0.3)
+        info_tw = cdp.ev("%s('bz-ai-btn')" % HINT_PROBE)
+        check("繁体说明文案", bool(info_tw and info_tw.get("text") ==
+              "點按此按鈕，盤面資訊會自動複製；跳轉到 DeepSeek 後，直接貼上傳送即可，無需手動輸入。"),
+              info_tw and info_tw.get("text"))
+        cdp.ev("window.setLangPref('zh-CN'); 'cn'")
+        time.sleep(0.3)
+        info_cn = cdp.ev("%s('bz-ai-btn')" % HINT_PROBE)
+        check("切回简体说明文案", bool(info_cn and info_cn.get("text") == HINT_TEXT),
+              info_cn and info_cn.get("text"))
+
         # ---------- 八字样本 ----------
         cdp.ev("document.getElementById('bazi-enter').click(); 'x'")
         time.sleep(0.6)
@@ -138,7 +154,8 @@ def main():
                 f.write(bz)
             for kw in ("【基本信息】", "【四柱】", "日柱 丙寅", "日主（日干）：丙", "【五行力量】",
                        "【命宫·身宫·胎元】", "【大运】", "← 当前大运", "【今年流年】", "先说结论",
-                       "伤官（想法多、爱表达", "数据里没给", "我的问题"):
+                       "伤官（想法多、爱表达", "数据里没给", "我的问题",
+                       "仅供文化参考", "不作医疗、投资、法律等重大决策的依据"):
                 check("八字提示词含「%s」" % kw, kw in bz)
             check("八字提示词以提问位结尾", bz.rstrip().endswith("全面讲）"))
             check("八字跳转 DeepSeek", cdp.ev("window.__opened") == "https://chat.deepseek.com/")
@@ -184,7 +201,8 @@ def main():
             with open(os.path.join(SAMPLES, "ziwei-prompt.txt"), "w", encoding="utf-8") as f:
                 f.write(zw)
             for kw in ("紫微斗数命盘", "五行局", "命主", "身主", "【十二宫】", "【命宫三方四正】",
-                       "【当前运限】", "当前大限", "流年四化", "我的问题"):
+                       "【当前运限】", "当前大限", "流年四化", "我的问题",
+                       "仅供文化参考", "不作医疗、投资、法律等重大决策的依据"):
                 check("紫微提示词含「%s」" % kw, kw in zw)
             names = ("命宫", "兄弟", "夫妻", "子女", "财帛", "疾厄", "迁移", "交友", "官禄", "田宅", "福德", "父母")
             n_p = sum(1 for ln in zw.split("\n") if any(ln.startswith(nm + "(") for nm in names))
@@ -215,12 +233,34 @@ def main():
             with open(os.path.join(SAMPLES, "liuyao-prompt.txt"), "w", encoding="utf-8") as f:
                 f.write(ly)
             for kw in ("所问事由：今年适不适合换工作", "占问分类：事业", "参考用神", "官鬼",
-                       "起卦四柱", "月建", "日辰", "旬空", "本卦：既济（坎宫", "青龙",
-                       "【世】", "【应】", "变卦：益（巽宫", "【变卦六爻】", "互卦", "我的问题"):
+                       "起卦四柱", "月建", "日辰", "旬空", "本卦：恒（震宫", "青龙",
+                       "【世】", "【应】", "变卦：未济", "【变卦六爻】", "互卦", "我的问题",
+                       "仅供文化参考", "不作医疗、投资、法律等重大决策的依据"):
                 check("六爻提示词含「%s」" % kw, kw in ly)
         cdp.ev("document.getElementById('ly-ai-btn').scrollIntoView({block:'center'}); 's'")
         time.sleep(0.3)
         check("截图 liuyao-day", shot(cdp, "liuyao-day.png"))
+
+        # ---------- 红光态：说明随全局红光变红 ----------
+        cdp.ev("localStorage.setItem('wuri_sky_redlight_v1','1'); 'r'")
+        boot(cdp)
+        cdp.ev(STUB_JS)
+        check("红光态生效", cdp.ev("document.body.classList.contains('sky-red')") is True)
+        cdp.ev("document.getElementById('bazi-enter').click(); 'x'")
+        time.sleep(0.6)
+        cdp.ev(BAZI_SET)
+        time.sleep(1.0)
+        info_r = cdp.ev("%s('bz-ai-btn')" % HINT_PROBE)
+        check("红光态八字说明可见", bool(info_r and info_r.get("found") and info_r.get("hidden") is False), info_r)
+        if info_r:
+            import re as _re
+            m = _re.match(r"rgb\((\d+), (\d+), (\d+)\)", info_r.get("color") or "")
+            check("红光态说明呈红色谱", bool(m and int(m.group(1)) > int(m.group(2)) + 30
+                  and int(m.group(1)) > int(m.group(3)) + 30), info_r.get("color"))
+        cdp.ev("document.getElementById('bz-ai-btn').scrollIntoView({block:'center'}); 's'")
+        time.sleep(0.3)
+        check("截图 bazi-red", shot(cdp, "bazi-red.png"))
+        cdp.ev("localStorage.setItem('wuri_sky_redlight_v1','0'); 'r0'")
 
         errs = cdp.ev("window.__errs || []")
         check("全程 JS 异常为零", errs == [], errs)
