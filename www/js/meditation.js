@@ -7,15 +7,15 @@ var Meditation = (function () {
   'use strict';
 
   var SOUNDS = [
-    { id: 'rain',    name: '温柔雨声', img: 'img/meditation/bg-rain.webp?v=3',    loop: 'audio/meditation/loop-rain.mp3?v=3',    asset: 'www/audio/meditation/loop-rain.mp3' },
-    { id: 'thunder', name: '雨·远雷',   img: 'img/meditation/bg-thunder.webp?v=3', loop: 'audio/meditation/loop-thunder.mp3?v=3', asset: 'www/audio/meditation/loop-thunder.mp3' },
-    { id: 'ocean',   name: '海浪',       img: 'img/meditation/bg-ocean.webp?v=3',   loop: 'audio/meditation/loop-ocean.mp3?v=3',   asset: 'www/audio/meditation/loop-ocean.mp3' },
-    { id: 'forest',  name: '森林鸟鸣', img: 'img/meditation/bg-forest.webp?v=3',  loop: 'audio/meditation/loop-forest.mp3?v=3',  asset: 'www/audio/meditation/loop-forest.mp3' },
-    { id: 'night',   name: '夜晚虫鸣', img: 'img/meditation/bg-night.webp?v=3',   loop: 'audio/meditation/loop-night.mp3?v=3',   asset: 'www/audio/meditation/loop-night.mp3' },
-    { id: 'fire',    name: '壁炉火声', img: 'img/meditation/bg-fire.webp?v=3',    loop: 'audio/meditation/loop-fire.mp3?v=3',    asset: 'www/audio/meditation/loop-fire.mp3' },
-    { id: 'creek',   name: '溪流',       img: 'img/meditation/bg-creek.webp?v=3',   loop: 'audio/meditation/loop-creek.mp3?v=3',   asset: 'www/audio/meditation/loop-creek.mp3' },
-    { id: 'wind',    name: '风声',       img: 'img/meditation/bg-wind.webp?v=3',    loop: 'audio/meditation/loop-wind.mp3?v=3',    asset: 'www/audio/meditation/loop-wind.mp3' },
-    { id: 'bowl',    name: '颂钵·静',   img: 'img/meditation/bg-bowl.webp?v=3',    loop: 'audio/meditation/loop-bowl.mp3?v=3',    asset: 'www/audio/meditation/loop-bowl.mp3' },
+    { id: 'rain',    name: '温柔雨声', img: 'img/meditation/bg-rain.webp?v=3',    loop: 'audio/meditation/loop-rain.mp3?v=4',    asset: 'www/audio/meditation/loop-rain.mp3' },
+    { id: 'thunder', name: '雨·远雷',   img: 'img/meditation/bg-thunder.webp?v=3', loop: 'audio/meditation/loop-thunder.mp3?v=4', asset: 'www/audio/meditation/loop-thunder.mp3' },
+    { id: 'ocean',   name: '海浪',       img: 'img/meditation/bg-ocean.webp?v=3',   loop: 'audio/meditation/loop-ocean.mp3?v=4',   asset: 'www/audio/meditation/loop-ocean.mp3' },
+    { id: 'forest',  name: '森林鸟鸣', img: 'img/meditation/bg-forest.webp?v=3',  loop: 'audio/meditation/loop-forest.mp3?v=4',  asset: 'www/audio/meditation/loop-forest.mp3' },
+    { id: 'night',   name: '夜晚虫鸣', img: 'img/meditation/bg-night.webp?v=3',   loop: 'audio/meditation/loop-night.mp3?v=4',   asset: 'www/audio/meditation/loop-night.mp3' },
+    { id: 'fire',    name: '壁炉火声', img: 'img/meditation/bg-fire.webp?v=3',    loop: 'audio/meditation/loop-fire.mp3?v=4',    asset: 'www/audio/meditation/loop-fire.mp3' },
+    { id: 'creek',   name: '溪流',       img: 'img/meditation/bg-creek.webp?v=3',   loop: 'audio/meditation/loop-creek.mp3?v=4',   asset: 'www/audio/meditation/loop-creek.mp3' },
+    { id: 'wind',    name: '风声',       img: 'img/meditation/bg-wind.webp?v=3',    loop: 'audio/meditation/loop-wind.mp3?v=4',    asset: 'www/audio/meditation/loop-wind.mp3' },
+    { id: 'bowl',    name: '颂钵·静',   img: 'img/meditation/bg-bowl.webp?v=3',    loop: 'audio/meditation/loop-bowl.mp3?v=4',    asset: 'www/audio/meditation/loop-bowl.mp3' },
     { id: 'silence', name: '无声·静室', img: 'img/meditation/bg-silence.webp?v=3', loop: '', asset: '' }
   ];
   var INTERVAL_BELL_LOOP = 'audio/meditation/bell-interval.mp3?v=3';
@@ -1777,7 +1777,7 @@ var Beads = (function () {
     if (stage) stage.addEventListener('click', tap);
     var undo = $('#bd-undo');
     if (undo) undo.addEventListener('click', function () {
-      if (session > 0) { session--; render(); }
+      if (session > 0) { session--; vibrate(90); render(); }   /* 回退一珠同单珠口径补震（原无震动） */
     });
     var fin = $('#bd-finish');
     if (fin) fin.addEventListener('click', finish);
@@ -1840,9 +1840,9 @@ var Beads = (function () {
     saved = false;
     if (!cfg().hintDim) dimHint();
     var goal = cfg().goal || 0;
-    if (session % ROUND === 0) vibrate([50, 40, 90]);
-    else if (goal && session === goal) vibrate([40, 40, 40, 40, 120]);
-    else vibrate(50);   /* 单珠 50ms（原 8ms 弱不可感，2026-10-28 用户口径加强） */
+    if (session % ROUND === 0) vibrate([90, 50, 150]);
+    else if (goal && session === goal) vibrate([70, 40, 70, 40, 200]);
+    else vibrate(90);   /* 单珠 90ms（50ms 仍嫌弱，2026-10-28 用户第二次要求加强） */
     var sv = $('#bd-saved'); if (sv) sv.textContent = '';
     render();
   }
