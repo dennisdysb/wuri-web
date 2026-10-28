@@ -280,6 +280,8 @@ var Meditation = (function () {
     /* 呼吸态布局类：中央区上移 + 呼吸圈放大（meditation.css），纯计时态不挂此列 */
     var view = $('#meditation-view');
     if (view) view.classList.toggle('med-breathing', !!breathPattern());
+    /* 混音浮层若开着：限高基准随呼吸态变化，重算一次 */
+    if (typeof mixFitPanel === 'function') mixFitPanel();
   }
   function setBreathVisual(phase, scale, remainSec) {
     var circle = $('#med-breath-circle');
@@ -811,6 +813,44 @@ var Meditation = (function () {
     if (openBtn) openBtn.hidden = !mixMode();
     var cnt = $('#med-mix-count');
     if (cnt) cnt.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '';
+    var pcnt = $('#med-mix-panel-count');
+    if (pcnt) pcnt.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '';
+  }
+  function mixPanelOpen() { var p = $('#med-mix-panel'); return !!p && !p.hidden; }
+  /* 浮层限高：底边由 CSS 锚在播放键上方，顶边不得越过呼吸圈峰值底线（呼吸态，
+   * 峰值＝基径×1.35、圆心取实测矩形中心）或中央区底线（纯计时态）；列表内部滚动。 */
+  function mixFitPanel() {
+    var p = $('#med-mix-panel'); if (!p || p.hidden) return;
+    var play = $('#med-play'); if (!play) return;
+    var bottomY = play.getBoundingClientRect().top - 10;
+    var safeBottom = 0;
+    var view = $('#meditation-view');
+    var circ = $('#med-breath-circle');
+    var box = $('#med-breath');
+    if (view && view.classList.contains('med-breathing') && circ && box && !box.hidden) {
+      var r = circ.getBoundingClientRect();
+      safeBottom = r.top + r.height / 2 + circ.offsetHeight * 1.35 / 2 + 12;
+    } else {
+      var mc = document.querySelector('.med-center');
+      if (mc) safeBottom = mc.getBoundingClientRect().bottom + 12;
+    }
+    var maxH = bottomY - safeBottom;
+    var cap = Math.min(window.innerHeight * 0.46, 340);
+    if (maxH > cap) maxH = cap;
+    if (maxH < 170) maxH = 170;
+    p.style.maxHeight = maxH + 'px';
+  }
+  /* 收起只收面板：不动混音轨单与播放；开钮文案/状态同步（展开时呈「收起」） */
+  function mixSetPanel(open) {
+    var p = $('#med-mix-panel'); if (!p) return;
+    p.hidden = !open;
+    var b = $('#med-mix-open');
+    if (b) {
+      b.textContent = open ? '收起' : '调混音';
+      b.classList.toggle('on', !!open);
+      b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    if (open) mixFitPanel();
   }
   function mixToggleTrack(id) {
     if (id in mix.tracks) {
@@ -1355,20 +1395,32 @@ var Meditation = (function () {
           if (s && s.loop) mix.tracks[s.id] = 80;
           saveMix();
         }
-        $('#med-mix-panel').hidden = false;
+        mixSetPanel(true);
       } else {
         mix.tracks = {};
         saveMix();
         mixPauseAll();
-        $('#med-mix-panel').hidden = true;
+        mixSetPanel(false);
         mixConvertIfPlaying();
       }
       renderMixPanel();
     });
     $('#med-mix-open').addEventListener('click', function () {
-      var p = $('#med-mix-panel');
-      p.hidden = !p.hidden;
+      mixSetPanel(!mixPanelOpen());
     });
+    $('#med-mix-close').addEventListener('click', function () {
+      mixSetPanel(false);
+    });
+    /* 点面板外收起（播放键/主音量/混音行本身除外，避免打断播放操作与开关切换） */
+    document.addEventListener('pointerdown', function (e) {
+      if (!mixPanelOpen()) return;
+      var v = $('#meditation-view'); if (!v || v.hidden) return;
+      var t = e.target;
+      if (t && t.closest && (t.closest('#med-mix-panel') || t.closest('#med-mix-open') ||
+          t.closest('#med-play') || t.closest('#med-vol') || t.closest('.med-mix-row'))) return;
+      mixSetPanel(false);
+    });
+    window.addEventListener('resize', function () { mixFitPanel(); });
     $('#med-mix-save').addEventListener('click', function () {
       if (!mixMode()) { mixHint('先选至少一轨再存配方'); return; }
       var name = '';
@@ -1613,9 +1665,16 @@ var Beads = (function () {
     var sub = $('#beads-entry-sub');
     if (sub) sub.textContent = '今日已诵 ' + (t.today + pending) + ' · 累计 ' + (t.total + pending);
   }
+  /* 提示转淡：首次记数后加 .dim 并落 cfg（重进页面即淡态，仍在场可瞥见） */
+  function dimHint() {
+    var h = $('#bd-hint'); if (h) h.classList.add('dim');
+    var c = cfg();
+    if (!c.hintDim) { c.hintDim = true; saveCfg(c); }
+  }
   function tap() {
     session++;
     saved = false;
+    if (!cfg().hintDim) dimHint();
     var goal = cfg().goal || 0;
     if (session % ROUND === 0) vibrate([50, 40, 90]);
     else if (goal && session === goal) vibrate([40, 40, 40, 40, 120]);
@@ -1641,6 +1700,8 @@ var Beads = (function () {
     build();
     var v = $('#beads-view');
     if (v) v.hidden = false;
+    var h = $('#bd-hint');
+    if (h) h.classList.toggle('dim', !!cfg().hintDim);
     layoutDots();
     render();
   }
