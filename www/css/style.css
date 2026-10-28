@@ -2679,6 +2679,13 @@ body.sky-red .hpe-lijilab { fill:#eda88f; }
 .hpe-calibline { stroke:var(--cinnabar); stroke-dasharray:.2 .14; }
 .hpe-temprect { fill:rgba(162,129,59,.12); stroke:var(--teal-deep); stroke-dasharray:.22 .14; }
 .hpe-boxrect { fill:rgba(43,94,90,.10); stroke:var(--teal-deep); stroke-dasharray:.22 .14; pointer-events:none; }
+/* 磁吸命中反馈：金点＋金引导线，全走变量链（日/夜自动随 --gold 换值），红光另给亮红口径（同选中墙） */
+.hpe-snapline { stroke:var(--gold); pointer-events:none; }
+.hpe-snapring { fill:none; stroke:var(--gold); opacity:.65; pointer-events:none; }
+.hpe-snapdot { fill:var(--gold-deep); pointer-events:none; }
+body.sky-red .hpe-snapline { stroke:#eda88f; }
+body.sky-red .hpe-snapring { stroke:#eda88f; }
+body.sky-red .hpe-snapdot { fill:#eda88f; }
 .hpe-op.dim { opacity:.45; }
 .hpe-quad { fill:rgba(162,129,59,.08); stroke:var(--gold); stroke-width:2.5; }
 .hpe-corner { fill:rgba(252,250,242,.25); stroke:var(--gold-deep); stroke-width:3; cursor:grab; }

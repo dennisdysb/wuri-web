@@ -153,7 +153,10 @@
     planDirty: false,
     /* 「选择」键多选：multi＝{room:{},fix:{},wall:{}} 以 id 记选中；boxMode 框选开关；
      * boxRect＝正在拉的框（坐标单位），null＝未在拉框 */
-    multi: null, boxMode: false, boxRect: null
+    multi: null, boxMode: false, boxRect: null,
+    /* 磁吸命中反馈：{pts:[{x,y}], lines:[{x1,y1,x2,y2}]}，拖动中由吸附函数
+     * 写入、render 画亮点/引导线，松手即清（见 snapHintPt/snapHintLine） */
+    snapHint: null
   };
   function F() { return window.WuriSoulFs; }
   function planOf() { return E.plan; }
@@ -379,6 +382,44 @@
     return best;
   }
 
+  /* ---------------- 统一磁吸（2026-10-27 用户定调：凡需对齐处都要磁吸） --------
+   * 半径按屏幕像素定（16px）、随缩放换算成计划单位：缩到全图也够得着，
+   * 放大也不会把远处的东西硬拽走位——旧版一律米数定阈（墙 0.3m/房 0.18m），
+   * 全图视角下只剩几像素，真机等于没有。覆盖：画墙端点/墙线垂足/网格、
+   * 房间拖动与拉边、构件贴墙与边对齐、分切刀口。命中记 E.snapHint，
+   * render 在拖动中画金点＋引导线，用户看得见「吸上了」。
+   * E.snap（图层面板开关）管房间/构件/刀口的边吸附；画墙端点吸附是作图
+   * 刚需、不受此开关管（口径同旧版）。 */
+  var SNAP_PX = 16;
+  function snapRadU() {
+    var svg = $('hpe-svg');
+    if (svg && E.view) {
+      var rc = svg.getBoundingClientRect();
+      if (rc.width > 0) return SNAP_PX * E.view.w / rc.width;
+    }
+    return toU(0.3); /* 视图未就绪时回落到旧版墙吸附半径 */
+  }
+  function snapHintPt(x, y) {
+    if (!E.snapHint) E.snapHint = { pts: [], lines: [] };
+    E.snapHint.pts.push({ x: x, y: y });
+  }
+  function snapHintLine(x1, y1, x2, y2) {
+    if (!E.snapHint) E.snapHint = { pts: [], lines: [] };
+    E.snapHint.lines.push({ x1: x1, y1: y1, x2: x2, y2: y2 });
+  }
+  /* 候选吸附：cands＝[{v:落点值, line:对齐边坐标}]，返回 {v, line}（未命中 line=null） */
+  function snapFromCands(v, cands, thr) {
+    var best = v, bl = null, bd = thr;
+    cands.forEach(function (c) {
+      var d = Math.abs(c.v - v);
+      if (d < bd) { bd = d; best = c.v; bl = c.line; }
+    });
+    return { v: best, line: bl };
+  }
+  function edgeCands(edges) {
+    return edges.map(function (e) { return { v: e, line: e }; });
+  }
+
   /* ---------------- 叠盘（定稿坐向投影） ---------------- */
   function facingDeg() { return E.fixed ? E.fixed.facingDeg : null; }
   function screenCell(dirName) {
@@ -564,6 +605,17 @@
     if (E.boxRect) {
       var br2 = E.boxRect;
       s += '<rect class="hpe-boxrect" x="' + br2.x + '" y="' + br2.y + '" width="' + br2.w + '" height="' + br2.h + '" stroke-width="' + (u * 0.25) + '"/>';
+    }
+    /* 磁吸命中反馈（仅拖动中）：金点＝吸住的点，金线＝对齐的边——让用户
+     * 眼睛确认「吸上了」；松手 E.drag 清空即不再画 */
+    if (E.snapHint && E.drag) {
+      E.snapHint.lines.forEach(function (ln) {
+        s += '<line class="hpe-snapline" x1="' + ln.x1 + '" y1="' + ln.y1 + '" x2="' + ln.x2 + '" y2="' + ln.y2 + '" stroke-width="' + (u * 0.22) + '"/>';
+      });
+      E.snapHint.pts.forEach(function (hp) {
+        s += '<circle class="hpe-snapring" cx="' + hp.x + '" cy="' + hp.y + '" r="' + (u * 2.7) + '" stroke-width="' + (u * 0.3) + '"/>' +
+          '<circle class="hpe-snapdot" cx="' + hp.x + '" cy="' + hp.y + '" r="' + (u * 1.4) + '"/>';
+      });
     }
     svg.innerHTML = s;
     syncTop();
@@ -1272,7 +1324,7 @@
     if (FIX[type].wallSeg) { placeWallItem(type, pt); return; }
     pushUndo();
     var nf = { id: uid(), type: type, x: pt.x, y: pt.y, rot: 0, flip: false };
-    wallSnap(nf, pt);
+    placeSnap(nf, pt);
     E.plan.fixtures.push(nf);
     E.sel = { kind: 'fixture', id: nf.id };
     /* 一次性放置：放下即卸待放态并保持选中——再点是选中、拖是移动，
@@ -1650,17 +1702,36 @@
   /* ---------------- 画墙（2026-10-27 用户定调「第一步应该是墙」） ----------------
    * 交互：一划成段，松手自动拉直——方向角向 45° 网格吸附（横/竖/斜 45°，
    * 13° 容差内吸正，超出容差的任意斜线原样保留为斜墙）；两端优先吸附到
-   * 已有墙端（0.3 m 内，闭合靠它精确同点）；墙与墙首尾相连围成一圈时，
+   * 已有墙端/本笔起点（统一磁吸·屏幕半径，闭合靠它精确同点），次吸墙线
+   * 垂足；墙与墙首尾相连围成一圈时，
    * 闭合区自动成房（见 tryCloseRoom），未闭合的段就是墙，存 plan.walls。 */
-  function wallSnapPt(pt, exclId) {
-    var thr = toU(0.3), best = null, bd = thr;
+  /* 端点吸附（统一磁吸）：半径按屏幕像素（snapRadU），优先级——已有墙
+   * 端点与本笔起点（闭合靠它精确同点）＞墙线垂足（T 型接点落线）。命中
+   * 记亮点反馈。exclId＝正在改长的墙自身不作目标。 */
+  function wallSnapPt(pt, exclId, extraPts) {
+    var thr = snapRadU(), best = null, bd = thr;
+    function tryPt(x, y) {
+      var d = Math.hypot(pt.x - x, pt.y - y);
+      if (d < bd) { bd = d; best = { x: x, y: y }; }
+    }
     (E.plan.walls || []).forEach(function (w) {
       if (w.id === exclId) return;
-      [[w.x1, w.y1], [w.x2, w.y2]].forEach(function (e) {
-        var d = Math.hypot(pt.x - e[0], pt.y - e[1]);
-        if (d < bd) { bd = d; best = { x: e[0], y: e[1] }; }
-      });
+      tryPt(w.x1, w.y1); tryPt(w.x2, w.y2);
     });
+    if (extraPts) extraPts.forEach(function (e) { tryPt(e.x, e.y); });
+    if (!best) {
+      (E.plan.walls || []).forEach(function (w) {
+        if (w.id === exclId) return;
+        var dx = w.x2 - w.x1, dy = w.y2 - w.y1, len2 = dx * dx + dy * dy;
+        if (len2 < 1e-12) return;
+        var t = ((pt.x - w.x1) * dx + (pt.y - w.y1) * dy) / len2;
+        if (t <= 0.001 || t >= 0.999) return; /* 端点附近归端点吸附管 */
+        var qx = w.x1 + dx * t, qy = w.y1 + dy * t;
+        var d = Math.hypot(pt.x - qx, pt.y - qy);
+        if (d < bd) { bd = d; best = { x: qx, y: qy }; }
+      });
+    }
+    if (best) snapHintPt(best.x, best.y);
     return best;
   }
   function wallStartPt(raw) {
@@ -1669,9 +1740,10 @@
     if (E.grid) { var s = toU(0.1); return { x: snapVal(raw.x, s), y: snapVal(raw.y, s) }; }
     return { x: raw.x, y: raw.y };
   }
-  /* 划线终点：先试端点吸附（闭合优先于方向），再方向角吸附，最后网格取整 */
+  /* 划线终点：先试端点吸附（闭合优先于方向；本笔起点 a 也在候选内，
+   * 一笔画回起点即同点），再方向角吸附，最后网格取整 */
   function wallStrokeEnd(a, raw, exclId) {
-    var sp = wallSnapPt(raw, exclId);
+    var sp = wallSnapPt(raw, exclId, [a]);
     if (sp) return sp;
     var p = { x: raw.x, y: raw.y };
     var dx = p.x - a.x, dy = p.y - a.y, len = Math.hypot(dx, dy);
@@ -2177,6 +2249,10 @@
       if (E.uiMode === 'split') { E.uiMode = 'free'; if (E.cut) E.cut = null; syncModeBtn(); }
       E.arm = null; E.placeType = null; E.sel = null;
       suppressOverlay();
+      /* 开框选的瞬间收起「选择」面板：面板盖着大半画布、框选时看不见选了
+       * 什么（用户真机报）。收尾靠属性条常驻的框选细条（计数/删除所选/完成）；
+       * 关掉框选（完成/删除后）不自动重开面板——要再开自己点托盘「选择」。 */
+      if (E.sheet === 'select') closeSheet();
     }
     syncTray(); render(); renderAttr();
     if (E.sheet === 'select') renderSelectPanel();
@@ -2280,7 +2356,8 @@
     return { x: p.x, y: p.y };
   }
   function edgeSnapRoom(r, skipSelf) {
-    /* 房间边吸附：收集他房边线 */
+    /* 房间边吸附目标集：他房边线＋描图外框边＋墙段端点坐标（竖墙端点 x
+     * 即墙线 x、横墙同理 y——房间边贴墙线/对墙头都从这里出） */
     var xs = [], ys = [];
     E.plan.rooms.forEach(function (o) {
       if (skipSelf && o.id === r.id) return;
@@ -2290,12 +2367,22 @@
       var t = E.plan.trace.rect;
       xs.push(t.x, t.x + t.w); ys.push(t.y, t.y + t.h);
     }
+    (E.plan.walls || []).forEach(function (w) {
+      xs.push(w.x1, w.x2); ys.push(w.y1, w.y2);
+    });
     return { xs: xs, ys: ys };
   }
   function wallSnap(f, pt) {
     var d = FIX[f.type];
     if (!d || !d.wall) return pt;
-    var thr = toU(0.45), best = null, bd = thr;
+    /* 半径：旧口径 0.45m 与屏幕磁吸半径取大——全图视角下不弱于从前 */
+    var thr = Math.max(toU(0.45), snapRadU()), best = null, bd = thr;
+    var allSegs = [];
+    (E.plan.walls || []).forEach(function (w) {
+      /* 画墙墙段同样是贴墙目标：横墙 rot 0、竖墙 rot 90，斜墙无正向不吸 */
+      if (Math.abs(w.y2 - w.y1) < 1e-9) allSegs.push({ x1: w.x1, y1: w.y1, x2: w.x2, y2: w.y2, rot: 0 });
+      else if (Math.abs(w.x2 - w.x1) < 1e-9) allSegs.push({ x1: w.x1, y1: w.y1, x2: w.x2, y2: w.y2, rot: 90 });
+    });
     E.plan.rooms.forEach(function (r) {
       var segs = [
         { x1: r.x, y1: r.y, x2: r.x + r.w, y2: r.y, rot: 0 },
@@ -2303,18 +2390,46 @@
         { x1: r.x, y1: r.y, x2: r.x, y2: r.y + r.h, rot: 90 },
         { x1: r.x + r.w, y1: r.y, x2: r.x + r.w, y2: r.y + r.h, rot: 90 }
       ];
-      segs.forEach(function (sg) {
-        var dx = sg.x2 - sg.x1, dy = sg.y2 - sg.y1;
-        var len2 = dx * dx + dy * dy || 1;
-        var t = ((pt.x - sg.x1) * dx + (pt.y - sg.y1) * dy) / len2;
-        t = Math.max(0, Math.min(1, t));
-        var qx = sg.x1 + dx * t, qy = sg.y1 + dy * t;
-        var dd = Math.sqrt((pt.x - qx) * (pt.x - qx) + (pt.y - qy) * (pt.y - qy));
-        if (dd < bd) { bd = dd; best = { x: qx, y: qy, rot: sg.rot }; }
-      });
+      segs.forEach(function (sg) { allSegs.push(sg); });
     });
-    if (best) { f.x = best.x; f.y = best.y; f.rot = best.rot; return { x: best.x, y: best.y }; }
+    allSegs.forEach(function (sg) {
+      var dx = sg.x2 - sg.x1, dy = sg.y2 - sg.y1;
+      var len2 = dx * dx + dy * dy || 1;
+      var t = ((pt.x - sg.x1) * dx + (pt.y - sg.y1) * dy) / len2;
+      t = Math.max(0, Math.min(1, t));
+      var qx = sg.x1 + dx * t, qy = sg.y1 + dy * t;
+      var dd = Math.sqrt((pt.x - qx) * (pt.x - qx) + (pt.y - qy) * (pt.y - qy));
+      if (dd < bd) { bd = dd; best = { x: qx, y: qy, rot: sg.rot }; }
+    });
+    if (best) {
+      f.x = best.x; f.y = best.y; f.rot = best.rot;
+      snapHintPt(best.x, best.y);
+      return { x: best.x, y: best.y };
+    }
     return pt;
+  }
+  /* 放置/拖动结算的统一吸附入口：贴墙件走 wallSnap 吸墙线，其余件在
+   * E.snap 开时走边对边吸附 */
+  function placeSnap(f, pt) {
+    wallSnap(f, pt);
+    var d = FIX[f.type];
+    if (E.snap && d && !d.wall) fixtureEdgeSnap(f);
+  }
+  /* 构件边对边吸附（非贴墙件）：构件左右边贴房间竖边、上下边贴横边
+   * （目标集与房间吸附同源，含墙端点线），命中给引导线反馈 */
+  function fixtureEdgeSnap(f) {
+    var d = FIX[f.type]; if (!d) return;
+    var swap = ((f.rot || 0) % 180 + 180) % 180 === 90;
+    var hw = toU(swap ? d.h : d.w) / 2, hh = toU(swap ? d.w : d.h) / 2;
+    var es = edgeSnapRoom({ id: '__fix__' }, false), thr = snapRadU();
+    var cx = snapFromCands(f.x, es.xs.reduce(function (acc, e) {
+      acc.push({ v: e + hw, line: e }, { v: e - hw, line: e }); return acc;
+    }, []), thr);
+    if (cx.line !== null) { f.x = cx.v; snapHintLine(cx.line, f.y - hh, cx.line, f.y + hh); }
+    var cy = snapFromCands(f.y, es.ys.reduce(function (acc, e) {
+      acc.push({ v: e + hh, line: e }, { v: e - hh, line: e }); return acc;
+    }, []), thr);
+    if (cy.line !== null) { f.y = cy.v; snapHintLine(f.x - hw, cy.line, f.x + hw, cy.line); }
   }
   function onDown(evt) {
     if (!E.plan && !E.stage) return;
@@ -2426,7 +2541,7 @@
       if (FIX[E.placeType] && FIX[E.placeType].wallSeg) { placeWallItem(E.placeType, pt); return; }
       pushUndo();
       var nf2 = { id: uid(), type: E.placeType, x: pt.x, y: pt.y, rot: 0, flip: false };
-      wallSnap(nf2, pt);
+      placeSnap(nf2, pt);
       E.plan.fixtures.push(nf2);
       E.sel = { kind: 'fixture', id: nf2.id };
       E.placeType = null; syncTray(); /* 一次性放置（同 placeFixAt） */
@@ -2474,7 +2589,7 @@
       if (FIX[E.placeType] && FIX[E.placeType].wallSeg) { placeWallItem(E.placeType, pt); return; }
       pushUndo();
       var nf = { id: uid(), type: E.placeType, x: pt.x, y: pt.y, rot: 0, flip: false };
-      wallSnap(nf, pt);
+      placeSnap(nf, pt);
       E.plan.fixtures.push(nf);
       E.sel = { kind: 'fixture', id: nf.id };
       E.placeType = null; syncTray(); /* 一次性放置（同 placeFixAt） */
@@ -2498,6 +2613,7 @@
   function onMove(evt) {
     var d = E.drag; if (!d) return;
     var pt = svgPoint(evt);
+    E.snapHint = null; /* 磁吸反馈逐帧重记：本帧没吸上就不画 */
     if (d.kind === 'box') {
       E.boxRect = {
         x: Math.min(d.start.x, pt.x), y: Math.min(d.start.y, pt.y),
@@ -2507,8 +2623,22 @@
       return;
     }
     if (d.kind === 'cutline') {
-      if (!cutRoom()) return;
+      var croom = cutRoom(); if (!croom) return;
       if (E.cut.dir === 'v') E.cut.pos = pt.x; else E.cut.pos = pt.y;
+      if (E.snap) {
+        /* 刀口磁吸：吸邻房边/外框边/已有切线（分切 tiling 里邻房边即旧切线），
+         * 对齐后整排切口成一条线；命中时切线本身就是引导线，再记一道 */
+        var ces = edgeSnapRoom(croom, true), cthr = snapRadU();
+        if (E.cut.dir === 'v') {
+          var ccx = snapFromCands(E.cut.pos, edgeCands(ces.xs), cthr);
+          E.cut.pos = ccx.v;
+          if (ccx.line !== null) snapHintLine(ccx.line, croom.y, ccx.line, croom.y + croom.h);
+        } else {
+          var ccy = snapFromCands(E.cut.pos, edgeCands(ces.ys), cthr);
+          E.cut.pos = ccy.v;
+          if (ccy.line !== null) snapHintLine(croom.x, ccy.line, croom.x + croom.w, ccy.line);
+        }
+      }
       clampCutPos();
       render(); syncCutBar();
       return;
@@ -2549,6 +2679,14 @@
     if (d.kind === 'walldraw') {
       var ep = wallStrokeEnd(d.start, pt, null);
       E.wallPrev = { x1: d.start.x, y1: d.start.y, x2: ep.x, y2: ep.y };
+      /* 起点在落笔时已吸住的（与已有墙端精确同点），整段拖动中持续给亮点：
+       * onMove 逐帧清反馈是为终点防残留，起点的「吸上了」不该跟着被抹掉 */
+      (E.plan.walls || []).forEach(function (w) {
+        if ((Math.abs(d.start.x - w.x1) < 1e-9 && Math.abs(d.start.y - w.y1) < 1e-9) ||
+            (Math.abs(d.start.x - w.x2) < 1e-9 && Math.abs(d.start.y - w.y2) < 1e-9)) {
+          snapHintPt(d.start.x, d.start.y);
+        }
+      });
       render();
       return;
     }
@@ -2579,12 +2717,24 @@
     if (d.kind === 'room') {
       var r = roomById(d.id); if (!r) return;
       var nx = d.orig.x + (pt.x - d.start.x), ny = d.orig.y + (pt.y - d.start.y);
+      var drSnX = false, drSnY = false;
       if (E.snap) {
-        var es = edgeSnapRoom(r, true), thr = toU(0.18);
-        nx = snapCoord(nx, es.xs.concat(es.xs.map(function (e) { return e - r.w; })), thr);
-        ny = snapCoord(ny, es.ys.concat(es.ys.map(function (e) { return e - r.h; })), thr);
+        /* 统一磁吸：半径按屏幕像素；左右两边都可贴（右边贴＝左缘落点平移），
+         * 命中画引导线——左/上边吸住线在边上，右/下边吸住线在对边 */
+        var es = edgeSnapRoom(r, true), thr = snapRadU();
+        var sxr = snapFromCands(nx, es.xs.reduce(function (acc, e) {
+          acc.push({ v: e, line: e }, { v: e - r.w, line: e }); return acc;
+        }, []), thr);
+        nx = sxr.v; drSnX = sxr.line !== null;
+        if (drSnX) snapHintLine(sxr.line, ny - r.h * 0.12, sxr.line, ny + r.h * 1.12);
+        var syr = snapFromCands(ny, es.ys.reduce(function (acc, e) {
+          acc.push({ v: e, line: e }, { v: e - r.h, line: e }); return acc;
+        }, []), thr);
+        ny = syr.v; drSnY = syr.line !== null;
+        if (drSnY) snapHintLine(nx - r.w * 0.12, syr.line, nx + r.w * 1.12, syr.line);
       }
-      if (step) { nx = snapVal(nx, step); ny = snapVal(ny, step); }
+      /* 吸住的轴不再过网格取整——取整最多带偏半步（0.05m），贴齐就废了 */
+      if (step) { if (!drSnX) nx = snapVal(nx, step); if (!drSnY) ny = snapVal(ny, step); }
       r.x = nx; r.y = ny; d.moved = true;
       render();
     } else if (d.kind === 'resize') {
@@ -2596,18 +2746,28 @@
       if (h.indexOf('s') >= 0) y2 += dy;
       if (h.indexOf('w') >= 0) x1 += dx;
       if (h.indexOf('n') >= 0) y1 += dy;
+      var rsSnX = false, rsSnY = false;
       if (E.snap) {
-        var es2 = edgeSnapRoom(rr, true), thr2 = toU(0.18);
-        if (h.indexOf('e') >= 0) x2 = snapCoord(x2, es2.xs, thr2);
-        if (h.indexOf('w') >= 0) x1 = snapCoord(x1, es2.xs, thr2);
-        if (h.indexOf('s') >= 0) y2 = snapCoord(y2, es2.ys, thr2);
-        if (h.indexOf('n') >= 0) y1 = snapCoord(y1, es2.ys, thr2);
+        var es2 = edgeSnapRoom(rr, true), thr2 = snapRadU();
+        if (h.indexOf('e') >= 0 || h.indexOf('w') >= 0) {
+          var scx = snapFromCands(h.indexOf('e') >= 0 ? x2 : x1, edgeCands(es2.xs), thr2);
+          if (h.indexOf('e') >= 0) x2 = scx.v; else x1 = scx.v;
+          rsSnX = scx.line !== null;
+          if (rsSnX) snapHintLine(scx.line, y1 - o.h * 0.12, scx.line, y2 + o.h * 0.12);
+        }
+        if (h.indexOf('s') >= 0 || h.indexOf('n') >= 0) {
+          var scy = snapFromCands(h.indexOf('s') >= 0 ? y2 : y1, edgeCands(es2.ys), thr2);
+          if (h.indexOf('s') >= 0) y2 = scy.v; else y1 = scy.v;
+          rsSnY = scy.line !== null;
+          if (rsSnY) snapHintLine(x1 - o.w * 0.12, scy.line, x2 + o.w * 0.12, scy.line);
+        }
       }
+      /* 吸住的边同拖房口径：跳过网格取整，免得贴齐被半步带偏 */
       if (step) {
-        if (h.indexOf('e') >= 0) x2 = snapVal(x2, step);
-        if (h.indexOf('w') >= 0) x1 = snapVal(x1, step);
-        if (h.indexOf('s') >= 0) y2 = snapVal(y2, step);
-        if (h.indexOf('n') >= 0) y1 = snapVal(y1, step);
+        if (h.indexOf('e') >= 0 && !rsSnX) x2 = snapVal(x2, step);
+        if (h.indexOf('w') >= 0 && !rsSnX) x1 = snapVal(x1, step);
+        if (h.indexOf('s') >= 0 && !rsSnY) y2 = snapVal(y2, step);
+        if (h.indexOf('n') >= 0 && !rsSnY) y1 = snapVal(y1, step);
       }
       var minS = toU(0.4);
       if (x2 - x1 < minS) { if (h.indexOf('w') >= 0) x1 = x2 - minS; else x2 = x1 + minS; }
@@ -2620,6 +2780,9 @@
       f.x = d.orig.x + (pt.x - d.start.x);
       f.y = d.orig.y + (pt.y - d.start.y);
       d.moved = true;
+      /* 拖动中实时磁吸：贴墙件吸墙线/画墙墙段、其余件边贴边——不等松手，
+       * 拖着就能看见吸上（松手 onUp 以 placeSnap 同口径再结算一次） */
+      placeSnap(f, { x: f.x, y: f.y });
       render();
     } else if (d.kind === 'liji') {
       E.plan.liji = { x: pt.x, y: pt.y };
@@ -2637,6 +2800,7 @@
      * 墙头会停在半路、端点吸附落空（闭合查无此环）——以 up 点为准 */
     if (d.kind === 'walldraw' || d.kind === 'wallend' || d.kind === 'wallmove') onMove(evt);
     E.drag = null;
+    E.snapHint = null; /* 磁吸反馈随拖动结束清掉 */
     if (d.kind === 'box') {
       var brc = E.boxRect; E.boxRect = null;
       /* 几乎没拉动＝点按：清掉多选；拉出实框才按框选 */
@@ -2670,7 +2834,7 @@
     }
     if (d.kind === 'fixture') {
       var f = fixById(d.id);
-      if (f && d.moved) { wallSnap(f, { x: f.x, y: f.y }); }
+      if (f && d.moved) { placeSnap(f, { x: f.x, y: f.y }); }
       if (f && !d.moved) { /* 纯点击选中：撤销栈回滚这次 pushUndo */ E.undoStack.pop(); }
       save(); render(); renderAttr();
       return;
@@ -2687,6 +2851,7 @@
   function cancelActiveDrag() {
     var d = E.drag; if (!d) return;
     E.drag = null;
+    E.snapHint = null;
     if (d.kind === 'room' || d.kind === 'resize') {
       var rid = d.id || (E.sel && E.sel.id), r = rid ? roomById(rid) : null;
       if (r && d.orig) { r.x = d.orig.x; r.y = d.orig.y; r.w = d.orig.w; r.h = d.orig.h; }
