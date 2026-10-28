@@ -277,11 +277,13 @@ var Meditation = (function () {
     /* 说明已移至控制层（chips 行上方）：显隐跟随型态选择，纯计时态不占位 */
     var noteEl = $('#med-breath-note');
     if (noteEl) noteEl.hidden = !breathPattern();
-    /* 呼吸态布局类：中央区上移 + 呼吸圈放大（meditation.css），纯计时态不挂此列 */
+    /* 呼吸态布局类：舞台与圈径口径随型态显隐切换（meditation.css），纯计时态不挂此列 */
     var view = $('#meditation-view');
     if (view) view.classList.toggle('med-breathing', !!breathPattern());
-    /* 混音浮层若开着：限高基准随呼吸态变化，重算一次 */
+    /* 圈径按舞台实测重算；浮层若开着，限高基准随呼吸态变化一并重算 */
+    fitBreathCircle();
     if (typeof mixFitPanel === 'function') mixFitPanel();
+    renderKeySubs();
   }
   function setBreathVisual(phase, scale, remainSec) {
     var circle = $('#med-breath-circle');
@@ -809,20 +811,43 @@ var Meditation = (function () {
     }
     var tgl = $('#med-mix-toggle');
     if (tgl) tgl.checked = mixMode();
-    var openBtn = $('#med-mix-open');
-    if (openBtn) openBtn.hidden = !mixMode();
-    var cnt = $('#med-mix-count');
-    if (cnt) cnt.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '';
     var pcnt = $('#med-mix-panel-count');
     if (pcnt) pcnt.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '';
+    renderKeySubs();
   }
   function mixPanelOpen() { var p = $('#med-mix-panel'); return !!p && !p.hidden; }
-  /* 浮层限高：底边由 CSS 锚在播放键上方，顶边不得越过呼吸圈峰值底线（呼吸态，
-   * 峰值＝基径×1.35、圆心取实测矩形中心）或中央区底线（纯计时态）；列表内部滚动。 */
-  function mixFitPanel() {
-    var p = $('#med-mix-panel'); if (!p || p.hidden) return;
+
+  /* ---------- 设置 sheet 管理（2026-10-28 改版：三键三 sheet） ----------
+   * 主界面三键（呼吸/时长/调音台）各开一个底部 sheet，任一时刻只开一个、
+   * 开新关旧；每 sheet 有收起钮＋点外可收，收起不影响播放状态。
+   * 混音 sheet 沿 v276 机制（mixSetPanel 为其开关入口），此处统一调度。 */
+  var SHEET_SEL = { breath: '#med-sheet-breath', dur: '#med-sheet-dur', mix: '#med-mix-panel' };
+  var KEY_SEL = { breath: '#med-key-breath', dur: '#med-key-dur', mix: '#med-key-mix' };
+  function sheetIsOpen(name) { var el = $(SHEET_SEL[name]); return !!el && !el.hidden; }
+  function anySheetOpen() { return sheetIsOpen('breath') || sheetIsOpen('dur') || sheetIsOpen('mix'); }
+  function syncSheetKey(name) {
+    var key = $(KEY_SEL[name]); if (!key) return;
+    var open = sheetIsOpen(name);
+    key.classList.toggle('on', open);
+    key.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function setSheet(name, open) {
+    if (name === 'mix') { mixSetPanel(open); return; }
+    if (open) { setSheet('mix', false); var other = (name === 'breath') ? 'dur' : 'breath'; setSheet(other, false); }
+    var el = $(SHEET_SEL[name]); if (!el) return;
+    el.hidden = !open;
+    syncSheetKey(name);
+    if (open) fitSheet(el);
+  }
+  function closeSheets() { setSheet('breath', false); setSheet('dur', false); setSheet('mix', false); }
+  /* 浮层定位/限高：底边锚在播放键上方 10px，顶边不得越过呼吸圈峰值底线（呼吸态，
+   * 峰值＝基径×1.35、圆心取实测矩形中心）或舞台底线（纯计时态）；内容内部滚动。 */
+  function fitSheet(p) {
+    if (!p || p.hidden) return;
     var play = $('#med-play'); if (!play) return;
-    var bottomY = play.getBoundingClientRect().top - 10;
+    var pr = play.getBoundingClientRect();
+    p.style.bottom = (window.innerHeight - pr.top + 10) + 'px';
+    var bottomY = pr.top - 10;
     var safeBottom = 0;
     var view = $('#meditation-view');
     var circ = $('#med-breath-circle');
@@ -831,26 +856,62 @@ var Meditation = (function () {
       var r = circ.getBoundingClientRect();
       safeBottom = r.top + r.height / 2 + circ.offsetHeight * 1.35 / 2 + 12;
     } else {
-      var mc = document.querySelector('.med-center');
-      if (mc) safeBottom = mc.getBoundingClientRect().bottom + 12;
+      /* 纯计时态：舞台已延伸至控制层上方（改版），护栏改按头部组（圆点行）底线——
+       * 舞台中下段本就空置，sheet 可用；只护声音名/倒计时/圆点不被盖。 */
+      var dots = $('#med-dots');
+      if (dots) safeBottom = dots.getBoundingClientRect().bottom + 12;
+      else { var mc = document.querySelector('.med-center'); if (mc) safeBottom = mc.getBoundingClientRect().top + 120; }
     }
     var maxH = bottomY - safeBottom;
-    var cap = Math.min(window.innerHeight * 0.46, 340);
+    var cap = Math.min(window.innerHeight * 0.62, 480);
+    if (p.id === 'med-mix-panel') cap = Math.min(window.innerHeight * 0.46, 340);  /* v276 混音口径不变 */
     if (maxH > cap) maxH = cap;
-    if (maxH < 170) maxH = 170;
+    /* 下限 96（v276 原为 170）：改版后呼吸圈变大，圈峰底↔播放键可用带可窄于 170，
+     * 此时保「展开零挤压」优先——sheet 取可用高、内容内部滚动，不许反压圈峰。 */
+    if (maxH < 96) maxH = 96;
     p.style.maxHeight = maxH + 'px';
   }
-  /* 收起只收面板：不动混音轨单与播放；开钮文案/状态同步（展开时呈「收起」） */
+  function fitSheets() { for (var k in SHEET_SEL) { var el = $(SHEET_SEL[k]); if (el && !el.hidden) fitSheet(el); } }
+  function mixFitPanel() { var p = $('#med-mix-panel'); if (p && !p.hidden) fitSheet(p); }
+  /* 收起只收面板：不动混音轨单与播放；键面状态同步（展开时「调音台」键呈 .on） */
   function mixSetPanel(open) {
     var p = $('#med-mix-panel'); if (!p) return;
+    if (open) { setSheet('breath', false); setSheet('dur', false); }
     p.hidden = !open;
-    var b = $('#med-mix-open');
-    if (b) {
-      b.textContent = open ? '收起' : '调混音';
-      b.classList.toggle('on', !!open);
-      b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    syncSheetKey('mix');
+    if (open) fitSheet(p);
+  }
+  /* 呼吸圈基径按舞台实测可用空间取（2026-10-28 改版）：舞台底边由控制层实测高
+   * 界定（--med-controls-h 同步写回 CSS 变量）；基径＝min(屏宽−边距, 圆区高)/1.35，
+   * 峰值恰塞圆区、谷值（×0.60）保下限 120 不失去存在感，短屏同此回落。 */
+  function fitBreathCircle() {
+    var view = $('#meditation-view'); if (!view || view.hidden) return;
+    var controls = document.querySelector('.med-controls');
+    if (controls) view.style.setProperty('--med-controls-h', controls.getBoundingClientRect().height + 'px');
+    var box = $('#med-breath'); if (!box || box.hidden) return;
+    var r = box.getBoundingClientRect();
+    var peak = Math.min(view.clientWidth - 36, r.height - 8);
+    var base = peak / 1.35;
+    if (base > 380) base = 380;
+    if (base < 120) base = 120;
+    box.style.setProperty('--med-circ', base.toFixed(1) + 'px');
+  }
+  /* 三键键面小字摘要：呼吸＝当前方式名、时长＝当前档位、调音台＝已选轨数/未开启 */
+  function renderKeySubs() {
+    var bs = $('#med-key-breath-sub');
+    if (bs) { var p = breathPattern(); bs.textContent = p ? p.name : '关闭'; }
+    var ds = $('#med-key-dur-sub');
+    if (ds) {
+      var on = document.querySelector('#med-dur-row .med-seg.on');
+      var v = on ? on.getAttribute('data-dur') : '15';
+      if (v === 'custom') {
+        var cmEl = $('#med-custom-min');
+        var m = parseInt((cmEl ? cmEl.value : '') || '', 10);
+        ds.textContent = '自选 ' + ((m >= 1 && m <= 180) ? m : 15) + '分钟';
+      } else ds.textContent = v + '分钟';
     }
-    if (open) mixFitPanel();
+    var ms = $('#med-key-mix-sub');
+    if (ms) ms.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '未开启';
   }
   function mixToggleTrack(id) {
     if (id in mix.tracks) {
@@ -923,6 +984,7 @@ var Meditation = (function () {
       cm.hidden = false; go.hidden = false;
       if (min) { cm.value = min; lsSet(LS_CUSTOM, String(min)); }
     } else { cm.hidden = true; go.hidden = true; }
+    renderKeySubs();
   }
   function applyPreset(p) {
     if (!p) return;
@@ -1166,6 +1228,7 @@ var Meditation = (function () {
     updatePlayBtn();
     $('#med-done').hidden = true;
     $('#meditation-view').hidden = true;
+    document.body.classList.remove('med-open');   /* 退出冥想：底部导航恢复 */
   }
 
   /* ---------- 降级播放（HTML5 Audio） ---------- */
@@ -1312,6 +1375,9 @@ var Meditation = (function () {
        否则 setPage 会因 bgEls 为空抛错、视图打不开（2026-10-25 冒烟竞态实证） */
     if (!bgEls.length) init();
     $('#med-done').hidden = true;
+    /* 沉浸口径：先挂 med-open 隐藏底部导航，再显视图——底栏在视图出现前已收，
+     * 不产生可见跳动；舞台/圈径随后按全高实测落位（fitBreathCircle）。 */
+    document.body.classList.add('med-open');
     $('#meditation-view').hidden = false;
     restoreOpts();
     renderMedStats();
@@ -1326,6 +1392,9 @@ var Meditation = (function () {
     seenActive = false;
     updatePlayBtn();
     resetBreathPreview();
+    /* 进页回到主界面态：sheet 全收、圈径按当前舞台实测落位 */
+    closeSheets();
+    fitBreathCircle();
   }
 
   var inited = false;
@@ -1344,6 +1413,7 @@ var Meditation = (function () {
           el.classList.add('on');
           var v = el.getAttribute('data-dur');
           lsSet(LS_DUR, v);
+          renderKeySubs();
           var cm = $('#med-custom-min'), go = $('#med-custom-go');
           if (v === 'custom') { cm.hidden = false; go.hidden = false; cm.focus(); }
           else {
@@ -1357,6 +1427,7 @@ var Meditation = (function () {
     }
     $('#med-custom-min').addEventListener('input', function () {
       lsSet(LS_CUSTOM, this.value);
+      renderKeySubs();
       if (!playing) { totalSec = getSelectedDuration(); showTime(totalSec); }
     });
     /* 自选开始键：未播则开始，播放中则从新时长重计 */
@@ -1405,22 +1476,36 @@ var Meditation = (function () {
       }
       renderMixPanel();
     });
-    $('#med-mix-open').addEventListener('click', function () {
+    /* 三键开合各自 sheet（开新关旧在 setSheet 内统一处理） */
+    $('#med-key-breath').addEventListener('click', function () {
+      setSheet('breath', !sheetIsOpen('breath'));
+    });
+    $('#med-key-dur').addEventListener('click', function () {
+      setSheet('dur', !sheetIsOpen('dur'));
+    });
+    $('#med-key-mix').addEventListener('click', function () {
       mixSetPanel(!mixPanelOpen());
     });
     $('#med-mix-close').addEventListener('click', function () {
       mixSetPanel(false);
     });
-    /* 点面板外收起（播放键/主音量/混音行本身除外，避免打断播放操作与开关切换） */
+    $('#med-sheet-breath-close').addEventListener('click', function () {
+      setSheet('breath', false);
+    });
+    $('#med-sheet-dur-close').addEventListener('click', function () {
+      setSheet('dur', false);
+    });
+    /* 点 sheet 外收起（键面/播放键/主音量除外：键面自身走 click 开合、播放操作不打断） */
     document.addEventListener('pointerdown', function (e) {
-      if (!mixPanelOpen()) return;
+      if (!anySheetOpen()) return;
       var v = $('#meditation-view'); if (!v || v.hidden) return;
       var t = e.target;
-      if (t && t.closest && (t.closest('#med-mix-panel') || t.closest('#med-mix-open') ||
-          t.closest('#med-play') || t.closest('#med-vol') || t.closest('.med-mix-row'))) return;
-      mixSetPanel(false);
+      if (t && t.closest && (t.closest('#med-mix-panel') || t.closest('#med-sheet-breath') ||
+          t.closest('#med-sheet-dur') || t.closest('.med-key') ||
+          t.closest('#med-play') || t.closest('#med-vol'))) return;
+      closeSheets();
     });
-    window.addEventListener('resize', function () { mixFitPanel(); });
+    window.addEventListener('resize', function () { fitSheets(); fitBreathCircle(); });
     $('#med-mix-save').addEventListener('click', function () {
       if (!mixMode()) { mixHint('先选至少一轨再存配方'); return; }
       var name = '';

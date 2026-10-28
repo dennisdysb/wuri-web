@@ -39,37 +39,29 @@
   font-weight:500;text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .med-top-sp{width:40px}
 
-/* ---------- 中央：声音名 + 倒计时 + 圆点 ---------- */
-.med-center{position:absolute;top:29%;left:0;right:0;z-index:3;transform:translateZ(0);text-align:center;pointer-events:none}
-.med-sound-name{color:rgba(245,241,230,.92);font-size:.95rem;letter-spacing:.35em;text-indent:.35em;
+/* ---------- 中央舞台：声音名 + 倒计时小字 + 圆点 + 呼吸圈 + 说明 ----------
+ * 2026-10-28 改版（用户真机反馈）：主界面只留三键＋播放＋音量，倒计时由巨字
+ * 改小字一行，舞台占满顶栏与控制层之间的全部高度、大部分空间让给呼吸圈。
+ * 舞台＝纵向 flex：头部（声音名/倒计时/圆点）→ 呼吸圈区（flex:1 居中）→ 说明行。
+ * 圈基径 --med-circ 由 JS 按舞台实测可用空间写（fitBreathCircle，宽高取小、
+ * 峰值 ×1.35 两端留安全边距、短屏回落保护）；CSS 里的 min() 仅作 JS 未跑时兜底。 */
+.med-center{position:absolute;top:calc(env(safe-area-inset-top,0px) + 92px);left:0;right:0;bottom:var(--med-controls-h,216px);z-index:3;
+  transform:translateZ(0);text-align:center;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center}
+.med-sound-name{color:rgba(245,241,230,.92);font-size:.95rem;letter-spacing:.35em;text-indent:.35em;flex:none;
   transition:opacity .18s ease;text-shadow:0 1px 6px rgba(0,0,0,.7)}
-.med-clock{color:#fff;font-size:4.2rem;font-weight:200;font-variant-numeric:tabular-nums;
-  letter-spacing:.06em;margin:10px 0 18px;text-shadow:0 2px 18px rgba(0,0,0,.65);
+.med-clock{color:#fff;font-size:1.3rem;font-weight:300;font-variant-numeric:tabular-nums;flex:none;
+  letter-spacing:.14em;margin:3px 0 9px;text-shadow:0 1px 10px rgba(0,0,0,.65);
   font-family:var(--serif,Georgia,serif)}
-.med-dots{display:flex;justify-content:center;gap:8px;pointer-events:none}
+.med-dots{display:flex;justify-content:center;gap:8px;pointer-events:none;flex:none}
 .med-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.32)}
 .med-dot.on{background:#e8c877;box-shadow:0 0 8px rgba(232,200,119,.8)}
-/* 呼吸态：中央区整体上移，给放大的呼吸圈让位（纯计时态不受影响，2026-10-25 修）。
- * 2026-10-26 声音引导设置块加入控制层（呼吸态 +49px），中央区再上移至 10.8%
- * 补偿，峰值圈底↔说明行间隙保持正值（412×915/390×844 量测 +40/+1.5px）。
- * 2026-10-28 冥想批：预设行＋混音行再入控制层（约 +70px），三路补偿——
- * 中央区再上移 0.8%（两带同动）、圈径高度预留 350→395px、控制层整体收紧
- * （gap 12→10、padding-top 18→14、预设 chips 改单行横滑不再换行长高）。 */
-#meditation-view.med-breathing .med-center{top:9.2%}
-#meditation-view.med-breathing .med-controls{gap:8px}
-/* 中高带（741–900px）：圈径由 63vh 项绑定、基线间隙最薄，中央区再上移 0.6% 补足 */
-@media (min-height:741px) and (max-height:900px){
-  #meditation-view.med-breathing .med-center{top:8.4%}
-}
-/* 呼吸圈尺寸/位置（2026-10-26 用户真机反馈改）：圈下移 + 峰值显著放大。
- * --med-circ 基径带高度项：峰值直径=基径×1.35 必须塞进「圆点行底↔底部说明」之间的可用带
- * （该带高≈0.85×屏高−459px），故基径≤(63vh−350px) 时峰值恰好两端各留约 6–7px
- * （2026-10-28 控制层增高后预留改 410px、中央区同步上移，口径不变）；
- * margin-top 随基径联动（7px+0.175×基径），使峰值上沿与圆点行的间距恒定。
- * 412×915 实测：基径 200、峰值 270、圈心下移约 38px（详见 breath-shots 量测）。 */
-.med-breath{--med-circ:min(50vw,200px,calc(63vh - 410px));margin:16px auto 0;margin-top:calc(7px + var(--med-circ)*.175);pointer-events:none}
+/* 纯计时态（无呼吸圈）：头部组垂直居中偏上，不贴顶 */
+#meditation-view:not(.med-breathing) .med-center{padding-top:9vh}
+.med-breath{--med-circ:min(58vw,300px,52vh);width:100%;flex:1 1 auto;min-height:0;
+  display:flex;align-items:center;justify-content:center;pointer-events:none}
 .med-breath[hidden]{display:none}
-.med-breath-circle{width:var(--med-circ);height:var(--med-circ);margin:0 auto;border-radius:50%;border:1px solid rgba(255,255,255,.5);
+.med-breath-circle{width:var(--med-circ);height:var(--med-circ);flex:none;border-radius:50%;border:1px solid rgba(255,255,255,.5);
   background:rgba(12,12,16,.34);color:#fff;display:flex;align-items:center;justify-content:center;
   backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 0 0 8px rgba(255,255,255,.05),0 8px 28px rgba(0,0,0,.28);
   transform-origin:center;will-change:transform}
@@ -78,7 +70,7 @@
 .med-breath-count{font-family:var(--serif,Georgia,serif);font-size:2rem;font-weight:200;line-height:1.15;font-variant-numeric:tabular-nums}
 /* 说明整段居中：原先被塞进 118px 宽的 .med-breath 容器、自身 210px 溢出右偏（2026-10-25 修） */
 /* 说明已移至底部控制层首位（chips 行上方，间距由 .med-controls 的 gap 提供）：圈周留空、更醒目（2026-10-25 v136） */
-.med-breath-note{width:min(320px,84vw);margin:0 auto;text-align:center;color:rgba(245,241,230,.78);font-size:.74rem;line-height:1.45;
+.med-breath-note{width:min(320px,84vw);margin:8px auto 4px;flex:none;text-align:center;color:rgba(245,241,230,.78);font-size:.74rem;line-height:1.45;
   text-shadow:0 1px 6px rgba(0,0,0,.72)}
 .med-breath-note[hidden]{display:none}
 
@@ -131,13 +123,11 @@
 .med-vol{width:min(64%,260px);accent-color:#fff}
 
 @media (max-height:740px){
-  .med-center{top:23%}
-  #meditation-view.med-breathing .med-center{top:8%}
-  .med-clock{font-size:3.35rem;margin:6px 0 10px}
-  .med-breath{--med-circ:132px;margin-top:26px}
-  .med-breath-circle{width:132px;height:132px}
+  .med-center{top:calc(env(safe-area-inset-top,0px) + 84px)}
+  #meditation-view:not(.med-breathing) .med-center{padding-top:4vh}
   .med-breath-count{font-size:1.55rem}
   .med-controls{gap:8px;padding-top:10px}
+  .med-play{width:64px;height:64px}
 }
 
 /* ---------- 冥想完成 ---------- */
@@ -178,7 +168,7 @@
  * 且无收起入口。改浮层后不占流内高度；底边锚在播放键上方、顶边由 JS 按
  * 呼吸圈峰值底线动态限高（mixFitPanel），列表区内部滚动。 */
 .med-mix-panel{position:absolute;left:50%;transform:translateX(-50%);
-  bottom:calc(env(safe-area-inset-bottom,0px) + 136px);z-index:4;
+  bottom:calc(var(--med-controls-h,216px) + 10px);z-index:4;
   width:min(560px,92vw);max-height:300px;display:flex;flex-direction:column;
   background:rgba(10,10,14,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:10px 12px;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 12px 34px rgba(0,0,0,.45)}
@@ -201,6 +191,39 @@
   color:#f5f1e6;border-radius:999px;padding:4px 10px;font-size:.78rem}
 .med-mix-recipe-del{margin-left:6px;opacity:.75;font-size:.72rem}
 .med-mix-hint{color:#e8c877;font-size:.76rem;min-height:1em;margin:6px 0 0}
+
+/* ---------- 主界面三键＋设置 sheet（2026-10-28 改版） ----------
+ * 三键同排：呼吸（预设/呼吸方式/声音引导）· 时长（时长/间隔磬）· 调音台（混音）。
+ * 键面＝名称＋一行小字摘要（当前呼吸方式/时长/已选轨数，JS renderKeySubs 同步）。
+ * sheet 与混音面板同族：底部浮层、底边锚控制层上方（JS fitSheet 按播放键实测
+ * 定位＋按呼吸圈峰值底线限高），任一时刻只开一个；颜色沿本页白＋鎏金口径，
+ * 背景图红移走全局滤镜链（与本页既有口径一致，不写死绕开）。 */
+.med-keys{display:flex;gap:8px;width:min(560px,92vw)}
+.med-key{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:8px 4px 7px;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.12);
+  color:#fff;border-radius:14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.med-key:active{transform:scale(.97)}
+.med-key.on{background:#e8c877;border-color:transparent;color:#1a1a1a}
+.med-key-name{font-size:.92rem;letter-spacing:.16em;text-indent:.16em;line-height:1.25;white-space:nowrap}
+.med-key-sub{font-size:.66rem;opacity:.78;line-height:1.3;white-space:nowrap;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis}
+.med-key.on .med-key-sub{opacity:.85}
+.med-sheet{position:absolute;left:50%;transform:translateX(-50%);
+  bottom:calc(var(--med-controls-h,216px) + 10px);z-index:4;
+  width:min(560px,92vw);max-height:430px;display:flex;flex-direction:column;
+  background:rgba(10,10,14,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:10px 12px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 12px 34px rgba(0,0,0,.45)}
+.med-sheet[hidden]{display:none}
+.med-sheet-body{overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:13px;padding-bottom:2px}
+.med-sheet-sec{display:flex;flex-direction:column;gap:7px;flex:none}
+.med-sheet-sec-title{color:rgba(245,241,230,.85);font-size:.78rem;letter-spacing:.22em;flex:none}
+.med-sheet .med-dur-row{flex-wrap:wrap}
+.med-sheet .med-cue-block{align-items:stretch;width:100%;flex:none}
+.med-sheet .med-cue-row{justify-content:flex-start}
+.med-sheet .med-bell-row{padding:2px 0}
+/* 混音总开关入面板头行：开关靠右、收起钮随后（原主界面混音行已撤） */
+.med-mix-switch{margin-left:auto}
+.med-mix-panel .med-mix-close{margin-left:0}
 /* 结束页增项 */
 .med-done-stats{color:#e8c877;font-size:.88rem;margin:-12px 0 14px;letter-spacing:.06em}
 .med-done-mile{color:#f5f1e6;font-size:.95rem;margin:0 0 14px;letter-spacing:.08em}
