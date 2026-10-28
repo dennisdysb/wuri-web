@@ -2169,25 +2169,27 @@ body.sky-red #dz-lightbox .dz-lightbox-cap{color:#f2c1b2}
 .dz-body{padding:4px 0 8px}
 .dz-note{font-size:.82em;color:var(--ink-2);margin:4px 0 8px}
 .dz-search input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line-soft);border-radius:10px;background:transparent;color:var(--ink);font-size:.95em}
-.dz-bu{display:flex;align-items:center;gap:10px;padding:13px 6px;border-bottom:1px solid var(--line-soft);cursor:pointer;font-family:var(--serif);font-size:1.35rem;font-weight:400;color:var(--ink)}/* 字体/字号/字重与经文列表书名行（.jing-title computed：serif 1.35rem/400）统一、同一宋体口径（2026-10-27 用户反馈：分类行字体与上面经文不一样；此前 v139 对齐段头 1.12em/700 的口径作废） */
+.dz-bu{display:flex;align-items:center;gap:10px;padding:13px 6px;margin-top:10px;border-bottom:1px solid var(--line);cursor:pointer;font-family:var(--serif);font-size:1.42rem;font-weight:700;color:var(--ink)}/* 丛书分层（2026-10-27 用户反馈：部与单经同字号同宝盒、纲目不分无丛书感，父级裁定）：部为「纲」——字号 1.35→1.42rem、字重 400→700、上方 margin 10px 与上一组拉开、行下分隔线 --line-soft→--line 稍深；字体仍 var(--serif) 与书名行同一宋体（2026-10-27 字体统一口径不变，只分大小/粗细/位置） */
+.dz-bu .jing-book{width:36px;height:36px;font-size:1.15rem;line-height:34px;border-radius:7px}/* 部行宝盒放大 44→36 档位中的纲级规格（基规格 .jing-book 不动，精选行不受影响）：盒 36×36、盒内字约 1.15rem */
 .dz-bu:active{background:var(--teal-wash)}
 .dz-count{margin-left:auto;font-size:.72em;color:var(--ink-2)}/* 部数属右侧信息组，整体再小一号贴右（2026-10-27 用户定：都留，但缩小往右靠给书名让宽） */
 /* 分架标题（.jing-sec-h）内计数后缀与 .dz-bu 行内共用 .dz-count 规格（字号/颜色），
    但标题是居中 flex：取消 margin-left:auto 的吸空，三架计数一律紧贴标题（v147 用户反馈统一） */
 .jing-sec-h .dz-count{margin-left:0}
 .dz-bu .jing-go{margin-left:2px}
-.dz-bu .dz-count{font-size:.62em}/* 部行本体已放大到 1.35rem，其内计数按 .62em 才较旧口径（14.3px）真小一号（≈13.4px） */
+.dz-bu .dz-count{font-size:.8rem}/* 丛书分层裁定：部数定为 .8rem 灰字置右（旧 .62em 随部行字号浮动，改 rem 定值） */
 .dz-works{border-bottom:1px solid var(--line-soft)}
-.dz-work{display:flex;align-items:center;gap:6px;padding:11px 4px 11px 6px;border-bottom:1px solid var(--line-soft);cursor:pointer}/* 行首加「藏」宝盒（.jing-book 与精选行同规格，2026-10-27 用户反馈批·文库视觉线）：对齐改 center 同精选行口径；宝盒占位约 50px，为不让长题折行变差，左缩进 18→6（与部行宝盒同列对齐）、gap 10→6、右内边距 6→4，能收回的宽度全收回给书名（.dz-wt flex:1），右侧信息组仍贴右 */
+.dz-work{display:flex;align-items:center;gap:6px;padding:9px 4px 9px 22px;border-bottom:1px solid var(--line-soft);border-bottom:1px solid color-mix(in srgb,var(--line-soft) 55%,transparent);cursor:pointer}/* 丛书分层（2026-10-27 裁定）：单经为「目」——整行左缩进 16px（padding-left 6→22，整块缩进非标题首行缩进，与部行拉开层级；此前「宝盒同列对齐」口径就此作废）、行上下 padding 11→9 收紧、行间分隔线降至 --line-soft 的 55% 更浅（前一行 var(--line-soft) 为 color-mix 不支持时的回落）；行首「藏」宝盒保留、规格由 .dz-work .jing-book 覆盖缩小 */
+.dz-work .jing-book{width:26px;height:26px;font-size:.8rem;line-height:24px;border-radius:6px}/* 目级宝盒：盒 26×26、盒内字约 .8rem（基规格 .jing-book 不动） */
 .dz-work:active{background:var(--teal-wash)}
 /* 返回定位高亮（2026-10-27 用户反馈）：从阅读器返回列表时给刚读的那条加短暂金色描边，走 --gold/--gold-wash 变量链（日/夜/红光自适应）。
    改淡＋缩短（同日晚用户复验反馈：原版太突兀）：描边 2px 全金→1.5px 半透（color-mix 50%），底色 gold-wash 同降 50%，
    总时长 2.4s→1.5s（保持段 55%≈0.83s，其后淡出）；color-mix 不支持的旧内核回落全色声明（后写覆盖为渐进增强）。 */
 @keyframes libRetHl{0%,55%{background:var(--gold-wash);background:color-mix(in srgb,var(--gold-wash) 50%,transparent);box-shadow:inset 0 0 0 1.5px var(--gold);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 50%,transparent)}100%{background:transparent;box-shadow:inset 0 0 0 0 rgba(0,0,0,0)}}
 .lib-ret-hl{animation:libRetHl 1.5s ease forwards}
-.dz-wt{flex:1;min-width:0;color:var(--ink);font-family:var(--serif);font-size:1.35rem}/* 字号对齐精选层书名 .jing-title 的 computed 1.35rem；行高去 1.45 改继承 body 1.65，与精选书名一致（v139）；字体补 var(--serif) 与书名行同一宋体口径（2026-10-27，日间 body 为 sans 时原先继承成黑体感） */
-.dz-lei{flex:none;font-size:.56em;line-height:1.6;color:var(--gold,#a8823c);border:1px solid currentColor;border-radius:5px;padding:0 3px}/* 右侧信息组整体再小一号（2026-10-27 用户定）：类签 .62em→.56em、内边距 0 4px→0 3px；v142 曾 .72em→.62em */
-.dz-wm{flex:none;font-size:.62em;color:var(--muted)}/* 右侧信息组整体再小一号（2026-10-27 用户定）：卷·字数 .69em→.62em；v142 曾 .76em→.69em */
+.dz-wt{flex:1;min-width:0;color:var(--ink);font-family:var(--serif);font-size:1.08rem;font-weight:400}/* 丛书分层裁定：经名 1.35→1.08rem、字重定 400，与部名（1.42rem/700）拉开约 1.3 倍层级差；字体仍 var(--serif) 同一宋体（v139/字体统一口径不变） */
+.dz-lei{flex:none;font-size:.56rem;line-height:1.6;color:var(--gold,#a8823c);color:color-mix(in srgb,var(--gold,#a8823c) 62%,var(--muted));border:1px solid currentColor;border-radius:5px;padding:0 3px}/* 丛书分层裁定：右侧信息组定 rem 口径（组约 .62rem 上限）且灰一档——类签 .56em→.56rem 定值、金色向 --muted 混 38% 灰化（前一行纯金为 color-mix 回落）；v142 曾 .72em→.62em */
+.dz-wm{flex:none;font-size:.62rem;color:var(--faint)}/* 丛书分层裁定：卷·字数 .62em→.62rem 定值、颜色 --muted→--faint 灰一档（变量链日/夜各自成立）；v142 曾 .76em→.69em */
 .dz-empty{padding:14px 6px;color:var(--ink-2);font-size:.9em}
 .dz-hitn{padding:10px 6px 2px;color:var(--ink-2);font-size:.85em}
 
