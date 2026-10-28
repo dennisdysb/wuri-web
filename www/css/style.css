@@ -2482,16 +2482,20 @@ body.sky-red .hdr-sign .brand { color:#f2c1b2; }
   #view-house-report .card { box-shadow:none !important; break-inside:avoid; }
   #view-house-report .hdr-planbox, #view-house-report .hdr-chart { break-inside:avoid; }
 }
-#fs-point-row { align-items:center; gap:10px; flex-wrap:wrap; }
+/* 测点区（2026-10-27 反馈批·排版）：标题居中加粗统领、五钮一排等分 */
+#fs-point-row { flex-direction:column; align-items:stretch; gap:9px; }
 #fs-point-row[hidden] { display:none; }
-.fs-pt-caps { display:flex; flex-wrap:wrap; gap:7px; }
-.fs-pt-chip { font-family:var(--serif); font-size:.88rem; letter-spacing:.08em; color:var(--ink-2);
-  border:1px solid var(--line); background:var(--paper-2); border-radius:999px; padding:6px 14px; cursor:pointer; }
+.fs-pt-title { font-family:var(--serif); font-size:1rem; font-weight:700; letter-spacing:.28em;
+  text-indent:.28em; text-align:center; color:var(--ink-2); }
+[data-theme="night"] .fs-pt-title { color:var(--gold); }
+.fs-pt-caps { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; width:100%; }
+.fs-pt-chip { font-family:var(--serif); font-size:.9rem; letter-spacing:.08em; color:var(--ink-2);
+  border:1px solid var(--line); background:var(--paper-2); border-radius:999px; padding:7px 0; text-align:center; cursor:pointer; }
 .fs-pt-chip.on { color:var(--gold-deep); border-color:rgba(162,129,59,.6); background:var(--gold-wash); font-weight:700; }
 [data-theme="night"] .fs-pt-chip.on { color:var(--gold); }
 body.sky-red .fs-pt-chip.on { color:#f2c1b2; border-color:rgba(255,96,72,.5); background:rgba(26,8,6,.4); }
 .fs-pt-caps.need .fs-pt-chip { border-color:var(--cinnabar); }
-.fs-pt-hint { flex:0 0 100%; margin:0; font-size:.8rem; color:var(--cinnabar); letter-spacing:.06em; }
+.fs-pt-hint { margin:0; font-size:.8rem; color:var(--cinnabar); letter-spacing:.06em; text-align:center; }
 .fs-pt-hint[hidden] { display:none; }
 
 /* 住户（补丁二） */
