@@ -2195,14 +2195,30 @@ var JingWen = (function () {
       var paraIdx = +(para.getAttribute('data-para') || 0);
 
       function textOffset(node, offsetInNode) {
+        /* 边界点 → 段内（非 RT）文本偏移。边界容器既可能是文本节点，
+           也可能是元素节点：安卓在 ruby 注音文本中选字时常把选区边界锚在
+           <ruby>/段落元素上（子节点序号），旧实现只认文本节点、锚到元素时
+           恒返回段长，起止相等使整段选区被丢弃、高亮条永不弹（道藏全藏
+           注音默认开故必现，内丹无 ruby 不受影响，2026-10-27 真机报）。
+           计量法：取「段首→边界点」前缀 Range 的克隆片段，累计其中非 RT
+           文本长度——不依赖 compareBoundaryPoints 的符号约定（其实测
+           END_TO_START 等跨点比较与同点比较符号相反，逐节点比较法曾在
+           文本节点边界上误判，已弃），文本/元素两种边界结果都精确。 */
+        var pre = document.createRange();
+        try {
+          pre.selectNodeContents(para);
+          pre.setEnd(node, offsetInNode);
+        } catch (e) { return 0; }
         var total = 0;
-        var walker = document.createTreeWalker(para, NodeFilter.SHOW_TEXT, null, false);
-        var n;
-        while ((n = walker.nextNode())) {
-          if (n.parentNode && n.parentNode.tagName === 'RT') continue;
-          if (n === node) return total + offsetInNode;
-          total += n.textContent.length;
-        }
+        try {
+          var frag = pre.cloneContents();
+          var walker = document.createTreeWalker(frag, NodeFilter.SHOW_TEXT, null, false);
+          var n;
+          while ((n = walker.nextNode())) {
+            if (n.parentNode && n.parentNode.tagName === 'RT') continue;
+            total += n.textContent.length;
+          }
+        } catch (e) {}
         return total;
       }
 
