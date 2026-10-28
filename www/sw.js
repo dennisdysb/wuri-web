@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v255-20261028-v255';
+const CACHE = 'wuri-v256-20261028-v256';
 /* 冥想资产专用缓存（场景图 10＋环境音/磬 11，约 28MB）：安装期整包预缓存，
  * 播放/显示一律本地出（用户 2026-10-25 定调「下载 App 时就该下载下来」）。
  * 与主缓存分开：单件失败不拖垮整版 SW 更新，缺件运行时回落网络现拉。 */
@@ -45,7 +45,7 @@ const ASSETS = [
   './img/logo-96.png',
   './img/qr-wechat.png',
   './img/qr-alipay.jpg',
-  './css/style.css?v=255',
+  './css/style.css?v=256',
   './css/qimen.css?v=78',
   './css/meditation.css?v=73',
   './icon-192.png',
@@ -166,6 +166,38 @@ self.addEventListener('fetch', e => {
   }
   // JS 文件：完全不拦截，让浏览器直接请求（SW 缓存 JS 出问题，2026-10-11）
   if (isJs) return;
+  // 道藏正文负载（texts/、texts-punct/ 分片＋注音字典＋图版清单）：缓存优先＋后台更新（SWR）。
+  // 这类文件按 KR 号寻址、内容只随发版变更，走通用 feed 的网络优先＋no-store 时，每次开卷
+  // （含重复开同一部）都白付一整趟网络往返——2026-10-28 用户真机实测短经点开也要久等
+  // 「载入中…」。缓存优先后二次开卷零网络；后台静默刷新保证内容更新至迟下下次开卷生效。
+  // index.json 不在此列（仍走网络优先：目录与标点注册表须先于正文新鲜）。旧 SW 已把这些
+  // 响应存入同一 CACHE（同名键），升级后首开即命中存量缓存，向后兼容。
+  var isDzContent = url.pathname.indexOf('/content/daozang/') !== -1 &&
+    (url.pathname.indexOf('/texts/') !== -1 || url.pathname.indexOf('/texts-punct/') !== -1 ||
+     url.pathname.endsWith('/pinyin.json') || url.pathname.endsWith('/images.json'));
+  if (isDzContent && e.request.method === 'GET') {
+    e.respondWith(
+      caches.open(CACHE).then(function (c) {
+        return c.match(e.request).then(function (hit) {
+          var net = fetch(e.request).then(function (res) {
+            if (res.ok && url.origin === location.origin) {
+              var copy = res.clone();
+              c.put(e.request, copy);
+            }
+            return res;
+          });
+          if (hit) {
+            net.catch(function () {});
+            return hit;
+          }
+          return net.catch(function () {
+            return new Response('{"error":"feed unavailable"}', { status: 504, headers: { 'Content-Type': 'application/json' } });
+          });
+        });
+      })
+    );
+    return;
+  }
   // 远程内容数据源（content/*.json）与星官数据（data/*.json）：网络优先＋no-store，保证内容更新即时生效；
   // 网络失败才回落缓存里的上一版 JSON，绝不回落 index.html（2026-10-19 内容通道上线）
   // data/*.json 原走文末通用 cache-first，用户端会滞留旧数据，2026-10-23 并入本分支（同 feed 规范）

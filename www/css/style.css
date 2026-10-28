@@ -2206,7 +2206,8 @@ body.sky-red #dz-lightbox .dz-lightbox-cap{color:#f2c1b2}
 .dz-bu .jing-go{margin-left:2px}
 .dz-bu .dz-count{font-size:.8rem}/* 丛书分层裁定：部数定为 .8rem 灰字置右（旧 .62em 随部行字号浮动，改 rem 定值） */
 .dz-works{border-bottom:1px solid var(--line-soft)}
-.dz-work{display:flex;align-items:center;gap:6px;padding:9px 4px 9px 22px;border-bottom:1px solid var(--line-soft);border-bottom:1px solid color-mix(in srgb,var(--line-soft) 55%,transparent);cursor:pointer}/* 丛书分层（2026-10-27 裁定）：单经为「目」——整行左缩进 16px（padding-left 6→22，整块缩进非标题首行缩进，与部行拉开层级；此前「宝盒同列对齐」口径就此作废）、行上下 padding 11→9 收紧、行间分隔线降至 --line-soft 的 55% 更浅（前一行 var(--line-soft) 为 color-mix 不支持时的回落）；行首「藏」宝盒保留、规格由 .dz-work .jing-book 覆盖缩小 */
+.dz-work{display:flex;align-items:center;gap:6px;padding:9px 4px 9px 22px;border-bottom:1px solid var(--line-soft);border-bottom:1px solid color-mix(in srgb,var(--line-soft) 55%,transparent);cursor:pointer}
+[data-dz-work].dz-row-loading{opacity:.45}/* 开卷在途示意（2026-10-28）：行内容保持原样仅变淡，不再以「载入中…」顶替整行（目录行与检索命中行共用） *//* 丛书分层（2026-10-27 裁定）：单经为「目」——整行左缩进 16px（padding-left 6→22，整块缩进非标题首行缩进，与部行拉开层级；此前「宝盒同列对齐」口径就此作废）、行上下 padding 11→9 收紧、行间分隔线降至 --line-soft 的 55% 更浅（前一行 var(--line-soft) 为 color-mix 不支持时的回落）；行首「藏」宝盒保留、规格由 .dz-work .jing-book 覆盖缩小 */
 .dz-work .jing-book{width:26px;height:26px;font-size:.8rem;line-height:24px;border-radius:6px}/* 目级宝盒：盒 26×26、盒内字约 .8rem（基规格 .jing-book 不动） */
 .dz-work:active{background:var(--teal-wash)}
 /* 返回定位高亮（2026-10-27 用户反馈）：从阅读器返回列表时给刚读的那条加短暂金色描边，走 --gold/--gold-wash 变量链（日/夜/红光自适应）。

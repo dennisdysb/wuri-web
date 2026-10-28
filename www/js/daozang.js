@@ -16,6 +16,7 @@
   var pyOverrides = null;   // {word: [py,...]}
   var dictLoading = null;
   var workCache = {};       // id -> JINGWEN entry
+  var workLoading = {};     // id -> true（openWork 在途，防重复点击重入）
   var imgData = null;       // images.json 解析结果 {version, works:{KRID:[锚点]}}
   var imgLoading = null;    // images.json 在途回调队列
   var openBu = {};          // bu -> true（重渲目录时恢复展开）
@@ -206,6 +207,61 @@
      使统一检索的书名阶段不等临查才拉索引（264K 单文件，解析后驻内存） */
   window.__wuri_dzPreload = ensureIndex;
 
+  /* ---------- 开卷提速（2026-10-28 用户真机：短经点开也要等「载入中…」） ----------
+   * 实测耗时结构：一趟并行（原文＋标点＋图清单）＋字典串行一趟＋注音/首渲。
+   * 慢在请求趟数与往返、不在字节。对症：字典与图清单在目录浏览期空闲预载、
+   * 可见行正文空闲预取进 SW 缓存、字典迟到不堵开卷（到后补注）。 */
+  function dzIdle(fn) {
+    if (window.requestIdleCallback) { try { requestIdleCallback(fn, { timeout: 2500 }); return; } catch (e) {} }
+    setTimeout(fn, 900);
+  }
+  function dzPreloadAssets() {
+    dzIdle(function () { ensureDict(function () {}); ensureImages(function () {}); });
+  }
+  /* 可见行预取：行进入视口（含 400px 预热边）即空闲预拉正文（＋标点）分片，
+     响应经 SW 缓存优先分支落缓存，点开时 fetch 直接命中、零网络等待。
+     并发 2、省流模式（saveData）跳过；失败静默（点击路径自会重试）。 */
+  var pfSeen = {}, pfQueue = [], pfActive = 0, pfObs = null;
+  function pfRun() {
+    while (pfActive < 2 && pfQueue.length) {
+      var id = pfQueue.shift();
+      pfActive++;
+      var done = function () { pfActive--; pfRun(); };
+      var urls = [FEED_DIR + 'texts/' + id + '.json'];
+      if (hasPunct(id)) urls.push(FEED_DIR + 'texts-punct/' + id + '.json');
+      Promise.all(urls.map(function (u) {
+        return fetch(u).then(function (r) { return r.text(); }).catch(function () {});
+      })).then(done, done);
+    }
+  }
+  function pfAdd(id, front) {
+    if (!id || pfSeen[id] || workCache[id] || workLoading[id]) return;
+    try { if (navigator.connection && navigator.connection.saveData) return; } catch (e) {}
+    pfSeen[id] = true;
+    if (front) pfQueue.unshift(id); else pfQueue.push(id);
+    pfRun();
+  }
+  function pfWatch(root) {
+    if (!root || !('IntersectionObserver' in window)) return;
+    if (pfObs) { try { pfObs.disconnect(); } catch (e) {} }
+    pfObs = new IntersectionObserver(function (es) {
+      es.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        pfObs.unobserve(en.target);
+        var id = en.target.getAttribute('data-dz-work');
+        dzIdle(function () { pfAdd(id); });
+      });
+    }, { rootMargin: '400px 0px' });
+    root.querySelectorAll('[data-dz-work]').forEach(function (el) { pfObs.observe(el); });
+  }
+  /* 手指/鼠标按下行时抢先急拉（早于 click 数十毫秒，正文＋标点并行） */
+  ['touchstart', 'mousedown'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) {
+      var wk = e.target && e.target.closest ? e.target.closest('[data-dz-work]') : null;
+      if (wk) pfAdd(wk.getAttribute('data-dz-work'), true);
+    }, { capture: true, passive: true });
+  });
+
   /* 逐字注音：审读表词组（最长匹配）优先，其次字典单字默认；无读音留空 */
   function annotateText(t, dict, ovr) {
     var out = new Array(t.length);
@@ -287,6 +343,8 @@
         + '<div class="dz-works" data-dz-works="' + esc(bu) + '"' + (openBu[bu] ? '' : ' hidden') + '>'
         + (openBu[bu] ? worksOfBu(bu).map(workRow).join('') : '') + '</div>';
     }).join('');
+    dzPreloadAssets();
+    pfWatch(cats);
   }
   function renderFold(host) {
     var fold = document.createElement('div');
@@ -381,18 +439,32 @@
        closeReader 时统一恢复原分类原滚动位（__wuriLibCapture） */
     if (window.__wuriLibCapture) { try { window.__wuriLibCapture(id, rowEl); } catch (e) {} }
     if (workCache[id]) { doOpen(workCache[id]); return; }
-    var old = rowEl ? rowEl.innerHTML : '';
-    if (rowEl) rowEl.innerHTML = '<span class="dz-wt">载入中…</span>';
+    if (workLoading[id]) return; /* 在途：首击已负责开卷 */
+    workLoading[id] = true;
+    /* 行内容保持原样（书名/卷数在位），只以变淡示在途——不再用「载入中…」顶替整行
+       （2026-10-28 用户真机：短经点开行间挂着「载入中…」迟迟不消失，观感如卡死） */
+    if (rowEl) rowEl.classList.add('dz-row-loading');
+    var settleRow = function () { if (rowEl) rowEl.classList.remove('dz-row-loading'); };
     ensureIndex(function () {
       var pText = fetch(FEED_DIR + 'texts/' + id + '.json').then(function (r) { return r.json(); });
       var pPunct = hasPunct(id)
         ? fetch(FEED_DIR + 'texts-punct/' + id + '.json').then(function (r) { return r.json(); }).catch(function () { return null; })
         : Promise.resolve(null);
+      /* 图清单只为极少数有图部服务，不许它堵住全部开卷：已载入即同步取；
+         未载入时与 600ms 竞速，超时按无图开卷且不入 workCache（下次开卷重建补图） */
       var pImg = new Promise(function (res) {
-        ensureImages(function (d) { res((d && d.works && d.works[id]) || null); });
+        if (imgData) { res({ anchors: (imgData.works && imgData.works[id]) || null, known: true }); return; }
+        var done = false;
+        ensureImages(function (d) {
+          if (!done) { done = true; res({ anchors: (d && d.works && d.works[id]) || null, known: true }); }
+        });
+        setTimeout(function () {
+          if (!done) { done = true; res({ anchors: null, known: false }); }
+        }, 600);
       });
       Promise.all([pText, pPunct, pImg]).then(function (res) {
-        var w = res[0], pw = res[1], anchors = res[2];
+        workLoading[id] = false;
+        var w = res[0], pw = res[1], anchors = res[2].anchors, imgKnown = res[2].known;
         var entry = {
           id: w.id, title: w.title,
           /* 分类/编号不在书头显示（2026-10-27 用户定）：随 dzMeta 交阅读器，文末一行小字交代 */
@@ -417,15 +489,16 @@
           if (entry.sectionsPunct) entry.sectionsPunct = dzApplyImages(entry.sectionsPunct, anchors);
         }
         applyDzMode(entry);
-        workCache[id] = entry;
+        /* 图清单竞速超时（imgKnown=false）时条目可能缺图：不入 workCache，
+           下次开卷时图清单多半已到、重建即补图（本次开卷内容不受影响） */
+        if (imgKnown) workCache[id] = entry;
         window.JINGWEN = window.JINGWEN || {};
         window.JINGWEN[id] = entry;
-        /* 成功也要还原行内容：否则返回列表时刚读的那条永远停在「载入中…」
-           （与返回定位高亮叠加后更显眼，2026-10-27 冒烟截图实证） */
-        if (rowEl) rowEl.innerHTML = old;
+        settleRow();
         doOpen(entry);
       }).catch(function () {
-        if (rowEl) rowEl.innerHTML = old;
+        workLoading[id] = false;
+        settleRow();
         if (window.showToast) showToast('载入失败，请检查网络后重试');
       });
     });
@@ -519,17 +592,16 @@
   function doOpen(entry) {
     var pyOn = true; /* 与阅读器一致：未设置时默认开（LS 为 '0' 才是关） */
     try { pyOn = localStorage.getItem('wuri_jing_py') !== '0'; } catch (e) {}
-    var go = function () {
-      annotateSection(entry, 0);
-      if (window.JingWen && JingWen.openReader) JingWen.openReader(entry.id);
-    };
+    /* 字典（224K）未到不再堵门等它（旧口径最长干等 5 秒，实测为短经冷开的
+       第二趟串行往返）：先按现状注音开卷，字典到达后经阅读器既有重注机制
+       （__wuri_dzOnPyToggle）补注已渲染卷；未渲染卷在懒填充时自动按新字典注。
+       注音关时不强求字典（浏览目录时已空闲预载，多半早已就位）。 */
+    annotateSection(entry, 0);
+    if (window.JingWen && JingWen.openReader) JingWen.openReader(entry.id);
     if (pyOn && !pyDict) {
-      var done = false;
-      ensureDict(function () { if (!done) { done = true; go(); } });
-      setTimeout(function () { if (!done) { done = true; go(); } }, 5000);
-    } else {
-      if (pyOn && !pyDict) ensureDict(function () {});
-      go();
+      ensureDict(function (ok) {
+        if (ok && window.__wuri_dzOnPyToggle) { try { window.__wuri_dzOnPyToggle(); } catch (e) {} }
+      });
     }
   }
 
@@ -555,6 +627,7 @@
         if (willOpen && !wrap.innerHTML) wrap.innerHTML = worksOfBu(name).map(workRow).join('');
         wrap.hidden = !willOpen;
         openBu[name] = willOpen;
+        if (willOpen) pfWatch(bu.parentNode); /* 重挂全目录观察（pfWatch 内 disconnect 旧观察） */
         dzNotifySave();
       }
       return;
