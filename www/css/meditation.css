@@ -50,7 +50,7 @@
   display:flex;flex-direction:column;align-items:center}
 .med-sound-name{color:rgba(245,241,230,.92);font-size:.95rem;letter-spacing:.35em;text-indent:.35em;flex:none;
   transition:opacity .18s ease;text-shadow:0 1px 6px rgba(0,0,0,.7)}
-.med-clock{color:#fff;font-size:1.3rem;font-weight:300;font-variant-numeric:tabular-nums;flex:none;
+.med-clock{color:#fff;font-size:2rem;font-weight:300;font-variant-numeric:tabular-nums;flex:none;
   letter-spacing:.14em;margin:3px 0 9px;text-shadow:0 1px 10px rgba(0,0,0,.65);
   font-family:var(--serif,Georgia,serif)}
 .med-dots{display:flex;justify-content:center;gap:8px;pointer-events:none;flex:none}
@@ -163,14 +163,15 @@
 .med-mix-open{margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);
   color:#fff;border-radius:999px;padding:4px 12px;font-size:.78rem}
 .med-mix-open.on{background:#e8c877;border-color:transparent;color:#1a1a1a;font-weight:600}
-/* 混音面板＝底部浮层 sheet（2026-10-28 修）：原先在 .med-controls 流内展开，
- * 整列被向上顶进 .med-center、压住呼吸圈中心文字（412/390 场实测压 16/26px），
- * 且无收起入口。改浮层后不占流内高度；底边锚在播放键上方、顶边由 JS 按
- * 呼吸圈峰值底线动态限高（mixFitPanel），列表区内部滚动。 */
+/* 混音面板＝底部大面板（2026-10-28 二轮真机反馈改定）：v276 曾作浮层 sheet
+ * 锚播放键上方、按圈峰底线动态限高，但面板被压得太扁、内容看不全。现改贴底
+ * 大面板：高按内容自适应（52–82vh，JS fitSheet 按顶栏护栏写 min/max-height），
+ * 展开覆盖下半部舞台与控制区属预期（覆盖≠挤压，布局尺寸不动），列表区内部滚动。 */
 .med-mix-panel{position:absolute;left:50%;transform:translateX(-50%);
-  bottom:calc(var(--med-controls-h,216px) + 10px);z-index:4;
-  width:min(560px,92vw);max-height:300px;display:flex;flex-direction:column;
-  background:rgba(10,10,14,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:10px 12px;
+  bottom:0;z-index:5;
+  width:min(560px,92vw);min-height:52vh;max-height:82vh;display:flex;flex-direction:column;
+  background:rgba(10,10,14,.72);border:1px solid rgba(255,255,255,.18);border-bottom:none;border-radius:16px 16px 0 0;
+  padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 12px 34px rgba(0,0,0,.45)}
 .med-mix-panel[hidden]{display:none}
 .med-mix-head{display:flex;align-items:center;gap:8px;padding:0 0 8px;flex:none}
@@ -195,8 +196,8 @@
 /* ---------- 主界面三键＋设置 sheet（2026-10-28 改版） ----------
  * 三键同排：呼吸（预设/呼吸方式/声音引导）· 时长（时长/间隔磬）· 调音台（混音）。
  * 键面＝名称＋一行小字摘要（当前呼吸方式/时长/已选轨数，JS renderKeySubs 同步）。
- * sheet 与混音面板同族：底部浮层、底边锚控制层上方（JS fitSheet 按播放键实测
- * 定位＋按呼吸圈峰值底线限高），任一时刻只开一个；颜色沿本页白＋鎏金口径，
+ * sheet 与混音面板同族：贴底大面板（高按内容自适应 52–82vh、JS fitSheet 按
+ * 顶栏护栏写 min/max-height），任一时刻只开一个；颜色沿本页白＋鎏金口径，
  * 背景图红移走全局滤镜链（与本页既有口径一致，不写死绕开）。 */
 .med-keys{display:flex;gap:8px;width:min(560px,92vw)}
 .med-key{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;
@@ -209,9 +210,10 @@
   overflow:hidden;text-overflow:ellipsis}
 .med-key.on .med-key-sub{opacity:.85}
 .med-sheet{position:absolute;left:50%;transform:translateX(-50%);
-  bottom:calc(var(--med-controls-h,216px) + 10px);z-index:4;
-  width:min(560px,92vw);max-height:430px;display:flex;flex-direction:column;
-  background:rgba(10,10,14,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:10px 12px;
+  bottom:0;z-index:5;
+  width:min(560px,92vw);min-height:52vh;max-height:82vh;display:flex;flex-direction:column;
+  background:rgba(10,10,14,.72);border:1px solid rgba(255,255,255,.18);border-bottom:none;border-radius:16px 16px 0 0;
+  padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 12px 34px rgba(0,0,0,.45)}
 .med-sheet[hidden]{display:none}
 .med-sheet-body{overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:13px;padding-bottom:2px}
