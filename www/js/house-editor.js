@@ -471,7 +471,7 @@
   function render() {
     var svg = $('hpe-svg'); if (!svg || !E.plan) return;
     var p = E.plan, L = p.layers;
-    if (E.stage) { hideJsBar(); renderStage(svg); return; }
+    if (E.stage) { hideJsBar(); hideWallFab(); renderStage(svg); return; }
     /* 视图持久：E.view 即当前 viewBox（空白拖平移／双指捏合缩放／顶栏「全图」改之），
      * 未定（开页/换层/套模板/描图成图）时才按 extent 自适应一次；拖动中不重算，
      * 杜绝旧版 extent 实时重拟合的坐标反馈放大。 */
@@ -640,6 +640,7 @@
     svg.innerHTML = s;
     syncTop();
     refreshJsBar();
+    refreshWallFab();
   }
   /* ---------------- 元素锁定（2026-10-28 对标 magicplan 锁定语义） ----------------
    * lock=true 存元素自身（房间/构件/墙段），随 plan 整行同步、导出 JSON 原样带。
@@ -1014,6 +1015,7 @@
       : E.sheet === 'select' ? T('hpe_select')
       : '';
     layoutAttr();
+    refreshWallFab();
   }
   function showSheet(kind) {
     E.sheet = kind;
@@ -1041,10 +1043,12 @@
       var sr = st.getBoundingClientRect(), hr = sh.getBoundingClientRect();
       if (sr.height > 0 && hr.height > 0) {
         at.style.bottom = Math.max(10, Math.round(sr.bottom - hr.top) + 8) + 'px';
+        refreshWallFabPos();
         return;
       }
     }
     at.style.bottom = '10px';
+    refreshWallFabPos();
   }
   function renderFloorsBar() {
     syncTop();
@@ -1540,6 +1544,7 @@
         (k === 'select' && E.boxMode);
       el.classList.toggle('hot', !!hot);
     });
+    syncWallFabHot();
   }
   function trayDown(e) {
     var el = e.target.closest ? e.target.closest('[data-tile]') : null;
@@ -1982,6 +1987,7 @@
     /* 画完一段自动卸下画墙态：新墙/新房保持选中可立即拖改；要续画点托盘「画墙」
      * 再入（入态后点已有墙端点仍可接续围合）。防「想拖却又生一段」 */
     exitWallMode();
+    if (!room) wallNextToastOnce();
   }
   /* 构件库墙件落位：不进 fixtures，直接生成 plan.walls 段（与手划同账） */
   function placeWallItem(type, pt) {
@@ -2025,6 +2031,87 @@
     E.uiMode = 'free';
     E.wallPrev = null;
     syncModeBtn(); renderTray(); render(); renderAttr();
+  }
+  /* ---------------- 画墙悬浮钮（2026-10-28 用户真机反馈） ----------------
+   * 画完一段自动卸画墙态是既定口径（防「想拖却又生一段」），但托盘「画墙」
+   * 钮在横滑区里、发现性差——用户画完一段想续画时找不到入口。舞台右下
+   * 常驻一枚悬浮钮（与托盘画墙同一动作、激活态双向同步），画完回常态后
+   * 仍在原地作提醒。JS 建 DOM 注入 .hpe-stage（同判定条口径，不动 index
+   * 结构）；z 序 7：高于属性条（6）、低于抽屉（8）与判定条（9）；定位随
+   * layoutAttr 同链——属性条/抽屉抬升时跟着抬，不压既有浮层。
+   * 显隐：无稿/描图照片舞台（E.stage）/描图态（E.mode==='trace'）/编辑器
+   * 关闭时隐藏；其余编辑态（含选择、锁定查看）常驻，点它即切画墙态，
+   * 与托盘入口现行行为一致（enterWallMode 自行清框选等互斥态）。 */
+  function ensureWallFab() {
+    var fab = $('hpe-wallfab');
+    if (fab) return fab;
+    var stage = document.querySelector('#view-plan .hpe-stage');
+    if (!stage) return null;
+    if (!document.getElementById('hpe-wallfab-css')) {
+      var st = document.createElement('style');
+      st.id = 'hpe-wallfab-css';
+      st.textContent =
+        '#hpe-wallfab{position:absolute;right:12px;bottom:12px;z-index:7;display:flex;align-items:center;gap:6px;padding:10px 15px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-family:var(--serif);font-size:.88rem;letter-spacing:.1em;box-shadow:0 6px 18px var(--line-soft);cursor:pointer;-webkit-tap-highlight-color:transparent}' +
+        '#hpe-wallfab[hidden]{display:none}' +
+        '#hpe-wallfab .gic{font-size:1.02rem;line-height:1}' +
+        '#hpe-wallfab.on{border-color:var(--gold);background:var(--gold-wash);color:var(--gold-deep);box-shadow:0 0 0 1px var(--gold) inset,0 6px 18px var(--line-soft)}';
+      document.head.appendChild(st);
+    }
+    fab = document.createElement('button');
+    fab.type = 'button';
+    fab.id = 'hpe-wallfab';
+    fab.hidden = true;
+    fab.innerHTML = '<span class="gic">✐</span><span class="n">' + esc(T('hpe_wall_tile')) + '</span>';
+    stage.appendChild(fab);
+    fab.addEventListener('click', function () {
+      if (E.uiMode === 'wall') exitWallMode(); else enterWallMode();
+    });
+    return fab;
+  }
+  function hideWallFab() { var f = $('hpe-wallfab'); if (f) f.hidden = true; }
+  /* 只同步激活态（无布局读数）：挂 syncTray，与托盘画墙 tile 的 .hot 同步 */
+  function syncWallFabHot() {
+    var fab = $('hpe-wallfab'); if (!fab) return;
+    fab.classList.toggle('on', E.uiMode === 'wall');
+  }
+  /* 定位：默认贴舞台右下 12px；属性条有高时抬到其上沿之上，抽屉开时
+   * 抬到抽屉上沿之上（与 layoutAttr 的让位数学同源） */
+  function refreshWallFabPos() {
+    var fab = $('hpe-wallfab'); if (!fab || fab.hidden) return;
+    var bottom = 12;
+    var st = fab.parentElement;
+    var sh = $('hpe-sheet');
+    if (sh && st && E.sheet && !sh.hidden) {
+      var sr = st.getBoundingClientRect(), hr = sh.getBoundingClientRect();
+      if (sr.height > 0 && hr.height > 0) bottom = Math.max(bottom, Math.round(sr.bottom - hr.top) + 8);
+    }
+    var at = $('hpe-attr');
+    if (at && at.offsetHeight > 0) {
+      var ab = parseFloat(at.style.bottom) || 10;
+      bottom = Math.max(bottom, Math.round(ab + at.offsetHeight + 10));
+    }
+    fab.style.bottom = bottom + 'px';
+  }
+  function refreshWallFab() {
+    var fab = ensureWallFab(); if (!fab) return;
+    var view = $('view-plan');
+    if (!E.plan || E.stage || E.mode === 'trace' || !view || view.hidden) { fab.hidden = true; return; }
+    fab.hidden = false;
+    var n = fab.querySelector('.n'); if (n) n.textContent = T('hpe_wall_tile');
+    syncWallFabHot();
+    /* 拖动/划线中位置与显隐不会变，只同步激活态，避免逐帧读布局 */
+    if (E.drag || E.wallPrev) return;
+    refreshWallFabPos();
+  }
+  /* 画完第一段墙的一次性轻提示：只飘一次，本地标记后不再扰。
+   * 围成房时已有成房 toast 占位，本次不叠加、标记也不落——留给下一次
+   * 普通墙段完成时再提（那时正是「想续画下一段」的场景）。 */
+  function wallNextToastOnce() {
+    try {
+      if (localStorage.getItem('wuri_hpe_wallnext_v1') === '1') return;
+      localStorage.setItem('wuri_hpe_wallnext_v1', '1');
+    } catch (e) {}
+    toastMsg(T('hpe_wall_next_toast'));
   }
   /* 墙命中（选中/拖移/拖端点）：画墙态与自由态共用，返回是否已接管本次落点 */
   function beginWallHit(act, actEl, pt, evt) {
