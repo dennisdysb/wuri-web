@@ -14,7 +14,7 @@
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
 <link rel="stylesheet" href="css/style.css?v=253">
 <link rel="stylesheet" href="css/qimen.css?v=78">
-<link rel="stylesheet" href="css/meditation.css?v=72">
+<link rel="stylesheet" href="css/meditation.css?v=73">
 </head>
 <body>
 <div id="app">
@@ -2038,6 +2038,19 @@
       <div class="btn-row"><button class="btn" id="daka-add-btn">＋ 自建打卡项</button></div>
     </section>
 
+    <!-- 拨珠念诵（与打坐并列入口；计数统计单列，不并入打卡时长） -->
+    <section class="card">
+      <div class="card-title">拨珠念诵</div>
+      <div class="daka-item" id="beads-open-2" role="button" tabindex="0">
+        <div class="daka-icon">珠</div>
+        <div class="daka-main">
+          <div class="daka-name">持珠计数<span class="daka-type">108 一轮</span></div>
+          <div class="daka-sub" id="beads-entry-sub">点按进珠 · 目标计数 · 统计单列</div>
+        </div>
+        <div class="daka-actions"><span class="sx-sky-link">开始 ›</span></div>
+      </div>
+    </section>
+
     <!-- 步罡踏斗跟练（v2.0.0 (5) 贯通批：《太上助国救民总真秘要》卷八北斗七星纲） -->
     <!-- 2026-10-25 用户定暂时隐藏：卡片带 hidden 不渲染，开关在 js/bugang.js 的 BUGANG_ENABLED；恢复时改开关即可，勿删卡片 -->
     <section class="card" id="bugang-entry-card" hidden>
@@ -2312,8 +2325,11 @@
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
       </button>
       <h1 class="med-title">打坐冥想</h1>
-      <span class="med-top-sp"></span>
+      <button class="med-back med-beads-btn" id="med-beads-open" aria-label="拨珠念诵">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="3.4" r="1.7"/><circle cx="17.2" cy="5.6" r="1.7"/><circle cx="19.8" cy="10.3" r="1.7"/><circle cx="19.8" cy="15.7" r="1.7"/><circle cx="16.4" cy="19.6" r="1.7"/><circle cx="11" cy="21" r="1.7"/><circle cx="5.9" cy="18.8" r="1.7"/><circle cx="3.6" cy="14" r="1.7"/><circle cx="4.4" cy="8.8" r="1.7"/><circle cx="7.6" cy="4.9" r="1.7"/></svg>
+      </button>
     </header>
+    <div class="med-stats" id="med-stats" hidden></div>
     <div class="med-center">
       <div class="med-sound-name" id="med-sound-name">温柔雨声</div>
       <div class="med-clock" id="med-clock">15:00</div>
@@ -2329,6 +2345,10 @@
     </div>
     <div class="med-controls">
       <div class="med-breath-note" id="med-breath-note" hidden></div>
+      <div class="med-preset-row">
+        <span class="med-breath-title">预设</span>
+        <div class="med-preset-chips" id="med-preset-chips" aria-label="场景预设"></div>
+      </div>
       <div class="med-breath-row">
         <span class="med-breath-title">呼吸</span>
         <div class="med-breath-options" id="med-breath-options" aria-label="呼吸型态"></div>
@@ -2354,6 +2374,21 @@
         <label class="med-switch"><input type="checkbox" id="med-bell-toggle" checked><span class="med-switch-ui"></span></label>
         <span class="med-bell-label">间隔磬 · 每5分钟</span>
       </div>
+      <div class="med-mix-row">
+        <label class="med-switch"><input type="checkbox" id="med-mix-toggle"><span class="med-switch-ui"></span></label>
+        <span class="med-bell-label">混音</span>
+        <span class="med-mix-count" id="med-mix-count"></span>
+        <button class="med-mix-open" id="med-mix-open" hidden>调混音</button>
+      </div>
+      <div class="med-mix-panel" id="med-mix-panel" hidden>
+        <div id="med-mix-list"></div>
+        <div class="med-mix-foot">
+          <div class="med-mix-recipe-chips" id="med-mix-recipe-chips"></div>
+          <button class="med-seg" id="med-mix-save">存为配方</button>
+          <button class="med-seg" id="med-mix-clear">清空</button>
+        </div>
+        <p class="med-mix-hint" id="med-mix-hint"></p>
+      </div>
       <button class="med-play" id="med-play" aria-label="播放/暂停"></button>
       <input type="range" id="med-vol" class="med-vol" min="0" max="100" value="70" aria-label="音量">
     </div>
@@ -2361,12 +2396,56 @@
       <div class="med-done-card">
         <div class="med-done-title">冥想完成</div>
         <div class="med-done-sub" id="med-done-sub"></div>
+        <div class="med-done-stats" id="med-done-stats"></div>
+        <div class="med-done-mile" id="med-done-mile" hidden></div>
+        <blockquote class="med-done-quote" id="med-done-quote" hidden></blockquote>
         <div class="btn-row">
           <button class="btn primary" id="med-again">再来一次</button>
           <button class="btn" id="med-done-back">返回</button>
         </div>
       </div>
     </div>
+  </div>
+
+  <div id="beads-view" hidden>
+    <img class="bd-bg" src="img/meditation/bg-bowl.webp?v=3" alt="">
+    <div class="bd-scrim"></div>
+    <header class="med-topbar bd-topbar">
+      <button class="med-back" id="bd-back" aria-label="返回">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+      <h1 class="med-title">拨珠念诵</h1>
+      <span class="med-top-sp"></span>
+    </header>
+    <div class="bd-stats" id="bd-stats"></div>
+    <div class="bd-cfg">
+      <input type="text" id="bd-name" class="bd-name" maxlength="24" placeholder="所诵圣号 / 咒名（可空）">
+      <div class="bd-cfg-row">
+        <label class="bd-goal-label">目标
+          <select id="bd-goal" class="bd-goal">
+            <option value="0">不限</option>
+            <option value="108">108</option>
+            <option value="300">300</option>
+            <option value="1000">1000</option>
+            <option value="10000">10000</option>
+          </select>
+        </label>
+        <span class="med-cue-item"><label class="med-switch"><input type="checkbox" id="bd-vib"><span class="med-switch-ui"></span></label><span class="med-cue-label">轻震动</span></span>
+      </div>
+    </div>
+    <button class="bd-stage" id="bd-stage" aria-label="拨珠进一">
+      <span class="bd-ring" id="bd-ring"></span>
+      <span class="bd-center">
+        <span class="bd-count" id="bd-count">0</span>
+        <span class="bd-round" id="bd-round">第 1 遍 · 0 / 108</span>
+        <span class="bd-session" id="bd-session">本次 0</span>
+      </span>
+    </button>
+    <div class="bd-actions">
+      <button class="btn" id="bd-undo">回退一珠</button>
+      <button class="btn primary" id="bd-finish">结束并保存</button>
+    </div>
+    <p class="bd-saved" id="bd-saved"></p>
   </div>
 </div>
 

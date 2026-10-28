@@ -74,6 +74,8 @@
     'wuri_daka_habits', 'wuri_daka_records', 'wuri_daka_bgm', 'wuri_daka_bgmvol',
     'wuri_mydays', 'wuri_practice_journal', 'wuri_practice_schedule',
     'wuri_med_vol', 'wuri_med_sound', 'wuri_med_dur', 'wuri_med_custom', 'wuri_med_breath', 'wuri_med_bell',
+    'wuri_med_cue', 'wuri_med_cuevol', 'wuri_med_cuevib',
+    'wuri_med_mix', 'wuri_med_mix_recipes', 'wuri_med_presets', 'wuri_beads_records', 'wuri_beads_cfg',
     'wuri_affinity_progress', 'wuri_affinity_result',
     'wuri_cfg_v1', 'wuri_lang_v1', 'wuri_bazi_sect',
     'wuri_sky_obs_v1', 'wuri_sky_lines_v1', 'wuri_sky_maglim_v1', 'wuri_sky_ar_cal_v1', 'wuri_sky_redlight_v1',

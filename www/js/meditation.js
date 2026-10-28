@@ -33,6 +33,15 @@ var Meditation = (function () {
   var LS_CUE = 'wuri_med_cue';
   var LS_CUE_VOL = 'wuri_med_cuevol';
   var LS_CUE_VIB = 'wuri_med_cuevib';
+  /* 冥想批（2026-10-28，对标 Insight Timer/潮汐）：混音配方、场景预设、拨珠计数。
+   * 新键全部已登记 account.js 同步表（冥想设置同步口径）：
+   * wuri_med_mix / wuri_med_mix_recipes / wuri_med_presets / wuri_beads_records / wuri_beads_cfg。 */
+  var LS_MIX = 'wuri_med_mix';
+  var LS_MIX_RECIPES = 'wuri_med_mix_recipes';
+  var LS_PRESETS = 'wuri_med_presets';
+  var LS_BEADS_RECORDS = 'wuri_beads_records';
+  var LS_BEADS_CFG = 'wuri_beads_cfg';
+  var MIX_MAX_TRACKS = 4; /* 多轨同播上限（移动端解码/耗电考量，对标潮汐混音） */
 
   /* 呼吸参数只取事实层（相位秒数），名称说明与引导实现均为本站自撰/自写。 */
   var BREATH_PATTERNS = [
@@ -211,8 +220,9 @@ var Meditation = (function () {
       nameEl.style.opacity = '1';
     }, 180);
     lsSet(LS_SOUND, SOUNDS[cur].id);
-    /* 播放中切换：保持剩余计时，只换背景音 */
-    if (playing) {
+    /* 播放中切换：保持剩余计时，只换背景音。混音模式下只换背景视觉与主声景标记，
+       不重启会话（混音轨与主声景解耦，各轨独立播放）。 */
+    if (playing && !mixMode()) {
       var rem = getRemaining();
       if (rem > 0) startPlayback(rem);
     }
@@ -470,6 +480,79 @@ var Meditation = (function () {
     if (vr) vr.classList.toggle('off', !cueOn());
   }
 
+  /* ---------- 冥想统计（对标 Insight Timer Stats & milestones） ----------
+   * 数据源＝修行打卡记录 wuri_daka_records 中 hid='dazuo' 的条目（结束自动记入
+   * 既有口径不变）；连续天数按「有打坐记录的自然日」单算，不与其它习惯混。
+   * 里程碑：累计 10/50/100 小时、连续 7/30 天，结束页在跨越当次提示。 */
+  var MILE_HOURS = [10, 50, 100];
+  var MILE_STREAK = [7, 30];
+  function lsJson(k, d) {
+    try { var v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; }
+    catch (e) { return d; }
+  }
+  function dateStrOf(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function medStats() {
+    var recs = lsJson('wuri_daka_records', []);
+    var total = 0, sessions = 0, days = {}, i, r;
+    if (Array.isArray(recs)) {
+      for (i = 0; i < recs.length; i++) {
+        r = recs[i];
+        if (!r || r.hid !== 'dazuo') continue;
+        total += (r.secs || 0);
+        sessions++;
+        if (r.date) days[r.date] = true;
+      }
+    }
+    var streak = 0, d = new Date();
+    if (!days[dateStrOf(d)]) d.setDate(d.getDate() - 1);
+    while (days[dateStrOf(d)]) { streak++; d.setDate(d.getDate() - 1); }
+    return { totalSecs: total, sessions: sessions, streak: streak };
+  }
+  function fmtDurZh(secs) {
+    secs = Math.max(0, Math.floor(secs || 0));
+    var h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60);
+    if (h > 0) return h + ' 小时' + (m > 0 ? ' ' + m + ' 分' : '');
+    if (m > 0) return m + ' 分钟';
+    return secs + ' 秒';
+  }
+  function crossedMilestones(before, after) {
+    var out = [], i;
+    for (i = 0; i < MILE_HOURS.length; i++) {
+      if (before.totalSecs < MILE_HOURS[i] * 3600 && after.totalSecs >= MILE_HOURS[i] * 3600) {
+        out.push('累计打坐满 ' + MILE_HOURS[i] + ' 小时');
+      }
+    }
+    for (i = 0; i < MILE_STREAK.length; i++) {
+      if (before.streak < MILE_STREAK[i] && after.streak >= MILE_STREAK[i]) {
+        out.push('连续打坐 ' + MILE_STREAK[i] + ' 天');
+      }
+    }
+    return out;
+  }
+  function renderMedStats() {
+    var el = $('#med-stats');
+    if (!el) return;
+    var st = medStats();
+    if (!st.sessions) { el.hidden = true; el.textContent = ''; return; }
+    el.hidden = false;
+    el.textContent = '连续 ' + st.streak + ' 天 · 累计 ' + fmtDurZh(st.totalSecs) + ' · 共 ' + st.sessions + ' 次';
+  }
+  /* 结束页寄语：取自每日一诗池（158 首，全部出自星空／修道游仙／宫观步虚／静观
+   * 四题口径，与 App 内容相关性口径一致）；按「日期＋累计次数」定种，同日同次不换。 */
+  function pickDoneQuote(seed) {
+    try {
+      var dd = window.WURI_POEMS_DATA || window.WURI_POEMS_BUNDLED;
+      var list = dd && Array.isArray(dd.poems) ? dd.poems : null;
+      if (!list || !list.length) return null;
+      var p = list[Math.abs(seed | 0) % list.length];
+      if (!p || !Array.isArray(p.text) || !p.text.length) return null;
+      var lines = p.text.slice(0, 2).join('');
+      return { text: lines, from: '《' + (p.title || '') + '》· ' + (p.author || '') };
+    } catch (e) { return null; }
+  }
+
   /* ---------- 时长 / 选项 ---------- */
   function getSelectedDuration() {
     var on = document.querySelector('#med-dur-row .med-seg.on');
@@ -514,6 +597,379 @@ var Meditation = (function () {
     resetBreathPreview();
   }
 
+  /* ---------- 环境音混音（对标潮汐：多源叠放、各轨独立音量、配方可存） ----------
+   * 素材＝App 既有 9 条环境音循环（loop-*.mp3，既往版本已上线、本批未引入外部
+   * 新音频）。混音态（≥1 轨）走网页多轨引擎：每轨一个 Audio 元素、懒创建后复用
+   * （沿「环境音 Audio 复用」口径）；会话计时/间隔磬/结束铃由本地定时器驱动。
+   * 原生桥（WuBridge）只支持单音轨：单轨/无混音时仍走既有原生路，行为不变；
+   * 混音时原生端环境音由网页层播放（前台/常亮下正常），计时磬铃不受影响。 */
+  var mix = (function () {
+    var m = lsJson(LS_MIX, null);
+    return (m && m.tracks && typeof m.tracks === 'object') ? m : { tracks: {} };
+  })();
+  var mixEls = {};
+  var mixSession = false;   /* 当前会话由混音网页引擎驱动 */
+  var mixTick = 0;
+  function saveMix() { lsSet(LS_MIX, JSON.stringify(mix)); }
+  function mixMode() { return Object.keys(mix.tracks).length > 0; }
+  function mixCount() { return Object.keys(mix.tracks).length; }
+  function soundById(id) {
+    for (var i = 0; i < SOUNDS.length; i++) if (SOUNDS[i].id === id) return SOUNDS[i];
+    return null;
+  }
+  function mixEnsureEl(id) {
+    var s = soundById(id);
+    if (!s || !s.loop) return null;
+    if (!mixEls[id]) {
+      try {
+        var a = new Audio();
+        a.loop = true;
+        a.preload = 'auto';
+        a.src = s.loop;
+        mixEls[id] = a;
+      } catch (e) { return null; }
+    }
+    return mixEls[id];
+  }
+  function mixTrackVol(id) {
+    var v = parseInt(mix.tracks[id], 10);
+    v = Math.max(0, Math.min(100, isNaN(v) ? 70 : v));
+    return (v / 100) * volume();
+  }
+  function mixApplyVolumes() {
+    for (var id in mix.tracks) {
+      var a = mixEls[id];
+      if (a) { try { a.volume = mixTrackVol(id); } catch (e) {} }
+    }
+  }
+  function mixPlayAll() {
+    for (var id in mix.tracks) {
+      var a = mixEnsureEl(id);
+      if (!a) continue;
+      try {
+        a.volume = mixTrackVol(id);
+        if (a.paused) { var p = a.play(); if (p && p.catch) p.catch(function () {}); }
+      } catch (e) {}
+    }
+  }
+  function mixPauseAll() {
+    for (var k in mixEls) { try { mixEls[k].pause(); } catch (e) {} }
+  }
+  function mixFadeOut(done) {
+    var els = [], i, a;
+    for (var k in mix.tracks) { a = mixEls[k]; if (a && !a.paused) els.push(a); }
+    if (!els.length) { done(); return; }
+    var v0 = els.map(function (x) { return x.volume; });
+    var steps = 15, n = 0;
+    var iv = setInterval(function () {
+      n++;
+      for (i = 0; i < els.length; i++) {
+        try { els[i].volume = Math.max(0, v0[i] * (1 - n / steps)); } catch (e) {}
+      }
+      if (n >= steps) {
+        clearInterval(iv);
+        for (i = 0; i < els.length; i++) { try { els[i].pause(); } catch (e) {} }
+        done();
+      }
+    }, 200);
+  }
+  /* --- 混音会话引擎（计时与磬铃本地驱动，与降级路同口径） --- */
+  function mixStartTick() {
+    mixStopTick();
+    mixTick = setInterval(function () {
+      showTime(Math.max(0, Math.ceil((fb.endAt - Date.now()) / 1000)));
+    }, 500);
+  }
+  function mixStopTick() { if (mixTick) { clearInterval(mixTick); mixTick = 0; } }
+  function mixStartSession(secs) {
+    totalSec = secs;
+    expectDone = true;
+    seenActive = true;
+    mixSession = true;
+    fb.paused = false;
+    fb.remainMs = 0;
+    fb.elapsedMs = 0;
+    fb.startedAt = Date.now();
+    fb.endAt = Date.now() + secs * 1000;
+    fbClearTimers();
+    mixPlayAll();
+    if (bellOn()) {
+      try { if (!fb.bellAudio) fb.bellAudio = new Audio(INTERVAL_BELL_LOOP); } catch (e) {}
+      fbArmBell(INTERVAL_SEC * 1000);
+    }
+    fb.endTimer = setTimeout(mixFinish, secs * 1000);
+    playing = true;
+    sess.base = 0; sess.since = Date.now();
+    updatePlayBtn();
+    showTime(totalSec);
+    mixStartTick();
+    startBreath();
+    acquireWakeLock();
+  }
+  function mixPauseSession() {
+    fb.remainMs = Math.max(0, fb.endAt - Date.now());
+    fb.elapsedMs = Date.now() - fb.startedAt;
+    fb.paused = true;
+    fbClearTimers();
+    mixStopTick();
+    mixPauseAll();
+  }
+  function mixResumeSession() {
+    fb.paused = false;
+    fb.startedAt = Date.now() - fb.elapsedMs;
+    fb.endAt = Date.now() + fb.remainMs;
+    mixPlayAll();
+    if (bellOn()) {
+      var nextIn = INTERVAL_SEC * 1000 - (fb.elapsedMs % (INTERVAL_SEC * 1000));
+      if (nextIn < fb.remainMs - 5000) fbArmBell(nextIn);
+    }
+    fb.endTimer = setTimeout(mixFinish, fb.remainMs);
+    mixStartTick();
+  }
+  function mixFinish() {
+    if (!expectDone) return;
+    fbClearTimers();
+    mixStopTick();
+    mixFadeOut(function () { fbPlayEndBell(); });
+  }
+  function mixStopSession() {
+    fbClearTimers();
+    mixStopTick();
+    mixSession = false;
+    mixPauseAll();
+  }
+  /* 播放中改混音构成：会话引擎随之转换（单轨⇄混音），剩余时长不变 */
+  function mixConvertIfPlaying() {
+    if (!playing) return;
+    var rem = getRemaining();
+    if (rem <= 0) return;
+    if (mixMode() && !mixSession) {
+      var b = bridge();
+      if (b) { try { b.medStop(); } catch (e) {} }
+      fbStop();
+      stopPoll();
+      mixStartSession(rem);
+      startBreath();
+    } else if (!mixMode() && mixSession) {
+      mixStopSession();
+      startPlayback(rem);
+    }
+  }
+  function mixHint(msg) {
+    var h = $('#med-mix-hint');
+    if (!h) return;
+    h.textContent = msg || '';
+    if (msg) setTimeout(function () { if (h.textContent === msg) h.textContent = ''; }, 2600);
+  }
+  function buildMixPanel() {
+    var list = $('#med-mix-list');
+    if (!list || list.children.length) { renderMixPanel(); return; }
+    SOUNDS.forEach(function (s) {
+      if (!s.loop) return;
+      var row = document.createElement('div');
+      row.className = 'med-mix-item';
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'med-mix-chip';
+      chip.setAttribute('data-mix', s.id);
+      chip.textContent = s.name;
+      chip.addEventListener('click', function () { mixToggleTrack(s.id); });
+      var vol = document.createElement('input');
+      vol.type = 'range';
+      vol.className = 'med-vol med-mix-vol';
+      vol.min = '0'; vol.max = '100'; vol.value = '70';
+      vol.setAttribute('data-mixvol', s.id);
+      vol.setAttribute('aria-label', s.name + '音量');
+      vol.addEventListener('input', function () {
+        if (!(s.id in mix.tracks)) return;
+        mix.tracks[s.id] = parseInt(vol.value, 10) || 0;
+        saveMix();
+        mixApplyVolumes();
+      });
+      row.appendChild(chip);
+      row.appendChild(vol);
+      list.appendChild(row);
+    });
+    renderMixPanel();
+    renderMixRecipes();
+  }
+  function renderMixPanel() {
+    var chips = document.querySelectorAll('#med-mix-list .med-mix-chip');
+    for (var i = 0; i < chips.length; i++) {
+      var id = chips[i].getAttribute('data-mix');
+      chips[i].classList.toggle('on', id in mix.tracks);
+    }
+    var vols = document.querySelectorAll('#med-mix-list .med-mix-vol');
+    for (var j = 0; j < vols.length; j++) {
+      var vid = vols[j].getAttribute('data-mixvol');
+      vols[j].value = (vid in mix.tracks) ? mix.tracks[vid] : 70;
+      vols[j].disabled = !(vid in mix.tracks);
+    }
+    var tgl = $('#med-mix-toggle');
+    if (tgl) tgl.checked = mixMode();
+    var openBtn = $('#med-mix-open');
+    if (openBtn) openBtn.hidden = !mixMode();
+    var cnt = $('#med-mix-count');
+    if (cnt) cnt.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '';
+  }
+  function mixToggleTrack(id) {
+    if (id in mix.tracks) {
+      delete mix.tracks[id];
+      var a = mixEls[id];
+      if (a) { try { a.pause(); } catch (e) {} }
+    } else {
+      if (mixCount() >= MIX_MAX_TRACKS) { mixHint('最多同时混 ' + MIX_MAX_TRACKS + ' 轨'); renderMixPanel(); return; }
+      mix.tracks[id] = 70;
+      if (playing && mixSession) mixPlayAll();
+    }
+    saveMix();
+    renderMixPanel();
+    mixConvertIfPlaying();
+  }
+  function mixRecipes() {
+    var r = lsJson(LS_MIX_RECIPES, []);
+    return Array.isArray(r) ? r : [];
+  }
+  function renderMixRecipes() {
+    var host = $('#med-mix-recipe-chips');
+    if (!host) return;
+    host.innerHTML = '';
+    mixRecipes().forEach(function (rcp, idx) {
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'med-mix-recipe';
+      chip.textContent = rcp.name;
+      chip.addEventListener('click', function () {
+        mix.tracks = {};
+        for (var k in rcp.tracks) mix.tracks[k] = rcp.tracks[k];
+        saveMix();
+        renderMixPanel();
+        if (playing && mixSession) { mixPauseAll(); mixPlayAll(); }
+        mixConvertIfPlaying();
+      });
+      var del = document.createElement('span');
+      del.className = 'med-mix-recipe-del';
+      del.textContent = '✕';
+      del.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var list = mixRecipes();
+        list.splice(idx, 1);
+        lsSet(LS_MIX_RECIPES, JSON.stringify(list));
+        renderMixRecipes();
+      });
+      chip.appendChild(del);
+      host.appendChild(chip);
+    });
+  }
+
+  /* ---------- 场景预设（对标 Insight Timer Preset：整组参数命名保存、一键开练） ---------- */
+  var BUILTIN_PRESETS = [
+    { name: '晨练', dur: { seg: '15' }, breath: 'awake', sound: 'forest', bell: true, cue: false, mix: null },
+    { name: '午间小憩', dur: { seg: 'custom', min: 10 }, breath: 'coherent', sound: 'rain', bell: false, cue: false, mix: null },
+    { name: '睡前', dur: { seg: 'custom', min: 20 }, breath: 'deep-calm', sound: 'night', bell: false, cue: false, mix: null }
+  ];
+  function userPresets() {
+    var r = lsJson(LS_PRESETS, []);
+    return Array.isArray(r) ? r : [];
+  }
+  function setDurSelection(seg, min) {
+    var segs = document.querySelectorAll('#med-dur-row .med-seg[data-dur]');
+    for (var i = 0; i < segs.length; i++) {
+      segs[i].classList.toggle('on', segs[i].getAttribute('data-dur') === seg);
+    }
+    lsSet(LS_DUR, seg);
+    var cm = $('#med-custom-min'), go = $('#med-custom-go');
+    if (seg === 'custom') {
+      cm.hidden = false; go.hidden = false;
+      if (min) { cm.value = min; lsSet(LS_CUSTOM, String(min)); }
+    } else { cm.hidden = true; go.hidden = true; }
+  }
+  function applyPreset(p) {
+    if (!p) return;
+    var idx = -1, i;
+    for (i = 0; i < SOUNDS.length; i++) if (SOUNDS[i].id === p.sound) idx = i;
+    if (idx >= 0 && idx !== cur) setPage(idx);
+    mix.tracks = {};
+    if (p.mix) { for (var k in p.mix) mix.tracks[k] = p.mix[k]; }
+    saveMix();
+    renderMixPanel();
+    if (!playing) mixPauseAll();
+    setDurSelection(p.dur && p.dur.seg ? p.dur.seg : '15', p.dur ? p.dur.min : null);
+    selectBreath(p.breath || 'off');
+    var bt = $('#med-bell-toggle');
+    if (bt) { bt.checked = !!p.bell; lsSet(LS_BELL, p.bell ? '1' : '0'); }
+    var ct = $('#med-cue-toggle');
+    if (ct) {
+      ct.checked = !!p.cue;
+      lsSet(LS_CUE, p.cue ? '1' : '0');
+      renderCueVolState();
+      if (p.cue) cueEnsureEls();
+    }
+    startPlayback(getSelectedDuration());
+  }
+  function capturePreset(name) {
+    var on = document.querySelector('#med-dur-row .med-seg.on');
+    var seg = on ? on.getAttribute('data-dur') : '15';
+    var p = {
+      name: name,
+      dur: { seg: seg },
+      breath: breathId,
+      sound: SOUNDS[cur].id,
+      bell: bellOn(),
+      cue: cueOn(),
+      mix: mixMode() ? (function () { var o = {}; for (var k in mix.tracks) o[k] = mix.tracks[k]; return o; })() : null
+    };
+    if (seg === 'custom') p.dur.min = parseInt(($('#med-custom-min').value || '10'), 10) || 10;
+    return p;
+  }
+  function renderPresetChips() {
+    var host = $('#med-preset-chips');
+    if (!host) return;
+    host.innerHTML = '';
+    BUILTIN_PRESETS.forEach(function (p) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'med-breath-chip med-preset-chip';
+      b.textContent = p.name;
+      b.addEventListener('click', function () { applyPreset(p); });
+      host.appendChild(b);
+    });
+    userPresets().forEach(function (p, idx) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'med-breath-chip med-preset-chip user';
+      b.textContent = p.name;
+      b.addEventListener('click', function () { applyPreset(p); });
+      var del = document.createElement('span');
+      del.className = 'med-mix-recipe-del';
+      del.textContent = '✕';
+      del.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var list = userPresets();
+        list.splice(idx, 1);
+        lsSet(LS_PRESETS, JSON.stringify(list));
+        renderPresetChips();
+      });
+      b.appendChild(del);
+      host.appendChild(b);
+    });
+    var save = document.createElement('button');
+    save.type = 'button';
+    save.className = 'med-breath-chip med-preset-chip med-preset-save';
+    save.textContent = '＋ 存当前';
+    save.addEventListener('click', function () {
+      var name = '';
+      try { name = window.prompt('预设名（如：晚课前）', ''); } catch (e) {}
+      if (!name || !name.trim()) return;
+      name = name.trim();
+      var list = userPresets().filter(function (x) { return x.name !== name; });
+      list.push(capturePreset(name));
+      lsSet(LS_PRESETS, JSON.stringify(list));
+      renderPresetChips();
+    });
+    host.appendChild(save);
+  }
+
   /* ---------- 播放控制 ---------- */
   function updatePlayBtn() {
     $('#med-play').innerHTML = playing ? SVG_PAUSE : SVG_PLAY;
@@ -521,6 +977,10 @@ var Meditation = (function () {
   function showTime(sec) { $('#med-clock').textContent = fmt(sec); }
 
   function getRemaining() {
+    if (mixSession) {
+      if (fb.paused) return Math.ceil(fb.remainMs / 1000);
+      return Math.max(0, Math.ceil((fb.endAt - Date.now()) / 1000));
+    }
     var b = bridge();
     if (b) {
       try {
@@ -535,6 +995,7 @@ var Meditation = (function () {
   }
 
   function startPlayback(secs) {
+    if (mixMode()) { mixStartSession(secs); return; }
     var s = SOUNDS[cur];
     totalSec = secs;
     expectDone = true;
@@ -561,23 +1022,29 @@ var Meditation = (function () {
   function togglePlay() {
     if (playing) {
       /* 暂停 */
-      var b = bridge();
-      if (b) { try { b.medPause(); } catch (e) {} }
-      else fbPause();
+      if (mixSession) mixPauseSession();
+      else {
+        var b = bridge();
+        if (b) { try { b.medPause(); } catch (e) {} }
+        else fbPause();
+      }
       playing = false;
       if (sess.since) { sess.base += Date.now() - sess.since; sess.since = 0; }
       pauseBreath();
       releaseWakeLock();
       updatePlayBtn();
     } else if (expectDone && seenActive) {
-      /* 暂停后继续：原生直接 resume；降级恢复计时 */
-      var b2 = bridge();
-      if (b2) { try { b2.medResume(); } catch (e) {} }
-      else fbResume();
+      /* 暂停后继续：混音走本地引擎；原生直接 resume；降级恢复计时 */
+      if (mixSession) mixResumeSession();
+      else {
+        var b2 = bridge();
+        if (b2) { try { b2.medResume(); } catch (e) {} }
+        else fbResume();
+      }
       playing = true;
       sess.since = Date.now();
       updatePlayBtn();
-      startPoll();
+      if (!mixSession) startPoll();
       resumeBreath();
       acquireWakeLock();
     } else {
@@ -600,11 +1067,13 @@ var Meditation = (function () {
   function stopPoll() { if (pollId) { clearInterval(pollId); pollId = 0; } }
 
   function onSessionDone() {
+    var statsBefore = medStats();
     expectDone = false;
     seenActive = false;
     playing = false;
     sessReset();
     stopPoll();
+    if (mixSession) mixStopSession();
     stopBreath();
     releaseWakeLock();
     showTime(0);
@@ -616,10 +1085,34 @@ var Meditation = (function () {
     } catch (e) {}
     var sub = $('#med-done-sub');
     sub.textContent = SOUNDS[cur].name + ' · ' + fmt(totalSec).replace(':', '分') + '秒';
+    /* 结束页：统计＋里程碑＋一句应景诗（每日一诗池，内容口径见 pickDoneQuote） */
+    var statsAfter = medStats();
+    var ds = $('#med-done-stats');
+    if (ds) {
+      ds.textContent = '本次 ' + fmtDurZh(totalSec) + ' · 累计 ' + fmtDurZh(statsAfter.totalSecs)
+        + ' · 连续 ' + statsAfter.streak + ' 天';
+    }
+    var miles = crossedMilestones(statsBefore, statsAfter);
+    var dm = $('#med-done-mile');
+    if (dm) {
+      if (miles.length) { dm.hidden = false; dm.textContent = '✦ 里程碑达成：' + miles.join(' · '); }
+      else { dm.hidden = true; dm.textContent = ''; }
+    }
+    var dq = $('#med-done-quote');
+    if (dq) {
+      var nowD = new Date();
+      var q = pickDoneQuote(statsAfter.sessions * 131 + nowD.getDate() * 7 + (nowD.getMonth() + 1) * 37);
+      if (q) {
+        dq.hidden = false;
+        dq.textContent = q.text + ' —— ' + q.from;
+      } else { dq.hidden = true; dq.textContent = ''; }
+    }
+    renderMedStats();
     $('#med-done').hidden = false;
   }
 
   function back() {
+    if (mixSession) mixStopSession();
     var b = bridge();
     if (b) { try { b.medStop(); } catch (e) {} }
     else fbStop();
@@ -781,6 +1274,9 @@ var Meditation = (function () {
     $('#med-done').hidden = true;
     $('#meditation-view').hidden = false;
     restoreOpts();
+    renderMedStats();
+    renderPresetChips();
+    renderMixPanel();
     /* 显示当前声音 */
     setPage(cur, true);
     totalSec = getSelectedDuration();
@@ -847,6 +1343,52 @@ var Meditation = (function () {
         try { b.medSetVolume(v); } catch (e) {}
       }
       if (fb.ambient) { try { fb.ambient.volume = v; } catch (e) {} }
+      mixApplyVolumes();
+    });
+    /* 混音开关/面板/配方 */
+    buildMixPanel();
+    renderPresetChips();
+    $('#med-mix-toggle').addEventListener('change', function () {
+      if (this.checked) {
+        if (!mixMode()) {
+          var s = SOUNDS[cur];
+          if (s && s.loop) mix.tracks[s.id] = 80;
+          saveMix();
+        }
+        $('#med-mix-panel').hidden = false;
+      } else {
+        mix.tracks = {};
+        saveMix();
+        mixPauseAll();
+        $('#med-mix-panel').hidden = true;
+        mixConvertIfPlaying();
+      }
+      renderMixPanel();
+    });
+    $('#med-mix-open').addEventListener('click', function () {
+      var p = $('#med-mix-panel');
+      p.hidden = !p.hidden;
+    });
+    $('#med-mix-save').addEventListener('click', function () {
+      if (!mixMode()) { mixHint('先选至少一轨再存配方'); return; }
+      var name = '';
+      try { name = window.prompt('配方名（如：雨夜读经）', ''); } catch (e) {}
+      if (!name || !name.trim()) return;
+      name = name.trim();
+      var tracks = {};
+      for (var k in mix.tracks) tracks[k] = mix.tracks[k];
+      var list = mixRecipes().filter(function (x) { return x.name !== name; });
+      list.push({ name: name, tracks: tracks });
+      lsSet(LS_MIX_RECIPES, JSON.stringify(list));
+      renderMixRecipes();
+      mixHint('已存配方「' + name + '」');
+    });
+    $('#med-mix-clear').addEventListener('click', function () {
+      mix.tracks = {};
+      saveMix();
+      mixPauseAll();
+      renderMixPanel();
+      mixConvertIfPlaying();
     });
     $('#med-cue-toggle').addEventListener('change', function () {
       lsSet(LS_CUE, this.checked ? '1' : '0');
@@ -881,6 +1423,20 @@ var Meditation = (function () {
   /* 冒烟专用钩子（非产品 API）：缩短间隔磬周期以构造口令让行场景 + 读引导状态 */
   window.__medTest = {
     setBellIntervalSec: function (s) { if (s && s > 0) INTERVAL_SEC = s; },
+    /* 冥想批冒烟：读混音/统计状态 + 以指定秒数直接走结束页路径 */
+    mixState: function () {
+      var els = [];
+      for (var k in mixEls) {
+        els.push({ id: k, paused: mixEls[k].paused, vol: Math.round(mixEls[k].volume * 100) });
+      }
+      return {
+        mode: mixMode(), count: mixCount(),
+        tracks: JSON.parse(JSON.stringify(mix.tracks)),
+        session: mixSession, playing: playing, els: els
+      };
+    },
+    medStats: function () { return medStats(); },
+    finishSession: function (secs) { if (secs && secs > 0) totalSec = secs; onSessionDone(); },
     cueState: function () {
       var nowPlaying = '';
       for (var k in cue.els) {
@@ -898,6 +1454,8 @@ var Meditation = (function () {
 
   /* 物理返回键（MainActivity 经 evaluateJavascript 调用） */
   window.__wuriOnBack = function () {
+    var bv = $('#beads-view');
+    if (bv && !bv.hidden) { if (window.Beads) window.Beads.back(); return true; }
     var v = $('#meditation-view');
     if (v && !v.hidden) { back(); return true; }
     return false;
@@ -911,3 +1469,208 @@ var Meditation = (function () {
     back: back
   };
 })();
+
+/* 戊日不上香 · 拨珠念诵计数（独门功能，无对标实现，按自家口径）
+ * 点按进珠、108 一轮、轻震动、目标计数；统计单列（wuri_beads_records），
+ * 不并入修行打卡记录、更不与静坐时长混算。入口与打坐并列：冥想页顶栏＋修行页卡。 */
+var Beads = (function () {
+  'use strict';
+  var LS_R = 'wuri_beads_records';
+  var LS_C = 'wuri_beads_cfg';
+  var ROUND = 108;
+  var session = 0;        /* 本次未保存计数 */
+  var saved = true;       /* 本次是否已落盘 */
+  var built = false;
+  var dotEls = [];
+
+  function $(s) { return document.querySelector(s); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function lsJson(k, d) {
+    try { var v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; }
+    catch (e) { return d; }
+  }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function cfg() {
+    var c = lsJson(LS_C, null);
+    if (!c || typeof c !== 'object') c = { name: '', goal: 0, vib: false };
+    return c;
+  }
+  function saveCfg(c) { lsSet(LS_C, JSON.stringify(c)); }
+  function records() {
+    var r = lsJson(LS_R, []);
+    return Array.isArray(r) ? r : [];
+  }
+  function totals() {
+    var recs = records(), t = todayStr(), today = 0, total = 0, rounds = 0, i, r;
+    for (i = 0; i < recs.length; i++) {
+      r = recs[i];
+      if (!r || !(r.count > 0)) continue;
+      total += r.count;
+      rounds += Math.floor(r.count / ROUND);
+      if (r.date === t) today += r.count;
+    }
+    return { today: today, total: total, rounds: rounds };
+  }
+
+  function build() {
+    if (built) return;
+    built = true;
+    var ring = $('#bd-ring'), i, dot;
+    if (ring) {
+      for (i = 0; i < ROUND; i++) {
+        dot = document.createElement('span');
+        dot.className = 'bd-dot';
+        dot.setAttribute('data-i', i);
+        ring.appendChild(dot);
+        dotEls.push(dot);
+      }
+      layoutDots();
+    }
+    var c = cfg();
+    var nameEl = $('#bd-name');
+    if (nameEl) {
+      nameEl.value = c.name || '';
+      nameEl.addEventListener('input', function () {
+        var cc = cfg(); cc.name = nameEl.value; saveCfg(cc);
+      });
+    }
+    var goalEl = $('#bd-goal');
+    if (goalEl) {
+      goalEl.value = String(c.goal || 0);
+      goalEl.addEventListener('change', function () {
+        var cc = cfg(); cc.goal = parseInt(goalEl.value, 10) || 0; saveCfg(cc);
+        render();
+      });
+    }
+    var vibEl = $('#bd-vib');
+    if (vibEl) {
+      vibEl.checked = !!c.vib;
+      if (!navigator.vibrate) {
+        var item = vibEl.closest ? vibEl.closest('.med-cue-item') : null;
+        if (item) item.style.display = 'none';
+      }
+      vibEl.addEventListener('change', function () {
+        var cc = cfg(); cc.vib = vibEl.checked; saveCfg(cc);
+      });
+    }
+    var stage = $('#bd-stage');
+    if (stage) stage.addEventListener('click', tap);
+    var undo = $('#bd-undo');
+    if (undo) undo.addEventListener('click', function () {
+      if (session > 0) { session--; render(); }
+    });
+    var fin = $('#bd-finish');
+    if (fin) fin.addEventListener('click', finish);
+    var backBtn = $('#bd-back');
+    if (backBtn) backBtn.addEventListener('click', back);
+    window.addEventListener('resize', layoutDots);
+  }
+  function layoutDots() {
+    var ring = $('#bd-ring');
+    if (!ring || !dotEls.length) return;
+    var R = ring.clientWidth / 2 - 7;
+    if (!(R > 0)) return;
+    for (var i = 0; i < dotEls.length; i++) {
+      var ang = (i / ROUND) * Math.PI * 2 - Math.PI / 2;
+      dotEls[i].style.transform =
+        'translate(' + (Math.cos(ang) * R).toFixed(1) + 'px,' + (Math.sin(ang) * R).toFixed(1) + 'px)';
+    }
+  }
+  function vibrate(pat) {
+    if (!cfg().vib || !navigator.vibrate) return;
+    try { navigator.vibrate(pat); } catch (e) {}
+  }
+  function render() {
+    var c = cfg();
+    var inRound = session % ROUND;
+    var justFull = session > 0 && inRound === 0;
+    var shown = justFull ? ROUND : inRound;
+    var roundNo = Math.floor(session / ROUND) + (justFull ? 0 : 1);
+    for (var i = 0; i < dotEls.length; i++) {
+      dotEls[i].classList.toggle('on', justFull || i < inRound);
+      dotEls[i].classList.toggle('cur', !justFull && i === inRound && session >= 0 && (inRound > 0 || session > 0));
+    }
+    var cnt = $('#bd-count'); if (cnt) cnt.textContent = shown;
+    var rd = $('#bd-round');
+    if (rd) rd.textContent = '第 ' + roundNo + ' 遍 · ' + shown + ' / ' + ROUND;
+    var goal = c.goal || 0;
+    var ss = $('#bd-session');
+    if (ss) {
+      ss.textContent = '本次 ' + session + (goal ? ' / 目标 ' + goal : '')
+        + (goal && session >= goal ? ' · 目标达成' : '');
+    }
+    var t = totals();
+    var pending = saved ? 0 : session;
+    var st = $('#bd-stats');
+    if (st) {
+      st.textContent = '今日 ' + (t.today + pending) + ' · 累计 ' + (t.total + pending)
+        + ' · ' + (t.rounds + Math.floor(session / ROUND)) + ' 遍';
+    }
+    var sub = $('#beads-entry-sub');
+    if (sub) sub.textContent = '今日已诵 ' + (t.today + pending) + ' · 累计 ' + (t.total + pending);
+  }
+  function tap() {
+    session++;
+    saved = false;
+    var goal = cfg().goal || 0;
+    if (session % ROUND === 0) vibrate([50, 40, 90]);
+    else if (goal && session === goal) vibrate([40, 40, 40, 40, 120]);
+    else vibrate(8);
+    var sv = $('#bd-saved'); if (sv) sv.textContent = '';
+    render();
+  }
+  function saveSession() {
+    if (session <= 0 || saved) return;
+    var recs = records();
+    recs.push({ date: todayStr(), count: session, name: cfg().name || '', ts: Date.now() });
+    lsSet(LS_R, JSON.stringify(recs));
+    saved = true;
+    var sv = $('#bd-saved');
+    if (sv) sv.textContent = '已保存：本次 ' + session + ' 计数';
+  }
+  function finish() {
+    saveSession();
+    session = 0;
+    render();
+  }
+  function open() {
+    build();
+    var v = $('#beads-view');
+    if (v) v.hidden = false;
+    layoutDots();
+    render();
+  }
+  function back() {
+    saveSession();
+    var v = $('#beads-view');
+    if (v) v.hidden = true;
+    session = 0;
+    render();
+  }
+
+  /* 冒烟专用钩子（非产品 API） */
+  window.__beadsTest = {
+    state: function () {
+      var t = totals();
+      return { session: session, saved: saved, records: records().length, today: t.today, total: t.total };
+    },
+    tap: tap,
+    open: open
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var b1 = $('#med-beads-open');
+    if (b1) b1.addEventListener('click', open);
+    var b2 = $('#beads-open-2');
+    if (b2) b2.addEventListener('click', open);
+    build();
+    render();
+  });
+
+  return { open: open, back: back };
+})();
+window.Beads = Beads;
