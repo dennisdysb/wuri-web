@@ -38,6 +38,7 @@ var Meditation = (function () {
    * wuri_med_mix / wuri_med_mix_recipes / wuri_med_presets / wuri_beads_records / wuri_beads_cfg。 */
   var LS_MIX = 'wuri_med_mix';
   var LS_MIX_RECIPES = 'wuri_med_mix_recipes';
+  var LS_MIX_LASTNAME = 'wuri_med_mix_lastname';   /* 命名面板预填用：上次保存的配方名（仅元数据，不入配方记录） */
   var LS_PRESETS = 'wuri_med_presets';
   var LS_BEADS_RECORDS = 'wuri_beads_records';
   var LS_BEADS_CFG = 'wuri_beads_cfg';
@@ -877,6 +878,49 @@ var Meditation = (function () {
     syncSheetKey('mix');
     if (open) fitSheet(p);
   }
+
+  /* ---------- 保存配方命名面板（2026-10-28：代 window.prompt） ----------
+   * 原生 prompt 顶着站点域名抬头、不合 App 观感，换同族底部小面板：
+   * 预填上次名（无则按已选轨名拼默认名）、聚焦全选；重名只在面板内
+   * 一行字提示、保存仍沿旧口径覆盖；空名与旧 prompt 取消/空回车同口径
+   * ——不存、静默关面板回混音面板。配方记录格式/键名/载入/删除零变化。 */
+  function nameSheetOpen() { var p = $('#med-name-sheet'); return !!p && !p.hidden; }
+  function mixDefaultName() {
+    var last = lsGet(LS_MIX_LASTNAME, '');
+    if (last) return last;
+    var names = [];
+    for (var k in mix.tracks) { var s = soundById(k); if (s) names.push(s.name); }
+    return names.length ? names.join(' · ') : '我的配方';
+  }
+  function nameDupCheck() {
+    var inp = $('#med-name-input'), dup = $('#med-name-dup');
+    if (!inp || !dup) return;
+    var v = (inp.value || '').trim();
+    dup.hidden = !(!!v && mixRecipes().some(function (x) { return x.name === v; }));
+  }
+  function openNameSheet() {
+    var p = $('#med-name-sheet'); if (!p) return;
+    var inp = $('#med-name-input');
+    if (inp) inp.value = mixDefaultName();
+    nameDupCheck();
+    p.hidden = false;
+    if (inp) setTimeout(function () { try { inp.focus(); inp.select(); } catch (e) {} }, 60);
+  }
+  function closeNameSheet() { var p = $('#med-name-sheet'); if (p) p.hidden = true; }
+  function saveNamedRecipe() {
+    var inp = $('#med-name-input');
+    var name = inp ? (inp.value || '').trim() : '';
+    closeNameSheet();
+    if (!name) return;
+    var tracks = {};
+    for (var k in mix.tracks) tracks[k] = mix.tracks[k];
+    var list = mixRecipes().filter(function (x) { return x.name !== name; });
+    list.push({ name: name, tracks: tracks });
+    lsSet(LS_MIX_RECIPES, JSON.stringify(list));
+    lsSet(LS_MIX_LASTNAME, name);
+    renderMixRecipes();
+    mixHint('已存配方「' + name + '」');
+  }
   /* 呼吸圈基径按舞台实测可用空间取（2026-10-28 改版）：舞台底边由控制层实测高
    * 界定（--med-controls-h 同步写回 CSS 变量）；基径＝min(屏宽−边距, 圆区高)/1.35，
    * 峰值恰塞圆区、谷值（×0.60）保下限 120 不失去存在感，短屏同此回落。 */
@@ -1510,28 +1554,26 @@ var Meditation = (function () {
     });
     /* 点 sheet 外收起（键面/播放键/主音量除外：键面自身走 click 开合、播放操作不打断） */
     document.addEventListener('pointerdown', function (e) {
-      if (!anySheetOpen()) return;
+      if (!anySheetOpen() && !nameSheetOpen()) return;
       var v = $('#meditation-view'); if (!v || v.hidden) return;
       var t = e.target;
-      if (t && t.closest && (t.closest('#med-mix-panel') || t.closest('#med-sheet-breath') ||
+      if (t && t.closest && (t.closest('#med-mix-panel') || t.closest('#med-name-sheet') || t.closest('#med-sheet-breath') ||
           t.closest('#med-sheet-dur') || t.closest('.med-key') ||
           t.closest('#med-play') || t.closest('#med-vol'))) return;
+      closeNameSheet();
       closeSheets();
     });
     window.addEventListener('resize', function () { fitSheets(); fitBreathCircle(); });
     $('#med-mix-save').addEventListener('click', function () {
       if (!mixMode()) { mixHint('先选至少一轨再存配方'); return; }
-      var name = '';
-      try { name = window.prompt('配方名（如：雨夜读经）', ''); } catch (e) {}
-      if (!name || !name.trim()) return;
-      name = name.trim();
-      var tracks = {};
-      for (var k in mix.tracks) tracks[k] = mix.tracks[k];
-      var list = mixRecipes().filter(function (x) { return x.name !== name; });
-      list.push({ name: name, tracks: tracks });
-      lsSet(LS_MIX_RECIPES, JSON.stringify(list));
-      renderMixRecipes();
-      mixHint('已存配方「' + name + '」');
+      openNameSheet();
+    });
+    $('#med-name-ok').addEventListener('click', saveNamedRecipe);
+    $('#med-name-cancel').addEventListener('click', closeNameSheet);
+    $('#med-name-input').addEventListener('input', nameDupCheck);
+    $('#med-name-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); saveNamedRecipe(); }
+      else if (e.key === 'Escape') { closeNameSheet(); }
     });
     $('#med-mix-clear').addEventListener('click', function () {
       mix.tracks = {};
@@ -1664,8 +1706,13 @@ var Beads = (function () {
     /* 记珠震动默认开（2026-10-28 用户口径）：旧版存量中 vib:false 且无 vibSet
      * 标记的，多为旧默认 false 被圣号/目标/提示转淡等顺带落盘「烘焙」出来的，
      * 并非用户在开关上亲手关闭——视作未表态、按新默认开；带 vibSet 标记的
-     * false 是用户亲手关的，永远尊重。自本版起开关 change 必写 vibSet。 */
-    if (c.vib === false && !c.vibSet) c.vib = true;
+     * false 是用户亲手关的，永远尊重。自本版起开关 change 必写 vibSet。
+     * 本批补两点：①判定扩到 vib 字段缺失（undefined）的存量形状（旧口径只认
+     * ===false 会漏掉它，读出的 vib 为 undefined 时开关与门控同样是关）；
+     * ②迁移结果回写落盘（一次性）——旧口径只在内存翻开，每次读都重新推导，
+     * 存储里的值始终是旧的，任何绕开 cfg() 的读法（如同步层原样搬运）都会把
+     * 旧值原样带走；回写后存储本身即新口径，翻开状态可直接核查。 */
+    if (!c.vibSet && c.vib !== true) { c.vib = true; lsSet(LS_C, JSON.stringify(c)); }
     return c;
   }
   function saveCfg(c) { lsSet(LS_C, JSON.stringify(c)); }

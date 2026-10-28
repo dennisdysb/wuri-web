@@ -12,9 +12,9 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=294">
+<link rel="stylesheet" href="css/style.css?v=295">
 <link rel="stylesheet" href="css/qimen.css?v=78">
-<link rel="stylesheet" href="css/meditation.css?v=76">
+<link rel="stylesheet" href="css/meditation.css?v=77">
 </head>
 <body>
 <div id="app">
@@ -948,7 +948,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v294）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v295）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -2482,6 +2482,21 @@
         <button class="med-seg" id="med-mix-clear">清空</button>
       </div>
       <p class="med-mix-hint" id="med-mix-hint"></p>
+    </div>
+    <!-- 保存配方命名面板（2026-10-28：代 window.prompt 的 App 内小面板，与三 sheet 同族、
+         盖在混音面板之上呈现；存/取消后回混音面板，配方存储格式与键名零变化） -->
+    <div class="med-sheet med-name-sheet" id="med-name-sheet" hidden>
+      <div class="med-mix-head">
+        <span class="med-mix-head-title">保存配方</span>
+      </div>
+      <div class="med-name-body">
+        <input type="text" id="med-name-input" class="med-name-input" maxlength="24" placeholder="配方名（如：雨夜读经）" aria-label="配方名">
+        <p class="med-name-dup" id="med-name-dup" hidden>已存在同名配方，保存将覆盖它</p>
+        <div class="med-name-btns">
+          <button class="med-seg" id="med-name-cancel">取消</button>
+          <button class="med-seg on" id="med-name-ok">保存</button>
+        </div>
+      </div>
     </div>
     <div class="med-done" id="med-done" hidden>
       <div class="med-done-card">

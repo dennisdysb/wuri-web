@@ -223,6 +223,18 @@
 .med-sheet .med-cue-block{align-items:stretch;width:100%;flex:none}
 .med-sheet .med-cue-row{justify-content:flex-start}
 .med-sheet .med-bell-row{padding:2px 0}
+/* 保存配方命名小面板：与三 sheet 同族（同底色/描边/圆角/毛玻璃），但内容只有
+ * 一行输入＋两钮，不套 52vh 下限；z-index 高于混音面板（5），盖在其上呈现，
+ * 关后混音面板原样在底下。配色全走本页既有白＋鎏金口径，红光下与姊妹面板一致。 */
+.med-name-sheet{z-index:6;min-height:0}
+.med-name-body{display:flex;flex-direction:column;gap:10px}
+.med-name-input{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);
+  border-radius:10px;color:#fff;padding:10px 14px;font-size:.95rem;width:100%;box-sizing:border-box}
+.med-name-input::placeholder{color:rgba(255,255,255,.45)}
+.med-name-dup{color:#e8c877;font-size:.78rem;margin:0}
+.med-name-dup[hidden]{display:none}
+.med-name-btns{display:flex;gap:8px}
+.med-name-btns .med-seg{flex:1;padding:9px 0}
 /* 混音总开关入面板头行：开关靠右、收起钮随后（原主界面混音行已撤） */
 .med-mix-switch{margin-left:auto}
 .med-mix-panel .med-mix-close{margin-left:0}
