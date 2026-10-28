@@ -199,6 +199,26 @@
   function hide(id) { var v = $(id); if (v) v.hidden = true; }
   function scrollTopOf(id) { var v = $(id); if (v) v.scrollTop = 0; }
 
+  /* 沉浸联动：任一星象子视图打开 → body.sky-immersive 隐藏底部导航（外壳
+   * 既有机制，与阅读器 body.jing-immersive、冥想 body.med-open 同路，CSS 各一行）；
+   * 六视图全收起 → 摘类恢复。子视图开关入口分散在 stars.js / sky-chart.js /
+   * sky-ar.js / deities.js 互链来源栈 / app.js 标签切换各处，逐点挂钩必漏——
+   * 在此以 hidden 属性 MutationObserver 统一同步，任何路径的开/收（含子视图间
+   * 跳转、跨模块收起/恢复、切标签批量收起）都自动跟随，跳转全程不闪现底栏。
+   * 落地页（tab-stars）不在名单内，底栏保持显示。 */
+  function syncImmersive() {
+    var any = STAR_SUBVIEWS.some(function (vid) { var v = $(vid); return v && !v.hidden; });
+    document.body.classList.toggle('sky-immersive', any);
+  }
+  (function watchStarSubViews() {
+    var mo = new MutationObserver(syncImmersive);
+    STAR_SUBVIEWS.forEach(function (vid) {
+      var v = $(vid);
+      if (v) mo.observe(v, { attributes: true, attributeFilter: ['hidden'] });
+    });
+    syncImmersive();
+  })();
+
   /* 深链/外部入口：切到星象标签页（app.js 的标签钩子会调 activate） */
   function openHome() {
     var tab = $('tab-stars');

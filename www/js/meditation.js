@@ -220,11 +220,16 @@ var Meditation = (function () {
       nameEl.style.opacity = '1';
     }, 180);
     lsSet(LS_SOUND, SOUNDS[cur].id);
-    /* 播放中切换：保持剩余计时，只换背景音。混音模式下只换背景视觉与主声景标记，
-       不重启会话（混音轨与主声景解耦，各轨独立播放）。 */
+    /* 切场景即清零上一场景全部音频（2026-10-28 用户确认口径，见 stopSceneAudio）：
+     * 先硬停弃置，再按新场景口径决定续播——非混音会话换上新场景声景（静室无声）；
+     * 混音会话各轨已弃置，由 mixPlayAll 按原选轨重建续播（静室时其内部闸口拦下、
+     * 保持全静）。暂停态切场景同样清零，恢复时按当前场景重建（见 fbResume）。 */
+    stopSceneAudio();
     if (playing && !mixMode()) {
       var rem = getRemaining();
       if (rem > 0) startPlayback(rem);
+    } else if (playing && mixSession) {
+      mixPlayAll();
     }
   }
 
@@ -277,11 +282,13 @@ var Meditation = (function () {
     /* 说明已移至控制层（chips 行上方）：显隐跟随型态选择，纯计时态不占位 */
     var noteEl = $('#med-breath-note');
     if (noteEl) noteEl.hidden = !breathPattern();
-    /* 呼吸态布局类：中央区上移 + 呼吸圈放大（meditation.css），纯计时态不挂此列 */
+    /* 呼吸态布局类：舞台与圈径口径随型态显隐切换（meditation.css），纯计时态不挂此列 */
     var view = $('#meditation-view');
     if (view) view.classList.toggle('med-breathing', !!breathPattern());
-    /* 混音浮层若开着：限高基准随呼吸态变化，重算一次 */
+    /* 圈径按舞台实测重算；浮层若开着，限高基准随呼吸态变化一并重算 */
+    fitBreathCircle();
     if (typeof mixFitPanel === 'function') mixFitPanel();
+    renderKeySubs();
   }
   function setBreathVisual(phase, scale, remainSec) {
     var circle = $('#med-breath-circle');
@@ -645,6 +652,9 @@ var Meditation = (function () {
     }
   }
   function mixPlayAll() {
+    /* 静室闸口：当前场景为无声·静室（无 loop）时混音各轨一律不起播——
+     * 「无声」名副其实（2026-10-28 口径）；切回有声场景时由 onSoundChanged 续播。 */
+    if (!SOUNDS[cur].loop) return;
     for (var id in mix.tracks) {
       var a = mixEnsureEl(id);
       if (!a) continue;
@@ -809,48 +819,95 @@ var Meditation = (function () {
     }
     var tgl = $('#med-mix-toggle');
     if (tgl) tgl.checked = mixMode();
-    var openBtn = $('#med-mix-open');
-    if (openBtn) openBtn.hidden = !mixMode();
-    var cnt = $('#med-mix-count');
-    if (cnt) cnt.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '';
     var pcnt = $('#med-mix-panel-count');
     if (pcnt) pcnt.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '';
+    renderKeySubs();
   }
   function mixPanelOpen() { var p = $('#med-mix-panel'); return !!p && !p.hidden; }
-  /* 浮层限高：底边由 CSS 锚在播放键上方，顶边不得越过呼吸圈峰值底线（呼吸态，
-   * 峰值＝基径×1.35、圆心取实测矩形中心）或中央区底线（纯计时态）；列表内部滚动。 */
-  function mixFitPanel() {
-    var p = $('#med-mix-panel'); if (!p || p.hidden) return;
-    var play = $('#med-play'); if (!play) return;
-    var bottomY = play.getBoundingClientRect().top - 10;
-    var safeBottom = 0;
-    var view = $('#meditation-view');
-    var circ = $('#med-breath-circle');
-    var box = $('#med-breath');
-    if (view && view.classList.contains('med-breathing') && circ && box && !box.hidden) {
-      var r = circ.getBoundingClientRect();
-      safeBottom = r.top + r.height / 2 + circ.offsetHeight * 1.35 / 2 + 12;
-    } else {
-      var mc = document.querySelector('.med-center');
-      if (mc) safeBottom = mc.getBoundingClientRect().bottom + 12;
-    }
-    var maxH = bottomY - safeBottom;
-    var cap = Math.min(window.innerHeight * 0.46, 340);
-    if (maxH > cap) maxH = cap;
-    if (maxH < 170) maxH = 170;
-    p.style.maxHeight = maxH + 'px';
+
+  /* ---------- 设置 sheet 管理（2026-10-28 改版：三键三 sheet） ----------
+   * 主界面三键（呼吸/时长/调音台）各开一个底部 sheet，任一时刻只开一个、
+   * 开新关旧；每 sheet 有收起钮＋点外可收，收起不影响播放状态。
+   * 混音 sheet 沿 v276 机制（mixSetPanel 为其开关入口），此处统一调度。 */
+  var SHEET_SEL = { breath: '#med-sheet-breath', dur: '#med-sheet-dur', mix: '#med-mix-panel' };
+  var KEY_SEL = { breath: '#med-key-breath', dur: '#med-key-dur', mix: '#med-key-mix' };
+  function sheetIsOpen(name) { var el = $(SHEET_SEL[name]); return !!el && !el.hidden; }
+  function anySheetOpen() { return sheetIsOpen('breath') || sheetIsOpen('dur') || sheetIsOpen('mix'); }
+  function syncSheetKey(name) {
+    var key = $(KEY_SEL[name]); if (!key) return;
+    var open = sheetIsOpen(name);
+    key.classList.toggle('on', open);
+    key.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
-  /* 收起只收面板：不动混音轨单与播放；开钮文案/状态同步（展开时呈「收起」） */
+  function setSheet(name, open) {
+    if (name === 'mix') { mixSetPanel(open); return; }
+    if (open) { setSheet('mix', false); var other = (name === 'breath') ? 'dur' : 'breath'; setSheet(other, false); }
+    var el = $(SHEET_SEL[name]); if (!el) return;
+    el.hidden = !open;
+    syncSheetKey(name);
+    if (open) fitSheet(el);
+  }
+  function closeSheets() { setSheet('breath', false); setSheet('dur', false); setSheet('mix', false); }
+  /* 大面板定位（2026-10-28 二轮真机反馈，用户口径优先于 v289「展开零挤压」）：
+   * 三个 sheet 改为正经底部大面板——贴底、高度按内容自适应，下限约 52vh、
+   * 上限约 82vh，顶边护栏只护页首顶栏一行（返回＋标题＋拨珠钮）不被盖。
+   * 展开时覆盖下半部舞台与控制区属预期（覆盖≠挤压：圈与控制层的布局尺寸
+   * 一律不动、收起后一切原样，fitBreathCircle 不因 sheet 开合重算）；内容超
+   * 上限时面板 body 内部滚动。收起钮在头行常驻，点面板外露出的上半部区域
+   * 也可收（document pointerdown 既有口径）；播放键展开时被面板覆盖点不到，
+   * 「点播放键不误收」随之自然失效（预期，非缺陷）。 */
+  function fitSheet(p) {
+    if (!p || p.hidden) return;
+    var ih = window.innerHeight;
+    var bar = document.querySelector('.med-topbar');
+    var guard = bar ? bar.getBoundingClientRect().bottom + 8 : 100;
+    var maxH = Math.min(ih * 0.82, ih - guard);
+    var minH = Math.min(ih * 0.52, maxH);
+    p.style.bottom = '0px';
+    p.style.maxHeight = maxH + 'px';
+    p.style.minHeight = minH + 'px';
+  }
+  function fitSheets() { for (var k in SHEET_SEL) { var el = $(SHEET_SEL[k]); if (el && !el.hidden) fitSheet(el); } }
+  function mixFitPanel() { var p = $('#med-mix-panel'); if (p && !p.hidden) fitSheet(p); }
+  /* 收起只收面板：不动混音轨单与播放；键面状态同步（展开时「调音台」键呈 .on） */
   function mixSetPanel(open) {
     var p = $('#med-mix-panel'); if (!p) return;
+    if (open) { setSheet('breath', false); setSheet('dur', false); }
     p.hidden = !open;
-    var b = $('#med-mix-open');
-    if (b) {
-      b.textContent = open ? '收起' : '调混音';
-      b.classList.toggle('on', !!open);
-      b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    syncSheetKey('mix');
+    if (open) fitSheet(p);
+  }
+  /* 呼吸圈基径按舞台实测可用空间取（2026-10-28 改版）：舞台底边由控制层实测高
+   * 界定（--med-controls-h 同步写回 CSS 变量）；基径＝min(屏宽−边距, 圆区高)/1.35，
+   * 峰值恰塞圆区、谷值（×0.60）保下限 120 不失去存在感，短屏同此回落。 */
+  function fitBreathCircle() {
+    var view = $('#meditation-view'); if (!view || view.hidden) return;
+    var controls = document.querySelector('.med-controls');
+    if (controls) view.style.setProperty('--med-controls-h', controls.getBoundingClientRect().height + 'px');
+    var box = $('#med-breath'); if (!box || box.hidden) return;
+    var r = box.getBoundingClientRect();
+    var peak = Math.min(view.clientWidth - 36, r.height - 8);
+    var base = peak / 1.35;
+    if (base > 380) base = 380;
+    if (base < 120) base = 120;
+    box.style.setProperty('--med-circ', base.toFixed(1) + 'px');
+  }
+  /* 三键键面小字摘要：呼吸＝当前方式名、时长＝当前档位、调音台＝已选轨数/未开启 */
+  function renderKeySubs() {
+    var bs = $('#med-key-breath-sub');
+    if (bs) { var p = breathPattern(); bs.textContent = p ? p.name : '关闭'; }
+    var ds = $('#med-key-dur-sub');
+    if (ds) {
+      var on = document.querySelector('#med-dur-row .med-seg.on');
+      var v = on ? on.getAttribute('data-dur') : '15';
+      if (v === 'custom') {
+        var cmEl = $('#med-custom-min');
+        var m = parseInt((cmEl ? cmEl.value : '') || '', 10);
+        ds.textContent = '自选 ' + ((m >= 1 && m <= 180) ? m : 15) + '分钟';
+      } else ds.textContent = v + '分钟';
     }
-    if (open) mixFitPanel();
+    var ms = $('#med-key-mix-sub');
+    if (ms) ms.textContent = mixMode() ? '已选 ' + mixCount() + ' 轨' : '未开启';
   }
   function mixToggleTrack(id) {
     if (id in mix.tracks) {
@@ -923,6 +980,7 @@ var Meditation = (function () {
       cm.hidden = false; go.hidden = false;
       if (min) { cm.value = min; lsSet(LS_CUSTOM, String(min)); }
     } else { cm.hidden = true; go.hidden = true; }
+    renderKeySubs();
   }
   function applyPreset(p) {
     if (!p) return;
@@ -1166,12 +1224,68 @@ var Meditation = (function () {
     updatePlayBtn();
     $('#med-done').hidden = true;
     $('#meditation-view').hidden = true;
+    document.body.classList.remove('med-open');   /* 退出冥想：底部导航恢复 */
   }
 
   /* ---------- 降级播放（HTML5 Audio） ---------- */
   function fbClearTimers() {
     if (fb.bellTimer) { clearTimeout(fb.bellTimer); fb.bellTimer = 0; }
     if (fb.endTimer) { clearTimeout(fb.endTimer); fb.endTimer = 0; }
+  }
+  /* 环境音起播（fbStart/fbResume 共用）：复用单个 Audio 对象（2026-10-11 fix，
+   * iOS 上频繁 new Audio + play 会被静默拦截）；src 未变不重 load。 */
+  function fbPlayAmbient(s) {
+    if (!fb.ambient) {
+      fb.ambient = new Audio();
+      fb.ambient.loop = true;
+      /* 音频载入出错时重新 load 一次（同一 src 只重试一次），防瞬时失败变永久无声（2026-10-19 修） */
+      fb.ambient.addEventListener('error', function () {
+        if (!fb.ambient.src || fb.retriedFor) return;
+        fb.retriedFor = fb.ambient.src;
+        /* 换破缓存参数重试一次：同 URL 重 load 可能再命中发版窗口期被污染的缓存（404/截断），2026-10-25 修 */
+        try { fb.ambient.src = fb.retriedFor + (fb.retriedFor.indexOf('?') >= 0 ? '&r=1' : '?r=1'); } catch (err0) {}
+        try { fb.ambient.load(); } catch (err) {}
+        try { var pr = fb.ambient.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (err2) {}
+      });
+    } else {
+      try { fb.ambient.pause(); } catch (e0) {}
+    }
+    var curSrc = '';
+    try { curSrc = fb.ambient.src || ''; } catch (e1) {}
+    /* 只有声音真的变了才换 src，避免重复 load */
+    if (curSrc.indexOf(s.loop) === -1) {
+      fb.retriedFor = '';
+      fb.ambient.src = s.loop;
+      try { fb.ambient.load(); } catch (e2) {}
+    }
+    fb.ambient.volume = volume();
+    try {
+      var p = fb.ambient.play();
+      if (p && p.catch) p.catch(function () {
+        /* iOS 偶发拦截，重试一次 */
+        try { var p2 = fb.ambient.play(); if (p2 && p2.catch) p2.catch(function () {}); } catch (e3) {}
+      });
+    } catch (e) {}
+    // 媒体卡片：iOS 上必须在 play() 后设，否则灵动岛不出（2026-10-11 回滚 v1.1.5 的顺序调整；v1.3.4 试过 play 前 setMetadata 会导致灵动岛消失，已回滚）
+    try {
+      if (window.WuriMediaSession && s.name) {
+        window.WuriMediaSession.bindAudio(fb.ambient, {
+          title: '打坐 · ' + s.name,
+          artist: '戊日不上香',
+          album: '打坐冥想'
+        });
+      }
+    } catch (e2) {}
+  }
+  /* 切场景硬停（2026-10-28 用户确认口径）：切换场景这个动作本身即停掉并清零
+   * 上一场景的全部音频——环境音元素停播弃置、混音各轨停播并弃置元素，不依赖
+   * 结束会话/开始新会话才清。续播与否由调用方按新场景口径决定。 */
+  function stopSceneAudio() {
+    try { if (fb.ambient) fb.ambient.pause(); } catch (e) {}
+    fb.ambient = null;
+    fb.retriedFor = '';
+    mixPauseAll();
+    mixEls = {};
   }
   function fbStart(s, secs) {
     fbClearTimers();
@@ -1180,48 +1294,7 @@ var Meditation = (function () {
     fb.startedAt = Date.now();
     fb.endAt = Date.now() + secs * 1000;
     if (s.loop) {
-      /* 2026-10-11 fix: 复用单个 Audio 对象，iOS 上频繁 new Audio + play 会被静默拦截 */
-      if (!fb.ambient) {
-        fb.ambient = new Audio();
-        fb.ambient.loop = true;
-        /* 音频载入出错时重新 load 一次（同一 src 只重试一次），防瞬时失败变永久无声（2026-10-19 修） */
-        fb.ambient.addEventListener('error', function () {
-          if (!fb.ambient.src || fb.retriedFor) return;
-          fb.retriedFor = fb.ambient.src;
-          /* 换破缓存参数重试一次：同 URL 重 load 可能再命中发版窗口期被污染的缓存（404/截断），2026-10-25 修 */
-          try { fb.ambient.src = fb.retriedFor + (fb.retriedFor.indexOf('?') >= 0 ? '&r=1' : '?r=1'); } catch (err0) {}
-          try { fb.ambient.load(); } catch (err) {}
-          try { var pr = fb.ambient.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (err2) {}
-        });
-      } else {
-        try { fb.ambient.pause(); } catch (e0) {}
-      }
-      var curSrc = '';
-      try { curSrc = fb.ambient.src || ''; } catch (e1) {}
-      /* 只有声音真的变了才换 src，避免重复 load */
-      if (curSrc.indexOf(s.loop) === -1) {
-        fb.retriedFor = '';
-        fb.ambient.src = s.loop;
-        try { fb.ambient.load(); } catch (e2) {}
-      }
-      fb.ambient.volume = volume();
-      try {
-        var p = fb.ambient.play();
-        if (p && p.catch) p.catch(function () {
-          /* iOS 偶发拦截，重试一次 */
-          try { var p2 = fb.ambient.play(); if (p2 && p2.catch) p2.catch(function () {}); } catch (e3) {}
-        });
-      } catch (e) {}
-      // 媒体卡片：iOS 上必须在 play() 后设，否则灵动岛不出（2026-10-11 回滚 v1.1.5 的顺序调整；v1.3.4 试过 play 前 setMetadata 会导致灵动岛消失，已回滚）
-      try {
-        if (window.WuriMediaSession && s.name) {
-          window.WuriMediaSession.bindAudio(fb.ambient, {
-            title: '打坐 · ' + s.name,
-            artist: '戊日不上香',
-            album: '打坐冥想'
-          });
-        }
-      } catch (e2) {}
+      fbPlayAmbient(s);
     } else {
       /* 无声·静室：停掉背景音 */
       try { if (fb.ambient) { fb.ambient.pause(); } } catch (e4) {}
@@ -1262,7 +1335,10 @@ var Meditation = (function () {
     fb.paused = false;
     fb.startedAt = Date.now() - fb.elapsedMs;
     fb.endAt = Date.now() + fb.remainMs;
-    try { if (fb.ambient) { var p = fb.ambient.play(); if (p && p.catch) p.catch(function () {}); } } catch (e) {}
+    /* 暂停期间切过场景时 fb.ambient 已被清零（stopSceneAudio）：按当前场景重建
+     * 起播；静室无 loop 则不起播——旧场景声不得在恢复时还魂（2026-10-28 修）。 */
+    var s = SOUNDS[cur];
+    if (s && s.loop) fbPlayAmbient(s);
     if (bellOn()) {
       var nextIn = INTERVAL_SEC * 1000 - (fb.elapsedMs % (INTERVAL_SEC * 1000));
       if (nextIn < fb.remainMs - 5000) fbArmBell(nextIn);
@@ -1312,6 +1388,9 @@ var Meditation = (function () {
        否则 setPage 会因 bgEls 为空抛错、视图打不开（2026-10-25 冒烟竞态实证） */
     if (!bgEls.length) init();
     $('#med-done').hidden = true;
+    /* 沉浸口径：先挂 med-open 隐藏底部导航，再显视图——底栏在视图出现前已收，
+     * 不产生可见跳动；舞台/圈径随后按全高实测落位（fitBreathCircle）。 */
+    document.body.classList.add('med-open');
     $('#meditation-view').hidden = false;
     restoreOpts();
     renderMedStats();
@@ -1326,6 +1405,9 @@ var Meditation = (function () {
     seenActive = false;
     updatePlayBtn();
     resetBreathPreview();
+    /* 进页回到主界面态：sheet 全收、圈径按当前舞台实测落位 */
+    closeSheets();
+    fitBreathCircle();
   }
 
   var inited = false;
@@ -1344,6 +1426,7 @@ var Meditation = (function () {
           el.classList.add('on');
           var v = el.getAttribute('data-dur');
           lsSet(LS_DUR, v);
+          renderKeySubs();
           var cm = $('#med-custom-min'), go = $('#med-custom-go');
           if (v === 'custom') { cm.hidden = false; go.hidden = false; cm.focus(); }
           else {
@@ -1357,6 +1440,7 @@ var Meditation = (function () {
     }
     $('#med-custom-min').addEventListener('input', function () {
       lsSet(LS_CUSTOM, this.value);
+      renderKeySubs();
       if (!playing) { totalSec = getSelectedDuration(); showTime(totalSec); }
     });
     /* 自选开始键：未播则开始，播放中则从新时长重计 */
@@ -1405,22 +1489,36 @@ var Meditation = (function () {
       }
       renderMixPanel();
     });
-    $('#med-mix-open').addEventListener('click', function () {
+    /* 三键开合各自 sheet（开新关旧在 setSheet 内统一处理） */
+    $('#med-key-breath').addEventListener('click', function () {
+      setSheet('breath', !sheetIsOpen('breath'));
+    });
+    $('#med-key-dur').addEventListener('click', function () {
+      setSheet('dur', !sheetIsOpen('dur'));
+    });
+    $('#med-key-mix').addEventListener('click', function () {
       mixSetPanel(!mixPanelOpen());
     });
     $('#med-mix-close').addEventListener('click', function () {
       mixSetPanel(false);
     });
-    /* 点面板外收起（播放键/主音量/混音行本身除外，避免打断播放操作与开关切换） */
+    $('#med-sheet-breath-close').addEventListener('click', function () {
+      setSheet('breath', false);
+    });
+    $('#med-sheet-dur-close').addEventListener('click', function () {
+      setSheet('dur', false);
+    });
+    /* 点 sheet 外收起（键面/播放键/主音量除外：键面自身走 click 开合、播放操作不打断） */
     document.addEventListener('pointerdown', function (e) {
-      if (!mixPanelOpen()) return;
+      if (!anySheetOpen()) return;
       var v = $('#meditation-view'); if (!v || v.hidden) return;
       var t = e.target;
-      if (t && t.closest && (t.closest('#med-mix-panel') || t.closest('#med-mix-open') ||
-          t.closest('#med-play') || t.closest('#med-vol') || t.closest('.med-mix-row'))) return;
-      mixSetPanel(false);
+      if (t && t.closest && (t.closest('#med-mix-panel') || t.closest('#med-sheet-breath') ||
+          t.closest('#med-sheet-dur') || t.closest('.med-key') ||
+          t.closest('#med-play') || t.closest('#med-vol'))) return;
+      closeSheets();
     });
-    window.addEventListener('resize', function () { mixFitPanel(); });
+    window.addEventListener('resize', function () { fitSheets(); fitBreathCircle(); });
     $('#med-mix-save').addEventListener('click', function () {
       if (!mixMode()) { mixHint('先选至少一轨再存配方'); return; }
       var name = '';
@@ -1488,6 +1586,20 @@ var Meditation = (function () {
       };
     },
     medStats: function () { return medStats(); },
+    /* 切场景清零冒烟：逐路音频实况（环境音/混音各轨/口令/磬） */
+    audioState: function () {
+      var amb = null;
+      if (fb.ambient) {
+        amb = { paused: fb.ambient.paused, src: (fb.ambient.src || '').split('/').pop(), vol: Math.round(fb.ambient.volume * 100) };
+      }
+      var mx = [];
+      for (var k in mixEls) mx.push({ id: k, paused: mixEls[k].paused });
+      var cu = [];
+      for (var k2 in cue.els) { var a = cue.els[k2]; if (a) cu.push({ k: k2, paused: a.paused, ended: a.ended }); }
+      return { ambient: amb, mixEls: mx, cueEls: cu,
+               bell: fb.bellAudio ? { paused: fb.bellAudio.paused } : null,
+               scene: SOUNDS[cur].id, playing: playing, pausedVis: !!fb.paused, mixSession: mixSession };
+    },
     finishSession: function (secs) { if (secs && secs > 0) totalSec = secs; onSessionDone(); },
     cueState: function () {
       var nowPlaying = '';
@@ -1523,7 +1635,7 @@ var Meditation = (function () {
 })();
 
 /* 戊日不上香 · 拨珠念诵计数（独门功能，无对标实现，按自家口径）
- * 点按进珠、108 一轮、轻震动、目标计数；统计单列（wuri_beads_records），
+ * 点按进珠、108 一轮、记珠震动（默认开、单珠 50ms）、目标计数；统计单列（wuri_beads_records），
  * 不并入修行打卡记录、更不与静坐时长混算。入口与打坐并列：冥想页顶栏＋修行页卡。 */
 var Beads = (function () {
   'use strict';
@@ -1548,7 +1660,12 @@ var Beads = (function () {
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function cfg() {
     var c = lsJson(LS_C, null);
-    if (!c || typeof c !== 'object') c = { name: '', goal: 0, vib: false };
+    if (!c || typeof c !== 'object') return { name: '', goal: 0, vib: true, vibSet: false };
+    /* 记珠震动默认开（2026-10-28 用户口径）：旧版存量中 vib:false 且无 vibSet
+     * 标记的，多为旧默认 false 被圣号/目标/提示转淡等顺带落盘「烘焙」出来的，
+     * 并非用户在开关上亲手关闭——视作未表态、按新默认开；带 vibSet 标记的
+     * false 是用户亲手关的，永远尊重。自本版起开关 change 必写 vibSet。 */
+    if (c.vib === false && !c.vibSet) c.vib = true;
     return c;
   }
   function saveCfg(c) { lsSet(LS_C, JSON.stringify(c)); }
@@ -1606,7 +1723,7 @@ var Beads = (function () {
         if (item) item.style.display = 'none';
       }
       vibEl.addEventListener('change', function () {
-        var cc = cfg(); cc.vib = vibEl.checked; saveCfg(cc);
+        var cc = cfg(); cc.vib = vibEl.checked; cc.vibSet = true; saveCfg(cc);
       });
     }
     var stage = $('#bd-stage');
@@ -1678,7 +1795,7 @@ var Beads = (function () {
     var goal = cfg().goal || 0;
     if (session % ROUND === 0) vibrate([50, 40, 90]);
     else if (goal && session === goal) vibrate([40, 40, 40, 40, 120]);
-    else vibrate(8);
+    else vibrate(50);   /* 单珠 50ms（原 8ms 弱不可感，2026-10-28 用户口径加强） */
     var sv = $('#bd-saved'); if (sv) sv.textContent = '';
     render();
   }

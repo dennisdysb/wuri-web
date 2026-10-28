@@ -12,9 +12,9 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=288">
+<link rel="stylesheet" href="css/style.css?v=292">
 <link rel="stylesheet" href="css/qimen.css?v=78">
-<link rel="stylesheet" href="css/meditation.css?v=74">
+<link rel="stylesheet" href="css/meditation.css?v=76">
 </head>
 <body>
 <div id="app">
@@ -177,17 +177,17 @@
         <div class="pentad-desc" id="pentad-desc"></div>
         <div class="pentad-phases" id="pentad-phases"></div>
       </div>
-      <div class="poem-card" id="poem-card" hidden role="button" tabindex="0">
-        <div class="pentad-head"><span data-i18n="d_poem">每日一诗</span><b id="poem-card-fest"></b></div>
-        <div class="poem-card-title" id="poem-card-title"></div>
-        <div class="poem-card-line" id="poem-card-line"></div>
-      </div>
       <div class="detail-row"><span class="dl" data-i18n="d_sun">日躔</span><span id="detail-sun">—</span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_chongsha">冲煞</span><span id="detail-chong"></span></div>
       <div class="detail-row"><span class="dl" data-i18n="d_zhishen">值神</span><span id="detail-zhishen"></span></div>
       <details class="detail-note"><summary data-i18n="zs_note_title">值神说明</summary><p class="hint" data-i18n="zs_note"></p></details>
       <div class="yiji"><span class="yi" data-i18n="yi">宜</span><p id="detail-yi"></p></div>
       <div class="yiji"><span class="ji" data-i18n="ji">忌</span><p id="detail-ji"></p></div>
+      <div class="poem-card" id="poem-card" hidden role="button" tabindex="0">
+        <div class="pentad-head"><span data-i18n="d_poem">每日一诗</span><b id="poem-card-fest"></b></div>
+        <div class="poem-card-title" id="poem-card-title"></div>
+        <div class="poem-card-line" id="poem-card-line"></div>
+      </div>
     </section>
     <div class="tab-spacer"></div>
   </main>
@@ -948,7 +948,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v288）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v292）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -2399,52 +2399,80 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="med-controls">
       <div class="med-breath-note" id="med-breath-note" hidden></div>
-      <div class="med-preset-row">
-        <span class="med-breath-title">预设</span>
-        <div class="med-preset-chips" id="med-preset-chips" aria-label="场景预设"></div>
-      </div>
-      <div class="med-breath-row">
-        <span class="med-breath-title">呼吸</span>
-        <div class="med-breath-options" id="med-breath-options" aria-label="呼吸型态"></div>
-      </div>
-      <div class="med-cue-block" id="med-cue-block" hidden>
-        <div class="med-cue-row">
-          <span class="med-cue-item"><label class="med-switch"><input type="checkbox" id="med-cue-toggle"><span class="med-switch-ui"></span></label><span class="med-cue-label">声音引导</span></span>
-          <span class="med-cue-item" id="med-cue-vib-item"><label class="med-switch"><input type="checkbox" id="med-cue-vib"><span class="med-switch-ui"></span></label><span class="med-cue-label">振动</span></span>
-        </div>
-        <div class="med-cue-row med-cue-volrow" id="med-cue-volrow">
-          <span class="med-cue-label">引导音量</span>
-          <input type="range" id="med-cue-vol" class="med-vol med-cue-vol" min="0" max="100" value="45" aria-label="引导音量">
-        </div>
-      </div>
-      <div class="med-dur-row" id="med-dur-row">
-        <button class="med-seg on" data-dur="15">15分钟</button>
-        <button class="med-seg" data-dur="30">30分钟</button>
-        <button class="med-seg" data-dur="custom">自选</button>
-        <input type="number" id="med-custom-min" class="med-custom-min" min="1" max="180" placeholder="分钟" hidden>
-        <button class="med-seg med-custom-go" id="med-custom-go" hidden>开始</button>
-      </div>
-      <div class="med-bell-row">
-        <label class="med-switch"><input type="checkbox" id="med-bell-toggle" checked><span class="med-switch-ui"></span></label>
-        <span class="med-bell-label">间隔磬 · 每5分钟</span>
-      </div>
-      <div class="med-mix-row">
-        <label class="med-switch"><input type="checkbox" id="med-mix-toggle"><span class="med-switch-ui"></span></label>
-        <span class="med-bell-label">混音</span>
-        <span class="med-mix-count" id="med-mix-count"></span>
-        <button class="med-mix-open" id="med-mix-open" hidden>调混音</button>
+    </div>
+    <!-- 主界面控制层（2026-10-28 改版）：只留三键＋播放＋音量，空间让给呼吸圈舞台；
+         预设/呼吸/引导收进「呼吸」sheet、时长/间隔磬收进「时长」sheet、混音走既有 sheet -->
+    <div class="med-controls">
+      <div class="med-keys">
+        <button class="med-key" id="med-key-breath" aria-haspopup="true" aria-expanded="false"><span class="med-key-name">呼吸</span><span class="med-key-sub" id="med-key-breath-sub"></span></button>
+        <button class="med-key" id="med-key-dur" aria-haspopup="true" aria-expanded="false"><span class="med-key-name">时长</span><span class="med-key-sub" id="med-key-dur-sub"></span></button>
+        <button class="med-key" id="med-key-mix" aria-haspopup="true" aria-expanded="false"><span class="med-key-name">调音台</span><span class="med-key-sub" id="med-key-mix-sub"></span></button>
       </div>
       <button class="med-play" id="med-play" aria-label="播放/暂停"></button>
       <input type="range" id="med-vol" class="med-vol" min="0" max="100" value="70" aria-label="音量">
     </div>
-    <!-- 混音面板：底部浮层 sheet（不占控制层流内高度，展开不顶压呼吸圈；收起只收面板、混音续播） -->
+    <!-- 呼吸 sheet：预设（场景预设＋存当前）＋呼吸方式＋声音引导（开关/振动/引导音量） -->
+    <div class="med-sheet" id="med-sheet-breath" hidden>
+      <div class="med-mix-head">
+        <span class="med-mix-head-title">呼吸</span>
+        <button class="med-mix-close" id="med-sheet-breath-close">收起</button>
+      </div>
+      <div class="med-sheet-body">
+        <div class="med-sheet-sec">
+          <div class="med-sheet-sec-title">预设</div>
+          <div class="med-preset-chips" id="med-preset-chips" aria-label="场景预设"></div>
+        </div>
+        <div class="med-sheet-sec">
+          <div class="med-sheet-sec-title">呼吸方式</div>
+          <div class="med-breath-options" id="med-breath-options" aria-label="呼吸型态"></div>
+        </div>
+        <div class="med-cue-block" id="med-cue-block" hidden>
+          <div class="med-sheet-sec-title">声音引导</div>
+          <div class="med-cue-row">
+            <span class="med-cue-item"><label class="med-switch"><input type="checkbox" id="med-cue-toggle"><span class="med-switch-ui"></span></label><span class="med-cue-label">声音引导</span></span>
+            <span class="med-cue-item" id="med-cue-vib-item"><label class="med-switch"><input type="checkbox" id="med-cue-vib"><span class="med-switch-ui"></span></label><span class="med-cue-label">振动</span></span>
+          </div>
+          <div class="med-cue-row med-cue-volrow" id="med-cue-volrow">
+            <span class="med-cue-label">引导音量</span>
+            <input type="range" id="med-cue-vol" class="med-vol med-cue-vol" min="0" max="100" value="45" aria-label="引导音量">
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 时长 sheet：时长选择（15/30/自选）＋间隔磬（开关与每5分钟口径不变） -->
+    <div class="med-sheet" id="med-sheet-dur" hidden>
+      <div class="med-mix-head">
+        <span class="med-mix-head-title">时长</span>
+        <button class="med-mix-close" id="med-sheet-dur-close">收起</button>
+      </div>
+      <div class="med-sheet-body">
+        <div class="med-sheet-sec">
+          <div class="med-sheet-sec-title">时长</div>
+          <div class="med-dur-row" id="med-dur-row">
+            <button class="med-seg on" data-dur="15">15分钟</button>
+            <button class="med-seg" data-dur="30">30分钟</button>
+            <button class="med-seg" data-dur="custom">自选</button>
+            <input type="number" id="med-custom-min" class="med-custom-min" min="1" max="180" placeholder="分钟" hidden>
+            <button class="med-seg med-custom-go" id="med-custom-go" hidden>开始</button>
+          </div>
+        </div>
+        <div class="med-sheet-sec">
+          <div class="med-sheet-sec-title">间隔磬</div>
+          <div class="med-bell-row">
+            <label class="med-switch"><input type="checkbox" id="med-bell-toggle" checked><span class="med-switch-ui"></span></label>
+            <span class="med-bell-label">间隔磬 · 每5分钟</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 混音面板：底部浮层 sheet（不占控制层流内高度，展开不顶压呼吸圈；收起只收面板、混音续播）。
+         2026-10-28 改版：混音总开关移入面板头行，主界面入口改为「调音台」键（#med-key-mix）。 -->
     <div class="med-mix-panel" id="med-mix-panel" hidden>
       <div class="med-mix-head">
         <span class="med-mix-head-title">混音</span>
         <span class="med-mix-count" id="med-mix-panel-count"></span>
+        <label class="med-switch med-mix-switch"><input type="checkbox" id="med-mix-toggle"><span class="med-switch-ui"></span></label>
         <button class="med-mix-close" id="med-mix-close">收起</button>
       </div>
       <div class="med-mix-listwrap"><div id="med-mix-list"></div></div>
@@ -2493,7 +2521,7 @@
             <option value="10000">10000</option>
           </select>
         </label>
-        <span class="med-cue-item"><label class="med-switch"><input type="checkbox" id="bd-vib"><span class="med-switch-ui"></span></label><span class="med-cue-label">轻震动</span></span>
+        <span class="med-cue-item"><label class="med-switch"><input type="checkbox" id="bd-vib"><span class="med-switch-ui"></span></label><span class="med-cue-label">记珠震动</span></span>
       </div>
     </div>
     <button class="bd-stage" id="bd-stage" aria-label="拨珠进一">
