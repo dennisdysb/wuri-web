@@ -1059,13 +1059,23 @@ details.disc-foot .hint{margin-top:9px}
 [data-theme="night"] .daka-cal-d.lv3{background:#4d8a4d}
 [data-theme="night"] .daka-cal-d.lv4{background:#5daa5d;color:#fff}
 
-/* 敲磬悬浮按钮 */
-.qing-fab{position:fixed;right:18px;bottom:90px;width:56px;height:56px;border-radius:50%;
+/* 敲磬悬浮按钮（2026-10-28 用户口径恢复圆形悬浮钮：底栏高 86＋间隙 8＝94，
+   悬在底部控制栏预留区上方；显隐随阅读器、沉浸时与底栏同收） */
+.qing-fab{position:fixed;right:18px;bottom:calc(94px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
   background:var(--teal-deep);color:#fff;font-size:1.3rem;font-family:var(--serif);
   border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
-  z-index:60;display:none}
+  z-index:990;display:none;transition:opacity .18s ease,transform .18s ease}
 .qing-fab.show{display:block}
 .qing-fab:active{transform:scale(.92)}
+body.jing-immersive #qing-btn{opacity:0;pointer-events:none;transform:translateY(12px)}
+/* 阅读器浮动返回钮（与磬成对，左下）：基类 .jing-back-fab 与星象子视图等共用，
+   此处只以 id 定点覆盖阅读器这一枚的底距（与磬同为 94＋安全区，悬在底栏上方）
+   与沉浸联动，不动共享基类 */
+#jing-back-fab{bottom:calc(94px + env(safe-area-inset-bottom));transition:opacity .18s ease,transform .18s ease}
+body.jing-immersive #jing-back-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
+/* 书签悬浮钮（左下竖叠：返回钮顶 150＋间隙 14＝底距 164，与另两钮同显同隐） */
+#jing-bookmark-fab{transition:opacity .18s ease,transform .18s ease}
+body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
 
 .daka-dur-row{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
 .daka-dur-row .mini-btn.tiny.on{background:var(--teal-deep);color:#fff;border-color:var(--teal-deep)}
@@ -1188,7 +1198,7 @@ details.disc-foot .hint{margin-top:9px}
 .jing-back-fab:active{transform:scale(.92)}
 
 /* 书签悬浮按钮（仅内丹书阅读时显示，层级同返回键） */
-.jing-bookmark-fab{position:fixed;left:18px;bottom:160px;width:56px;height:56px;border-radius:50%;
+.jing-bookmark-fab{position:fixed;left:18px;bottom:calc(164px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
   background:#b8860b;color:#fff;font-size:1.5rem;line-height:1;
   border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
   z-index:10001;display:none}
@@ -3132,7 +3142,7 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 .jing-toc-ch{padding:7px 14px 7px 30px;cursor:pointer;font-size:.88rem;color:var(--muted);font-family:var(--serif)}
 .jing-toc-ch:active{background:var(--line-soft)}
 /* 查字悬浮钮（右下、磬钮之上） */
-.dict-fab{position:fixed;right:18px;bottom:calc(112px + env(safe-area-inset-bottom));z-index:950;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 88%,transparent);color:var(--gold-deep,#8a6d1f);font-family:var(--serif);font-size:1rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.22);cursor:pointer}
+.dict-fab{position:fixed;right:18px;bottom:calc(162px + env(safe-area-inset-bottom));z-index:950;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 88%,transparent);color:var(--gold-deep,#8a6d1f);font-family:var(--serif);font-size:1rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.22);cursor:pointer}
 .dict-fab[hidden]{display:none}
 .dict-fab:active{transform:scale(.92)}
 /* 查字弹卡（底部 sheet） */
@@ -3217,10 +3227,12 @@ body.sky-immersive #tabbar{display:none}
 /* ===== 阅读器底部控制栏（2026-10-28 用户定案·微信读书式） =====
  * 阅读器打开期间：App 底 tab 与经文页眉不占位；顶部工具栏撤除；所有控制
  * 收进本栏（fixed 覆盖层、不入正文流，显隐零重排——翻页几何因此恒定）。
- * 主行三组等高单行按钮、永不换行：导航‹目录｜播放 诵读/停止·跟读·磬｜显示 注音·设置 */
+ * 主行三组等高单行按钮、永不换行：导航‹目录｜播放 诵读/停止·跟读｜显示 注音·设置
+ * （磬与返回为左右下圆形悬浮钮、不入本栏，见 .qing-fab / #jing-back-fab） */
 body.reader-open #tabbar{display:none}
 body.reader-open #tab-jing .appbar{display:none}
-#jing-reader:not(.reader-paged){padding-bottom:calc(128px + env(safe-area-inset-bottom))}
+/* 滚动模式底部预留：底栏 86＋磬/返回悬浮钮顶 150＋8 净空＝158，滚到底时正文末行不被悬浮钮压住（恒定值、与底栏显隐无关） */
+#jing-reader:not(.reader-paged){padding-bottom:calc(158px + env(safe-area-inset-bottom))}
 #jing-dock{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:560px;z-index:1000;
   background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   border-top:1px solid var(--line-soft);padding-bottom:env(safe-area-inset-bottom);
@@ -3232,8 +3244,6 @@ body.reader-open #tab-jing .appbar{display:none}
 .jd-group + .jd-group{border-left:1px solid var(--line-soft);padding-left:9px;margin-left:2px}
 .jd-btn{white-space:nowrap;min-height:40px;padding:7px 10px;font-size:.92rem;border-radius:10px;line-height:1.15}
 .jd-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
-.jd-qing{font-family:var(--serif);min-width:40px;padding:7px 8px}
-.jd-qing:active{transform:scale(.92)}
 /* 设置面板：栏内向上展开，按播放/显示/本书分节带小标题 */
 #jing-dock .jing-more-panel{display:block;border-top:1px dashed var(--line-soft);padding:9px 12px 3px;max-height:46vh;overflow-y:auto}
 #jing-dock .jing-more-panel[hidden]{display:none}

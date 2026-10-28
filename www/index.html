@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=295">
+<link rel="stylesheet" href="css/style.css?v=296">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=77">
 </head>
@@ -236,6 +236,14 @@
         <div id="jing-content" class="jing-content"></div>
         <!-- 高亮操作浮层（内容由 JS 动态生成：4色+取消，或写心得+换色+删除） -->
         <div id="hl-pop" class="hl-pop" hidden></div>
+        <!-- 敲磬悬浮按钮（2026-10-28 用户口径：磬不入底栏、恢复圆形悬浮钮；
+             显隐由 jingwen.js updateFab 随阅读器同步，沉浸时随底栏同收） -->
+        <button id="qing-btn" class="qing-fab" title="敲磬">磬</button>
+        <!-- 阅读器浮动返回按钮（与磬成对恢复：点击退出阅读器回经文列表） -->
+        <button id="jing-back-fab" class="jing-back-fab" title="返回目录">‹</button>
+        <!-- 书签悬浮按钮（左下竖叠在返回钮上方；仅标记类书籍显示，判定在
+             jingwen.js readerMarksOn；点击在当前位置加书签） -->
+        <button id="jing-bookmark-fab" class="jing-bookmark-fab" title="加书签">✎</button>
         <!-- 底部控制栏（2026-10-28 用户定案·微信读书式）：顶部工具栏与正文悬浮钮
              全部撤除，控制只此一处。状态行（卷/章名·本书%＋翻页页码＋右端书签
              图标钮）＋三组等高单行按钮（导航｜播放｜显示）；设置面板按
@@ -291,7 +299,6 @@
               <button class="mini-btn jd-btn" id="jing-speak" data-i18n="jing_speak">诵读</button>
               <button class="mini-btn jd-btn" id="jing-stop" data-i18n="jing_stop" hidden>停止</button>
               <button class="mini-btn jd-btn" id="jing-follow">跟读</button>
-              <button class="mini-btn jd-btn jd-qing" id="qing-btn" title="敲磬">磬</button>
             </div>
             <div class="jd-group jd-disp">
               <button class="mini-btn jd-btn" id="jing-pybtn">注音</button>
@@ -948,7 +955,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v295）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v296）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">

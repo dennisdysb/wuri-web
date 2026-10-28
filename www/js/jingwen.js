@@ -3197,34 +3197,37 @@ var JingWen = (function () {
     }
     return audio;
   }
+  /* 标记类书籍判定（现行＝内丹等可加书签/高亮的书）——书签/高亮各入口的
+     显示条件唯一真源；下一批把支持面铺满全书时只改这一处 */
+  function readerMarksOn(curId) {
+    try {
+      return !!(curId && window.JingMark && typeof window.JingMark.marksEnabled === 'function' && window.JingMark.marksEnabled(curId));
+    } catch (e) { return false; }
+  }
   function updateFab() {
-    /* 2026-10-28 底栏化后：磬/返回已是底部控制栏常驻按钮（随 #jing-reader
-       显隐），此处只管「加书签」（设置面板·本书节）与高亮钮的内丹可见性 */
+    /* 敲磬/返回圆形悬浮钮随阅读器显隐（2026-10-28 用户口径：两钮恢复悬浮、
+       不入底栏）；书签悬浮钮（左下竖叠在返回钮上方）与面板钮/状态行图标钮/
+       高亮钮的可见性同由 readerMarksOn 判定 */
     var bmBtn = document.getElementById('jing-bookmark-btn');
     var reader = document.getElementById('jing-reader');
     var showReader = !!(reader && !reader.hidden);
-    // 加书签（面板钮＋状态行右端图标钮）与「我的划线」：仅内丹书阅读时显示
+    var qFab = document.getElementById('qing-btn');
+    if (qFab) qFab.classList.toggle('show', showReader);
+    var backFab = document.getElementById('jing-back-fab');
+    if (backFab) backFab.classList.toggle('show', showReader);
+    // 加书签（悬浮钮＋面板钮＋状态行右端图标钮）与「我的划线」：仅标记类书籍显示
     var curId = window._jingCurrentId;
-    var isNd = false;
-    try {
-      if (curId && window.JingMark && typeof window.JingMark.marksEnabled === 'function') isNd = window.JingMark.marksEnabled(curId);
-    } catch (e) { isNd = false; }
-    var bmShow = !!(showReader && curId && isNd);
+    var bmShow = !!(showReader && readerMarksOn(curId));
+    var bmFab = document.getElementById('jing-bookmark-fab');
+    if (bmFab) bmFab.classList.toggle('show', bmShow);
     if (bmBtn) bmBtn.hidden = !bmShow;
     var bmIco = document.getElementById('jing-bookmark-ico');
     if (bmIco) bmIco.hidden = !bmShow;
     var mkBtn2 = document.getElementById('jing-marks-btn');
     if (mkBtn2) mkBtn2.hidden = !bmShow;
-    // 高亮按钮：仅内丹书阅读时显示（与书签悬浮按钮同逻辑）
+    // 高亮按钮：同口径（与书签悬浮按钮同逻辑）
     var hlBtn = document.getElementById('jing-highlight-btn');
-    if (hlBtn) {
-      var curId2 = window._jingCurrentId;
-      var isNd2 = false;
-      try {
-        if (curId2 && window.JingMark && typeof window.JingMark.marksEnabled === 'function') isNd2 = window.JingMark.marksEnabled(curId2);
-      } catch (e) { isNd2 = false; }
-      hlBtn.hidden = !(showReader && curId2 && isNd2);
-    }
+    if (hlBtn) hlBtn.hidden = !bmShow;
   }
   document.addEventListener('DOMContentLoaded', function () {
     var fab = document.getElementById('qing-btn');
@@ -3238,6 +3241,26 @@ var JingWen = (function () {
           fab.style.transform = 'scale(0.9)';
           setTimeout(function () { fab.style.transform = ''; }, 150);
         } catch (e) {}
+      });
+    }
+    // 浮动返回钮：退出阅读器回经文列表（与底栏「‹ 目录」同一 closeReader）
+    var backFab2 = document.getElementById('jing-back-fab');
+    if (backFab2) {
+      backFab2.addEventListener('click', function () {
+        if (window.closeReader) window.closeReader();
+      });
+    }
+    // 书签悬浮按钮：点击在当前位置加书签（旧行为/旧存储 JingMark.saveBookmark）
+    var bmFab2 = document.getElementById('jing-bookmark-fab');
+    if (bmFab2) {
+      bmFab2.addEventListener('click', function () {
+        var sid = window._jingCurrentId;
+        if (!sid || !readerMarksOn(sid)) return;
+        if (window.JingMark && window.JingMark.saveBookmark) {
+          window.JingMark.saveBookmark(sid);
+        }
+        bmFab2.style.transform = 'scale(0.9)';
+        setTimeout(function () { bmFab2.style.transform = ''; }, 150);
       });
     }
     // 加书签（设置面板·本书节钮＋状态行右端图标钮）：点击保存当前位置
