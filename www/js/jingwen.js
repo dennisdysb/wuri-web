@@ -1284,7 +1284,9 @@ var JingWen = (function () {
     loadTimestamps(sid, voice, function () { if (cb) cb(!!jingTimestamps); });
   }
   var JING_BASE = 'https://dennisdysb.github.io/wuri-web/www/audio/jing/';
-  var JING_HAS_AUDIO = ['s01','s02','s03','s04','s05','s07','s09','s15','s10','s12','s13','s14','s16','s17','s26','s27','s28','s29','s30','s31','s32','s33','s35','s34','s36','s39'];
+  var JING_HAS_AUDIO = ['s01','s02','s03','s04','s05','s07','s09','s15','s10','s12','s13','s14','s16','s17','s26','s27','s28','s29','s30','s31','s32','s33','s35','s34','s36','s39',
+    /* 2026-10-27 扩容常见经文配音：KR 指针挂架 8 部（键＝书架条目 id，与全藏同条目同呈现） */
+    'KR5c0005','KR5c0002','KR5a0027','KR5a0194','KR5b0242','KR5c0030','KR5i0088','KR5c0181'];
   /* 注意：本 IIFE 内 isNeidan 有两处同名声明（模块头 NEIDAN_IDS 版与此处
      JING_NEIDAN 版），函数声明提升以后者为准——目录排除/门控/注音隐藏实际
      都走这张表。两表必须同步增减（2026-10-28 书架扩容冒烟实证）。 */
