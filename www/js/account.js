@@ -1,8 +1,13 @@
 /* 戊日不上香 · 账号＋云同步 v1（2026-10-26）
- * 设计蓝本：~/workspace/wuri-app/account-design/DESIGN.md；后端：pay.shengboyu.ca（src/account.js）。
- * 用户定版五条：①赠送码/免费期不自动跟账号（服务端归集只认购买码邮箱匹配，客户端无自助绑码入口）；
- * ②无设备概念——不列设备、不设上限，仅「退出全部设备」安全出口；③v1 不做端到端加密，文案如实；
- * ④配额免费 200MB／高级版 2GB，超限只停新照片；⑤身份层只实现邮箱。
+ * 设计蓝本：~/workspace/wuri-app/account-design/DESIGN.md＋BINDING-DESIGN.md；后端：pay.shengboyu.ca（src/account.js）。
+ * 2026-10-28 定版（supersede 2026-10-26 旧口径）：①购买码可凭证据自助绑进账号（bind-code），
+ * 服务端归集只认已兑换码；赠送码走丙案——账号卡提交申请、人工按赠送登记表核对后绑，批准前不生效；
+ * 无码存量（免费期）走三案——旧设备签发一次性迁移码、新设备同账号输码确认；②防共享：服务端有仅供
+ * 安全裁决的设备凭据（本机持久 UUID，绝不进同步清单、不做设备列表 UI），密码账户在新设备首次登录须
+ * 过已验证绑定邮箱的验证码（无已验证邮箱走人工），同一账户同时有效设备上限 3 台、第 4 台顶最早一台；
+ * 被顶下线（session_evicted）只清账号会话与账号 Pro 缓存，绝不清本机激活事实；③权益铁律：服务端
+ * pro=true 才置账号 Pro 缓存，false/失败绝不清，登录/退出/换账号都不得让本机已激活设备掉 Pro；
+ * ④配额免费 200MB／高级版 2GB，超限只停新照片；⑤v1 不做端到端加密，文案如实。
  * v1.1（2026-10-27，用户拍板全端双登录）：在邮箱验证码之外加「用户名＋密码」——同一账号可双持两身份、
  * 同步数据同一份（owner 键：邮箱身份用邮箱、纯用户名身份用 'user:<用户名>'）；密码只在服务端存
  * PBKDF2 加盐哈希，客户端从不留存明文；登录方式管理在账号视图「登录方式」区（加绑/改密/加绑邮箱）。
@@ -46,7 +51,11 @@
     consent: 'wuri_acct_consent_house_v1', cfg: 'wuri_acct_cfg_v1',
     photometa: 'wuri_acct_photometa_v1', usage: 'wuri_acct_usage_v1', owner: 'wuri_acct_owner_v1',
     username: 'wuri_acct_username_v1', haspw: 'wuri_acct_haspw_v1',
-    delintent: 'wuri_acct_delintent_v1'
+    delintent: 'wuri_acct_delintent_v1',
+    /* 设备凭据（防共享裁决用）：本机持久 UUID，绝不进 LS_KEYS 同步清单——同步＝把信任复制到新设备 */
+    device: 'wuri_acct_device_v1',
+    /* 绑码提示 snooze 时间戳（毫秒）；sources 为服务端下发的权益来源缓存 */
+    bindSnooze: 'wuri_acct_bind_snooze', sources: 'wuri_acct_sources_v1'
   };
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
@@ -61,8 +70,10 @@
     hasPw: lsGet(K.haspw) === '1',
     syncOn: lsGet(K.sync) === '1',
     running: false,
-    lastEnt: 0
+    lastEnt: 0,
+    sources: lsJSON(K.sources, [])
   };
+  var bindPromptCode = null; /* 登录后绑码提示条当前预填的 WURI 码（规范化） */
   function isLoggedIn() { return !!state.token; }
 
   /* ---------------- 同步清单：localStorage 键组 ---------------- */
@@ -133,10 +144,46 @@
   }
   function nowISO() { return new Date().toISOString(); }
 
+  /* ---------------- 设备凭据（2026-10-28 防共享定版） ----------------
+   * 持久 UUID 存 K.device（不进 LS_KEYS）；所有 api() 请求带请求头 x-wuri-device-id，
+   * 供后端登记受信设备（含把上线前存量会话以 existing_session 登记，不下线、不补码）。
+   * deviceLabel 只发粗粒度（系统·浏览器族），不发原始 UA；原始 UA 仅 bind-code 的
+   * device_hint 用作 B 级证据粗匹配（见 doBindCode）。 */
+  function getDeviceId() {
+    var id = lsGet(K.device);
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      id = newUuid();
+      lsSet(K.device, id);
+    }
+    return id;
+  }
+  function deviceLabel() {
+    var ua = '';
+    try { ua = navigator.userAgent || ''; } catch (e) {}
+    if (!ua) return 'web';
+    var os = /Android/i.test(ua) ? 'Android' : (/iPhone|iPad|iPod/i.test(ua) ? 'iOS' : (/Windows/i.test(ua) ? 'Windows' : (/Macintosh|Mac OS/i.test(ua) ? 'macOS' : (/Linux/i.test(ua) ? 'Linux' : ''))));
+    var br = /Edg\//i.test(ua) ? 'Edge' : (/OPR\/|Opera/i.test(ua) ? 'Opera' : (/Firefox\//i.test(ua) ? 'Firefox' : (/Chrome\//i.test(ua) ? 'Chrome' : (/Safari\//i.test(ua) ? 'Safari' : ''))));
+    var parts = [];
+    if (os) parts.push(os);
+    if (br) parts.push(br);
+    return parts.length ? parts.join(' · ') : 'web';
+  }
+  function rawDeviceHint() {
+    try { return (navigator.userAgent || '').slice(0, 120); } catch (e) { return ''; }
+  }
+  function deviceFields(extra) {
+    var o = extra || {};
+    o.deviceId = getDeviceId();
+    o.deviceLabel = deviceLabel();
+    return o;
+  }
+
   /* ---------------- API ---------------- */
   function api(path, opts) {
     opts = opts || {};
     var h = { 'Content-Type': 'application/json' };
+    /* 所有请求（带 token 与 auth 皆然）都带设备凭据头：后端据此登记受信设备 */
+    try { h['x-wuri-device-id'] = getDeviceId(); } catch (e) {}
     if (opts.auth !== false && state.token) h['Authorization'] = 'Bearer ' + state.token;
     return fetch(API + path, {
       method: opts.method || 'GET',
@@ -164,8 +211,25 @@
     if (e === 'no_password') return T('acct_no_password');
     if (e === 'has_username') return T('acct_has_username');
     if (e === 'email_is_identity') return T('acct_email_identity');
+    if (e === 'device_verification_required') return T('acct_devcode_hint');
+    if (e === 'device_manual_required') return T('acct_device_manual');
+    if (e === 'session_evicted') return T('acct_session_evicted');
+    if (e === 'too_many_attempts') return T('acct_bind_err_toomany');
     if (r && r.body && r.body.message) return r.body.message;
     return T(fallbackKey || 'acct_net_err');
+  }
+  /* 绑码类接口错误：优先服务端 message（后端话术为准），否则按 error 码映射 */
+  function bindErrText(r) {
+    var e = r && r.body && r.body.error;
+    if (r && r.body && r.body.message) return r.body.message;
+    if (e === 'bad_code') return T('acct_bind_err_bad');
+    if (e === 'code_not_found') return T('acct_bind_err_notfound');
+    if (e === 'bound_other') return T('acct_bind_err_bound_other');
+    if (e === 'not_redeemed') return T('acct_bind_err_not_redeemed');
+    if (e === 'code_invalid') return T('acct_bind_err_invalid');
+    if (e === 'proof_required') return T('acct_bind_err_proof');
+    if (e === 'too_many_attempts') return T('acct_bind_err_toomany');
+    return errText(r);
   }
 
   /* ---------------- 会话 ---------------- */
@@ -182,26 +246,42 @@
     lsSet(K.delintent, null);
   }
   function clearSession(silent) {
+    /* 只清账号态（令牌/身份/账号 Pro 缓存/sources）；绝不碰本机激活事实
+     * wuri_pro_redeem / wuri_pro_code，也不清设备凭据与 bind snooze */
     state.token = ''; state.email = ''; state.username = ''; state.hasPw = false; state.syncOn = false;
+    state.sources = [];
     lsSet(K.token, null); lsSet(K.email, null); lsSet(K.username, null); lsSet(K.haspw, null); lsSet(K.pro, null);
+    lsSet(K.sources, null);
     if (!silent) render();
   }
-  function on401() {
+  /* 会话失效：session_evicted＝被另一台新设备登录顶下线——只清账号会话与 K.pro
+   * （clearSession 本就如此），文案用定稿句、不泄露其他设备任何信息；普通 401 用旧文案 */
+  function on401(err) {
     if (!state.token) return;
+    var e = '';
+    if (typeof err === 'string') e = err;
+    else if (err && err.body && err.body.error) e = err.body.error;
+    else if (err && err.error) e = err.error;
     clearSession(true);
-    toastMsg(T('acct_session_out'));
+    toastMsg(e === 'session_evicted' ? T('acct_session_evicted') : T('acct_session_out'));
     render();
   }
+  /* 铁律（只增不减）：服务端 pro=true 才置 K.pro='1'；pro=false、失败、缺字段一律不动，
+   * 绝不清 K.pro，更不碰本机标记。sources 有下发才更新缓存。 */
   function applyEntitlement(ent) {
     if (!ent) return;
-    lsSet(K.pro, ent.pro ? '1' : null);
+    if (Array.isArray(ent.sources)) {
+      state.sources = ent.sources;
+      lsSetJSON(K.sources, ent.sources);
+    }
+    if (ent.pro) lsSet(K.pro, '1');
     if (window.WuriPro && WuriPro.refreshProUI) { try { WuriPro.refreshProUI(); } catch (e) {} }
   }
   function refreshEntitlement() {
     if (!state.token) return Promise.resolve(null);
     state.lastEnt = Date.now();
     return api('/api/account/entitlement').then(function (r) {
-      if (r.status === 401) { on401(); return null; }
+      if (r.status === 401) { on401(r.body && r.body.error); return null; }
       if (r.body && r.body.ok) { applyEntitlement(r.body); render(); return r.body; }
       return null;
     }).catch(function () { return null; });
@@ -836,7 +916,7 @@
       var chunk = items.slice(idx, idx + 200);
       idx += chunk.length;
       return api('/api/sync/push', { method: 'POST', body: { items: chunk.map(stripInternal) } }).then(function (r) {
-        if (r.status === 401) { on401(); throw new Error('unauthorized'); }
+        if (r.status === 401) { on401(r && r.body && r.body.error); throw new Error('unauthorized'); }
         if (!r.body || !r.body.ok) throw new Error('push_failed');
         if (Array.isArray(r.body.applied)) {
           r.body.applied.forEach(function (a) { applied[a.dataset + '|' + a.key] = 1; });
@@ -901,7 +981,7 @@
       .then(function (preSnap) { recordDelIntents(preSnap); })
       .then(function () { return api('/api/sync/pull', { method: 'POST', body: { stamps: stamps } }); })
       .then(function (r) {
-        if (r.status === 401) { on401(); throw new Error('unauthorized'); }
+        if (r.status === 401) { on401(r && r.body && r.body.error); throw new Error('unauthorized'); }
         if (!r.body || !r.body.ok) throw new Error('pull_failed');
         return applyItems(r.body.items || []);
       })
@@ -927,7 +1007,7 @@
           chain = chain.then(function () {
             var pre = ph.needBinary
               ? photoPut(ph.item.key, ph.blob).then(function (r) {
-                  if (r.status === 401) { on401(); throw new Error('unauthorized'); }
+                  if (r.status === 401) { on401(r && r.body && r.body.error); throw new Error('unauthorized'); }
                   if (r.status === 413) { blocked++; return 'blocked'; }
                   if (!r.body || !r.body.ok) throw new Error('photo_put_failed');
                   var shadow = loadShadow(); shadow.photo[ph.item.key] = ph.sha; saveShadow(shadow);
@@ -979,6 +1059,166 @@
       var p = computePush(snap);
       return p.items.length + p.photos.length;
     }).catch(function () { return 0; });
+  }
+
+  /* ---------------- 高级版绑定（2026-10-28 定版） ---------------- */
+  function normCodeKey(code) {
+    var c = String(code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return c.indexOf('WURI') === 0 ? c.slice(4) : c;
+  }
+  function sourcesHasCode(code) {
+    var want = normCodeKey(code);
+    if (!want) return false;
+    return (state.sources || []).some(function (s) {
+      return s && s.source === 'code' && normCodeKey(s.ref) === want;
+    });
+  }
+  function localProInfoSafe() {
+    if (window.WuriPro && WuriPro.localProInfo) {
+      try { return WuriPro.localProInfo(); } catch (e) {}
+    }
+    var redeemed = false, code = null;
+    try { redeemed = localStorage.getItem('wuri_pro_redeem') === '1'; code = localStorage.getItem('wuri_pro_code'); } catch (e) {}
+    return { hasLocalPro: redeemed, redeemed: redeemed, code: code, codeKind: code ? 'wuri' : null, playPro: false, redeemedAt: null };
+  }
+  /* 绑定状态摘要：能从 sources 辨来源就说清来源，否则退回已绑/未绑 */
+  function bindStatusText() {
+    var src = state.sources || [];
+    for (var i = 0; i < src.length; i++) {
+      var s = src[i];
+      if (!s) continue;
+      if (s.source === 'code') {
+        var tail = normCodeKey(s.ref).slice(-4);
+        return tail ? TF('acct_bind_status_code', tail) : T('acct_bind_status_bound');
+      }
+      if (s.source === 'play') return T('acct_bind_status_play');
+      if (s.source === 'gift') return T('acct_bind_status_gift');
+      if (s.source === 'legacy_free') return T('acct_bind_status_legacy');
+    }
+    if (src.length) return T('acct_bind_status_bound');
+    return lsGet(K.pro) === '1' ? T('acct_prow_bound') : T('acct_prow_none');
+  }
+  function applyBindSuccess(body) {
+    if (body) applyEntitlement({ pro: body.pro != null ? !!body.pro : true, sources: body.sources });
+    bindPromptCode = null;
+    render();
+  }
+  function postBindCode(code, purchaseEmail, withLocalEvidence) {
+    var body = { code: code };
+    if (purchaseEmail) body.purchase_email = purchaseEmail;
+    if (withLocalEvidence) {
+      var at = null;
+      try { at = localStorage.getItem('wuri_pro_redeemed_at_local'); } catch (e) {}
+      if (at) body.local_redeemed_at = at;
+      body.device_hint = rawDeviceHint();
+    }
+    return api('/api/account/bind-code', { method: 'POST', body: body });
+  }
+  function doBindPrompt() {
+    if (!bindPromptCode) return;
+    var msg = $('acct-bind-prompt-msg');
+    var btn = $('acct-bind-prompt-btn');
+    if (btn) btn.disabled = true;
+    postBindCode(bindPromptCode, '', true).then(function (r) {
+      if (btn) btn.disabled = false;
+      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
+      if (r.body && r.body.ok) {
+        applyBindSuccess(r.body);
+        toastMsg(T('acct_bind_ok'));
+      } else if (msg) msg.textContent = bindErrText(r);
+    }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
+  }
+  function doBindManual() {
+    var input = $('acct-bind-code');
+    var emailEl = $('acct-bind-email');
+    var msg = $('acct-bind-msg');
+    var raw = input ? input.value.trim() : '';
+    var norm = (window.WuriPro && WuriPro.normalizeWuriCode) ? WuriPro.normalizeWuriCode(raw) : null;
+    if (!norm) { if (msg) msg.textContent = T('acct_bind_err_bad'); return; }
+    var purchaseEmail = emailEl ? emailEl.value.trim().toLowerCase() : '';
+    if (purchaseEmail && !validEmail(purchaseEmail)) { if (msg) msg.textContent = T('acct_bad_email'); return; }
+    var info = localProInfoSafe();
+    var withEv = !!(info.code && normCodeKey(info.code) === normCodeKey(norm));
+    var btn = $('acct-bind-btn'); if (btn) btn.disabled = true;
+    postBindCode(norm, purchaseEmail, withEv).then(function (r) {
+      if (btn) btn.disabled = false;
+      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
+      if (r.body && r.body.ok) {
+        if (msg) msg.textContent = T('acct_bind_ok');
+        applyBindSuccess(r.body);
+        toastMsg(T('acct_bind_ok'));
+      } else if (msg) msg.textContent = bindErrText(r);
+    }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
+  }
+  function doGiftRequest() {
+    var codeEl = $('acct-gift-code'), nameEl = $('acct-gift-name'), noteEl = $('acct-gift-note'), msg = $('acct-gift-msg');
+    var code = codeEl ? codeEl.value.toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
+    var name = nameEl ? nameEl.value.trim() : '';
+    var note = noteEl ? noteEl.value.trim() : '';
+    if (code.length !== 6 || !name) { if (msg) msg.textContent = T('acct_gift_need'); return; }
+    var body = { code: code, registeredName: name };
+    if (note) body.note = note;
+    var btn = $('acct-gift-btn'); if (btn) btn.disabled = true;
+    api('/api/account/gift-bind-request', { method: 'POST', body: body }).then(function (r) {
+      if (btn) btn.disabled = false;
+      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
+      if (r.body && r.body.ok) { if (msg) msg.textContent = T('acct_gift_ok'); }
+      else if (msg) msg.textContent = bindErrText(r);
+    }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
+  }
+  function doMigIssue() {
+    var msg = $('acct-mig-msg'), out = $('acct-mig-issued');
+    var btn = $('acct-mig-issue-btn'); if (btn) btn.disabled = true;
+    api('/api/account/legacy-migration/issue', { method: 'POST', body: { localUnlocked: true, deviceId: getDeviceId() } }).then(function (r) {
+      if (btn) btn.disabled = false;
+      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
+      if (r.body && r.body.ok && r.body.code) {
+        if (out) {
+          out.hidden = false;
+          out.textContent = TF('acct_mig_issued', r.body.code, String(r.body.expiresAt || '').replace('T', ' ').slice(0, 16));
+        }
+        if (msg) msg.textContent = '';
+      } else if (msg) msg.textContent = bindErrText(r);
+    }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
+  }
+  function doMigConfirm() {
+    var codeEl = $('acct-mig-code'), msg = $('acct-mig-msg');
+    var code = codeEl ? codeEl.value.trim() : '';
+    if (!code) { if (msg) msg.textContent = T('acct_mig_need'); return; }
+    var btn = $('acct-mig-confirm-btn'); if (btn) btn.disabled = true;
+    api('/api/account/legacy-migration/confirm', { method: 'POST', body: { code: code, deviceId: getDeviceId() } }).then(function (r) {
+      if (btn) btn.disabled = false;
+      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
+      if (r.body && r.body.ok) {
+        if (msg) msg.textContent = T('acct_mig_ok');
+        applyBindSuccess(r.body);
+        toastMsg(T('acct_mig_ok'));
+      } else if (msg) msg.textContent = bindErrText(r);
+    }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
+  }
+  /* 登录后绑码体检：已登录＋本机已兑换且存有 WURI 码＋sources 未含该码＋snooze 未生效 */
+  function checkBindPrompt() {
+    var el = $('acct-bind-prompt');
+    if (!el) return;
+    var show = false, tail = '';
+    bindPromptCode = null;
+    if (isLoggedIn()) {
+      var info = localProInfoSafe();
+      if (info.redeemed && info.code && info.codeKind === 'wuri') {
+        var snooze = parseInt(lsGet(K.bindSnooze) || '0', 10) || 0;
+        if (!(snooze > Date.now()) && !sourcesHasCode(info.code)) {
+          show = true;
+          bindPromptCode = info.code;
+          tail = normCodeKey(info.code).slice(-4);
+        }
+      }
+    }
+    el.hidden = !show;
+    if (show) {
+      var tx = $('acct-bind-prompt-text');
+      if (tx) tx.textContent = TF('acct_bind_prompt', tail);
+      var pm = $('acct-bind-prompt-msg'); if (pm) pm.textContent = '';
+    }
   }
 
   /* ---------------- UI ---------------- */
@@ -1040,7 +1280,27 @@
       var unRow = $('acct-username-row');
       if (state.username) { unRow.hidden = false; $('acct-username').textContent = state.username; }
       else unRow.hidden = true;
-      $('acct-prow').textContent = lsGet(K.pro) === '1' ? T('acct_prow_bound') : T('acct_prow_none');
+      $('acct-prow').textContent = lsGet(K.pro) === '1' ? bindStatusText() : T('acct_prow_none');
+      var bsRow = $('acct-bind-status-row');
+      if (bsRow) {
+        bsRow.hidden = false;
+        var bsEl = $('acct-bind-status');
+        if (bsEl) bsEl.textContent = bindStatusText();
+      }
+      checkBindPrompt();
+      /* 赠送申请／手动绑码预填：仅在输入框为空时填本机存码，不覆盖用户输入 */
+      var info2 = localProInfoSafe();
+      if (info2.code && info2.codeKind === 'gift') {
+        var gEl = $('acct-gift-code');
+        if (gEl && !gEl.value) gEl.value = info2.code;
+      }
+      if (info2.code && info2.codeKind === 'wuri') {
+        var bEl = $('acct-bind-code');
+        if (bEl && !bEl.value) bEl.value = info2.code;
+      }
+      /* 存量迁移生成按钮：仅本机已解锁（本机兑换标记或 Play 桥，不含账号 Pro 本身）时显示 */
+      var migBtn = $('acct-mig-issue-btn');
+      if (migBtn) migBtn.hidden = !info2.hasLocalPro;
       var tg = $('acct-sync-toggle'); if (tg) tg.checked = state.syncOn;
       var usage = lsJSON(K.usage, null);
       var qrow = $('acct-quota-row');
@@ -1109,7 +1369,7 @@
   function refreshMe() {
     if (!state.token) return;
     api('/api/account/me').then(function (r) {
-      if (r.status === 401) { on401(); return; }
+      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
       if (r.body && r.body.ok) {
         state.email = r.body.email || state.email;
         state.username = r.body.username || '';
@@ -1171,7 +1431,7 @@
   function requestCode(email, btn, msgEl, defKey) {
     if (!validEmail(email)) { msgEl.textContent = T('acct_bad_email'); return; }
     btn.disabled = true;
-    api('/api/auth/request-code', { method: 'POST', auth: false, body: { email: email } }).then(function (r) {
+    api('/api/auth/request-code', { method: 'POST', auth: false, body: deviceFields({ email: email }) }).then(function (r) {
       if (r.body && r.body.ok && r.body.sent) {
         msgEl.textContent = T('acct_code_sent');
         startCountdown(btn, defKey);
@@ -1192,7 +1452,7 @@
     if (!validEmail(email)) { msg.textContent = T('acct_bad_email'); return; }
     if (!/^\d{6}$/.test(code)) { msg.textContent = T('acct_code_bad'); return; }
     var btn = $('acct-do-login'); btn.disabled = true;
-    api('/api/auth/verify', { method: 'POST', auth: false, body: { email: email, code: code, label: 'web' } }).then(function (r) {
+    api('/api/auth/verify', { method: 'POST', auth: false, body: deviceFields({ email: email, code: code, label: 'web' }) }).then(function (r) {
       btn.disabled = false;
       if (r.body && r.body.ok && r.body.token) {
         afterLogin(r.body, email, r.body.username || '');
@@ -1210,11 +1470,15 @@
     if (prevOwner && prevOwner !== ident) {
       wipeSyncState();
       state.syncOn = false; lsSet(K.sync, '0');
+      /* 换账号：先清旧账号的 Pro 缓存与 sources，再按新账号 body.pro 置位（只此一处可清，
+       * 且清的是旧账号缓存；本机 wuri_pro_redeem / wuri_pro_code 永不碰） */
+      lsSet(K.pro, null);
+      state.sources = []; lsSet(K.sources, null);
     }
     lsSet(K.owner, ident);
     saveSession(body.token, email || '', username || '', body.hasPassword);
     state.syncOn = lsGet(K.sync) === '1';
-    applyEntitlement({ pro: !!body.pro });
+    applyEntitlement({ pro: !!body.pro, sources: body.sources });
     toastMsg(T('acct_login_ok'));
     refreshUsage();
     if (!lsGet(K.migrated) && !state.syncOn) openSyncExplainer();
@@ -1230,10 +1494,30 @@
     if (!validUsername(username)) { msg.textContent = T('acct_bad_username'); return; }
     if (!password) { msg.textContent = T('acct_bad_password'); return; }
     var btn = $('acct-do-login-user'); btn.disabled = true;
-    api('/api/auth/login-username', { method: 'POST', auth: false, body: { username: username, password: password, label: 'web' } }).then(function (r) {
+    var loginBody = deviceFields({ username: username, password: password, label: 'web' });
+    /* 新设备闸第二段：验证码输入区已显示且有值时，原 body 加 deviceCode 再提交 */
+    var devEl = $('acct-devcode');
+    var devRow = $('acct-devcode-row');
+    if (devEl && devRow && !devRow.hidden && (devEl.value || '').trim()) {
+      loginBody.deviceCode = (devEl.value || '').trim();
+    }
+    api('/api/auth/login-username', { method: 'POST', auth: false, body: loginBody }).then(function (r) {
       btn.disabled = false;
+      if (r.body && r.body.error === 'device_verification_required') {
+        /* 密码已过、尚无会话：验证码已发绑定邮箱，显示验证码区等二次提交 */
+        if (devRow) devRow.hidden = false;
+        msg.textContent = T('acct_devcode_hint');
+        if (devEl) devEl.focus();
+        return;
+      }
+      if (r.body && (r.body.error === 'device_manual_required' || r.body.error === 'manual_required')) {
+        msg.textContent = T('acct_device_manual');
+        return;
+      }
       if (r.body && r.body.ok && r.body.token) {
         $('acct-upass').value = '';
+        if (devEl) devEl.value = '';
+        if (devRow) devRow.hidden = true;
         afterLogin(r.body, r.body.email || '', r.body.username || username);
       } else {
         msg.textContent = errText(r, 'acct_bad_credentials');
@@ -1251,7 +1535,7 @@
     if (pw1.length < 8) { msg.textContent = T('acct_bad_password'); return; }
     if (pw1 !== pw2) { msg.textContent = T('acct_pass_mismatch'); return; }
     if (email && !validEmail(email)) { msg.textContent = T('acct_bad_email'); return; }
-    var body = { username: username, password: pw1, label: 'web' };
+    var body = deviceFields({ username: username, password: pw1, label: 'web' });
     if (email) body.email = email;
     var btn = $('acct-do-register'); btn.disabled = true;
     api('/api/auth/register-username', { method: 'POST', auth: false, body: body }).then(function (r) {
@@ -1274,7 +1558,7 @@
     if (!/^\d{6}$/.test(code)) { msg.textContent = T('acct_code_bad'); return; }
     if (pw.length < 8) { msg.textContent = T('acct_bad_password'); return; }
     var btn = $('acct-do-reset'); btn.disabled = true;
-    api('/api/auth/reset-password', { method: 'POST', auth: false, body: { email: email, code: code, newPassword: pw } }).then(function (r) {
+    api('/api/auth/reset-password', { method: 'POST', auth: false, body: deviceFields({ email: email, code: code, newPassword: pw }) }).then(function (r) {
       btn.disabled = false;
       if (r.body && r.body.ok) {
         $('acct-f-pass').value = ''; $('acct-f-code').value = '';
@@ -1300,7 +1584,7 @@
         toastMsg(T('acct_del_done'));
         closeToMe();
         render();
-      } else if (r.status === 401) { on401(); closeToMe(); }
+      } else if (r.status === 401) { on401(r && r.body && r.body.error); closeToMe(); }
       else msg.textContent = errText(r, 'acct_code_bad');
     }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
   }
@@ -1317,7 +1601,7 @@
     var btn = $('acct-b-do'); btn.disabled = true;
     api('/api/account/bind-username', { method: 'POST', body: { username: username, password: pw1 } }).then(function (r) {
       btn.disabled = false;
-      if (r.status === 401) { on401(); closeToMe(); return; }
+      if (r.status === 401) { on401(r && r.body && r.body.error); closeToMe(); return; }
       if (r.body && r.body.ok) {
         state.username = r.body.username || username;
         state.hasPw = true;
@@ -1341,7 +1625,7 @@
     var btn = $('acct-c-do'); btn.disabled = true;
     api('/api/account/change-password', { method: 'POST', body: body }).then(function (r) {
       btn.disabled = false;
-      if (r.status === 401) { on401(); closeToMe(); return; }
+      if (r.status === 401) { on401(r && r.body && r.body.error); closeToMe(); return; }
       if (r.body && r.body.ok) {
         $('acct-c-old').value = ''; $('acct-c-new').value = ''; $('acct-c-code').value = '';
         toastMsg(T('acct_chpw_ok'));
@@ -1357,7 +1641,7 @@
     var btn = $('acct-e-do'); btn.disabled = true;
     api('/api/account/bind-email', { method: 'POST', body: { email: email, code: code } }).then(function (r) {
       btn.disabled = false;
-      if (r.status === 401) { on401(); closeToMe(); return; }
+      if (r.status === 401) { on401(r && r.body && r.body.error); closeToMe(); return; }
       if (r.body && r.body.ok) {
         state.email = email;
         lsSet(K.email, email);
@@ -1387,7 +1671,7 @@
         toastMsg(T('acct_del_done'));
         closeToMe();
         render();
-      } else if (r.status === 401) { on401(); closeToMe(); }
+      } else if (r.status === 401) { on401(r && r.body && r.body.error); closeToMe(); }
       else msg.textContent = errText(r, 'acct_bad_credentials');
     }).catch(function () { btn.disabled = false; msg.textContent = T('acct_net_err'); });
   }
@@ -1396,7 +1680,7 @@
     if (!state.token) return;
     toastMsg(T('acct_syncing'));
     api('/api/account/export', { method: 'POST', raw: true }).then(function (r) {
-      if (r.status === 401) { on401(); return; }
+      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
       if (!r.ok) { toastMsg(T('acct_net_err')); return; }
       return r.blob().then(function (blob) {
         var url = URL.createObjectURL(blob);
@@ -1450,6 +1734,17 @@
     });
     on('acct-e-do', 'click', doBindEmail);
     on('acct-del-pw-btn', 'click', doDeletePw);
+    /* 2026-10-28 绑定三入口＋提示条 */
+    on('acct-bind-prompt-btn', 'click', doBindPrompt);
+    on('acct-bind-prompt-later', 'click', function () {
+      lsSet(K.bindSnooze, String(Date.now() + 7 * 24 * 3600 * 1000));
+      bindPromptCode = null;
+      var el = $('acct-bind-prompt'); if (el) el.hidden = true;
+    });
+    on('acct-bind-btn', 'click', doBindManual);
+    on('acct-gift-btn', 'click', doGiftRequest);
+    on('acct-mig-issue-btn', 'click', doMigIssue);
+    on('acct-mig-confirm-btn', 'click', doMigConfirm);
     on('acct-sync-toggle', 'change', function () {
       var tg = $('acct-sync-toggle');
       if (tg.checked) {
@@ -1539,6 +1834,10 @@
     runSync: runSync,
     refreshEntitlement: refreshEntitlement,
     isLoggedIn: isLoggedIn,
+    _deviceId: getDeviceId,
+    _deviceLabel: deviceLabel,
+    _applyEntitlement: applyEntitlement,
+    _bindStatusText: bindStatusText,
     _snapshot: snapshot,
     _computePush: computePush
   };

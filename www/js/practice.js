@@ -276,14 +276,14 @@ var Practice = (function () {
   var doneAudio = null;
   /* 背景音乐（内练/早晚功课等老计时窗用）：本地纯自然声，无缝循环 */
   var BGM_LIST = [
-    { id: 'rain',    name: '温柔雨声', url: 'audio/meditation/loop-rain.mp3?v=3' },
-    { id: 'thunder', name: '雨·远雷',   url: 'audio/meditation/loop-thunder.mp3?v=3' },
-    { id: 'ocean',   name: '海浪',       url: 'audio/meditation/loop-ocean.mp3?v=3' },
-    { id: 'forest',  name: '森林鸟鸣', url: 'audio/meditation/loop-forest.mp3?v=3' },
-    { id: 'night',   name: '夜晚虫鸣', url: 'audio/meditation/loop-night.mp3?v=3' },
-    { id: 'fire',    name: '壁炉火声', url: 'audio/meditation/loop-fire.mp3?v=3' },
-    { id: 'creek',   name: '溪流',       url: 'audio/meditation/loop-creek.mp3?v=3' },
-    { id: 'wind',    name: '风声',       url: 'audio/meditation/loop-wind.mp3?v=3' }
+    { id: 'rain',    name: '温柔雨声', url: 'audio/meditation/loop-rain.mp3?v=4' },
+    { id: 'thunder', name: '雨·远雷',   url: 'audio/meditation/loop-thunder.mp3?v=4' },
+    { id: 'ocean',   name: '海浪',       url: 'audio/meditation/loop-ocean.mp3?v=4' },
+    { id: 'forest',  name: '森林鸟鸣', url: 'audio/meditation/loop-forest.mp3?v=4' },
+    { id: 'night',   name: '夜晚虫鸣', url: 'audio/meditation/loop-night.mp3?v=4' },
+    { id: 'fire',    name: '壁炉火声', url: 'audio/meditation/loop-fire.mp3?v=4' },
+    { id: 'creek',   name: '溪流',       url: 'audio/meditation/loop-creek.mp3?v=4' },
+    { id: 'wind',    name: '风声',       url: 'audio/meditation/loop-wind.mp3?v=4' }
   ];
   /* 背景音乐按钮按 BGM_LIST 动态渲染（index.html 只留容器） */
   function renderBgmRow() {

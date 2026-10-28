@@ -3,6 +3,10 @@
  * iOS / 纯网页：无内购桥，Pro 功能保持锁定（iOS 版 Pro 待定）。
  * 测试包（TEST-ONLY 未剔除）：window.__wuriTestBuild=true，可用测试按钮本地解锁，
  *   正式包剔除后该路径不存在，只能走真实购买。
+ * 2026-10-28 定版（BINDING-DESIGN.md）：兑换成功除置 wuri_pro_redeem 外，同记规范化
+ *   完整码 wuri_pro_code 与本机兑换时刻 wuri_pro_redeemed_at_local，供账号绑码时作
+ *   本机证据／赠送码申请预填；wuri_pro_code 是 bearer 凭证，绝不进任何同步清单。
+ *   Pro 判定恒为并集（本机兑换 ∪ 账号权益缓存 ∪ Play 桥 ∪ 测试键），只增不减。
  */
 var WuriPro = (function () {
   'use strict';
@@ -65,9 +69,58 @@ var WuriPro = (function () {
     var chk = c.substring(4, 6);
     return redeemChecksum(s4) === chk;
   }
+  /* 规范化：WURI 码统一成 WURI-XXXX-XXXX-XXXX；6 位赠送码统一成大写无分隔 6 位 */
+  function normalizeWuriCode(code) {
+    if (!code) return null;
+    var clean = String(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    var body = clean.indexOf('WURI') === 0 ? clean.slice(4) : clean;
+    if (body.length !== 12) return null;
+    return 'WURI-' + body.slice(0, 4) + '-' + body.slice(4, 8) + '-' + body.slice(8, 12);
+  }
+  function normalizeGiftCode(code) {
+    if (!code) return null;
+    var c = String(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return c.length === 6 ? c : null;
+  }
+  function rememberRedeemedCode(normalized) {
+    if (!normalized) return;
+    try {
+      localStorage.setItem('wuri_pro_code', normalized);
+      localStorage.setItem('wuri_pro_redeemed_at_local', new Date().toISOString());
+    } catch (e) {}
+  }
+  /* 只读 helper（供 account.js 绑定体检）：区分本机来源——存有 WURI 码／存有赠送码／
+   * 只有本机兑换标记但无码（老存量）／Play 桥已购；hasLocalPro 不含账号权益缓存。 */
+  function localProInfo() {
+    var code = null, at = null, redeemed = false;
+    try {
+      code = localStorage.getItem('wuri_pro_code');
+      at = localStorage.getItem('wuri_pro_redeemed_at_local');
+      redeemed = localStorage.getItem('wuri_pro_redeem') === '1';
+    } catch (e) {}
+    var play = false;
+    try { play = status().pro; } catch (e) {}
+    var kind = null;
+    if (code) {
+      if (normalizeWuriCode(code)) kind = 'wuri';
+      else if (normalizeGiftCode(code)) kind = 'gift';
+    }
+    return {
+      hasLocalPro: !!(redeemed || play),
+      redeemed: redeemed,
+      code: code || null,
+      codeKind: kind,
+      redeemedAt: at || null,
+      playPro: play,
+      hasCode: !!code,
+      localOnlyNoCode: !!(redeemed && !code)
+    };
+  }
+  function hasLocalPro() { return localProInfo().hasLocalPro; }
   function redeemPro(code) {
     if (validateRedeem(code)) {
       try { localStorage.setItem('wuri_pro_redeem', '1'); } catch (e) {}
+      rememberRedeemedCode(normalizeGiftCode(code));
       refreshProUI();
       return true;
     }
@@ -210,6 +263,7 @@ var WuriPro = (function () {
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d && d.success) {
             try { localStorage.setItem('wuri_pro_redeem', '1'); } catch (e) {}
+            rememberRedeemedCode(wuri);
             refreshProUI();
             if (msg) { msg.textContent = '兑换成功！高级版已解锁'; msg.className = 'ok'; }
             if (input) input.value = '';
@@ -305,6 +359,10 @@ var WuriPro = (function () {
     isPro: isPro,
     redeemPro: redeemPro,
     validateRedeem: validateRedeem,
+    normalizeWuriCode: normalizeWuriCode,
+    normalizeGiftCode: normalizeGiftCode,
+    localProInfo: localProInfo,
+    hasLocalPro: hasLocalPro,
     status: status,
     showPaywall: showPaywall,
     hidePaywall: hidePaywall,

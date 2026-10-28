@@ -1666,11 +1666,26 @@ function bindRemind() {
     }
   } catch (e) {}
 }
+/* color-scheme 声明同步（2026-10-28 用户拍板）：禁止浏览器「智能深色」在渲染层强改颜色。
+ * meta[name=color-scheme] 与 <html> 行内 color-scheme 同值、只在此一处收口：
+ * 生效主题 day→「only light」、night→「only dark」（auto 由 applyTheme 按系统解析为 night 布尔，
+ * 系统日夜变化经既有 matchMedia 监听回 applyTheme 时一并更新）。
+ * CSS 侧 :root/[data-theme=night] 的静态 color-scheme 仅作脚本未跑时的回落，运行时以本函数为准。
+ * 红光是叠加在日/夜底子上的全局红移——声明只跟底层主题、绝不为红光单设值。 */
+function syncColorScheme(night) {
+  try {
+    var v = night ? 'only dark' : 'only light';
+    var m = document.querySelector('meta[name="color-scheme"]');
+    if (m) m.setAttribute('content', v);
+    document.documentElement.style.colorScheme = v;
+  } catch (e) {}
+}
 function applyTheme() {
   var t = CFG.theme || 'auto';
   var night = t === 'night' ||
     (t === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.setAttribute('data-theme', night ? 'night' : 'day');
+  syncColorScheme(night);
   try {
     var mc = document.querySelector('meta[name=theme-color]');
     if (mc) mc.setAttribute('content', night ? '#060608' : '#F5F1E6');
