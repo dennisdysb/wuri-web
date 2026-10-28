@@ -1199,7 +1199,7 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
 
 /* 书签悬浮按钮（仅内丹书阅读时显示，层级同返回键） */
 .jing-bookmark-fab{position:fixed;left:18px;bottom:calc(164px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
-  background:#b8860b;color:#fff;font-size:1.5rem;line-height:1;
+  background:var(--amber-deep);color:#fff;font-size:1.5rem;line-height:1;
   border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
   z-index:10001;display:none}
 .jing-bookmark-fab.show{display:block}
