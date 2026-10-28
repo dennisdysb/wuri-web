@@ -112,6 +112,7 @@ var JingWen = (function () {
   var currentId = null;
   var pyOn = true;
   var fontPx = 17;
+  var turnMode = 'scroll'; /* 翻页方式：'scroll' 上下滚动（默认）｜'page' 左右翻页 */
   var reciteMode = false; /* 背诵模式：只显示每句首字，点句显示全文 */
   var followMode = false; /* 跟读模式：点段落从该处开始播，播放时高亮跟随 */
   var followMap = null; /* tsIdx -> {el, start} */
@@ -490,6 +491,15 @@ var JingWen = (function () {
   /* 跳到第 secIdx 节并展开（懒填充卷先填后展）；charOff>0 时再定位到节内对应段 */
   function jumpToSec(secIdx, charOff) {
     if (secIdx == null) return;
+    if (isPaged() && currentId && _metrics) {
+      ensureSecFilled(secIdx);
+      var toff = (_metrics.cum[secIdx] || 0) + (charOff || 0);
+      goToContentOffset(toff);
+      /* 后续卷填充会改变分页：挂恢复轮询按同一字偏移复位直至版面稳定 */
+      _restoreOff = toff;
+      pagedRestorePos();
+      return;
+    }
     var sec = document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"]');
     if (!sec) return;
     var body = sec.querySelector('.jing-sec-body');
@@ -530,7 +540,11 @@ var JingWen = (function () {
     if (!id) return;
     try {
       var m = JSON.parse(localStorage.getItem(AUTOPOS_KEY) || '{}');
+      var prev = m[id] || {};
       m[id] = { y: Math.round(y || 0), expanded: expanded || [], ts: Date.now() };
+      if (prev.frac != null) m[id].frac = prev.frac;
+      if (prev.done) { m[id].done = true; if (prev.doneTs) m[id].doneTs = prev.doneTs; }
+      try { m[id].off = currentContentOffset(); } catch (e) {}
       var keys = Object.keys(m);
       if (keys.length > 40) {
         keys.sort(function (a, b) { return (m[a].ts || 0) - (m[b].ts || 0); });
@@ -648,13 +662,197 @@ var JingWen = (function () {
     if (window.scrollY > 0 && (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 2)) return _metrics.total;
     return contentOffsetNow();
   }
+  /* ---------- 左右翻页模式（二期，2026-10-28） ----------
+   * 形态：#jing-reader 变全屏 stage（position:fixed），#jing-content 横向滚动
+   * ＋CSS 多列分页（列宽＝可视宽－左右 padding、列距＝padding 和，保证一列
+   * 恰为一页、scrollLeft 按 clientWidth 整页步进）。位置一律走「内容字偏移」
+   * 同一坐标系（_metrics 累计字数），与滚动模式共用 autopos/书签/进度口径：
+   * autopos 与书签另存 off 字段，跨模式打开按 off 落位、分页重排不漂。
+   * 懒填充：fillAhead 预填当前页后 3 页内的未填充卷，填充若动到当前页之前
+   * 的版面则按锚点偏移复位。跟读/划线点跳/目录跳卷在分页下改走 goToParaPage。 */
+  var _pageAnchorOff = 0, _pagedSnapId = null, _restoreOff = null, _fillAheadT = null, _restoreGen = 0, _turnSwitchOff = null;
+  function isPaged() { return turnMode === 'page'; }
+  function pageScroller() { return $('#jing-content'); }
+  function pageW() { var sc = pageScroller(); return sc ? sc.clientWidth : 0; }
+  function pageCount() {
+    var sc = pageScroller(), w = pageW();
+    if (!sc || !w) return 1;
+    return Math.max(1, Math.ceil((sc.scrollWidth - 1) / w));
+  }
+  function curPage() {
+    var sc = pageScroller(), w = pageW();
+    if (!sc || !w) return 0;
+    return Math.max(0, Math.min(pageCount() - 1, Math.round(sc.scrollLeft / w)));
+  }
+  function paraContentOff(p) {
+    if (!_metrics || !p) return 0;
+    var si = +p.getAttribute('data-sec'), pi = +p.getAttribute('data-para');
+    var off = _metrics.cum[si] || 0, pl = _metrics.paraLens[si] || [];
+    for (var i = 0; i < pi && i < pl.length; i++) off += pl[i];
+    return off;
+  }
+  function ensureSecFilled(si) {
+    var body = document.querySelector('#jing-content .jing-sec[data-sec="' + si + '"] .jing-sec-body');
+    if (body && body.hasAttribute('data-lazy') && window.__wuri_dzFill) { try { window.__wuri_dzFill(si); } catch (e) {} }
+  }
+  /* 某页的起始内容字偏移：第一段其横坐标落入该页（或跨入该页）的段 */
+  function pageOffset(page) {
+    var sc = pageScroller(); if (!sc || !_metrics) return 0;
+    var sr = sc.getBoundingClientRect(), w = pageW(); if (!w) return 0;
+    var px = page * w, off = 0, straddle = null;
+    var secs = sc.querySelectorAll('.jing-sec');
+    for (var k = 0; k < secs.length; k++) {
+      var secEl = secs[k], si = +secEl.getAttribute('data-sec');
+      var r = secEl.getBoundingClientRect();
+      var x0 = r.left - sr.left + sc.scrollLeft, x1 = x0 + r.width;
+      if (x1 <= px) { off = (_metrics.cum[si] || 0) + (_metrics.secLens[si] || 0); continue; }
+      if (x0 > px) break;
+      var ps = secEl.querySelectorAll('p.jing-para');
+      for (var i = 0; i < ps.length; i++) {
+        var pr = ps[i].getBoundingClientRect();
+        var qx = pr.left - sr.left + sc.scrollLeft;
+        if (qx >= px - 8) return paraContentOff(ps[i]);
+        straddle = ps[i];
+      }
+      if (straddle) return paraContentOff(straddle);
+    }
+    return Math.min(off, _metrics.total);
+  }
+  /* 当前阅读位置的内容字偏移（双模式统一口径，供进度/autopos/书签共用）。
+     分页下末页即全书末页、整页在目 → 计 total（同滚动到底规则）。 */
+  function currentContentOffset() {
+    if (!_metrics || !_metrics.total) return 0;
+    if (isPaged()) {
+      var cp = curPage();
+      if (cp >= pageCount() - 1 && pageCount() > 1) {
+        /* 末页判读完须实证：末段确已排进当前页（版面未就绪时 pageCount 会
+           暂时为 1/偏小，此时误判 total 会毒化锚点——实测 TOC 跳卷被冲到书末） */
+        var sc3 = pageScroller(), ps3 = sc3 ? sc3.querySelectorAll('p.jing-para') : [];
+        if (ps3.length) {
+          var sr3 = sc3.getBoundingClientRect();
+          var lx = ps3[ps3.length - 1].getBoundingClientRect().left - sr3.left + sc3.scrollLeft;
+          if (Math.floor(lx / pageW()) <= cp) return _metrics.total;
+        }
+      }
+      return pageOffset(cp);
+    }
+    return effContentOffset();
+  }
+  function goToPage(p, smooth) {
+    var sc = pageScroller(), w = pageW(); if (!sc || !w) return;
+    p = Math.max(0, Math.min(pageCount() - 1, p));
+    sc.scrollTo({ left: p * w, behavior: smooth ? 'smooth' : 'auto' });
+    scheduleReadUI(); pagedFillAheadSoon();
+  }
+  function goToContentOffset(off, instant) {
+    var sc = pageScroller(); if (!sc || !_metrics || !pageW()) return;
+    off = Math.max(0, Math.min(off, _metrics.total));
+    var si = secIdxAtOffset(off);
+    ensureSecFilled(si);
+    var acc = _metrics.cum[si] || 0, pl = _metrics.paraLens[si] || [], pi = 0;
+    for (var i = 0; i < pl.length; i++) { if (acc + pl[i] > off) { pi = i; break; } acc += pl[i]; pi = i; }
+    var el = document.querySelector('#jing-content .jing-para[data-sec="' + si + '"][data-para="' + pi + '"]');
+    if (!el) el = document.querySelector('#jing-content .jing-para[data-sec="' + si + '"]');
+    if (!el) return;
+    var sr = sc.getBoundingClientRect();
+    var x = el.getBoundingClientRect().left - sr.left + sc.scrollLeft;
+    var pg = Math.max(0, Math.floor(x / pageW()));
+    sc.scrollTo({ left: pg * pageW(), behavior: instant ? 'auto' : 'smooth' });
+    _pageAnchorOff = off; _pagedSnapId = currentId;
+  }
+  function pagedFillAheadSoon() {
+    if (_fillAheadT) return;
+    _fillAheadT = setTimeout(function () { _fillAheadT = null; pagedFillAhead(); }, 250);
+  }
+  function pagedFillAhead() {
+    if (!isPaged() || !currentId) return;
+    var sc = pageScroller(); if (!sc) return;
+    var sr = sc.getBoundingClientRect(), w = pageW(); if (!w) return;
+    var limitX = (curPage() + 3) * w, curX = curPage() * w, shifted = false;
+    document.querySelectorAll('#jing-content .jing-sec').forEach(function (secEl) {
+      var body = secEl.querySelector('.jing-sec-body');
+      if (!body || !body.hasAttribute('data-lazy')) return;
+      var x = secEl.getBoundingClientRect().left - sr.left + sc.scrollLeft;
+      if (x <= limitX) {
+        if (window.__wuri_dzFill) { try { window.__wuri_dzFill(+secEl.getAttribute('data-sec')); } catch (e) {} }
+        if (x < curX + w) shifted = true;
+      }
+    });
+    if (shifted && _restoreOff == null) goToContentOffset(_pageAnchorOff, true);
+  }
+  function sizePagedColumns() {
+    var sc = pageScroller(); if (!sc) return;
+    var cs = window.getComputedStyle(sc);
+    var pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var w = sc.clientWidth - pad;
+    if (w > 40) { sc.style.columnWidth = w + 'px'; sc.style.columnGap = pad + 'px'; }
+  }
+  function syncPagedChrome() {
+    var reader = $('#jing-reader');
+    var on = isPaged() && !!currentId && reader && !reader.hidden;
+    if (reader) reader.classList.toggle('reader-paged', !!on);
+    document.body.style.overflow = on ? 'hidden' : '';
+    if (on) { sizePagedColumns(); updateTurnBtn(); }
+  }
+  function applyTurnMode() {
+    var off = 0;
+    if (_turnSwitchOff != null) { off = _turnSwitchOff; _turnSwitchOff = null; }
+    else { try { off = currentContentOffset(); } catch (e) {} }
+    syncPagedChrome();
+    if (!currentId) return;
+    if (isPaged()) {
+      pagedFillAhead();
+      _restoreOff = off;
+      pagedRestorePos();
+    } else {
+      var si = _metrics ? secIdxAtOffset(off) : 0;
+      jumpToSec(si, _metrics ? Math.max(0, off - (_metrics.cum[si] || 0)) : 0);
+    }
+    updateTurnBtn();
+  }
+  function pagedRestorePos() {
+    var gen = ++_restoreGen;
+    if (!isPaged() || !currentId || _restoreOff == null) return;
+    var tries = 0, target = _restoreOff, lastSW = -1, lastSL = -1, stable = 0;
+    var iv = setInterval(function () {
+      tries++;
+      if (gen !== _restoreGen || !isPaged() || !currentId || _restoreOff == null) { clearInterval(iv); return; }
+      pagedFillAhead();
+      goToContentOffset(target, true);
+      var sc = pageScroller();
+      var sw = sc ? sc.scrollWidth : 0, sl = sc ? sc.scrollLeft : 0;
+      if (sw === lastSW && sl === lastSL) stable++; else stable = 0;
+      lastSW = sw; lastSL = sl;
+      /* 版面（scrollWidth）与落点连稳 4 拍才收：注音/标点异步重排未完时
+         目标段横坐标还在漂，提前收手会被甩在旧位置（实测重进落位偏小） */
+      if (stable >= 4 || tries >= 60) { clearInterval(iv); if (_restoreOff === target) _restoreOff = null; }
+    }, 180);
+  }
+  function updateTurnBtn() {
+    var b = $('#jing-turn-btn');
+    if (b) b.textContent = isPaged() ? '翻页·左右' : '翻页·滚动';
+  }
+  /* 跨闭包钩子（JingMark 的点跳/书签存档借用同一字偏移口径） */
+  window.__wuriPagedActive = function () { return isPaged() && !!currentId; };
+  window.__wuriReaderOffset = function () { try { return currentContentOffset(); } catch (e) { return 0; } };
+  window.__wuriReaderGoToPara = function (el) {
+    if (!el) return false;
+    if (isPaged() && currentId) {
+      var p = el.closest ? (el.closest('.jing-para') || el) : el;
+      if (p && p.getAttribute && p.getAttribute('data-sec') != null) { goToContentOffset(paraContentOff(p)); return true; }
+    }
+    return false;
+  };
+
   function saveProgressNow() {
     if (!currentId || !_metrics || !_metrics.total) return;
-    var off = effContentOffset(), frac = off / _metrics.total;
+    if (_restoreOff != null) return; /* 落位未稳：此刻的偏移可能是重排瞬时值，写盘会毒化下次落位 */
+    var off = currentContentOffset(), frac = off / _metrics.total;
     try {
       var m = JSON.parse(localStorage.getItem(AUTOPOS_KEY) || '{}');
       var e = m[currentId] || {};
       e.frac = Math.round(frac * 10000) / 10000;
+      e.off = off; /* 字偏移锚随进度同写，保证重渲/重进落位不读到陈旧 off */
       if (frac >= 0.995 && !e.done) { e.done = true; e.doneTs = Date.now(); }
       e.ts = Date.now();
       m[currentId] = e;
@@ -684,7 +882,10 @@ var JingWen = (function () {
       if (bar) bar.hidden = true;
       return;
     }
-    var off = effContentOffset(), frac = off / _metrics.total;
+    var off = currentContentOffset(), frac = off / _metrics.total;
+    if (_restoreOff == null) _pageAnchorOff = off; /* 恢复轮询期间锚点归轮询所有，防瞬时误算毒化 */
+    var _pi = $('#jing-page-ind');
+    if (_pi) _pi.textContent = isPaged() ? (curPage() + 1) + ' / ' + pageCount() : '';
     if (fill) fill.style.width = (frac * 100).toFixed(1) + '%';
     /* 速度采样：间隔 >2.5s 且确有推进才计，EMA 平滑后落盘 */
     var now = Date.now();
@@ -770,7 +971,7 @@ var JingWen = (function () {
     var toc = $('#jing-toc'), list = $('#jing-toc-list'), title = $('#jing-toc-title');
     if (!d || !toc || !list) return;
     if (!_metrics) buildReaderMetrics(d);
-    var off = effContentOffset();
+    var off = currentContentOffset();
     var curSi = secIdxAtOffset(off);
     var frac = _metrics && _metrics.total ? off / _metrics.total : 0;
     if (title) title.textContent = txScript(d.title || '');
@@ -1077,7 +1278,22 @@ var JingWen = (function () {
         if (ap && ap.y > 50) { posY = ap.y; posExp = ap.expanded || null; posHit = true; }
       }
       window._jingAnchorY = null; window._jingAnchorExp = null;
-      if (posHit) insistReaderPos(id, posY, posExp);
+      if (isPaged()) {
+        /* 分页落位：重渲锚（落色等）＞书签 off＞autopos off/frac，全走字偏移 */
+        var roff = null;
+        if (_restoreOff != null && _pagedSnapId === id) roff = _restoreOff; /* 恢复在途的重渲：沿用原目标，不读存档（可能已被瞬时值污染） */
+        else if (bm && bm.off != null) roff = bm.off;
+        else if (_pageAnchorOff > 0 && _pagedSnapId === id) roff = _pageAnchorOff; /* 同书重渲（落色等）：内存锚最新 */
+        else {
+          var ap2 = loadAutoPos(id);
+          if (ap2 && ap2.off != null) roff = ap2.off;
+          else if (ap2 && ap2.frac && _metrics) roff = Math.round(ap2.frac * _metrics.total);
+        }
+        var sc0 = pageScroller(); if (sc0) sc0.scrollLeft = 0;
+        _restoreOff = roff;
+        syncPagedChrome();
+        if (roff != null) pagedRestorePos();
+      } else if (posHit) insistReaderPos(id, posY, posExp);
       else window.scrollTo(0, 0);
       // 跟读模式开着时重渲染了内容：重建段落映射
       if (followMode) {
@@ -1097,6 +1313,7 @@ var JingWen = (function () {
   }
 
   function toggleSection(si) {
+    if (isPaged()) return; /* 分页下全卷展开呈现，折叠无意义 */
     if (window.__wuri_dzFill) { try { window.__wuri_dzFill(+si); } catch (e) {} }
     var body = document.querySelector('#jing-content .jing-sec[data-sec="' + si + '"] .jing-sec-body');
     if (body) { body.hidden = !body.hidden; updateFoldBtn(); }
@@ -1137,6 +1354,7 @@ var JingWen = (function () {
 
   var _foldBusy = false;
   function foldAll() {
+    if (isPaged()) { showToast('翻页模式下随翻页自动加载'); return; }
     if (_foldBusy) return;
     var bodies = document.querySelectorAll('#jing-content .jing-sec-body');
     var anyClosed = false;
@@ -1321,6 +1539,9 @@ var JingWen = (function () {
     currentId = null;
     window._jingCurrentId = null;
     $('#jing-reader').hidden = true;
+    _restoreOff = null;
+    document.body.style.overflow = '';
+    var _rd = $('#jing-reader'); if (_rd) _rd.classList.remove('reader-paged');
     $('#jing-home').hidden = false;
     var lr = libReturn; libReturn = null;
     libRestore(lr);
@@ -1373,6 +1594,11 @@ var JingWen = (function () {
     var showPy = pyOn && !isNd;
     $('#jing-content').classList.toggle('no-py', !showPy);
     if (pyBtn) pyBtn.textContent = pyOn ? '注音开' : '注音关';
+    if (isPaged() && currentId && _pagedSnapId === currentId && _restoreOff == null) {
+      var _a = _pageAnchorOff;
+      sizePagedColumns();
+      requestAnimationFrame(function () { if (isPaged() && currentId) goToContentOffset(_a, true); });
+    }
     $('#jing-content').classList.toggle('recite-on', reciteMode);
     var rb = $('#jing-recite');
     if (rb) rb.textContent = reciteMode ? t('jing_recite_on') : t('jing_recite');
@@ -1504,11 +1730,18 @@ var JingWen = (function () {
       clearFollowCur();
       el.classList.add('follow-cur');
       _followCurEl = el;
-      // 温和跟随：只在段落不在视口内时滚动
+      // 温和跟随：只在段落不在视口内时滚动（分页下＝段落不在当前页时翻页）
       try {
-        var r = el.getBoundingClientRect();
-        if (r.top < 80 || r.bottom > window.innerHeight - 120) {
-          el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        if (isPaged() && currentId) {
+          var sc2 = pageScroller(), sr2 = sc2.getBoundingClientRect();
+          var ex = el.getBoundingClientRect().left - sr2.left + sc2.scrollLeft;
+          var ep = Math.floor(ex / pageW());
+          if (ep !== curPage()) goToPage(ep, true);
+        } else {
+          var r = el.getBoundingClientRect();
+          if (r.top < 80 || r.bottom > window.innerHeight - 120) {
+            el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          }
         }
       } catch (e) {}
     }, 800);
@@ -2237,6 +2470,7 @@ var JingWen = (function () {
     /* 校准到两种之一 */
     fontPx = Math.abs(fontPx - 17) <= Math.abs(fontPx - 28) ? 17 : 28;
     try { pyOn = localStorage.getItem('wuri_jing_py') !== '0'; } catch (e) {}
+    try { turnMode = localStorage.getItem('wuri_jing_turn') === 'page' ? 'page' : 'scroll'; } catch (e) {}
     renderCatalog();
     refreshMarksRow();
     /* 我的标记入口行（div 模拟按钮）键盘可达：Enter/空格触发 */
@@ -2280,6 +2514,7 @@ var JingWen = (function () {
         openReader(jingId);
         if (sec != null && sec !== '-1') {
           setTimeout(function () {
+            if (isPaged() && currentId) { jumpToSec(+sec, 0); return; }
             var body = document.querySelector('#jing-content .jing-sec[data-sec="' + sec + '"] .jing-sec-body');
             if (body) { body.hidden = false; updateFoldBtn(); }
             var hs = document.querySelectorAll('#jing-content .jing-sec-h');
@@ -2400,6 +2635,52 @@ var JingWen = (function () {
     }
     $('#jing-font-inc').addEventListener('click', function () { setFont(fontIdx() + 1); });
     $('#jing-font-dec').addEventListener('click', function () { setFont(fontIdx() - 1); });
+    /* 翻页方式切换钮（阅读设置，与字号/注音同排） */
+    var turnBtn = $('#jing-turn-btn');
+    if (turnBtn) turnBtn.addEventListener('click', function () {
+      try { _turnSwitchOff = currentContentOffset(); } catch (e) { _turnSwitchOff = null; }
+      turnMode = isPaged() ? 'scroll' : 'page';
+      try { localStorage.setItem('wuri_jing_turn', turnMode); } catch (e) {}
+      applyTurnMode();
+    });
+    updateTurnBtn();
+    /* 分页容器：横滚即刷新进度/页码并预填后续卷 */
+    var scEl = $('#jing-content');
+    if (scEl) {
+      scEl.addEventListener('scroll', function () {
+        if (!isPaged() || !currentId) return;
+        scheduleReadUI(); pagedFillAheadSoon();
+      }, { passive: true });
+      /* 点按分区：左/右 30% 翻页（捕获相位，抢在沉浸切换与段落委托之前）；
+         中区放行给既有沉浸切换，切换后版面高度变、150ms 后按锚复位 */
+      scEl.addEventListener('click', function (e) {
+        if (!isPaged() || !currentId || followMode) return;
+        if (e.target.closest('.hl, .qing-inline, .dz-fig, a, button, .jing-sec-h')) return;
+        var sel = window.getSelection();
+        if (sel && !sel.isCollapsed) return;
+        var r = scEl.getBoundingClientRect();
+        var xr = (e.clientX - r.left) / Math.max(1, r.width);
+        if (xr < 0.3) { _restoreOff = null; goToPage(curPage() - 1, true); e.stopImmediatePropagation(); e.preventDefault(); }
+        else if (xr > 0.7) { _restoreOff = null; goToPage(curPage() + 1, true); e.stopImmediatePropagation(); e.preventDefault(); }
+        else setTimeout(function () { if (isPaged() && currentId) { sizePagedColumns(); goToContentOffset(_pageAnchorOff, true); } }, 160);
+      }, true);
+      /* 滑动翻页：横向快扫（有选区时不触发，避免与查字选词打架） */
+      var _tsx = 0, _tsy = 0, _tst = 0;
+      scEl.addEventListener('touchstart', function (e) {
+        if (!isPaged()) return;
+        var t = e.changedTouches[0]; _tsx = t.clientX; _tsy = t.clientY; _tst = Date.now();
+      }, { passive: true });
+      scEl.addEventListener('touchend', function (e) {
+        if (!isPaged() || !currentId || followMode) return;
+        var sel = window.getSelection();
+        if (sel && !sel.isCollapsed) return;
+        var t = e.changedTouches[0];
+        var dx = t.clientX - _tsx, dy = t.clientY - _tsy;
+        if (Date.now() - _tst < 600 && Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+          _restoreOff = null; goToPage(curPage() + (dx < 0 ? 1 : -1), true);
+        }
+      }, { passive: true });
+    }
     $('#jing-speak').addEventListener('click', speakAll);
     var ttsSetBtn = $('#jing-tts-set');
     if (ttsSetBtn) ttsSetBtn.addEventListener('click', function () {
@@ -2575,6 +2856,7 @@ var JingWen = (function () {
     if (!bm[sid]) bm[sid] = [];
     if (!Array.isArray(bm[sid])) bm[sid] = [bm[sid]]; // 兼容旧数据
     bm[sid].push({
+      off: (window.__wuriReaderOffset ? window.__wuriReaderOffset() : 0),
       scrollTop: window.scrollY || window.pageYOffset || 0,
       expanded: expanded,
       ts: Date.now(),
@@ -3001,7 +3283,8 @@ var JingWen = (function () {
     var sel = '#jing-content .jing-para[data-sec="' + hl.sec + '"][data-para="' + dispPara + '"] .hl[data-hl-id="' + hlId + '"]';
     var el = document.querySelector(sel);
     if (el) {
-      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      if (window.__wuriReaderGoToPara && window.__wuriReaderGoToPara(el)) { /* 分页：翻到该段所在页 */ }
+      else el.scrollIntoView({ block: 'center', behavior: 'smooth' });
       // 闪烁提示
       el.classList.add('hl-flash');
       setTimeout(function () { el.classList.remove('hl-flash'); }, 1500);
@@ -3012,7 +3295,8 @@ var JingWen = (function () {
       // 降级：找该段第一处高亮，或滚到该章
       var para = document.querySelector('#jing-content .jing-para[data-sec="' + hl.sec + '"][data-para="' + dispPara + '"] .hl');
       if (para) {
-        para.scrollIntoView({ block: 'center' });
+        if (window.__wuriReaderGoToPara && window.__wuriReaderGoToPara(para)) { /* 分页同口径 */ }
+        else para.scrollIntoView({ block: 'center' });
       } else {
         var sec = document.querySelector('#jing-content .jing-para[data-sec="' + hl.sec + '"]');
         if (sec) sec.scrollIntoView({ block: 'start' });

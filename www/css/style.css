@@ -3156,3 +3156,36 @@ body.jing-immersive .jing-prog-track{margin-top:0}
   #jing-reader .jing-srcnote{max-width:680px;margin-left:auto;margin-right:auto}
   #jing-statusbar{max-width:680px}
 }
+
+/* ---------- 阅读器左右翻页模式（二期）：全屏 stage＋横向多列分页 ---------- */
+#jing-page-ind { display: none; }
+#jing-reader.reader-paged {
+  position: fixed; inset: 0; z-index: 300;
+  background: var(--paper); color: var(--ink);
+  display: flex; flex-direction: column;
+}
+#jing-reader.reader-paged #jing-title,
+#jing-reader.reader-paged #jing-subtitle,
+#jing-reader.reader-paged #jing-srcnote { display: none; }
+#jing-reader.reader-paged #jing-content {
+  flex: 1 1 auto; min-height: 0;
+  overflow-x: auto; overflow-y: hidden;
+  overflow-anchor: none; /* 关 Chrome 滚动锚定：注音/标点异步重排期它会与落位轮询对打（实测 scrollLeft 在首尾间弹跳） */
+  column-fill: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+#jing-reader.reader-paged #jing-content::-webkit-scrollbar { display: none; }
+/* 分页下全卷展开呈现（覆盖 hidden 折叠的 UA display:none，作者规则优先） */
+#jing-reader.reader-paged .jing-sec-body { display: block; }
+#jing-reader.reader-paged .jing-sec-h { pointer-events: none; }
+#jing-reader.reader-paged .jing-para,
+#jing-reader.reader-paged .dz-fig { break-inside: avoid; }
+#jing-reader.reader-paged img.dz-fig { max-height: 55vh; }
+#jing-reader.reader-paged #jing-page-ind {
+  display: block; position: absolute; right: 14px; bottom: 10px; z-index: 120;
+  font-size: .78rem; color: var(--ink2);
+  background: var(--card); border: 1px solid var(--line);
+  padding: 2px 9px; border-radius: 999px; opacity: .92;
+}
+body.jing-immersive #jing-reader.reader-paged #jing-page-ind { opacity: .55; }
