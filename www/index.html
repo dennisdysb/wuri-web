@@ -12,7 +12,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=283">
+<link rel="stylesheet" href="css/style.css?v=284">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=74">
 </head>
@@ -215,23 +215,28 @@
       </div>
       <div id="jing-reader" hidden>
         <div class="jing-rhead" style="position:sticky;top:0;z-index:100;background:var(--paper);padding:8px 0;">
-          <button class="mini-btn" id="jing-back" data-i18n="jing_back">‹ 目录</button>
-          <div class="jing-rtools" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <button class="mini-btn tiny" id="jing-speak" data-i18n="jing_speak">诵读</button>
+          <div class="jing-rrow">
+            <button class="mini-btn" id="jing-back" data-i18n="jing_back">‹ 目录</button>
+            <div class="jing-rtools" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <button class="mini-btn tiny" id="jing-speak" data-i18n="jing_speak">诵读</button>
+              <button class="mini-btn tiny" id="jing-stop" data-i18n="jing_stop" hidden>停止</button>
+              <button class="mini-btn tiny" id="jing-follow">跟读</button>
+              <button class="mini-btn tiny" id="jing-pybtn">注音</button>
+              <button class="mini-btn tiny" id="jing-turn-btn">翻页·滚动</button>
+              <button class="mini-btn tiny" id="jing-more-btn" aria-expanded="false">设置</button>
+            </div>
+          </div>
+          <div class="jing-more-panel" id="jing-more-panel" hidden>
             <select id="jing-voice" class="mini-btn tiny">
               <option value="male">男声</option>
               <option value="female">女声</option>
             </select>
             <button class="mini-btn tiny" id="jing-download">下载</button>
-            <button class="mini-btn tiny" id="jing-stop" data-i18n="jing_stop" hidden>停止</button>
-            <button class="mini-btn tiny" id="jing-pybtn">注音</button>
             <button class="mini-btn tiny" id="jing-font-dec">字小</button>
             <button class="mini-btn tiny" id="jing-font-inc">字大</button>
             <button class="mini-btn tiny" id="jing-foldall">展开</button>
             <button class="mini-btn tiny" id="jing-toc-btn">目录</button>
-            <button class="mini-btn tiny" id="jing-turn-btn">翻页·滚动</button>
             <button class="mini-btn tiny" id="jing-recite" data-i18n="jing_recite">背诵</button>
-            <button class="mini-btn tiny" id="jing-follow">跟读</button>
             <button class="mini-btn tiny" id="jing-highlight-btn" hidden>高亮</button>
           </div>
           <div class="jing-prog-track" aria-hidden="true"><i id="jing-prog-fill"></i></div>
@@ -914,7 +919,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v283）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v284）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
