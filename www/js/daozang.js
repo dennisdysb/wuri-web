@@ -217,8 +217,12 @@
   /* 道藏全集门控（2026-10-26 用户拍板）：目录/分类/书名对所有人可见可浏览，
    * 点开正文为高级版——在取正文之前落点拦截（不发 fetch）。统一检索命中的
    * 全藏条目点击同经 data-dz-work 委托到此，一并覆盖。 */
-  function dzGate() {
+  function dzGate(id) {
     if (window.WuriPro && WuriPro.isPro()) return true;
+    /* 书架扩容例外（2026-10-28 用户批准）：挂入常见经文架的 10 部 KR 指针
+       按常见经文口径免费（名单由 jingwen.js 暴露 __wuriShelfFreeKR 共用）；
+       自全藏分类点开同一部仍走此口径——同一本书不两价 */
+    if (id && window.__wuriShelfFreeKR && window.__wuriShelfFreeKR[id]) return true;
     if (window.WuriPro) WuriPro.requirePro('daozang');
     return false;
   }
@@ -249,7 +253,7 @@
     entry.sections = entry.punctMode ? entry.sectionsPunct : entry.sectionsOrig;
   }
   function openWork(id, rowEl) {
-    if (!dzGate()) return;
+    if (!dzGate(id)) return;
     /* 返回定位：记下出处（全藏分类列表/统一检索命中），jingwen.js 在
        closeReader 时统一恢复原分类原滚动位（__wuriLibCapture） */
     if (window.__wuriLibCapture) { try { window.__wuriLibCapture(id, rowEl); } catch (e) {} }

@@ -12,14 +12,34 @@ var JingWen = (function () {
   };
   /* 内丹书籍（单独折叠分类，不用背诵模式） */
   var NEIDAN_IDS = ['s18','s19','s20','s21','s22','s23','s24','s25',
-    's40','s41','s42','s43','s44','s45','s46','s47','s48'];
+    's40','s41','s42','s43','s44','s45','s46','s47','s48',
+    /* 书架扩容（2026-10-28 用户批准）：KR 指针挂架 16 部，正文/标点共用
+       道藏全集 feed 分片（content/daozang/texts[-punct]/<KR>.json），零新增存储；
+       开卷走 daozang.js openWork，门控/注音/背诵与既有内丹同口径 */
+    'KR5a0250','KR5a0247','KR5d0113','KR5g0117','KR5e0055','KR5a0242',
+    'KR5d0111','KR5a0014','KR5c0022','KR5d0097','KR5a0265','KR5g0067',
+    'KR5d0080','KR5d0078','KR5i0064','KR5c0350'];
   var NEIDAN_TITLES = {
     s18: '黄庭内景经', s19: '周易参同契', s20: '太乙金华宗旨', s21: '太清元道真经',
     s22: '钟吕传道集', s23: '性命圭旨', s24: '伍柳仙宗', s25: '乐育堂语录',
     s40: '悟真篇', s41: '入药镜', s42: '金丹四百字', s43: '灵宝毕法',
     s44: '规中指南', s45: '金丹大要', s46: '还源篇', s47: '天仙正理', s48: '坐忘论',
+    KR5a0250: '中和集', KR5a0247: '西山群仙会真记', KR5d0113: '翠虚篇',
+    KR5g0117: '海琼问道集', KR5e0055: '重阳全真集', KR5a0242: '碧虚子亲传直指',
+    KR5d0111: '还丹复命篇', KR5a0014: '高上玉皇胎息经', KR5c0022: '太上老君内观经',
+    KR5d0097: '还真集', KR5a0265: '修真十书金丹大成集', KR5g0067: '诸真内丹集要',
+    KR5d0080: '丹阳真人语录', KR5d0078: '纯阳真人浑成集',
+    KR5i0064: '孙不二元君传述丹道秘书', KR5c0350: '上洞心丹经诀',
   };
   function isNeidan(id) { return NEIDAN_IDS.indexOf(id) >= 0; }
+  /* 书架扩容·常见经文 KR 指针 10 部（2026-10-28 用户批准）：挂在常见经文架、
+     按常见经文口径免费——是道藏全集 Pro 门控的例外名单，daozang.js 的
+     dzGate 与本文件 openReader/openReaderAt 的 KR 门控共用此表 */
+  var SHELF_FREE_KR = {
+    KR5c0005: 1, KR5c0002: 1, KR5a0027: 1, KR5a0194: 1, KR5b0242: 1,
+    KR5c0030: 1, KR5i0087: 1, KR5i0088: 1, KR5c0181: 1, KR5a0171: 1
+  };
+  window.__wuriShelfFreeKR = SHELF_FREE_KR;
   var jingFilter = 'all';
   /* 「常见经文」区收起状态：仅内存，不持久化——每次进经文页默认展开
      （resetToCatalog 复位 false；2026-10-27 用户定） */
@@ -58,7 +78,34 @@ var JingWen = (function () {
     s47: ['天仙正理', '天仙正理直论', '伍守阳'],
     s48: ['坐忘论', '司马承祯'],
     s26: ['清静经', '清靜經', '常清静经'],
-    s27: ['心印经', '心印妙经', '玉皇心印']
+    s27: ['心印经', '心印妙经', '玉皇心印'],
+    /* 书架扩容 KR 指针条目别名（2026-10-28） */
+    KR5a0250: ['中和集', '李道纯'],
+    KR5a0247: ['会真记', '西山会真记', '施肩吾'],
+    KR5d0113: ['翠虚篇', '陈楠'],
+    KR5g0117: ['海琼问道集', '白玉蟾', '海琼'],
+    KR5e0055: ['重阳全真集', '王重阳', '重阳集'],
+    KR5a0242: ['碧虚子', '亲传直指', '陈景元'],
+    KR5d0111: ['还丹复命篇', '薛道光', '复命篇'],
+    KR5a0014: ['胎息经', '玉皇胎息经'],
+    KR5c0022: ['内观经', '老君内观经'],
+    KR5d0097: ['还真集', '王吉昌'],
+    KR5a0265: ['金丹大成集', '修真十书'],
+    KR5g0067: ['内丹集要', '诸真内丹'],
+    KR5d0080: ['丹阳真人语录', '马钰', '马丹阳'],
+    KR5d0078: ['浑成集', '纯阳真人', '吕洞宾'],
+    KR5i0064: ['孙不二', '丹道秘书', '清静派'],
+    KR5c0350: ['心丹经诀', '上洞心丹'],
+    KR5c0005: ['南斗经', '南斗', '南斗六司'],
+    KR5c0002: ['斗姆心经', '斗姆', '斗姥心经'],
+    KR5a0027: ['真武妙经', '北方真武'],
+    KR5a0194: ['玉皇宝忏', '玉皇忏'],
+    KR5b0242: ['救苦宝忏', '青玄宝忏'],
+    KR5c0030: ['天妃经', '妈祖经', '天妃救苦'],
+    KR5i0087: ['阴骘文', '文昌阴骘文'],
+    KR5i0088: ['关帝真经', '觉世真经', '关圣帝君', '忠孝忠义真经'],
+    KR5c0181: ['老君戒经', '戒经'],
+    KR5a0171: ['文昌化书', '梓潼化书', '化书']
   };
 
   var loaded = {};
@@ -103,6 +150,9 @@ var JingWen = (function () {
 
   function ensureLoaded(id, cb) {
     if (window.JINGWEN && JINGWEN[id]) { cb && cb(); return; }
+    /* KR 条目正文不走 jing/<id>.js 脚本通道（由 daozang.js openWork 取文建 entry）：
+       全文检索的 ensureAll 扫到时直接跳过，避免无谓 404 */
+    if (/^KR5/.test(id || '')) { cb && cb(); return; }
     if (loaded[id] === 'loading') {
       var tries = 0;
       var iv = setInterval(function () {
@@ -353,8 +403,17 @@ var JingWen = (function () {
     /* 内丹书籍为高级版（2026-10-14 用户定）：目录、搜索、每日推荐所有入口都经此函数，未解锁弹付费墙 */
     if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
     /* 道藏全集为高级版（2026-10-26 用户定）：正文开卷在 daozang.js openWork 已拦，
-       此处兜底书签/高亮/心得列表跳转等直达路径（KR5* 条目），与内丹同口径 */
-    if (/^KR5/.test(id || '') && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
+       此处兜底书签/高亮/心得列表跳转等直达路径（KR5* 条目），与内丹同口径；
+       书架扩容挂入常见经文架的 10 部 KR 指针（SHELF_FREE_KR）按常见经文口径免费，为例外 */
+    if (/^KR5/.test(id || '')) {
+      if (!isPro() && !SHELF_FREE_KR[id]) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
+      /* entry 未建时走 daozang.js 取文开卷（建好后其回调本函数渲染）；
+         entry 已建（openWork 回调/缓存命中）则落到下面正常渲染 */
+      if (!(window.JINGWEN && JINGWEN[id]) && typeof window.__wuri_dzOpenWork === 'function') {
+        window.__wuri_dzOpenWork(id);
+        return;
+      }
+    }
     ensureLoaded(id, function () {
       var d = window.JINGWEN && JINGWEN[id];
       if (!d) {
@@ -419,8 +478,9 @@ var JingWen = (function () {
   function openReaderAt(id, secIdx, charOff, _retry) {
     if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
     if (/^KR5/.test(id || '')) {
-      /* 全藏正文走 daozang.js 的取文/开卷路径（其内另有一道门控），开卷后跳锚 */
-      if (!isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
+      /* 全藏正文走 daozang.js 的取文/开卷路径（其内另有一道门控），开卷后跳锚；
+         常见经文架 KR 指针 10 部免费例外与 openReader 同口径 */
+      if (!isPro() && !SHELF_FREE_KR[id]) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
       if (typeof window.__wuri_dzOpenWork === 'function') {
         window.__wuri_dzOpenWork(id);
         dzPollJump(id, secIdx, charOff || 0, 40);
@@ -897,7 +957,7 @@ var JingWen = (function () {
   /* ---------- 检索 ---------- */
   /* 2026-10-26 三修（用户真机实测）：
    * ①分阶段出结果——精选别名/题名与全藏书名只依赖书名级索引，不再被
-   *   ensureAll（44 部全文顺序加载）阻塞，书名命中先行渲染，全文命中随后并入；
+   *   ensureAll（精选全文顺序加载，KR 指针条目跳过）阻塞，书名命中先行渲染，全文命中随后并入；
    * ②时序令牌——每次查询自增 seq，异步回调渲染前先验令牌，旧查询结果一律
    *   丢弃（此前连查时上一查结果会串到下一查名下：搜「度人经」冒出「道德经」）；
    * ③索引未就绪/阶段未齐时显示「检索中…」，不先报空；
@@ -1021,7 +1081,13 @@ var JingWen = (function () {
   }
   var JING_BASE = 'https://dennisdysb.github.io/wuri-web/www/audio/jing/';
   var JING_HAS_AUDIO = ['s01','s02','s03','s04','s05','s07','s09','s15','s10','s12','s13','s14','s16','s17','s26','s27','s28','s29','s30','s31','s32','s33','s35','s34','s36','s39'];
-  var JING_NEIDAN = ['s18','s19','s20','s21','s23','s22','s40','s41','s42','s43','s44','s45','s46','s47','s48'];
+  /* 注意：本 IIFE 内 isNeidan 有两处同名声明（模块头 NEIDAN_IDS 版与此处
+     JING_NEIDAN 版），函数声明提升以后者为准——目录排除/门控/注音隐藏实际
+     都走这张表。两表必须同步增减（2026-10-28 书架扩容冒烟实证）。 */
+  var JING_NEIDAN = ['s18','s19','s20','s21','s23','s22','s40','s41','s42','s43','s44','s45','s46','s47','s48',
+    'KR5a0250','KR5a0247','KR5d0113','KR5g0117','KR5e0055','KR5a0242',
+    'KR5d0111','KR5a0014','KR5c0022','KR5d0097','KR5a0265','KR5g0067',
+    'KR5d0080','KR5d0078','KR5i0064','KR5c0350'];
   function isNeidan(sid) { return JING_NEIDAN.indexOf(sid) >= 0; }
   function hasAudio(sid) { return JING_HAS_AUDIO.indexOf(sid) >= 0; }
   function updateAudioButtons() {

@@ -317,7 +317,8 @@
         'content/deities.json', 'content/festivals.json'];
       var idx = (window.JINGWEN_INDEX || []).map(function (x) { return x.id; });
       var ids = idx.length ? idx : AUDIO_BOOKS.slice();
-      ids.forEach(function (id) { rels.push('content/jing/' + id + '.js'); });
+      /* KR 指针条目（书架扩容）无 content/jing/<id>.js 文件，正文走全藏分片在线取，不进离线预取 */
+      ids.forEach(function (id) { if (!/^KR5/.test(id)) rels.push('content/jing/' + id + '.js'); });
       audioKeys.forEach(function (k) { rels.push('audio/timestamps/' + k + '.json'); });
       return fetch(relUrl('content/deities.json')).then(function (r) {
         return r.ok ? r.json() : null;
