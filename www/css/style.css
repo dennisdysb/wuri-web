@@ -3050,6 +3050,11 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 .acct-link { color:var(--gold-deep); font-size:13px; background:none; border:none; padding:6px 0 2px; cursor:pointer; font-family:var(--sans); display:block; }
 /* .detail-row 的 display 会盖掉 hidden 属性，身份两行按 hidden 显隐须显式压回 */
 #acct-email-row[hidden], #acct-username-row[hidden] { display:none; }
+/* 2026-10-28 绑码提示条＋绑定区（颜色走变量链） */
+.acct-bind-prompt { border:1px solid var(--line); background:var(--gold-wash); border-radius:10px;
+  padding:10px 12px; margin-top:12px; }
+#acct-bind-status-row[hidden], #acct-bind-prompt[hidden], #acct-devcode-row[hidden],
+#acct-mig-issued[hidden], #acct-mig-issue-btn[hidden] { display:none; }
 
 /* ===== 金锁玉关（jinsuo.js）· 颜色全走变量链（日/夜/红光三态） ===== */
 #js-tabs{margin:4px 0 12px}
