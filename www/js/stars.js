@@ -175,6 +175,7 @@
   var STAR_SUBVIEWS = ['view-star-region', 'view-butiange', 'view-star-detail', 'view-sky-tonight', 'view-sky-chart', 'view-sky-ar'];
   function openDeity(id) {
     if (!window.__wuri_openDeity) return;
+    tourPause(); /* 离开典籍页去神祇详情即停导览播放 */
     var stack = [], scroll = {};
     STAR_SUBVIEWS.forEach(function (vid) {
       var v = $(vid);
@@ -208,6 +209,7 @@
 
   /* 星象标签页激活：收起子视图、懒加载并渲染图鉴首页（今日星象卡由 renderTodaySky 常驻渲染） */
   function activate() {
+    tourPause(); /* 切回星象标签页即停导览播放（位置保留） */
     regionOrigin = null; /* 切回星象标签即重置子视图栈，陈旧来源不得残留 */
     hide('view-star-region'); hide('view-star-detail'); hide('view-butiange');
     var host = $('sx-home');
@@ -235,6 +237,7 @@
   function openRegion(section) {
     if (!section) return;
     if (!starGate()) return;
+    tourPause(); /* 离开典籍页去区页即停导览播放 */
     if (XG && !secInfo[section] && !lordOfMansion(section)) section = resolveSection(section);
     if (XG && !secInfo[section]) return;
     /* 捕获来处必须在收起其他子视图之前；区页已打开时（失败重试等）保留原来源不覆写 */
@@ -263,6 +266,7 @@
 
   function openDetail(key) {
     if (!starGate()) return;
+    tourPause(); /* 离开典籍页去详情即停导览播放 */
     show('view-star-detail');
     var host = $('sx-detail');
     if (XG && BT) { renderDetail(key); scrollTopOf('view-star-detail'); return; }
@@ -1124,6 +1128,7 @@
 
   function renderBook(focusSection) {
     var host = $('sx-book'); if (!host || !BT) return;
+    if (tourState) tourPause(); /* 重渲染即停播：定时器与旧 DOM 钮脱钩，位置保留、手动续行 */
     closeVersePop(); /* 重渲染（展开他段/切语言）先收浮层，打开状态不残留 */
     if (focusSection) bookOpen[focusSection] = true;
     else if (!Object.keys(bookOpen).length && secOrder.length) bookOpen[secOrder[0]] = true;
@@ -1134,24 +1139,34 @@
       '<div class="sx-sub">' + txEsc(auth + ' · ' + (BT.version || '')) + '<br>' +
       txEsc(tf(t('sx_book_sub'), BT.total_lines, secOrder.length)) + '</div></div>';
 
+    if (tourState) h += tourPanelHTML();
+    else h += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px">' +
+      '<button class="btn primary" data-sx-tour="enter">' + txEsc('导览 · 逐句看图') + '</button>' +
+      '<span style="font-family:var(--sans);font-size:.8rem;color:var(--muted)">' +
+      txEsc('按区逐句步进，歌诀与示意图同步高亮 · 全歌 ' + BT.total_lines + ' 句') + '</span></div>';
+
     h += '<div class="sx-sec">' + esc(t('sx_toc')) + ' <small>' + esc(t('sx_toc_note')) + '</small></div><div class="sx-toc">';
     secOrder.forEach(function (s) {
       h += '<span data-sx-toc="' + esc(s) + '">' + txEsc(s) + '<i>' + (secInfo[s] ? secInfo[s].lineCount : 0) + '</i></span>';
     });
     h += '</div>';
 
+    var tourG = 0; /* 导览全歌序号：与 tourFlat() 同序（secOrder × 区内行序），导览模式全区展开故逐行对齐 */
     secOrder.forEach(function (s) {
       var si = secInfo[s]; if (!si) return;
-      var open = !!bookOpen[s];
+      var open = tourState ? true : !!bookOpen[s];
       h += '<div class="sx-booksec" id="sx-sec-' + esc(s) + '">' +
         '<div class="sx-sec" data-sx-toc="' + esc(s) + '">' + txEsc(s) + ' <small>' + txEsc(tf(t('sx_section_lines'), si.lineCount)) + '</small>' +
         '<span class="sx-toregion" data-sx-region="' + esc(s) + '">' + esc(t('sx_to_region')) + '</span></div>';
       if (open) {
         si.lines.forEach(function (l, li) {
+          var g = tourG++;
           var isStar = l.kind === '星官句' && l.asterism;
-          var isPop = isStar && POP_SECTIONS.indexOf(s) >= 0;
-          h += '<div class="sx-verse' + (isStar ? '' : ' dim') + (isPop ? ' pop' : '') + '"' +
+          var isPop = !tourState && isStar && POP_SECTIONS.indexOf(s) >= 0;
+          var isCur = !!tourState && g === tourState.pos;
+          h += '<div class="sx-verse' + (isStar ? '' : ' dim') + (isPop ? ' pop' : '') + (isCur ? ' on' : '') + '"' +
             (isPop ? ' data-sx-pop="' + esc(s) + ':' + li + '"' : '') +
+            (tourState ? ' data-sx-tour-g="' + g + '"' + (isCur ? ' data-sx-tour-cur="1" style="background:var(--cinnabar-wash);box-shadow:inset 4px 0 0 var(--cinnabar)"' : '') : '') +
             '><span class="sx-verse-t">' + txEsc(l.text) + '</span>';
           if (isStar) {
             h += '<span class="sx-verse-tags">';
@@ -1175,10 +1190,214 @@
 
     h += '<div class="sx-foot">' + txEsc(BT.collation_note || '') + '</div>';
     host.innerHTML = h;
+    if (tourState) { tourState.chartKey = ''; tourSync(false); }
     if (focusSection) {
       var el = $('sx-sec-' + focusSection);
       if (el) setTimeout(function () { el.scrollIntoView({ block: 'start' }); }, 30);
     }
+  }
+
+  /* ---------------- s5++ 《步天歌》导览模式 ----------------
+   * 典籍页内逐句步进：全歌按《步天歌》序（secOrder＝31 区）拉平为 361 句，
+   * 当前句整行高亮（既有 .sx-verse.on＋var(--cinnabar) 内联描边，走变量链、
+   * 红光三态随 body.sky-red 变量重映射）并自动滚动居中；同句星官在示意图上
+   * 同步高亮——图直接复用 regionMapHTML 的 pop 模式（图式坐标/描点与区页
+   * 总览图、点句浮图同源，不新造坐标、不动遗留待裁三处连线层），高亮着色
+   * 按浮图 .sx-pop .sx-hl/.sx-dim 同款规则以 var() 内联落到 SVG 子元素上
+   * （CSS 文件本批不动，正式作用域样式列入回执清单请协调补）。
+   * 句→星官映射只用 butiange.json 的 asterism 字段（kind＝星官句才有）：
+   * 352 句星官句全部可解出至少一座本区星官（404 个官名、44 句多官）；
+   * kind 非星官句的 9 句（天市垣结构句 4＋张宿/轸宿回指句 5，无 asterism
+   * 字段）诚实降级：只高亮句子，图不高亮单官、整区以高亮呈现作语境，
+   * 面板注文言明；回指句所指虽在 kind 文案里写明属太微垣，亦不跨区编造
+   * 映射。星官句中整官未绘于书图者（太微垣郎将）随浮图同口径注出。
+   * 播放：setInterval 自动步进，间隔三档（快 1.5s／常 2.4s／慢 4.5s，默认常档，3 秒内必步进一句）；
+   * 跨区自动续行，末句自动停。切视图/关页/重渲染/页面隐藏皆停播（tourPause
+   * 挂在 openRegion/openDetail/openDeity/activate/返回钮/visibilitychange/
+   * renderBook 入口）。门控不变：入口在本页内，本页经 openButiange 的
+   * starGate 才可达，导览不另开口子。 */
+  var tourState = null; /* {flat:[{section,secIdx,idx,line}], pos, playing, timer, speed, chartKey} */
+
+  function tourFlat() {
+    var flat = [];
+    secOrder.forEach(function (s, si2) {
+      var si = secInfo[s]; if (!si) return;
+      si.lines.forEach(function (l, li) { flat.push({ section: s, secIdx: si2, idx: li, line: l }); });
+    });
+    return flat;
+  }
+  function tourTargets(entry) {
+    if (!entry || !entry.line || entry.line.kind !== '星官句' || !entry.line.asterism) return [];
+    var si = secInfo[entry.section]; if (!si) return [];
+    var out = [];
+    entry.line.asterism.split('、').forEach(function (nm) {
+      var a = si.list.filter(function (x) { return x.name === nm; })[0];
+      if (a) out.push(a);
+    });
+    return out;
+  }
+  function tourPanelHTML() {
+    var btn = 'style="font-family:var(--sans)"';
+    return '<div id="sx-tour" style="position:sticky;top:8px;z-index:6;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 14px;box-shadow:0 8px 24px rgba(0,0,0,.14)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">' +
+      '<span style="font-family:var(--serif);font-weight:700;font-size:1.05rem;color:var(--ink)">' + txEsc('步天歌导览') + '</span>' +
+      '<span id="sx-tour-progress" style="font-family:var(--sans);font-size:.74rem;color:var(--muted)"></span></div>' +
+      '<div id="sx-tour-verse" style="font-family:var(--serif);font-size:1.3rem;letter-spacing:.08em;color:var(--cinnabar-deep);margin-top:6px;line-height:1.5"></div>' +
+      '<div id="sx-tour-note" style="font-family:var(--sans);font-size:.76rem;color:var(--muted);margin-top:2px;line-height:1.6"></div>' +
+      '<div id="sx-tour-chart"></div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">' +
+      '<button class="btn" ' + btn + ' data-sx-tour="prev">' + txEsc('上一句') + '</button>' +
+      '<button class="btn primary" ' + btn + ' id="sx-tour-play" data-sx-tour="play">' + txEsc('播放') + '</button>' +
+      '<button class="btn" ' + btn + ' data-sx-tour="next">' + txEsc('下一句') + '</button>' +
+      '<span style="font-family:var(--sans);font-size:.74rem;color:var(--muted)">' + txEsc('间隔') + '</span>' +
+      '<button class="btn" ' + btn + ' data-sx-tour="speed:1500" data-sx-tour-speed="1500">' + txEsc('快') + '</button>' +
+      '<button class="btn" ' + btn + ' data-sx-tour="speed:2400" data-sx-tour-speed="2400">' + txEsc('常') + '</button>' +
+      '<button class="btn" ' + btn + ' data-sx-tour="speed:4500" data-sx-tour-speed="4500">' + txEsc('慢') + '</button>' +
+      '<button class="btn" data-sx-tour="exit" style="font-family:var(--sans);margin-left:auto">' + txEsc('退出导览') + '</button>' +
+      '</div></div>';
+  }
+  /* 浮图高亮规则的内联复刻（.sx-pop .sx-hl/.sx-dim 同值，全走 var() 变量链） */
+  function tourPaintChart(box) {
+    if (!box) return;
+    function paint(sel, props) {
+      box.querySelectorAll(sel).forEach(function (el) {
+        Object.keys(props).forEach(function (k) { el.style.setProperty(k, props[k]); });
+      });
+    }
+    paint('.sx-dim .sx-star', { 'fill': 'var(--ink-2)', 'stroke': 'none', 'opacity': '.45' });
+    paint('.sx-dim .sx-plot-line,.sx-dim .sx-plot-dash', { 'stroke': 'var(--muted)', 'opacity': '.32' });
+    paint('.sx-dim .sx-plot-t', { 'fill': 'var(--muted)', 'opacity': '.8' });
+    paint('.sx-dim .sx-leader', { 'stroke': 'var(--muted)', 'opacity': '.35' });
+    paint('.sx-dim .sx-star.sx-sch-ring', { 'fill': 'var(--paper)', 'stroke': 'var(--muted)', 'stroke-width': '1.1', 'opacity': '.6' });
+    paint('.sx-hl .sx-star', { 'fill': 'var(--cinnabar)', 'stroke': 'var(--cinnabar-deep)', 'stroke-width': '.8' });
+    paint('.sx-hl .sx-plot-line', { 'stroke': 'var(--cinnabar)', 'stroke-width': '1.9' });
+    paint('.sx-hl .sx-plot-dash', { 'stroke': 'var(--cinnabar)', 'stroke-width': '1.5' });
+    paint('.sx-hl .sx-plot-t', { 'fill': 'var(--cinnabar-deep)', 'font-weight': '700' });
+    paint('.sx-hl .sx-leader', { 'stroke': 'var(--cinnabar)', 'opacity': '.65' });
+  }
+  function tourSync(scroll) {
+    if (!tourState) return;
+    var st = tourState, e = st.flat[st.pos]; if (!e) return;
+    var si = secInfo[e.section]; if (!si) return;
+    var targets = tourTargets(e);
+    var whole = !targets.length; /* 无映射降级：整区高亮呈现，不指单官 */
+    var prog = $('sx-tour-progress');
+    if (prog) prog.textContent = T('第 ' + (e.secIdx + 1) + ' 区 · ' + e.section +
+      ' · 本区第 ' + (e.idx + 1) + '/' + si.lineCount + ' 句 · 全歌第 ' + (st.pos + 1) + '/' + st.flat.length + ' 句');
+    var verse = $('sx-tour-verse');
+    if (verse) verse.textContent = T(e.line.text);
+    var note = $('sx-tour-note');
+    if (note) {
+      if (whole) {
+        note.textContent = T('本句为' + (String(e.line.kind || '').indexOf('回指') === 0 ? '回指句' : '结构句') +
+          '，不指单一星官：图中整区呈现作语境，不作单官高亮。');
+      } else {
+        var nt = T('本句星官：') + targets.map(function (a) { return T(a.name); }).join(' · ');
+        var sch = schemaReady(si);
+        targets.forEach(function (a) {
+          var sa = sch ? sch.asterisms[a.name] : null;
+          if (sa && !(sa.stars || []).length) nt += ' ' + tf(t('sx_pop_notplotted'), T(a.name));
+        });
+        note.textContent = nt;
+      }
+    }
+    var hl = {};
+    if (whole) si.list.forEach(function (a) { hl[astKey(a)] = 1; });
+    else targets.forEach(function (a) { hl[astKey(a)] = 1; });
+    var key = e.section + '|' + (whole ? '__whole__' : targets.map(function (a) { return astKey(a); }).join(','));
+    var box = $('sx-tour-chart');
+    if (box && st.chartKey !== key) {
+      box.innerHTML = regionMapHTML(si, { pop: true, hl: hl }).html;
+      tourPaintChart(box);
+      st.chartKey = key;
+    }
+    var prev = document.querySelector('[data-sx-tour-cur]');
+    if (prev && prev.getAttribute('data-sx-tour-g') !== String(st.pos)) {
+      prev.removeAttribute('data-sx-tour-cur'); prev.classList.remove('on');
+      prev.style.background = ''; prev.style.boxShadow = '';
+    }
+    var row = document.querySelector('[data-sx-tour-g="' + st.pos + '"]');
+    if (row) {
+      row.setAttribute('data-sx-tour-cur', '1'); row.classList.add('on');
+      row.style.background = 'var(--cinnabar-wash)'; row.style.boxShadow = 'inset 4px 0 0 var(--cinnabar)';
+      if (scroll) {
+        row.scrollIntoView({ block: 'center' });
+        /* 导览面板 sticky 置顶且较高：居中滚动会把当前句压到面板之下，
+         * 再按面板下沿回补滚动量，让当前句落在面板正下方完整可见 */
+        var panel = $('sx-tour'), view = $('view-butiange');
+        if (panel && view) {
+          var pr = panel.getBoundingClientRect(), rr = row.getBoundingClientRect();
+          if (rr.top < pr.bottom + 8) view.scrollTop -= (pr.bottom + 8 - rr.top);
+          rr = row.getBoundingClientRect();
+          if (rr.bottom > window.innerHeight - 8) view.scrollTop += (rr.bottom - (window.innerHeight - 8));
+        }
+      }
+    }
+    var pb = $('sx-tour-play');
+    if (pb) pb.textContent = T(st.playing ? '暂停' : '播放');
+    document.querySelectorAll('[data-sx-tour-speed]').forEach(function (b) {
+      var on = parseInt(b.getAttribute('data-sx-tour-speed'), 10) === st.speed;
+      b.style.borderColor = on ? 'var(--cinnabar)' : '';
+      b.style.color = on ? 'var(--cinnabar-deep)' : '';
+      b.style.fontWeight = on ? '700' : '';
+    });
+  }
+  function tourPause() {
+    if (!tourState) return;
+    tourState.playing = false;
+    if (tourState.timer) { clearInterval(tourState.timer); tourState.timer = null; }
+    var pb = $('sx-tour-play');
+    if (pb) pb.textContent = T('播放');
+  }
+  function tourStartTimer() {
+    if (!tourState) return;
+    if (tourState.timer) clearInterval(tourState.timer);
+    tourState.timer = setInterval(function () {
+      if (!tourState || !tourState.playing) return;
+      if (tourState.pos >= tourState.flat.length - 1) { tourPause(); return; }
+      tourState.pos++;
+      tourSync(true);
+    }, tourState.speed);
+  }
+  function tourPlayToggle() {
+    if (!tourState) return;
+    if (tourState.playing) { tourPause(); return; }
+    if (tourState.pos >= tourState.flat.length - 1) tourState.pos = 0; /* 末句按播放＝从头重播 */
+    tourState.playing = true;
+    tourStartTimer();
+    tourSync(false);
+  }
+  function tourSetSpeed(ms) {
+    if (!tourState || !ms) return;
+    tourState.speed = ms;
+    if (tourState.playing) tourStartTimer();
+    tourSync(false);
+  }
+  function tourGo(delta) {
+    if (!tourState) return;
+    var n = tourState.pos + delta;
+    if (n < 0) n = 0;
+    if (n > tourState.flat.length - 1) n = tourState.flat.length - 1;
+    tourState.pos = n;
+    tourSync(true);
+  }
+  function tourJump(pos) {
+    if (!tourState || typeof pos !== 'number' || pos < 0 || pos >= tourState.flat.length) return;
+    tourState.pos = pos;
+    tourSync(true);
+  }
+  function enterTour() {
+    if (!BT || !secOrder.length) return;
+    closeVersePop();
+    tourState = { flat: tourFlat(), pos: 0, playing: false, timer: null, speed: 2400, chartKey: '' };
+    if (!tourState.flat.length) { tourState = null; return; }
+    renderBook();
+    tourSync(true);
+  }
+  function exitTour() {
+    tourPause();
+    tourState = null;
+    renderBook(); /* 回普通典籍页：展开状态复归 bookOpen 原状，导览面板与全量展开一并撤下 */
   }
 
   /* ---------------- s5+ 点句浮图（v2.3.0，作用域：POP_SECTIONS 已落图式层的段） ----------------
@@ -1390,6 +1609,23 @@
 
   /* ---------------- 全局点击委托 ---------------- */
   document.addEventListener('click', function (e) {
+    /* 《步天歌》导览控件/句行跳转优先：控件钮与导览句行不落入下方通用委托 */
+    var tourBtn = e.target && e.target.closest ? e.target.closest('[data-sx-tour]') : null;
+    if (tourBtn) {
+      var act = tourBtn.getAttribute('data-sx-tour');
+      if (act === 'enter') enterTour();
+      else if (act === 'exit') exitTour();
+      else if (act === 'prev') tourGo(-1);
+      else if (act === 'next') tourGo(1);
+      else if (act === 'play') tourPlayToggle();
+      else if (act.indexOf('speed:') === 0) tourSetSpeed(parseInt(act.slice(6), 10));
+      return;
+    }
+    var tourRow = e.target && e.target.closest ? e.target.closest('[data-sx-tour-g]') : null;
+    if (tourRow && !(e.target.closest && e.target.closest('[data-sx-detail],[data-sx-region]'))) {
+      tourJump(parseInt(tourRow.getAttribute('data-sx-tour-g'), 10));
+      return;
+    }
     /* 点句浮图（POP_SECTIONS 段）优先于通用委托：浮层内「看详情」先收浮层再进详情；
      * 作用域段句行（含行内星官签）整行开浮图，不走签的详情跳转 */
     var popLink = e.target && e.target.closest ? e.target.closest('[data-sx-pop-detail]') : null;
@@ -1459,7 +1695,8 @@
       }
     });
     if ((b = $('star-detail-back'))) b.addEventListener('click', function () { hide('view-star-detail'); });
-    if ((b = $('butiange-back'))) b.addEventListener('click', function () { closeVersePop(); hide('view-butiange'); });
+    if ((b = $('butiange-back'))) b.addEventListener('click', function () { tourPause(); closeVersePop(); hide('view-butiange'); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) tourPause(); }); /* 导览播放中页面隐藏即停 */
     /* 点句浮图关闭路径：✕ 钮／点浮层外空白／Esc；返回手势走上面的 back（已先收浮层） */
     if ((b = $('sx-pop-x'))) b.addEventListener('click', function () { closeVersePop(); });
     var popEl = $('sx-pop');

@@ -106,6 +106,7 @@
     ASTS = []; ALLSTARS = [];
     (XG.asterisms || []).forEach(function (a) {
       var ast = { key: a.section + '|' + a.name, name: a.name, section: a.section,
+        verses: a.verses || [],
         starsIdx: [], edges: [], doubtful: false, brightest: -1 };
       var byName = {}, ai = ASTS.length;
       (a.stars || []).forEach(function (s) {
@@ -162,7 +163,8 @@
     noPose: false, fallback: null, posCache: null, posAt: 0, msgText: '', msgUntil: 0,
     bodyCache: null, bodyAt: 0, bodyPts: [], moonIllum: null, moonWaxing: true,
     labels: [], segments: 0, hudText: '', els: null, oriBound: false,
-    absSeen: false, relSeen: false, alignTarget: null
+    absSeen: false, relSeen: false, alignTarget: null,
+    starPts: [], pick: null
   };
 
   /* 姿态事件 ingest（AR 与星图跟随共用，根因与口径见文件头注）：
@@ -247,7 +249,7 @@
    * HUD/按钮/标签胶囊都是 DOM、本就不入合成画布，画布内唯一的界面
    * 元素就是这枚准星，故只在此处分流。 */
   function drawScene(ctx, w, h, keepBase, forPhoto) {
-    S.labels = []; S.segments = 0;
+    S.labels = []; S.starPts = []; S.segments = 0;
     if (!keepBase) ctx.clearRect(0, 0, w, h);
     if (!S.pose || !S.posCache) return;
     var ax = camAxes();
@@ -313,6 +315,9 @@
       ctx.globalAlpha = st.mag <= 3 ? 0.95 : st.mag <= 5 ? 0.8 : 0.6;
       ctx.fillStyle = colStar;
       ctx.beginPath(); ctx.arc(pj.x, pj.y, starR(st.mag), 0, 6.2832); ctx.fill();
+      /* 点选竞近表：只登记实际绘出的星点（与画面所见严格一致），
+       * 坐标为工作单位 CSS px，与标签表 S.labels 同口径 */
+      S.starPts.push({ gi: j, x: pj.x, y: pj.y });
     }
     ctx.globalAlpha = 1;
     /* 月亮/行星标记（v2.1.1）：月亮带月相盘面（亮盘＋背阳暗盘，偏移
@@ -452,6 +457,9 @@
       /* 标签密度胶囊（画面右上角，点一下循环三档；DOM 元素不入拍照
        * 合成，见 drawScene 头注。显隐与快门同规：仅相机运行且无面板时露面） */
       '<button class="ar-labelchip" id="ar-labelchip" data-ar="labelmode" hidden></button>' +
+      /* 点选详情卡（C 线）：舞台内 DOM、面板（z4）之下；拍照合成只取
+       * video 帧＋画布，卡不入图。样式走 .ar-pickcard 类（协调批 CSS） */
+      '<div class="ar-pickcard" id="ar-pickcard" hidden></div>' +
       '<div class="ar-panel" id="ar-panel"></div>' +
       /* 舞台内快门钮（v2.1.0 (8)：取代原视图级悬浮返回键——它悬在舞台外
        * 左下、压工具栏「拍照」钮。快门收进舞台框内左下，与工具栏拍照钮
@@ -523,6 +531,7 @@
 
   function setPanel(kind) {
     if (!S.els || !S.els.panel) return;
+    if (kind) hidePickCard();   /* 面板在场时点选卡让位，免得隔着面板残留 */
     /* 快门钮只在相机运行中（无面板）时露面：开启面板/回落面板在场时藏起，
      * 免得隔着半透明面板误点、也免得在无相机时点了只换来报错 */
     var sh = $('ar-shutter'); if (sh) sh.hidden = !!kind;
@@ -543,6 +552,7 @@
     if (rb) rb.classList.toggle('on', cal.red);
     var ab = document.querySelector('#sx-ar [data-ar="align"]');
     if (ab) ab.classList.toggle('red', cal.red);
+    var pc = $('ar-pickcard'); if (pc) pc.classList.toggle('red', cal.red);
   }
 
   function openAR() {
@@ -568,6 +578,7 @@
     if (S.oriBound) { unbindOri(onOri, onOriAbs); S.oriBound = false; }
     if (S.els && S.els.video) S.els.video.srcObject = null;
     S.pose = null; S.posCache = null;
+    hidePickCard();
   }
 
   function fallback(kind) {
@@ -608,7 +619,30 @@
    * 保存值口径：渲染层以「星位 + cal」绘制，故要让被对准的天体标记落回
    * 准星，cal 须等于「当前中心读数 − 天体真值」（读数出自 drawScene 的
    * centerAz/centerAlt，已含磁偏角修正）。与拖动共用 cal 与存档、后写
-   * 覆盖；偏差过大（|Δaz|>60 或 |Δalt|>30）判罗盘受干扰、拒存。 */
+   * 覆盖；偏差过大（|Δaz|>60 或 |Δalt|>30）判罗盘受干扰、拒存。
+ *
+ * 【星空批·C 线：AR 点选详情卡】
+ * 点/轻触画面（既有 tap 判定：位移 <8px 且 <500ms）走三级竞近，阈值
+ * 均为 CSS px（与 S.labels/pick 旧口径同为工作单位）：
+ *   ①星点 28px——drawScene 星点层同帧登记的 S.starPts（实绘星点半径
+ *     仅 0.85–3.4px，触控须给足捕获半径，28px 约为两指节宽内可达）；
+ *   ②星官标签 48px——沿用旧 pick 的标签竞近阈值，不改旧口径；
+ *   ③天体圆盘 32px——S.bodyPts（月盘 r=7、行星 r=3.6，盘面点选）。
+ * 优先级星点 > 标签 > 天体：标签锚点就在最亮星上方 11px，直接点标签
+ * 文字中心会先中星点卡（星名卡含所属星官与歌诀，信息不缺）；点标签
+ * 文字两端或星点 28px 外、48px 内则中星官卡。无命中收起已弹卡。
+ * 卡内容取数：星名/星等/所属星官/成员星数全出自 AR 已载的同一份
+ * WuriSky.starData()（xingguan.json）；歌诀句用 xingguan.json 每星官
+ * 自带的 verses 字段（与图鉴详情页 sx-lead 同源同文）——butiange.json
+ * AR 侧不另载（步天歌全本 361 句是典籍页的数据，卡上只需本星官句）。
+ * 卡为舞台内 DOM（#ar-pickcard），拍照合成只画 video 帧＋drawScene
+ * 画布，DOM 天然不入图（与 HUD/标签胶囊/快门同口径）；样式全走
+ * .ar-pickcard 类与 .ar-stage.red 红光变体，JS 不写死任何颜色。
+ * 常驻标签集合与三档密度行为不因点选改变：pick 只读 S.labels/
+ * S.starPts/S.bodyPts，不写 labelMode、不增删标签。
+ * 「看详情 ›」复用 Stars.openDetail（与旧标签 pick 同一通道）：
+ * 详情视图与 AR 同为 z-62、DOM 在 AR 之后故盖住 AR，相机保持运行，
+ * 详情返回即回活 AR——与旧行为一致，不另走 openDeity 的来源栈。 */
   function wrap180(x) { x = ((x % 360) + 360) % 360; return x > 180 ? x - 360 : x; }
   function fmtSigned(v) { var r = Math.round(v); return r === 0 ? '0' : (r > 0 ? '+' + r : '−' + Math.abs(r)); }
   function doAlign() {
@@ -728,6 +762,7 @@
     var canvas = S.els.canvas;
     var drag = null;
     canvas.addEventListener('pointerdown', function (e) {
+      hidePickCard();   /* 新手势开始即收旧卡；若是 tap，pointerup 的 pick 会重新弹 */
       drag = { x: e.clientX, y: e.clientY, az: cal.az, alt: cal.alt, moved: 0, t: performance.now() };
       canvas.setPointerCapture(e.pointerId);
     });
@@ -767,6 +802,12 @@
       else if (act === 'snap') snap();
       else if (act === 'align') { if (S.running) setPanel('align'); }
       else if (act === 'alignpick') { S.alignTarget = b.getAttribute('data-id'); setPanel('aligning'); }
+      else if (act === 'pickclose') hidePickCard();
+      else if (act === 'pickdetail') {
+        var pk = b.getAttribute('data-key');
+        hidePickCard();
+        if (pk && window.Stars) window.Stars.openDetail(pk);
+      }
       else if (act === 'alignok') doAlign();
       else if (act === 'aligncancel') { S.alignTarget = null; setPanel(null); }
       else if (act === 'red') {
@@ -780,32 +821,116 @@
     });
   }
 
-  function pick(e) {
-    if (!S.labels.length || !S.els) return;
-    var r = S.els.canvas.getBoundingClientRect();
-    var x = e.clientX - r.left, y = e.clientY - r.top;
-    var best = null, bestD = 48;
-    S.labels.forEach(function (L) {
+  /* ---------------- 点选详情卡（星空批·C 线，口径见文件头注） ----------------
+   * 阈值（CSS px）：星点 28 / 星官标签 48（旧口径）/ 天体圆盘 32。 */
+  var PICK_STAR_TOL = 28, PICK_LABEL_TOL = 48, PICK_BODY_TOL = 32;
+  /* i18n 新键未落库前的兜底文案：键已由协调批登记，落库后自动走译文 */
+  function tt(k, fb) { var v = t(k); return v === k ? fb : v; }
+
+  function pickCardHTML() {
+    var p = S.pick; if (!p) return '';
+    var ast = ASTS[p.astIdx]; if (!ast) return '';
+    var head, sub;
+    if (p.kind === 'star') {
+      var st = ALLSTARS[p.gi];
+      head = T(st.cn) || '—';
+      sub = T(ast.section) + ' · ' + T(ast.name);
+      if (st.mag < 90) sub += ' · ' + tf(t('sx2_mag'), st.mag.toFixed(1));
+    } else {
+      head = T(ast.name);
+      sub = T(ast.section) + ' · ' + tf(tt('sx2_ar_pick_nstars', '%d 星'), ast.starsIdx.length);
+    }
+    var h = '<div class="ar-pick-head"><span class="ar-pick-name">' + esc(head) + '</span>' +
+      '<button class="ar-pick-x" data-ar="pickclose" aria-label="×">×</button></div>' +
+      '<div class="ar-pick-sub">' + esc(sub) + '</div>';
+    if (ast.verses && ast.verses.length) {
+      h += '<div class="ar-pick-verse"><span class="ar-pick-vfrom">' +
+        esc(tf(t('sx_verse_from'), ast.section)) + '</span>' +
+        ast.verses.map(function (v) { return '<span class="ar-pick-vline">' + esc(T(v)) + '</span>'; }).join('') +
+        '</div>';
+    }
+    h += '<button class="ar-pick-go" data-ar="pickdetail" data-key="' + esc(ast.key) + '">' +
+      esc(t('sx2_detail')) + '</button>';
+    return h;
+  }
+  function showPickCard() {
+    var el = $('ar-pickcard'); if (!el) return;
+    if (!S.pick) { el.hidden = true; el.innerHTML = ''; return; }
+    el.innerHTML = pickCardHTML();
+    el.classList.toggle('red', cal.red);
+    el.hidden = false;
+    /* 快门（舞台左下 58px 圆）与卡片左下角重叠、会盖住「看详情」钮（协调批
+     * 冒烟截图实证）：卡在场时快门让位，与 setPanel 面板让位同口径 */
+    var sh = $('ar-shutter'); if (sh) sh.hidden = true;
+  }
+  function hidePickCard() {
+    S.pick = null;
+    var el = $('ar-pickcard'); if (el) { el.hidden = true; el.innerHTML = ''; }
+    /* 快门恢复：仅当面板不在场（setPanel 无 kind 时的同款状态）才露面 */
+    var sh2 = $('ar-shutter');
+    if (sh2 && S.els && S.els.panel && S.els.panel.hidden) sh2.hidden = false;
+  }
+
+  /* 天体点选（标签级与圆盘级共用）：月亮/行星没有详情页，沿旧口径在
+   * HUD 出信息（名＋身份＋当前方位/高度＋今晚最佳），不弹卡不跳详情 */
+  function bodyPick(id) {
+    var B = null;
+    (S.bodyCache || []).forEach(function (bb) { if (bb.id === id) B = bb; });
+    if (!B) return;
+    var bk = (window.WuriSkyChart && WuriSkyChart.bestBody) ? WuriSkyChart.bestBody(B.id) : null;
+    var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+    var s = t('sx2_body_' + B.id) + ' · ' + t(B.kind === 'moon' ? 'sx2_kind_moon' : 'sx2_kind_planet') + ' · ' +
+      tf(t('sx2_info_alt'), B.alt.toFixed(0)) + ' · ' + tf(t('sx2_info_az'), (((B.az % 360) + 360) % 360).toFixed(0)) + ' · ' +
+      tf(t('sx2_info_best'), bk && bk.alt >= 0 ? p2(bk.date.getHours()) + ':' + p2(bk.date.getMinutes()) : '—');
+    if (B.kind === 'moon' && S.moonIllum != null) s += ' · ' + tf(t('sx_moon_illum'), (Math.round(S.moonIllum * 1000) / 10).toFixed(1));
+    flashMsg(s);
+  }
+
+  /* 三级竞近（x/y 为画布工作坐标 CSS px）：星点 > 星官标签 > 天体圆盘；
+   * 无命中收起已弹卡。返回命中描述（冒烟/调试用），无命中返回 null。
+   * 只读三张同帧表，不改常驻标签集合与密度档。 */
+  function pickAt(x, y) {
+    var best = null, bestD = PICK_STAR_TOL, i;
+    (S.starPts || []).forEach(function (p) {
+      var d = Math.hypot(p.x - x, p.y - y);
+      if (d < bestD) { bestD = d; best = p; }
+    });
+    if (best) {
+      var st = ALLSTARS[best.gi];
+      S.pick = { kind: 'star', gi: best.gi, astIdx: st.ast, key: ASTS[st.ast].key };
+      showPickCard();
+      return S.pick;
+    }
+    best = null; bestD = PICK_LABEL_TOL;
+    (S.labels || []).forEach(function (L) {
       var d = Math.hypot(L.x - x, L.y - y);
       if (d < bestD) { bestD = d; best = L; }
     });
-    if (!best) return;
-    if (best.body) {
-      /* 月亮/行星没有详情页：点选在 HUD 出信息（名＋身份＋当前方位/高度
-       * ＋今晚最佳），不跳星官详情 */
-      var B = null;
-      (S.bodyCache || []).forEach(function (bb) { if (bb.id === best.body) B = bb; });
-      if (!B) return;
-      var bk = (window.WuriSkyChart && WuriSkyChart.bestBody) ? WuriSkyChart.bestBody(B.id) : null;
-      var p2 = function (n) { return (n < 10 ? '0' : '') + n; };
-      var s = t('sx2_body_' + B.id) + ' · ' + t(B.kind === 'moon' ? 'sx2_kind_moon' : 'sx2_kind_planet') + ' · ' +
-        tf(t('sx2_info_alt'), B.alt.toFixed(0)) + ' · ' + tf(t('sx2_info_az'), (((B.az % 360) + 360) % 360).toFixed(0)) + ' · ' +
-        tf(t('sx2_info_best'), bk && bk.alt >= 0 ? p2(bk.date.getHours()) + ':' + p2(bk.date.getMinutes()) : '—');
-      if (B.kind === 'moon' && S.moonIllum != null) s += ' · ' + tf(t('sx_moon_illum'), (Math.round(S.moonIllum * 1000) / 10).toFixed(1));
-      flashMsg(s);
-      return;
+    if (best) {
+      if (best.body) { hidePickCard(); bodyPick(best.body); return { kind: 'body', id: best.body }; }
+      var ai = -1;
+      for (i = 0; i < ASTS.length; i++) if (ASTS[i].key === best.key) { ai = i; break; }
+      if (ai >= 0) {
+        S.pick = { kind: 'ast', astIdx: ai, key: best.key };
+        showPickCard();
+        return S.pick;
+      }
+      return null;
     }
-    if (best.key && window.Stars) window.Stars.openDetail(best.key);
+    best = null; bestD = PICK_BODY_TOL;
+    (S.bodyPts || []).forEach(function (p) {
+      var d = Math.hypot(p.x - x, p.y - y);
+      if (d < bestD) { bestD = d; best = p; }
+    });
+    if (best) { hidePickCard(); bodyPick(best.id); return { kind: 'body', id: best.id }; }
+    hidePickCard();
+    return null;
+  }
+
+  function pick(e) {
+    if (!S.els) return null;
+    var r = S.els.canvas.getBoundingClientRect();
+    return pickAt(e.clientX - r.left, e.clientY - r.top);
   }
 
   /* ---------------- 入口注入（星象页，继双入口之后的整行卡） ---------------- */
@@ -927,6 +1052,26 @@
         centerAz: S.centerAz, centerAlt: S.centerAlt, polePoint: S.polePoint };
     },
     _setCal: function (az, alt) { cal.az = az; cal.alt = alt; clampCal(); saveCal(); },
+    /* 点选冒烟钩子（C 线）：按画布工作坐标直接驱动 pickAt（与真实 tap
+     * 同一函数）；读点选卡状态；按星名/星官 key 查最近一帧投影点 */
+    _pickAt: function (x, y) { return pickAt(x, y); },
+    _pickState: function () {
+      var el = $('ar-pickcard');
+      return { pick: S.pick, visible: !!(el && !el.hidden), text: el ? el.textContent : '' };
+    },
+    _starPointOf: function (cn) {
+      for (var i = 0; i < (S.starPts || []).length; i++) {
+        var p = S.starPts[i];
+        if (ALLSTARS[p.gi] && ALLSTARS[p.gi].cn === cn) return { x: p.x, y: p.y, gi: p.gi };
+      }
+      return null;
+    },
+    _labelPointOf: function (key) {
+      for (var i = 0; i < (S.labels || []).length; i++) {
+        if (S.labels[i].key === key) return { x: S.labels[i].x, y: S.labels[i].y };
+      }
+      return null;
+    },
     _captureDataURL: async function () { var c = await capturePhoto(); return c ? c.toDataURL('image/png') : null; },
     _stop: stopAR
   };

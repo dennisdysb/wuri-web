@@ -33,7 +33,7 @@
   var D2R = Math.PI / 180;
 
   /* ---------------- 数据 ---------------- */
-  var XG = null, dataPromise = null, ASTS = [], ALLSTARS = [];
+  var XG = null, dataPromise = null, ASTS = [], ALLSTARS = [], UNLOCATED = [];
   /* 数据走 WuriSky.starData() 共享加载（v2.1.1 (4)）：与 stars.js 同一份
    * 结果、同一条双通道（fetch→XHR）路径，不得另起 fetch 读包内数据 */
   function loadData() {
@@ -49,13 +49,18 @@
     return dataPromise;
   }
   function buildIndex(LINEMAP) {
-    ASTS = []; ALLSTARS = [];
+    ASTS = []; ALLSTARS = []; UNLOCATED = [];
     (XG.asterisms || []).forEach(function (a) {
       var ast = { key: a.section + '|' + a.name, name: a.name, section: a.section, region: a.region,
-        starsIdx: [], edges: [], doubtful: false, brightest: -1 };
+        starsIdx: [], edges: [], doubtful: false, brightest: -1, unlocated: [] };
       var byName = {}, ai = ASTS.length;
       (a.stars || []).forEach(function (s) {
-        if (s.ra_deg == null || s.dec_deg == null) return;
+        if (s.ra_deg == null || s.dec_deg == null) {
+          /* 位置待考星（unlocated/not_plotted 口径）：只登记名字供搜索
+           * 诚实标注，绝不编造坐标、绝不进 ALLSTARS/投影 */
+          if (s.cn_name) { ast.unlocated.push(s.cn_name); UNLOCATED.push({ cn: s.cn_name, astKey: ast.key, astName: a.name, section: a.section }); }
+          return;
+        }
         var gi = ALLSTARS.push({ ra: s.ra_deg, dec: s.dec_deg, mag: (s.vmag == null ? 99 : s.vmag), cn: s.cn_name || '', ast: ai }) - 1;
         ast.starsIdx.push(gi); byName[s.cn_name] = gi;
         if (ast.brightest < 0 || ALLSTARS[gi].mag < ALLSTARS[ast.brightest].mag) ast.brightest = gi;
@@ -184,7 +189,18 @@
     var dusk = SKY.astroDusk(base, obsState);
     var start = dusk || new Date(base.getFullYear(), base.getMonth(), base.getDate(), 19, 0);
     var end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 1, 0, 0, 0);
-    return { start: start, end: end, duskExact: !!dusk };
+    var dawn = astroDawnAfter(start);
+    return { start: start, end: end, duskExact: !!dusk, dawn: dawn, dawnExact: !!dawn };
+  }
+
+  /* 明晨天文暮光始：与 SKY.astroDusk 同法（Astronomy Engine SearchAltitude，
+   * 太阳升至 −18°、direction=+1），SKY 未暴露 dawn，本页直调同一 vendor 库 */
+  function astroDawnAfter(from) {
+    var A = window.Astronomy; if (!A || !A.SearchAltitude || !A.Observer) return null;
+    try {
+      var r = A.SearchAltitude(A.Body.Sun, new A.Observer(obsState.lat, obsState.lon, 0), 1, from, 1.5, -18);
+      return r ? r.date : null;
+    } catch (e) { return null; }
   }
 
   /* 今夜最佳采样（今夜可见页、星图侧栏摘要、点选信息条共用同一口径：
@@ -226,6 +242,109 @@
   }
   function moonIllum(date) {
     return (window.WuriTodaySky && WuriTodaySky.moonPhaseOf) ? WuriTodaySky.moonPhaseOf(date) : null;
+  }
+
+  /* ---------------- 今晚时间线（v252 星空批 B 线⑥） ----------------
+   * 采样口径：天文暮光终了→明晨天文暮光始（无 dawn 解则暮光后 9 小时），
+   * 每 10 分钟一采样；星官以最亮定星为准（projectAll 批量），行星/月亮走
+   * bodyPos。升/落＝高度穿越 0° 的线性内插时刻；中天＝采样内最高高度时刻
+   * （10 分钟粒度）。最佳窗＝得分曲线（Σ 目标 sin(高度)+ × 权重，星官权重
+   * 按最亮星等 (7−mag)/4 下限 0.3、天体 1.2）峰值点向两侧扩展至 0.6×峰值。
+   * 月扰口径：目标中天时刻，月球与目标的角距 sep（球面余弦定理，赤道坐标
+   * 同为当日期分点）＋月照亮比 illum 分级——illum<0.25 月光弱；sep≥90°
+   * 距月远；45°≤sep<90° 中等；sep<45° 且 illum≥0.6 干扰强。 */
+  var nightInfo = null;
+  function moonInterference(illum, sepDeg) {
+    if (illum == null || sepDeg == null) return '';
+    if (illum < 0.25) return T('月光弱，影响小');
+    if (sepDeg >= 90) return T('距月远，影响小');
+    if (sepDeg >= 45) return illum >= 0.7 ? T('月光较强，背景略亮') : T('月光中等，影响有限');
+    return illum >= 0.6 ? T('近月且月亮亮，干扰强') : T('近月，月光中等');
+  }
+  function computeNightSeries(win, items) {
+    var t0 = win.start.getTime();
+    var t1 = win.dawn ? win.dawn.getTime() : t0 + 9 * 3600000;
+    if (t1 <= t0) t1 = t0 + 9 * 3600000;
+    var step = 10 * 60000, n = Math.max(2, Math.round((t1 - t0) / step) + 1);
+    var astItems = items.filter(function (it) { return !it.body; });
+    var brightStars = astItems.map(function (it) { return ALLSTARS[it.ast.brightest]; });
+    var series = astItems.map(function () { return []; });
+    var bodySeries = {};
+    items.forEach(function (it) { if (it.body) bodySeries[it.body.id] = []; });
+    var samples = [], s, d;
+    for (s = 0; s < n; s++) {
+      d = new Date(t0 + s * step);
+      var pr = SKY.projectAll(d, obsState, brightStars);
+      var score = 0, up20 = 0;
+      astItems.forEach(function (it, ai) {
+        var alt = pr ? pr[ai].alt : -99;
+        series[ai].push(alt);
+        if (alt > 0) {
+          score += Math.sin(Math.min(alt, 90) * D2R) * Math.max(0.3, (7 - ALLSTARS[it.ast.brightest].mag) / 4);
+          if (alt >= 20) up20++;
+        }
+      });
+      if (SKY.bodyPos) SKY.BODIES.forEach(function (bd) {
+        if (!bodySeries[bd.id]) return;
+        var bp = SKY.bodyPos(d, obsState, bd.id);
+        bodySeries[bd.id].push(bp ? bp.alt : -99);
+        if (bp && bp.alt > 0) { score += Math.sin(Math.min(bp.alt, 90) * D2R) * 1.2; if (bp.alt >= 20) up20++; }
+      });
+      samples.push({ t: d, score: score, up20: up20 });
+    }
+    function rtsOf(alts) {
+      var rise = null, set = null, trI = -1, trAlt = -99, i;
+      for (i = 0; i < alts.length; i++) if (alts[i] > trAlt) { trAlt = alts[i]; trI = i; }
+      function cross(i1, i2) {
+        var a1 = alts[i1], a2 = alts[i2];
+        if (a2 === a1) return new Date(t0 + i2 * step);
+        return new Date(t0 + (i1 + (0 - a1) / (a2 - a1)) * step);
+      }
+      for (i = 1; i < alts.length; i++) { if (alts[i - 1] <= 0 && alts[i] > 0) { rise = cross(i - 1, i); break; } }
+      for (i = alts.length - 1; i > 0; i--) { if (alts[i - 1] > 0 && alts[i] <= 0) { set = cross(i - 1, i); break; } }
+      return { rise: rise, set: set, transit: trI >= 0 ? new Date(t0 + trI * step) : null, transitAlt: trAlt };
+    }
+    items.forEach(function (it) {
+      if (it.body) it.rts = rtsOf(bodySeries[it.body.id] || []);
+      else it.rts = rtsOf(series[astItems.indexOf(it)]);
+    });
+    items.forEach(function (it) {
+      var td = it.rts && it.rts.transit ? it.rts.transit : win.start;
+      var mp2 = SKY.bodyPos ? SKY.bodyPos(td, obsState, 'moon') : null;
+      var tra, tdec;
+      if (it.body) {
+        if (it.body.kind === 'moon') { it.moonSep = null; it.moonNote = ''; return; }
+        var tp = SKY.bodyPos(td, obsState, it.body.id); if (!tp) { it.moonSep = null; it.moonNote = ''; return; }
+        tra = tp.ra; tdec = tp.dec;
+      } else {
+        var bs = ALLSTARS[it.ast.brightest], ep = SKY.eqdOf(td, bs.ra, bs.dec);
+        tra = ep[0]; tdec = ep[1];
+      }
+      if (!mp2) { it.moonSep = null; it.moonNote = ''; return; }
+      var cosS = Math.sin(tdec * D2R) * Math.sin(mp2.dec * D2R) +
+        Math.cos(tdec * D2R) * Math.cos(mp2.dec * D2R) * Math.cos((tra - mp2.ra) * D2R);
+      it.moonSep = Math.acos(Math.max(-1, Math.min(1, cosS))) / D2R;
+      var mi = moonIllum(td);
+      it.moonNote = moonInterference(mi ? mi.illumination : null, it.moonSep);
+    });
+    var bestWin = null, mx = -1, mi2 = -1;
+    samples.forEach(function (sm, i) { if (sm.score > mx) { mx = sm.score; mi2 = i; } });
+    if (mi2 >= 0 && mx > 0) {
+      var thr = mx * 0.6, a = mi2, b = mi2;
+      while (a > 0 && samples[a - 1].score >= thr) a--;
+      while (b < samples.length - 1 && samples[b + 1].score >= thr) b++;
+      bestWin = { start: samples[a].t, end: samples[b].t, up20: samples[mi2].up20, score: mx };
+    }
+    return { samples: samples, bestWin: bestWin, t0: new Date(t0), t1: new Date(t1) };
+  }
+  function rtsText(it) {
+    if (!it.rts || !it.rts.transit) return '';
+    var s = T('升') + ' ' + (it.rts.rise ? fmtTime(it.rts.rise) : T('入夜已升')) + ' · ' +
+      T('中天') + ' ' + fmtTime(it.rts.transit) + ' · ' +
+      T('落') + ' ' + (it.rts.set ? fmtTime(it.rts.set) : T('天亮未落'));
+    if (it.moonSep != null) s += ' · ' + tf(T('月距 %s°'), it.moonSep.toFixed(0));
+    if (it.moonNote) s += ' · ' + it.moonNote;
+    return s;
   }
 
   /* 点选信息条用：单官今夜最佳（与列表同一采样口径） */
@@ -281,8 +400,34 @@
         var pr = SKY.projectAll(it.b.date, obsState, arr);
         it.up = pr ? pr.filter(function (p) { return p.alt > 0; }).length : 0;
       });
-      var h = '<div class="sk-night-head">' + txEsc(tf(t('sx2_night_line'), items.length)) +
-        '<br>' + esc(t('sx2_dusk')) + ' ' + fmtTime(win.start) + (win.duskExact ? '' : ' ' + esc(t('sx2_dusk_approx'))) + '</div>';
+      /* 时间线层（⑥）：全夜采样→升/中天/落＋月扰＋最佳窗；失败静默回落旧表 */
+      var series = null;
+      try { series = computeNightSeries(win, items); } catch (e) { series = null; }
+      var sampleNote = '';
+      for (var sni = 0; sni < items.length; sni++) if (items[sni].moonNote) { sampleNote = items[sni].moonNote; break; }
+      nightInfo = { dusk: win.start, dawn: win.dawn || null, bestWin: series ? series.bestWin : null,
+        moon: moonIllum(win.start), items: items.length, sampleMoonNote: sampleNote,
+        firstRts: items.length && items[0].rts ? { rise: items[0].rts.rise, transit: items[0].rts.transit, set: items[0].rts.set } : null };
+      var h = '';
+      if (series && series.bestWin && items.length) {
+        var bw = series.bestWin, moonNow = moonIllum(win.start);
+        h += '<div class="sk-night-verdict" style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px">' +
+          '<div style="font-weight:700;margin-bottom:4px">' + esc(T('今晚最值得看')) + '</div>';
+        items.slice(0, 3).forEach(function (it) {
+          var nm3 = it.body ? bodyName(it.body.id) : it.ast.name;
+          var tt = it.rts && it.rts.transit ? it.rts.transit : it.b.date;
+          var ta = it.rts ? it.rts.transitAlt : it.b.alt;
+          h += '<div>' + txEsc(nm3) + ' · ' + esc(T('中天')) + ' ' + fmtTime(tt) + ' · ' + txEsc(tf(t('sx2_alt'), ta.toFixed(0))) + '</div>';
+        });
+        h += '<div style="margin-top:4px">' + esc(T('最佳观测窗')) + ' <b>' + fmtTime(bw.start) + '–' + fmtTime(bw.end) + '</b>' +
+          esc(tf(T('（窗内峰值时 %s 个目标同在 20° 以上）'), bw.up20)) + '</div>';
+        if (moonNow) h += '<div>' + esc(T('月亮')) + '：' + esc(T(moonNow.phaseName || '')) + ' · ' +
+          esc(tf(T('月龄 %s 天'), moonNow.ageDays.toFixed(1))) + ' · ' + esc(tf(t('sx_moon_illum'), moonNow.illuminationPct.toFixed(1))) + '</div>';
+        h += '</div>';
+      }
+      h += '<div class="sk-night-head">' + txEsc(tf(t('sx2_night_line'), items.length)) +
+        '<br>' + esc(t('sx2_dusk')) + ' ' + fmtTime(win.start) + (win.duskExact ? '' : ' ' + esc(t('sx2_dusk_approx'))) +
+        (win.dawn ? '<br>' + esc(T('明晨天文暮光始')) + ' ' + fmtTime(win.dawn) + (win.dawnExact ? '' : ' ' + esc(t('sx2_dusk_approx'))) : '') + '</div>';
       if (!items.length) h += '<div class="sx-loading">' + esc(t('sx2_empty')) + '</div>';
       items.forEach(function (it) {
         if (it.body) {
@@ -291,7 +436,8 @@
           h += '<div class="sx-row sx-row-body" data-sx-body="' + esc(bd.id) + '">' +
             '<div class="sx-row-main"><span class="sx-row-name">' + esc(T(bodyName(bd.id))) + '</span>' +
             '<span class="sx-badge body">' + esc(bodyKindName(bd.kind)) + '</span>' +
-            '<span class="sx-row-verse">' + (mp2 ? esc(tf(t('sx_moon_illum'), mp2.illuminationPct.toFixed(1))) : esc(bodyKindName(bd.kind))) + '</span></div>' +
+            '<span class="sx-row-verse">' + (mp2 ? esc(tf(t('sx_moon_illum'), mp2.illuminationPct.toFixed(1))) : esc(bodyKindName(bd.kind))) + '</span>' +
+            (rtsText(it) ? '<div class="sx-row-verse sk-rts">' + esc(rtsText(it)) + '</div>' : '') + '</div>' +
             '<div class="sx-row-side"><span class="sk-best">' + esc(t('sx2_best')) + ' ' + fmtTime(it.b.date) + '</span>' +
             '<span class="sx-row-n">' + txEsc(tf(t('sx2_alt'), it.b.alt.toFixed(0))) + '</span></div></div>';
           return;
@@ -300,11 +446,13 @@
         h += '<div class="sx-row" data-sx-detail="' + esc(ast.key) + '">' +
           '<div class="sx-row-main"><span class="sx-row-name">' + txEsc(ast.name) + '</span>' +
           '<span class="sx-row-verse">' + txEsc(ast.section) + ' · ' + txEsc(bs.cn) + ' ' +
-          txEsc(tf(t('sx2_mag'), bs.mag.toFixed(1))) + ' · ' + txEsc(tf(t('sx2_stars_up'), it.up, ast.starsIdx.length)) + '</span></div>' +
+          txEsc(tf(t('sx2_mag'), bs.mag.toFixed(1))) + ' · ' + txEsc(tf(t('sx2_stars_up'), it.up, ast.starsIdx.length)) + '</span>' +
+          (rtsText(it) ? '<div class="sx-row-verse sk-rts">' + esc(rtsText(it)) + '</div>' : '') + '</div>' +
           '<div class="sx-row-side"><span class="sk-best">' + esc(t('sx2_best')) + ' ' + fmtTime(it.b.date) + '</span>' +
           '<span class="sx-row-n">' + txEsc(tf(t('sx2_alt'), it.b.alt.toFixed(0))) + '</span></div></div>';
       });
-      h += '<div class="sx-caliber">' + esc(t('sx2_caliber_tonight')) + '</div>';
+      h += '<div class="sx-caliber">' + esc(t('sx2_caliber_tonight')) + '<br>' +
+        esc(T('时间线口径：升／中天／落以最亮定星（天体以本体）每 10 分钟采样、升落线性内插；月扰按中天时刻月距角与月照亮比分级。')) + '</div>';
       body.innerHTML = h;
     }).catch(function () { var b = $('sk-tonight-body'); if (b) b.innerHTML = failHTML(); });
   }
@@ -340,10 +488,130 @@
     try { localStorage.setItem('wuri_sky_lines_v1', JSON.stringify(chart.lines)); } catch (e) {}
   }
 
+  /* ---------------- 图层与标签档（v252 星空批 B 线④） ----------------
+   * 标签密度三档与相机认星共用键 wuri_sky_label_mode_v1（sky-ar.js 同键
+   * 同口径：smart 智能／all 全标／major 精简）：本页面板改档写回同键，
+   * AR 侧下次打开生效；major 大星官表与 sky-ar.js MAJOR_LABELS 逐字一致。
+   * 其余图层（连线/标签总开关/分野/网格/银河）存新键 wuri_sky_layers_v1；
+   * 黄道/天赤道仍走既有 wuri_sky_lines_v1（chart.lines），面板只是其新入口，
+   * 不另起第二套状态。 */
+  var LABEL_KEY = 'wuri_sky_label_mode_v1';
+  var LABEL_MODES = ['smart', 'all', 'major'];
+  var MAJOR_LABELS = {};
+  ['角', '亢', '氐', '房', '心', '尾', '箕', '斗', '牛', '女', '虚', '危', '室', '壁',
+   '奎', '娄', '胃', '昴', '毕', '觜', '参', '井', '鬼', '柳', '星', '张', '翼', '轸',
+   '紫微左垣', '紫微右垣', '太微左垣', '太微右垣', '天市左垣', '天市右垣']
+    .forEach(function (n) { MAJOR_LABELS[n] = 1; });
+  function loadLabelMode() {
+    try { var v = localStorage.getItem(LABEL_KEY); if (LABEL_MODES.indexOf(v) >= 0) return v; } catch (e) {}
+    return 'smart';
+  }
+  function saveLabelMode() {
+    try { localStorage.setItem(LABEL_KEY, chart.labelMode); } catch (e) {}
+  }
+  var LAYERS_KEY = 'wuri_sky_layers_v1';
+  function loadLayers() {
+    try {
+      var v = JSON.parse(localStorage.getItem(LAYERS_KEY) || 'null');
+      if (v) return { lines: v.lines !== false, labelsOn: v.labelsOn !== false, fenye: !!v.fenye, grid: !!v.grid, milky: !!v.milky };
+    } catch (e) {}
+    return { lines: true, labelsOn: true, fenye: false, grid: false, milky: false };
+  }
+  function saveLayers() {
+    try { localStorage.setItem(LAYERS_KEY, JSON.stringify(chart.layers)); } catch (e) {}
+  }
+
+  /* 分野层：fenye.json 十二次——与 today-sky.sunMansionOf 同一锚点法
+   * （宿度位置↔黄经以中气定锚、分段线性），此处反解：次界宿度→黄经，
+   * 界线即该黄经的子午大圆（黄经圈），次名标在次中点宿度对应黄经处。
+   * 数据全出 fenye.json，不另造界线数据。 */
+  var FENYE = null, fenyePromise = null, FENYE_ANCH = null;
+  var MANSION_ORDER28 = ['角', '亢', '氐', '房', '心', '尾', '箕', '斗', '牛', '女', '虚', '危',
+    '室', '壁', '奎', '娄', '胃', '昴', '毕', '觜', '参', '井', '鬼', '柳', '星', '张', '翼', '轸'];
+  var ZHONGQI_LON12 = { '冬至': 270, '大寒': 300, '雨水': 330, '春分': 0, '谷雨': 30, '小满': 60,
+    '夏至': 90, '大暑': 120, '处暑': 150, '秋分': 180, '霜降': 210, '小雪': 240 };
+  function loadFenye() {
+    if (FENYE) return Promise.resolve(FENYE);
+    if (fenyePromise) return fenyePromise;
+    fenyePromise = SKY.loadJSON('data/fenye.json').then(function (fy) {
+      FENYE = fy; FENYE_ANCH = buildFenyeAnchors(fy); return fy;
+    }).catch(function () { fenyePromise = null; return null; });
+    return fenyePromise;
+  }
+  function buildFenyeAnchors(fy) {
+    if (!fy || !fy.mansions || !fy.shierci) return null;
+    var width = {}, cum = {}, acc = 0;
+    fy.mansions.forEach(function (m) { width[m.mansion.replace(/宿$/, '')] = m.width_degrees; });
+    MANSION_ORDER28.forEach(function (n) { cum[n] = acc; acc += width[n] || 0; });
+    var total = acc; if (!total) return null;
+    function ptPos(p) { return cum[p.mansion.replace(/宿$/, '')] + p.degree; }
+    var raw = [];
+    fy.shierci.forEach(function (c) {
+      var mid = ZHONGQI_LON12[c.span_mid.solar_term]; if (typeof mid !== 'number') return;
+      raw.push([((mid - 15) % 360 + 360) % 360, ptPos(c.span_start)]);
+      raw.push([mid, ptPos(c.span_mid)]);
+      raw.push([((mid + 15) % 360 + 360) % 360, ptPos(c.span_end)]);
+    });
+    if (raw.length < 12) return null;
+    raw.sort(function (a, b) { return a[0] - b[0]; });
+    var anchors = [], lastPos = -Infinity;
+    raw.forEach(function (p) {
+      var pos = p[1];
+      while (pos < lastPos - 1e-9) pos += total;
+      if (anchors.length && Math.abs(anchors[anchors.length - 1][0] - p[0]) < 1e-9) return;
+      anchors.push([p[0], pos]); lastPos = pos;
+    });
+    return { anchors: anchors, total: total, ptPos: ptPos };
+  }
+  function lonOfPos(pos) {
+    var A2 = FENYE_ANCH; if (!A2) return null;
+    var anchors = A2.anchors, total = A2.total, base = anchors[0][1];
+    var ext = anchors.concat(anchors.map(function (p) { return [p[0] + 360, p[1] + total]; }));
+    var p0 = ((pos % total) + total) % total;
+    while (p0 < base) p0 += total;
+    while (p0 >= base + total) p0 -= total;
+    for (var i = 0; i + 1 < ext.length; i++) {
+      if (p0 >= ext[i][1] && p0 <= ext[i + 1][1]) {
+        var span = ext[i + 1][1] - ext[i][1];
+        var lon = ext[i][0] + (span > 0 ? (ext[i + 1][0] - ext[i][0]) * (p0 - ext[i][1]) / span : 0);
+        return ((lon % 360) + 360) % 360;
+      }
+    }
+    return null;
+  }
+  /* 黄道坐标 (λ, β) → 当日期分点投影入参 [−RA, Dec] */
+  function eclToEqdPt(date, lam, beta) {
+    var lr = lam * D2R, br = beta * D2R, er = OBL * D2R;
+    var dec = Math.asin(Math.sin(br) * Math.cos(er) + Math.cos(br) * Math.sin(er) * Math.sin(lr)) / D2R;
+    var ra = Math.atan2(Math.sin(lr) * Math.cos(er) - Math.tan(br) * Math.sin(er), Math.cos(lr)) / D2R;
+    var e = SKY.eqdOf(date, ((ra % 360) + 360) % 360, dec);
+    return [-e[0], e[1]];
+  }
+  /* 银河层（示意）：无实测亮度轮廓数据，不编造——只绘银道面本身：
+   * 银河赤道由 IAU 定义的银北极（J2000 RA 192.859508°、Dec +27.128336°）
+   * 决定，用通行银道→赤道旋转矩阵（J2000）逐点换算，带宽 ±12° 作示意带，
+   * UI 与回执均注明「示意」。 */
+  var GAL_R = [[-0.0548755604, -0.8734370902, -0.4838350155],
+               [0.4941094279, -0.4448296300, 0.7469822445],
+               [-0.8676661490, -0.1980763734, 0.4559837762]];
+  function galToEqd(date, l, b) {
+    var lr = l * D2R, br = b * D2R;
+    var x = Math.cos(br) * Math.cos(lr), y = Math.cos(br) * Math.sin(lr), z = Math.sin(br);
+    var ex = GAL_R[0][0] * x + GAL_R[0][1] * y + GAL_R[0][2] * z;
+    var ey = GAL_R[1][0] * x + GAL_R[1][1] * y + GAL_R[1][2] * z;
+    var ez = GAL_R[2][0] * x + GAL_R[2][1] * y + GAL_R[2][2] * z;
+    var ra = ((Math.atan2(ey, ex) / D2R) % 360 + 360) % 360;
+    var dec = Math.asin(Math.max(-1, Math.min(1, ez))) / D2R;
+    var e = SKY.eqdOf(date, ra, dec);
+    return [-e[0], e[1]];
+  }
+  function fmtDateMD(d) { return (d.getMonth() + 1) + '月' + d.getDate() + '日'; }
+
   var chart = { spin: 0, zoom: 1, offsetMin: 0, labels: [], uprights: [], drawn: false,
-    focus: null, focusBody: null, focusName: '', infoKey: null, infoBody: null, bodies: [], sensor: false, lastPr: null,
+    focus: null, focusBody: null, focusStar: null, focusName: '', infoKey: null, infoBody: null, bodies: [], sensor: false, lastPr: null,
     play: { on: false, speed: 300, raf: 0, lastTs: 0, drawAt: 0 },
-    lines: loadLinePrefs() };
+    lines: loadLinePrefs(), labelMode: loadLabelMode(), layers: loadLayers(),
+    pan: null, curRot: null, settled: true };
   var chartEls = null;
 
   function openChart() { if (!skyGate()) return; show('view-sky-chart'); renderChartView(); }
@@ -353,6 +621,28 @@
    * 侧栏汇：观测地、搜索定位、播放/时间、最暗星等、黄道/赤道/跟随开关、
    * 点选信息条、今夜可见摘要、口径注。SVG 为矢量渲染，任意尺寸不糊，
    * 等效于 canvas 的 DPR 高清出图（且缩放不重绘位图）。 */
+  /* 图层面板（④）：连线／星名（含与 AR 共用三档）／黄道·天赤道（既有
+   * lines 状态）／分野／银河（示意）／网格，各自独立开关、即时重绘 */
+  function layerPanelHTML() {
+    var L = chart.layers;
+    function tg(id, on, label) {
+      return '<button class="mini-btn tiny' + (on ? ' on' : '') + '" data-ly="' + id + '">' + label + '</button>';
+    }
+    function lmBtn(m) {
+      return '<button class="mini-btn tiny' + (chart.labelMode === m ? ' on' : '') + '" data-lmode="' + m + '">' + esc(t('sx2_ar_label_' + m)) + '</button>';
+    }
+    return '<div class="sk-layers" id="sk-layers" hidden>' +
+      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('连线')) + '</span>' + tg('lines', L.lines, esc(T('连线'))) + '</div>' +
+      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('星名')) + '</span>' + tg('labelsOn', L.labelsOn, esc(T('星名'))) +
+      lmBtn('smart') + lmBtn('all') + lmBtn('major') + '</div>' +
+      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('参考线')) + '</span>' +
+      tg('ecl', chart.lines.ecl, esc(t('sx2_ecliptic'))) + tg('equ', chart.lines.equ, esc(t('sx2_equator'))) + '</div>' +
+      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(t('sx_fenye')) + '</span>' + tg('fenye', L.fenye, esc(t('sx_fenye'))) + '</div>' +
+      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('银河')) + '</span>' + tg('milky', L.milky, esc(T('银河（示意）'))) + '</div>' +
+      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('网格')) + '</span>' + tg('grid', L.grid, esc(T('网格'))) + '</div>' +
+      '<div class="sk-layer-note">' + esc(T('银河按银道面绘示意带，非实测轮廓；星名密度与相机认星共用一档（wuri_sky_label_mode_v1）。')) + '</div></div>';
+  }
+
   function chartSkeleton() {
     var pl = chart.play;
     return '<div class="sk-layout"><div class="sk-main">' +
@@ -360,26 +650,35 @@
       '<g id="sk-chart-g"></g></svg></div>' +
       '<div class="sk-hint">' + esc(t('sx2_chart_hint')) + '</div></div>' +
       '<aside class="sk-side">' + locBarHTML() +
-      '<div class="sk-search"><input class="sk-in" id="sk-q" type="search" placeholder="' + esc(t('sx2_search_ph')) + '">' +
+      '<div class="sk-search" style="position:relative"><input class="sk-in" id="sk-q" type="search" placeholder="' + esc(t('sx2_search_ph')) + '">' +
       '<button class="mini-btn tiny" id="sk-go">' + esc(t('sx2_locate')) + '</button>' +
-      '<span class="sk-q-note" id="sk-q-note"></span></div>' +
-      '<div class="sk-focusbar" id="sk-focusbar"' + (chart.focus ? '' : ' hidden') + '><span class="sk-focus-lab">' + esc(t('sx2_locate')) + '：<b id="sk-focus-name">' + esc(T(chart.focusName || '')) + '</b></span>' +
+      '<span class="sk-q-note" id="sk-q-note"></span>' +
+      '<div class="sk-q-results" id="sk-q-results" hidden style="position:absolute;left:0;right:0;top:100%;z-index:30;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden"></div></div>' +
+      '<div class="sk-focusbar" id="sk-focusbar"' + ((chart.focus || chart.focusBody || chart.focusStar != null) ? '' : ' hidden') + '><span class="sk-focus-lab">' + esc(t('sx2_locate')) + '：<b id="sk-focus-name">' + esc(T(chart.focusName || '')) + '</b></span>' +
       '<button class="mini-btn tiny" id="sk-unfocus">' + esc(t('sx2_back_zenith')) + '</button></div>' +
       '<div class="sk-controls"><button class="mini-btn tiny" id="sk-play">' + esc(t(pl.on ? 'sx2_pause' : 'sx2_play')) + '</button>' +
       '<select class="sk-in sk-sel" id="sk-speed">' +
+      '<option value="1"' + (pl.speed === 1 ? ' selected' : '') + '>1×</option>' +
       '<option value="60"' + (pl.speed === 60 ? ' selected' : '') + '>60×</option>' +
       '<option value="300"' + (pl.speed === 300 ? ' selected' : '') + '>300×</option>' +
-      '<option value="900"' + (pl.speed === 900 ? ' selected' : '') + '>900×</option></select>' +
-      '<input type="range" id="sk-time" min="-720" max="720" step="15" value="' + chart.offsetMin + '">' +
+      '<option value="900"' + (pl.speed === 900 ? ' selected' : '') + '>900×</option>' +
+      '<option value="3600"' + (pl.speed === 3600 ? ' selected' : '') + '>3600×</option></select>' +
+      '<input type="range" id="sk-time" min="-720" max="720" step="5" value="' + Math.max(-720, Math.min(720, chart.offsetMin)) + '">' +
       '<span id="sk-time-lab"></span></div>' +
+      '<div class="sk-controls sk-timestep" id="sk-timestep">' +
+      '<button class="mini-btn tiny" data-step="-1440">' + esc(T('−1日')) + '</button>' +
+      '<button class="mini-btn tiny" data-step="-60">' + esc(T('−1时')) + '</button>' +
+      '<button class="mini-btn tiny" id="sk-now">' + esc(t('sx2_now')) + '</button>' +
+      '<button class="mini-btn tiny" data-step="60">' + esc(T('+1时')) + '</button>' +
+      '<button class="mini-btn tiny" data-step="1440">' + esc(T('+1日')) + '</button>' +
+      '<span id="sk-date-lab"></span></div>' +
       '<div class="sk-controls"><span class="sk-ctl-lab">' + esc(t('sx2_maglim')) + '</span>' +
       '<input type="range" id="sk-mag" min="3" max="6" step="1" value="' + (SKY && SKY.magLim ? SKY.magLim() : 6) + '">' +
       '<span id="sk-mag-lab"></span></div>' +
       '<div class="sk-controls sk-toggles">' +
-      '<button class="mini-btn tiny' + (chart.lines.ecl ? ' on' : '') + '" id="sk-tg-ecl">' + esc(t('sx2_ecliptic')) + '</button>' +
-      '<button class="mini-btn tiny' + (chart.lines.equ ? ' on' : '') + '" id="sk-tg-equ">' + esc(t('sx2_equator')) + '</button>' +
-      '<button class="mini-btn tiny' + (chart.sensor ? ' on' : '') + '" id="sk-tg-sensor">' + esc(t('sx2_sensor')) + '</button>' +
-      '<button class="mini-btn tiny" id="sk-now">' + esc(t('sx2_now')) + '</button></div>' +
+      '<button class="mini-btn tiny" id="sk-tg-layers">' + esc(T('图层')) + '</button>' +
+      '<button class="mini-btn tiny' + (chart.sensor ? ' on' : '') + '" id="sk-tg-sensor">' + esc(t('sx2_sensor')) + '</button></div>' +
+      layerPanelHTML() +
       '<div class="sk-infobar" id="sk-info" hidden><div class="sk-info-main">' +
       '<span class="sk-info-name" id="sk-info-name"></span><span class="sk-info-data" id="sk-info-data"></span></div>' +
       '<button class="mini-btn tiny" id="sk-info-detail">' + esc(t('sx2_detail')) + '</button>' +
@@ -395,11 +694,12 @@
     chart.infoKey = null;
     host.innerHTML = chartSkeleton();
     bindLocBar(host, renderChartView);
-    chartEls = { svg: $('sk-chart-svg'), g: $('sk-chart-g'), time: $('sk-time'), lab: $('sk-time-lab') };
+    chartEls = { svg: $('sk-chart-svg'), g: $('sk-chart-g'), time: $('sk-time'), lab: $('sk-time-lab'), dateLab: $('sk-date-lab') };
     bindChartEvents();
     var ml = $('sk-mag-lab'); if (ml) ml.textContent = (SKY.magLim ? SKY.magLim() : 6) + ' ' + t('sx2_mag_unit');
     loadData().then(function () { drawChart(); renderSideTonight(); })
       .catch(function () { host.innerHTML = failHTML(); });
+    if (chart.layers.fenye) loadFenye().then(function () { drawChart(); });
   }
 
   function chartDate() { return new Date(Date.now() + chart.offsetMin * 60000); }
@@ -450,14 +750,27 @@
     if (chart.focus) {
       ASTS.forEach(function (a) { if (a.key === chart.focus && a.brightest >= 0) foc = { ast: a, ra: pr[a.brightest].raEqd, dec: pr[a.brightest].decEqd }; });
       if (!foc) chart.focus = null;
+    } else if (chart.focusStar != null && pr[chart.focusStar]) {
+      foc = { ra: pr[chart.focusStar].raEqd, dec: pr[chart.focusStar].decEqd, star: chart.focusStar };
     } else if (chart.focusBody) {
       var fbp = SKY.bodyPos ? SKY.bodyPos(date, obsState, chart.focusBody) : null;
       if (fbp) foc = { ra: fbp.ra, dec: fbp.dec, bodyId: chart.focusBody };
       else chart.focusBody = null;
     }
-    var proj = foc
-      ? d3.geoStereographic().rotate([foc.ra, -foc.dec, 0]).scale(BASE_K).translate([CX, CY]).clipAngle(90)
-      : d3.geoStereographic().rotate([SKY.lstDeg(date, obsState), obsState.lat - 90, 0]).scale(BASE_K).translate([CX, CY]).clipAngle(90);
+    /* 视图平移（②搜星定位）：旋转参数在「当前位↔目标位」间 ease 插值，
+     * 两端点即原天顶式/聚焦式旋转参数本身，落点与旧口径逐位一致 */
+    var rotT = foc ? [foc.ra, -foc.dec] : [SKY.lstDeg(date, obsState), obsState.lat - 90];
+    if (chart.pan) {
+      if (!chart.pan.to) chart.pan.to = rotT;
+      var pk = Math.min(1, (Date.now() - chart.pan.t0) / chart.pan.dur);
+      var pe = pk < 0.5 ? 2 * pk * pk : 1 - Math.pow(-2 * pk + 2, 2) / 2;
+      var dlam = chart.pan.to[0] - chart.pan.from[0];
+      while (dlam > 180) dlam -= 360;
+      while (dlam < -180) dlam += 360;
+      rotT = [chart.pan.from[0] + dlam * pe, chart.pan.from[1] + (chart.pan.to[1] - chart.pan.from[1]) * pe];
+    }
+    chart.curRot = rotT;
+    var proj = d3.geoStereographic().rotate([rotT[0], rotT[1], 0]).scale(BASE_K).translate([CX, CY]).clipAngle(90);
     var path = d3.geoPath(proj);
     function angToFoc(p) {
       var s = Math.sin(p.decEqd * D2R) * Math.sin(foc.dec * D2R) +
@@ -496,8 +809,44 @@
     if (!foc) [60, 30].forEach(function (alt) {
       P.push('<circle class="sk-ring" cx="' + CX + '" cy="' + CY + '" r="' + (BASE_K * Math.tan((90 - alt) / 2 * D2R)).toFixed(1) + '"/>');
     });
+    /* 网格层（④）：赤经圈每 30°＋赤纬圈 −60°…+60° 每 30°（当日期分点） */
+    if (chart.layers.grid) {
+      var gLines = [], gra, gd;
+      for (gra = 0; gra < 360; gra += 30) {
+        var gl1 = [];
+        for (gd = -75; gd <= 75; gd += 5) { var ge1 = SKY.eqdOf(date, gra, gd); gl1.push([-ge1[0], ge1[1]]); }
+        gLines.push(gl1);
+      }
+      [-60, -30, 0, 30, 60].forEach(function (gdec) {
+        var gl2 = [];
+        for (var ga = 0; ga <= 360; ga += 6) { var ge2 = SKY.eqdOf(date, ga % 360, gdec); gl2.push([-ge2[0], ge2[1]]); }
+        gLines.push(gl2);
+      });
+      var gdd = path({ type: 'MultiLineString', coordinates: gLines });
+      if (gdd) P.push('<path class="sk-grid" style="fill:none;stroke:var(--line);stroke-width:.55;opacity:.45" d="' + gdd + '"/>');
+    }
+    /* 银河层（④，示意）：银道面 ±12° 柔光带＋银道虚线，定义见 galToEqd 注；
+     * 光斑须裁在盘内（与月亮同法 clipPath，单图面单 id 安全） */
+    if (chart.layers.milky) {
+      var mwR = BASE_K * Math.tan(14 * D2R / 2);   /* 盘心处约 ±14° 角半径，相邻 6° 间距圆相叠成带 */
+      var mwCenters = [], mwLine = [], mwBlobs = '';
+      for (var ml2 = 0; ml2 < 360; ml2 += 6) {
+        var mc = galToEqd(date, ml2, 0), mxy = proj(mc);
+        if (mxy && Math.hypot(mxy[0] - CX, mxy[1] - CY) < BASE_K + 30) {
+          mwCenters.push(mxy);
+          mwBlobs += '<circle class="sk-milky-blob" cx="' + mxy[0].toFixed(1) + '" cy="' + mxy[1].toFixed(1) + '" r="' + mwR.toFixed(1) + '" style="fill:var(--gold);opacity:.05"/>';
+        }
+        if (ml2 % 3 === 0) mwLine.push(mc);
+      }
+      if (mwBlobs) P.push('<clipPath id="sk-discclip"><circle cx="' + CX + '" cy="' + CY + '" r="' + BASE_K + '"/></clipPath><g clip-path="url(#sk-discclip)">' + mwBlobs + '</g>');
+      var mwd = path({ type: 'LineString', coordinates: mwLine });
+      if (mwd) P.push('<path class="sk-milky-line" style="fill:none;stroke:var(--gold);stroke-width:.8;stroke-dasharray:2 5;opacity:.5" d="' + mwd + '"/>');
+      var mwLab = null;
+      mwCenters.forEach(function (xy) { if (Math.hypot(xy[0] - CX, xy[1] - CY) < BASE_K - 34 && (!mwLab || xy[1] < mwLab[1])) mwLab = xy; });
+      if (mwLab) deferredUp.push({ str: upText('sk-milkylabel', mwLab[0], mwLab[1], T('银河（示意）')), lx: mwLab[0], ly: mwLab[1] });
+    }
     /* 连线层（图式连线；存疑官虚线） */
-    ASTS.forEach(function (ast) {
+    if (chart.layers.lines) ASTS.forEach(function (ast) {
       if (!ast.edges.length) return;
       var any = false;
       for (var i = 0; i < ast.starsIdx.length; i++) if (visLine(pr[ast.starsIdx[i]])) { any = true; break; }
@@ -534,6 +883,26 @@
         var qa = lineLabelAnchor(qpts);
         if (qa) deferredUp.push({ str: upText('sk-linelabel', qa[0], qa[1], t('sx2_equator')), lx: qa[0], ly: qa[1] });
       }
+    }
+    /* 分野层（④）：十二次界＝次界黄经圈（反解锚点，见 lonOfPos），
+     * 次名＋国分野标在次中点黄经、黄纬 +14° 处 */
+    if (chart.layers.fenye && FENYE && FENYE_ANCH) {
+      FENYE.shierci.forEach(function (c) {
+        var lon = lonOfPos(FENYE_ANCH.ptPos(c.span_start));
+        if (lon != null) {
+          var fpts = [];
+          for (var fb2 = -78; fb2 <= 78; fb2 += 6) fpts.push(eclToEqdPt(date, lon, fb2));
+          var fd = path({ type: 'LineString', coordinates: fpts });
+          if (fd) P.push('<path class="sk-fenye" style="fill:none;stroke:var(--line);stroke-width:.7;stroke-dasharray:1.5 4;opacity:.8" d="' + fd + '"/>');
+        }
+        var midLon = lonOfPos(FENYE_ANCH.ptPos(c.span_mid));
+        if (midLon != null) {
+          var mpt = eclToEqdPt(date, midLon, 14), mxy2 = proj(mpt);
+          if (mxy2 && Math.hypot(mxy2[0] - CX, mxy2[1] - CY) < BASE_K - 26) {
+            deferredUp.push({ str: upText('sk-fenyelabel', mxy2[0], mxy2[1], c.name + '·' + (c.guo || []).join('、')), lx: mxy2[0], ly: mxy2[1] });
+          }
+        }
+      });
     }
     var se = SKY.sunEqd ? SKY.sunEqd(date) : null;
     if (se) {
@@ -618,7 +987,14 @@
       var rmax = 0;
       pts.forEach(function (xy) { var dd = Math.hypot(xy[0] - cxp, xy[1] - cyp); if (dd > rmax) rmax = dd; });
       var isHost = (ast.name + '宿') === ast.section;
-      var showLabel = n > 0 && (isHost || bm <= magCap) && (foc ? angToFoc(bp) < 88 : bp.alt > 2);
+      /* 标签层（④）：总开关＋与 AR 共用三档——smart＝现行分级口径；
+       * all＝可见星官全标（不受星等分级）；major＝只标 MAJOR_LABELS 大星官 */
+      var visL = foc ? angToFoc(bp) < 88 : bp.alt > 2;
+      var showLabel;
+      if (!chart.layers.labelsOn || n === 0 || !visL) showLabel = false;
+      else if (chart.labelMode === 'all') showLabel = true;
+      else if (chart.labelMode === 'major') showLabel = !!MAJOR_LABELS[ast.name];
+      else showLabel = isHost || bm <= magCap;
       var halfW = ast.name.length * fontU * chart.zoom * 0.54;
       var dx = bxy[0] - cxp, dy = bxy[1] - cyp, dl = Math.hypot(dx, dy);
       var ox = dl > 0.5 ? dx / dl : 0, oy = dl > 0.5 ? dy / dl : -1;
@@ -633,6 +1009,22 @@
         if (HL.key === foc.ast.key) {
           P.splice(pBeforeLabels, 0, '<circle class="sk-hl" cx="' + HL.cx.toFixed(1) + '" cy="' + HL.cy.toFixed(1) + '" r="' + Math.max(15, (HL.rmax || 10) + 9).toFixed(1) + '"/>');
           break;
+        }
+      }
+    }
+    /* 定位标记（②）：平移途中脉冲圈随目标滑动指引；落定后换定标
+     * （圈＋四短刻，恒在目标投影点，即盘心） */
+    if (foc) {
+      var txy = proj([-foc.ra, foc.dec]);
+      if (txy) {
+        if (chart.pan) {
+          P.push('<circle class="sk-hl" cx="' + txy[0].toFixed(1) + '" cy="' + txy[1].toFixed(1) + '" r="13"/>');
+        } else if (chart.settled) {
+          var mx = txy[0], my = txy[1], mr = 11;
+          var f1 = function (v) { return v.toFixed(1); };
+          P.push('<g class="sk-locate-mark" style="stroke:var(--gold);fill:none;stroke-width:1.4">' +
+            '<circle cx="' + f1(mx) + '" cy="' + f1(my) + '" r="' + mr + '"/>' +
+            '<path d="M' + f1(mx - mr - 5) + ' ' + f1(my) + ' h6 M' + f1(mx + mr - 1) + ' ' + f1(my) + ' h6 M' + f1(mx) + ' ' + f1(my - mr - 5) + ' v6 M' + f1(mx) + ' ' + f1(my + mr - 1) + ' v6"/></g>');
         }
       }
     }
@@ -659,6 +1051,8 @@
       }
       chartEls.lab.textContent = fmtTime(date) + offH;
     }
+    /* 时间旅行读数（③）：目标时刻的月日恒显（步进跨日时不迷失） */
+    if (chartEls.dateLab) chartEls.dateLab.textContent = T(fmtDateMD(date)) + ' ' + fmtTime(date);
   }
 
   function bindChartEvents() {
@@ -668,14 +1062,25 @@
       if (redrawTimer) clearTimeout(redrawTimer);
       redrawTimer = setTimeout(drawChart, 150);
     }
+    /* 时间轴 scrub（③）：与既有 offsetMin/play 同一套状态——拖动即随动
+     * 重绘（不再走 150ms 防抖，读数与天象同步） */
     chartEls.time.addEventListener('input', function () {
       if (chart.play.on) setPlaying(false);   /* 手动拨动时间即暂停播放 */
-      chart.offsetMin = +chartEls.time.value; scheduleRedraw();
-      if (chartEls.lab) chartEls.lab.textContent = fmtTime(chartDate());
+      chart.offsetMin = +chartEls.time.value; drawChart();
     });
     $('sk-now').addEventListener('click', function () {
       if (chart.play.on) setPlaying(false);
       chart.offsetMin = 0; chartEls.time.value = '0'; drawChart();
+    });
+    /* 常用步进：±1 时／±1 日（offsetMin 可超滑杆 ±720，滑杆回钳位显示） */
+    var tsb = $('sk-timestep');
+    if (tsb) tsb.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('[data-step]') : null;
+      if (!b) return;
+      if (chart.play.on) setPlaying(false);
+      chart.offsetMin += (+b.getAttribute('data-step'));
+      chartEls.time.value = String(Math.max(-720, Math.min(720, chart.offsetMin)));
+      drawChart();
     });
     /* 播放/倍速 */
     var pb = $('sk-play'); if (pb) pb.addEventListener('click', function () { setPlaying(!chart.play.on); });
@@ -687,18 +1092,46 @@
       var ml = $('sk-mag-lab'); if (ml) ml.textContent = mg.value + ' ' + t('sx2_mag_unit');
       drawChart(); renderSideTonight();
     });
-    /* 黄道 / 天赤道 开关 */
-    var te = $('sk-tg-ecl');
-    if (te) te.addEventListener('click', function () { chart.lines.ecl = !chart.lines.ecl; te.classList.toggle('on', chart.lines.ecl); saveLinePrefs(); drawChart(); });
-    var tq = $('sk-tg-equ');
-    if (tq) tq.addEventListener('click', function () { chart.lines.equ = !chart.lines.equ; tq.classList.toggle('on', chart.lines.equ); saveLinePrefs(); drawChart(); });
+    /* 图层面板（④）：开合＋行内开关/档位委托（状态落盘口径见 loadLayers 注） */
+    var tgl = $('sk-tg-layers');
+    if (tgl) tgl.addEventListener('click', function () { var p = $('sk-layers'); if (p) p.hidden = !p.hidden; });
+    var lp = $('sk-layers');
+    if (lp) lp.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('[data-ly],[data-lmode]') : null;
+      if (!b || !lp.contains(b)) return;
+      var lm2 = b.getAttribute('data-lmode');
+      if (lm2) {
+        chart.labelMode = lm2; saveLabelMode();
+        var btns = lp.querySelectorAll('[data-lmode]');
+        for (var bi = 0; bi < btns.length; bi++) btns[bi].classList.toggle('on', btns[bi].getAttribute('data-lmode') === lm2);
+        drawChart(); return;
+      }
+      var k = b.getAttribute('data-ly'); if (!k) return;
+      if (k === 'ecl') { chart.lines.ecl = !chart.lines.ecl; saveLinePrefs(); }
+      else if (k === 'equ') { chart.lines.equ = !chart.lines.equ; saveLinePrefs(); }
+      else {
+        chart.layers[k] = !chart.layers[k]; saveLayers();
+        if (k === 'fenye' && chart.layers.fenye) loadFenye().then(function () { drawChart(); });
+      }
+      b.classList.toggle('on', k === 'ecl' ? chart.lines.ecl : k === 'equ' ? chart.lines.equ : chart.layers[k]);
+      drawChart();
+    });
     /* 跟随手机（传感器模式，与 AR 共用姿态管线） */
     var ts2 = $('sk-tg-sensor');
     if (ts2) ts2.addEventListener('click', function () { setSensor(!chart.sensor); });
     /* 搜索定位 */
     var go = $('sk-go'); if (go) go.addEventListener('click', doLocate);
     var qq = $('sk-q');
-    if (qq) qq.addEventListener('keydown', function (e) { if (e.key === 'Enter') doLocate(); });
+    if (qq) {
+      qq.addEventListener('keydown', function (e) { if (e.key === 'Enter') doLocate(); });
+      qq.addEventListener('input', renderSearchResults);
+    }
+    var qr = $('sk-q-results');
+    if (qr) qr.addEventListener('click', function (e) {
+      var it = e.target && e.target.closest ? e.target.closest('[data-qidx]') : null;
+      if (!it || !qr._res) return;
+      pickResult(qr._res[+it.getAttribute('data-qidx')]);
+    });
     var uf = $('sk-unfocus'); if (uf) uf.addEventListener('click', exitFocus);
     /* 点选信息条 */
     var idb = $('sk-info-detail');
@@ -793,43 +1226,108 @@
     }
   }
 
-  /* ---------------- 搜索定位 / 聚焦 ---------------- */
-  function doLocate() {
-    var qEl = $('sk-q'), note = $('sk-q-note');
-    var q = qEl ? (qEl.value || '').trim() : '';
-    if (!q) return;
-    /* 先查月亮/行星（名字精确/前缀/包含，三级与星官同规矩） */
-    var bodyHit = null;
+  /* ---------------- 搜索定位 / 聚焦（②） ----------------
+   * 搜索域：星官名＋单星名（ALLSTARS 索引）＋月亮/行星＋位置待考星
+   * （UNLOCATED，只报「位置待考」不定位）。排序：精确＞前缀＞包含，
+   * 同级短名优先；单星与待考星同级内次于星官/天体（+0.5）。 */
+  function searchSky(q) {
+    q = (q || '').trim(); if (!q) return [];
+    function rank(name) {
+      var tn = T(name);
+      if (name === q || tn === q) return 0;
+      if (name.indexOf(q) === 0 || tn.indexOf(q) === 0) return 1;
+      if (name.indexOf(q) >= 0 || tn.indexOf(q) >= 0) return 2;
+      return -1;
+    }
+    var out = [];
     if (SKY && SKY.BODIES) SKY.BODIES.forEach(function (bd) {
-      if (bodyHit) return;
-      var nm2 = bodyName(bd.id), tn2 = T(nm2);
-      if (nm2 === q || tn2 === q || nm2.indexOf(q) === 0 || tn2.indexOf(q) === 0 || nm2.indexOf(q) >= 0 || tn2.indexOf(q) >= 0) bodyHit = bd;
+      var r = rank(bodyName(bd.id));
+      if (r >= 0) out.push({ type: 'body', rank: r, id: bd.id, name: bodyName(bd.id), sub: bodyKindName(bd.kind) });
     });
-    if (bodyHit) {
-      if (note) note.textContent = '';
-      chart.focus = null; chart.focusBody = bodyHit.id; chart.focusName = bodyName(bodyHit.id);
-      chart.zoom = 2.2;
-      drawChart();
-      var fb2 = $('sk-focusbar'); if (fb2) fb2.hidden = false;
-      var fn2 = $('sk-focus-name'); if (fn2) fn2.textContent = T(bodyName(bodyHit.id));
-      for (var bi = 0; bi < chart.bodies.length; bi++) if (chart.bodies[bi].id === bodyHit.id) { showBodyInfo(chart.bodies[bi]); break; }
+    ASTS.forEach(function (ast) {
+      var r = rank(ast.name);
+      if (r >= 0) out.push({ type: 'ast', rank: r, key: ast.key, name: ast.name,
+        sub: ast.section + (ast.brightest < 0 ? ' · ' + T('位置待考') : ''), unlocated: ast.brightest < 0 });
+    });
+    ALLSTARS.forEach(function (st, gi) {
+      if (!st.cn) return;
+      var r = rank(st.cn);
+      if (r >= 0) {
+        var ast = ASTS[st.ast];
+        out.push({ type: 'star', rank: r + 0.5, gi: gi, name: st.cn,
+          sub: (ast ? ast.name : '') + ' · ' + tf(t('sx2_mag'), st.mag.toFixed(1)) });
+      }
+    });
+    UNLOCATED.forEach(function (u) {
+      var r = rank(u.cn);
+      if (r >= 0) out.push({ type: 'unlocated', rank: r + 0.5, name: u.cn, sub: u.astName + ' · ' + T('位置待考') });
+    });
+    out.sort(function (a, b) { return (a.rank - b.rank) || (a.name.length - b.name.length); });
+    return out.slice(0, 9);
+  }
+  function renderSearchResults() {
+    var box = $('sk-q-results'), qEl = $('sk-q'); if (!box || !qEl) return;
+    var res = searchSky(qEl.value);
+    if (!res.length) { box.hidden = true; box.innerHTML = ''; box._res = []; return; }
+    box.innerHTML = res.map(function (r, i) {
+      return '<div class="sk-q-item" data-qidx="' + i + '" style="padding:8px 10px;cursor:pointer;border-top:1px solid var(--line)">' +
+        '<b>' + esc(T(r.name)) + '</b> <span style="opacity:.65;font-size:.85em">' + esc(T(r.sub || '')) + '</span></div>';
+    }).join('');
+    box._res = res;
+    box.hidden = false;
+  }
+  /* 视图平移：从当前旋转位 ease 到新目标位（drawChart 内插值），约 0.75s；
+   * 途中目标点带脉冲圈、落定换定标（drawChart 内按 pan/settled 分工） */
+  function startPan() {
+    if (!chart.curRot) { chart.settled = true; return; }
+    chart.pan = { from: chart.curRot.slice(), to: null, t0: Date.now(), dur: 750, drawAt: 0 };
+    chart.settled = false;
+    requestAnimationFrame(panTick);
+  }
+  function panTick() {
+    if (!chart.pan) return;
+    var now = Date.now();
+    if (now - chart.pan.t0 >= chart.pan.dur) { chart.pan = null; chart.settled = true; drawChart(); return; }
+    if (now - chart.pan.drawAt >= 33) { chart.pan.drawAt = now; drawChart(); }
+    if (chart.pan) requestAnimationFrame(panTick);
+  }
+  function pickResult(r) {
+    var note = $('sk-q-note');
+    var box = $('sk-q-results'); if (box) box.hidden = true;
+    if (!r) { if (note) note.textContent = t('sx2_notfound'); return; }
+    if (r.type === 'unlocated' || (r.type === 'ast' && r.unlocated)) {
+      if (note) note.textContent = T(r.name) + ' · ' + T('位置待考，暂不可定位');
       return;
     }
-    var found = null, i;
-    for (i = 0; i < ASTS.length && !found; i++) if (ASTS[i].name === q || T(ASTS[i].name) === q) found = ASTS[i];
-    for (i = 0; i < ASTS.length && !found; i++) if (ASTS[i].name.indexOf(q) === 0 || T(ASTS[i].name).indexOf(q) === 0) found = ASTS[i];
-    for (i = 0; i < ASTS.length && !found; i++) if (ASTS[i].name.indexOf(q) >= 0 || T(ASTS[i].name).indexOf(q) >= 0) found = ASTS[i];
-    if (!found) { if (note) note.textContent = t('sx2_notfound'); return; }
     if (note) note.textContent = '';
-    chart.focus = found.key; chart.focusBody = null; chart.focusName = found.name;
+    chart.focus = null; chart.focusBody = null; chart.focusStar = null;
+    if (r.type === 'body') { chart.focusBody = r.id; chart.focusName = bodyName(r.id); }
+    else if (r.type === 'star') {
+      var ast = ASTS[ALLSTARS[r.gi].ast];
+      chart.focusStar = r.gi;
+      chart.focusName = ALLSTARS[r.gi].cn + (ast ? '（' + ast.name + '）' : '');
+    } else { chart.focus = r.key; chart.focusName = r.name; }
     chart.zoom = 2.2;
+    startPan();
     drawChart();
     var fb = $('sk-focusbar'); if (fb) fb.hidden = false;
-    var fn = $('sk-focus-name'); if (fn) fn.textContent = T(found.name);
-    showInfo(found.key);
+    var fn = $('sk-focus-name'); if (fn) fn.textContent = T(chart.focusName);
+    if (r.type === 'body') {
+      for (var bi = 0; bi < chart.bodies.length; bi++) if (chart.bodies[bi].id === r.id) { showBodyInfo(chart.bodies[bi]); break; }
+    } else if (r.type === 'star') showInfo(ASTS[ALLSTARS[r.gi].ast].key);
+    else showInfo(r.key);
+  }
+  function doLocate() {
+    var qEl = $('sk-q');
+    var q = qEl ? (qEl.value || '').trim() : '';
+    if (!q) return;
+    var res = searchSky(q);
+    if (!res.length) { var note = $('sk-q-note'); if (note) note.textContent = t('sx2_notfound'); return; }
+    pickResult(res[0]);
   }
   function exitFocus() {
-    chart.focus = null; chart.focusBody = null; chart.zoom = 1;
+    chart.focus = null; chart.focusBody = null; chart.focusStar = null; chart.zoom = 1;
+    startPan();
     drawChart();
     var fb = $('sk-focusbar'); if (fb) fb.hidden = true;
   }
@@ -953,11 +1451,16 @@
     setSpin: function (deg) { chart.spin = deg; applyTransform(); },
     /* 冒烟/调试：星图综合状态（聚焦/信息条/播放/传感器/线开关/星等/时间偏移） */
     state: function () {
-      return { focus: chart.focus, focusBody: chart.focusBody, infoKey: chart.infoKey, infoBody: chart.infoBody, playing: chart.play.on,
+      return { focus: chart.focus, focusBody: chart.focusBody, focusStar: chart.focusStar, infoKey: chart.infoKey, infoBody: chart.infoBody, playing: chart.play.on,
         offsetMin: Math.round(chart.offsetMin * 10) / 10, sensor: chart.sensor,
         spin: chart.spin, zoom: chart.zoom, lines: { ecl: chart.lines.ecl, equ: chart.lines.equ },
+        labelMode: chart.labelMode, layers: { lines: chart.layers.lines, labelsOn: chart.layers.labelsOn, fenye: chart.layers.fenye, grid: chart.layers.grid, milky: chart.layers.milky },
+        settled: chart.settled, panning: !!chart.pan, curRot: chart.curRot,
         magLim: SKY && SKY.magLim ? SKY.magLim() : null };
     },
+    /* 冒烟/调试（星空批 B 线）：搜索索引、今晚时间线摘要 */
+    search: searchSky,
+    tonightInfo: function () { return nightInfo; },
     /* 冒烟/调试：某星官形心在当前图面（含自旋/缩放）的屏幕坐标（viewBox 单位） */
     pickPointOf: function (key) {
       for (var i = 0; i < chart.labels.length; i++) {
