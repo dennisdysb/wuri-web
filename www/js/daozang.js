@@ -325,10 +325,45 @@
   function workRow(w) {
     return '<div class="dz-work" data-dz-work="' + w.id + '">'
       + '<span class="jing-book">藏</span>'
-      + '<span class="dz-wt">' + esc(dzTx(w.title)) + '</span>'
+      + '<span class="dz-wtext"><span class="dz-wt">' + esc(dzTx(w.title)) + '</span>'
+      + '<span class="dz-wmeta">'
       + (w.lei ? '<span class="dz-lei">' + esc(dzTx(w.lei)) + '</span>' : '')
-      + '<span class="dz-wm">' + w.juan + ' ' + txUi('卷') + ' · ' + fmtNum(w.chars) + ' ' + txUi('字') + '</span></div>';
+      + '<span class="dz-wm">' + w.juan + ' ' + txUi('卷') + ' · ' + fmtNum(w.chars) + ' ' + txUi('字') + '</span>'
+      + '</span></span></div>';
   }
+  /* 眷属小字（类签/卷·字数/读进度，.dz-wmeta）呈现（2026-10-28 用户定版，覆盖同日早先「一律行内顺排」口径）：
+     经名占满整行宽度（已废右侧固定元信息列）；经名单行时小字独占第二行（.dz-meta-block 左对齐副行）；
+     经名自身断行（≥2 行）时小字不再另起一行，行内接在经名末行尾顺排。行数以渲染后 Range 量测为准，
+     字体迟到与视口变化后复测，避免行数算错；隐藏（折叠未展开）行不测，展开路径补测。 */
+  function dzFlowRow(row) {
+    var wt = row.querySelector('.dz-wt');
+    if (!wt || !row.offsetParent) return;
+    row.classList.remove('dz-meta-block');
+    var lines = 1;
+    try {
+      var rg = document.createRange();
+      rg.selectNodeContents(wt);
+      var rects = rg.getClientRects(), tops = [];
+      for (var i = 0; i < rects.length; i++) {
+        var t = rects[i].top, seen = false;
+        for (var j = 0; j < tops.length; j++) if (Math.abs(tops[j] - t) < 3) { seen = true; break; }
+        if (!seen) tops.push(t);
+      }
+      if (tops.length) lines = tops.length;
+    } catch (e) { lines = 1; }
+    if (lines <= 1) row.classList.add('dz-meta-block');
+  }
+  function dzFlowRows(scope) {
+    (scope || document).querySelectorAll('.dz-work').forEach(dzFlowRow);
+  }
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { dzFlowRows(document); });
+  }
+  var dzFlowRzT = null;
+  window.addEventListener('resize', function () {
+    if (dzFlowRzT) clearTimeout(dzFlowRzT);
+    dzFlowRzT = setTimeout(function () { dzFlowRzT = null; dzFlowRows(document); }, 150);
+  });
   function renderCats(body) {
     var cats = body.querySelector('.dz-cats');
     if (!cats) return;
@@ -346,6 +381,7 @@
     dzPreloadAssets();
     pfWatch(cats);
     if (window.__wuriDecorateProgress) { try { window.__wuriDecorateProgress(); } catch (e) {} }
+    dzFlowRows(cats);
   }
   function renderFold(host) {
     var fold = document.createElement('div');
@@ -627,6 +663,7 @@
         var willOpen = wrap.hidden;
         if (willOpen && !wrap.innerHTML) { wrap.innerHTML = worksOfBu(name).map(workRow).join(''); if (window.__wuriDecorateProgress) { try { window.__wuriDecorateProgress(); } catch (e) {} } }
         wrap.hidden = !willOpen;
+        if (willOpen) dzFlowRows(wrap); /* 展开补测：隐藏时行数无从量（折叠行在 dzFlowRow 内跳过） */
         openBu[name] = willOpen;
         if (willOpen) pfWatch(bu.parentNode); /* 重挂全目录观察（pfWatch 内 disconnect 旧观察） */
         dzNotifySave();

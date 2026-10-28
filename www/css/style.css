@@ -2215,9 +2215,14 @@ body.sky-red #dz-lightbox .dz-lightbox-cap{color:#f2c1b2}
    总时长 2.4s→1.5s（保持段 55%≈0.83s，其后淡出）；color-mix 不支持的旧内核回落全色声明（后写覆盖为渐进增强）。 */
 @keyframes libRetHl{0%,55%{background:var(--gold-wash);background:color-mix(in srgb,var(--gold-wash) 50%,transparent);box-shadow:inset 0 0 0 1.5px var(--gold);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--gold) 50%,transparent)}100%{background:transparent;box-shadow:inset 0 0 0 0 rgba(0,0,0,0)}}
 .lib-ret-hl{animation:libRetHl 1.5s ease forwards}
-.dz-wt{flex:1;min-width:0;color:var(--ink);font-family:var(--serif);font-size:1.08rem;font-weight:400}/* 丛书分层裁定：经名 1.35→1.08rem、字重定 400，与部名（1.42rem/700）拉开约 1.3 倍层级差；字体仍 var(--serif) 同一宋体（v139/字体统一口径不变） */
-.dz-lei{flex:none;font-size:.56rem;line-height:1.6;color:var(--gold,#a8823c);color:color-mix(in srgb,var(--gold,#a8823c) 62%,var(--muted));border:1px solid currentColor;border-radius:5px;padding:0 3px}/* 丛书分层裁定：右侧信息组定 rem 口径（组约 .62rem 上限）且灰一档——类签 .56em→.56rem 定值、金色向 --muted 混 38% 灰化（前一行纯金为 color-mix 回落）；v142 曾 .72em→.62em */
-.dz-wm{flex:none;font-size:.62rem;color:var(--faint)}/* 丛书分层裁定：卷·字数 .62em→.62rem 定值、颜色 --muted→--faint 灰一档（变量链日/夜各自成立）；v142 曾 .76em→.69em */
+.dz-wt{color:var(--ink);font-family:var(--serif);font-size:1.08rem;font-weight:400}/* 2026-10-28 排版定版：经名不再是 flex 子项，改在 .dz-wtext 内行内流式占满整行宽度（旧 flex:1＋右侧固定元信息列就此作废） */
+.dz-wtext{flex:1;min-width:0}
+.dz-wmeta{display:inline;margin-left:.4em}/* 眷属小字默认行内：经名断行（≥2 行）时接经名末行尾顺排（daozang.js 量测后未加 .dz-meta-block 的行） */
+.dz-work.dz-meta-block .dz-wmeta{display:block;margin:3px 0 0}/* 经名单行：小字独占第二行左对齐（副行观感） */
+.dz-wmeta>*+*{margin-left:6px}
+.dz-wmeta .read-prog{display:inline-block;margin-left:6px;vertical-align:2px}/* 胶囊在小字流内：覆盖 .read-prog 基规格的 flex 期 margin（特异性更高，后者留给精选行） *//* 丛书分层裁定：经名 1.35→1.08rem、字重定 400，与部名（1.42rem/700）拉开约 1.3 倍层级差；字体仍 var(--serif) 同一宋体（v139/字体统一口径不变） */
+.dz-lei{display:inline-block;vertical-align:2px;font-size:.56rem;line-height:1.6;color:var(--gold,#a8823c);color:color-mix(in srgb,var(--gold,#a8823c) 62%,var(--muted));border:1px solid currentColor;border-radius:5px;padding:0 3px}/* 丛书分层裁定：右侧信息组定 rem 口径（组约 .62rem 上限）且灰一档——类签 .56em→.56rem 定值、金色向 --muted 混 38% 灰化（前一行纯金为 color-mix 回落）；v142 曾 .72em→.62em */
+.dz-wm{font-size:.62rem;color:var(--faint)}/* 丛书分层裁定：卷·字数 .62em→.62rem 定值、颜色 --muted→--faint 灰一档（变量链日/夜各自成立）；v142 曾 .76em→.69em */
 .dz-empty{padding:14px 6px;color:var(--ink-2);font-size:.9em}
 .dz-hitn{padding:10px 6px 2px;color:var(--ink-2);font-size:.85em}
 
