@@ -3164,6 +3164,11 @@ body.jing-immersive #dict-fab{display:none !important}
 body.jing-immersive #jing-reader .jing-rhead{padding-top:0;padding-bottom:0}
 body.jing-immersive #jing-reader .jing-rhead > *:not(.jing-prog-track){display:none}
 body.jing-immersive .jing-prog-track{margin-top:0}
+/* 星象沉浸（2026-10-28 用户口径：重要模块内藏底栏、如进另一个 App）：与阅读器/
+ * 冥想同一外壳机制——body 类控 #tabbar 显隐；星象六子视图任一打开即挂
+ * sky-immersive（stars.js 以 MutationObserver 统一同步子视图 hidden 态）、
+ * 全收起摘除。#tabbar 与子视图均 fixed，显隐不引起布局重排。 */
+body.sky-immersive #tabbar{display:none}
 /* 平板/宽屏：版心限宽居中、两侧留白加大（字号联动在 applyReaderPrefs） */
 @media (min-width:768px){
   #jing-reader{padding-left:24px;padding-right:24px}
