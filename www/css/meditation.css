@@ -172,10 +172,23 @@
 .med-mix-count{color:#e8c877;font-size:.78rem}
 .med-mix-open{margin-left:auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);
   color:#fff;border-radius:999px;padding:4px 12px;font-size:.78rem}
-.med-mix-panel{width:min(560px,92vw);margin:0 auto;max-height:24vh;overflow-y:auto;
-  background:rgba(10,10,14,.55);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:10px 12px;
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.med-mix-open.on{background:#e8c877;border-color:transparent;color:#1a1a1a;font-weight:600}
+/* 混音面板＝底部浮层 sheet（2026-10-28 修）：原先在 .med-controls 流内展开，
+ * 整列被向上顶进 .med-center、压住呼吸圈中心文字（412/390 场实测压 16/26px），
+ * 且无收起入口。改浮层后不占流内高度；底边锚在播放键上方、顶边由 JS 按
+ * 呼吸圈峰值底线动态限高（mixFitPanel），列表区内部滚动。 */
+.med-mix-panel{position:absolute;left:50%;transform:translateX(-50%);
+  bottom:calc(env(safe-area-inset-bottom,0px) + 136px);z-index:4;
+  width:min(560px,92vw);max-height:300px;display:flex;flex-direction:column;
+  background:rgba(10,10,14,.72);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:10px 12px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 12px 34px rgba(0,0,0,.45)}
 .med-mix-panel[hidden]{display:none}
+.med-mix-head{display:flex;align-items:center;gap:8px;padding:0 0 8px;flex:none}
+.med-mix-head-title{color:#f5f1e6;font-size:.88rem;letter-spacing:.2em}
+.med-mix-close{margin-left:auto;border:1px solid rgba(232,200,119,.55);background:rgba(232,200,119,.14);
+  color:#f5f1e6;border-radius:999px;padding:4px 14px;font-size:.78rem}
+.med-mix-close:active{transform:scale(.95)}
+.med-mix-listwrap{overflow-y:auto;flex:1;min-height:0}
 .med-mix-item{display:flex;align-items:center;gap:10px;padding:5px 0}
 .med-mix-chip{flex:none;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.10);color:#fff;
   border-radius:999px;padding:5px 12px;font-size:.8rem;min-width:92px}
@@ -227,6 +240,13 @@
   font-variant-numeric:tabular-nums;text-shadow:0 2px 16px rgba(0,0,0,.6)}
 .bd-round{color:rgba(245,241,230,.92);font-size:.9rem;letter-spacing:.14em}
 .bd-session{color:#e8c877;font-size:.82rem;letter-spacing:.08em}
+/* 使用提示（2026-10-28 追加）：计数区下方、按钮上方；首入鎏金略醒目，
+ * 完成第一次记数后转淡（.dim，仍在场可瞥见）；文案走 i18n bd_hint、
+ * 措辞与实测命中一致（#bd-stage 整个圆盘按钮均可点）。 */
+.bd-hint{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);z-index:3;
+  text-align:center;color:#e8c877;font-size:.86rem;letter-spacing:.14em;margin:0;
+  text-shadow:0 1px 6px rgba(0,0,0,.7);transition:color .6s ease,opacity .6s ease}
+.bd-hint.dim{color:rgba(245,241,230,.48)}
 .bd-actions{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 30px);z-index:3;
   display:flex;gap:12px;justify-content:center}
 .bd-actions .btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.35);color:#fff}
