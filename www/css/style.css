@@ -1249,7 +1249,7 @@ details.disc-foot .hint{margin-top:9px}
 /* 书签高亮 */
 .hl-pop{position:fixed;z-index:9999;background:#333;color:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center;justify-content:center;max-width:92vw;flex-wrap:wrap}
 /* 底部固定模式：选中文字后从底部升起，避开系统菜单 */
-.hl-pop.hl-bottom{left:50%;transform:translateX(-50%);bottom:80px;top:auto !important}
+.hl-pop.hl-bottom{left:50%;transform:translateX(-50%);bottom:calc(112px + env(safe-area-inset-bottom));top:auto !important}
 .hl-pop[hidden]{display:none}
 .hl-pop button{border:none;border-radius:6px;padding:6px 12px;font-size:14px;cursor:pointer;background:#555;color:#fff}
 .hl-pop button.primary{background:#f5c518;color:#333}
@@ -3097,9 +3097,20 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 /* 阅读进度条：嵌阅读器 sticky 头部底沿 */
 .jing-prog-track{height:3px;background:var(--line-soft);border-radius:2px;margin-top:6px;overflow:hidden}
 .jing-prog-track i{display:block;height:100%;width:0;background:var(--gold);border-radius:2px;transition:width .25s ease}
-/* 阅读状态栏：固定底栏（标签栏之上），常显 卷名·百分比·剩余 */
-#jing-statusbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(66px + env(safe-area-inset-bottom));width:100%;max-width:560px;z-index:900;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line-soft);padding:6px 14px;font-size:.8rem;color:var(--muted);text-align:center;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 进度细线：固定顶沿（覆盖层、不占正文流，沉浸时亦在） */
+.jing-prog-top{position:fixed;top:0;left:0;right:0;height:3px;background:var(--line-soft);z-index:1001}
+.jing-prog-top i{display:block;height:100%;width:0;background:var(--gold);transition:width .25s ease}
+/* 阅读状态行：底部控制栏（#jing-dock）顶行，常显 卷/章名·本书%（翻页模式右侧并入页码） */
+#jing-statusbar{display:flex;align-items:baseline;gap:10px;padding:7px 14px 1px;font-size:.8rem;color:var(--muted);cursor:pointer;white-space:nowrap;overflow:hidden}
+#jing-status-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center}
+#jing-page-ind{flex:none;font-size:.78rem;color:var(--ink2)}
 #jing-statusbar[hidden]{display:none}
+.jd-bm-ico{flex:none;margin-left:auto;background:none;border:none;color:var(--gold,#8a6d3b);cursor:pointer;padding:2px 4px;line-height:0;align-self:center}
+.jd-bm-ico[hidden]{display:none}
+.jd-bm-ico:active{transform:scale(.88)}
+/* 高亮落色等整段重渲时关掉浏览器滚动锚定：锚定会把视图先泊到旧锚点在
+   新 DOM 的位置（画面先闪回旧位），再被落位轮询拉回——两段式回闪的元凶之一 */
+#jing-content{overflow-anchor:none}
 #jing-status-text b{color:var(--ink);font-weight:600}
 /* 目录行进度徽标 */
 .read-prog{flex:none;font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 7px;margin-left:8px;font-family:var(--sans,inherit)}
@@ -3121,7 +3132,7 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 .jing-toc-ch{padding:7px 14px 7px 30px;cursor:pointer;font-size:.88rem;color:var(--muted);font-family:var(--serif)}
 .jing-toc-ch:active{background:var(--line-soft)}
 /* 查字悬浮钮（右下、磬钮之上） */
-.dict-fab{position:fixed;right:18px;bottom:160px;z-index:950;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 88%,transparent);color:var(--gold-deep,#8a6d1f);font-family:var(--serif);font-size:1rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.22);cursor:pointer}
+.dict-fab{position:fixed;right:18px;bottom:calc(112px + env(safe-area-inset-bottom));z-index:950;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 88%,transparent);color:var(--gold-deep,#8a6d1f);font-family:var(--serif);font-size:1rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.22);cursor:pointer}
 .dict-fab[hidden]{display:none}
 .dict-fab:active{transform:scale(.92)}
 /* 查字弹卡（底部 sheet） */
@@ -3152,14 +3163,8 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 /* ===== 沉浸态＋平板适配（2026-10-28 追加） ===== */
 /* 沉浸：点正文切换——顶栏工具/状态栏/悬浮钮/标签栏全收，只剩正文＋顶部极简进度线 */
 body.jing-immersive #tabbar{display:none}
-body.jing-immersive #jing-statusbar{display:none}
-body.jing-immersive .jing-back-fab,
-body.jing-immersive .jing-bookmark-fab,
-body.jing-immersive .qing-fab,
+body.jing-immersive #jing-dock{opacity:0;pointer-events:none;transform:translate(-50%,12px)}
 body.jing-immersive #dict-fab{display:none !important}
-body.jing-immersive #jing-reader .jing-rhead{padding-top:0;padding-bottom:0}
-body.jing-immersive #jing-reader .jing-rhead > *:not(.jing-prog-track){display:none}
-body.jing-immersive .jing-prog-track{margin-top:0}
 /* 平板/宽屏：版心限宽居中、两侧留白加大（字号联动在 applyReaderPrefs） */
 @media (min-width:768px){
   #jing-reader{padding-left:24px;padding-right:24px}
@@ -3171,11 +3176,14 @@ body.jing-immersive .jing-prog-track{margin-top:0}
 }
 
 /* ---------- 阅读器左右翻页模式（二期）：全屏 stage＋横向多列分页 ---------- */
-#jing-page-ind { display: none; }
 #jing-reader.reader-paged {
   position: fixed; inset: 0; z-index: 300;
   background: var(--paper); color: var(--ink);
   display: flex; flex-direction: column;
+  /* 底栏占位恒定预留：控制栏（fixed 覆盖层）恰落此带内，沉浸隐藏底栏时
+     此带保留为空——翻页几何永不因底栏显隐重算（v284 闪烁病根之一） */
+  padding-bottom: calc(98px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 #jing-reader.reader-paged #jing-title,
 #jing-reader.reader-paged #jing-subtitle,
@@ -3195,10 +3203,34 @@ body.jing-immersive .jing-prog-track{margin-top:0}
 #jing-reader.reader-paged .jing-para,
 #jing-reader.reader-paged .dz-fig { break-inside: avoid; }
 #jing-reader.reader-paged img.dz-fig { max-height: 55vh; }
-#jing-reader.reader-paged #jing-page-ind {
-  display: block; position: absolute; right: 14px; bottom: 10px; z-index: 120;
-  font-size: .78rem; color: var(--ink2);
-  background: var(--card); border: 1px solid var(--line);
-  padding: 2px 9px; border-radius: 999px; opacity: .92;
-}
-body.jing-immersive #jing-reader.reader-paged #jing-page-ind { opacity: .55; }
+/* 页码已并入底部控制栏状态行（#jing-statusbar 内 #jing-page-ind），无独立浮标 */
+
+/* ===== 阅读器底部控制栏（2026-10-28 用户定案·微信读书式） =====
+ * 阅读器打开期间：App 底 tab 与经文页眉不占位；顶部工具栏撤除；所有控制
+ * 收进本栏（fixed 覆盖层、不入正文流，显隐零重排——翻页几何因此恒定）。
+ * 主行三组等高单行按钮、永不换行：导航‹目录｜播放 诵读/停止·跟读·磬｜显示 注音·设置 */
+body.reader-open #tabbar{display:none}
+body.reader-open #tab-jing .appbar{display:none}
+#jing-reader:not(.reader-paged){padding-bottom:calc(128px + env(safe-area-inset-bottom))}
+#jing-dock{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:560px;z-index:1000;
+  background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-top:1px solid var(--line-soft);padding-bottom:env(safe-area-inset-bottom);
+  transition:opacity .18s ease,transform .18s ease}
+@media (min-width:768px){#jing-dock{max-width:680px}}
+#jing-dock[hidden]{display:none}
+.jing-dock-row{display:flex;align-items:stretch;justify-content:space-between;gap:4px;padding:7px 10px 9px}
+.jd-group{display:flex;align-items:center;gap:5px}
+.jd-group + .jd-group{border-left:1px solid var(--line-soft);padding-left:9px;margin-left:2px}
+.jd-btn{white-space:nowrap;min-height:40px;padding:7px 10px;font-size:.92rem;border-radius:10px;line-height:1.15}
+.jd-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+.jd-qing{font-family:var(--serif);min-width:40px;padding:7px 8px}
+.jd-qing:active{transform:scale(.92)}
+/* 设置面板：栏内向上展开，按播放/显示/本书分节带小标题 */
+#jing-dock .jing-more-panel{border-top:1px dashed var(--line-soft);padding:9px 12px 3px;max-height:46vh;overflow-y:auto}
+#jing-dock .jing-more-panel[hidden]{display:none}
+.jmp-sec{margin-bottom:8px}
+.jmp-h{font-size:.72rem;color:var(--muted);letter-spacing:.14em;margin-bottom:5px}
+.jmp-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.jmp-lab{font-size:.85rem;color:var(--muted)}
+.jmp-row .mini-btn{white-space:nowrap}
+.jmp-row select.mini-btn{max-width:110px}

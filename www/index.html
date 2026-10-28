@@ -214,34 +214,7 @@
 <div id="jing-marks" hidden></div>
       </div>
       <div id="jing-reader" hidden>
-        <div class="jing-rhead" style="position:sticky;top:0;z-index:100;background:var(--paper);padding:8px 0;">
-          <div class="jing-rrow">
-            <button class="mini-btn" id="jing-back" data-i18n="jing_back">‹ 目录</button>
-            <div class="jing-rtools" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-              <button class="mini-btn tiny" id="jing-speak" data-i18n="jing_speak">诵读</button>
-              <button class="mini-btn tiny" id="jing-stop" data-i18n="jing_stop" hidden>停止</button>
-              <button class="mini-btn tiny" id="jing-follow">跟读</button>
-              <button class="mini-btn tiny" id="jing-pybtn">注音</button>
-              <button class="mini-btn tiny" id="jing-turn-btn">翻页·滚动</button>
-              <button class="mini-btn tiny" id="jing-more-btn" aria-expanded="false">设置</button>
-            </div>
-          </div>
-          <div class="jing-more-panel" id="jing-more-panel" hidden>
-            <select id="jing-voice" class="mini-btn tiny">
-              <option value="male">男声</option>
-              <option value="female">女声</option>
-            </select>
-            <button class="mini-btn tiny" id="jing-download">下载</button>
-            <button class="mini-btn tiny" id="jing-font-dec">字小</button>
-            <button class="mini-btn tiny" id="jing-font-inc">字大</button>
-            <button class="mini-btn tiny" id="jing-foldall">展开</button>
-            <button class="mini-btn tiny" id="jing-toc-btn">目录</button>
-            <button class="mini-btn tiny" id="jing-recite" data-i18n="jing_recite">背诵</button>
-            <button class="mini-btn tiny" id="jing-highlight-btn" hidden>高亮</button>
-          </div>
-          <div class="jing-prog-track" aria-hidden="true"><i id="jing-prog-fill"></i></div>
-        </div>
-        <div id="jing-statusbar" hidden><span id="jing-status-text"></span></div>
+        <div class="jing-prog-top" aria-hidden="true"><i id="jing-prog-fill"></i></div>
         <div id="jing-toc" hidden>
           <div class="jing-toc-backdrop" data-toc-close></div>
           <div class="jing-toc-panel">
@@ -261,15 +234,71 @@
         <div id="jing-subtitle" class="jing-book-subtitle" hidden></div>
         <div id="jing-srcnote" class="jing-srcnote" hidden></div>
         <div id="jing-content" class="jing-content"></div>
-        <div id="jing-page-ind" aria-hidden="true"></div>
         <!-- 高亮操作浮层（内容由 JS 动态生成：4色+取消，或写心得+换色+删除） -->
         <div id="hl-pop" class="hl-pop" hidden></div>
-        <!-- 敲磬悬浮按钮 -->
-        <button id="qing-btn" class="qing-fab show" title="敲磬">磬</button>
-        <!-- 阅读器浮动返回按钮 -->
-        <button id="jing-back-fab" class="jing-back-fab show" title="返回目录">‹</button>
-        <!-- 书签悬浮按钮（仅内丹书） -->
-        <button id="jing-bookmark-fab" class="jing-bookmark-fab" title="加书签">✎</button>
+        <!-- 底部控制栏（2026-10-28 用户定案·微信读书式）：顶部工具栏与正文悬浮钮
+             全部撤除，控制只此一处。状态行（卷/章名·本书%＋翻页页码＋右端书签
+             图标钮）＋三组等高单行按钮（导航｜播放｜显示）；设置面板按
+             播放｜显示｜翻页｜本书 四组分节（Kindle Aa 四分法口径）。
+             本栏为 fixed 覆盖层、不占正文流，显隐不引起正文重排/页位变化。 -->
+        <div id="jing-dock">
+          <div id="jing-statusbar" hidden><span id="jing-status-text"></span><span id="jing-page-ind" aria-hidden="true"></span><button id="jing-bookmark-ico" class="jd-bm-ico" hidden aria-label="加书签" title="加书签"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg></button></div>
+          <div class="jing-more-panel" id="jing-more-panel" hidden>
+            <div class="jmp-sec">
+              <div class="jmp-h">播放</div>
+              <div class="jmp-row">
+                <button class="mini-btn tiny" id="jing-speak-p">诵读</button>
+                <button class="mini-btn tiny" id="jing-follow-p">跟读</button>
+                <span class="jmp-lab">声线</span>
+                <select id="jing-voice" class="mini-btn tiny">
+                  <option value="male">男声</option>
+                  <option value="female">女声</option>
+                </select>
+              </div>
+            </div>
+            <div class="jmp-sec">
+              <div class="jmp-h">显示</div>
+              <div class="jmp-row">
+                <button class="mini-btn tiny" id="jing-pybtn-p">注音</button>
+                <button class="mini-btn tiny" id="jing-font-dec">字小</button>
+                <button class="mini-btn tiny" id="jing-font-inc">字大</button>
+                <button class="mini-btn tiny" id="jing-recite" data-i18n="jing_recite">背诵</button>
+                <button class="mini-btn tiny" id="jing-highlight-btn" hidden>高亮</button>
+              </div>
+            </div>
+            <div class="jmp-sec">
+              <div class="jmp-h">翻页</div>
+              <div class="jmp-row">
+                <button class="mini-btn tiny" id="jing-turn-btn">翻页·滚动</button>
+              </div>
+            </div>
+            <div class="jmp-sec">
+              <div class="jmp-h">本书</div>
+              <div class="jmp-row">
+                <button class="mini-btn tiny" id="jing-toc-btn">卷次目录</button>
+                <button class="mini-btn tiny" id="jing-bookmark-btn" hidden>加书签</button>
+                <button class="mini-btn tiny" id="jing-marks-btn" hidden>我的划线</button>
+                <button class="mini-btn tiny" id="jing-download">下载</button>
+                <button class="mini-btn tiny" id="jing-foldall">展开</button>
+              </div>
+            </div>
+          </div>
+          <div class="jing-dock-row">
+            <div class="jd-group jd-nav">
+              <button class="mini-btn jd-btn" id="jing-back" data-i18n="jing_back">‹ 目录</button>
+            </div>
+            <div class="jd-group jd-play">
+              <button class="mini-btn jd-btn" id="jing-speak" data-i18n="jing_speak">诵读</button>
+              <button class="mini-btn jd-btn" id="jing-stop" data-i18n="jing_stop" hidden>停止</button>
+              <button class="mini-btn jd-btn" id="jing-follow">跟读</button>
+              <button class="mini-btn jd-btn jd-qing" id="qing-btn" title="敲磬">磬</button>
+            </div>
+            <div class="jd-group jd-disp">
+              <button class="mini-btn jd-btn" id="jing-pybtn">注音</button>
+              <button class="mini-btn jd-btn" id="jing-more-btn" aria-expanded="false">设置</button>
+            </div>
+          </div>
+        </div>
       </div>
 
 

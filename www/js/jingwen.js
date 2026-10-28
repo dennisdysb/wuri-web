@@ -603,10 +603,13 @@ var JingWen = (function () {
      命中（±2px）才收工，最多 25 拍（约 3 秒）。已命中后视图被外部稳定拖离
      >48px（用户接管/直达跳转）即停手不抢；命中前若已有稳定的外来落点
      （>200 且偏离 >48px）同样停手。当前书已切换则立即作废。 */
+  var _insistGen = 0;
   function insistReaderPos(sid, y, expanded) {
+    var gen = ++_insistGen; /* 代际：新落位一起，旧轮询立即作废，杜绝两套轮询交替落位 */
     var tries = 0, hits = 0, lastCur = -1, stableTicks = 0, t0 = Date.now();
     var iv = setInterval(function () {
       tries++;
+      if (gen !== _insistGen) { clearInterval(iv); return; }
       if (window._jingCurrentId !== sid) { clearInterval(iv); return; }
       var reader = $('#jing-reader');
       if (!reader || reader.hidden) { if (tries >= 30) clearInterval(iv); return; }
@@ -728,6 +731,64 @@ var JingWen = (function () {
     if (!sc || !w) return 0;
     return Math.max(0, Math.min(pageCount() - 1, Math.round(sc.scrollLeft / w)));
   }
+  /* 总页数发布口径：scrollWidth 还在变（懒填充/字体到位）时不发布新总数，
+     同一 scrollWidth 稳定 700ms 后才更新——防用户实见的总页数 122↔123 跳变。
+     导航（curPage/goToPage）仍用实时 pageCount，本函数仅供页码显示。 */
+  var _dispPC = { sw: -1, count: 0, ts: 0, settledFor: -1 };
+  /* 总页数只在分页量测定死后才发布：scrollWidth 仍在变（懒填充/重排中）
+     或变化后未静置满 700ms → 返回 null，状态行只显示当前页、不显示总数，
+     杜绝用户实见的「122↔123」跳变（2026-10-28 定版口径） */
+  function stablePageCount() {
+    var sc = pageScroller(); if (!sc) return null;
+    var sw = sc.scrollWidth, now = Date.now();
+    if (sw !== _dispPC.sw) { _dispPC.sw = sw; _dispPC.ts = now; }
+    if (_dispPC.settledFor === sw) return _dispPC.count;
+    if (now - _dispPC.ts > 700) { _dispPC.count = pageCount(); _dispPC.settledFor = sw; return _dispPC.count; }
+    return null;
+  }
+  /* 页模型（分页层可复用接口，为后续仿真翻页等呈现模式预留）：
+   * {count, ranges:[{page,startOff,endOff}]}——每页的内容字偏移范围，由段落
+   * 横坐标单趟扫描推导并按 scrollWidth+页宽缓存。落位/进度真源恒为字偏移
+   * 锚点（_pageAnchorOff / autopos off），像素 scrollLeft 仅作呈现。 */
+  var _pmCache = null;
+  function buildPageModel() {
+    var sc = pageScroller(); if (!sc || !_metrics || !isPaged()) return null;
+    var w = pageW(); if (!w) return null;
+    var key = sc.scrollWidth + '|' + w + '|' + _metrics.total + '|' + currentId;
+    if (_pmCache && _pmCache.key === key) return _pmCache.model;
+    var sr = sc.getBoundingClientRect();
+    var count = pageCount();
+    var byPage = {};
+    var ps = sc.querySelectorAll('.jing-para');
+    for (var i = 0; i < ps.length; i++) {
+      var r = ps[i].getBoundingClientRect(); if (!r.width) continue;
+      var x = r.left - sr.left + sc.scrollLeft;
+      var pg = Math.max(0, Math.min(count - 1, Math.floor(x / w)));
+      var si = +ps[i].getAttribute('data-sec'), pi = +ps[i].getAttribute('data-para');
+      var off = paraContentOff(ps[i]);
+      var len = ((_metrics.paraLens[si] || [])[pi]) || 0;
+      var cur = byPage[pg];
+      if (!cur) byPage[pg] = { page: pg, startOff: off, endOff: off + len };
+      else { if (off < cur.startOff) cur.startOff = off; if (off + len > cur.endOff) cur.endOff = off + len; }
+    }
+    var ranges = [], lastEnd = 0;
+    for (var p = 0; p < count; p++) {
+      var e = byPage[p];
+      if (!e) e = { page: p, startOff: lastEnd, endOff: lastEnd };
+      ranges.push(e); lastEnd = e.endOff;
+    }
+    var model = { count: count, ranges: ranges };
+    _pmCache = { key: key, model: model };
+    return model;
+  }
+  window.__wuriPageModel = function () { try { return buildPageModel(); } catch (e) { return null; } };
+  window.__wuriPageOfOffset = function (off) {
+    var m = buildPageModel(); if (!m) return -1;
+    for (var i = 0; i < m.ranges.length; i++) {
+      if (off < m.ranges[i].endOff) return i;
+    }
+    return m.count - 1;
+  };
   function paraContentOff(p) {
     if (!_metrics || !p) return 0;
     var si = +p.getAttribute('data-sec'), pi = +p.getAttribute('data-para');
@@ -1012,6 +1073,9 @@ var JingWen = (function () {
         if (_restoreOff === target) _restoreOff = null;
         /* 落位收官复查：落在虚空（目标段缺失/版面未就绪）→ 看门狗接手 */
         setTimeout(pagedVoidWatchdog, 350);
+        /* 收官补一记状态行刷新：restore 期间无滚动事件时页码/进度无人发布，
+           总数要等 updateReadUI 在量测定死后自调度复查链跑完才上栏 */
+        updateReadUI();
       }
     }, 180);
   }
@@ -1036,6 +1100,7 @@ var JingWen = (function () {
   function saveProgressNow() {
     if (!currentId || !_metrics || !_metrics.total) return;
     if (_restoreOff != null) return; /* 落位未稳：此刻的偏移可能是重排瞬时值，写盘会毒化下次落位 */
+    if (window.__wuriHlFreeze && window.__wuriHlFreeze.id === currentId && Date.now() < window.__wuriHlFreeze.until) return; /* 高亮提交冻结期：回闪瞬时位不得写进 autopos 毒化后续落位 */
     var off = currentContentOffset(), frac = off / _metrics.total;
     try {
       var m = JSON.parse(localStorage.getItem(AUTOPOS_KEY) || '{}');
@@ -1077,7 +1142,19 @@ var JingWen = (function () {
     if (_restoreOff == null && (!_jumpInsist || secIdxAtOffset(off) === _jumpInsist.sec) &&
         Date.now() - _lastScrollTs > 800) _pageAnchorOff = off;
     var _pi = $('#jing-page-ind');
-    if (_pi) _pi.textContent = isPaged() ? (curPage() + 1) + ' / ' + pageCount() : '';
+    if (_pi) {
+      if (!isPaged()) _pi.textContent = '';
+      else {
+        var _spc = stablePageCount();
+        _pi.textContent = _spc ? (curPage() + 1) + ' / ' + _spc : String(curPage() + 1);
+        /* 量测未定死时自调度复查：填充收尾后无人滚动也会在定死那一刻把
+           总数发布出来（不等下一次手势），定死即停 */
+        if (!_spc) {
+          if (window.__wuriPcT) clearTimeout(window.__wuriPcT);
+          window.__wuriPcT = setTimeout(function () { window.__wuriPcT = null; updateReadUI(); }, 450);
+        }
+      }
+    }
     if (fill) fill.style.width = (frac * 100).toFixed(1) + '%';
     /* 速度采样：间隔 >2.5s 且确有推进才计，EMA 平滑后落盘 */
     var now = Date.now();
@@ -1374,6 +1451,8 @@ var JingWen = (function () {
       if (libReturn && libReturn.id === id) libReturn.armed = true;
       $('#jing-home').hidden = true;
       $('#jing-reader').hidden = false;
+      /* 阅读器打开期间 App 底 tab 与经文页眉不占位（微信读书式底部控制栏定案） */
+      document.body.classList.add('reader-open');
       updateAudioButtons();
       // 切到无音频经时若跟读开着，自动退出跟读态（避免高亮映射残留到新经）
       if (followMode && !hasAudio(id)) toggleFollow();
@@ -1473,13 +1552,16 @@ var JingWen = (function () {
       }
       /* 滚动落点：锚点（落色等重渲前位置，5 秒内有效）＞书签＞自动位置记忆；
          openReaderAt 直达时限内只认锚点。命中走 insistReaderPos 轮询落位
-         （展开＋等页高长够）；无命中维持旧行为回顶。 */
+         （展开＋等页高长够）；无命中维持旧行为回顶。
+         高亮提交冻结期（__wuriHlFreeze）：只认落色锚点一处，书签/autopos
+         两级冻结——防陈旧存档与锚点赛跑出「先闪回旧位、再跳回高亮处」。 */
+      var _hlFrozen = !!(window.__wuriHlFreeze && window.__wuriHlFreeze.id === id && Date.now() < window.__wuriHlFreeze.until);
       var posY = 0, posExp = null, posHit = false;
       if (window._jingAnchorY != null && (Date.now() - (window._jingAnchorTs || 0)) < 5000) {
         posY = window._jingAnchorY; posExp = window._jingAnchorExp || null; posHit = true;
-      } else if (bm && bm.scrollTop != null) {
+      } else if (!_hlFrozen && bm && bm.scrollTop != null) {
         posY = bm.scrollTop; posExp = bm.expanded || null; posHit = true;
-      } else if (Date.now() > _posSuppressUntil) {
+      } else if (!_hlFrozen && Date.now() > _posSuppressUntil) {
         var ap = loadAutoPos(id);
         if (ap && ap.y > 50) { posY = ap.y; posExp = ap.expanded || null; posHit = true; }
       }
@@ -1488,14 +1570,19 @@ var JingWen = (function () {
         /* 分页落位：重渲锚（落色等）＞书签 off＞autopos off/frac，全走字偏移 */
         var roff = null;
         if (_restoreOff != null && _pagedSnapId === id) roff = _restoreOff; /* 恢复在途的重渲：沿用原目标，不读存档（可能已被瞬时值污染） */
-        else if (bm && bm.off != null) roff = bm.off;
+        else if (!_hlFrozen && bm && bm.off != null) roff = bm.off;
         else if (_pageAnchorOff > 0 && _pagedSnapId === id) roff = _pageAnchorOff; /* 同书重渲（落色等）：内存锚最新 */
+        else if (_hlFrozen) { roff = null; } /* 冻结期无内存锚可用时不读存档，保持原地 */
         else {
           var ap2 = loadAutoPos(id);
           if (ap2 && ap2.off != null) roff = ap2.off;
           else if (ap2 && ap2.frac && _metrics) roff = Math.round(ap2.frac * _metrics.total);
         }
-        var sc0 = pageScroller(); if (sc0) sc0.scrollLeft = 0;
+        /* 同书重渲（落色等）且有字偏移锚时不清零：无条件清零会让画面先闪回
+           第 1 页、再被恢复轮询拉回锚点页——正是内丹书翻页模式落色回闪的
+           第二落点（2026-10-28 探针实测 scrollLeft 1236→0→1236）。
+           仅无锚（新开书/无存档）时才清零防残留。 */
+        var sc0 = pageScroller(); if (sc0 && roff == null) sc0.scrollLeft = 0;
         _restoreOff = roff;
         syncPagedChrome();
         if (roff != null) pagedRestorePos();
@@ -1739,6 +1826,7 @@ var JingWen = (function () {
     }
     var _sb = $('#jing-statusbar'); if (_sb) _sb.hidden = true;
     document.body.classList.remove('jing-immersive');
+    document.body.classList.remove('reader-open');
     closeToc();
     var _dc = $('#dict-card'); if (_dc) _dc.hidden = true;
     var _df = $('#dict-fab'); if (_df) _df.hidden = true;
@@ -1881,7 +1969,7 @@ var JingWen = (function () {
       var voice = getVoice();
       ensureTimestamps(currentId, voice, function (ok) {
         if (!ok || !buildFollowMap()) {
-          alert('该经文暂无分段朗读数据，跟读模式不可用');
+          readerToast('该经文暂无分段朗读数据，跟读模式不可用');
           if (followMode) toggleFollow();
         }
       });
@@ -2062,6 +2150,7 @@ var JingWen = (function () {
 
   /* ---------- MP3 诵读（Qwen3-TTS 预渲染） ---------- */
   var jingAudio = null;
+  var _playToken = 0, _jingSrc = '', _playRetry = 0, _playErrToken = -1;
   var jingTimestamps = null;
   var jingTsSid = null, jingTsVoice = null; /* 时间戳所属经文+声音，避免跨经文错配 */
   function getVoice() {
@@ -2184,7 +2273,7 @@ var JingWen = (function () {
     if (el) return el;
     el = document.createElement('div');
     el.id = 'jing-float-player';
-    el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:78px;z-index:10000;'
+    el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(110px + env(safe-area-inset-bottom));z-index:10000;'
       + 'width:min(92%,480px);background:rgba(18,18,26,0.96);border-radius:20px;'
       + 'padding:10px 12px 12px;color:#fff;display:none;'
       + 'box-shadow:0 8px 28px rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.09);'
@@ -2339,21 +2428,63 @@ var JingWen = (function () {
       updateDownloadBtn(sid, voice, !!lp);
       return;
     }
-    // 降级：HTML5 Audio（桌面调试用）
+    // 降级：HTML5 Audio（网页版/桌面）
     var filename = localAudioFile(sid, voice);
     var src = JING_BASE + filename;
-    if (!jingAudio) { jingAudio = new Audio(); }
-    jingAudio.src = src;
-    // 跟读点播：从指定位置开始（iOS 网页版修复 2026-10-10）
+    /* 装载/播放串行化（2026-10-28 跟读首播弹错修复）：旧实现 src 一设就
+       play()、loadedmetadata 后又设 currentTime——play() 未决期间的二次
+       装载/seek 会把 play() 打断（AbortError: interrupted by a new load
+       request），旧代码还把该拒绝 alert 给用户（真机截图实证：点跟读先
+       弹「播放失败」确定后才出声）。现行口径：令牌串行（新调用废旧调用）、
+       同 src 不重设、seek 只在元数据就绪后且在 play() 之前设一次、
+       play() 只发一次；AbortError 静默（仍是当前意图则限次重试续播），
+       真失败走 toast，阅读器内不再用原生 alert 弹播放错误。 */
+    var token = ++_playToken;
     var seekSec = posMs / 1000;
-    if (seekSec > 0) {
-      try { jingAudio.currentTime = seekSec; } catch (e) {}
-      // 部分浏览器在元数据加载前设置 currentTime 会被忽略，加载完成后再设一次
-      var _seekOnce = function () {
-        jingAudio.removeEventListener('loadedmetadata', _seekOnce);
-        try { if (seekSec > 0) jingAudio.currentTime = seekSec; } catch (e2) {}
+    if (!jingAudio) {
+      jingAudio = new Audio();
+      jingAudio.addEventListener('error', function () {
+        if (_playErrToken !== _playToken) return;
+        _playErrToken = _playToken;
+        readerToast(!navigator.onLine
+          ? '无网络：这部经文的音频还没有离线下载。请联网后播放，或先下载音频。'
+          : '播放失败：音频加载出错，请检查网络后重试。');
+      });
+    }
+    if (_jingSrc !== src) {
+      _jingSrc = src;
+      try { jingAudio.pause(); } catch (e) {}
+      jingAudio.src = src;
+    }
+    var doPlay = function () {
+      if (token !== _playToken) return;
+      if (seekSec > 0) { try { jingAudio.currentTime = seekSec; } catch (e) {} }
+      var p = null;
+      try { p = jingAudio.play(); } catch (e) { p = null; }
+      if (p && p.catch) p.catch(function (e) {
+        if (token !== _playToken) return;
+        if (e && e.name === 'AbortError') {
+          /* 被后续装载打断：若播放意图仍在（未被新调用/停止取代），重试续播 */
+          if (_playRetry < 2) {
+            _playRetry++;
+            setTimeout(function () { if (token === _playToken && jingAudio && jingAudio.paused) doPlay(); }, 300);
+          }
+          return;
+        }
+        readerToast(!navigator.onLine
+          ? '无网络：这部经文的音频还没有离线下载。请联网后播放，或先下载音频。'
+          : '播放失败：' + (e && e.message ? e.message : '请重试'));
+      });
+    };
+    _playRetry = 0;
+    if (seekSec > 0 && jingAudio.readyState < 1) {
+      var _seekPlay = function () {
+        jingAudio.removeEventListener('loadedmetadata', _seekPlay);
+        doPlay();
       };
-      jingAudio.addEventListener('loadedmetadata', _seekOnce);
+      jingAudio.addEventListener('loadedmetadata', _seekPlay);
+    } else {
+      doPlay();
     }
     /* 媒体卡片：先设 metadata 再 play，iOS 才能显示 logo（2026-10-11） */
     try {
@@ -2372,13 +2503,13 @@ var JingWen = (function () {
         });
       }
     } catch (e2) {}
-    jingAudio.play().catch(function(e) {
-      /* 断网且该音频未离线下载时给明确话术，别只报一句播放失败（2026-10-21 离线下载） */
-      if (!navigator.onLine) alert('无网络：这部经文的音频还没有离线下载。请联网后播放，或到「我的 → 离线音频」先一键下载。');
-      else alert('播放失败：' + e.message);
-    });
     document.getElementById('jing-speak').hidden = true;
     document.getElementById('jing-stop').hidden = false;
+  }
+  /* 播放/跟读类提示一律非阻塞 toast（阅读器内禁用原生 alert 弹播放错误） */
+  function readerToast(msg) {
+    if (window.showToast) { try { showToast(msg); return; } catch (e) {} }
+    try { console.warn('[jing]', msg); } catch (e) {}
   }
   function updateDownloadBtn(sid, voice, isDownloaded) {
     var btn = document.getElementById('jing-download');
@@ -2418,7 +2549,7 @@ var JingWen = (function () {
         a.click();
         document.body.removeChild(a);
       } catch (e) {
-        alert('下载失败：' + e.message);
+        readerToast('下载失败：' + e.message);
       }
       return;
     }
@@ -2470,6 +2601,7 @@ var JingWen = (function () {
     }
   });
   function stopJingAudio() {
+    _playToken++; /* 废止一切在途装载/播放意图，防停止后迟到回调又出声 */
     svcStop();
     if (jingAudio) { try { jingAudio.pause(); } catch (e) {} }
   }
@@ -2591,7 +2723,7 @@ var JingWen = (function () {
           jingTimestamps = null; jingTsSid = null; jingTsVoice = null;
           loadTimestamps(currentId, vsel.value, function () {
             if (!buildFollowMap()) {
-              alert('该声音暂无分段朗读数据，跟读模式已关闭');
+              readerToast('该声音暂无分段朗读数据，跟读模式已关闭');
               toggleFollow();
             }
           });
@@ -2874,6 +3006,23 @@ var JingWen = (function () {
       var tocB2 = $('#jing-toc-btn');
       if (tocB2) tocB2.addEventListener('click', closeMore);
     }
+    /* 设置面板四组里的复用钮（2026-10-28 四分法）：诵读/跟读/注音在面板内
+       的入口只转发到主行同一按钮，保持单一真源（状态/文案由主钮维护） */
+    var spP = $('#jing-speak-p');
+    if (spP) spP.addEventListener('click', function () {
+      var stB = $('#jing-stop'), spB = $('#jing-speak');
+      if (stB && !stB.hidden) stB.click(); else if (spB) spB.click();
+    });
+    var foP = $('#jing-follow-p');
+    if (foP) foP.addEventListener('click', function () { var b = $('#jing-follow'); if (b) b.click(); });
+    var pyP = $('#jing-pybtn-p');
+    if (pyP) pyP.addEventListener('click', function () { var b = $('#jing-pybtn'); if (b) b.click(); });
+    /* 本书·我的划线：退出阅读器后打开标记页「划线」页签 */
+    var mkB = $('#jing-marks-btn');
+    if (mkB) mkB.addEventListener('click', function () {
+      closeReader();
+      if (window.__wuriOpenMarks) window.__wuriOpenMarks('lines');
+    });
     /* 分页容器：横滚即刷新进度/页码并预填后续卷 */
     var scEl = $('#jing-content');
     if (scEl) {
@@ -2915,26 +3064,19 @@ var JingWen = (function () {
         if (e.target.closest('.hl, .qing-inline, .dz-fig, a, button, .jing-sec-h')) return;
         var sel = window.getSelection();
         if (sel && !sel.isCollapsed) return;
-        var reanchor = function () {
-          setTimeout(function () {
-            if (isPaged() && currentId && _restoreOff == null) {
-              sizePagedColumns();
-              _restoreOff = _pageAnchorOff;
-              pagedRestorePos();
-            }
-          }, 160);
-        };
+        /* 沉浸进/出只切底栏显隐：底栏是覆盖层、正文几何恒定，不再 reanchor
+           ——旧实现 reanchor 是为补偿顶栏（在 flex 流内）塌陷引发的重分页，
+           底栏化后该补偿本身就是多余扰动（落位被无故重跑、与恢复轮询互斗） */
         if (document.body.classList.contains('jing-immersive')) {
           document.body.classList.remove('jing-immersive');
           e.stopImmediatePropagation(); e.preventDefault();
-          reanchor();
           return;
         }
         var r = scEl.getBoundingClientRect();
         var xr = (e.clientX - r.left) / Math.max(1, r.width);
         if (xr < 0.3) { _restoreOff = null; _jumpInsist = null; goToPage(curPage() - 1, true); e.stopImmediatePropagation(); e.preventDefault(); }
         else if (xr > 0.7) { _restoreOff = null; _jumpInsist = null; goToPage(curPage() + 1, true); e.stopImmediatePropagation(); e.preventDefault(); }
-        else { document.body.classList.add('jing-immersive'); e.stopImmediatePropagation(); e.preventDefault(); reanchor(); }
+        else { document.body.classList.add('jing-immersive'); e.stopImmediatePropagation(); e.preventDefault(); }
       }, true);
       /* 滑动翻页＝真分页（v262 失效主因之二）：旧实现 touch 监听全 passive、
          不接管手势，触摸期间原生横滚自由滑过多页，touchend 再按已被滑走的
@@ -3056,24 +3198,23 @@ var JingWen = (function () {
     return audio;
   }
   function updateFab() {
-    var fab = document.getElementById('qing-btn');
-    var backFab = document.getElementById('jing-back-fab');
-    var bmFab = document.getElementById('jing-bookmark-fab');
-    // 阅读器开着就显示浮动按钮（不依赖 tab 的 active 状态，避免从搜索/背诵等入口进入时丢失）
+    /* 2026-10-28 底栏化后：磬/返回已是底部控制栏常驻按钮（随 #jing-reader
+       显隐），此处只管「加书签」（设置面板·本书节）与高亮钮的内丹可见性 */
+    var bmBtn = document.getElementById('jing-bookmark-btn');
     var reader = document.getElementById('jing-reader');
     var showReader = !!(reader && !reader.hidden);
-    if (fab) fab.classList.toggle('show', !!showReader);
-    if (backFab) backFab.classList.toggle('show', !!showReader);
-    // 书签悬浮按钮：仅内丹书阅读时显示
-    if (bmFab) {
-      var curId = window._jingCurrentId;
-      var isNd = false;
-      try {
-        if (curId && window.JingMark && typeof window.JingMark.marksEnabled === 'function') isNd = window.JingMark.marksEnabled(curId);
-      } catch (e) { isNd = false; }
-      var showBm = showReader && curId && isNd;
-      bmFab.classList.toggle('show', !!showBm);
-    }
+    // 加书签（面板钮＋状态行右端图标钮）与「我的划线」：仅内丹书阅读时显示
+    var curId = window._jingCurrentId;
+    var isNd = false;
+    try {
+      if (curId && window.JingMark && typeof window.JingMark.marksEnabled === 'function') isNd = window.JingMark.marksEnabled(curId);
+    } catch (e) { isNd = false; }
+    var bmShow = !!(showReader && curId && isNd);
+    if (bmBtn) bmBtn.hidden = !bmShow;
+    var bmIco = document.getElementById('jing-bookmark-ico');
+    if (bmIco) bmIco.hidden = !bmShow;
+    var mkBtn2 = document.getElementById('jing-marks-btn');
+    if (mkBtn2) mkBtn2.hidden = !bmShow;
     // 高亮按钮：仅内丹书阅读时显示（与书签悬浮按钮同逻辑）
     var hlBtn = document.getElementById('jing-highlight-btn');
     if (hlBtn) {
@@ -3099,29 +3240,21 @@ var JingWen = (function () {
         } catch (e) {}
       });
     }
-    // 浮动返回按钮：点击关闭阅读器回目录
-    var backFab = document.getElementById('jing-back-fab');
-    if (backFab) {
-      backFab.addEventListener('click', function () {
-        closeReader();
-      });
-    }
-    // 书签悬浮按钮：点击保存当前位置
-    var bmFab = document.getElementById('jing-bookmark-fab');
-    if (bmFab) {
-      bmFab.addEventListener('click', function () {
-        var sid = window._jingCurrentId;
-        var isNd = window.JingMark && typeof window.JingMark.marksEnabled === 'function' ? window.JingMark.marksEnabled(sid) : false;
-        if (!sid || !isNd) return;
-        // 调用 JingMark 的保存（如果可用），否则用内部的
-        if (window.JingMark && window.JingMark.saveBookmark) {
-          window.JingMark.saveBookmark(sid);
-        }
-        // 视觉反馈
-        bmFab.style.transform = 'scale(0.9)';
-        setTimeout(function () { bmFab.style.transform = ''; }, 150);
-      });
-    }
+    // 加书签（设置面板·本书节钮＋状态行右端图标钮）：点击保存当前位置
+    var bmBtn = document.getElementById('jing-bookmark-btn');
+    var bmSave = function (btn) {
+      var sid = window._jingCurrentId;
+      var isNd = window.JingMark && typeof window.JingMark.marksEnabled === 'function' ? window.JingMark.marksEnabled(sid) : false;
+      if (!sid || !isNd) return;
+      if (window.JingMark && window.JingMark.saveBookmark) {
+        window.JingMark.saveBookmark(sid);
+      }
+      btn.style.transform = 'scale(0.9)';
+      setTimeout(function () { btn.style.transform = ''; }, 150);
+    };
+    if (bmBtn) bmBtn.addEventListener('click', function () { bmSave(bmBtn); });
+    var bmIco2 = document.getElementById('jing-bookmark-ico');
+    if (bmIco2) bmIco2.addEventListener('click', function (e) { e.stopPropagation(); bmSave(bmIco2); });
     // 六爻浮动返回：回到六爻主页面
     var lyBackFab = document.getElementById('liuyao-back-fab');
     if (lyBackFab) {
@@ -3130,14 +3263,7 @@ var JingWen = (function () {
         if (btn) btn.click();
       });
     }
-    // 置顶按钮：滚动到顶部
-    var topFab = document.querySelector('.jing-back-fab.to-top');
-    if (topFab) {
-      topFab.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    }
-    // 定时更新浮动按钮
+    // 定时更新内丹专属按钮可见性
     setInterval(updateFab, 500);
     updateFab();
   });
@@ -3793,14 +3919,20 @@ var JingWen = (function () {
         window._jingAnchorY = st;
         window._jingAnchorExp = expanded;
         window._jingAnchorTs = Date.now();
+        /* 高亮提交冻结（2026-10-28 用户报「先闪回旧位、再跳回高亮处」）：
+           冻结期内 autopos 写入停摆、重渲落位只认此锚点一处（见
+           saveProgressNow / renderReaderBody 的 _hlFrozen 分支） */
+        window.__wuriHlFreeze = { id: sid, until: Date.now() + 4000 };
         JingWen.openReader(sid);
-        // 兜底：900ms 后锚点仍未被渲染消费（如重入被拦未走渲染），直接轮询落位
-        setTimeout(function () {
-          if (window._jingAnchorY != null && window.__wuriInsistPos) {
-            var ay = window._jingAnchorY, ae = window._jingAnchorExp;
-            window._jingAnchorY = null; window._jingAnchorExp = null;
-            window.__wuriInsistPos(sid, ay, ae);
-          }
+        /* 兜底只续期、绝不自行落位：旧实现 900ms 后直接 __wuriInsistPos 在
+           半成品 DOM 上先落一次、渲染完成再落一次，正是两段式回闪的第二落点。
+           现改为锚点仍未被渲染消费时只刷新其新鲜度＋延长冻结，等渲染消费。 */
+        var _fbTries = 0;
+        var _fbIv = setInterval(function () {
+          _fbTries++;
+          if (window._jingAnchorY == null || _fbTries >= 4) { clearInterval(_fbIv); return; }
+          window._jingAnchorTs = Date.now();
+          if (window.__wuriHlFreeze && window.__wuriHlFreeze.id === sid) window.__wuriHlFreeze.until = Date.now() + 4000;
         }, 900);
       }
     });
@@ -3876,6 +4008,7 @@ var JingWen = (function () {
   // 暴露给外部调用（每日经文推荐等）
   window.JingTitleOf = titleOf;
 
+  window.__wuriOpenMarks = function (tab) { window._jingMarksUserRequested = true; showMarks(tab || 'lines'); };
   function showMarks(tab) {
     // 守卫：只有用户点了"我的标记"才允许显示，防止 tab 切换时误显示
     if (!window._jingMarksUserRequested && !tab) return;
