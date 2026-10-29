@@ -211,10 +211,13 @@
       <div id="jing-home">
         <div class="jing-search"><input id="jing-q" data-i18n-ph="jing_search_ph" placeholder="搜索经文…" aria-label="搜索经文"><button id="jing-q-clear" class="jing-q-clear" hidden aria-label="清除搜索"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.2 2.2 L9.8 9.8 M9.8 2.2 L2.2 9.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></button></div>
         <!-- 标记/统计/生词三入口收成一行三格（2026-10-29 反馈第二批第 7 项）：
-             每格 名＋关键数字，点击行为与旧三行一致（标记开标记页、统计展开
-             明细格、生词展开生词面板）；id 沿用旧行 id，JS 写入点不变。 -->
+             每格 名＋关键数字；id 沿用旧行 id，JS 写入点不变。三格一律
+             toggle（2026-10-29 晚真机反馈）：统计/生词就地展开再点收起；
+             标记开标记页、已开时再点该格关闭回目录列表并恢复原滚动位置
+             （JingToggleMarks，jingwen.js 单点绑定——勿再加内联 onclick，
+             双触发会让 toggle 开合相抵）。 -->
         <div class="jing-trio" id="jing-trio">
-          <div class="jing-trio-cell" id="jing-mymarks" role="button" tabindex="0" onclick="if(window.JingShowMarks)window.JingShowMarks('bookmark')"><span class="jt-t" data-i18n="jing_marks">我的标记</span><span class="jt-s" id="jing-marks-count"></span></div>
+          <div class="jing-trio-cell" id="jing-mymarks" role="button" tabindex="0"><span class="jt-t" data-i18n="jing_marks">我的标记</span><span class="jt-s" id="jing-marks-count"></span></div>
           <div class="jing-trio-cell" id="jing-stats-row" role="button" tabindex="0"><span class="jt-t">阅读统计</span><span class="jt-s" id="jing-stats-sum">今日 0 分钟</span></div>
           <div class="jing-trio-cell" id="jing-vocab-row" role="button" tabindex="0"><span class="jt-t">生词本</span><span class="jt-s" id="jing-vocab-count">0 词</span></div>
         </div>
@@ -346,9 +349,9 @@
           </div>
           <div class="jing-dock-row" id="jing-dock-main">
             <button class="mini-btn jd-btn" id="jing-toc-btn" hidden>目录</button>
-            <button class="mini-btn jd-btn" id="jing-read-btn" aria-expanded="false">诵读/跟读</button>
-            <button class="mini-btn jd-btn" id="jing-recite" data-i18n="jing_recite">背诵</button>
-            <button class="mini-btn jd-btn" id="jing-font-btn" aria-expanded="false">排版</button>
+            <button class="mini-btn jd-btn" id="jing-read-btn" aria-expanded="false">读</button>
+            <button class="mini-btn jd-btn" id="jing-recite" data-i18n="jing_recite">背</button>
+            <button class="mini-btn jd-btn" id="jing-font-btn" aria-expanded="false">字</button>
             <button class="mini-btn jd-btn" id="jing-foldall">全展开</button>
             <button class="mini-btn jd-btn" id="jing-pybtn">注音开</button>
           </div>

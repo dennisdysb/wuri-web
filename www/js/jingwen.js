@@ -1299,6 +1299,9 @@ var JingWen = (function () {
     if (row) row.addEventListener('click', function () {
       var det = document.getElementById('jing-stats-detail');
       if (!det) return;
+      /* 三格互切不叠开（2026-10-29 晚定版）：展开统计前先收标记页 */
+      if (det.hidden && window.__wuriMarksIsOpen && window.__wuriMarksIsOpen()
+          && window.__wuriCloseMarksToList) window.__wuriCloseMarksToList();
       det.hidden = !det.hidden;
       rpRenderStats();
     });
@@ -1486,10 +1489,15 @@ var JingWen = (function () {
     html = '<div class="jing-toc-vol" data-toc-marks="1"><span class="tv-name">我的标记</span><span class="tv-pct">书签 · 高亮 · 心得</span></div>' + html;
     list.innerHTML = html;
     toc.hidden = false;
+    /* 目录钮激活态（2026-10-29 晚定版：面板类钮一律 toggle＋.on 示开） */
+    var tbOn = $('#jing-toc-btn'); if (tbOn) tbOn.classList.add('on');
     var cur = list.querySelector('.jing-toc-vol.cur');
     if (cur) setTimeout(function () { cur.scrollIntoView({ block: 'center' }); }, 30);
   }
-  function closeToc() { var toc = $('#jing-toc'); if (toc) toc.hidden = true; }
+  function closeToc() {
+    var toc = $('#jing-toc'); if (toc) toc.hidden = true;
+    var tbOff = $('#jing-toc-btn'); if (tbOff) tbOff.classList.remove('on');
+  }
 
   /* ---------- 长按查字（数据层 js/dict.js：__wuriDict，全书可用） ---------- */
   var _dictSel = null; /* {text, paraText, start, end} */
@@ -1636,6 +1644,9 @@ var JingWen = (function () {
     if (row) row.addEventListener('click', function () {
       var p = document.getElementById('jing-vocab-panel');
       if (!p) return;
+      /* 三格互切不叠开（2026-10-29 晚定版）：展开生词本前先收标记页 */
+      if (p.hidden && window.__wuriMarksIsOpen && window.__wuriMarksIsOpen()
+          && window.__wuriCloseMarksToList) window.__wuriCloseMarksToList();
       p.hidden = !p.hidden;
       rpVocabRender();
     });
@@ -1832,7 +1843,8 @@ var JingWen = (function () {
       if (fb2) fb2.hidden = !(d.sections && d.sections.length > 1);
       /* 统一底栏（2026-10-29 第 0 步用户定版，supersede 反馈批第 11 条的
          分书类底栏与 v318 的内丹/道藏四钮）：全书类同一套钮 目录｜读｜
-         背诵｜字｜全展开/全收回｜注音开/关（单节书隐藏全展开）；注音钮
+         背｜字｜全展开/全收回｜注音开/关（单节书隐藏全展开；钮名 2026-10-29
+         晚回单字，见 applyReaderPrefs 背诵钮注）；注音钮
          按书的注音能力显隐（applyReaderPrefs 内以 py 数据判定，内丹无
          注音数据→不显示）；「我的标记」不占底栏（入口＝目录面板首行
          ＋字面板本书组，全书类一致） */
@@ -2314,8 +2326,12 @@ var JingWen = (function () {
     if (pyBtn) pyBtn.textContent = pyOn ? '注音关' : '注音开';
     $('#jing-content').classList.toggle('recite-on', reciteMode);
     var rb = $('#jing-recite');
-    if (rb) rb.textContent = reciteMode ? t('jing_recite_on') : t('jing_recite');
-    if (rb) rb.classList.toggle('active', reciteMode);
+    /* 背诵钮恒单字「背」（2026-10-29 晚真机反馈：长名「诵读/跟读」「退出
+       背诵」在 360 档溢出按键，打磨二长名口径作废）；进/退状态改由 .on
+       金底激活态表达——与读/字面板钮的 dockPanelToggle 同一套 .on 口径
+       （旧 .active 类在底栏无对应样式、等于不变色，一并纠正） */
+    if (rb) rb.textContent = t('jing_recite');
+    if (rb) rb.classList.toggle('on', reciteMode);
   }
   /* ---------- 字体版式（批一第 2 项）：字号滑杆/字体/行距 ---------- */
   function setFontPx(px) {
@@ -4225,9 +4241,15 @@ var JingWen = (function () {
       closeDockPanels();
       if (window.__wuriOpenMarksFromReader) window.__wuriOpenMarksFromReader('lines');
     });
-    /* 内丹/道藏底栏：目录钮＝与点状态行同一目录视图 */
+    /* 底栏目录钮＝与点状态行同一目录视图；toggle 口径（2026-10-29 晚
+       定版：面板类钮一律可开合）——抽屉已开再点即关。注：抽屉本体是
+       全屏覆盖层（z 10002 盖住底栏），开着时此钮物理上点不到，实际
+       关闭走遮罩/「关闭」钮/点卷跳转，皆经 closeToc 同步撤 .on；此
+       toggle 分支保证程序态一致、防重复 openToc 重渲 */
     var tocB = $('#jing-toc-btn');
     if (tocB) tocB.addEventListener('click', function () {
+      var tocEl = $('#jing-toc');
+      if (tocEl && !tocEl.hidden) { closeToc(); return; }
       closeDockPanels();
       openToc();
     });
@@ -5785,12 +5807,40 @@ var JingWen = (function () {
     window._marksReturn = null;
   }
 
+  /* 三格「我的标记」toggle（2026-10-29 晚真机反馈，与统计/生词同规）：
+     标记页已开时再点三格即合——回目录列表，并恢复打开前的 window
+     滚动位置（开页时存 _trioMarksY）。统计/生词两格打开前亦经
+     __wuriCloseMarksToList 先收标记页（三格互切不叠开不残留） */
+  var _trioMarksY = null;
+  function marksIsOpen() { var m = $('#jing-marks'); return !!(m && !m.hidden); }
+  function closeMarksToList() {
+    var y = _trioMarksY;
+    _trioMarksY = null;
+    hideMarks();
+    if (window.__wuriRefreshMarksRow) window.__wuriRefreshMarksRow();
+    if (typeof y === 'number') {
+      var applyY = function () { try { window.scrollTo(0, y); } catch (e) {} };
+      if (window.requestAnimationFrame) requestAnimationFrame(applyY);
+      setTimeout(function () { if (Math.abs((window.scrollY || 0) - y) > 4) applyY(); }, 150);
+    }
+  }
+  window.__wuriMarksIsOpen = marksIsOpen;
+  window.__wuriCloseMarksToList = closeMarksToList;
+  function trioToggleMarks() {
+    if (marksIsOpen()) { closeMarksToList(); return; }
+    _trioMarksY = window.scrollY || window.pageYOffset || 0;
+    var det0 = document.getElementById('jing-stats-detail'); if (det0) det0.hidden = true;
+    var vp0 = document.getElementById('jing-vocab-panel'); if (vp0) vp0.hidden = true;
+    window._jingMarksUserRequested = true;
+    showMarks('bookmark');
+  }
+  window.JingToggleMarks = trioToggleMarks;
+
   document.addEventListener('DOMContentLoaded', function () {
     var btn = $('#jing-mymarks');
     if (btn) btn.addEventListener('click', function () {
       try {
-        window._jingMarksUserRequested = true;
-        showMarks('bookmark');
+        trioToggleMarks();
       } catch (e) {
         alert('我的标记出错：' + (e && e.message));
       }
@@ -5811,7 +5861,7 @@ var JingWen = (function () {
       // （反馈批第 6 条）；从目录进来 → 回目录列表
       if (e.target.closest('#marks-back')) {
         if (window._marksReturn && window.__wuriReturnToReader && window.__wuriReturnToReader()) return;
-        hideMarks(); if (window.__wuriRefreshMarksRow) window.__wuriRefreshMarksRow(); return;
+        closeMarksToList(); return;
       }
       // 删除书签
       var delBm = e.target.closest('[data-del-bm]');
