@@ -1779,6 +1779,23 @@
       if (state.syncOn) setTimeout(function () { runSync(); }, 1500);
     }
   }
+  /* 通用同步桥（2026-10-29 阅读统计上云）：供 jingwen.js 统计模块复用
+     本通道的 token/设备头/401 处理，推拉任意白名单 dataset 的条目；
+     调用方自负合并语义（统计按设备分桶、只写自己的 key） */
+  function syncBridgeEnabled() { return !!(state.token && state.syncOn); }
+  function syncBridgePush(items) {
+    return api('/api/sync/push', { method: 'POST', body: { items: items } }).then(function (r) {
+      if (r.status === 401) on401(r && r.body && r.body.error);
+      return r;
+    });
+  }
+  function syncBridgePullAll() {
+    return api('/api/sync/pull', { method: 'POST', body: { stamps: {} } }).then(function (r) {
+      if (r.status === 401) { on401(r && r.body && r.body.error); return null; }
+      if (r.status !== 200 || !r.body || !r.body.ok) return null;
+      return r.body.items || [];
+    });
+  }
   window.WuriAccount = {
     runSync: runSync,
     refreshEntitlement: refreshEntitlement,
@@ -1788,7 +1805,10 @@
     _applyEntitlement: applyEntitlement,
     _bindStatusText: bindStatusText,
     _snapshot: snapshot,
-    _computePush: computePush
+    _computePush: computePush,
+    _syncEnabled: syncBridgeEnabled,
+    _syncPushItems: syncBridgePush,
+    _syncPullAll: syncBridgePullAll
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

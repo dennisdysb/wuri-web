@@ -1105,11 +1105,14 @@ body.fabs-ghost #jing-back-fab,body.fabs-ghost #jing-bookmark-fab{opacity:.55;to
 body.fabs-ghost #jing-back-fab:active,body.fabs-ghost #jing-bookmark-fab:active{opacity:.85}
 /* 播放悬浮胶囊（第 4 条）：半透明、可拖、默认左下；沉浸同隐；
    层级 999 同悬浮钮，受面板盖压规则约束 */
-#jing-play-fab{position:fixed;left:18px;bottom:calc(94px + env(safe-area-inset-bottom));z-index:999;display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--teal-deep) 88%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28);touch-action:none}
-#jing-play-fab[hidden]{display:none}
-#jing-play-fab .jpf-btn{border:none;background:transparent;color:#fff;font:inherit;font-size:.9rem;padding:9px 16px;border-radius:999px;cursor:pointer}
-#jing-play-fab .jpf-btn:active{background:rgba(255,255,255,.18)}
-body.jing-immersive #jing-play-fab{opacity:0;pointer-events:none;transition:opacity .25s}
+/* 透明度与悬浮钮组同口径 .55（反馈第二批第 2 项）；TTS 胶囊同款（第 4 项），
+   默认位在播放胶囊上方竖叠，各自可拖、位置独立持久化 */
+#jing-play-fab{position:fixed;left:18px;bottom:calc(94px + env(safe-area-inset-bottom));z-index:999;display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--teal-deep) 88%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28);touch-action:none;opacity:.55;transition:opacity .25s}
+#jing-tts-fab{position:fixed;left:18px;bottom:calc(152px + env(safe-area-inset-bottom));z-index:999;display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--teal-deep) 88%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28);touch-action:none;opacity:.55;transition:opacity .25s}
+#jing-play-fab[hidden],#jing-tts-fab[hidden]{display:none}
+#jing-play-fab .jpf-btn,#jing-tts-fab .jpf-btn{border:none;background:transparent;color:#fff;font:inherit;font-size:.9rem;padding:9px 16px;border-radius:999px;cursor:pointer}
+#jing-play-fab .jpf-btn:active,#jing-tts-fab .jpf-btn:active{background:rgba(255,255,255,.18)}
+body.jing-immersive #jing-play-fab,body.jing-immersive #jing-tts-fab{opacity:0;pointer-events:none}
 body.jing-immersive #jing-back-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
 /* 书签悬浮钮（左下竖叠：返回钮顶 150＋间隙 14＝底距 164，与另两钮同显同隐） */
 #jing-bookmark-fab{transition:opacity .18s ease,transform .18s ease}
@@ -1218,6 +1221,19 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
 .jing-marks-row-t{font-family:var(--serif);font-size:1.22rem;color:var(--ink);flex:none}/* 主标题加大一号（2026-10-27 用户反馈批·文库视觉线：入口行一眼更醒目） */
 .jing-marks-row-s{font-size:.92rem;color:var(--muted);flex:none}/* 副字随主标题按比例协调 .82→.92rem */
 .jing-marks-row-n{margin-left:auto;font-size:.92rem;color:var(--ink-2);flex:none}/* 计数同副字口径 .82→.92rem */
+/* 标记/统计/生词一行三格（反馈第二批第 7 项）：等分三列、格内名＋数字两行，
+   整行恒一行（360 档断言不换行不溢出） */
+.jing-trio{display:flex;gap:8px;padding:10px 2px;border-bottom:1px solid var(--line-soft)}
+.jing-trio-cell{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;padding:8px 4px;border:1px solid var(--line-soft);border-radius:10px;cursor:pointer;background:var(--card,#fff)}
+.jing-trio-cell:active{background:var(--teal-wash)}
+.jing-trio-cell .jt-t{font-family:var(--serif);font-size:1.02rem;color:var(--ink);white-space:nowrap}
+.jing-trio-cell .jt-s{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+/* 每周阅读总结卡（反馈第二批第 8 项）：列表顶一次性卡，可关 */
+.jing-wk-card{margin:10px 2px 2px;padding:12px 14px;border:1px solid var(--line-soft);border-radius:12px;background:var(--card,#fff)}
+.jing-wk-card h4{margin:0 0 6px;font-family:var(--serif);font-size:1.05rem;color:var(--ink)}
+.jing-wk-card p{margin:0 0 4px;font-size:.86rem;color:var(--ink-2);line-height:1.55}
+.jing-wk-card .wk-btns{display:flex;gap:8px;margin-top:8px}
+.jing-wk-review-row{display:flex;justify-content:center;padding:0 14px 12px}
 
 /* 背诵模式 */
 #jing-content.recite-on .jing-para{line-height:2.6}
@@ -1295,13 +1311,17 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
 }
 
 /* 书签高亮 */
-.hl-pop{position:fixed;z-index:9999;background:#333;color:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center;justify-content:center;width:max-content;max-width:92vw;flex-wrap:wrap}
+/* 弹窗恒水平居中（反馈第二批第 1 项：不再锚选区横向跑偏）；纵向两行制：
+   按钮一行、八色一行（行内 nowrap，色圈 30px 保证 360 档一行放下） */
+.hl-pop{position:fixed;left:50%;transform:translateX(-50%);z-index:9999;background:#333;color:#fff;border-radius:12px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;width:max-content;max-width:94vw}
+.hl-pop-row{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:nowrap}
+.hl-pop-note{font-size:12.5px;line-height:1.5;color:#ffd968;max-width:300px;max-height:4.5em;overflow:auto;white-space:pre-wrap;word-break:break-word;text-align:left}
 /* 底部固定模式：选中文字后从底部升起，避开系统菜单 */
-.hl-pop.hl-bottom{left:50%;transform:translateX(-50%);bottom:calc(112px + env(safe-area-inset-bottom));top:auto !important}
+.hl-pop.hl-bottom{bottom:calc(112px + env(safe-area-inset-bottom));top:auto !important}
 .hl-pop[hidden]{display:none}
-.hl-pop button{border:none;border-radius:6px;padding:6px 12px;font-size:14px;cursor:pointer;background:#555;color:#fff}
+.hl-pop button{border:none;border-radius:6px;padding:6px 11px;font-size:13.5px;cursor:pointer;background:#555;color:#fff;white-space:nowrap}
 .hl-pop button.primary{background:#f5c518;color:#333}
-.hl-pop .hl-color-btn{width:32px;height:32px;border-radius:50%;padding:0;font-weight:bold;color:#333}
+.hl-pop .hl-color-btn{width:30px;height:30px;border-radius:50%;padding:0;font-weight:bold;color:#333;font-size:13px;flex:none}
 /* 划线 8 色（2026-10-28 晚反馈批第 9 条：4 色→8 色；色值走变量链——
    日间浅底/夜间深底/红光红谱亮度梯度，三态都可辨；旧 4 色键名不变、
    存量数据直接兼容） */
@@ -1325,11 +1345,11 @@ body.sky-red{
 .hl-pop .hl-orange{background:var(--hl-orange)}
 .hl-pop .hl-pink{background:var(--hl-pink)}
 .hl-pop .hl-teal{background:var(--hl-teal)}
-/* 小屏收紧（2026-10-29 分享钮加入后）：360 档色板与分享钮同排不溢出，
-   取消钮可次行；色板圆钮仅小屏略缩，大屏维持 32px */
+/* 小屏收紧（反馈第二批第 1 项两行制后）：360 档两行各一排不换行不溢出 */
 @media (max-width:420px){
-  .hl-pop{max-width:97vw;padding:8px 10px;gap:5px}
-  .hl-pop .hl-color-btn{width:27px;height:27px;font-size:12px}
+  .hl-pop{padding:8px;gap:6px}
+  .hl-pop-row{gap:5px}
+  .hl-pop .hl-color-btn{width:28px;height:28px;font-size:12px}
   .hl-pop button{padding:5px 9px;font-size:13px}
 }
 /* 正文高亮颜色 */

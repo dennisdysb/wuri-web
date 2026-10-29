@@ -741,6 +741,175 @@ var JingWen = (function () {
   function rpSaveStats(d) {
     try { localStorage.setItem(RP_STATS_KEY, JSON.stringify(d)); } catch (e) {}
   }
+  /* ---------- 阅读统计云同步（反馈第二批第 9 项） ----------
+   * 本地 wuri_jing_stats_v1 永远只记本设备。同步走既有账号通道：
+   * dataset 'jing.stats'、item_key＝设备 id、值＝本设备桶 {days, fin}
+   * 快照。后端 sync_items 按 (user_id, dataset, item_key) 后写为准，
+   * 每台设备只写自己的 key —— 分桶即防覆盖，不存在整 blob 互覆。
+   * 展示与周结一律读合并视图 rpMergedStats()：本设备贡献取本地与自家
+   * 远端桶逐日 max（同源计数、max 防双计），他设备桶逐日相加；fin 按
+   * 书 id 并集取最早 ts；total＝合并 days 之和，连读/天数按合并 days。
+   * 拉取时把自家远端桶回填本地（换机/清数据后恢复本设备历史）。
+   * 未登录或未开同步：rpSyncOn() 为假、全部短路，纯本地现状不变；
+   * 失败静默，下次落盘/进页自动补传。 */
+  var RP_REMOTE_KEY = 'wuri_jing_stats_remote_v1';
+  var rpSyncBusy = false, rpPushTimer = null, rpLastPull = 0;
+  function rpMyDeviceId() {
+    try { if (window.WuriAccount && WuriAccount._deviceId) return WuriAccount._deviceId(); } catch (e) {}
+    return '';
+  }
+  function rpSyncOn() {
+    try { return !!(window.WuriAccount && WuriAccount._syncEnabled && WuriAccount._syncEnabled()); } catch (e) { return false; }
+  }
+  function rpRemoteLoad() {
+    try { var d = JSON.parse(localStorage.getItem(RP_REMOTE_KEY) || 'null'); if (d && typeof d === 'object') return d; } catch (e) {}
+    return {};
+  }
+  function rpRemoteSave(d) { try { localStorage.setItem(RP_REMOTE_KEY, JSON.stringify(d)); } catch (e) {} }
+  function rpMergedStats() {
+    var local = rpLoadStats();
+    var remote = rpRemoteLoad();
+    var myId = rpMyDeviceId();
+    var days = {}, fin = {};
+    Object.keys(local.days).forEach(function (k) { if (local.days[k] > 0) days[k] = local.days[k]; });
+    Object.keys(local.fin).forEach(function (k) { fin[k] = local.fin[k]; });
+    Object.keys(remote).forEach(function (dev) {
+      var b = remote[dev]; if (!b) return;
+      var bd = b.days || {}, bf = b.fin || {};
+      Object.keys(bd).forEach(function (k) {
+        if (!(bd[k] > 0)) return;
+        if (dev === myId) days[k] = Math.max(days[k] || 0, bd[k]);
+        else days[k] = (days[k] || 0) + bd[k];
+      });
+      Object.keys(bf).forEach(function (k) { if (!fin[k] || bf[k] < fin[k]) fin[k] = bf[k]; });
+    });
+    var total = 0;
+    Object.keys(days).forEach(function (k) { total += days[k]; });
+    return { days: days, fin: fin, total: total };
+  }
+  function rpSyncPull() {
+    if (!rpSyncOn() || rpSyncBusy) return;
+    rpSyncBusy = true;
+    rpLastPull = Date.now();
+    WuriAccount._syncPullAll().then(function (items) {
+      rpSyncBusy = false;
+      if (!items) return;
+      var remote = rpRemoteLoad();
+      var myId = rpMyDeviceId();
+      var changed = false;
+      items.forEach(function (it) {
+        if (!it || it.dataset !== 'jing.stats' || it.deleted) return;
+        var v = null;
+        try { v = JSON.parse(it.value); } catch (e) {}
+        if (!v || typeof v !== 'object') return;
+        remote[it.key] = { days: v.days || {}, fin: v.fin || {} };
+        changed = true;
+      });
+      if (!changed) return;
+      rpRemoteSave(remote);
+      var mine = myId && remote[myId];
+      if (mine) {
+        var d = rpLoadStats(), dirty = false;
+        Object.keys(mine.days || {}).forEach(function (k) {
+          if ((mine.days[k] || 0) > (d.days[k] || 0)) { d.days[k] = mine.days[k]; dirty = true; }
+        });
+        Object.keys(mine.fin || {}).forEach(function (k) {
+          if (!d.fin[k]) { d.fin[k] = mine.fin[k]; dirty = true; }
+        });
+        if (dirty) {
+          d.total = 0;
+          Object.keys(d.days).forEach(function (k) { d.total += d.days[k] || 0; });
+          rpSaveStats(d);
+        }
+      }
+      rpRenderStats();
+    }).catch(function () { rpSyncBusy = false; });
+  }
+  function rpSyncPush() {
+    if (!rpSyncOn()) return;
+    var myId = rpMyDeviceId();
+    if (!myId) return;
+    var d = rpLoadStats();
+    try {
+      WuriAccount._syncPushItems([{ dataset: 'jing.stats', key: myId, value: JSON.stringify({ days: d.days, fin: d.fin }), updated_at: new Date().toISOString() }])
+        .catch(function () { /* 静默：下次落盘/进页补传 */ });
+    } catch (e) {}
+  }
+  function rpSyncPushSoon() {
+    if (rpPushTimer) clearTimeout(rpPushTimer);
+    rpPushTimer = setTimeout(rpSyncPush, 4000);
+  }
+  /* ---------- 每周阅读总结（反馈第二批第 8 项） ----------
+   * 口径：本地周一为周始；总结对象＝刚结束的上一周。数据读合并视图
+   * （第 9 项；未同步时即本机数据——卡面口径不变式：分钟/天数/读完，
+   * 有数据才带连读，无数据的项不显示、不编造未追踪字段）。每个新周
+   * 首次渲染经文页在列表顶出一次性卡（关后本周不再弹，旗标存已弹的
+   * 本周一日期）；统计明细里留「上周总结」回看入口随时重开。 */
+  var WK_SHOWN_KEY = 'wuri_jing_wk_shown';
+  function wkMonday(dt) {
+    var d = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d;
+  }
+  function wkRangeLabel(start) {
+    var end = new Date(start); end.setDate(end.getDate() + 6);
+    var f = function (x) { return (x.getMonth() + 1) + '月' + x.getDate() + '日'; };
+    return f(start) + ' – ' + f(end);
+  }
+  function wkSummaryData() {
+    var d = rpMergedStats();
+    var start = wkMonday(new Date()); start.setDate(start.getDate() - 7);
+    var sec = 0, daysN = 0;
+    for (var i = 0; i < 7; i++) {
+      var dt = new Date(start); dt.setDate(dt.getDate() + i);
+      var s = d.days[rpDayKey(dt)] || 0;
+      sec += s; if (s > 0) daysN++;
+    }
+    var finN = 0, lo = start.getTime(), hi = lo + 7 * 86400000;
+    Object.keys(d.fin).forEach(function (k) { var ts = d.fin[k]; if (ts >= lo && ts < hi) finN++; });
+    return { start: start, sec: sec, days: daysN, fin: finN, streak: rpStreak(d) };
+  }
+  function wkHasData(s) { return s.sec > 0 || s.fin > 0; }
+  function wkCardHTML(s) {
+    var lines = '<p>阅读 ' + rpFmtDur(s.sec) + ' · 阅读 ' + s.days + ' 天';
+    if (s.fin > 0) lines += ' · 读完 ' + s.fin + ' 本';
+    lines += '</p>';
+    if (s.days > 0 && s.streak > 1) lines += '<p>当前连读 ' + s.streak + ' 天</p>';
+    return '<h4>上周阅读小结（' + wkRangeLabel(s.start) + '）</h4>' + lines
+      + '<div class="wk-btns"><button class="mini-btn tiny" id="jing-wk-share">分享</button>'
+      + '<button class="mini-btn tiny" id="jing-wk-close">关闭</button></div>';
+  }
+  function wkMaybeShow() {
+    var card = document.getElementById('jing-wk-card');
+    if (!card || !card.hidden) return;
+    var wkKey = rpDayKey(wkMonday(new Date()));
+    var shown = '';
+    try { shown = localStorage.getItem(WK_SHOWN_KEY) || ''; } catch (e) {}
+    if (shown === wkKey) return;
+    var s = wkSummaryData();
+    if (!wkHasData(s)) return; // 无数据不弹也不置旗标，待同步数据到达后仍可弹
+    try { localStorage.setItem(WK_SHOWN_KEY, wkKey); } catch (e) {}
+    card.innerHTML = wkCardHTML(s);
+    card.hidden = false;
+  }
+  function wkShowSummary() {
+    var card = document.getElementById('jing-wk-card');
+    if (!card) return;
+    var s = wkSummaryData();
+    card.innerHTML = wkHasData(s) ? wkCardHTML(s)
+      : '<h4>上周阅读小结（' + wkRangeLabel(s.start) + '）</h4><p>上周暂无阅读记录</p>'
+        + '<div class="wk-btns"><button class="mini-btn tiny" id="jing-wk-close">关闭</button></div>';
+    card.hidden = false;
+    try { card.scrollIntoView({ block: 'nearest' }); } catch (e) {}
+  }
+  function wkShareCard() {
+    var s = wkSummaryData();
+    var lines = ['上周阅读小结', wkRangeLabel(s.start), '阅读 ' + rpFmtDur(s.sec), '阅读 ' + s.days + ' 天'];
+    if (s.fin > 0) lines.push('读完 ' + s.fin + ' 本');
+    if (s.days > 0 && s.streak > 1) lines.push('当前连读 ' + s.streak + ' 天');
+    // 复用图卡 Canvas 规格（宣纸底/金边/右下落款），经分享 IIFE 的桥出图
+    if (window.__wuriShareCardParts) window.__wuriShareCardParts({ text: lines.join('\n'), book: '', secTitle: '' });
+  }
   function rpDayKey(dt) {
     var p = function (n) { return (n < 10 ? '0' : '') + n; };
     return dt.getFullYear() + '-' + p(dt.getMonth() + 1) + '-' + p(dt.getDate());
@@ -754,12 +923,14 @@ var JingWen = (function () {
     rpPending = 0;
     rpSaveStats(d);
     rpRenderStats();
+    rpSyncPushSoon();
   }
   function rpStatsFinish(sid) {
     if (!sid) return;
     var d = rpLoadStats();
     if (!d.fin[sid]) { d.fin[sid] = Date.now(); rpSaveStats(d); }
     rpRenderStats();
+    rpSyncPushSoon();
   }
   function rpStreak(d) {
     var n = 0, cur = new Date();
@@ -779,11 +950,12 @@ var JingWen = (function () {
     var row = document.getElementById('jing-stats-row');
     var sum = document.getElementById('jing-stats-sum');
     if (!row || !sum) return;
-    var d = rpLoadStats();
+    /* 同步开时进页懒拉取（5 分钟节流；拉回后 rpSyncPull 内部会再渲染） */
+    if (rpSyncOn() && !rpSyncBusy && Date.now() - rpLastPull > 300000) rpSyncPull();
+    var d = rpMergedStats(); // 展示读合并视图（本机＋已同步的他设备）
     var today = d.days[rpDayKey(new Date())] || 0;
     var finN = Object.keys(d.fin).length;
-    sum.textContent = '今日 ' + rpFmtDur(today) + ' · 连读 ' + rpStreak(d) + ' 天 · 读完 ' + finN + ' 本';
-    row.hidden = false;
+    sum.textContent = '今日 ' + rpFmtDur(today); // 一行三格格内只放关键数字（第 7 项）
     var det = document.getElementById('jing-stats-detail');
     if (det && !det.hidden) {
       var wk = 0;
@@ -799,10 +971,12 @@ var JingWen = (function () {
         + '<div><b>' + finN + ' 本</b><span>读完本数</span></div>'
         + '<div><b>' + rpFmtDur(d.total || 0) + '</b><span>总时长</span></div>'
         + '<div><b>' + daysN + ' 天</b><span>累计阅读天数</span></div>'
-        + '</div>';
+        + '</div>'
+        + '<div class="wk-review-row"><button class="mini-btn tiny" id="jing-wk-review">上周总结</button></div>';
     }
+    wkMaybeShow();
   }
-  window.__wuriStats = { load: rpLoadStats, render: rpRenderStats, finish: rpStatsFinish, flush: rpFlushStats };
+  window.__wuriStats = { load: rpLoadStats, render: rpRenderStats, finish: rpStatsFinish, flush: rpFlushStats, merged: rpMergedStats, pull: rpSyncPull, push: rpSyncPush, wkData: wkSummaryData, wkShow: wkShowSummary };
   document.addEventListener('DOMContentLoaded', function () {
     ['touchstart', 'touchmove', 'scroll', 'click', 'keydown'].forEach(function (ev) {
       document.addEventListener(ev, function () { rpLastAct = Date.now(); }, { passive: true });
@@ -830,7 +1004,19 @@ var JingWen = (function () {
       det.hidden = !det.hidden;
       rpRenderStats();
     });
+    /* 周结卡按钮（事件委托：卡与明细按钮都由 innerHTML 动态生成） */
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('#jing-wk-close')) {
+        var c = document.getElementById('jing-wk-card');
+        if (c) c.hidden = true;
+      } else if (e.target.closest('#jing-wk-share')) {
+        wkShareCard();
+      } else if (e.target.closest('#jing-wk-review')) {
+        wkShowSummary();
+      }
+    });
     rpRenderStats();
+    rpSyncPull(); // 进页先拉一次（未登录/未开同步内部短路）
   });
   function secIdxAtOffset(off) {
     if (!_metrics) return 0;
@@ -2564,9 +2750,59 @@ var JingWen = (function () {
     if (cur) out.push(cur);
     return out;
   }
-  function ttsSetBtn(on) {
+  var TTS_VOICE_KEY = 'wuri_jing_tts_voice';
+  function ttsZhVoices() {
+    var vs = [];
+    try { vs = speechSynthesis.getVoices() || []; } catch (e) {}
+    return vs.filter(function (v) { return /^zh/i.test(v.lang || ''); });
+  }
+  function ttsPickVoice() {
+    /* 语音选择（反馈第二批第 5 项）：持久化 voiceURI 优先，失效回落首个
+       中文语音；逐句调用，故面板改选下一句即生效。只按原名呈现、不贴
+       男女等推断标签（选择列表在 ttsPopulateVoices） */
+    var want = '';
+    try { want = localStorage.getItem(TTS_VOICE_KEY) || ''; } catch (e) {}
+    var all = [];
+    try { all = speechSynthesis.getVoices() || []; } catch (e) {}
+    if (want) for (var i = 0; i < all.length; i++) if (all[i].voiceURI === want) return all[i];
+    var zh = ttsZhVoices();
+    return zh.length ? zh[0] : null;
+  }
+  function ttsPopulateVoices() {
+    var sel = document.getElementById('jing-tts-voice');
+    var row = document.getElementById('jing-tts-voice-row');
+    if (!sel) return;
+    var zh = ttsZhVoices();
+    if (row) row.hidden = !zh.length;
+    if (!zh.length) { sel.innerHTML = ''; return; }
+    var want = '';
+    try { want = localStorage.getItem(TTS_VOICE_KEY) || ''; } catch (e) {}
+    var cur = zh[0];
+    sel.innerHTML = '';
+    zh.forEach(function (v) {
+      var o = document.createElement('option');
+      o.value = v.voiceURI;
+      o.textContent = v.name; // 照原名显示，不加任何推断标签
+      sel.appendChild(o);
+      if (v.voiceURI === want) cur = v;
+    });
+    sel.value = cur.voiceURI;
+  }
+  function ttsSetBtn() {
+    /* 面板钮与胶囊钮面三态同步（反馈第二批第 4 项）：未开始「系统朗读」／
+       朗读中「暂停朗读」／已暂停「继续朗读」；胶囊暂停钮同理 */
     var b = document.getElementById('jing-tts-btn');
-    if (b) b.textContent = on ? '停止朗读' : '系统朗读';
+    var p = document.getElementById('jing-tts-pause');
+    if (b) b.textContent = !ttsState ? '系统朗读' : (ttsState.paused ? '继续朗读' : '暂停朗读');
+    if (p) p.textContent = ttsState && ttsState.paused ? '继续' : '暂停';
+  }
+  function syncTtsFab() {
+    var fab = document.getElementById('jing-tts-fab');
+    if (fab) {
+      fab.hidden = !ttsState;
+      if (ttsState) clampFabIntoView(fab);
+    }
+    ttsSetBtn();
   }
   function ttsStop() {
     var st = ttsState;
@@ -2576,11 +2812,27 @@ var JingWen = (function () {
     if (st && st.curEl) st.curEl.classList.remove('follow-cur');
     var jc = document.getElementById('jing-content');
     if (jc && !followMode) jc.classList.remove('follow-on');
-    ttsSetBtn(false);
+    syncTtsFab();
+  }
+  function ttsPauseToggle() {
+    /* 暂停不打乱状态机：gen++ 作废当前句的 onend/onerror 与看门狗，
+       idx 停在本句；继续从本句句首重读、看门狗随 ttsSpeakNext 重装 */
+    var st = ttsState;
+    if (!st) return;
+    if (!st.paused) {
+      st.paused = true;
+      st.gen = (st.gen || 0) + 1;
+      if (st.watchdog) { clearTimeout(st.watchdog); st.watchdog = null; }
+      try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+    } else {
+      st.paused = false;
+      ttsSpeakNext();
+    }
+    syncTtsFab();
   }
   function ttsSpeakNext() {
     var st = ttsState;
-    if (!st) return;
+    if (!st || st.paused) return;
     if (window._jingCurrentId !== st.book) { ttsStop(); return; }
     if (st.idx >= st.queue.length) {
       ttsStop();
@@ -2599,10 +2851,12 @@ var JingWen = (function () {
     try { u = new SpeechSynthesisUtterance(item.text); } catch (e) { ttsStop(); return; }
     u.lang = 'zh-CN';
     u.rate = st.rate || 1;
-    if (st.voice) { try { u.voice = st.voice; } catch (e) { /* 异常语音对象忽略 */ } }
+    var vNow = ttsPickVoice(); // 逐句取音：面板改选下一句起生效
+    if (vNow) { try { u.voice = vNow; } catch (e) { /* 异常语音对象忽略 */ } }
+    var gen = st.gen || 0;
     var advanced = false;
     var advance = function () {
-      if (advanced || ttsState !== st) return;
+      if (advanced || ttsState !== st || (st.gen || 0) !== gen) return;
       advanced = true;
       if (st.watchdog) { clearTimeout(st.watchdog); st.watchdog = null; }
       st.idx++;
@@ -2634,31 +2888,35 @@ var JingWen = (function () {
         });
       });
       if (!queue.length) { if (window.showToast) showToast('本节暂无可朗读文字'); return; }
-      var voices = [];
-      try { voices = speechSynthesis.getVoices() || []; } catch (e) {}
-      var zh = null;
-      voices.forEach(function (v) { if (!zh && /^zh/i.test(v.lang || '')) zh = v; });
-      if (!zh && window.showToast) showToast('未检测到中文语音，将用默认语音朗读');
+      ttsPopulateVoices();
+      var zh = ttsPickVoice();
+      if (!zh && !ttsZhVoices().length && window.showToast) showToast('未检测到中文语音，将用默认语音朗读');
       var rate = 1;
       try { rate = +localStorage.getItem('wuri_jing_tts_rate') || 1; } catch (e) {}
       var sel = document.getElementById('jing-tts-speed');
       if (sel && sel.value) rate = +sel.value || rate;
       try { speechSynthesis.cancel(); } catch (e) {}
-      ttsState = { book: currentId, queue: queue, idx: 0, rate: rate, voice: zh, curEl: null, watchdog: null };
+      ttsState = { book: currentId, queue: queue, idx: 0, rate: rate, voice: zh, curEl: null, watchdog: null, gen: 0, paused: false };
       var jc = document.getElementById('jing-content');
       if (jc) jc.classList.add('follow-on');
-      ttsSetBtn(true);
+      syncTtsFab();
       closeDockPanels();
       ttsSpeakNext();
     };
     if (d.lazy) setTimeout(build, 350); else build();
   }
-  window.__wuriTTSStart = ttsStart;
+  /* 面板钮三态：未开始→开始；朗读中→暂停；已暂停→继续（停止走胶囊或切书/关阅读器） */
+  window.__wuriTTSStart = function () {
+    if (!ttsState) { ttsStart(); return; }
+    ttsPauseToggle();
+  };
   window.__wuriTTSStop = ttsStop;
+  window.__wuriTTSPauseToggle = ttsPauseToggle;
   window.__wuriTTSSetRate = function (r) { if (ttsState && r > 0) ttsState.rate = r; };
   window.__wuriTTSState = function () {
-    return ttsState ? { on: true, book: ttsState.book, idx: ttsState.idx, total: ttsState.queue.length } : { on: false };
+    return ttsState ? { on: true, paused: !!ttsState.paused, book: ttsState.book, idx: ttsState.idx, total: ttsState.queue.length } : { on: false };
   };
+  window.__wuriTTSVoices = ttsPopulateVoices;
 
   /* ---------- MP3 诵读（Qwen3-TTS 预渲染） ---------- */
   var jingAudio = null;
@@ -3309,7 +3567,7 @@ var JingWen = (function () {
   }
   function refreshMarksRow() {
     var el = document.getElementById('jing-marks-count');
-    if (el) el.textContent = '（' + marksTotal() + '）';
+    if (el) el.textContent = marksTotal() + ' 条'; // 一行三格格内副字（反馈第二批第 7 项）
   }
   window.__wuriRefreshMarksRow = refreshMarksRow;
 
@@ -3514,6 +3772,35 @@ var JingWen = (function () {
     /* 播放胶囊：暂停/继续（钮在 #jing-play-fab 胶囊内） */
     var pzB = $('#jing-pause');
     if (pzB) pzB.addEventListener('click', dockPauseToggle);
+    /* 系统朗读胶囊（反馈第二批第 4 项）：暂停/继续＋停止，与面板钮共用
+       ttsPauseToggle/ttsStop，状态经 syncTtsFab 双向同步 */
+    var tpB = $('#jing-tts-pause');
+    if (tpB) tpB.addEventListener('click', function () { if (window.__wuriTTSPauseToggle) window.__wuriTTSPauseToggle(); });
+    var tsB = $('#jing-tts-stop');
+    if (tsB) tsB.addEventListener('click', function () { if (window.__wuriTTSStop) window.__wuriTTSStop(); });
+    var tcapEl = $('#jing-tts-fab');
+    if (tcapEl && window.__wuriMakeDraggable) {
+      window.__wuriMakeDraggable(tcapEl, 'wuri_jing_ttsfab_v1', { always: true });
+      try {
+        var tp0 = JSON.parse(localStorage.getItem('wuri_jing_ttsfab_v1') || 'null');
+        if (tp0 && typeof tp0.x === 'number') {
+          tcapEl.style.left = tp0.x + 'px'; tcapEl.style.top = tp0.y + 'px';
+          tcapEl.style.right = 'auto'; tcapEl.style.bottom = 'auto';
+        }
+      } catch (e) {}
+    }
+    /* TTS 语音选择（反馈第二批第 5 项）：填充中文语音列表（异步补列）、
+       改选持久化 voiceURI、下一句起生效（ttsPickVoice 逐句取） */
+    if (window.__wuriTTSVoices) window.__wuriTTSVoices();
+    try {
+      if (window.speechSynthesis && speechSynthesis.addEventListener) {
+        speechSynthesis.addEventListener('voiceschanged', function () { if (window.__wuriTTSVoices) window.__wuriTTSVoices(); });
+      }
+    } catch (e) {}
+    var tvSel = $('#jing-tts-voice');
+    if (tvSel) tvSel.addEventListener('change', function () {
+      try { localStorage.setItem('wuri_jing_tts_voice', tvSel.value); } catch (e) {}
+    });
     /* 播放胶囊可拖动（反馈批第 4 条；与内丹/道藏悬浮钮同一套拖动机制，
        位置独立持久化）。拖动装配器在文件后段（磬 IIFE）挂 window 上，
        init 在 DOMContentLoaded 后运行、届时已就绪 */
@@ -4142,33 +4429,34 @@ var JingWen = (function () {
   function showHlPop(x, y, isExisting) {
     var pop = $('#hl-pop');
     if (!pop) return;
-    // 构建颜色按钮
+    /* 两行制（2026-10-29 反馈第二批第 1 项）：按钮一行、八色一行；
+       弹窗恒水平居中（CSS left:50%＋translate），不再锚选区横向跑偏；
+       已存在态不显原文引文（用户定），自写想法仍显（用户自己的内容） */
     var html = '';
-    if (!isExisting) {
-      // 新建高亮：8 色 + 分享 + 取消（底部固定，不跟随选择位置）
+    var colorRow = function (attr) {
+      var s = '<div class="hl-pop-row">';
       Object.keys(HL_COLORS).forEach(function (c) {
-        html += '<button class="hl-color-btn hl-' + c + '" data-hl-color="' + c + '" title="' + HL_COLORS[c].label + '">' + HL_COLORS[c].name + '</button>';
+        s += '<button class="hl-color-btn hl-' + c + '" ' + attr + '="' + c + '" title="' + HL_COLORS[c].label + '">' + HL_COLORS[c].name + '</button>';
       });
-      html += '<button id="hl-share">分享</button>';
-      html += '<button id="hl-card">图卡</button>';
-      html += '<button id="hl-cancel">取消</button>';
+      return s + '</div>';
+    };
+    if (!isExisting) {
+      // 新建高亮：按钮一行（分享/图卡/取消）＋八色一行（底部固定）
+      html += '<div class="hl-pop-row">'
+        + '<button id="hl-share">分享</button>'
+        + '<button id="hl-card">图卡</button>'
+        + '<button id="hl-cancel">取消</button></div>';
+      html += colorRow('data-hl-color');
     } else {
-      // 已存在高亮：顶部小卡（原文＋想法摘要）＋写/改想法 / 分享 / 换色 / 删除
-      var exHl = pendingHlId ? getHighlightById(pendingHlId) : null;
       var exNote = pendingHlId ? getNoteForHighlight(pendingHlId) : null;
       var exNoteText = exNote ? (typeof exNote === 'string' ? exNote : (exNote.text || '')) : '';
-      if (exHl) {
-        html += '<div class="hl-pop-card"><div class="hl-pop-quote">' + escH(exHl.text || '') + '</div>'
-          + (exNoteText ? '<div class="hl-pop-note">想法：' + escH(exNoteText) + '</div>' : '')
-          + '</div>';
-      }
-      html += '<button id="hl-note">' + (exNoteText ? '改想法' : '写想法') + '</button>';
-      html += '<button id="hl-share">分享</button>';
-      html += '<button id="hl-card">图卡</button>';
-      Object.keys(HL_COLORS).forEach(function (c) {
-        html += '<button class="hl-color-btn hl-' + c + '" data-hl-recolor="' + c + '">' + HL_COLORS[c].name + '</button>';
-      });
-      html += '<button id="hl-del">删除</button>';
+      if (exNoteText) html += '<div class="hl-pop-note">想法：' + escH(exNoteText) + '</div>';
+      html += '<div class="hl-pop-row">'
+        + '<button id="hl-note">' + (exNoteText ? '改想法' : '写想法') + '</button>'
+        + '<button id="hl-share">分享</button>'
+        + '<button id="hl-card">图卡</button>'
+        + '<button id="hl-del">删除</button></div>';
+      html += colorRow('data-hl-recolor');
     }
     pop.innerHTML = html;
     pop.hidden = false;
@@ -4178,10 +4466,11 @@ var JingWen = (function () {
       pop.style.left = '';
       pop.style.top = '';
     } else {
-      // 已存在：跟随位置
+      // 已存在：纵向跟点按处、钳回屏内；横向恒居中（不设 left）
       pop.classList.remove('hl-bottom');
-      pop.style.left = Math.min(x, window.innerWidth - 160) + 'px';
-      pop.style.top = (y + 10) + 'px';
+      pop.style.left = '';
+      var ph = pop.offsetHeight || 150;
+      pop.style.top = Math.max(8, Math.min(y + 10, window.innerHeight - ph - 12)) + 'px';
     }
   }
   function hideHlPop() {
@@ -4281,7 +4570,9 @@ var JingWen = (function () {
     ctx.textAlign = 'right';
     ctx.fillStyle = '#6b5a35';
     ctx.font = '30px ' + FONT;
-    ctx.fillText('——《' + parts.book + '》' + (parts.secTitle ? '·' + parts.secTitle : ''), W - PAD, y);
+    if (parts.book) {
+      ctx.fillText('——《' + parts.book + '》' + (parts.secTitle ? '·' + parts.secTitle : ''), W - PAD, y);
+    }
     y += 46;
     /* 品牌行：图标在左、文字在右，整组右对齐；文字正常字距，
        「戊日不上香」与「APP」间一个普通空格 */
@@ -4308,37 +4599,49 @@ var JingWen = (function () {
     ctx.textAlign = 'left';
     return cv;
   }
+  function deliverCardCanvas(cv) {
+    var saveFallback = function () {
+      try {
+        var a = document.createElement('a');
+        a.href = cv.toDataURL('image/png');
+        a.download = '戊日不上香图卡.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast('图卡已保存');
+      } catch (e) { showToast('图卡生成失败'); }
+    };
+    if (cv.toBlob) {
+      cv.toBlob(function (blob) {
+        if (!blob) { saveFallback(); return; }
+        var file = null;
+        try { file = new File([blob], 'wuri-card.png', { type: 'image/png' }); } catch (e) {}
+        if (file && navigator.canShare && navigator.canShare({ files: [file] }) && typeof navigator.share === 'function') {
+          navigator.share({ files: [file] }).then(function () {}, function () { /* 用户取消：不回落保存 */ });
+        } else saveFallback();
+      }, 'image/png');
+    } else saveFallback();
+  }
+  /* 出图统一管线（打磨批口径）：等图标加载完成再出图，图标失败则不出图 */
+  function makeAndDeliverCard(parts) {
+    loadCardIcon().then(function (iconImg) {
+      deliverCardCanvas(drawShareCard(parts, iconImg));
+    }, function () { showToast('图卡生成失败'); });
+  }
   function shareCard() {
     var parts = getShareParts(); // 先取文案：hideHlPop 会清空 pending 状态
     hideHlPop();
     try { window.getSelection().removeAllRanges(); } catch (e) {}
     if (!parts) return;
-    /* 等图标加载完成再出图：图标失败则不出图（不许出无图标版） */
-    loadCardIcon().then(function (iconImg) {
-      var cv = drawShareCard(parts, iconImg);
-      var saveFallback = function () {
-        try {
-          var a = document.createElement('a');
-          a.href = cv.toDataURL('image/png');
-          a.download = '戊日不上香图卡.png';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          showToast('图卡已保存');
-        } catch (e) { showToast('图卡生成失败'); }
-      };
-      if (cv.toBlob) {
-        cv.toBlob(function (blob) {
-          if (!blob) { saveFallback(); return; }
-          var file = null;
-          try { file = new File([blob], 'wuri-card.png', { type: 'image/png' }); } catch (e) {}
-          if (file && navigator.canShare && navigator.canShare({ files: [file] }) && typeof navigator.share === 'function') {
-            navigator.share({ files: [file] }).then(function () {}, function () { /* 用户取消：不回落保存 */ });
-          } else saveFallback();
-        }, 'image/png');
-      } else saveFallback();
-    }, function () { showToast('图卡生成失败'); });
+    makeAndDeliverCard(parts);
   }
+  /* 任意文案出图卡（周结卡用：parts={text, book:'', secTitle:''}，
+     落款与经文图卡同一 drawShareCard＋同一等图标管线） */
+  window.__wuriShareCardParts = function (parts) {
+    if (!parts || !parts.text) return false;
+    makeAndDeliverCard(parts);
+    return true;
+  };
   window.__wuriMakeCard = function () {
     var parts = getShareParts();
     if (!parts) return Promise.resolve(null);
