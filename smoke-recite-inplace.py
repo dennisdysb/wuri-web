@@ -13,7 +13,7 @@ _WG_SHA = hashlib.sha256(open(_WG, "rb").read()).hexdigest()
 spec = importlib.util.spec_from_file_location("smoke_base", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
 base = importlib.util.module_from_spec(spec); sys.modules["smoke_base"] = base; spec.loader.exec_module(base)
 
-WWW = os.path.expanduser("~/workspace/.wt/recite-inplace/www")
+WWW = os.path.join(os.path.dirname(os.path.abspath(__file__)), "www")
 R = []
 def report(name, ok, extra=""):
     R.append((name, bool(ok)))

@@ -2476,27 +2476,76 @@ var JingWen = (function () {
     }
     return null;
   }
+  /* 背诵切换的落点接管（2026-10-29 15:13 真机三报，s04《太上玄灵北斗
+   * 本命延生真经》：读到持诵功德点「背」→背诵形态对了、人却回篇首，
+   * 状态行变开经玄蕴咒、覆盖 % 不动）：沙箱三变体（列表点开＋autopos
+   * 历史、注音开/关、字号 28）原地路径均正常，唯兜底路径可复现该三联
+   * 征——机制实验（smoke-recite-mech）实证：兜底一旦触发且 autopos 展
+   * 开集不满全节，renderReaderBody 按短书口径 posY=0 落顶。故修：
+   * ①锚点改 DOM 先行捕获（节序＋节内内容字偏移，与数据模型无关）；
+   * ②兜底收紧——阅读器在屏且本节 DOM 在场时，数据迟到只短轮询等它，
+   * 绝不整书重渲；真未就绪才重渲，且落点由 jumpToSec 的跳转坚持接管
+   * （12 秒轮询重跳至锚点段），不再任 renderReaderBody 的像素落位口径
+   * 决定；③insistReciteAnchor 收敛后留 4.5 秒看守：无手势的晚到位移
+   * （网络字体切片迟到改高）把锚点带离 >48px 时再纠回，手势即停。 */
+  function captureReciteAnchorPos() {
+    var a = captureReciteAnchor();
+    if (!a || !a.el || !a.el.getAttribute) return null;
+    var sec = +a.el.getAttribute('data-sec');
+    if (isNaN(sec)) return null;
+    var off = 0;
+    var body = a.el.closest ? a.el.closest('.jing-sec-body') : null;
+    if (body && a.el.getAttribute('data-para') != null) {
+      var ps = body.querySelectorAll('p.jing-para');
+      for (var i = 0; i < ps.length; i++) {
+        if (ps[i] === a.el) break;
+        off += dzContentLen(ps[i]);
+      }
+    }
+    return { sec: sec, off: off };
+  }
+  function reciteRerenderWithAnchor(pos) {
+    var sid = currentId;
+    openReader(sid);
+    if (!pos) return;
+    var tries = 0;
+    var iv = setInterval(function () {
+      tries++;
+      if (window._jingCurrentId !== sid) { clearInterval(iv); return; }
+      var sec = document.querySelector('#jing-content .jing-sec[data-sec="' + pos.sec + '"]');
+      if (sec) { clearInterval(iv); jumpToSec(pos.sec, pos.off); }
+      else if (tries > 50) clearInterval(iv);
+    }, 200);
+  }
   function insistReciteAnchor(anchor, sid) {
     var gen = ++_reciteAnchorGen;
-    var tries = 0, hits = 0, cancelled = false;
+    var hits = 0, cancelled = false, converged = false;
+    var watchUntil = Date.now() + 4500;
     var onGesture = function () { cancelled = true; };
     window.addEventListener('touchstart', onGesture, { passive: true });
     window.addEventListener('wheel', onGesture, { passive: true });
+    window.addEventListener('mousedown', onGesture);
     var iv = setInterval(function () {
-      tries++;
       var done = cancelled || gen !== _reciteAnchorGen || window._jingCurrentId !== sid
-        || !anchor.el || !anchor.el.isConnected || tries > 14;
+        || !anchor.el || !anchor.el.isConnected || Date.now() > watchUntil;
       if (!done) {
         var r = anchor.el.getBoundingClientRect();
         var want = Math.max(anchor.top, -(Math.max(0, r.height - 80)));
         var delta = r.top - want;
-        if (Math.abs(delta) <= 2) { hits++; if (hits >= 2) done = true; }
-        else { hits = 0; window.scrollBy(0, delta); }
+        if (!converged) {
+          if (Math.abs(delta) <= 2) { hits++; if (hits >= 2) converged = true; }
+          else { hits = 0; window.scrollBy(0, delta); }
+        } else if (Math.abs(delta) > 48) {
+          /* 看守期晚到位移：重新纠回（字体切片迟到等无手势改高） */
+          converged = false; hits = 0;
+          window.scrollBy(0, delta);
+        }
       }
       if (done) {
         clearInterval(iv);
         window.removeEventListener('touchstart', onGesture);
         window.removeEventListener('wheel', onGesture);
+        window.removeEventListener('mousedown', onGesture);
       }
     }, 120);
   }
@@ -2525,19 +2574,46 @@ var JingWen = (function () {
   function toggleRecite() {
     reciteMode = !reciteMode;
     try { localStorage.setItem('wuri_jing_recite', reciteMode ? '1' : '0'); } catch (e) {}
-    var d = currentId && window.JINGWEN && window.JINGWEN[currentId];
     var content = document.getElementById('jing-content');
-    if (!d || !d.sections || !content || !content.querySelector('.jing-sec')) {
-      /* 数据未就绪（全藏异步取文中）：回落整书渲染，维持旧行为 */
-      if (currentId) openReader(currentId);
-      else applyReaderPrefs();
+    var domLive = !!(currentId && content && content.querySelector('.jing-sec'));
+    var anchor = domLive ? captureReciteAnchor() : null;
+    var anchorPos = domLive ? captureReciteAnchorPos() : null;
+    var d = currentId && window.JINGWEN && window.JINGWEN[currentId];
+    if (d && d.sections && domLive) {
+      reciteSwapInPlace(d);
+      applyReaderPrefs();
+      if (anchor) insistReciteAnchor(anchor, currentId);
+      setTimeout(updateReadUI, 60);
       return;
     }
-    var anchor = captureReciteAnchor();
-    reciteSwapInPlace(d);
-    applyReaderPrefs();
-    if (anchor) insistReciteAnchor(anchor, currentId);
-    setTimeout(updateReadUI, 60);
+    if (domLive) {
+      /* 书已在屏、整书 DOM 在场，只是数据模型一时取不到（异步取文/模型
+         替换的瞬时态）：短轮询等它到手再原地换段，绝不整书重渲丢位；
+         2 秒仍未到才走重渲＋锚点接管（见 captureReciteAnchorPos 注） */
+      applyReaderPrefs();
+      var sid = currentId, tries = 0;
+      var iv = setInterval(function () {
+        tries++;
+        if (window._jingCurrentId !== sid) { clearInterval(iv); return; }
+        var dd = window.JINGWEN && window.JINGWEN[sid];
+        if (dd && dd.sections) {
+          clearInterval(iv);
+          reciteSwapInPlace(dd);
+          applyReaderPrefs();
+          if (anchor && anchor.el && anchor.el.isConnected) insistReciteAnchor(anchor, sid);
+          else if (anchorPos) jumpToSec(anchorPos.sec, anchorPos.off);
+          setTimeout(updateReadUI, 60);
+        } else if (tries >= 20) {
+          clearInterval(iv);
+          reciteRerenderWithAnchor(anchorPos);
+        }
+      }, 100);
+      return;
+    }
+    /* 阅读器未开/无 DOM：真未就绪，回落整书渲染（落点由锚点接管，无
+       锚点时维持旧行为） */
+    if (currentId) reciteRerenderWithAnchor(anchorPos);
+    else applyReaderPrefs();
   }
 
   /* ---------- 跟读模式 ---------- */
