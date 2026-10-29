@@ -1528,11 +1528,11 @@ var JingWen = (function () {
       syncDockPlayUI(_dockState); /* 胶囊显隐随阅读器可见性重同步 */
       // 切到无音频经时若跟读开着，自动退出跟读态（避免高亮映射残留到新经）
       if (followMode && !hasAudio(id)) toggleFollow();
-      /* 磬钮数据判定（反馈批第 2 条）：仅当本书正文含（敲磬）标注才出现。
+      /* 磬钮数据判定（反馈批第 2 条）：本书是否有敲磬语境。
          两路并集——①任一段落原文含「敲磬」字样（经文自带的舞台指示）；
          ②任一节名属赞/韵/咒/偈/开经/完经类（渲染时在末段追加内联（敲磬）
-         标注，见下方 isQingSec）。不按书架类别硬编码名单；判定结果由
-         updateFab 读 window._jingHasQing */
+         标注，见下方 isQingSec）。判定结果存 window._jingHasQing；实际
+         显示还须叠加书类闸（仅常见经文类，见 updateFab 的 fabIsNdDz） */
       var hasQing = false;
       if (d.sections) {
         for (var qi = 0; qi < d.sections.length && !hasQing; qi++) {
@@ -3672,10 +3672,12 @@ var JingWen = (function () {
       if (ghost) { applyFabPos(bf, storedFabPos('back')); applyFabPos(mf, storedFabPos('bm')); }
       else { applyFabPos(bf, null); applyFabPos(mf, null); }
     }
-    /* 磬（反馈批第 2 条）：仅当本书正文含（敲磬）标注才出现——判定在
-       renderReaderBody 按数据扫描（window._jingHasQing），不按书架名单 */
+    /* 磬（反馈批第 2 条＋2026-10-28 晚收紧）：显示＝常见经文类 AND 数据
+       判定有敲磬。数据判定在 renderReaderBody 扫描（window._jingHasQing）；
+       书类复用底栏分书类同一谓词 fabIsNdDz（内丹/道藏四钮类的反面）——
+       内丹、道藏无论正文有无（敲磬）舞台指示，一律不出现磬钮 */
     var qFab = document.getElementById('qing-btn');
-    if (qFab) qFab.classList.toggle('show', !!(showReader && window._jingHasQing));
+    if (qFab) qFab.classList.toggle('show', !!(showReader && window._jingHasQing && !fabIsNdDz(curId)));
     var backFab = document.getElementById('jing-back-fab');
     if (backFab) backFab.classList.toggle('show', showReader);
     /* 加书签悬浮钮＝加书签唯一入口（第 7 条）；「我的标记」本书组行
