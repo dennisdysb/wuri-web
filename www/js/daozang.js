@@ -761,4 +761,122 @@
       cb && cb(hits.slice(0, 60));
     });
   };
+  /* 全文检索钩子（批一第 1 项②）：索引在 content/daozang/search/
+     （bigram 倒排 96 分片，构建器 build_dz_search_index.py；归一化＝
+     dzStripPunct＋t2s，与图版锚点/阅读器内容偏移同口径）。查词流程：
+     询问 bigrams→按需拉分片（每片约 500KB）→最小 posting 为主钥与其余
+     求交→候选≤30 部逐部拉底本 JSON 验证，产 {id,title,sec,snip,off}，
+     off 为底本剥标点字偏移（点开后由 jingwen 侧轮询落位）。 */
+  var dzSrchManifest = null, dzSrchShards = {};
+  function dzSrchNorm(s) {
+    var st = dzStripPunct(String(s || ''));
+    return window.t2s ? window.t2s(st) : st;
+  }
+  function dzSrchLoadManifest(cb) {
+    if (dzSrchManifest) { cb(dzSrchManifest); return; }
+    fetch('content/daozang/search/manifest.json').then(function (r) { return r.json(); })
+      .then(function (m) { dzSrchManifest = m; cb(m); })
+      .catch(function () { cb(null); });
+  }
+  function dzSrchShard(n, cb) {
+    if (dzSrchShards[n]) { cb(dzSrchShards[n]); return; }
+    fetch('content/daozang/search/s' + ('00' + n).slice(-3) + '.bin')
+      .then(function (r) { return r.arrayBuffer(); })
+      .then(function (buf) { dzSrchShards[n] = buf; cb(buf); })
+      .catch(function () { cb(null); });
+  }
+  function dzShardPosting(buf, key) {
+    var dv = new DataView(buf);
+    var n = dv.getUint32(0, true);
+    var lo = 0, hi = n - 1, found = -1;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      var k = dv.getUint32(4 + mid * 12, true);
+      if (k === key) { found = mid; break; }
+      if (k < key) lo = mid + 1; else hi = mid - 1;
+    }
+    if (found < 0) return [];
+    var off = dv.getUint32(4 + found * 12 + 4, true);
+    var len = dv.getUint32(4 + found * 12 + 8, true);
+    var base = 4 + n * 12 + off, end = base + len, i = base;
+    var out = [], acc = 0;
+    while (i < end) {
+      var v = 0, sh = 0, b;
+      do { b = dv.getUint8(i++); v |= (b & 0x7f) << sh; sh += 7; } while (b & 0x80);
+      acc += v; out.push(acc);
+    }
+    return out;
+  }
+  window.__wuri_dzTextSearch = function (q, cb) {
+    var nq = dzSrchNorm(q);
+    if (nq.length < 2) { cb({ hits: [], short: true }); return; }
+    dzSrchLoadManifest(function (m) {
+      if (!m || !m.works) { cb({ hits: [], error: true }); return; }
+      var nshard = m.shards || 96;
+      var grams = [], seenG = {};
+      for (var i = 0; i + 1 < nq.length; i++) {
+        var u1 = nq.charCodeAt(i), u2 = nq.charCodeAt(i + 1);
+        var key = ((u1 << 16) | u2) >>> 0;
+        if (seenG[key]) continue;
+        seenG[key] = 1;
+        grams.push({ key: key, shard: (u1 * 31 + u2) % nshard });
+      }
+      var shardNos = [];
+      grams.forEach(function (g) { if (shardNos.indexOf(g.shard) < 0) shardNos.push(g.shard); });
+      var bufs = {}, left = shardNos.length;
+      if (!left) { cb({ hits: [] }); return; }
+      shardNos.forEach(function (sn) {
+        dzSrchShard(sn, function (buf) {
+          bufs[sn] = buf;
+          if (--left > 0) return;
+          var lists = [];
+          for (var gi = 0; gi < grams.length; gi++) {
+            var buf2 = bufs[grams[gi].shard];
+            if (!buf2) { lists = null; break; }
+            lists.push(dzShardPosting(buf2, grams[gi].key));
+          }
+          if (!lists) { cb({ hits: [], error: true }); return; }
+          lists.sort(function (a, b) { return a.length - b.length; });
+          var cand = (lists[0] || []).slice();
+          for (var li = 1; li < lists.length && cand.length; li++) {
+            var set = {};
+            lists[li].forEach(function (w) { set[w] = 1; });
+            cand = cand.filter(function (w) { return set[w]; });
+          }
+          var truncated = cand.length > 30;
+          cand = cand.slice(0, 30);
+          if (!cand.length) { cb({ hits: [], truncated: truncated }); return; }
+          var hits = [], done = 0;
+          cand.forEach(function (wi) {
+            var id = m.works[wi];
+            var fin = function () { if (++done === cand.length) cb({ hits: hits.slice(0, 120), truncated: truncated }); };
+            if (!id) { fin(); return; }
+            fetch(FEED_DIR + 'texts/' + id + '.json').then(function (r) { return r.json(); })
+              .then(function (w) {
+                var per = 0, base = 0;
+                (w.volumes || []).forEach(function (vol, vi) {
+                  var nt = dzSrchNorm((vol.paras || []).join(''));
+                  var from = 0;
+                  while (per < 3 && from <= nt.length - nq.length) {
+                    var ix = nt.indexOf(nq, from);
+                    if (ix < 0) break;
+                    var s0 = Math.max(0, ix - 14), e0 = Math.min(nt.length, ix + nq.length + 14);
+                    hits.push({
+                      id: id, title: w.title, dzt: true,
+                      sec: vol.h || ('卷' + (vi + 1)),
+                      snip: (s0 > 0 ? '…' : '') + nt.slice(s0, e0) + (e0 < nt.length ? '…' : ''),
+                      off: base + ix
+                    });
+                    per++; from = ix + Math.max(1, nq.length);
+                  }
+                  base += nt.length;
+                });
+              })
+              .catch(function () {})
+              .then(fin);
+          });
+        });
+      });
+    });
+  };
 })();

@@ -711,7 +711,8 @@ var JingWen = (function () {
       var e = m[currentId] || {};
       e.frac = Math.round(frac * 10000) / 10000;
       e.off = off; /* 字偏移锚随进度同写，保证重渲/重进落位不读到陈旧 off */
-      if (frac >= 0.995 && !e.done) { e.done = true; e.doneTs = Date.now(); }
+      var newlyDone = false;
+      if (frac >= 0.995 && !e.done) { e.done = true; e.doneTs = Date.now(); newlyDone = true; }
       e.ts = Date.now();
       m[currentId] = e;
       var keys = Object.keys(m);
@@ -721,7 +722,116 @@ var JingWen = (function () {
       }
       localStorage.setItem(AUTOPOS_KEY, JSON.stringify(m));
     } catch (err) {}
+    if (newlyDone) rpStatsFinish(currentId);
   }
+  /* ---------- 阅读统计（批一第 4 项）：纯本地，不上传 ----------
+   * 存储 wuri_jing_stats_v1 = {days:{'YYYY-MM-DD':秒}, fin:{sid:ts}, total:秒}
+   * 计时：5 秒节拍，仅当 阅读器打开＋页面可见＋最近 90 秒内有交互 才累加
+   * （防挂机刷时长）；攒满 15 秒落盘，页面转隐藏时立即落盘（心跳防丢）。
+   * 读完：saveProgressNow 判定进度 100%（frac≥0.995）时经 rpStatsFinish 记账。 */
+  var RP_STATS_KEY = 'wuri_jing_stats_v1';
+  var rpPending = 0, rpLastTick = 0, rpLastAct = Date.now();
+  function rpLoadStats() {
+    try {
+      var d = JSON.parse(localStorage.getItem(RP_STATS_KEY) || 'null');
+      if (d && d.days && d.fin) return d;
+    } catch (e) {}
+    return { days: {}, fin: {}, total: 0 };
+  }
+  function rpSaveStats(d) {
+    try { localStorage.setItem(RP_STATS_KEY, JSON.stringify(d)); } catch (e) {}
+  }
+  function rpDayKey(dt) {
+    var p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return dt.getFullYear() + '-' + p(dt.getMonth() + 1) + '-' + p(dt.getDate());
+  }
+  function rpFlushStats() {
+    if (rpPending <= 0) return;
+    var d = rpLoadStats();
+    var k = rpDayKey(new Date());
+    d.days[k] = (d.days[k] || 0) + rpPending;
+    d.total = (d.total || 0) + rpPending;
+    rpPending = 0;
+    rpSaveStats(d);
+    rpRenderStats();
+  }
+  function rpStatsFinish(sid) {
+    if (!sid) return;
+    var d = rpLoadStats();
+    if (!d.fin[sid]) { d.fin[sid] = Date.now(); rpSaveStats(d); }
+    rpRenderStats();
+  }
+  function rpStreak(d) {
+    var n = 0, cur = new Date();
+    if (!d.days[rpDayKey(cur)]) cur.setDate(cur.getDate() - 1); /* 今日未读：自昨日起算 */
+    while (d.days[rpDayKey(cur)] > 0) { n++; cur.setDate(cur.getDate() - 1); }
+    return n;
+  }
+  function rpFmtDur(sec) {
+    sec = Math.round(sec || 0);
+    if (sec <= 0) return '0 分钟';
+    if (sec < 60) return '不足 1 分钟';
+    var m = Math.round(sec / 60);
+    if (m < 60) return m + ' 分钟';
+    return Math.floor(m / 60) + ' 小时 ' + (m % 60 ? (m % 60) + ' 分钟' : '');
+  }
+  function rpRenderStats() {
+    var row = document.getElementById('jing-stats-row');
+    var sum = document.getElementById('jing-stats-sum');
+    if (!row || !sum) return;
+    var d = rpLoadStats();
+    var today = d.days[rpDayKey(new Date())] || 0;
+    var finN = Object.keys(d.fin).length;
+    sum.textContent = '今日 ' + rpFmtDur(today) + ' · 连读 ' + rpStreak(d) + ' 天 · 读完 ' + finN + ' 本';
+    row.hidden = false;
+    var det = document.getElementById('jing-stats-detail');
+    if (det && !det.hidden) {
+      var wk = 0;
+      for (var i = 0; i < 7; i++) {
+        var dt = new Date(); dt.setDate(dt.getDate() - i);
+        wk += d.days[rpDayKey(dt)] || 0;
+      }
+      var daysN = Object.keys(d.days).filter(function (k) { return d.days[k] > 0; }).length;
+      det.innerHTML = '<div class="rp-stat-grid">'
+        + '<div><b>' + rpFmtDur(today) + '</b><span>今日时长</span></div>'
+        + '<div><b>' + rpFmtDur(wk) + '</b><span>本周时长</span></div>'
+        + '<div><b>' + rpStreak(d) + ' 天</b><span>连读天数</span></div>'
+        + '<div><b>' + finN + ' 本</b><span>读完本数</span></div>'
+        + '<div><b>' + rpFmtDur(d.total || 0) + '</b><span>总时长</span></div>'
+        + '<div><b>' + daysN + ' 天</b><span>累计阅读天数</span></div>'
+        + '</div>';
+    }
+  }
+  window.__wuriStats = { load: rpLoadStats, render: rpRenderStats, finish: rpStatsFinish, flush: rpFlushStats };
+  document.addEventListener('DOMContentLoaded', function () {
+    ['touchstart', 'touchmove', 'scroll', 'click', 'keydown'].forEach(function (ev) {
+      document.addEventListener(ev, function () { rpLastAct = Date.now(); }, { passive: true });
+    });
+    rpLastTick = Date.now();
+    setInterval(function () {
+      var now = Date.now();
+      var dt = Math.min(10, (now - rpLastTick) / 1000);
+      rpLastTick = now;
+      var rd = document.getElementById('jing-reader');
+      var active = !!(window._jingCurrentId && rd && !rd.hidden && !document.hidden
+        && (now - rpLastAct) < 90000);
+      if (active && dt > 0) {
+        rpPending += dt;
+        if (rpPending >= 15) rpFlushStats();
+      }
+    }, 5000);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) rpFlushStats();
+    });
+    var row = document.getElementById('jing-stats-row');
+    if (row) row.addEventListener('click', function () {
+      var det = document.getElementById('jing-stats-detail');
+      if (!det) return;
+      det.hidden = !det.hidden;
+      rpRenderStats();
+    });
+    rpRenderStats();
+  });
   function secIdxAtOffset(off) {
     if (!_metrics) return 0;
     var si = 0;
@@ -1997,29 +2107,48 @@ var JingWen = (function () {
     box.hidden = false;
     box.innerHTML = '<p class="hint">检索中…</p>';
     dzPreload();
-    var st = { alias: searchAliasHits(q), dz: null, text: null };
+    var st = { alias: searchAliasHits(q), dz: null, text: null, dzt: null, dztTrunc: false, dztShort: false };
     function render() {
       if (mySeq !== searchSeq) return; /* 旧查询结果：一律丢弃 */
-      var pending = (st.dz === null || st.text === null);
-      var all = st.alias.concat(st.dz || [], st.text || []);
-      if (!all.length) {
+      var pending = (st.dz === null || st.text === null || st.dzt === null);
+      var nameHits = st.alias.concat(st.dz || []);
+      var total = nameHits.length + (st.text || []).length + (st.dzt || []).length;
+      if (!total) {
         box.innerHTML = pending
           ? '<p class="hint">检索中…</p>'
           : '<p class="hint">未找到「' + esc(q) + '」</p>';
         return;
       }
-      box.innerHTML = '<div class="jing-res-count">共 ' + all.length + ((st.dz && st.dz.length) ? ' 条' : ' 处')
-        + (pending ? '（全文检索中…）' : '') + '</div>'
-        + all.slice(0, 200).map(function (r) {
+      function jingRow(r) {
+        return '<div class="jing-res" data-jing="' + r.id + '" data-sec="' + r.si + '">'
+          + '<div class="jing-res-t">' + esc(r.title) + (r.sec ? ' · ' + esc(r.sec) : '') + '</div>'
+          + '<div class="jing-res-s">' + r.snip + '</div></div>';
+      }
+      /* 分组呈现（批一第 1 项）：书名／精选正文／道藏正文口径分明 */
+      var html = '<div class="jing-res-count">共 ' + total + ' 条'
+        + (pending ? '（全文检索中…）' : '') + '</div>';
+      if (nameHits.length) {
+        html += '<div class="jing-res-group">书名</div>' + nameHits.slice(0, 60).map(function (r) {
           if (r.dz) {
             return '<div class="jing-res" data-dz-work="' + r.id + '">'
               + '<div class="jing-res-t">' + esc(txScript(r.title)) + '</div>'
               + '<div class="jing-res-s">' + esc(txScript(r.snip)) + '</div></div>';
           }
-          return '<div class="jing-res" data-jing="' + r.id + '" data-sec="' + r.si + '">'
-            + '<div class="jing-res-t">' + esc(r.title) + (r.sec ? ' · ' + esc(r.sec) : '') + '</div>'
-            + '<div class="jing-res-s">' + r.snip + '</div></div>';
+          return jingRow(r);
         }).join('');
+      }
+      if (st.text && st.text.length) {
+        html += '<div class="jing-res-group">精选正文</div>' + st.text.slice(0, 120).map(jingRow).join('');
+      }
+      if (st.dzt && st.dzt.length) {
+        html += '<div class="jing-res-group">道藏正文</div>' + st.dzt.map(function (r) {
+          return '<div class="jing-res" data-dz-work="' + r.id + '" data-dz-off="' + r.off + '">'
+            + '<div class="jing-res-t">' + esc(txScript(r.title)) + (r.sec ? ' · ' + esc(txScript(r.sec)) : '') + '</div>'
+            + '<div class="jing-res-s">' + esc(txScript(r.snip)) + '</div></div>';
+        }).join('') + (st.dztTrunc ? '<p class="hint">命中过多，仅显示前一部分</p>' : '');
+      }
+      if (st.dztShort) html += '<p class="hint">道藏正文搜索至少输入 2 个字</p>';
+      box.innerHTML = html;
     }
     render();
     /* 统一检索：精选（题名/别名＋全文）＋道藏全集（书名，经 daozang.js 钩子）一处搜全 */
@@ -2029,6 +2158,21 @@ var JingWen = (function () {
       try { window.__wuri_dzTitleSearch(q, dzFinish); } catch (e) { dzFinish([]); }
       setTimeout(function () { dzFinish([]); }, 4000);
     } else { st.dz = []; render(); }
+    /* 道藏正文（批一第 1 项②）：bigram 索引钩子，20 秒超时兜底 */
+    if (window.__wuri_dzTextSearch) {
+      var dztDone = false;
+      var dztFinish = function (res) {
+        if (dztDone) return;
+        dztDone = true;
+        if (mySeq !== searchSeq) return;
+        st.dzt = (res && res.hits) || [];
+        st.dztTrunc = !!(res && res.truncated);
+        st.dztShort = !!(res && res.short);
+        render();
+      };
+      try { window.__wuri_dzTextSearch(q, dztFinish); } catch (e) { dztFinish({ hits: [] }); }
+      setTimeout(function () { dztFinish({ hits: [] }); }, 20000);
+    } else { st.dzt = []; }
     ensureAll(function () {
       if (mySeq !== searchSeq) return;
       st.text = searchTextHits(q);
@@ -2207,28 +2351,32 @@ var JingWen = (function () {
     var id = el.getAttribute('data-dz-work');
     var off = +el.getAttribute('data-dz-off');
     if (!id || !(off >= 0)) return;
+    /* 全局偏移→（节序，节内偏移）：_metrics.cum 为各节起始偏移 */
     var tries = 0;
     var iv = setInterval(function () {
       tries++;
-      if (window._jingCurrentId === id && typeof _metrics !== 'undefined' && _metrics && _metrics.total) {
+      if (window._jingCurrentId === id && _metrics && _metrics.total) {
         clearInterval(iv);
-        try { goToContentOffset(off); } catch (err) {}
-        setTimeout(function () {
-          var paras = document.querySelectorAll('#jing-content .jing-para');
-          var best = null;
-          for (var i = 0; i < paras.length; i++) {
-            var po = 0;
-            try { po = paraContentOff(paras[i]); } catch (err) { continue; }
-            if (po <= off) best = paras[i]; else break;
+        var secIdx = secIdxAtOffset(off);
+        var charOff = off - (_metrics.cum[secIdx] || 0);
+        dzPollJump(id, secIdx, charOff, 60);
+        /* 落位后给目标段一记闪烁（等懒填充把该节段落铺好） */
+        var fTries = 0;
+        var fIv = setInterval(function () {
+          fTries++;
+          var sec = document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"]');
+          var body = sec && sec.querySelector('.jing-sec-body');
+          var target = null;
+          if (body && body.querySelector('p.jing-para')) {
+            try { target = paraAtContentOff(body, charOff); } catch (err) {}
           }
-          if (best) {
-            if (window.__wuriReaderGoToPara && window.__wuriReaderGoToPara(best)) {}
-            else best.scrollIntoView({ block: 'center' });
-            best.classList.add('find-flash');
-            setTimeout(function () { best.classList.remove('find-flash'); }, 1300);
-          }
+          if (target) {
+            clearInterval(fIv);
+            target.classList.add('find-flash');
+            setTimeout(function () { target.classList.remove('find-flash'); }, 1600);
+          } else if (fTries > 40) clearInterval(fIv);
         }, 400);
-      } else if (tries > 26) clearInterval(iv);
+      } else if (tries > 40) clearInterval(iv);
     }, 300);
   }, true);
 
@@ -3468,6 +3616,11 @@ var JingWen = (function () {
     pink: { name: '粉', css: 'hl-pink', label: '优美文句' },
     teal: { name: '青', css: 'hl-teal', label: '地点时节' }
   };
+  function escH(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
   function getHighlights() {
     try { return JSON.parse(localStorage.getItem('wuri_jing_highlights') || '[]'); }
     catch (e) { return []; }
@@ -3713,8 +3866,16 @@ var JingWen = (function () {
       html += '<button id="hl-share">分享</button>';
       html += '<button id="hl-cancel">取消</button>';
     } else {
-      // 已存在高亮：写心得 / 分享 / 换色 / 删除（跟随点击位置）
-      html += '<button id="hl-note">写心得</button>';
+      // 已存在高亮：顶部小卡（原文＋想法摘要）＋写/改想法 / 分享 / 换色 / 删除
+      var exHl = pendingHlId ? getHighlightById(pendingHlId) : null;
+      var exNote = pendingHlId ? getNoteForHighlight(pendingHlId) : null;
+      var exNoteText = exNote ? (typeof exNote === 'string' ? exNote : (exNote.text || '')) : '';
+      if (exHl) {
+        html += '<div class="hl-pop-card"><div class="hl-pop-quote">' + escH(exHl.text || '') + '</div>'
+          + (exNoteText ? '<div class="hl-pop-note">想法：' + escH(exNoteText) + '</div>' : '')
+          + '</div>';
+      }
+      html += '<button id="hl-note">' + (exNoteText ? '改想法' : '写想法') + '</button>';
       html += '<button id="hl-share">分享</button>';
       Object.keys(HL_COLORS).forEach(function (c) {
         html += '<button class="hl-color-btn hl-' + c + '" data-hl-recolor="' + c + '">' + HL_COLORS[c].name + '</button>';
@@ -4000,6 +4161,7 @@ var JingWen = (function () {
           it.color = color;
           saveHighlight(it);
         });
+        var firstNewId = items[0] && items[0].id;
         if (sid) rebuildHlRanges(sid);
         hideHlPop();
         window.getSelection().removeAllRanges();
@@ -4007,6 +4169,14 @@ var JingWen = (function () {
         if (window.JingWen) {
           var evt = new CustomEvent('jing-rerender');
           document.dispatchEvent(evt);
+        }
+        if (items.length === 1 && firstNewId) {
+          /* 划完就地写想法（批一第 3 项）：单段新划线落色后以「已存在」
+             形态在底部重开小卡（原文＋写想法入口），免再点一次划线 */
+          pendingHlId = firstNewId;
+          showHlPop(0, 0, true);
+          var pop2 = $('#hl-pop');
+          if (pop2) { pop2.classList.add('hl-bottom'); pop2.style.left = ''; pop2.style.top = ''; }
         }
         return;
       }
