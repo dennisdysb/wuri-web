@@ -4767,6 +4767,28 @@ var JingWen = (function () {
     var arr = getNotes().filter(function (n) { return n.highlightId !== highlightId; });
     try { localStorage.setItem('wuri_jing_notes', JSON.stringify(arr)); } catch (e) {}
   }
+  /* --- 全部删除（2026-10-29 用户提议） ---
+     清空全部标记（书签＋高亮＋心得）；三键写空值而非删键：账号同步按
+     整值哈希比对，空值会被推上云端，不会被旧云端值拉回 */
+  function clearAllMarks() {
+    try { localStorage.setItem('wuri_jing_bookmarks', '{}'); } catch (e) {}
+    try { localStorage.setItem('wuri_jing_highlights', '[]'); } catch (e) {}
+    try { localStorage.setItem('wuri_jing_notes', '[]'); } catch (e) {}
+  }
+  /* 只清某一本书的标记（标记汇总页「本书」范围用）：该书书签、高亮、
+     心得一并清，其他书不动 */
+  function clearBookMarks(sid) {
+    if (!sid) return;
+    var bm = getBookmarks();
+    if (bm[sid]) {
+      delete bm[sid];
+      try { localStorage.setItem('wuri_jing_bookmarks', JSON.stringify(bm)); } catch (e) {}
+    }
+    var hl = getHighlights().filter(function (h) { return h.sid !== sid; });
+    try { localStorage.setItem('wuri_jing_highlights', JSON.stringify(hl)); } catch (e) {}
+    var nt = getNotes().filter(function (n) { return n.sid !== sid; });
+    try { localStorage.setItem('wuri_jing_notes', JSON.stringify(nt)); } catch (e) {}
+  }
   function getNoteForHighlight(highlightId) {
     var arr = getNotes();
     for (var i = 0; i < arr.length; i++) if (arr[i].highlightId === highlightId) return arr[i];
@@ -5539,6 +5561,8 @@ var JingWen = (function () {
     getNoteForHighlight: getNoteForHighlight,
     saveNote: saveNote,
     deleteNote: deleteNote,
+    clearAllMarks: clearAllMarks,
+    clearBookMarks: clearBookMarks,
     showNoteModal: showNoteModal,
     scrollToHighlight: scrollToHighlight,
     isNeidanBook: isNeidanBook,
@@ -5585,6 +5609,106 @@ var JingWen = (function () {
   window.JingTitleOf = titleOf;
 
   window.__wuriOpenMarks = function (tab) { window._jingMarksUserRequested = true; showMarks(tab || 'lines'); };
+
+  /* ---------- 全部删除（2026-10-29 用户提议） ----------
+     两个范围分开：页头钮＝全部（所有书）；汇总页钮跟随其「全部／本书」
+     范围切换，本书只删当前书。确认一律走 App 内弹窗（学心得悬浮窗
+     note-modal 的现成口径），严禁原生 confirm */
+  function marksCounts(JM, sid) {
+    var bmN = 0;
+    try {
+      var bm = JSON.parse(localStorage.getItem('wuri_jing_bookmarks') || '{}');
+      if (sid) {
+        var a = bm[sid];
+        bmN = Array.isArray(a) ? a.length : (a ? 1 : 0);
+      } else {
+        Object.keys(bm).forEach(function (k) {
+          var x = bm[k];
+          bmN += Array.isArray(x) ? x.length : (x ? 1 : 0);
+        });
+      }
+    } catch (e) {}
+    var hlN = sid ? JM.getHighlightsFor(sid).length : JM.getHighlights().length;
+    var ntN = sid ? JM.getNotesFor(sid).length : JM.getNotes().length;
+    return { bm: bmN, hl: hlN, nt: ntN, total: bmN + hlN + ntN };
+  }
+  var _marksConfirmCb = null;
+  function hideMarksConfirm() {
+    var modal = document.getElementById('marks-confirm');
+    if (modal) modal.hidden = true;
+    _marksConfirmCb = null;
+  }
+  function showMarksConfirm(opts, onOk) {
+    var modal = document.getElementById('marks-confirm');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'marks-confirm';
+      modal.className = 'marks-confirm';
+      modal.hidden = true;
+      modal.innerHTML =
+        '<div class="marks-confirm-backdrop" id="marks-confirm-backdrop"></div>' +
+        '<div class="marks-confirm-box">' +
+          '<div class="marks-confirm-title" id="marks-confirm-title"></div>' +
+          '<p class="marks-confirm-text" id="marks-confirm-text"></p>' +
+          '<div class="marks-confirm-btns">' +
+            '<button id="marks-confirm-cancel">取消</button>' +
+            '<button id="marks-confirm-ok" class="danger"></button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(modal);
+      document.getElementById('marks-confirm-backdrop').addEventListener('click', hideMarksConfirm);
+      document.getElementById('marks-confirm-cancel').addEventListener('click', hideMarksConfirm);
+      document.getElementById('marks-confirm-ok').addEventListener('click', function () {
+        var cb = _marksConfirmCb;
+        hideMarksConfirm();
+        if (cb) cb();
+      });
+    }
+    document.getElementById('marks-confirm-title').textContent = opts.title;
+    document.getElementById('marks-confirm-text').textContent = opts.text;
+    document.getElementById('marks-confirm-ok').textContent = opts.okLabel || '删除';
+    _marksConfirmCb = onOk;
+    modal.hidden = false;
+  }
+  /* 删除后的统一收口：三格计数即时归零/更新；阅读器若正开着受影响的书，
+     重建高亮区间＋触发重渲（与正文里删单条高亮同路），正文高亮即时消失；
+     最后重渲标记页回空态。阅读进度/阅读统计/生词本不在此列、绝不触碰 */
+  function afterMarksCleared(sid) {
+    if (window.__wuriRefreshMarksRow) window.__wuriRefreshMarksRow();
+    var cur = window._jingCurrentId;
+    if (cur && (!sid || sid === cur) && window._jingHlRebuild) {
+      try {
+        window._jingHlRebuild(cur);
+        document.dispatchEvent(new CustomEvent('jing-rerender'));
+      } catch (e) {}
+    }
+    showMarks();
+  }
+  function askClearAllMarks(JM) {
+    var c = marksCounts(JM, null);
+    if (!c.total) return;
+    showMarksConfirm({
+      title: '全部删除',
+      text: '删除全部 ' + c.total + ' 条标记？所有书的书签（' + c.bm + ' 条）、高亮（' + c.hl + ' 条）和心得（' + c.nt + ' 条）会一起删除，删除后无法恢复。',
+      okLabel: '全部删除'
+    }, function () {
+      JM.clearAllMarks();
+      afterMarksCleared(null);
+    });
+  }
+  function askClearBookMarks(JM, sid) {
+    var c = marksCounts(JM, sid);
+    if (!c.total) return;
+    showMarksConfirm({
+      title: '删除本书标记',
+      text: '删除《' + titleOf(sid) + '》的全部 ' + c.total + ' 条标记？这本书的书签（' + c.bm + ' 条）、高亮（' + c.hl + ' 条）和心得（' + c.nt + ' 条）会一起删除，删除后无法恢复。',
+      okLabel: '删除'
+    }, function () {
+      JM.clearBookMarks(sid);
+      afterMarksCleared(sid);
+    });
+  }
+
   function showMarks(tab) {
     // 守卫：只有用户点了"我的标记"才允许显示，防止 tab 切换时误显示
     if (!window._jingMarksUserRequested && !tab) return;
@@ -5602,7 +5726,9 @@ var JingWen = (function () {
     var JM = window.JingMark;
     if (!JM) { marksEl.innerHTML = '<p class="hint">加载中…</p>'; return; }
 
-    var html = '<div class="jing-rhead"><button class="mini-btn" id="marks-back">‹ 返回目录</button></div>';
+    var html = '<div class="jing-rhead"><button class="mini-btn" id="marks-back">‹ 返回目录</button>'
+      + (marksCounts(JM, null).total ? '<button class="mini-btn marks-clear-btn" id="marks-clear-all">全部删除</button>' : '')
+      + '</div>';
     // 页签
     html += '<div class="marks-tabs">'
       + '<button class="marks-tab' + (activeTab === 'bookmark' ? ' active' : '') + '" data-tab="bookmark">书签</button>'
@@ -5794,6 +5920,10 @@ var JingWen = (function () {
   function renderLines(JM) {
     var data = linesData(JM);
     var bookSid = linesBookSid();
+    /* 删除钮跟随范围切换：本书范围只删本书（三类一并），全部范围删所有书；
+       条数按范围实数（与搜索过滤无关，删的是整书/全部） */
+    var bookScoped = (linesScope === 'book' && !!bookSid);
+    var clearN = marksCounts(JM, bookScoped ? bookSid : null).total;
     var html = '<h3 class="jing-sec-h">我的标记（' + data.total + '）</h3>'
       + '<div class="lines-tools">'
       + '<input class="lines-search" id="lines-q" type="search" placeholder="搜索划线、心得、书名…" value="' + esc(linesQ) + '">'
@@ -5805,6 +5935,7 @@ var JingWen = (function () {
       + '<button class="mini-btn" id="lines-random">随机回顾</button>'
       + '<button class="mini-btn" id="lines-export-md">导出 Markdown</button>'
       + '<button class="mini-btn" id="lines-export-txt">导出 TXT</button>'
+      + (clearN ? '<button class="mini-btn marks-clear-btn" id="lines-clear">' + (bookScoped ? '删除本书标记' : '全部删除') + '</button>' : '')
       + '</div>'
       + '<div class="lines-note">跨书汇总全部划线与心得，点任一条跳回原文。</div>'
       + '<div id="lines-list">' + renderLinesList(JM) + '</div>';
@@ -5949,6 +6080,25 @@ var JingWen = (function () {
       if (e.target.closest('#marks-back')) {
         if (window._marksReturn && window.__wuriReturnToReader && window.__wuriReturnToReader()) return;
         closeMarksToList(); return;
+      }
+      // 全部删除（页头钮＝全部范围：所有书的书签＋高亮＋心得）
+      var clearAll = e.target.closest('#marks-clear-all');
+      if (clearAll) {
+        e.stopPropagation();
+        if (window.JingMark) askClearAllMarks(window.JingMark);
+        return;
+      }
+      // 汇总页删除钮：跟随其「全部／本书」范围切换
+      var linesClear = e.target.closest('#lines-clear');
+      if (linesClear) {
+        e.stopPropagation();
+        var JM3 = window.JingMark;
+        if (JM3) {
+          var bookSid3 = linesBookSid();
+          if (linesScope === 'book' && bookSid3) askClearBookMarks(JM3, bookSid3);
+          else askClearAllMarks(JM3);
+        }
+        return;
       }
       // 删除书签
       var delBm = e.target.closest('[data-del-bm]');
