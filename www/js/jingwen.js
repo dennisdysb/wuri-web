@@ -5081,10 +5081,10 @@ var JingWen = (function () {
       return s + '</div>';
     };
     if (!isExisting) {
-      // 新建高亮：按钮一行（分享/图卡/取消）＋八色一行（底部固定）
+      // 新建高亮：按钮一行（文字分享/图卡分享/取消）＋八色一行（底部固定）
       html += '<div class="hl-pop-row">'
-        + '<button id="hl-share">分享</button>'
-        + '<button id="hl-card">图卡</button>'
+        + '<button id="hl-share">文字分享</button>'
+        + '<button id="hl-card">图卡分享</button>'
         + '<button id="hl-cancel">取消</button></div>';
       html += colorRow('data-hl-color');
     } else {
@@ -5093,8 +5093,8 @@ var JingWen = (function () {
       if (exNoteText) html += '<div class="hl-pop-note">想法：' + escH(exNoteText) + '</div>';
       html += '<div class="hl-pop-row">'
         + '<button id="hl-note">' + (exNoteText ? '改想法' : '写想法') + '</button>'
-        + '<button id="hl-share">分享</button>'
-        + '<button id="hl-card">图卡</button>'
+        + '<button id="hl-share">文字分享</button>'
+        + '<button id="hl-card">图卡分享</button>'
         + '<button id="hl-del">删除</button></div>';
       html += colorRow('data-hl-recolor');
     }
@@ -5120,8 +5120,9 @@ var JingWen = (function () {
     pendingHlId = null;
   }
 
-  /* 分享（2026-10-29 追加）：选中原文＋出处一行（《书名》·节名）纯文本；
-     优先系统分享通道 navigator.share，不支持时回落复制＋toast。不自建面板。 */
+  /* 文字分享（2026-10-29 追加，同日晚正名拆分）：选中原文＋出处一行
+     （《书名》·节名）纯文本；优先系统分享通道 navigator.share，
+     不支持时回落复制＋toast。不自建面板。与图卡分享为并列两路。 */
   function getShareParts() {
     var text = '', sid = null, sec = 0;
     if (pendingHlId) {
@@ -5152,7 +5153,7 @@ var JingWen = (function () {
     if (!p) return null;
     return p.text + (p.book ? '\n——《' + p.book + '》' + (p.secTitle ? '·' + p.secTitle : '') : '');
   }
-  /* 分享图卡（批二第 8 项）：宣纸底＋原文＋出处＋品牌落款，
+  /* 图卡分享（批二第 8 项）：宣纸底＋原文＋出处＋品牌落款，
      Canvas 出图走系统分享（图片）或保存。图卡是对外物料，恒用日间
      宣纸配色，不随夜间/红光变色。超长口径：字号自 40px 逐档降到
      28px 仍超 12 行时，截断至 12 行、末行尾加「……」。
@@ -5549,12 +5550,12 @@ var JingWen = (function () {
         window.getSelection().removeAllRanges();
         return;
       }
-      // 分享（选中文字或已存在高亮皆可；文案与收尾在 shareSelection 内）
+      // 文字分享（选中文字或已存在高亮皆可；文案与收尾在 shareSelection 内）
       if (e.target.closest('#hl-share')) {
         shareSelection();
         return;
       }
-      // 图卡（批二第 8 项，分享旁）
+      // 图卡分享（批二第 8 项，文字分享旁）
       if (e.target.closest('#hl-card')) {
         shareCard();
         return;
