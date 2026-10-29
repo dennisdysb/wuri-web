@@ -1288,7 +1288,7 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
 }
 
 /* 书签高亮 */
-.hl-pop{position:fixed;z-index:9999;background:#333;color:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center;justify-content:center;max-width:92vw;flex-wrap:wrap}
+.hl-pop{position:fixed;z-index:9999;background:#333;color:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;gap:8px;align-items:center;justify-content:center;width:max-content;max-width:92vw;flex-wrap:wrap}
 /* 底部固定模式：选中文字后从底部升起，避开系统菜单 */
 .hl-pop.hl-bottom{left:50%;transform:translateX(-50%);bottom:calc(112px + env(safe-area-inset-bottom));top:auto !important}
 .hl-pop[hidden]{display:none}
@@ -1318,6 +1318,13 @@ body.sky-red{
 .hl-pop .hl-orange{background:var(--hl-orange)}
 .hl-pop .hl-pink{background:var(--hl-pink)}
 .hl-pop .hl-teal{background:var(--hl-teal)}
+/* 小屏收紧（2026-10-29 分享钮加入后）：360 档色板与分享钮同排不溢出，
+   取消钮可次行；色板圆钮仅小屏略缩，大屏维持 32px */
+@media (max-width:420px){
+  .hl-pop{max-width:97vw;padding:8px 10px;gap:5px}
+  .hl-pop .hl-color-btn{width:27px;height:27px;font-size:12px}
+  .hl-pop button{padding:5px 9px;font-size:13px}
+}
 /* 正文高亮颜色 */
 .jing-para .hl{border-radius:3px;padding:1px 0;cursor:pointer}
 .jing-para .hl-yellow{background:var(--hl-yellow)}
@@ -3170,7 +3177,6 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 /* 阅读状态行：底部控制栏（#jing-dock）顶行，常显 卷/章名·本书%（翻页模式右侧并入页码） */
 #jing-statusbar{display:flex;align-items:baseline;gap:10px;padding:7px 14px 1px;font-size:.8rem;color:var(--muted);cursor:pointer;white-space:nowrap;overflow:hidden}
 #jing-status-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center}
-#jing-page-ind{flex:none;font-size:.78rem;color:var(--ink2)}
 #jing-statusbar[hidden]{display:none}
 .jd-bm-ico{flex:none;margin-left:auto;background:none;border:none;color:var(--gold,#8a6d3b);cursor:pointer;padding:2px 4px;line-height:0;align-self:center}
 .jd-bm-ico[hidden]{display:none}
@@ -3252,38 +3258,8 @@ body.sky-immersive #tabbar{display:none}
   #jing-statusbar{max-width:680px}
 }
 
-/* ---------- 阅读器左右翻页模式（三期切片引擎）：全屏 stage＋竖列切片 ----------
- * 二期曾用 CSS 多列＋横向滚动分页：Chrome 多列在横滚容器里分片不稳定
- * （同一节在分片/未分片两态横跳、总页数与落点无限振荡），三度真机失效
- * 后换引擎——正文回到竖向单列普通流，#jing-content 只作一页高的切片
- * 视口（overflow:hidden、scrollTop 程序呈现），页界由 JS 量测段落与
- * 行盒算出。滚动不再触发任何重排，分页几何与呈现彻底解耦 */
-#jing-reader.reader-paged {
-  position: fixed; inset: 0; z-index: 300;
-  background: var(--paper); color: var(--ink);
-  display: flex; flex-direction: column;
-  /* 底栏占位预留：控制栏（fixed 覆盖层）恰落此带内，沉浸隐藏底栏时此带
-     保留为空——翻页几何永不因底栏显隐重算（v284 闪烁病根之一）。JS 量测
-     时会按底栏实测顶边把此值校准为内联值（可用高吃满至底栏顶边） */
-  padding-bottom: calc(98px + env(safe-area-inset-bottom));
-  box-sizing: border-box;
-}
-#jing-reader.reader-paged #jing-title,
-#jing-reader.reader-paged #jing-subtitle,
-#jing-reader.reader-paged #jing-srcnote { display: none; }
-#jing-reader.reader-paged #jing-content {
-  flex: 1 1 auto; min-height: 0;
-  overflow: hidden; /* 切片视口：只许 JS 以 scrollTop 呈现页片，用户不可原生滚动 */
-  overflow-anchor: none; /* 关 Chrome 滚动锚定：注音/填充重排期它会与落位对打 */
-  scrollbar-width: none;
-  touch-action: none; /* 手势全归 JS 分页接管，不触发原生滚动/缩放手势链 */
-}
-#jing-reader.reader-paged #jing-content::-webkit-scrollbar { display: none; }
-/* 分页下全卷展开呈现（覆盖 hidden 折叠的 UA display:none，作者规则优先） */
-#jing-reader.reader-paged .jing-sec-body { display: block; }
-#jing-reader.reader-paged .jing-sec-h { pointer-events: none; }
-#jing-reader.reader-paged img.dz-fig { max-height: 55vh; }
-/* 页码已并入底部控制栏状态行（#jing-statusbar 内 #jing-page-ind），无独立浮标 */
+/* 阅读器左右翻页模式已于 2026-10-29 整体下线（只留滚动）：
+   .reader-paged 全套规则随之删除 */
 
 /* ===== 阅读器底部控制栏（2026-10-28 晚用户定案·五钮主行） =====
  * 阅读器打开期间：App 底 tab 与经文页眉不占位；顶部工具栏撤除；所有控制
@@ -3295,7 +3271,7 @@ body.sky-immersive #tabbar{display:none}
 body.reader-open #tabbar{display:none}
 body.reader-open #tab-jing .appbar{display:none}
 /* 滚动模式底部预留：底栏 86＋磬/返回悬浮钮顶 150＋8 净空＝158，滚到底时正文末行不被悬浮钮压住（恒定值、与底栏显隐无关） */
-#jing-reader:not(.reader-paged){padding-bottom:calc(158px + env(safe-area-inset-bottom))}
+#jing-reader{padding-bottom:calc(158px + env(safe-area-inset-bottom))}
 #jing-dock{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:560px;z-index:1000;
   background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   border-top:1px solid var(--line-soft);padding-bottom:env(safe-area-inset-bottom);

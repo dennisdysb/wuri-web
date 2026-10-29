@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=317">
+<link rel="stylesheet" href="css/style.css?v=318">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=77">
 </head>
@@ -248,17 +248,18 @@
         <button id="jing-back-fab" class="jing-back-fab" title="返回目录">‹</button>
         <!-- 书签悬浮按钮：加书签的唯一入口（点击在当前位置加书签） -->
         <button id="jing-bookmark-fab" class="jing-bookmark-fab" title="加书签">✎</button>
-        <!-- 底部控制栏（2026-10-28 晚定案＋当晚真机反馈批修订）：状态行
-             （卷/章名·本书%＋翻页页码，点状态行开卷次目录）＋主行按书类
-             分两套——常见经文五钮 读｜背｜字｜全展开/全收回｜注音（双态
-             钮面＝动作标签：点了会发生什么）；内丹/道藏四钮 目录｜字｜
-             全展开/全收回｜我的标记（无读/背/注音/磬）。读开播放面板
-             （声线/诵读/跟读/下载音频），字开显示面板（字号/翻页方式＋
-             本书组仅我的标记）。播放控制（暂停/停止）不占主行：独立半
-             透明悬浮胶囊 #jing-play-fab（可拖动），主行播放中保持原样。
-             本栏为 fixed 覆盖层、不占正文流，显隐不引起正文重排。 -->
+        <!-- 底部控制栏（2026-10-28 晚定案＋真机反馈批修订＋2026-10-29
+             翻页下线）：状态行（卷/章名·本书%，点状态行开卷次目录）＋主
+             行按书类分两套——常见经文五钮 读｜背｜字｜全展开/全收回｜
+             注音（双态钮面＝动作标签：点了会发生什么）；内丹/道藏四钮
+             目录｜字｜全展开/全收回｜注音（无读/背/磬；「我的标记」入
+             口在字面板本书组）。读开播放面板（声线/诵读/跟读/下载音
+             频），字开显示面板（字号＋本书组仅我的标记）。播放控制
+             （暂停/停止）不占主行：独立半透明悬浮胶囊 #jing-play-fab
+             （可拖动），主行播放中保持原样。本栏为 fixed 覆盖层、不占
+             正文流，显隐不引起正文重排。 -->
         <div id="jing-dock">
-          <div id="jing-statusbar" hidden><span id="jing-status-text"></span><span id="jing-page-ind" aria-hidden="true"></span></div>
+          <div id="jing-statusbar" hidden><span id="jing-status-text"></span></div>
           <div class="jing-more-panel" id="jing-play-panel" hidden>
             <div class="jmp-sec">
               <div class="jmp-h">播放</div>
@@ -280,7 +281,6 @@
               <div class="jmp-row">
                 <button class="mini-btn tiny" id="jing-font-dec">字小</button>
                 <button class="mini-btn tiny" id="jing-font-inc">字大</button>
-                <button class="mini-btn tiny" id="jing-turn-btn">翻页·滚动</button>
               </div>
             </div>
             <div class="jmp-sec">
@@ -297,7 +297,6 @@
             <button class="mini-btn jd-btn" id="jing-font-btn" aria-expanded="false">字</button>
             <button class="mini-btn jd-btn" id="jing-foldall">全展开</button>
             <button class="mini-btn jd-btn" id="jing-pybtn">注音开</button>
-            <button class="mini-btn jd-btn" id="jing-dock-marks" hidden>我的标记</button>
           </div>
         </div>
         <!-- 播放悬浮胶囊（2026-10-28 晚反馈批：暂停/停止不占底栏主行；
@@ -979,7 +978,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v317）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v318）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
