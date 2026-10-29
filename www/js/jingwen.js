@@ -1989,7 +1989,7 @@ var JingWen = (function () {
     if (window.__wuri_dzAnnotate) { try { window.__wuri_dzAnnotate(d, si); } catch (e) {} }
     body.innerHTML = sec.paras.map(function (p, pi) {
       if (p.img) return dzFigHtml(p);
-      return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + rubyPara(p, si, pi) + '</p>';
+      return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + (reciteMode ? recitePara(p) : rubyPara(p, si, pi)) + '</p>';
     }).join('');
     body.removeAttribute('data-lazy');
     if (window._jingHlRebuild) { try { window._jingHlRebuild(currentId); } catch (e) {} }
@@ -2443,12 +2443,99 @@ var JingWen = (function () {
     asSyncBtn();
   });
 
+  /* 背诵原地切换（2026-10-29 晚用户真机两例实证后改，supersede 旧
+   * 「toggleRecite→openReader 整书重渲」）：旧实现点「背」必整书重渲——
+   * 多节书重渲后节体回到折叠（《钟吕传道集》读到卷十四中段点背全书
+   * 收回成标题列表）、单节长书滚动恢复在新布局下失效跳回篇首（《太上
+   * 老君开天经》45% 点背回开头）、且 openReader 内的 loadCoverage 会把
+   * 未落盘的内存覆盖账读回旧值（页脚 % 45→42 回退）。现行口径：不重渲
+   * 整书，只把已填充节体的段落内容在原 DOM 上按新模式换一遍（节展开
+   * 集、覆盖账本、滚动锚点全部原样保留），未填充的懒卷不碰、其后展开
+   * 时 dzFillSection 按现行模式出；切换前锚住视口顶边正看的那一段，
+   * 切换后轮询把该段拉回同一视口位置，用户手势接管即停手。锚点选段
+   * 不用进度口径的 120px 顶线：两形态段高悬殊，跨线段会随形态换人
+   * （实测进背时锚点段本人在原位、跨线段却后移两段，退出再锚错段、
+   * 视图漂移数行）——按视口顶边（bottom>0 的第一段）选段，身份与形态
+   * 无关、进出对称。恢复时目标位钳制：新形态下整段高不足时不许把段
+   * 顶拉到视口外（长段在背诵形态只剩两三行，原 top 无从达到）。 */
+  var _reciteAnchorGen = 0;
+  function captureReciteAnchor() {
+    var ps = document.querySelectorAll('#jing-content p.jing-para');
+    for (var i = 0; i < ps.length; i++) {
+      var body = ps[i].closest('.jing-sec-body');
+      if (!body || body.hidden) continue;
+      var r = ps[i].getBoundingClientRect();
+      if (r.bottom > 0) return { el: ps[i], top: r.top };
+    }
+    var secs = document.querySelectorAll('#jing-content .jing-sec');
+    for (var j = 0; j < secs.length; j++) {
+      var sr = secs[j].getBoundingClientRect();
+      if (sr.bottom > 0) return { el: secs[j], top: sr.top };
+    }
+    return null;
+  }
+  function insistReciteAnchor(anchor, sid) {
+    var gen = ++_reciteAnchorGen;
+    var tries = 0, hits = 0, cancelled = false;
+    var onGesture = function () { cancelled = true; };
+    window.addEventListener('touchstart', onGesture, { passive: true });
+    window.addEventListener('wheel', onGesture, { passive: true });
+    var iv = setInterval(function () {
+      tries++;
+      var done = cancelled || gen !== _reciteAnchorGen || window._jingCurrentId !== sid
+        || !anchor.el || !anchor.el.isConnected || tries > 14;
+      if (!done) {
+        var r = anchor.el.getBoundingClientRect();
+        var want = Math.max(anchor.top, -(Math.max(0, r.height - 80)));
+        var delta = r.top - want;
+        if (Math.abs(delta) <= 2) { hits++; if (hits >= 2) done = true; }
+        else { hits = 0; window.scrollBy(0, delta); }
+      }
+      if (done) {
+        clearInterval(iv);
+        window.removeEventListener('touchstart', onGesture);
+        window.removeEventListener('wheel', onGesture);
+      }
+    }, 120);
+  }
+  function reciteSwapInPlace(d) {
+    /* 先刷新高亮范围表（rubyPara 渲染时读它）：退出背诵回普通排版时
+       高亮投影随本次换段一并重挂，背诵形态本身不消费该表 */
+    if (window._jingHlRebuild) { try { window._jingHlRebuild(currentId); } catch (e) {} }
+    document.querySelectorAll('#jing-content .jing-sec-body').forEach(function (body) {
+      if (body.hasAttribute('data-lazy')) return; /* 未填充卷：展开时按现行模式出 */
+      var si = +(body.parentNode && body.parentNode.getAttribute('data-sec'));
+      var sec = d.sections[si];
+      if (!sec || !sec.paras) return;
+      var isQingSec = /赞|韵|咒|偈|开经|完经/.test(sec.h || '');
+      body.querySelectorAll('p.jing-para').forEach(function (el) {
+        var pi = +el.getAttribute('data-para');
+        var p = sec.paras[pi];
+        if (!p || p.img) return;
+        var txt = reciteMode ? recitePara(p) : rubyPara(p, si, pi);
+        if (isQingSec && pi === sec.paras.length - 1) {
+          txt += ' <span class="qing-inline" data-qing title="此处叩磬">（敲磬）</span>';
+        }
+        el.innerHTML = txt;
+      });
+    });
+  }
   function toggleRecite() {
     reciteMode = !reciteMode;
     try { localStorage.setItem('wuri_jing_recite', reciteMode ? '1' : '0'); } catch (e) {}
-    // 重新渲染当前经文
-    if (currentId) openReader(currentId);
-    else applyReaderPrefs();
+    var d = currentId && window.JINGWEN && window.JINGWEN[currentId];
+    var content = document.getElementById('jing-content');
+    if (!d || !d.sections || !content || !content.querySelector('.jing-sec')) {
+      /* 数据未就绪（全藏异步取文中）：回落整书渲染，维持旧行为 */
+      if (currentId) openReader(currentId);
+      else applyReaderPrefs();
+      return;
+    }
+    var anchor = captureReciteAnchor();
+    reciteSwapInPlace(d);
+    applyReaderPrefs();
+    if (anchor) insistReciteAnchor(anchor, currentId);
+    setTimeout(updateReadUI, 60);
   }
 
   /* ---------- 跟读模式 ---------- */
