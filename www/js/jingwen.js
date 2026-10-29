@@ -1774,11 +1774,11 @@ var JingWen = (function () {
       syncDockPlayUI(_dockState); /* 胶囊显隐随阅读器可见性重同步 */
       // 切到无音频经时若跟读开着，自动退出跟读态（避免高亮映射残留到新经）
       if (followMode && !hasAudio(id)) toggleFollow();
-      /* 磬钮数据判定（反馈批第 2 条）：本书是否有敲磬语境。
+      /* 磬语境数据判定（反馈批第 2 条）：本书是否有敲磬语境。
          两路并集——①任一段落原文含「敲磬」字样（经文自带的舞台指示）；
          ②任一节名属赞/韵/咒/偈/开经/完经类（渲染时在末段追加内联（敲磬）
-         标注，见下方 isQingSec）。判定结果存 window._jingHasQing；实际
-         显示还须叠加书类闸（仅常见经文类，见 updateFab 的 fabIsNdDz） */
+         标注，见下方 isQingSec）。判定结果存 window._jingHasQing；
+         2026-10-29 晚起磬钮全书开放、本判定不再作显隐闸（见 updateFab） */
       var hasQing = false;
       if (d.sections) {
         for (var qi = 0; qi < d.sections.length && !hasQing; qi++) {
@@ -4323,16 +4323,9 @@ var JingWen = (function () {
   };
   /* 悬浮钮模式（反馈批第 1 条定内丹/道藏 ghost；2026-10-29 用户真机
      定版推广全书类）：ghost＝阅读器打开即生效（半透明＋可拖＋恢复
-     持久化位置），与书类无关；fabIsNdDz 此后仅余磬显隐书类闸一职 */
+     持久化位置），与书类无关；磬钮自 2026-10-29 晚起全书开放，
+     显隐只随阅读器开关（见 updateFab），不再设书类闸 */
   var _fabGhost = null;
-  function fabIsNdDz(curId) {
-    if (!curId) return false;
-    try {
-      if (window.JingWen && JingWen.isNeidan && JingWen.isNeidan(curId)) return true;
-      var d = window.JINGWEN && window.JINGWEN[curId];
-      return !!(d && d.daozang);
-    } catch (e) { return false; }
-  }
   function applyFabPos(el, pos) {
     if (!el) return;
     if (pos && typeof pos.x === 'number') {
@@ -4361,12 +4354,13 @@ var JingWen = (function () {
       if (ghost) { applyFabPos(bf, storedFabPos('back')); applyFabPos(mf, storedFabPos('bm')); applyFabPos(qf, storedFabPos('qing')); }
       else { applyFabPos(bf, null); applyFabPos(mf, null); applyFabPos(qf, null); }
     }
-    /* 磬（反馈批第 2 条＋2026-10-28 晚收紧）：显示＝常见经文类 AND 数据
-       判定有敲磬。数据判定在 renderReaderBody 扫描（window._jingHasQing）；
-       书类复用底栏分书类同一谓词 fabIsNdDz（内丹/道藏四钮类的反面）——
-       内丹、道藏无论正文有无（敲磬）舞台指示，一律不出现磬钮 */
+    /* 磬（2026-10-29 晚用户真机定：全书开放，supersede 2026-10-28 晚
+       v316 收紧口径）：阅读器打开即显示——常见经文/常见内丹书籍/道藏
+       全集一律有磬钮，点即手动敲磬（audio/qing.mp3 既有路径）；带
+       （敲磬）标注的书内联标注渲染与点按行为保持原样，无标注书纯
+       手动。window._jingHasQing 数据判定此后不再作磬显隐闸 */
     var qFab = document.getElementById('qing-btn');
-    if (qFab) qFab.classList.toggle('show', !!(showReader && window._jingHasQing && !fabIsNdDz(curId)));
+    if (qFab) qFab.classList.toggle('show', !!showReader);
     var backFab = document.getElementById('jing-back-fab');
     if (backFab) backFab.classList.toggle('show', showReader);
     /* 加书签悬浮钮＝加书签唯一入口（第 7 条）；「我的标记」本书组行
