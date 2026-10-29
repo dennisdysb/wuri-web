@@ -322,12 +322,26 @@
   function worksOfBu(bu) {
     return (idxData.works || []).filter(function (w) { return w.bu === bu; });
   }
+  /* 部短签（pill 第三档补位用）：輯要→輯要、續道藏→續藏、余者去「部」字 */
+  function buShort(bu) {
+    if (bu === '道藏輯要') return '輯要';
+    if (bu === '續道藏') return '續藏';
+    return String(bu || '').replace(/部$/, '');
+  }
   function workRow(w) {
+    /* 标签 pill（2026-10-28 晚反馈批第 17 条）：lei（十二部類）只有三洞
+       （洞真/洞玄/洞神）有真值，四辅/續/輯要按道藏目录学本就不分十二類、
+       源数据 lei 为空——不编造类名，依次以正統道藏編號（DZxxxx）、所属
+       部短签补位（輯要诸书无 DZ 编号、散见双空共 134 行），全藏书行样式
+       统一（图标＋pill＋卷/字），三档都是真实目录信息 */
+    var pill = w.lei ? '<span class="dz-lei">' + esc(dzTx(w.lei)) + '</span>'
+      : (w.dz ? '<span class="dz-lei dz-lei-dz">' + esc(w.dz) + '</span>'
+      : '<span class="dz-lei dz-lei-bu">' + esc(dzTx(buShort(w.bu))) + '</span>');
     return '<div class="dz-work" data-dz-work="' + w.id + '">'
       + '<span class="jing-book">藏</span>'
       + '<span class="dz-wtext"><span class="dz-wt">' + esc(dzTx(w.title)) + '</span>'
       + '<span class="dz-wmeta">'
-      + (w.lei ? '<span class="dz-lei">' + esc(dzTx(w.lei)) + '</span>' : '')
+      + pill
       + '<span class="dz-wm">' + w.juan + ' ' + txUi('卷') + ' · ' + fmtNum(w.chars) + ' ' + txUi('字') + '</span>'
       + '</span></span></div>';
   }
@@ -406,6 +420,63 @@
     if (!host || host.querySelector('[data-dz-fold]')) return;
     renderFold(host);
   };
+  /* ---------- 回选部悬浮钮（2026-10-28 晚反馈批第 16 条） ----------
+   * 某部展开且深滚（滚过该部标题行约 1.5 屏、且仍在该部书单内）时，
+   * 右下出现「↑ 选部」，一键平滑回当前部标题行（在那里收起/改选）；
+   * 未展开部、浅滚、已滚出该部、阅读器/标记页打开时都不出现 */
+  var dzBuFab = null, dzBuTarget = null, dzBuTick = false;
+  function dzBuFabEl() {
+    if (dzBuFab) return dzBuFab;
+    dzBuFab = document.createElement('button');
+    dzBuFab.id = 'dz-bu-fab';
+    dzBuFab.type = 'button';
+    dzBuFab.textContent = '↑ 选部';
+    dzBuFab.hidden = true;
+    dzBuFab.addEventListener('click', function () {
+      if (dzBuTarget) dzBuTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    document.body.appendChild(dzBuFab);
+    return dzBuFab;
+  }
+  function dzBuFabUpdate() {
+    dzBuTick = false;
+    var fab = dzBuFabEl();
+    var show = false, target = null;
+    try {
+      var tab = document.getElementById('tab-jing');
+      var marks = document.getElementById('jing-marks');
+      var body = document.querySelector('[data-dz-body]');
+      var ok = tab && tab.classList.contains('active')
+        && !document.body.classList.contains('reader-open')
+        && (!marks || marks.hidden)
+        && body && !body.hidden;
+      if (ok) {
+        var y = window.scrollY || 0, vh = window.innerHeight || 0;
+        var heads = body.querySelectorAll('[data-dz-bu]');
+        for (var i = 0; i < heads.length; i++) {
+          var h = heads[i];
+          var wrap = h.parentNode ? h.parentNode.querySelector('[data-dz-works="' + h.getAttribute('data-dz-bu') + '"]') : null;
+          if (!wrap || wrap.hidden) continue;
+          var hTop = h.getBoundingClientRect().top + y;
+          if (hTop > y + 4) break; /* 已到视口下方的部：更后面的更不用看 */
+          if (y - hTop > vh * 1.5) {
+            var wBot = wrap.getBoundingClientRect().bottom + y;
+            if (wBot > y + 100) { target = h; show = true; }
+          }
+        }
+      }
+    } catch (e) { show = false; target = null; }
+    dzBuTarget = target;
+    fab.hidden = !show;
+  }
+  function dzBuFabSchedule() {
+    if (dzBuTick) return;
+    dzBuTick = true;
+    requestAnimationFrame(dzBuFabUpdate);
+  }
+  window.addEventListener('scroll', dzBuFabSchedule, { passive: true });
+  window.addEventListener('resize', dzBuFabSchedule);
+  document.addEventListener('click', function () { setTimeout(dzBuFabSchedule, 60); }, true);
   /* 文库视图记忆接口（jingwen.js 调用）：读/写道藏侧展开态（折叠体＋各部） */
   window.__wuri_dzGetState = function () {
     var bu = {};

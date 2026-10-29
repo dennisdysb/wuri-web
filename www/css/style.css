@@ -627,6 +627,20 @@ details.disc-foot .hint{margin-top:9px}
 .jing-book{font-family:var(--serif);font-size:1.3rem;color:var(--gold-deep);border:1.5px solid var(--gold);border-radius:8px;width:44px;height:44px;line-height:42px;text-align:center;flex:none}
 .jing-title{flex:1;font-size:1.12rem;color:var(--ink)}
 .jing-go{font-size:1.6rem;color:var(--muted)}
+/* 书名列（2026-10-28 晚反馈批第 15 条）：书名占满整行宽、均衡断行杜绝
+   孤字行；读进度徽标退到书名下方小字行（.jing-sub），不再挤占书名行宽 */
+.jing-item .jing-twrap{flex:1;min-width:0;display:flex;flex-direction:column}
+.jing-item .jing-title{flex:none;text-wrap:balance}
+.jing-item .jing-sub{display:none}
+.jing-item .jing-sub.has{display:block;margin-top:3px}
+.jing-item .jing-sub .read-prog{margin-left:0}
+/* 道藏书名同样均衡断行（徽标本就在小字流内、不挤行宽） */
+.dz-wt{text-wrap:balance}
+/* 回选部悬浮钮（第 16 条）：经文页内某部展开且深滚时出现，右下、底栏
+   上方（避开右下既有的置顶钮 .to-top@118，再叠一层）；三态走变量链 */
+#dz-bu-fab{position:fixed;right:18px;bottom:calc(190px + env(safe-area-inset-bottom));z-index:960;padding:10px 16px;border-radius:999px;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 92%,transparent);color:var(--gold-deep);font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer}
+#dz-bu-fab[hidden]{display:none}
+.dz-bu{scroll-margin-top:64px}
 .jing-locktag{flex:none;font-size:.72rem;color:var(--gold-deep);border:1px solid var(--gold);border-radius:999px;padding:2px 8px;white-space:nowrap}
 .jing-res-count{color:var(--muted);font-size:.9rem;margin:8px 0}
 .jing-res{padding:12px 4px;border-bottom:1px solid var(--line-soft);cursor:pointer}
@@ -654,8 +668,10 @@ details.disc-foot .hint{margin-top:9px}
 #jing-content.dz-punct .jing-para.dz-verse{text-indent:0;line-height:1.8;margin:0;text-align:left}
 #jing-content.dz-punct .jing-para.dz-dlg{text-indent:0}
 #jing-content.dz-punct .jing-para.dz-cht{text-indent:0;font-weight:700;font-size:1.06em;margin:1em 0;text-align:left}
-/* 跟读模式 */
-#jing-content.follow-on .jing-para{cursor:pointer;border-radius:6px;padding:4px 6px;margin:0 -6px 8px;transition:background .2s}
+/* 跟读模式（2026-10-28 晚反馈批第 5 条：高亮只许变背景/字色，绝不改段落
+   盒尺寸与行高——旧口径 padding:4px 6px＋margin:0 -6px 8px 在开关瞬间
+   全页重排、锚点串位，真机实录；hover/当前句仅背景与内阴影，几何安全） */
+#jing-content.follow-on .jing-para{cursor:pointer;border-radius:6px}
 #jing-content.follow-on .jing-para:hover{background:rgba(200,170,90,.12)}
 #jing-content.follow-on .jing-para.follow-cur{background:rgba(200,170,90,.22);box-shadow:inset 3px 0 0 var(--gold,#c8a95a)}
 #jing-follow.on{background:var(--gold,#c8a95a);color:#fff;border-color:transparent}
@@ -1071,7 +1087,22 @@ body.jing-immersive #qing-btn{opacity:0;pointer-events:none;transform:translateY
 /* 阅读器浮动返回钮（与磬成对，左下）：基类 .jing-back-fab 与星象子视图等共用，
    此处只以 id 定点覆盖阅读器这一枚的底距（与磬同为 94＋安全区，悬在底栏上方）
    与沉浸联动，不动共享基类 */
-#jing-back-fab{bottom:calc(94px + env(safe-area-inset-bottom));transition:opacity .18s ease,transform .18s ease}
+/* 阅读器悬浮钮右侧竖列（2026-10-28 晚反馈批第 1/3 条）：底→上＝磬 94 /
+   返回 168 / 书签 242；层级 999 低于底栏与一切底部面板（dock 1000），
+   面板打开时被面板盖住、不挡面板内键。基类 .jing-back-fab（其他视图
+   共用、左下）不动，只用 #id 覆写阅读器这一枚。 */
+#jing-back-fab{left:auto;right:18px;bottom:calc(168px + env(safe-area-inset-bottom));z-index:999;transition:opacity .18s ease,transform .18s ease}
+#jing-bookmark-fab{left:auto;right:18px;bottom:calc(242px + env(safe-area-inset-bottom));z-index:999}
+/* 内丹/道藏：悬浮钮半透明＋可拖（body.fabs-ghost 由 updateFab 按书类切） */
+body.fabs-ghost #jing-back-fab,body.fabs-ghost #jing-bookmark-fab{opacity:.55;touch-action:none}
+body.fabs-ghost #jing-back-fab:active,body.fabs-ghost #jing-bookmark-fab:active{opacity:.85}
+/* 播放悬浮胶囊（第 4 条）：半透明、可拖、默认左下；沉浸同隐；
+   层级 999 同悬浮钮，受面板盖压规则约束 */
+#jing-play-fab{position:fixed;left:18px;bottom:calc(94px + env(safe-area-inset-bottom));z-index:999;display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--teal-deep) 88%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28);touch-action:none}
+#jing-play-fab[hidden]{display:none}
+#jing-play-fab .jpf-btn{border:none;background:transparent;color:#fff;font:inherit;font-size:.9rem;padding:9px 16px;border-radius:999px;cursor:pointer}
+#jing-play-fab .jpf-btn:active{background:rgba(255,255,255,.18)}
+body.jing-immersive #jing-play-fab{opacity:0;pointer-events:none;transition:opacity .25s}
 body.jing-immersive #jing-back-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
 /* 书签悬浮钮（左下竖叠：返回钮顶 150＋间隙 14＝底距 164，与另两钮同显同隐） */
 #jing-bookmark-fab{transition:opacity .18s ease,transform .18s ease}
@@ -1264,32 +1295,53 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
 .hl-pop button{border:none;border-radius:6px;padding:6px 12px;font-size:14px;cursor:pointer;background:#555;color:#fff}
 .hl-pop button.primary{background:#f5c518;color:#333}
 .hl-pop .hl-color-btn{width:32px;height:32px;border-radius:50%;padding:0;font-weight:bold;color:#333}
-.hl-pop .hl-yellow{background:#fff3a3}
-.hl-pop .hl-green{background:#c8f0c8}
-.hl-pop .hl-blue{background:#c8e0f8}
-.hl-pop .hl-red{background:#f8c8c8}
+/* 划线 8 色（2026-10-28 晚反馈批第 9 条：4 色→8 色；色值走变量链——
+   日间浅底/夜间深底/红光红谱亮度梯度，三态都可辨；旧 4 色键名不变、
+   存量数据直接兼容） */
+:root{
+  --hl-yellow:#fff3a3;--hl-green:#c8f0c8;--hl-blue:#c8e0f8;--hl-red:#f8c8c8;
+  --hl-purple:#e3ccf5;--hl-orange:#fbe0bd;--hl-pink:#fbd3e0;--hl-teal:#c2ecec;
+}
+[data-theme="night"]{
+  --hl-yellow:#7a6a1a;--hl-green:#2d6a2d;--hl-blue:#2a4d7a;--hl-red:#7a2d2d;
+  --hl-purple:#4d2a6a;--hl-orange:#7a4d1a;--hl-pink:#6e2a44;--hl-teal:#1f5a5a;
+}
+body.sky-red{
+  --hl-yellow:#8a4a20;--hl-green:#6e2f16;--hl-blue:#5f2413;--hl-red:#93331f;
+  --hl-purple:#4a1a10;--hl-orange:#a85424;--hl-pink:#b06a4a;--hl-teal:#c98a6a;
+}
+.hl-pop .hl-yellow{background:var(--hl-yellow)}
+.hl-pop .hl-green{background:var(--hl-green)}
+.hl-pop .hl-blue{background:var(--hl-blue)}
+.hl-pop .hl-red{background:var(--hl-red)}
+.hl-pop .hl-purple{background:var(--hl-purple)}
+.hl-pop .hl-orange{background:var(--hl-orange)}
+.hl-pop .hl-pink{background:var(--hl-pink)}
+.hl-pop .hl-teal{background:var(--hl-teal)}
 /* 正文高亮颜色 */
 .jing-para .hl{border-radius:3px;padding:1px 0;cursor:pointer}
-.jing-para .hl-yellow{background:#fff3a3}
-.jing-para .hl-green{background:#c8f0c8}
-.jing-para .hl-blue{background:#c8e0f8}
-.jing-para .hl-red{background:#f8c8c8}
+.jing-para .hl-yellow{background:var(--hl-yellow)}
+.jing-para .hl-green{background:var(--hl-green)}
+.jing-para .hl-blue{background:var(--hl-blue)}
+.jing-para .hl-red{background:var(--hl-red)}
+.jing-para .hl-purple{background:var(--hl-purple)}
+.jing-para .hl-orange{background:var(--hl-orange)}
+.jing-para .hl-pink{background:var(--hl-pink)}
+.jing-para .hl-teal{background:var(--hl-teal)}
 .jing-para .hl-flash{outline:2px solid #f5c518;outline-offset:2px}
-/* 夜间模式：高亮用深色底，保证浅色文字可读 */
-[data-theme="night"] .jing-para .hl-yellow{background:#7a6a1a;color:#fff}
-[data-theme="night"] .jing-para .hl-green{background:#2d6a2d;color:#fff}
-[data-theme="night"] .jing-para .hl-blue{background:#2a4d7a;color:#fff}
-[data-theme="night"] .jing-para .hl-red{background:#7a2d2d;color:#fff}
+/* 夜间/红光：高亮深底配浅字（底色已由变量切换，此处只管字色） */
+[data-theme="night"] .jing-para .hl,body.sky-red .jing-para .hl{color:#fff}
 .jing-hl-item{padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
 .jing-hl-item .hl-text{padding:2px 4px;border-radius:3px}
-.jing-hl-item .hl-text.hl-yellow{background:#fff3a3}
-.jing-hl-item .hl-text.hl-green{background:#c8f0c8}
-.jing-hl-item .hl-text.hl-blue{background:#c8e0f8}
-.jing-hl-item .hl-text.hl-red{background:#f8c8c8}
-[data-theme="night"] .jing-hl-item .hl-text.hl-yellow{background:#7a6a1a;color:#fff}
-[data-theme="night"] .jing-hl-item .hl-text.hl-green{background:#2d6a2d;color:#fff}
-[data-theme="night"] .jing-hl-item .hl-text.hl-blue{background:#2a4d7a;color:#fff}
-[data-theme="night"] .jing-hl-item .hl-text.hl-red{background:#7a2d2d;color:#fff}
+.jing-hl-item .hl-text.hl-yellow{background:var(--hl-yellow)}
+.jing-hl-item .hl-text.hl-green{background:var(--hl-green)}
+.jing-hl-item .hl-text.hl-blue{background:var(--hl-blue)}
+.jing-hl-item .hl-text.hl-red{background:var(--hl-red)}
+.jing-hl-item .hl-text.hl-purple{background:var(--hl-purple)}
+.jing-hl-item .hl-text.hl-orange{background:var(--hl-orange)}
+.jing-hl-item .hl-text.hl-pink{background:var(--hl-pink)}
+.jing-hl-item .hl-text.hl-teal{background:var(--hl-teal)}
+[data-theme="night"] .jing-hl-item .hl-text,body.sky-red .jing-hl-item .hl-text{color:#fff}
 .jing-hl-item .hl-meta{font-size:12px;color:var(--muted);margin-top:4px}
 .jing-hl-item .hl-del{float:right;color:#c00;font-size:12px}
 /* 我的标记页签 */
@@ -3147,7 +3199,8 @@ body.sky-red .hpe-rose-gua { fill:#eda88f; }
 .jing-toc-ch{padding:7px 14px 7px 30px;cursor:pointer;font-size:.88rem;color:var(--muted);font-family:var(--serif)}
 .jing-toc-ch:active{background:var(--line-soft)}
 /* 查字悬浮钮（右下、磬钮之上） */
-.dict-fab{position:fixed;right:18px;bottom:calc(162px + env(safe-area-inset-bottom));z-index:950;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 88%,transparent);color:var(--gold-deep,#8a6d1f);font-family:var(--serif);font-size:1rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.22);cursor:pointer}
+/* 查字钮（2026-10-28 晚反馈批：右侧竖列已让给悬浮钮组，查字挪左下） */
+.dict-fab{position:fixed;left:18px;right:auto;bottom:calc(94px + env(safe-area-inset-bottom));z-index:950;width:56px;height:56px;border-radius:50%;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 88%,transparent);color:var(--gold-deep,#8a6d1f);font-family:var(--serif);font-size:1rem;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.22);cursor:pointer}
 .dict-fab[hidden]{display:none}
 .dict-fab:active{transform:scale(.92)}
 /* 查字弹卡（底部 sheet） */

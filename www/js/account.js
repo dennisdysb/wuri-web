@@ -1,8 +1,9 @@
 /* 戊日不上香 · 账号＋云同步 v1（2026-10-26）
  * 设计蓝本：~/workspace/wuri-app/account-design/DESIGN.md＋BINDING-DESIGN.md；后端：pay.shengboyu.ca（src/account.js）。
  * 2026-10-28 定版（supersede 2026-10-26 旧口径）：①购买码可凭证据自助绑进账号（bind-code），
- * 服务端归集只认已兑换码；赠送码走丙案——账号卡提交申请、人工按赠送登记表核对后绑，批准前不生效；
- * 无码存量（免费期）走三案——旧设备签发一次性迁移码、新设备同账号输码确认；②防共享：服务端有仅供
+ * 服务端归集只认已兑换码；赠送码与无码存量（免费期）的换机绑定走人工通道——【2026-10-28 晚
+ * 用户再拍板：赠送码换机申请（丙案）与存量迁移码（三案）的前端入口整套删除，后端端点休眠保留，
+ * 账号卡该区只剩绑码表单＋一句人工通道提示（本批第 18/19 条）】；②防共享：服务端有仅供
  * 安全裁决的设备凭据（本机持久 UUID，绝不进同步清单、不做设备列表 UI），密码账户在新设备首次登录须
  * 过已验证绑定邮箱的验证码（无已验证邮箱走人工），同一账户同时有效设备上限 3 台、第 4 台顶最早一台；
  * 被顶下线（session_evicted）只清账号会话与账号 Pro 缓存，绝不清本机激活事实；③权益铁律：服务端
@@ -1150,52 +1151,10 @@
       } else if (msg) msg.textContent = bindErrText(r);
     }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
   }
-  function doGiftRequest() {
-    var codeEl = $('acct-gift-code'), nameEl = $('acct-gift-name'), noteEl = $('acct-gift-note'), msg = $('acct-gift-msg');
-    var code = codeEl ? codeEl.value.toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
-    var name = nameEl ? nameEl.value.trim() : '';
-    var note = noteEl ? noteEl.value.trim() : '';
-    if (code.length !== 6 || !name) { if (msg) msg.textContent = T('acct_gift_need'); return; }
-    var body = { code: code, registeredName: name };
-    if (note) body.note = note;
-    var btn = $('acct-gift-btn'); if (btn) btn.disabled = true;
-    api('/api/account/gift-bind-request', { method: 'POST', body: body }).then(function (r) {
-      if (btn) btn.disabled = false;
-      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
-      if (r.body && r.body.ok) { if (msg) msg.textContent = T('acct_gift_ok'); }
-      else if (msg) msg.textContent = bindErrText(r);
-    }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
-  }
-  function doMigIssue() {
-    var msg = $('acct-mig-msg'), out = $('acct-mig-issued');
-    var btn = $('acct-mig-issue-btn'); if (btn) btn.disabled = true;
-    api('/api/account/legacy-migration/issue', { method: 'POST', body: { localUnlocked: true, deviceId: getDeviceId() } }).then(function (r) {
-      if (btn) btn.disabled = false;
-      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
-      if (r.body && r.body.ok && r.body.code) {
-        if (out) {
-          out.hidden = false;
-          out.textContent = TF('acct_mig_issued', r.body.code, String(r.body.expiresAt || '').replace('T', ' ').slice(0, 16));
-        }
-        if (msg) msg.textContent = '';
-      } else if (msg) msg.textContent = bindErrText(r);
-    }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
-  }
-  function doMigConfirm() {
-    var codeEl = $('acct-mig-code'), msg = $('acct-mig-msg');
-    var code = codeEl ? codeEl.value.trim() : '';
-    if (!code) { if (msg) msg.textContent = T('acct_mig_need'); return; }
-    var btn = $('acct-mig-confirm-btn'); if (btn) btn.disabled = true;
-    api('/api/account/legacy-migration/confirm', { method: 'POST', body: { code: code, deviceId: getDeviceId() } }).then(function (r) {
-      if (btn) btn.disabled = false;
-      if (r.status === 401) { on401(r && r.body && r.body.error); return; }
-      if (r.body && r.body.ok) {
-        if (msg) msg.textContent = T('acct_mig_ok');
-        applyBindSuccess(r.body);
-        toastMsg(T('acct_mig_ok'));
-      } else if (msg) msg.textContent = bindErrText(r);
-    }).catch(function () { if (btn) btn.disabled = false; if (msg) msg.textContent = T('acct_net_err'); });
-  }
+  /* 赠送码换机申请（丙案）与存量迁移码前端已删（2026-10-28 晚用户拍板，
+     本批第 18/19 条）：两类换机绑定改走人工通道（联系→后台核对后绑）；
+     后端 /api/account/gift-bind-request 与 legacy-migration 端点保持
+     休眠不动。账号卡该区只剩购买码绑码表单＋一句人工通道提示 */
   /* 登录后绑码体检：已登录＋本机已兑换且存有 WURI 码＋sources 未含该码＋snooze 未生效 */
   function checkBindPrompt() {
     var el = $('acct-bind-prompt');
@@ -1288,19 +1247,12 @@
         if (bsEl) bsEl.textContent = bindStatusText();
       }
       checkBindPrompt();
-      /* 赠送申请／手动绑码预填：仅在输入框为空时填本机存码，不覆盖用户输入 */
+      /* 手动绑码预填：仅在输入框为空时填本机存码，不覆盖用户输入 */
       var info2 = localProInfoSafe();
-      if (info2.code && info2.codeKind === 'gift') {
-        var gEl = $('acct-gift-code');
-        if (gEl && !gEl.value) gEl.value = info2.code;
-      }
       if (info2.code && info2.codeKind === 'wuri') {
         var bEl = $('acct-bind-code');
         if (bEl && !bEl.value) bEl.value = info2.code;
       }
-      /* 存量迁移生成按钮：仅本机已解锁（本机兑换标记或 Play 桥，不含账号 Pro 本身）时显示 */
-      var migBtn = $('acct-mig-issue-btn');
-      if (migBtn) migBtn.hidden = !info2.hasLocalPro;
       var tg = $('acct-sync-toggle'); if (tg) tg.checked = state.syncOn;
       var usage = lsJSON(K.usage, null);
       var qrow = $('acct-quota-row');
@@ -1742,9 +1694,6 @@
       var el = $('acct-bind-prompt'); if (el) el.hidden = true;
     });
     on('acct-bind-btn', 'click', doBindManual);
-    on('acct-gift-btn', 'click', doGiftRequest);
-    on('acct-mig-issue-btn', 'click', doMigIssue);
-    on('acct-mig-confirm-btn', 'click', doMigConfirm);
     on('acct-sync-toggle', 'change', function () {
       var tg = $('acct-sync-toggle');
       if (tg.checked) {
