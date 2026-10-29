@@ -318,7 +318,77 @@ var JingWen = (function () {
     /* 道藏全藏入口（daozang.js 挂钩，纯增量；无该脚本时目录不变） */
     if (window.__wuri_dzCatalog) { try { window.__wuri_dzCatalog(host); } catch (e) {} }
     decorateReadProgress();
+    shelfFabSchedule();
   }
+
+  /* ---------- 书架回顶悬浮钮（2026-10-29 用户定） ----------
+   * 常见经文/常见内丹书籍两书架：滚过本区标题行约 1.5 屏、且仍在本区内时，
+   * 右下出现「↑ <区名>」，一键平滑回本区标题行；浅滚、已滚出本区（进道藏
+   * 区）、本区收起、阅读器/标记页/搜索结果打开时都不出现。出现阈值、位置
+   * 与样式口径与道藏回选部钮（daozang.js dzBuFab）同一套，两钮按滚动所在
+   * 区互斥出现。 */
+  var shelfFab = null, shelfFabTarget = null, shelfFabLabel = '', shelfFabTick = false;
+  function shelfFabEl() {
+    if (shelfFab) return shelfFab;
+    shelfFab = document.createElement('button');
+    shelfFab.id = 'jing-shelf-fab';
+    shelfFab.type = 'button';
+    shelfFab.hidden = true;
+    shelfFab.addEventListener('click', function () {
+      if (shelfFabTarget) shelfFabTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    document.body.appendChild(shelfFab);
+    return shelfFab;
+  }
+  function shelfFabUpdate() {
+    shelfFabTick = false;
+    var fab = shelfFabEl();
+    var show = false, target = null, label = '';
+    try {
+      var tab = document.getElementById('tab-jing');
+      var marks = document.getElementById('jing-marks');
+      var results = document.getElementById('jing-results');
+      var list = document.getElementById('jing-list');
+      var ok = tab && tab.classList.contains('active')
+        && !document.body.classList.contains('reader-open')
+        && (!marks || marks.hidden)
+        && (!results || results.hidden)
+        && list && !list.hidden;
+      if (ok) {
+        var y = window.scrollY || 0, vh = window.innerHeight || 0;
+        var secs = [
+          { sec: list.querySelector('[data-common-sec]'), body: list.querySelector('.jing-common-body'), name: t('jing_sec_common') },
+          { sec: list.querySelector('[data-neidan-fold]'), body: list.querySelector('.jing-neidan-body'), name: t('jing_sec_neidan') }
+        ];
+        for (var i = 0; i < secs.length; i++) {
+          var s = secs[i];
+          if (!s.sec || !s.body || s.body.hidden) continue;
+          var head = s.sec.querySelector('.jing-sec-h');
+          if (!head) continue;
+          var hTop = head.getBoundingClientRect().top + y;
+          if (hTop > y + 4) break; /* 已到视口下方的区：更后面的更不用看 */
+          if (y - hTop > vh * 1.5) {
+            var sBot = s.sec.getBoundingClientRect().bottom + y;
+            if (sBot > y + 100) { target = head; label = s.name; show = true; }
+          }
+        }
+      }
+    } catch (e) { show = false; target = null; }
+    shelfFabTarget = target;
+    if (show && label !== shelfFabLabel) {
+      shelfFabLabel = label;
+      fab.textContent = '↑ ' + label;
+    }
+    fab.hidden = !show;
+  }
+  function shelfFabSchedule() {
+    if (shelfFabTick) return;
+    shelfFabTick = true;
+    requestAnimationFrame(shelfFabUpdate);
+  }
+  window.addEventListener('scroll', shelfFabSchedule, { passive: true });
+  window.addEventListener('resize', shelfFabSchedule);
+  document.addEventListener('click', function () { setTimeout(shelfFabSchedule, 60); }, true);
 
   /* ---------- 阅读器 ---------- */
   /* 道藏图版段（daozang.js 预切分出的 {img} 段）：渲染为图片块而非文字段。

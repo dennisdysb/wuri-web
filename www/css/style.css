@@ -641,6 +641,12 @@ details.disc-foot .hint{margin-top:9px}
 #dz-bu-fab{position:fixed;right:18px;bottom:calc(190px + env(safe-area-inset-bottom));z-index:960;padding:10px 16px;border-radius:999px;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 92%,transparent);color:var(--gold-deep);font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer}
 #dz-bu-fab[hidden]{display:none}
 .dz-bu{scroll-margin-top:64px}
+/* 书架回顶悬浮钮（2026-10-29 用户定）：常见经文/常见内丹书籍两书架深滚时
+   出现，点回当前书架块标题行；与回选部钮同一套（位置/样式/三态变量链），
+   两钮按滚动所在区互斥出现、不叠位 */
+#jing-shelf-fab{position:fixed;right:18px;bottom:calc(190px + env(safe-area-inset-bottom));z-index:960;padding:10px 16px;border-radius:999px;border:1px solid var(--gold);background:color-mix(in srgb,var(--paper) 92%,transparent);color:var(--gold-deep);font:inherit;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:pointer}
+#jing-shelf-fab[hidden]{display:none}
+[data-common-toggle],[data-neidan-toggle]{scroll-margin-top:64px}
 .jing-locktag{flex:none;font-size:.72rem;color:var(--gold-deep);border:1px solid var(--gold);border-radius:999px;padding:2px 8px;white-space:nowrap}
 .jing-res-count{color:var(--muted);font-size:.9rem;margin:8px 0}
 .jing-res{padding:12px 4px;border-bottom:1px solid var(--line-soft);cursor:pointer}
