@@ -567,6 +567,11 @@ var JingWen = (function () {
       m[id] = { y: Math.round(y || 0), expanded: expanded || [], ts: Date.now() };
       if (prev.frac != null) m[id].frac = prev.frac;
       if (prev.done) { m[id].done = true; if (prev.doneTs) m[id].doneTs = prev.doneTs; }
+      if (prev.cov) m[id].cov = prev.cov;
+      if (prev.covFrac != null) m[id].covFrac = prev.covFrac;
+      if (prev.covSec) m[id].covSec = prev.covSec;
+      if (prev.legacyFrac !== undefined) m[id].legacyFrac = prev.legacyFrac;
+      if (prev.legacyDone) { m[id].legacyDone = true; if (prev.legacyDoneTs) m[id].legacyDoneTs = prev.legacyDoneTs; }
       try { m[id].off = currentContentOffset(); } catch (e) {}
       var keys = Object.keys(m);
       if (keys.length > 40) {
@@ -640,17 +645,17 @@ var JingWen = (function () {
   function buildReaderMetrics(d) {
     _metrics = null; _lastOff = -1; _lastOffT = 0;
     if (!d || !d.sections) return;
-    var secLens = [], paraLens = [], cum = [], total = 0;
+    var secLens = [], paraLens = [], paraCum = [], cum = [], total = 0;
     d.sections.forEach(function (sec) {
       cum.push(total);
-      var pl = [], sl = 0;
+      var pl = [], pc = [], sl = 0;
       (sec.paras || []).forEach(function (p) {
         var L = p.img ? 0 : stripContent(p.t).length;
-        pl.push(L); sl += L;
+        pc.push(sl); pl.push(L); sl += L;
       });
-      paraLens.push(pl); secLens.push(sl); total += sl;
+      paraLens.push(pl); paraCum.push(pc); secLens.push(sl); total += sl;
     });
-    _metrics = { secLens: secLens, paraLens: paraLens, cum: cum, total: total };
+    _metrics = { secLens: secLens, paraLens: paraLens, paraCum: paraCum, cum: cum, total: total };
   }
   function contentOffsetNow() {
     if (!_metrics || !_metrics.total) return 0;
@@ -702,15 +707,172 @@ var JingWen = (function () {
   /* 跨闭包钩子：JingMark 书签存档借用同一字偏移口径 */
   window.__wuriReaderOffset = function () { try { return currentContentOffset(); } catch (e) { return 0; } };
 
+  /* ---------- 阅读覆盖账本（2026-10-29 进度误标修复） ----------
+   * 旧口径之病：frac＝当前位置偏移÷全书字数（contentOffsetNow 把视口
+   * 顶线以上的整节字数全计「已过」）——深链/位置恢复落到哪，前面的卷
+   * 就整卷算读完（用户实证：每日一经推《虚靖语录》卷五，前四卷全标
+   * 已读完、本书 63%，本人从未读过）。现行口径：只有真正进过视口带
+   * 的字才记账。_cov＝已读字区间并集（全书字坐标、升序合并）；节百
+   * 分比＝该节被覆盖字数÷节字数；本书 frac＝覆盖总字数÷全书字数。
+   * 节「已读完」阈值＝覆盖率≥0.90：记账以段为粒度做 rect 分数插值，
+   * 节首尾段只部分入带、图版段 0 字，真读完一节实测覆盖≥95%，0.90
+   * 留采样损耗余量、又明显高于「读了大半」；书「已读完」（读完信号，
+   * 阅读统计 rpStatsFinish 的唯一定义）＝覆盖率≥0.995。
+   * 记账节拍与 updateReadUI 同拍（滚动 300ms 节流＋开卷定时拍）：相
+   * 邻拍位移＞1.2 屏判为跳跃/直达穿越，该拍不记账、不弥合；连续小位
+   * 移滚动时弥合两拍间扫过的字带（仅与已展开已填充节求交的部分，
+   * 折叠节不凭空给分）。深链落位、展开、开目录、位置恢复本身都不产
+   * 生覆盖；落位后用户正看的那一屏自下一拍起正常记账。
+   * 落盘：随 autopos 条目存 cov（区间）/covFrac/covSec，frac 字段语义
+   * 自本版起改为真实覆盖率；off 仍是位置锚（落位用），分工不变。
+   * 存量条目只有旧 frac/done、无从分辨真读与误标：首次打开时把旧值
+   * 隔离存入 legacyFrac/legacyDone（原样保留、不删数据），账本从空
+   * 重计、done 活动旗清零，显示随即转新口径；统计 fin 已入账者不回
+   * 滚（同样无从分辨，见回执存量方案）。 */
+  var _cov = null;         /* 当前书已读字区间 [[a,b],...]（升序、已合并） */
+  var _covTotal = 0;       /* 区间并集总字数 */
+  var _covTick = null;     /* 上一记账拍 {y, lo, hi}：scrollY 与带覆盖字区间 */
+  var _covLegacy = false;  /* 本书存量进度待隔离落盘 */
+  var _covLegacyVals = null;
+  var COV_SEC_DONE = 0.90;
+  var COV_MAX_IV = 80;
+  function covInsert(a, b) {
+    if (!_cov) _cov = [];
+    if (b <= a) return;
+    var out = [], na = a, nb = b, placed = false;
+    for (var i = 0; i < _cov.length; i++) {
+      var iv = _cov[i];
+      if (iv[1] < na) { out.push(iv); continue; }
+      if (iv[0] > nb) {
+        if (!placed) { out.push([na, nb]); placed = true; }
+        out.push(iv); continue;
+      }
+      na = Math.min(na, iv[0]); nb = Math.max(nb, iv[1]);
+    }
+    if (!placed) out.push([na, nb]);
+    /* 区间数封顶：逐对并掉最近的一对（间隙被多算，量级为段落级、罕见触发） */
+    while (out.length > COV_MAX_IV) {
+      var bi = 0, bg = Infinity;
+      for (var j = 0; j + 1 < out.length; j++) {
+        var g = out[j + 1][0] - out[j][1];
+        if (g < bg) { bg = g; bi = j; }
+      }
+      out.splice(bi, 2, [out[bi][0], out[bi + 1][1]]);
+    }
+    _cov = out;
+    _covTotal = 0;
+    for (var k = 0; k < out.length; k++) _covTotal += out[k][1] - out[k][0];
+  }
+  function covCoveredIn(a, b) {
+    if (!_cov || b <= a) return 0;
+    var s = 0;
+    for (var i = 0; i < _cov.length; i++) {
+      if (_cov[i][1] <= a) continue;
+      if (_cov[i][0] >= b) break;
+      s += Math.min(b, _cov[i][1]) - Math.max(a, _cov[i][0]);
+    }
+    return s;
+  }
+  function coveredFracNow() {
+    return (_metrics && _metrics.total) ? _covTotal / _metrics.total : 0;
+  }
+  function secCovRatio(si) {
+    if (!_metrics) return 0;
+    var sl = _metrics.secLens[si] || 0;
+    if (!sl) return 1; /* 空节无字可读，视为满 */
+    return covCoveredIn(_metrics.cum[si], _metrics.cum[si] + sl) / sl;
+  }
+  function loadCoverage(id) {
+    _cov = []; _covTotal = 0; _covTick = null;
+    _covLegacy = false; _covLegacyVals = null;
+    var e = loadAutoPos(id);
+    if (!e) return;
+    if (Array.isArray(e.cov)) {
+      var raw = e.cov.filter(function (iv) {
+        return Array.isArray(iv) && isFinite(iv[0]) && isFinite(iv[1]) && iv[1] > iv[0];
+      }).sort(function (x, y) { return x[0] - y[0]; });
+      raw.forEach(function (iv) { covInsert(iv[0], iv[1]); });
+    } else if (e.frac != null || e.done) {
+      _covLegacy = true;
+      _covLegacyVals = { frac: (e.frac != null ? e.frac : null), done: !!e.done, doneTs: e.doneTs || null };
+    }
+  }
+  function accrueCoverage() {
+    if (!_metrics || !_metrics.total || !currentId) return;
+    var ih = window.innerHeight || 0;
+    if (!ih) return;
+    var y = window.scrollY || window.pageYOffset || 0;
+    /* 已展开已填充的节才可能被看到：折叠节/懒填充未填节一律不记账 */
+    var openSecs = {};
+    document.querySelectorAll('#jing-content .jing-sec').forEach(function (secEl) {
+      var body = secEl.querySelector('.jing-sec-body');
+      if (body && !body.hidden && !body.hasAttribute('data-lazy')) openSecs[+secEl.getAttribute('data-sec')] = secEl;
+    });
+    var lo = Infinity, hi = -Infinity, spans = [];
+    for (var sk in openSecs) {
+      var si = +sk, secEl = openSecs[sk];
+      var sr = secEl.getBoundingClientRect();
+      if (sr.bottom <= 0 || sr.top >= ih) continue;
+      var ps = secEl.querySelectorAll('.jing-sec-body p.jing-para');
+      for (var i = 0; i < ps.length; i++) {
+        var pi = +ps[i].getAttribute('data-para');
+        var len = (_metrics.paraLens[si] || [])[pi] || 0;
+        if (!len) continue;
+        var r = ps[i].getBoundingClientRect();
+        if (r.bottom <= 0) continue;
+        if (r.top >= ih) break;
+        var base = _metrics.cum[si] + ((_metrics.paraCum[si] || [])[pi] || 0);
+        var f0 = Math.min(1, Math.max(0, (0 - r.top) / Math.max(1, r.height)));
+        var f1 = Math.min(1, Math.max(0, (ih - r.top) / Math.max(1, r.height)));
+        if (f1 <= f0) continue;
+        var a = base + f0 * len, b = base + f1 * len;
+        spans.push([a, b]);
+        if (a < lo) lo = a;
+        if (b > hi) hi = b;
+      }
+    }
+    var prev = _covTick;
+    _covTick = { y: y, lo: lo, hi: hi };
+    if (!prev) return; /* 首拍只建基准，不记账 */
+    if (Math.abs(y - prev.y) > ih * 1.2) return; /* 跳跃/直达穿越：不记不弥合 */
+    if (hi === -Infinity) return; /* 本拍视口内无正文 */
+    if (prev.hi !== -Infinity && isFinite(prev.hi)) {
+      var gapA = (y >= prev.y) ? prev.hi : hi;
+      var gapB = (y >= prev.y) ? lo : prev.lo;
+      if (gapB > gapA) {
+        for (var sk2 in openSecs) {
+          var sj = +sk2, s0 = _metrics.cum[sj], s1 = s0 + (_metrics.secLens[sj] || 0);
+          var ia = Math.max(gapA, s0), ib = Math.min(gapB, s1);
+          if (ib > ia) spans.push([ia, ib]);
+        }
+      }
+    }
+    spans.forEach(function (sp) { covInsert(sp[0], sp[1]); });
+  }
+
   function saveProgressNow() {
     if (!currentId || !_metrics || !_metrics.total) return;
     if (window.__wuriHlFreeze && window.__wuriHlFreeze.id === currentId && Date.now() < window.__wuriHlFreeze.until) return; /* 高亮提交冻结期：回闪瞬时位不得写进 autopos 毒化后续落位 */
-    var off = currentContentOffset(), frac = off / _metrics.total;
+    accrueCoverage(); /* 落盘前先记账到最新一拍 */
+    var frac = coveredFracNow();
     try {
       var m = JSON.parse(localStorage.getItem(AUTOPOS_KEY) || '{}');
       var e = m[currentId] || {};
-      e.frac = Math.round(frac * 10000) / 10000;
-      e.off = off; /* 字偏移锚随进度同写，保证重渲/重进落位不读到陈旧 off */
+      if (_covLegacy && _covLegacyVals) {
+        /* 存量隔离：旧位置口径 frac/done 原样转存 legacy*，活动字段转新口径 */
+        if (e.legacyFrac === undefined) {
+          e.legacyFrac = _covLegacyVals.frac;
+          e.legacyDone = _covLegacyVals.done;
+          if (_covLegacyVals.doneTs) e.legacyDoneTs = _covLegacyVals.doneTs;
+        }
+        if (e.done && frac < 0.995) { e.done = false; delete e.doneTs; }
+        _covLegacy = false; _covLegacyVals = null;
+      }
+      e.frac = Math.round(frac * 10000) / 10000; /* 语义＝真实覆盖率（见账本注释） */
+      e.off = currentContentOffset(); /* 字偏移锚随进度同写，保证重渲/重进落位不读到陈旧 off */
+      e.cov = (_cov || []).map(function (iv) { return [Math.round(iv[0]), Math.round(iv[1])]; });
+      e.covFrac = e.frac;
+      e.covSec = _metrics.secLens.map(function (sl, si) { return sl ? Math.floor(secCovRatio(si) * 100) : 100; });
       var newlyDone = false;
       if (frac >= 0.995 && !e.done) { e.done = true; e.doneTs = Date.now(); newlyDone = true; }
       e.ts = Date.now();
@@ -1043,10 +1205,13 @@ var JingWen = (function () {
       return;
     }
     var off = currentContentOffset(), frac = off / _metrics.total;
+    accrueCoverage(); /* 与滚动同拍记账（覆盖账本，见其注释） */
+    var covFrac = coveredFracNow();
     /* 显示口径（2026-10-29 翻页下线后）：状态行只呈现卷/章名 · 本书
-       百分比，百分比/进度条与存档同源实时偏移（off） */
+       百分比；百分比/进度条＝真实覆盖率（2026-10-29 误标修复：旧版用
+       实时位置偏移，深链落点前的卷被整卷计满）；卷/章名仍按位置 off */
     var _dispOff = off;
-    if (fill) fill.style.width = ((_dispOff / _metrics.total) * 100).toFixed(1) + '%';
+    if (fill) fill.style.width = (covFrac * 100).toFixed(1) + '%';
     /* 速度采样：间隔 >2.5s 且确有推进才计，EMA 平滑后落盘 */
     var now = Date.now();
     if (_lastOff >= 0 && off > _lastOff && now - _lastOffT > 2500) {
@@ -1064,7 +1229,7 @@ var JingWen = (function () {
       /* 口径（2026-10-28 用户钉死）：百分比恒以本经为单位——全经已读内容字数
          ÷ 全经总内容字数（多卷经跨卷合并计算）；本卷进度与本卷剩余作并列小字，
          不做任何跨经聚合；存档/已读完落盘走实时 frac */
-      var dfrac = _dispOff / _metrics.total;
+      var dfrac = covFrac;
       var pct = dfrac >= 0.995 ? 100 : Math.floor(dfrac * 100);
       /* 底栏瘦身（2026-10-28 用户定，推翻 v257 口径）：只呈现「卷/章名 · 本书
          X%」；本卷进度与剩余时间估算不再上栏（底层 frac/速度采样/autopos
@@ -1074,7 +1239,7 @@ var JingWen = (function () {
     if (now - _lastProgSave > 2500) { _lastProgSave = now; saveProgressNow(); }
     /* 读完瞬间立即落盘一次：滚到底后不再有滚动事件触发节流保存，
        否则 done 只停在状态栏、存档仍是 98.x%（实测 KR5g0030）。 */
-    if (frac >= 0.995 && _doneSavedFor !== currentId) { _doneSavedFor = currentId; _lastProgSave = now; saveProgressNow(); }
+    if (covFrac >= 0.995 && _doneSavedFor !== currentId) { _doneSavedFor = currentId; _lastProgSave = now; saveProgressNow(); }
   }
   function scheduleReadUI() {
     if (_readUiT) return;
@@ -1092,7 +1257,7 @@ var JingWen = (function () {
       var id = row.getAttribute('data-jing') || row.getAttribute('data-dz-work');
       var e = m[id];
       var old = row.querySelector('.read-prog');
-      if (!e || (e.frac == null && !e.done)) {
+      if (!e || (e.frac == null && e.covFrac == null && !e.done)) {
         if (old) old.remove();
         var sub0 = row.querySelector('.jing-sub');
         if (sub0) sub0.classList.remove('has');
@@ -1114,8 +1279,11 @@ var JingWen = (function () {
           }
         }
       }
-      old.textContent = e.done ? '已读完' : ('读 ' + Math.floor((e.frac || 0) * 100) + '%');
-      old.classList.toggle('done', !!e.done);
+      /* 覆盖口径优先（covFrac 在场即以真实覆盖为准，旧 frac/done 仅未隔离存量回落） */
+      var _ef = (e.covFrac != null) ? e.covFrac : (e.frac || 0);
+      var _edone = (e.covFrac != null) ? (_ef >= 0.995) : !!e.done;
+      old.textContent = _edone ? '已读完' : ('读 ' + Math.floor(_ef * 100) + '%');
+      old.classList.toggle('done', _edone);
       var sub2 = row.querySelector('.jing-sub');
       if (sub2) sub2.classList.toggle('has', !!old.parentNode && old.parentNode === sub2);
     });
@@ -1123,7 +1291,9 @@ var JingWen = (function () {
   window.__wuriDecorateProgress = decorateReadProgress;
   window.__wuriReadFrac = function (id) {
     var e = loadAutoPos(id);
-    return (e && (e.frac != null || e.done)) ? { frac: e.frac || 0, done: !!e.done } : null;
+    if (!e || (e.frac == null && e.covFrac == null && !e.done)) return null;
+    var f = (e.covFrac != null) ? e.covFrac : (e.frac || 0);
+    return { frac: f, done: (e.covFrac != null) ? (f >= 0.995) : !!e.done };
   };
 
   /* ---------- 卷次目录抽屉：卷→章二级（章＝卷内 dz-cht 类题/第X题式段） ---------- */
@@ -1148,17 +1318,16 @@ var JingWen = (function () {
     if (!_metrics) buildReaderMetrics(d);
     var off = currentContentOffset();
     var curSi = secIdxAtOffset(off);
-    var frac = _metrics && _metrics.total ? off / _metrics.total : 0;
+    /* 本书进度与每卷百分比＝真实覆盖（覆盖账本）；cur 高亮仍按位置 */
+    var frac = (_metrics && _metrics.total) ? coveredFracNow() : 0;
     if (title) title.textContent = txScript(d.title || '');
     var html = '<div class="jing-toc-all">本书进度 ' + (frac >= 0.995 ? '已读完' : Math.floor(frac * 100) + '%') + ' · 共 ' + d.sections.length + ' 卷</div>';
     d.sections.forEach(function (sec, si) {
-      var sl = _metrics ? _metrics.secLens[si] : 0;
-      var sb = _metrics ? _metrics.cum[si] : 0;
-      var sp = sl ? Math.min(1, Math.max(0, (off - sb) / sl)) : 0;
-      var spct = off >= sb + sl && sl ? 100 : Math.floor(sp * 100);
+      var sp = secCovRatio(si);
+      var spct = Math.floor(sp * 100);
       html += '<div class="jing-toc-vol' + (si === curSi ? ' cur' : '') + '" data-toc-sec="' + si + '">'
         + '<span class="tv-name">' + esc(txScript(sec.h || ('第' + (si + 1) + '卷'))) + '</span>'
-        + '<span class="tv-pct">' + (spct >= 100 ? '已读完' : spct + '%') + '</span></div>';
+        + '<span class="tv-pct">' + (sp >= COV_SEC_DONE ? '已读完' : spct + '%') + '</span></div>';
       tocChapters(d, si).forEach(function (ch) {
         html += '<div class="jing-toc-ch" data-toc-sec="' + si + '" data-toc-off="' + ch.off + '">' + esc(txScript(ch.name)) + '</div>';
       });
@@ -1567,6 +1736,7 @@ var JingWen = (function () {
       }
       $('#jing-content').innerHTML = html;
       buildReaderMetrics(d);
+      loadCoverage(id); /* 覆盖账本载入（存量隔离判定在此，落盘在首次 saveProgressNow） */
       _lastProgSave = 0; _doneSavedFor = null;
       setTimeout(updateReadUI, 700);
       setTimeout(updateReadUI, 2000);
