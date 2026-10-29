@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#F5F1E6">
+<meta name="color-scheme" content="only light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="戊日不上香">
@@ -11,8 +12,8 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
-<script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=297">
+<script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
+<link rel="stylesheet" href="css/style.css?v=309">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=77">
 </head>
@@ -924,6 +925,48 @@
         <div class="detail-row" id="acct-email-row"><span class="dl" data-i18n="acct_email">邮箱</span><span class="dv" id="acct-email-mask"></span></div>
         <div class="detail-row" id="acct-username-row" hidden><span class="dl" data-i18n="acct_username">用户名</span><span class="dv" id="acct-username"></span></div>
         <div class="detail-row"><span class="dl" data-i18n="acct_prow">高级版</span><span class="dv" id="acct-prow"></span></div>
+        <div class="detail-row" id="acct-bind-status-row" hidden><span class="dl" data-i18n="acct_bind_status_label">绑定状态</span><span class="dv" id="acct-bind-status"></span></div>
+        <div class="acct-bind-prompt" id="acct-bind-prompt" hidden>
+          <p class="hint" id="acct-bind-prompt-text"></p>
+          <p class="hint" id="acct-bind-prompt-msg"></p>
+          <div class="btn-row">
+            <button class="btn primary" id="acct-bind-prompt-btn" data-i18n="acct_bind_prompt_do">绑定到我的账号</button>
+            <button class="btn" id="acct-bind-prompt-later" data-i18n="acct_bind_prompt_later">暂不</button>
+          </div>
+        </div>
+        <div class="acct-divider"></div>
+        <div class="row-title" data-i18n="acct_bind_title">高级版绑定</div>
+        <p class="hint" data-i18n="acct_bind_manual_hint">已在本机兑换过的购买码可以绑到账号；还没兑换过的码请先在本机兑换，再回来绑定。</p>
+        <div style="margin-top:10px">
+          <input class="acct-inp" id="acct-bind-code" type="text" data-i18n-ph="acct_bind_code_ph" placeholder="WURI-XXXX-XXXX-XXXX 激活码" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        </div>
+        <div style="margin-top:10px">
+          <input class="acct-inp" id="acct-bind-email" type="email" data-i18n-ph="acct_bind_email_ph" placeholder="可选：购买时的邮箱（核对用）" autocomplete="email">
+        </div>
+        <p class="hint" id="acct-bind-msg"></p>
+        <div class="btn-row"><button class="btn" id="acct-bind-btn" style="flex:1" data-i18n="acct_bind_do">绑定激活码</button></div>
+        <p class="hint" style="margin-top:14px"><b data-i18n="acct_gift_title">赠送码换机申请</b><br><span data-i18n="acct_gift_hint">赠送码不能自动绑定。提交后我们按赠送登记表人工核对，批准前高级版不会生效；批准后会绑到本账号。</span></p>
+        <div style="margin-top:10px">
+          <input class="acct-inp" id="acct-gift-code" type="text" data-i18n-ph="acct_gift_code_ph" placeholder="6 位赠送码" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="6">
+        </div>
+        <div style="margin-top:10px">
+          <input class="acct-inp" id="acct-gift-name" type="text" data-i18n-ph="acct_gift_name_ph" placeholder="受赠时登记的称呼" autocomplete="off">
+        </div>
+        <div style="margin-top:10px">
+          <input class="acct-inp" id="acct-gift-note" type="text" data-i18n-ph="acct_gift_note_ph" placeholder="可选：备注" autocomplete="off">
+        </div>
+        <p class="hint" id="acct-gift-msg"></p>
+        <div class="btn-row"><button class="btn" id="acct-gift-btn" style="flex:1" data-i18n="acct_gift_do">提交申请</button></div>
+        <p class="hint" style="margin-top:14px"><b data-i18n="acct_mig_title">免费期存量迁移</b><br><span data-i18n="acct_mig_hint">仅限免费期解锁、没有激活码的用户：在旧设备上生成一次性迁移码，再在新设备登录同一个账号输入确认。</span></p>
+        <div class="btn-row">
+          <button class="btn" id="acct-mig-issue-btn" hidden data-i18n="acct_mig_issue">在旧设备生成迁移码</button>
+        </div>
+        <p class="hint" id="acct-mig-issued" hidden></p>
+        <div style="margin-top:10px">
+          <input class="acct-inp" id="acct-mig-code" type="text" data-i18n-ph="acct_mig_code_ph" placeholder="输入迁移码" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        </div>
+        <p class="hint" id="acct-mig-msg"></p>
+        <div class="btn-row"><button class="btn" id="acct-mig-confirm-btn" style="flex:1" data-i18n="acct_mig_confirm">确认迁移</button></div>
         <div class="acct-divider"></div>
         <div class="row-between">
           <div><div class="row-title" data-i18n="acct_sync_title">云同步</div><div class="row-sub" data-i18n="acct_sync_sub">家宅档案、排盘记录、书签高亮、修行打卡、设置</div></div>
@@ -955,7 +998,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v297）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v309）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -1226,6 +1269,12 @@
           </div>
           <div style="margin-top:10px">
             <input class="acct-inp" id="acct-upass" type="password" data-i18n-ph="acct_password_ph" placeholder="密码" autocomplete="current-password">
+          </div>
+          <div id="acct-devcode-row" hidden>
+            <div style="margin-top:10px">
+              <input class="acct-inp acct-code" id="acct-devcode" inputmode="numeric" autocomplete="one-time-code" data-i18n-ph="acct_devcode_ph" placeholder="邮箱验证码" maxlength="6">
+            </div>
+            <p class="hint small" data-i18n="acct_devcode_hint">这台新设备需要验证：验证码已发到账号绑定的邮箱，输入后点登录继续。</p>
           </div>
           <p class="hint" id="acct-user-msg"></p>
           <div class="btn-row"><button class="btn primary" id="acct-do-login-user" style="flex:1" data-i18n="acct_do_login">登录</button></div>

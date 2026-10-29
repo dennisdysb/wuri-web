@@ -156,8 +156,13 @@ $('confirm-btn').addEventListener('click', function () {
     body: JSON.stringify({ code: verifiedCode, device: device, email: ($('email-input').value || '').trim() })
   }).then(function (d) {
     if (d.success) {
-      /* 与 wuri-web 的 Pro 系统对接: 写这个 key 即解锁全部 Pro 功能 */
-      try { localStorage.setItem('wuri_pro_redeem', '1'); } catch (e) {}
+      /* 与 wuri-web 的 Pro 系统对接: 写这个 key 即解锁全部 Pro 功能；
+         2026-10-28 起同记规范化完整码＋本机兑换时刻，供登录后绑进账号（不进任何同步清单） */
+      try {
+        localStorage.setItem('wuri_pro_redeem', '1');
+        localStorage.setItem('wuri_pro_code', String(verifiedCode || '').toUpperCase().trim());
+        localStorage.setItem('wuri_pro_redeemed_at_local', new Date().toISOString());
+      } catch (e) {}
       $('redeem-card').hidden = true; $('buy-card').hidden = true;
       $('done-card').hidden = false;
       window.scrollTo(0, 0);
