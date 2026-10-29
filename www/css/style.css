@@ -886,6 +886,28 @@ details.disc-foot .hint{margin-top:9px}
 .jing-content ruby { ruby-align: center; ruby-position: over; }
 
 .jing-content.no-py ruby rt { display: none; }
+/* 选字收口（2026-10-29 用户真机定）：长按选字只许作用于正文汉字——
+   阅读器全部界面层一律禁选（#jing-reader 统辖：底栏钮/读字面板/状态行
+   页脚/悬浮钮/播放胶囊/目录抽屉/在页搜索条/查字钮与查字卡/高亮浮层/
+   书头书名副题来源行）；经文页三格同禁。正文 #jing-content 与表单
+   输入（搜本书关键词等）显式回开可选。注音 ruby 的 rt 同样禁选：
+   选区涂色只落在汉字本体、复制只得纯汉字（拼音串不入选区/剪贴板）；
+   App 划线偏移计量本就跳 RT 文本（jingwen.js getSelOffsets），禁选
+   后边界锚点改走元素路径，偏移精度由 smoke-sel-scope 实证不回归。 */
+#jing-reader, #jing-trio {
+  -webkit-user-select: none;
+  user-select: none;
+}
+#jing-reader #jing-content,
+#jing-reader input,
+#jing-reader textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.jing-content ruby rt {
+  -webkit-user-select: none;
+  user-select: none;
+}
 /* 经名（一级标题） */
 .jing-book-title {
   font-family: 'WuriSong', 'JingSerif', 'Songti SC', serif;
