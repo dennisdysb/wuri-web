@@ -3229,11 +3229,13 @@ body.sky-immersive #tabbar{display:none}
 #jing-reader.reader-paged img.dz-fig { max-height: 55vh; }
 /* 页码已并入底部控制栏状态行（#jing-statusbar 内 #jing-page-ind），无独立浮标 */
 
-/* ===== 阅读器底部控制栏（2026-10-28 用户定案·微信读书式） =====
+/* ===== 阅读器底部控制栏（2026-10-28 晚用户定案·五钮主行） =====
  * 阅读器打开期间：App 底 tab 与经文页眉不占位；顶部工具栏撤除；所有控制
  * 收进本栏（fixed 覆盖层、不入正文流，显隐零重排——翻页几何因此恒定）。
- * 主行三组等高单行按钮、永不换行：导航‹目录｜播放 诵读/停止·跟读｜显示 注音·设置
- * （磬与返回为左右下圆形悬浮钮、不入本栏，见 .qing-fab / #jing-back-fab） */
+ * 状态行（点开卷次目录）＋主行五钮等宽单行、永不换行：读｜背｜字｜
+ * 全展开/全收回｜注音；播放态主行原位换 暂停＋停止 两钮等宽。
+ * 读面板（播放组）与字面板（显示组＋本书组）自栏内向上展开、互斥。
+ * （磬与返回/书签为左右下圆形悬浮钮、不入本栏，见 .qing-fab / #jing-back-fab） */
 body.reader-open #tabbar{display:none}
 body.reader-open #tab-jing .appbar{display:none}
 /* 滚动模式底部预留：底栏 86＋磬/返回悬浮钮顶 150＋8 净空＝158，滚到底时正文末行不被悬浮钮压住（恒定值、与底栏显隐无关） */
@@ -3244,12 +3246,14 @@ body.reader-open #tab-jing .appbar{display:none}
   transition:opacity .18s ease,transform .18s ease}
 @media (min-width:768px){#jing-dock{max-width:680px}}
 #jing-dock[hidden]{display:none}
-.jing-dock-row{display:flex;align-items:stretch;justify-content:space-between;gap:4px;padding:7px 10px 9px}
-.jd-group{display:flex;align-items:center;gap:5px}
-.jd-group + .jd-group{border-left:1px solid var(--line-soft);padding-left:9px;margin-left:2px}
-.jd-btn{white-space:nowrap;min-height:40px;padding:7px 10px;font-size:.92rem;border-radius:10px;line-height:1.15}
+.jing-dock-row{display:flex;align-items:stretch;gap:4px;padding:7px 10px 9px}
+.jing-dock-row[hidden]{display:none}
+.jd-btn{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;min-height:40px;padding:7px 2px;font-size:.88rem;border-radius:10px;line-height:1.15}
 .jd-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
-/* 设置面板：栏内向上展开，按播放/显示/本书分节带小标题 */
+.jd-btn[hidden]{display:none}
+/* 面板内开关态（跟读开等）：与主行 .on 同口径 */
+#jing-dock .mini-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+/* 读/字面板：栏内向上展开，按播放/显示/本书分节带小标题 */
 #jing-dock .jing-more-panel{display:block;border-top:1px dashed var(--line-soft);padding:9px 12px 3px;max-height:46vh;overflow-y:auto}
 #jing-dock .jing-more-panel[hidden]{display:none}
 .jmp-sec{margin-bottom:8px}

@@ -643,7 +643,6 @@ var JingWen = (function () {
    * 剩余分钟：按本人实测速度（会话内采样 EMA，存 wuri_jing_speed）估算，
    * 无样本回落 300 字/分钟。 */
   var _metrics = null; /* {secLens:[], paraLens:[[]], cum:[], total} */
-  var _statusMode = 'vol';
   var _lastOff = -1, _lastOffT = 0, _lastProgSave = 0, _readUiT = null, _doneSavedFor = null;
   var SPEED_KEY = 'wuri_jing_speed';
   function readSpeed() {
@@ -1266,6 +1265,9 @@ var JingWen = (function () {
         html += '<div class="jing-toc-ch" data-toc-sec="' + si + '" data-toc-off="' + ch.off + '">' + esc(txScript(ch.name)) + '</div>';
       });
     });
+    /* 目录顶部固定一行「我的划线」入口（2026-10-28 晚：本书组入口随
+       全书化保留可达路径之一；点击处理在目录委托里 data-toc-marks） */
+    html = '<div class="jing-toc-vol" data-toc-marks="1"><span class="tv-name">我的划线</span><span class="tv-pct">书签 · 高亮 · 心得</span></div>' + html;
     list.innerHTML = html;
     toc.hidden = false;
     var cur = list.querySelector('.jing-toc-vol.cur');
@@ -1350,11 +1352,16 @@ var JingWen = (function () {
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    var tocBtn = $('#jing-toc-btn');
-    if (tocBtn) tocBtn.addEventListener('click', openToc);
     var toc = $('#jing-toc');
     if (toc) toc.addEventListener('click', function (e) {
       if (e.target.closest('[data-toc-close]')) { closeToc(); return; }
+      /* 目录顶部「我的划线」入口：关目录、退阅读器、开标记页划线页签 */
+      if (e.target.closest('[data-toc-marks]')) {
+        closeToc();
+        closeReader();
+        if (window.__wuriOpenMarks) window.__wuriOpenMarks('lines');
+        return;
+      }
       var vol = e.target.closest('[data-toc-sec]');
       if (vol) {
         var si = +vol.getAttribute('data-toc-sec');
@@ -1364,10 +1371,13 @@ var JingWen = (function () {
         setTimeout(updateReadUI, 500);
       }
     });
+    /* 点状态行开卷次目录（2026-10-28 晚用户定：底栏不再设目录钮；
+       状态行右端书签图标钮自带 stopPropagation、不会误开）。
+       旧 _statusMode 卷/本切换随之退役（状态文案早已不分模式） */
     var bar = $('#jing-statusbar');
     if (bar) bar.addEventListener('click', function () {
-      _statusMode = _statusMode === 'vol' ? 'book' : 'vol';
-      updateReadUI();
+      closeDockPanels();
+      openToc();
     });
     var fab = $('#dict-fab');
     if (fab) fab.addEventListener('click', runDictLookup);
@@ -1496,6 +1506,9 @@ var JingWen = (function () {
       // 内丹书：隐藏背诵模式按钮；全藏无音频亦隐藏背诵
       var rcb2 = $('#jing-recite');
       if (rcb2) rcb2.hidden = isNeidan(id) || !!d.daozang;
+      // 单节书无折叠概念：全展开/全收回钮隐藏（多节书恒显）
+      var fb2 = $('#jing-foldall');
+      if (fb2) fb2.hidden = !(d.sections && d.sections.length > 1);
       // 「全部展开」全藏多卷本同样显示（2026-10-26 用户定）：卷体按需填充，
       // 展开走 foldAll 内的渐进分片渲染防卡死，按钮不再按 lazy 隐藏
       // 内丹书强制关闭背诵模式；全藏同理（背诵走逐字转换、无短语上下文）
@@ -1549,6 +1562,20 @@ var JingWen = (function () {
       setTimeout(updateReadUI, 700);
       setTimeout(updateReadUI, 2000);
       updateFoldBtn();
+      /* 短书开卷全展开（2026-10-28 晚用户定）：正文 ≤2 万字一打开就全
+         展开；>2 万字维持分节，靠播放驱动读到哪节展开哪节（见跟随高亮
+         驱动）。翻页模式无折叠概念、不涉及。落位恢复的展开集不满全节
+         时，其 scrollTop 是旧展开布局下量的、展开全后失真——下方恢复
+         段对这种情形放弃纵向落位（短书全开、回顶可接受）；展开集本
+         就全满时照常恢复。 */
+      var autoAll = false;
+      if (!isPaged() && d.sections && d.sections.length > 1 && _metrics && _metrics.total <= 20000) {
+        autoAll = true;
+        var allBodies = document.querySelectorAll('#jing-content .jing-sec-body');
+        if (d.lazy) expandAllProgressive(allBodies);
+        else for (var ab = 0; ab < allBodies.length; ab++) allBodies[ab].hidden = false;
+        updateFoldBtn();
+      }
       // 恢复书签位置（如果有）
       var bm = (window.JingMark && window.JingMark.getBookmark(id)) || null;
       if (bm && bm.expanded && d.lazy) {
@@ -1573,6 +1600,7 @@ var JingWen = (function () {
         var ap = loadAutoPos(id);
         if (ap && ap.y > 50) { posY = ap.y; posExp = ap.expanded || null; posHit = true; }
       }
+      if (autoAll && posExp && d.sections && posExp.length < d.sections.length) posY = 0;
       window._jingAnchorY = null; window._jingAnchorExp = null;
       if (isPaged()) {
         /* 分页落位：重渲锚（落色等）＞书签 off＞autopos off/frac，全走字偏移 */
@@ -1596,10 +1624,11 @@ var JingWen = (function () {
         if (roff != null) pagedRestorePos();
       } else if (posHit) insistReaderPos(id, posY, posExp);
       else window.scrollTo(0, 0);
-      // 跟读模式开着时重渲染了内容：重建段落映射
+      // 跟读模式开着时重渲染了内容：重建段落映射（懒节书一并填齐）
       if (followMode) {
         clearFollowCur();
-        buildFollowMap();
+        _mapSid = null;
+        ensurePlayMap(function () {});
       }
   }
 
@@ -1610,7 +1639,9 @@ var JingWen = (function () {
     var bodies = document.querySelectorAll('#jing-content .jing-sec-body');
     var open = 0;
     for (var i = 0; i < bodies.length; i++) if (!bodies[i].hidden) open++;
-    btn.textContent = (open === bodies.length && bodies.length) ? '全部折叠' : '全部展开';
+    /* 动作标签（2026-10-28 晚用户亲定）：有任一节未开→「全展开」；
+       全部已开→「全收回」 */
+    btn.textContent = (open === bodies.length && bodies.length) ? '全收回' : '全展开';
   }
 
   function toggleSection(si) {
@@ -1658,6 +1689,7 @@ var JingWen = (function () {
     if (isPaged()) { showToast('翻页模式下随翻页自动加载'); return; }
     if (_foldBusy) return;
     var bodies = document.querySelectorAll('#jing-content .jing-sec-body');
+    if (bodies.length <= 1) return; /* 单节书无折叠概念（钮已隐藏，此为兜底） */
     var anyClosed = false;
     for (var i = 0; i < bodies.length; i++) if (bodies[i].hidden) { anyClosed = true; break; }
     if (!anyClosed) {
@@ -1843,7 +1875,7 @@ var JingWen = (function () {
     $('#jing-reader').hidden = true;
     _restoreOff = null;
     _jumpInsist = null;
-    var _mp = $('#jing-more-panel'); if (_mp) _mp.hidden = true;
+    closeDockPanels();
     document.body.style.overflow = '';
     var _rd = $('#jing-reader'); if (_rd) _rd.classList.remove('reader-paged');
     $('#jing-home').hidden = false;
@@ -1897,7 +1929,9 @@ var JingWen = (function () {
     if (pyBtn) pyBtn.hidden = !!isNd;
     var showPy = pyOn && !isNd;
     $('#jing-content').classList.toggle('no-py', !showPy);
-    if (pyBtn) pyBtn.textContent = pyOn ? '注音开' : '注音关';
+    /* 动作标签（2026-10-28 晚用户亲定）：钮面＝点了会发生什么——拼音
+       正显示时钮写「注音关」（点了关掉），关着时写「注音开」 */
+    if (pyBtn) pyBtn.textContent = pyOn ? '注音关' : '注音开';
     if (isPaged() && currentId && _pagedSnapId === currentId && _restoreOff == null) {
       sizePagedColumns();
       /* 字号/注音切换后版面未稳：一次性按锚跳转会落错页（实测注音切换后
@@ -1973,10 +2007,9 @@ var JingWen = (function () {
     if (btn) btn.classList.toggle('on', followMode);
     $('#jing-content').classList.toggle('follow-on', followMode);
     if (followMode) {
-      // 需要当前经文+声音的时间戳：错配或缺失则重载
-      var voice = getVoice();
-      ensureTimestamps(currentId, voice, function (ok) {
-        if (!ok || !buildFollowMap()) {
+      // 需要当前经文+声音的时间戳与段落映射（懒节书先填齐未填充卷）
+      ensurePlayMap(function (ok) {
+        if (!ok) {
           readerToast('该经文暂无分段朗读数据，跟读模式不可用');
           if (followMode) toggleFollow();
         }
@@ -1985,10 +2018,165 @@ var JingWen = (function () {
     } else {
       stopFollowTicker();
       clearFollowCur();
+      /* 播放中退出跟读：句高亮由诵读驱动接棒，不随跟读一起熄 */
+      if (_dockState !== 'idle') startSpeakTicker();
     }
   }
   function clearFollowCur() {
     if (_followCurEl) { _followCurEl.classList.remove('follow-cur'); _followCurEl = null; }
+  }
+  /* ---------- 播放位置双来源＋句高亮驱动（2026-10-28 晚回归修） ----------
+   * v293 后句高亮丢失的根因：旧 ticker 的位置只取原生桥 jingPosition()，
+   * 网页版 bridge() 恒为 null → 每拍直接 return、永不高亮；且 ticker 只
+   * 在跟读模式启动，普通诵读从不驱动页内高亮。现行口径：位置双来源
+   * （原生桥毫秒数 ?? 网页 jingAudio.currentTime），诵读/跟读任一播放
+   * 都驱动；段所在节折叠着先展开（规格：读到哪节自动展开哪节，展开
+   * 不打断播放）；停止/播完清高亮。 */
+  var _speakTimer = null, _speakLastIdx = -1, _followLastIdx = -1;
+  var _mapSid = null, _mapVoice = null, _mapRebuilding = false;
+  function playPosSec() {
+    var b = bridge();
+    if (b && typeof b.jingPosition === 'function') {
+      try { var p = b.jingPosition(); if (typeof p === 'number' && p >= 0) return p / 1000; } catch (e) {}
+    }
+    if (jingAudio && _jingSrc) {
+      try { var ct = jingAudio.currentTime; if (typeof ct === 'number' && isFinite(ct)) return ct; } catch (e) {}
+    }
+    return null;
+  }
+  /* 确保当前书＋声线的段→段落映射可用（懒节书先把未填充卷填齐，元素
+     齐了映射才完整；填充只补内容、节仍保持折叠态） */
+  function ensurePlayMap(cb) {
+    if (followMap && _mapSid === currentId && _mapVoice === getVoice()) { cb(true); return; }
+    var sid = currentId, voice = getVoice();
+    ensureTimestamps(sid, voice, function (ok) {
+      if (!ok) { cb(false); return; }
+      var d = window.JINGWEN && window.JINGWEN[sid];
+      if (d && d.lazy && window.__wuri_dzFill) {
+        document.querySelectorAll('#jing-content .jing-sec-body[data-lazy]').forEach(function (bEl) {
+          try { window.__wuri_dzFill(+bEl.parentNode.getAttribute('data-sec')); } catch (e) {}
+        });
+      }
+      var built = buildFollowMap();
+      if (built) { _mapSid = sid; _mapVoice = voice; }
+      cb(built);
+    });
+  }
+  function hlTick(kind) {
+    if (kind === 'follow') { if (!followMode) { stopFollowTicker(); return; } }
+    else if (_dockState === 'idle') { stopSpeakTicker(); return; }
+    if (!followMap || !jingTimestamps || !jingTimestamps.segments) return;
+    var posSec = playPosSec();
+    if (posSec == null) return;
+    var ts = jingTimestamps.segments;
+    var lo = 0, hi = ts.length - 1, ans = 0;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (ts[mid].start <= posSec) { ans = mid; lo = mid + 1; } else { hi = mid - 1; }
+    }
+    var last = (kind === 'follow') ? _followLastIdx : _speakLastIdx;
+    if (ans === last || !followMap[ans]) return;
+    var el = followMap[ans].el;
+    if (!el || !el.isConnected) {
+      /* 重渲（注音切换/落色等）后映射元素失效：重建一次映射再继续 */
+      if (!_mapRebuilding) {
+        _mapRebuilding = true; _mapSid = null;
+        ensurePlayMap(function () {
+          _mapRebuilding = false;
+          if (kind === 'follow') _followLastIdx = -1; else _speakLastIdx = -1;
+        });
+      }
+      return;
+    }
+    if (kind === 'follow') _followLastIdx = ans; else _speakLastIdx = ans;
+    /* 播放自动展开：当前段所在节折叠着 → 先展开（懒节先填充）再高亮；
+       只动该节，不打断播放、不跳位 */
+    var body = el.closest ? el.closest('.jing-sec-body') : null;
+    if (body && body.hidden) {
+      if (body.hasAttribute('data-lazy') && window.__wuri_dzFill) {
+        try { window.__wuri_dzFill(+el.getAttribute('data-sec')); } catch (e) {}
+        var el2 = document.querySelector('#jing-content .jing-para[data-sec="' + el.getAttribute('data-sec') + '"][data-para="' + el.getAttribute('data-para') + '"]');
+        if (el2) {
+          el = el2; followMap[ans].el = el2;
+          if (followElToTs) followElToTs.set(el2, ans);
+          body = el2.closest ? el2.closest('.jing-sec-body') : body;
+        }
+      }
+      if (body && body.hidden) { body.hidden = false; updateFoldBtn(); }
+    }
+    clearFollowCur();
+    el.classList.add('follow-cur');
+    _followCurEl = el;
+    // 温和跟随：只在段落不在视口内时滚动（分页下＝段落不在当前页时翻页）
+    try {
+      if (isPaged() && currentId) {
+        var sc2 = pageScroller(), sr2 = sc2.getBoundingClientRect();
+        var ex = el.getBoundingClientRect().left - sr2.left + sc2.scrollLeft;
+        var ep = Math.floor(ex / pageW());
+        if (ep !== curPage()) goToPage(ep, true);
+      } else {
+        var r = el.getBoundingClientRect();
+        if (r.top < 80 || r.bottom > window.innerHeight - 120) {
+          el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      }
+    } catch (e) {}
+  }
+  /* 普通诵读的句高亮驱动（跟读走 startFollowTicker，同一 hlTick） */
+  function startSpeakTicker() {
+    stopSpeakTicker();
+    if (followMode) return;
+    ensurePlayMap(function (ok) {
+      if (!ok || followMode || _dockState === 'idle') return;
+      _speakLastIdx = -1;
+      _speakTimer = setInterval(function () { hlTick('speak'); }, 500);
+    });
+  }
+  function stopSpeakTicker() {
+    if (_speakTimer) { clearInterval(_speakTimer); _speakTimer = null; }
+  }
+  /* ---------- 底栏播放态（2026-10-28 晚五钮主行） ----------
+   * 诵读/跟读开始 → 主行原位换 暂停＋停止；停止/播完 → 变回五钮常态 */
+  var _dockState = 'idle';
+  function syncDockPlayUI(state) {
+    _dockState = state;
+    var main = document.getElementById('jing-dock-main');
+    var play = document.getElementById('jing-dock-play');
+    if (main) main.hidden = (state !== 'idle');
+    if (play) play.hidden = (state === 'idle');
+    var pz = document.getElementById('jing-pause');
+    if (pz) pz.textContent = (state === 'paused') ? '继续' : '暂停';
+  }
+  function dockPauseToggle() {
+    if (_dockState === 'idle') return;
+    var b = bridge();
+    if (_dockState === 'paused') {
+      if (b && window._fpSid) svcResume();
+      else if (jingAudio && _jingSrc) {
+        var p = null;
+        try { p = jingAudio.play(); } catch (e) {}
+        if (p && p.catch) p.catch(function () {});
+      }
+      else if (b && typeof b.ttsResume === 'function') { try { b.ttsResume(); } catch (e) {} }
+      else if (window.speechSynthesis && speechSynthesis.paused) { try { speechSynthesis.resume(); } catch (e) {} }
+      syncDockPlayUI('playing');
+    } else {
+      if (b && window._fpSid) svcPause();
+      else if (jingAudio && _jingSrc && !jingAudio.paused) { try { jingAudio.pause(); } catch (e) {} }
+      else if (b && typeof b.ttsPause === 'function') { try { b.ttsPause(); } catch (e) {} }
+      else if (window.speechSynthesis && speechSynthesis.speaking) { try { speechSynthesis.pause(); } catch (e) {} }
+      syncDockPlayUI('paused');
+    }
+  }
+  function closeDockPanels() {
+    var pp = document.getElementById('jing-play-panel');
+    if (pp) pp.hidden = true;
+    var fp = document.getElementById('jing-font-panel');
+    if (fp) fp.hidden = true;
+    var rb = document.getElementById('jing-read-btn');
+    if (rb) { rb.setAttribute('aria-expanded', 'false'); rb.classList.remove('on'); }
+    var fb = document.getElementById('jing-font-btn');
+    if (fb) { fb.setAttribute('aria-expanded', 'false'); fb.classList.remove('on'); }
   }
   // 跟读点播：点段落 -> 跳到该段时间戳并播放
   function followSeek(el) {
@@ -2010,47 +2198,13 @@ var JingWen = (function () {
     el.classList.add('follow-cur');
     _followCurEl = el;
   }
-  // 播放时轮询：根据播放位置高亮当前段并跟随滚动
+  // 播放时轮询：根据播放位置高亮当前段并跟随滚动（hlTick 双来源驱动，
+  // 网页版同样有效——旧实现只认原生桥位置、网页版每拍空转，是 v293 后
+  // 句高亮在网页版丢失的根因）
   function startFollowTicker() {
     stopFollowTicker();
-    var lastTsIdx = -1;
-    _followTimer = setInterval(function () {
-      if (!followMode) { stopFollowTicker(); return; }
-      var b = bridge();
-      if (!b || typeof b.jingPosition !== 'function') return;
-      var pos = -1;
-      try { pos = b.jingPosition(); } catch (e) { return; }
-      if (pos < 0 || !followMap) return;
-      var posSec = pos / 1000;
-      // 二分找当前 ts 段
-      var ts = jingTimestamps.segments;
-      var lo = 0, hi = ts.length - 1, ans = 0;
-      while (lo <= hi) {
-        var mid = (lo + hi) >> 1;
-        if (ts[mid].start <= posSec) { ans = mid; lo = mid + 1; } else { hi = mid - 1; }
-      }
-      if (ans === lastTsIdx || !followMap[ans]) return;
-      lastTsIdx = ans;
-      var el = followMap[ans].el;
-      if (!el) return;
-      clearFollowCur();
-      el.classList.add('follow-cur');
-      _followCurEl = el;
-      // 温和跟随：只在段落不在视口内时滚动（分页下＝段落不在当前页时翻页）
-      try {
-        if (isPaged() && currentId) {
-          var sc2 = pageScroller(), sr2 = sc2.getBoundingClientRect();
-          var ex = el.getBoundingClientRect().left - sr2.left + sc2.scrollLeft;
-          var ep = Math.floor(ex / pageW());
-          if (ep !== curPage()) goToPage(ep, true);
-        } else {
-          var r = el.getBoundingClientRect();
-          if (r.top < 80 || r.bottom > window.innerHeight - 120) {
-            el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-          }
-        }
-      } catch (e) {}
-    }, 800);
+    _followLastIdx = -1;
+    _followTimer = setInterval(function () { hlTick('follow'); }, 800);
   }
   function stopFollowTicker() {
     if (_followTimer) { clearInterval(_followTimer); _followTimer = null; }
@@ -2200,6 +2354,9 @@ var JingWen = (function () {
     // 跟读依赖分段朗读时间戳：无音频的经（如内丹诸经）隐藏跟读按钮
     var flEl = document.getElementById('jing-follow');
     if (flEl) flEl.style.display = hasAudio(currentId) ? '' : 'none';
+    /* 主行「读」钮显隐与旧口径一致：有音频（或免费版系统诵读可用）才
+       出现，免得点开空面板留假入口；播放行（暂停/停止）由播放态控制 */
+    var readBtn = document.getElementById('jing-read-btn');
     var isFree = window.IS_FREE_BUILD;
     if (isFree) {
       // 免费版：只显示系统诵读相关，隐藏 MP3 专用
@@ -2210,15 +2367,17 @@ var JingWen = (function () {
       var sp = document.getElementById('jing-speak');
       if (sp) { sp.style.display = ''; sp.hidden = false; }
       // 道藏全藏一律无音频：免费版口径下亦隐藏系统诵读
-      if (/^KR5/.test(currentId || '') && sp) sp.style.display = 'none';
-      // jing-stop 由播放状态控制，这里不动
+      var krFree = /^KR5/.test(currentId || '');
+      if (krFree && sp) sp.style.display = 'none';
+      if (readBtn) readBtn.style.display = krFree ? 'none' : '';
       return;
     }
     var show = hasAudio(currentId);
-    ['jing-speak','jing-voice','jing-download','jing-stop'].forEach(function(id) {
+    ['jing-speak','jing-voice','jing-download'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.style.display = show ? '' : 'none';
     });
+    if (readBtn) readBtn.style.display = show ? '' : 'none';
   }
   // 免费版诵读：强制用系统 TTS
   var _origSpeak = null;
@@ -2258,10 +2417,10 @@ var JingWen = (function () {
     var b = bridge();
     if (b && typeof b.jingStop === 'function') { try { b.jingStop(); } catch (e) {} }
     hideFloatPlayer();
-    var s = document.getElementById('jing-stop');
-    if (s) s.hidden = true;
-    var sp = document.getElementById('jing-speak');
-    if (sp) sp.hidden = false;
+    /* 底栏回五钮常态＋诵读句高亮驱动停转＋高亮清除 */
+    syncDockPlayUI('idle');
+    stopSpeakTicker();
+    clearFollowCur();
   }
   // 断点续播：把当前毫秒存起来
   function saveJingPos() {
@@ -2414,10 +2573,9 @@ var JingWen = (function () {
     var sid = window._fpSid;
     hideFloatPlayer();
     try { if (sid) localStorage.removeItem('wuri_jing_pos_' + sid); } catch (e) {}
-    var s = document.getElementById('jing-stop');
-    if (s) s.hidden = true;
-    var sp = document.getElementById('jing-speak');
-    if (sp) sp.hidden = false;
+    /* 底栏回五钮常态＋诵读句高亮驱动停转 */
+    syncDockPlayUI('idle');
+    stopSpeakTicker();
   }
   function playJingAudio(sid, startTime) {
     var voice = getVoice();
@@ -2426,8 +2584,9 @@ var JingWen = (function () {
     var posMs = Math.floor(((startTime !== undefined) ? startTime : savedPos) * 1000);
     // 优先用后台服务（支持后台播放+通知栏控制）
     if (svcPlay(sid, voice, posMs)) {
-      document.getElementById('jing-speak').hidden = true;
-      document.getElementById('jing-stop').hidden = false;
+      syncDockPlayUI('playing');
+      closeDockPanels();
+      startSpeakTicker();
       var b = bridge();
       var lp = '';
       if (b && typeof b.getLocalAudioPath === 'function') {
@@ -2451,6 +2610,9 @@ var JingWen = (function () {
     var seekSec = posMs / 1000;
     if (!jingAudio) {
       jingAudio = new Audio();
+      /* 网页版自然播完：与原生 onTrackCompleted 同口径收尾（底栏回常态、
+         句高亮清掉、续播位清除）——旧实现无此监听，播完底栏停在播放态 */
+      jingAudio.addEventListener('ended', function () { onTrackCompleted(); });
       jingAudio.addEventListener('error', function () {
         if (_playErrToken !== _playToken) return;
         _playErrToken = _playToken;
@@ -2511,8 +2673,9 @@ var JingWen = (function () {
         });
       }
     } catch (e2) {}
-    document.getElementById('jing-speak').hidden = true;
-    document.getElementById('jing-stop').hidden = false;
+    syncDockPlayUI('playing');
+    closeDockPanels();
+    startSpeakTicker();
   }
   /* 播放/跟读类提示一律非阻塞 toast（阅读器内禁用原生 alert 弹播放错误） */
   function readerToast(msg) {
@@ -2645,22 +2808,14 @@ var JingWen = (function () {
     var b = bridge();
     if (b && typeof b.ttsStop === 'function') { try { b.ttsStop(); } catch (e) {} }
     try { speechSynthesis.cancel(); } catch (e) {}
-    if (!isSvcActive()) {
-      var sp = document.getElementById('jing-speak');
-      var st = document.getElementById('jing-stop');
-      if (sp) sp.hidden = false;
-      if (st) st.hidden = true;
-    }
+    if (!isSvcActive()) syncDockPlayUI('idle');
   }
   function speakSection(si) {
     var d = window.JINGWEN[currentId];
     if (!d) return;
     var sec = d.sections[si];
     var text = sec.paras.map(function (p) { return p.t; }).join('\n');
-    if (speakText(text)) {
-      $('#jing-speak').hidden = true;
-      $('#jing-stop').hidden = false;
-    }
+    if (speakText(text)) syncDockPlayUI('playing');
   }
   function speakAll() {
     if (!currentId) return;
@@ -2671,10 +2826,7 @@ var JingWen = (function () {
       var text = d.sections.map(function(sec) {
         return sec.paras.map(function(p) { return p.t; }).join('\n');
       }).join('\n\n');
-      if (speakText(text)) {
-        $('#jing-speak').hidden = true;
-        $('#jing-stop').hidden = false;
-      }
+      if (speakText(text)) syncDockPlayUI('playing');
       return;
     }
     var voice = getVoice();
@@ -2950,7 +3102,8 @@ var JingWen = (function () {
       });
     }
 
-    $('#jing-back').addEventListener('click', closeReader);
+    /* 返回走左下悬浮钮（jing-back-fab，绑定在 JingMark 侧 DOMContentLoaded）；
+       底栏旧「‹ 目录」钮已随五钮主行撤除 */
     $('#jing-pybtn').addEventListener('click', function () {
       pyOn = !pyOn;
       try { localStorage.setItem('wuri_jing_py', pyOn ? '1' : '0'); } catch (e) {}
@@ -3011,34 +3164,32 @@ var JingWen = (function () {
       applyTurnMode();
     });
     updateTurnBtn();
-    /* 设置面板（E 瘦身）：点开/点外关；点目录开抽屉时先收面板 */
-    var moreBtn = $('#jing-more-btn'), morePanel = $('#jing-more-panel');
-    if (moreBtn && morePanel) {
-      var closeMore = function () { morePanel.hidden = true; moreBtn.setAttribute('aria-expanded', 'false'); };
-      moreBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        morePanel.hidden = !morePanel.hidden;
-        moreBtn.setAttribute('aria-expanded', morePanel.hidden ? 'false' : 'true');
-      });
-      document.addEventListener('click', function (e) {
-        if (morePanel.hidden) return;
-        if (e.target.closest('#jing-more-panel') || e.target.closest('#jing-more-btn')) return;
-        closeMore();
-      });
-      var tocB2 = $('#jing-toc-btn');
-      if (tocB2) tocB2.addEventListener('click', closeMore);
+    /* 读/字双面板（2026-10-28 晚五钮主行）：互斥展开、点外关（收起逻辑
+       在 closeDockPanels，播放开始/开目录/关阅读器时亦调用） */
+    var readBtn = $('#jing-read-btn'), playPanel = $('#jing-play-panel');
+    var fontBtn = $('#jing-font-btn'), fontPanel = $('#jing-font-panel');
+    function dockPanelToggle(which) {
+      var p = which === 'read' ? playPanel : fontPanel;
+      var b = which === 'read' ? readBtn : fontBtn;
+      var o = which === 'read' ? fontPanel : playPanel;
+      var ob = which === 'read' ? fontBtn : readBtn;
+      if (!p || !b) return;
+      var willOpen = p.hidden;
+      p.hidden = !willOpen;
+      b.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      b.classList.toggle('on', willOpen);
+      if (o) o.hidden = true;
+      if (ob) { ob.setAttribute('aria-expanded', 'false'); ob.classList.remove('on'); }
     }
-    /* 设置面板四组里的复用钮（2026-10-28 四分法）：诵读/跟读/注音在面板内
-       的入口只转发到主行同一按钮，保持单一真源（状态/文案由主钮维护） */
-    var spP = $('#jing-speak-p');
-    if (spP) spP.addEventListener('click', function () {
-      var stB = $('#jing-stop'), spB = $('#jing-speak');
-      if (stB && !stB.hidden) stB.click(); else if (spB) spB.click();
+    if (readBtn) readBtn.addEventListener('click', function (e) { e.stopPropagation(); dockPanelToggle('read'); });
+    if (fontBtn) fontBtn.addEventListener('click', function (e) { e.stopPropagation(); dockPanelToggle('font'); });
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('#jing-dock')) return;
+      closeDockPanels();
     });
-    var foP = $('#jing-follow-p');
-    if (foP) foP.addEventListener('click', function () { var b = $('#jing-follow'); if (b) b.click(); });
-    var pyP = $('#jing-pybtn-p');
-    if (pyP) pyP.addEventListener('click', function () { var b = $('#jing-pybtn'); if (b) b.click(); });
+    /* 播放行：暂停/继续 */
+    var pzB = $('#jing-pause');
+    if (pzB) pzB.addEventListener('click', dockPauseToggle);
     /* 本书·我的划线：退出阅读器后打开标记页「划线」页签 */
     var mkB = $('#jing-marks-btn');
     if (mkB) mkB.addEventListener('click', function () {
@@ -3219,8 +3370,9 @@ var JingWen = (function () {
     }
     return audio;
   }
-  /* 标记类书籍判定（现行＝内丹等可加书签/高亮的书）——书签/高亮各入口的
-     显示条件唯一真源；下一批把支持面铺满全书时只改这一处 */
+  /* 书签/高亮支持面判定——书签/高亮各入口的显示条件唯一真源。
+     2026-10-28 晚起全书化（精选经文/常见内丹/道藏全藏皆可），真源在
+     JingMark.marksEnabled；此处只做空书防护 */
   function readerMarksOn(curId) {
     try {
       return !!(curId && window.JingMark && typeof window.JingMark.marksEnabled === 'function' && window.JingMark.marksEnabled(curId));
@@ -3237,7 +3389,7 @@ var JingWen = (function () {
     if (qFab) qFab.classList.toggle('show', showReader);
     var backFab = document.getElementById('jing-back-fab');
     if (backFab) backFab.classList.toggle('show', showReader);
-    // 加书签（悬浮钮＋面板钮＋状态行右端图标钮）与「我的划线」：仅标记类书籍显示
+    // 加书签（悬浮钮＋面板钮＋状态行右端图标钮）与「我的划线」：全部书籍显示
     var curId = window._jingCurrentId;
     var bmShow = !!(showReader && readerMarksOn(curId));
     var bmFab = document.getElementById('jing-bookmark-fab');
@@ -3317,22 +3469,24 @@ var JingWen = (function () {
   window.JingOpenReaderAt = (typeof JingWen !== 'undefined' && JingWen.openReaderAt) ? JingWen.openReaderAt : null;
 })();
 
-/* ---------- 书签·高亮·心得（仅内丹书籍） ---------- */
+/* ---------- 书签·高亮·心得（全部书籍，2026-10-28 晚全书化） ---------- */
 (function () {
   'use strict';
   function $(s) { return document.querySelector(s); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
-  /* 仅内丹书可用 */
+  /* 内丹书判定（心得/书签的旧数据归类仍用；可用面判定见 marksEnabled） */
   function isNeidanBook(sid) {
     try {
       if (window.JingWen && typeof window.JingWen.isNeidan === 'function') return window.JingWen.isNeidan(sid);
     } catch (e) {}
     return false;
   }
-  /* 标记（书签/高亮/心得）适用范围：内丹书籍＋道藏全藏（KR5*） */
+  /* 标记（书签/高亮/心得）适用范围：2026-10-28 晚用户定全书化——精选
+     经文、常见内丹、道藏全藏皆可；存储本就按书 id 分键（书签对象
+     sid→数组、高亮/心得条目带 sid），「我的划线」汇总天然含三类书 */
   function marksEnabled(sid) {
-    return isNeidanBook(sid) || /^KR5/.test(sid || '');
+    return !!sid;
   }
   function currentIsNeidan() {
     var sid = window._jingCurrentId;
@@ -4112,7 +4266,7 @@ var JingWen = (function () {
     });
     var html = '<h3 class="jing-sec-h">书签（' + total + '）</h3>';
     if (!total) {
-      html += '<p class="hint">暂无书签。在内丹书籍阅读时点悬浮书签按钮保存进度。</p>';
+      html += '<p class="hint">暂无书签。阅读时点左下悬浮书签按钮保存进度。</p>';
     } else {
       keys.forEach(function (sid) {
         var arr = bm[sid];
@@ -4135,7 +4289,7 @@ var JingWen = (function () {
     var colors = JM.HL_COLORS || {};
     var html = '<h3 class="jing-sec-h">高亮（' + hls.length + '）</h3>';
     if (!hls.length) {
-      html += '<p class="hint">暂无高亮。在内丹书籍中长按选择文字即可高亮。</p>';
+      html += '<p class="hint">暂无高亮。在任意书籍中长按选择文字即可高亮。</p>';
     } else {
       var bySid = {};
       hls.forEach(function (h) {

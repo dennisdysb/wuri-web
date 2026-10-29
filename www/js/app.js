@@ -1835,7 +1835,8 @@ window.__wuriCal = {
     var dy = Math.abs(t.clientY - startY);
     /* 右滑超过50px且垂直偏移小，视为返回手势 */
     if (dx > 50 && dy < 80) {
-      var ids = ['#bazi-back', '#practice-back', '#jing-back'];
+      /* 阅读器返回钮已改为左下悬浮钮 #jing-back-fab（.show 时才在场） */
+      var ids = ['#bazi-back', '#practice-back', '#jing-back-fab.show'];
       for (var i = 0; i < ids.length; i++) {
         var btn = document.querySelector(ids[i]);
         /* 用 getClientRects 判断可见性，比 offsetParent 更可靠 */
