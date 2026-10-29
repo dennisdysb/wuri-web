@@ -4,6 +4,8 @@
 * content/dict/index.json 版本、分片表、条目数、来源与许可
 * content/dict/chars-*.json 单字分片（按 Unicode 码点区间分片，懒加载）
 * content/dict/words.json 自编经文词表
+* content/dict/big/b*.json 大词库分片（index.json v2 起，bigShards 表，按首字码点懒加载；
+*   查词三级：自编词表→大词库→未收返回 null 由调用方逐字拆；大词库不可用时静默落回不报错）
 * content/dict/shuowen.json 《说文解字》公版原文摘录（亦并入 chars 分片 sw 字段）
 *
 * 单字条目内部紧凑格式：[py, def, radical, strokes, sw?]
@@ -39,6 +41,7 @@ var indexData = null;
 var shardCache = Object.create(null); // file -> Promise<obj>
 var wordsPromise = null;
 var wordsData = null;
+var bigShardCache = Object.create(null); // file -> Promise<obj>
 
 function fetchJson(url) {
 return fetch(url, { credentials: 'same-origin'}).then(function (r) {
@@ -55,6 +58,7 @@ return {
 version: idx.version,
 charCount: idx.charCount,
 wordCount: idx.wordCount,
+bigWordCount: idx.bigWordCount || 0,
 shuowenCount: idx.shuowenCount
 };
 });
@@ -116,13 +120,99 @@ throw err;
 return wordsPromise;
 }
 
+/* 大词库查词辅助：底本异体归一（Kanripo 用字→标准繁体，与建库口径一致） */
+var VAR2STD = {'无': '無', '寳': '寶', '衆': '眾', '乗': '乘', '廻': '迴', '爲': '為', '眞': '真', '鍊': '煉'};
+function normalizeWord(w) {
+var out = '';
+for (var i = 0; i < w.length; i++) out += VAR2STD[w[i]] || w[i];
+return out;
+}
+var _s2t = null; // 简->繁候选表（由 t2s.js 的 T2S_MAP 反转，懒构建；无 t2s 时为空表）
+function s2tMap() {
+if (_s2t) return _s2t;
+_s2t = Object.create(null);
+try {
+var m = (typeof T2S_MAP!== 'undefined')? T2S_MAP: null;
+if (m) for (var t in m) { var s = m[t]; if (s && s.length === 1) { (_s2t[s] = _s2t[s] || []).push(t);} }
+} catch (e) { /* 无 t2s 表时只查原形与归一形 */ }
+return _s2t;
+}
+function wordCandidates(w) {
+// 候选顺序：原形 > 异体归一形 > 简转繁枚举（束宽 24，避免组合爆炸）
+var list = [], seen = Object.create(null);
+function push(x) { if (x &&!seen[x]) { seen[x] = 1; list.push(x);} }
+push(w);
+var nw = normalizeWord(w);
+push(nw);
+var s2t = s2tMap();
+var beams = [nw];
+for (var i = 0; i < nw.length; i++) {
+var opts = s2t[nw[i]];
+if (!opts ||!opts.length) continue;
+var next = [];
+for (var b = 0; b < beams.length; b++) {
+next.push(beams[b]);
+for (var o = 0; o < opts.length && next.length < 24; o++) {
+if (opts[o]!== nw[i]) next.push(beams[b].slice(0, i) + opts[o] + beams[b].slice(i + 1));
+}
+}
+beams = next;
+}
+for (var k = 0; k < beams.length; k++) push(normalizeWord(beams[k]));
+return list;
+}
+
+function bigShardFileFor(ch) {
+if (!indexData ||!indexData.bigShards) return null;
+var cp = ch.codePointAt(0);
+for (var i = 0; i < indexData.bigShards.length; i++) {
+var s = indexData.bigShards[i];
+if (cp >= s.from && cp <= s.to) return s.file;
+}
+return null;
+}
+
+function loadBigShard(file) {
+if (!bigShardCache[file]) {
+bigShardCache[file] = fetchJson(BASE + file).catch(function (err) {
+delete bigShardCache[file];
+throw err;
+});
+}
+return bigShardCache[file];
+}
+
+function lookupBig(w) {
+return ready().then(function () {
+if (!indexData ||!indexData.bigShards) return null;
+var cands = wordCandidates(w);
+var files = [], fseen = Object.create(null);
+for (var i = 0; i < cands.length; i++) {
+var f = bigShardFileFor(cands[i].charAt(0));
+if (f &&!fseen[f]) { fseen[f] = 1; files.push(f); }
+}
+if (!files.length) return null;
+return Promise.all(files.map(function (f) { return loadBigShard(f); })).then(function (shards) {
+var byFile = {};
+for (var j = 0; j < files.length; j++) byFile[files[j]] = shards[j];
+for (var k = 0; k < cands.length; k++) {
+var sh = byFile[bigShardFileFor(cands[k].charAt(0))];
+if (sh && sh[cands[k]]) { var e = sh[cands[k]]; return { w: cands[k], py: e[0] || '', def: e[1] || '', jingDef: '' }; }
+}
+return null;
+});
+}).catch(function () { return null; });
+}
+
 function lookupWord(w) {
 if (!w || typeof w!== 'string') return Promise.resolve(null);
 return loadWords().then(function (words) {
 var e = words[w];
-if (!e) return null;
-return { w: w, py: e[0] || '', def: e[1] || '', jingDef: e[2] || ''};
-}).catch(function () { return null;});
+if (e) return { w: w, py: e[0] || '', def: e[1] || '', jingDef: e[2] || '' };
+var nw = normalizeWord(w);
+if (nw!== w) { var e2 = words[nw]; if (e2) return { w: nw, py: e2[0] || '', def: e2[1] || '', jingDef: e2[2] || '' }; }
+return lookupBig(w);
+}, function () { return lookupBig(w); });
 }
 
 var PUNCT = '，。；：、！？·…—「」『』（）《》〈〉“”‘’,.;:!?()[]{}<>\t\n\r　';

@@ -1,6 +1,6 @@
 {
  "name": "戊日不上香阅读器辞书",
- "version": 1,
+ "version": 2,
  "generated": "2026-10-28",
  "charCount": 12260,
  "wordCount": 577,
@@ -61,5 +61,51 @@
    "license": "本项目自有内容",
    "note": "据精选经文与道藏高频词自编简明释义，每词均校验在语料中实际出现"
   }
- ]
+ ],
+ "bigShards": [
+  {
+   "from": 15745,
+   "to": 21067,
+   "file": "big/b0000.json",
+   "count": 3399
+  },
+  {
+   "from": 21069,
+   "to": 23436,
+   "file": "big/b0001.json",
+   "count": 3448
+  },
+  {
+   "from": 23447,
+   "to": 26082,
+   "file": "big/b0002.json",
+   "count": 3514
+  },
+  {
+   "from": 26085,
+   "to": 29305,
+   "file": "big/b0003.json",
+   "count": 3468
+  },
+  {
+   "from": 29309,
+   "to": 33268,
+   "file": "big/b0004.json",
+   "count": 3461
+  },
+  {
+   "from": 33274,
+   "to": 38281,
+   "file": "big/b0005.json",
+   "count": 3352
+  },
+  {
+   "from": 38283,
+   "to": 40860,
+   "file": "big/b0006.json",
+   "count": 1895
+  }
+ ],
+ "bigWordCount": 22537,
+ "bigSources": "中文维基词典 (CC BY-SA 4.0/GFDL, 经 kaikki.org wiktextract 抽取) + CC-CEDICT (CC BY-SA 4.0, MDBG) + 本项目自编补充词表"
 }
