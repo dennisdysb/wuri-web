@@ -374,6 +374,17 @@ var JingWen = (function () {
     s43: 'KR5f0025', s44: 'KR5a0244', s45: 'KR5d0090', s46: 'KR5d0114',
     s47: 'KR5i0067', s48: 'KR5d0059'
   };
+  /* 道藏来源判定（2026-10-29 用户定：凡底本出自道藏的书，阅读页书头不显示
+     底本/note 整框；feed 数据与关于页 Kanripo 署名不动，仅撤展示）：
+     全藏条目带 daozang 标记；精选 KR 转录书以 JING_PUNCT_SRC 映射或其自带
+     note 内的 KR 编号为据——数据判定，不按书名硬编码清单。 */
+  function isKrSourced(d) {
+    if (!d) return false;
+    if (d.daozang) return true;
+    if (d.id && JING_PUNCT_SRC[d.id]) return true;
+    if (d.note && /KR5[a-z]\d{4}/.test(d.note)) return true;
+    return false;
+  }
   var JP_PUNCT_CHARS = '。，、；：？！·…—「」『』﹝﹞（）《》〈〉“”‘’％';
   function jpIsPunct(ch) { return JP_PUNCT_CHARS.indexOf(ch) >= 0 || /\s/.test(ch); }
   function jpStrip(s) {
@@ -1651,10 +1662,11 @@ var JingWen = (function () {
         if (d.subtitle && !d.daozang) { jsub.textContent = txScript(d.subtitle); jsub.hidden = false; }
         else { jsub.hidden = true; }
       }
-      // 来源标注（精选自家口径，书头显示；道藏全集不在书头显示，文末行交代）
+      // 来源标注（精选自家口径，书头显示；道藏全集不在书头显示，文末行交代；
+      // 精选 KR 转录书同口径不显示底本框，2026-10-29 用户定，判定见 isKrSourced）
       var jnote = $('#jing-srcnote');
       if (jnote) {
-        if (d.note && !d.daozang) {
+        if (d.note && !isKrSourced(d)) {
           var dzSuffix = '';
           if (d.daozang) {
             dzSuffix = d.punctMode
