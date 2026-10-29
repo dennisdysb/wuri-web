@@ -3252,13 +3252,19 @@ body.sky-immersive #tabbar{display:none}
   #jing-statusbar{max-width:680px}
 }
 
-/* ---------- 阅读器左右翻页模式（二期）：全屏 stage＋横向多列分页 ---------- */
+/* ---------- 阅读器左右翻页模式（三期切片引擎）：全屏 stage＋竖列切片 ----------
+ * 二期曾用 CSS 多列＋横向滚动分页：Chrome 多列在横滚容器里分片不稳定
+ * （同一节在分片/未分片两态横跳、总页数与落点无限振荡），三度真机失效
+ * 后换引擎——正文回到竖向单列普通流，#jing-content 只作一页高的切片
+ * 视口（overflow:hidden、scrollTop 程序呈现），页界由 JS 量测段落与
+ * 行盒算出。滚动不再触发任何重排，分页几何与呈现彻底解耦 */
 #jing-reader.reader-paged {
   position: fixed; inset: 0; z-index: 300;
   background: var(--paper); color: var(--ink);
   display: flex; flex-direction: column;
-  /* 底栏占位恒定预留：控制栏（fixed 覆盖层）恰落此带内，沉浸隐藏底栏时
-     此带保留为空——翻页几何永不因底栏显隐重算（v284 闪烁病根之一） */
+  /* 底栏占位预留：控制栏（fixed 覆盖层）恰落此带内，沉浸隐藏底栏时此带
+     保留为空——翻页几何永不因底栏显隐重算（v284 闪烁病根之一）。JS 量测
+     时会按底栏实测顶边把此值校准为内联值（可用高吃满至底栏顶边） */
   padding-bottom: calc(98px + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
@@ -3267,18 +3273,15 @@ body.sky-immersive #tabbar{display:none}
 #jing-reader.reader-paged #jing-srcnote { display: none; }
 #jing-reader.reader-paged #jing-content {
   flex: 1 1 auto; min-height: 0;
-  overflow-x: auto; overflow-y: hidden;
-  overflow-anchor: none; /* 关 Chrome 滚动锚定：注音/标点异步重排期它会与落位轮询对打（实测 scrollLeft 在首尾间弹跳） */
-  column-fill: auto;
+  overflow: hidden; /* 切片视口：只许 JS 以 scrollTop 呈现页片，用户不可原生滚动 */
+  overflow-anchor: none; /* 关 Chrome 滚动锚定：注音/填充重排期它会与落位对打 */
   scrollbar-width: none;
-  touch-action: none; /* 手势全归 JS 分页接管（v262 真机失效修复：原生横滚自由滑多页是主因之一） */
+  touch-action: none; /* 手势全归 JS 分页接管，不触发原生滚动/缩放手势链 */
 }
 #jing-reader.reader-paged #jing-content::-webkit-scrollbar { display: none; }
 /* 分页下全卷展开呈现（覆盖 hidden 折叠的 UA display:none，作者规则优先） */
 #jing-reader.reader-paged .jing-sec-body { display: block; }
 #jing-reader.reader-paged .jing-sec-h { pointer-events: none; }
-#jing-reader.reader-paged .jing-para,
-#jing-reader.reader-paged .dz-fig { break-inside: avoid; }
 #jing-reader.reader-paged img.dz-fig { max-height: 55vh; }
 /* 页码已并入底部控制栏状态行（#jing-statusbar 内 #jing-page-ind），无独立浮标 */
 

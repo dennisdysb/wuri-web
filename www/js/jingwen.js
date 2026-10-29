@@ -700,89 +700,99 @@ var JingWen = (function () {
     if (window.scrollY > 0 && (window.scrollY + window.innerHeight) >= (document.documentElement.scrollHeight - 2)) return _metrics.total;
     return contentOffsetNow();
   }
-  /* ---------- 左右翻页模式（二期，2026-10-28） ----------
-   * 形态：#jing-reader 变全屏 stage（position:fixed），#jing-content 横向滚动
-   * ＋CSS 多列分页（列宽＝可视宽－左右 padding、列距＝padding 和，保证一列
-   * 恰为一页、scrollLeft 按 clientWidth 整页步进）。位置一律走「内容字偏移」
-   * 同一坐标系（_metrics 累计字数），与滚动模式共用 autopos/书签/进度口径：
-   * autopos 与书签另存 off 字段，跨模式打开按 off 落位、分页重排不漂。
-   * 懒填充：fillAhead 预填当前页后 3 页内的未填充卷，填充若动到当前页之前
-   * 的版面则按锚点偏移复位。跟读/划线点跳/目录跳卷在分页下改走 goToParaPage。 */
+  /* ---------- 左右翻页模式（三期切片引擎，2026-10-28 深夜换引擎） ----------
+   * 病史：二期用 CSS 多列（multicol）＋横向滚动分页，v284/v298/v315 三度
+   * 沙箱冒烟全过、真机照坏。本批探针实证根因＝Chrome 多列在横滚容器里
+   * 分片不稳定：同一节在「跨 4 列分片」与「2212px 自然高未分片」两态间
+   * 横跳（s02 恢复落位时 scrollLeft 在 4680↔6480、总页数 36↔68 无限
+   * 振荡 30 秒不收敛），恢复轮询/预填充/冻结门三套机制与引擎互斗——
+   * 点按被拽回、页码跳闪（11↔13）、落点离格切字，皆出于此。参数修补
+   * 无用，换引擎：
+   * 形态：#jing-reader 变全屏 stage（position:fixed），#jing-content 改
+   * 竖向单列普通流（宽＝页宽、高＝一页），overflow:hidden 后以 scrollTop
+   * 切片呈现——页界由 JS 量测段落/行盒顶边算出（_pgTops），滚动不触发
+   * 任何重排，分片状态不存在。位置一律走「内容字偏移」同一坐标系
+   * （_metrics 累计字数），与滚动模式共用 autopos/书签/进度口径。
+   * 懒填充：fillAhead 预填当前页后 3 页内的未填充卷，填充完成重测页表
+   * 并按锚点偏移复位（填充点之前的页界不变，复位多为无操作）。
+   * 跟读/划线点跳/目录跳卷在分页下改走 goToContentOffset。 */
   var _pageAnchorOff = 0, _pagedSnapId = null, _restoreOff = null, _fillAheadT = null, _restoreGen = 0, _turnSwitchOff = null;
+  /* 切片页表（量测纪元 _pgEpoch）：_pgTops[i]＝第 i 页顶边的纵坐标（内容
+     坐标，严格递增、首元 0），_pgOffs[i]＝第 i 页首个原子的内容字偏移；
+     _pgTotalH＝全文总高（scrollHeight 实测）。量测触发：进翻页/开书渲染/
+     填充完成/字号注音变更/字体到位/视口尺寸变——全部走 measurePagedLayout，
+     量测后按锚点复位，用户手势后另有 _manualHoldUntil 让跟读自动翻页让路 */
+  var _pgTops = null, _pgOffs = null, _pgTotalH = 0, _pgPageH = 0, _pgReady = false, _pgEpoch = 0, _pgObsInit = false;
+  var _manualHoldUntil = 0, _pgTween = null, _pgBandPx = 0, _pgMeasureT = null, _edgeHintShown = false;
   /* 翻页显示冻结门（2026-10-28 晚反馈批第 13 条）：状态行页码/总数/百分比
      只发布「连续两拍一致且稳定一段短窗」的候选，已发布总数同纪元不撤回；
      布局参数变更（切翻页模式/改字号/注音/换书）经 resetDispGate() 换纪元 */
   var _dispGate = { pub: null, cand: null, candSince: 0, candHits: 0 };
   var _gateFastUntil = 0;
   function resetDispGate() { _dispGate.pub = null; _dispGate.cand = null; _dispGate.candHits = 0; }
-  /* v262 真机失效修复（2026-10-28）：几何单一真源＋保险丝＋跳转坚持（见各项注释） */
-  var _pagedFuseOff = false, _pagedW = 0, _geoBadStreak = 0, _jumpInsist = null, _jumpGen = 0, _lastDragEnd = 0, _dragUntil = 0, _lastTurnTs = 0, _lastScrollTs = 0;
+  /* 保险丝＋跳转坚持＋手势时戳（二期遗产，切片引擎继续沿用） */
+  var _pagedFuseOff = false, _geoBadStreak = 0, _jumpInsist = null, _jumpGen = 0, _lastDragEnd = 0, _dragUntil = 0, _lastTurnTs = 0, _lastScrollTs = 0;
   function isPaged() { return turnMode === 'page' && !_pagedFuseOff; }
   function pageScroller() { return $('#jing-content'); }
-  /* 页宽单一真源：分页生效时恒用 sizePagedColumns 量定的 _pagedW，
-     不再在每次翻页时现读 clientWidth（量测时刻与翻页时刻的视口状态
-     在真机上可不一致，列步进≠页步进会逐页漂移、列面宽出屏幕） */
-  function pageW() {
-    if (isPaged() && _pagedW > 40) return _pagedW;
-    var sc = pageScroller(); return sc ? sc.clientWidth : 0;
+  /* 一页高：量测纪元内的 #jing-content 客户高（＝切片步进）。页界全部
+     由 _pgTops 给出，scrollTop 只是呈现位置——与二期「页宽＝列宽」不同，
+     这里没有任何布局参数能与视口分家 */
+  function pageH() {
+    if (isPaged() && _pgReady && _pgPageH > 40) return _pgPageH;
+    var sc = pageScroller(); return sc ? sc.clientHeight : 0;
   }
   function pageCount() {
-    var sc = pageScroller(), w = pageW();
-    if (!sc || !w) return 1;
-    return Math.max(1, Math.ceil((sc.scrollWidth - 1) / w));
+    if (_pgReady && _pgTops) return Math.max(1, _pgTops.length);
+    return 1;
   }
+  function pageOfY(y) {
+    if (!_pgReady || !_pgTops) return 0;
+    var lo = 0, hi = _pgTops.length - 1, ans = 0;
+    while (lo <= hi) { var mid = (lo + hi) >> 1; if (_pgTops[mid] <= y + 1) { ans = mid; lo = mid + 1; } else hi = mid - 1; }
+    return ans;
+  }
+  /* 末页有效顶边：末页高度不足一页时 scrollTop 物理上到不了它的页表
+     顶边（被钳在 totalH-pageH），落位/当前页/吸附一律按有效顶边口径 */
+  function pgMaxTop() { return Math.max(0, _pgTotalH - pageH()); }
+  function pgTopFor(p) { if (!_pgTops) return 0; return Math.min(_pgTops[p], pgMaxTop()); }
   function curPage() {
-    var sc = pageScroller(), w = pageW();
-    if (!sc || !w) return 0;
-    return Math.max(0, Math.min(pageCount() - 1, Math.round(sc.scrollLeft / w)));
+    var sc = pageScroller(); if (!sc) return 0;
+    if (!_pgReady) return 0;
+    if (pageCount() > 1 && sc.scrollTop >= pgMaxTop() - 1) return pageCount() - 1;
+    return Math.max(0, Math.min(pageCount() - 1, pageOfY(sc.scrollTop)));
   }
-  /* 总页数发布口径：scrollWidth 还在变（懒填充/字体到位）时不发布新总数，
-     同一 scrollWidth 稳定 700ms 后才更新——防用户实见的总页数 122↔123 跳变。
-     导航（curPage/goToPage）仍用实时 pageCount，本函数仅供页码显示。 */
-  var _dispPC = { sw: -1, count: 0, ts: 0, settledFor: -1 };
-  /* 总页数只在分页量测定死后才发布：scrollWidth 仍在变（懒填充/重排中）
-     或变化后未静置满 700ms → 返回 null，状态行只显示当前页、不显示总数，
-     杜绝用户实见的「122↔123」跳变（2026-10-28 定版口径） */
+  function pageOfOffsetIdx(off) {
+    if (!_pgReady || !_pgOffs) return 0;
+    var lo = 0, hi = _pgOffs.length - 1, ans = 0;
+    while (lo <= hi) { var mid = (lo + hi) >> 1; if (_pgOffs[mid] <= off) { ans = mid; lo = mid + 1; } else hi = mid - 1; }
+    return ans;
+  }
+  function pageOfEl(el) {
+    var sc = pageScroller(); if (!sc || !el || !_pgReady) return -1;
+    var sr = sc.getBoundingClientRect();
+    var y = el.getBoundingClientRect().top - sr.top + sc.scrollTop;
+    return pageOfY(y);
+  }
+  /* 总页数发布口径：页表未就绪（量测未完成/懒填充尚在扩展）→ 返回 null，
+     状态行只显示当前页；页表就绪即发布——切片页表在纪元内不可变，不存在
+     二期那种 scrollWidth 反复横跳，发布值天然稳定 */
   function stablePageCount() {
-    var sc = pageScroller(); if (!sc) return null;
-    var sw = sc.scrollWidth, now = Date.now();
-    if (sw !== _dispPC.sw) { _dispPC.sw = sw; _dispPC.ts = now; }
-    if (_dispPC.settledFor === sw) return _dispPC.count;
-    if (now - _dispPC.ts > 700) { _dispPC.count = pageCount(); _dispPC.settledFor = sw; return _dispPC.count; }
-    return null;
+    if (!_pgReady || !_pgTops) return null;
+    return pageCount();
   }
   /* 页模型（分页层可复用接口，为后续仿真翻页等呈现模式预留）：
-   * {count, ranges:[{page,startOff,endOff}]}——每页的内容字偏移范围，由段落
-   * 横坐标单趟扫描推导并按 scrollWidth+页宽缓存。落位/进度真源恒为字偏移
-   * 锚点（_pageAnchorOff / autopos off），像素 scrollLeft 仅作呈现。 */
+   * {count, ranges:[{page,startOff,endOff}]}——直接由切片页表导出。
+   * 落位/进度真源恒为字偏移锚点（_pageAnchorOff / autopos off） */
   var _pmCache = null;
   function buildPageModel() {
-    var sc = pageScroller(); if (!sc || !_metrics || !isPaged()) return null;
-    var w = pageW(); if (!w) return null;
-    var key = sc.scrollWidth + '|' + w + '|' + _metrics.total + '|' + currentId;
+    if (!_pgReady || !_pgTops || !_metrics || !isPaged()) return null;
+    var key = _pgEpoch + '|' + _metrics.total + '|' + currentId;
     if (_pmCache && _pmCache.key === key) return _pmCache.model;
-    var sr = sc.getBoundingClientRect();
-    var count = pageCount();
-    var byPage = {};
-    var ps = sc.querySelectorAll('.jing-para');
-    for (var i = 0; i < ps.length; i++) {
-      var r = ps[i].getBoundingClientRect(); if (!r.width) continue;
-      var x = r.left - sr.left + sc.scrollLeft;
-      var pg = Math.max(0, Math.min(count - 1, Math.floor(x / w)));
-      var si = +ps[i].getAttribute('data-sec'), pi = +ps[i].getAttribute('data-para');
-      var off = paraContentOff(ps[i]);
-      var len = ((_metrics.paraLens[si] || [])[pi]) || 0;
-      var cur = byPage[pg];
-      if (!cur) byPage[pg] = { page: pg, startOff: off, endOff: off + len };
-      else { if (off < cur.startOff) cur.startOff = off; if (off + len > cur.endOff) cur.endOff = off + len; }
+    var ranges = [];
+    for (var p = 0; p < _pgTops.length; p++) {
+      ranges.push({ page: p, startOff: _pgOffs[p], endOff: (p + 1 < _pgOffs.length) ? _pgOffs[p + 1] : _metrics.total });
     }
-    var ranges = [], lastEnd = 0;
-    for (var p = 0; p < count; p++) {
-      var e = byPage[p];
-      if (!e) e = { page: p, startOff: lastEnd, endOff: lastEnd };
-      ranges.push(e); lastEnd = e.endOff;
-    }
-    var model = { count: count, ranges: ranges };
+    var model = { count: _pgTops.length, ranges: ranges, tops: _pgTops.slice() };
     _pmCache = { key: key, model: model };
     return model;
   }
@@ -805,60 +815,54 @@ var JingWen = (function () {
     var body = document.querySelector('#jing-content .jing-sec[data-sec="' + si + '"] .jing-sec-body');
     if (body && body.hasAttribute('data-lazy') && window.__wuri_dzFill) { try { window.__wuri_dzFill(si); } catch (e) {} }
   }
-  /* 某页的起始内容字偏移：第一段其横坐标落入该页（或跨入该页）的段 */
+  /* 某页的起始内容字偏移：切片页表直查 */
   function pageOffset(page) {
-    var sc = pageScroller(); if (!sc || !_metrics) return 0;
-    var sr = sc.getBoundingClientRect(), w = pageW(); if (!w) return 0;
-    var px = page * w, off = 0, straddle = null;
-    var secs = sc.querySelectorAll('.jing-sec');
-    for (var k = 0; k < secs.length; k++) {
-      var secEl = secs[k], si = +secEl.getAttribute('data-sec');
-      var r = secEl.getBoundingClientRect();
-      var x0 = r.left - sr.left + sc.scrollLeft, x1 = x0 + r.width;
-      if (x1 <= px) { off = (_metrics.cum[si] || 0) + (_metrics.secLens[si] || 0); continue; }
-      if (x0 > px) break;
-      var ps = secEl.querySelectorAll('p.jing-para');
-      for (var i = 0; i < ps.length; i++) {
-        var pr = ps[i].getBoundingClientRect();
-        var qx = pr.left - sr.left + sc.scrollLeft;
-        if (qx >= px - 8) return paraContentOff(ps[i]);
-        straddle = ps[i];
-      }
-      if (straddle) return paraContentOff(straddle);
-    }
-    return Math.min(off, _metrics.total);
+    if (!_pgReady || !_pgOffs) return 0;
+    page = Math.max(0, Math.min(page, _pgOffs.length - 1));
+    return _pgOffs[page];
   }
   /* 当前阅读位置的内容字偏移（双模式统一口径，供进度/autopos/书签共用）。
      分页下末页即全书末页、整页在目 → 计 total（同滚动到底规则）。 */
   function currentContentOffset() {
     if (!_metrics || !_metrics.total) return 0;
     if (isPaged()) {
+      if (!_pgReady) return Math.max(0, Math.min(_pageAnchorOff, _metrics.total));
       var cp = curPage();
       if (cp >= pageCount() - 1 && pageCount() > 1) {
-        /* 末页判读完须实证：末段确已排进当前页（版面未就绪时 pageCount 会
-           暂时为 1/偏小，此时误判 total 会毒化锚点——实测 TOC 跳卷被冲到书末） */
+        /* 末页判读完须实证：末段确已排进当前页（版面未就绪时页数会暂时
+           偏小，此时误判 total 会毒化锚点——实测 TOC 跳卷被冲到书末） */
         var sc3 = pageScroller(), ps3 = sc3 ? sc3.querySelectorAll('p.jing-para') : [];
-        if (ps3.length) {
-          var sr3 = sc3.getBoundingClientRect();
-          var lx = ps3[ps3.length - 1].getBoundingClientRect().left - sr3.left + sc3.scrollLeft;
-          if (Math.floor(lx / pageW()) <= cp) return _metrics.total;
-        }
+        if (ps3.length && pageOfEl(ps3[ps3.length - 1]) <= cp) return _metrics.total;
       }
       return pageOffset(cp);
     }
     return effContentOffset();
   }
+
+  /* 切片呈现：scrollTop 直接落位（instant）或 rAF 补间（smooth）。
+     overflow:hidden 的滚动盒只能程序滚动，scrollTop 写入不触发重排 */
+  function pgSetTop(y, smooth) {
+    var sc = pageScroller(); if (!sc) return;
+    if (_pgTween) { cancelAnimationFrame(_pgTween); _pgTween = null; }
+    y = Math.max(0, y);
+    if (!smooth || Math.abs(sc.scrollTop - y) < 2) { sc.scrollTop = y; return; }
+    var from = sc.scrollTop, t0 = performance.now(), dur = 230;
+    var step = function (tn) {
+      var k = Math.min(1, (tn - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      sc.scrollTop = from + (y - from) * e;
+      if (k < 1) _pgTween = requestAnimationFrame(step); else _pgTween = null;
+    };
+    _pgTween = requestAnimationFrame(step);
+  }
   function goToPage(p, smooth) {
-    var sc = pageScroller(), w = pageW(); if (!sc || !w) return;
+    var sc = pageScroller(); if (!sc || !_pgReady) return;
     p = Math.max(0, Math.min(pageCount() - 1, p));
-    var maxL = Math.max(0, sc.scrollWidth - w);
     _gateFastUntil = Date.now() + 1500; /* 显式翻页：冻结门加速放行 */
-    /* 连翻时降为瞬时落位：平滑动画排队会与填充/落位对打、放大卡顿 */
+    /* 连翻时降为瞬时落位：补间排队会与填充/落位对打、放大卡顿 */
     var useSmooth = smooth && (Date.now() - _lastTurnTs > 400);
     _lastTurnTs = Date.now();
-    sc.scrollTo({ left: Math.min(p * w, maxL), behavior: useSmooth ? 'smooth' : 'auto' });
-    /* 锚点立即跟到目标页：否则填充触发的复位会按旧锚把用户刚翻的页拽回去
-       （改前探针实测 swipe 后页码倒退的主因之一） */
+    pgSetTop(pgTopFor(p), useSmooth);
+    /* 锚点立即跟到目标页：否则填充触发的复位会按旧锚把用户刚翻的页拽回去 */
     if (_metrics && _metrics.total) {
       try { _pageAnchorOff = pageOffset(p); _pagedSnapId = currentId; } catch (e) {}
     }
@@ -866,18 +870,20 @@ var JingWen = (function () {
   }
   function goToContentOffset(off, instant) {
     _gateFastUntil = Date.now() + 1500; /* 显式跳转：冻结门加速放行 */
-    var sc = pageScroller(); if (!sc || !_metrics || !pageW()) return;
+    var sc = pageScroller(); if (!sc || !_metrics) return;
     off = Math.max(0, Math.min(off, _metrics.total));
     var si = secIdxAtOffset(off);
+    var _bodyPre = document.querySelector('#jing-content .jing-sec[data-sec="' + si + '"] .jing-sec-body');
+    var _wasLazy = !!(_bodyPre && _bodyPre.hasAttribute('data-lazy'));
     ensureSecFilled(si);
     var acc = _metrics.cum[si] || 0, pl = _metrics.paraLens[si] || [], pi = 0;
     for (var i = 0; i < pl.length; i++) { if (acc + pl[i] > off) { pi = i; break; } acc += pl[i]; pi = i; }
     var el = document.querySelector('#jing-content .jing-para[data-sec="' + si + '"][data-para="' + pi + '"]');
     if (!el) el = document.querySelector('#jing-content .jing-para[data-sec="' + si + '"]');
     if (!el) {
-      /* 目标段不在 DOM（目标卷填充失败/未就绪）：旧实现在此静默 return，
-         落位轮询空转到期满、用户被留在虚空。改为回落到目标卷之前最近
-         一个已有段落的卷，再不行用全文第一段——落位目标必须存在 */
+      /* 目标段不在 DOM（目标卷填充失败/未就绪）：回落到目标卷之前最近
+         一个已有段落的卷，再不行用全文第一段——落位目标必须存在；
+         恢复轮询会在填充到位后继续把落点推进到真目标 */
       ensureSecFilled(si);
       el = document.querySelector('#jing-content .jing-para[data-sec="' + si + '"]');
       if (!el) {
@@ -889,11 +895,15 @@ var JingWen = (function () {
       if (!el) el = document.querySelector('#jing-content .jing-para');
       if (!el) return;
     }
-    var sr = sc.getBoundingClientRect();
-    var x = el.getBoundingClientRect().left - sr.left + sc.scrollLeft;
-    var pg = Math.max(0, Math.floor(x / pageW()));
-    var maxL2 = Math.max(0, sc.scrollWidth - pageW());
-    sc.scrollTo({ left: Math.min(pg * pageW(), maxL2), behavior: instant ? 'auto' : 'smooth' });
+    if (!_pgReady || _wasLazy) measurePagedLayout();
+    /* 落位页优先按内容偏移查页表（pageOfOffsetIdx）：目标字可能落在段落
+       被行切片溢出到下一页的那几行里，此时段落顶页（pageOfEl）会早一页、
+       目标字根本不在屏上（s01 off=300 实证：段顶在第 5 页、目标字在第 6
+       页的溢出行里）。段首偏移跳转时两口径一致，不受影响。 */
+    var pg = pageOfOffsetIdx(off);
+    if (pg < 0) pg = pageOfEl(el);
+    if (pg < 0) { measurePagedLayout(); pg = pageOfEl(el); }
+    pgSetTop(pgTopFor(pg), !instant);
     _pageAnchorOff = off; _pagedSnapId = currentId;
   }
   function pagedFillAheadSoon() {
@@ -903,64 +913,179 @@ var JingWen = (function () {
   function pagedFillAhead() {
     if (!isPaged() || !currentId) return;
     /* 落位在途时不预填邻卷：目标卷由 goToContentOffset 的 ensureSecFilled
-       直填，邻卷填充只会在落位期制造版面漂移与主线程争用（连滑楔死链） */
+       直填，邻卷填充只会在落位期制造版面漂移与主线程争用 */
     if (_restoreOff != null) return;
     /* 拖动/连翻期让路，空闲后再续填 */
     if (Date.now() < _dragUntil) { pagedFillAheadSoon(); return; }
-    var sc = pageScroller(); if (!sc) return;
-    var sr = sc.getBoundingClientRect(), w = pageW(); if (!w) return;
-    var limitX = (curPage() + 3) * w, curX = curPage() * w, shifted = false, more = false;
+    var sc = pageScroller(); if (!sc || !_pgReady) return;
+    var sr = sc.getBoundingClientRect();
+    var limitY = sc.scrollTop + pageH() * 4, filledOne = false, more = false;
     var secs = document.querySelectorAll('#jing-content .jing-sec');
     for (var k = 0; k < secs.length; k++) {
       var secEl = secs[k];
       var body = secEl.querySelector('.jing-sec-body');
       if (!body || !body.hasAttribute('data-lazy')) continue;
-      var x = secEl.getBoundingClientRect().left - sr.left + sc.scrollLeft;
-      if (x <= limitX) {
-        if (more) break; /* 一拍只填一卷：填充（逐字注音+高亮重建）是重活，
-                            连填多卷会把主线程堵死、真机表现为卡死无响应 */
+      var y = secEl.getBoundingClientRect().top - sr.top + sc.scrollTop;
+      if (y <= limitY) {
+        if (filledOne) { more = true; break; } /* 一拍只填一卷：填充是重活，连填会堵主线程 */
         if (window.__wuri_dzFill) { try { window.__wuri_dzFill(+secEl.getAttribute('data-sec')); } catch (e) {} }
-        if (x < curX + w) shifted = true;
-        more = true;
+        filledOne = true;
       }
     }
-    if (shifted) { _restoreOff = _pageAnchorOff; pagedRestorePos(); } /* 一次性跳在版面未稳时会落错页，统一走恢复轮询收敛 */
+    if (filledOne) schedulePagedMeasure(_pageAnchorOff);
     if (more) pagedFillAheadSoon(); /* 还有到期未填卷：下一拍续填 */
   }
-  function sizePagedColumns() {
-    var sc = pageScroller(); if (!sc) return;
-    var cs = window.getComputedStyle(sc);
-    var pad = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
-    var w = sc.clientWidth - pad;
-    if (w > 40) { sc.style.columnWidth = w + 'px'; sc.style.columnGap = pad + 'px'; _pagedW = sc.clientWidth; }
-  }
-  /* 几何自检：所有段落的外边距盒（margin box）左缘必须落在页宽整数倍网格
-     上（±3px），且总宽与页数自洽。真机上量测时刻视口与实际可见宽分家时
-     列步进≠页步进，段落左缘会整体离格——这是「宽列跑出屏幕/逐页错位」的
-     机器判据。量外边距盒而非边框盒：多栏布局里占格的是外边距盒，边框盒会
-     被 margin 平移——跟读高亮给段落加 margin:0 -6px（.follow-on .jing-para）
-     时边框盒整体左移 6px，若按边框盒判，全段离格（mod=页宽-6）误触发保险
-     丝把用户打回滚动（2026-10-28 真机实报、探针复现定罪）。原点取滚动容器
-     的内容盒左缘（边框+内边距之内），与列的排布原点一致 */
-  function pagedGeometryOK() {
-    var sc = pageScroller(); if (!sc || !isPaged()) return false;
-    var w = pageW(); if (!w || w <= 40) return false;
-    if (!sc.scrollWidth || sc.scrollWidth < w - 1) return false;
-    var sr = sc.getBoundingClientRect();
-    var scs = window.getComputedStyle(sc);
-    var originX = sr.left + (parseFloat(scs.borderLeftWidth) || 0) + (parseFloat(scs.paddingLeft) || 0);
-    var ps = sc.querySelectorAll('.jing-para');
-    var checked = 0;
-    for (var i = 0; i < ps.length && checked < 60; i++) {
-      var r = ps[i].getBoundingClientRect();
-      if (!r.width) continue;
-      var ml = parseFloat(window.getComputedStyle(ps[i]).marginLeft) || 0;
-      var cx = (r.left - ml) - originX + sc.scrollLeft;
-      var m = ((cx % w) + w) % w;
-      if (m > 3 && m < w - 3) return false;
-      checked++;
+  /* 量测（切片引擎核心）：把全文按页高切成页表。页界优先落在原子
+     （卷题/段落/图版）顶边；单个原子跨页时落在其行盒底边（行不被劈开、
+     注音不与本字分家）——每页底边死区因此 <1 行高（反馈批 B 条：二期
+     多列按段避断，死区可达整段高；另有底栏预留带系统性多留约 11px，
+     本量测先按底栏实测顶边校准 reader 的 padding-bottom 再量页高）。
+     原子量测走 getBoundingClientRect：单列普通流下一趟强制布局后其余
+     皆缓存读，千段级 <50ms。未填充懒卷只有卷题原子在表内，填充完成
+     后由 schedulePagedMeasure 重测扩展页表 */
+  function measurePagedLayout() {
+    var sc = pageScroller(); if (!sc || !currentId) return false;
+    var reader = $('#jing-reader');
+    if (!reader || reader.hidden) return false;
+    /* 底栏带校准：分页可用高应吃满状态行/底栏顶边之上（B 条）。沉浸时
+       底栏隐藏不重测带高，沿用最近实测值——几何恒定原则不变 */
+    var dock = $('#jing-dock');
+    if (dock && !dock.hidden && !document.body.classList.contains('jing-immersive')) {
+      var band = Math.round(window.innerHeight - dock.getBoundingClientRect().top);
+      /* 「读/字」面板是浮层（打开时底栏在流内长高、暂覆正文底部），不占
+         阅读几何：band 须扣除打开中的面板高，否则开面板/开跟读（跟读钮
+         在面板里）都会改页高、总页数跳变（s01 实测 83<->100 来回跳的真
+         根源）。面板开关由此对分页几何中性 */
+      var panels = dock.querySelectorAll('.jing-more-panel');
+      for (var pi2 = 0; pi2 < panels.length; pi2++) {
+        if (!panels[pi2].hidden) band -= Math.round(panels[pi2].getBoundingClientRect().height);
+      }
+      if (band >= 30 && band <= 220 && Math.abs(band - _pgBandPx) > 1) {
+        _pgBandPx = band;
+        reader.style.paddingBottom = band + 'px';
+      }
     }
-    return checked > 0;
+    /* 几何收敛看门：底栏/视口尺寸任何变化都排一次重测。没有它时存在
+       「错而稳定」死锁——开书首测若撞上状态行尚未入流（display:none，
+       底栏只剩 57px），band 被毒化成 57px、视口高与页表自洽地错下去，
+       此后再没有任何信号能纠正（实测 padB 永久停在 57px、正文钻进状态
+       行底下 30px）。状态行入流/转屏/面板开关都改变这两个元素的尺寸，
+       ResizeObserver 一并兜住；重测本身不改尺寸时不会自激 */
+    if (!_pgObsInit && window.ResizeObserver) {
+      _pgObsInit = true;
+      try {
+        var _pgRO = new ResizeObserver(function () {
+          if (isPaged() && currentId) schedulePagedMeasure(_pageAnchorOff);
+        });
+        if (dock) _pgRO.observe(dock);
+        _pgRO.observe(sc);
+      } catch (e) {}
+    }
+    var pageHeight = sc.clientHeight;
+    if (pageHeight < 40) return false;
+    var sr = sc.getBoundingClientRect(), st = sc.scrollTop;
+    var atoms = [];
+    var secs = sc.querySelectorAll('.jing-sec');
+    for (var k = 0; k < secs.length; k++) {
+      var secEl = secs[k], si = +secEl.getAttribute('data-sec');
+      var head = secEl.querySelector('.jing-sec-h');
+      if (head) {
+        var hr = head.getBoundingClientRect();
+        if (hr.height > 0) atoms.push({ y: hr.top - sr.top + st, h: hr.height, off: _metrics ? (_metrics.cum[si] || 0) : 0, el: head });
+      }
+      var ps = secEl.querySelectorAll('p.jing-para, .dz-fig');
+      var lastOff = _metrics ? (_metrics.cum[si] || 0) : 0;
+      for (var i = 0; i < ps.length; i++) {
+        var r = ps[i].getBoundingClientRect();
+        if (!r.height && !r.width) continue;
+        var off = ps[i].classList.contains('jing-para') ? paraContentOff(ps[i]) : lastOff;
+        if (ps[i].classList.contains('jing-para')) lastOff = off;
+        atoms.push({ y: r.top - sr.top + st, h: r.height, off: off, el: ps[i] });
+      }
+    }
+    var totalH = sc.scrollHeight;
+    if (!atoms.length || totalH <= 0) return false;
+    atoms.sort(function (a, b) { return a.y - b.y; });
+    var tops = [0], offs = [atoms[0].off];
+    var pos = 0, guard = 0;
+    while (pos < totalH - 1 && guard++ < 20000) {
+      var limit = pos + pageHeight;
+      if (limit >= totalH) break;
+      var boundary = -1, cross = null;
+      for (var a = 0; a < atoms.length; a++) {
+        var at = atoms[a];
+        if (at.y <= pos) { if (at.y + at.h > limit) cross = at; continue; }
+        if (at.y > limit) break;
+        boundary = at.y; cross = null;
+      }
+      if (boundary < 0) {
+        boundary = limit; /* 原子跨页：一期先按页高硬切，下方行盒细化兜底 */
+        if (cross && cross.el && cross.el.classList && cross.el.classList.contains('jing-para')) {
+          try {
+            var rng = document.createRange();
+            rng.selectNodeContents(cross.el);
+            var rects = rng.getClientRects(), best = -1;
+            for (var q = 0; q < rects.length; q++) {
+              var rb = rects[q].bottom - sr.top + st;
+              if (rb <= limit + 0.5 && rb > pos + 8 && rb > best) best = rb;
+            }
+            if (best > 0) boundary = best;
+            rng.detach && rng.detach();
+          } catch (e) {}
+        }
+      }
+      if (boundary <= pos) boundary = limit; /* 兜底防死循环 */
+      var boff = _metrics ? _metrics.total : 0;
+      for (var b = 0; b < atoms.length; b++) { if (atoms[b].y >= boundary - 0.5) { boff = atoms[b].off; break; } }
+      tops.push(boundary); offs.push(boff);
+      pos = boundary;
+    }
+    _pgTops = tops; _pgOffs = offs; _pgTotalH = totalH; _pgPageH = pageHeight;
+    _pgReady = true; _pgEpoch++; _pmCache = null;
+    return true;
+  }
+  /* 填充/字体等迟到布局变化后的重测：防抖 120ms；重测后按锚点复位
+     （用户正在翻页/拖动/恢复中则不抢视口，落点由各自主链负责） */
+  function schedulePagedMeasure(anchorOff) {
+    if (_pgMeasureT) clearTimeout(_pgMeasureT);
+    _pgMeasureT = setTimeout(function () {
+      _pgMeasureT = null;
+      if (!isPaged() || !currentId) return;
+      var before = _pgEpoch;
+      if (!measurePagedLayout()) return;
+      if (_pgEpoch === before) return;
+      if (anchorOff == null || _restoreOff != null) return;
+      if (Date.now() < _dragUntil || Date.now() - _lastTurnTs < 500) return;
+      var sc = pageScroller(); if (!sc) return;
+      var pg = pageOfOffsetIdx(anchorOff);
+      if (pg >= 0 && Math.abs(sc.scrollTop - pgTopFor(pg)) > 1) pgSetTop(pgTopFor(pg), false);
+      scheduleReadUI();
+    }, 120);
+  }
+  /* 旧名兼容 shim：二期多处以 sizePagedColumns 表「分页几何刷新」——
+     切片引擎下即重量测（字号/注音切换点、syncPagedChrome 调用） */
+  function sizePagedColumns() { if (isPaged() && currentId) measurePagedLayout(); }
+  /* 几何自检（切片版）：页表严格递增、覆盖全文、总高与实测自洽，并抽查
+     当前页首个可见段的实测页与页表一致。二期「段落左缘对页宽取模」判据
+     随多列退役——单列流里段落纵坐标由浏览器普通流给出，不存在离格 */
+  function pagedGeometryOK() {
+    var sc = pageScroller(); if (!sc || !isPaged() || !_pgReady || !_pgTops) return false;
+    if (_pgTops[0] !== 0) return false;
+    for (var i = 1; i < _pgTops.length; i++) if (!(_pgTops[i] > _pgTops[i - 1])) return false;
+    var ps = sc.querySelectorAll('.jing-para');
+    if (!ps.length) return false;
+    /* 当前页一致性：取首个「在本页内起头」的段验页号；整页被一个跨页
+       长段罩住时该段页号应为本页或上一页。总高漂移（字体迟到/迟填）不
+       在此判罪——那是重测信号，由 pagedGeoCheckSoon 处理 */
+    var sr = sc.getBoundingClientRect();
+    for (var j = 0; j < ps.length; j++) {
+      var r = ps[j].getBoundingClientRect();
+      if (r.bottom <= sr.top + 1 || r.top >= sr.bottom - 1) continue;
+      var y = r.top - sr.top + sc.scrollTop;
+      if (r.top >= sr.top - 1) return pageOfY(y) === curPage();
+      return pageOfY(y) === curPage() || pageOfY(y) === curPage() - 1;
+    }
+    return false;
   }
   /* 保险丝：几何校验连续不过 → 本会话回落滚动模式并告知（不改用户保存的
      翻页偏好，下次打开可重试）；用户手动再选翻页时由切换钮清保险丝 */
@@ -977,13 +1102,21 @@ var JingWen = (function () {
     requestAnimationFrame(function () {
       setTimeout(function () {
         if (!isPaged() || !currentId) return;
-        if (pagedGeometryOK()) { _geoBadStreak = 0; return; }
-        /* 段落尚未渲染完时 checked=0 会误判：无段落不算坏几何 */
+        /* 无段落（渲染未完）不算坏几何 */
         var sc = pageScroller();
         if (!sc || !sc.querySelector('.jing-para')) return;
-        _geoBadStreak++;
-        if (_geoBadStreak === 1) { sizePagedColumns(); pagedGeoCheckSoon(); return; }
-        pagedFuseFallback();
+        /* 总高漂移＝版面还在长（字体迟到/迟填）：重测即可，永不记过——
+           初版把漂移当坏几何，开书期字体 swap 一到就误烧保险丝（探针实证）。
+           页高漂移同理：开书后状态行迟到入流会让视口高收缩（实测
+           683→653），只盯总高会把页表冻结在错误页高上（总页数差一页、
+           恢复落位差一页），故 clientHeight 变化也是重测信号 */
+        if (!_pgReady || Math.abs(sc.scrollHeight - _pgTotalH) > 2 || sc.clientHeight !== _pgPageH) {
+          if (measurePagedLayout()) { _geoBadStreak = 0; return; }
+          _geoBadStreak++;
+        } else if (pagedGeometryOK()) { _geoBadStreak = 0; return; }
+        else _geoBadStreak++;
+        if (_geoBadStreak === 1) { pagedGeoCheckSoon(); return; }
+        if (_geoBadStreak >= 3) pagedFuseFallback();
       }, 60);
     });
   }
@@ -1037,7 +1170,14 @@ var JingWen = (function () {
     if (reader) reader.classList.toggle('reader-paged', !!on);
     document.body.style.overflow = on ? 'hidden' : '';
     if (on) { sizePagedColumns(); updateTurnBtn(); pagedGeoCheckSoon(); }
+    else if (reader) {
+      /* 离开翻页：撤量测时写入的底栏带内联值与未竟补间，CSS 口径复位 */
+      reader.style.paddingBottom = '';
+      if (_pgTween) { cancelAnimationFrame(_pgTween); _pgTween = null; }
+    }
   }
+
+
   function applyTurnMode() {
     resetDispGate(); /* 翻页模式切换：显示发布换纪元 */
     var off = 0;
@@ -1058,46 +1198,55 @@ var JingWen = (function () {
   function pagedRestorePos() {
     var gen = ++_restoreGen;
     if (!isPaged() || !currentId || _restoreOff == null) return;
-    var tries = 0, target = _restoreOff, lastSW = -1, lastSL = -1, lastTX = -1, stable = 0;
+    var tries = 0, target = _restoreOff, stable = 0, lastEpoch = -1, lastTop = -1;
     var iv = setInterval(function () {
       tries++;
       if (gen !== _restoreGen || !isPaged() || !currentId || _restoreOff == null) { clearInterval(iv); return; }
-      pagedFillAhead();
+      /* 目标卷先直填，再量测落位：切片落位是确定性的（scrollTop 写入不
+         触发重排），不收敛只可能来自填充/字体使页表换纪元——判据＝纪元
+         与落点页顶连续 3 拍不变且当前页范围覆盖目标偏移 */
+      ensureSecFilled(_metrics ? secIdxAtOffset(target) : 0);
+      var _scR = pageScroller();
+      if (!_pgReady || (_scR && (Math.abs(_scR.scrollHeight - _pgTotalH) > 2 || _scR.clientHeight !== _pgPageH))) measurePagedLayout();
       goToContentOffset(target, true);
       var sc = pageScroller();
-      var sw = sc ? sc.scrollWidth : 0, sl = sc ? sc.scrollLeft : 0;
-      /* 目标卷首段的横坐标：版面未稳时它还在漂，与 sw/sl 一并纳入稳定判据
-         （旧判据只有 sw+sl，慢渲染下两者假稳、落位在错页提前收官） */
-      var tx = -1;
-      if (sc && _metrics) {
-        var tsi = secIdxAtOffset(target);
-        var tel = document.querySelector('#jing-content .jing-para[data-sec="' + tsi + '"]');
-        if (tel) { var tsr = sc.getBoundingClientRect(); tx = Math.round(tel.getBoundingClientRect().left - tsr.left + sc.scrollLeft); }
-      }
-      if (sw === lastSW && sl === lastSL && tx === lastTX) stable++; else stable = 0;
-      lastSW = sw; lastSL = sl; lastTX = tx;
       var done = false;
-      if (stable >= 4 && tries >= 6) {
-        /* 收官前验落点：当前页的内容范围必须真的覆盖目标偏移 */
+      if (_pgReady && sc) {
+        var cp = curPage();
+        var covers = false;
         try {
-          var cp = curPage(), co = pageOffset(cp);
-          done = co <= target && (cp >= pageCount() - 1 || pageOffset(cp + 1) > target);
-        } catch (e) { done = true; }
+          var co = pageOffset(cp);
+          covers = co <= target && (cp >= pageCount() - 1 || pageOffset(cp + 1) > target);
+        } catch (e) {}
+        if (covers && _pgEpoch === lastEpoch && Math.abs(sc.scrollTop - pgTopFor(cp)) <= 1 && sc.scrollTop === lastTop) stable++;
+        else stable = 0;
+        lastEpoch = _pgEpoch; lastTop = sc.scrollTop;
+        done = stable >= 3 && tries >= 4;
       }
-      if (done || tries >= 60) {
+      if (done || tries >= 45) {
         clearInterval(iv);
         if (_restoreOff === target) _restoreOff = null;
         /* 落位收官复查：落在虚空（目标段缺失/版面未就绪）→ 看门狗接手 */
         setTimeout(pagedVoidWatchdog, 350);
-        /* 收官补一记状态行刷新：restore 期间无滚动事件时页码/进度无人发布，
-           总数要等 updateReadUI 在量测定死后自调度复查链跑完才上栏 */
+        /* 收官补一记状态行刷新：恢复期间无滚动事件时页码/进度无人发布 */
         updateReadUI();
       }
-    }, 180);
+    }, 160);
   }
+
+
   function updateTurnBtn() {
     var b = $('#jing-turn-btn');
     if (b) b.textContent = isPaged() ? '翻页·左右' : '翻页·滚动';
+  }
+  /* 字体到位重测：JingSerif 是 swap 字体，真机首开时分页量测多半在回落
+     字体下完成、真字体迟到后段落高度全变——二期对此毫无防备（量测后
+     从不复检），是恢复落位在真机跑偏的帮凶。字体就绪/新字体载完都按
+     锚点重测一次（沙箱文件直载字体瞬间到位，此路从未被冒烟覆盖） */
+  if (document.fonts) {
+    var _fontsHook = function () { if (isPaged() && currentId) schedulePagedMeasure(_pageAnchorOff); };
+    if (document.fonts.ready && document.fonts.ready.then) document.fonts.ready.then(function () { setTimeout(_fontsHook, 60); });
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', function () { setTimeout(_fontsHook, 60); });
   }
   /* 跨闭包钩子（JingMark 的点跳/书签存档借用同一字偏移口径） */
   window.__wuriPagedActive = function () { return isPaged() && !!currentId; };
@@ -1695,7 +1844,7 @@ var JingWen = (function () {
            第 1 页、再被恢复轮询拉回锚点页——正是内丹书翻页模式落色回闪的
            第二落点（2026-10-28 探针实测 scrollLeft 1236→0→1236）。
            仅无锚（新开书/无存档）时才清零防残留。 */
-        var sc0 = pageScroller(); if (sc0 && roff == null) sc0.scrollLeft = 0;
+        var sc0 = pageScroller(); if (sc0 && roff == null) sc0.scrollTop = 0;
         _restoreOff = roff;
         syncPagedChrome();
         if (roff != null) pagedRestorePos();
@@ -1940,7 +2089,7 @@ var JingWen = (function () {
   window.__wuriOpenMarksFromReader = function (tab) {
     if (!currentId) { if (window.__wuriOpenMarks) window.__wuriOpenMarks(tab); return; }
     var rt = { id: currentId, y: window.scrollY, sl: null, paged: isPaged() };
-    if (rt.paged) { var sc = pageScroller(); if (sc) rt.sl = sc.scrollLeft; }
+    if (rt.paged) { var sc = pageScroller(); if (sc) rt.sl = sc.scrollTop; }
     window._marksReturn = rt;
     saveProgressNow();
     var reader = $('#jing-reader'); if (reader) reader.hidden = true;
@@ -1963,11 +2112,11 @@ var JingWen = (function () {
     var restore = function () {
       tries++;
       try {
-        if (rt.paged) { var sc = pageScroller(); if (sc && rt.sl != null) sc.scrollLeft = rt.sl; }
+        if (rt.paged) { var sc = pageScroller(); if (sc && rt.sl != null) sc.scrollTop = rt.sl; }
         else window.scrollTo(0, rt.y);
       } catch (e) {}
       var okPos = rt.paged
-        ? (function () { var s2 = pageScroller(); return s2 && rt.sl != null && Math.abs(s2.scrollLeft - rt.sl) <= 2; })()
+        ? (function () { var s2 = pageScroller(); return s2 && rt.sl != null && Math.abs(s2.scrollTop - rt.sl) <= 2; })()
         : Math.abs(window.scrollY - rt.y) <= 2;
       if (!okPos && tries < 8) setTimeout(restore, 120);
       else updateReadUI();
@@ -2134,7 +2283,7 @@ var JingWen = (function () {
        侧不再改段落几何），此处再加位置双保险——记切换前位置，切换后
        两拍复核、不等则复位；自动跟随滚动另有 playAdvancing 门（hlTick） */
     var y0 = window.scrollY, sl0 = null;
-    if (isPaged()) { var sc0 = pageScroller(); if (sc0) sl0 = sc0.scrollLeft; }
+    if (isPaged()) { var sc0 = pageScroller(); if (sc0) sl0 = sc0.scrollTop; }
     followMode = !followMode;
     var btn = $('#jing-follow');
     if (btn) btn.classList.toggle('on', followMode);
@@ -2156,7 +2305,7 @@ var JingWen = (function () {
     }
     var restoreAnchor = function () {
       try {
-        if (isPaged()) { var sc1 = pageScroller(); if (sc1 && sl0 != null && Math.abs(sc1.scrollLeft - sl0) > 1) sc1.scrollLeft = sl0; }
+        if (isPaged()) { var sc1 = pageScroller(); if (sc1 && sl0 != null && Math.abs(sc1.scrollTop - sl0) > 1) sc1.scrollTop = sl0; }
         else if (Math.abs(window.scrollY - y0) > 1) window.scrollTo(0, y0);
       } catch (e) {}
     };
@@ -2210,6 +2359,7 @@ var JingWen = (function () {
       }
       var built = buildFollowMap();
       if (built) { _mapSid = sid; _mapVoice = voice; }
+      if (built && isPaged()) schedulePagedMeasure(_pageAnchorOff); /* 直填改版面：页表重测 */
       cb(built);
     });
   }
@@ -2265,10 +2415,12 @@ var JingWen = (function () {
     // 温和跟随：只在段落不在视口内时滚动（分页下＝段落不在当前页时翻页）
     try {
       if (isPaged() && currentId) {
-        var sc2 = pageScroller(), sr2 = sc2.getBoundingClientRect();
-        var ex = el.getBoundingClientRect().left - sr2.left + sc2.scrollLeft;
-        var ep = Math.floor(ex / pageW());
-        if (ep !== curPage()) goToPage(ep, true);
+        /* 手动翻页让路（反馈追加 C 条）：用户刚手动翻过页，让路窗内不
+           自动跟随；窗外也只许在播放句确已离开当前页时才自动翻页——
+           判定走切片页表，不读易变的像素横坐标 */
+        if (Date.now() < _manualHoldUntil) return;
+        var ep = pageOfEl(el);
+        if (ep >= 0 && ep !== curPage()) goToPage(ep, true);
       } else {
         var r = el.getBoundingClientRect();
         if (r.top < 80 || r.bottom > window.innerHeight - 120) {
@@ -3288,6 +3440,7 @@ var JingWen = (function () {
     var jc = $('#jing-content');
     if (jc) jc.addEventListener('click', function (e) {
       if (!followMode) return;
+      if (Date.now() - _lastDragEnd < 400) return; /* 拖动翻页后的合成 click 不点播 */
       // 高亮/背诵/折叠等已有交互优先
       if (e.target.closest('.hl') || e.target.closest('[data-qing]') ||
           e.target.closest('.recite-sen') || e.target.closest('[data-fold]')) return;
@@ -3383,7 +3536,10 @@ var JingWen = (function () {
       closeDockPanels();
       if (window.__wuriOpenMarksFromReader) window.__wuriOpenMarksFromReader('bookmark');
     });
-    /* 分页容器：横滚即刷新进度/页码并预填后续卷 */
+    /* 分页容器（切片引擎）：scrollTop 变化即刷新进度/页码并预填后续卷；
+       静置后吸附最近页界。scrollTop 在切片模式下只有三个合法来源——
+       程序落位（goToPage/恢复）、拖动跟手、补间——静置吸附只兜手势被
+       系统打断（来电/手势导航抢占）停在半页的残局 */
     var scEl = $('#jing-content');
     if (scEl) {
       var _scrollSettleT = null;
@@ -3394,17 +3550,14 @@ var JingWen = (function () {
         if (_scrollSettleT) clearTimeout(_scrollSettleT);
         _scrollSettleT = setTimeout(function () {
           _scrollSettleT = null;
-          if (!isPaged() || !currentId) return;
-          var w = pageW(); if (!w) return;
-          /* 硬钳制（settle 时做：逐事件读 scrollWidth 会强迫巨型多列同步
-             布局，是连滑卡顿的放大器之一） */
-          var maxL = Math.max(0, scEl.scrollWidth - w);
-          if (scEl.scrollLeft > maxL) scEl.scrollLeft = maxL;
-          else if (scEl.scrollLeft < 0) scEl.scrollLeft = 0;
-          /* 落点离格（手势被打断/事件丢失停在半页）→ 吸附最近页 */
-          if (!_drag && _restoreOff == null) {
-            var rem = scEl.scrollLeft % w;
-            if (rem > 2 && rem < w - 2) goToPage(curPage(), false);
+          if (!isPaged() || !currentId || !_pgReady) return;
+          var maxT = Math.max(0, _pgTotalH - pageH());
+          if (scEl.scrollTop > maxT) scEl.scrollTop = maxT;
+          else if (scEl.scrollTop < 0) scEl.scrollTop = 0;
+          if (!_drag && _restoreOff == null && !_pgTween) {
+            var cp = pageOfY(scEl.scrollTop + pageH() / 2);
+            var ty = pgTopFor(cp);
+            if (Math.abs(scEl.scrollTop - ty) > 1) pgSetTop(ty, false);
           }
           pagedVoidWatchdog();
         }, 700);
@@ -3413,12 +3566,26 @@ var JingWen = (function () {
       var cancelInsist = function () {
         if (_jumpInsist && Date.now() - _jumpInsist.ts > 400) _jumpInsist = null;
       };
-      /* 点按分区（捕获相位，分页手势的唯一权威）：左/右 30% 翻一页，中区
-         进沉浸；沉浸中任何点按只退出沉浸——v262 旧实现把左右区点按的
-         stopImmediatePropagation 与沉浸切换监听对打，沉浸中 60% 屏幕点按
-         既退不出沉浸、又在坏几何里乱翻页，是「卡死」链的一环 */
+      /* 手动翻页统一入口：作废恢复/坚持、给跟读自动跟随开让路窗 */
+      var manualTurn = function (delta) {
+        _restoreOff = null; _jumpInsist = null;
+        _manualHoldUntil = Date.now() + 6000;
+        goToPage(curPage() + delta, true);
+      };
+      /* 边缘起手提示（反馈追加 D 条）：安卓手势导航会吃掉贴边起手的横滑，
+         网页拦不住系统返回——本 App 翻页不依赖边缘起手（点按分区/中部横滑/
+         竖向轻扫皆可），贴边起手又被系统取消时给一次不打扰的提示 */
+      var edgeHintMaybe = function () {
+        if (_edgeHintShown) return;
+        _edgeHintShown = true;
+        if (window.showToast) showToast('从屏幕中部滑动也可翻页');
+      };
+      /* 点按分区（捕获相位，分页点按的唯一权威）：左/右 30% 翻一页，中区
+         进沉浸；沉浸中任何点按只退出沉浸。跟读开启时（二期口径是整体禁
+         用点按——用户实报「跟读开则翻页坏」）改为：左右区照常翻页（压过
+         点段点播），中区点段落仍放行冒泡相位的点播处理器、点空白进沉浸 */
       scEl.addEventListener('click', function (e) {
-        if (!isPaged() || !currentId || followMode) return;
+        if (!isPaged() || !currentId) return;
         /* 拖动刚结束的合成 click：吞掉，防一滑翻两页 */
         if (Date.now() - _lastDragEnd < 400) { e.stopImmediatePropagation(); e.preventDefault(); return; }
         /* 背诵模式点被遮句（反馈批第 10 条）：放行给 document 委托的展开
@@ -3427,9 +3594,7 @@ var JingWen = (function () {
         if (e.target.closest('.hl, .qing-inline, .dz-fig, a, button, .jing-sec-h')) return;
         var sel = window.getSelection();
         if (sel && !sel.isCollapsed) return;
-        /* 沉浸进/出只切底栏显隐：底栏是覆盖层、正文几何恒定，不再 reanchor
-           ——旧实现 reanchor 是为补偿顶栏（在 flex 流内）塌陷引发的重分页，
-           底栏化后该补偿本身就是多余扰动（落位被无故重跑、与恢复轮询互斗） */
+        /* 沉浸进/出只切底栏显隐：底栏是覆盖层、正文几何恒定，不再 reanchor */
         if (document.body.classList.contains('jing-immersive')) {
           document.body.classList.remove('jing-immersive');
           e.stopImmediatePropagation(); e.preventDefault();
@@ -3437,90 +3602,103 @@ var JingWen = (function () {
         }
         var r = scEl.getBoundingClientRect();
         var xr = (e.clientX - r.left) / Math.max(1, r.width);
-        if (xr < 0.3) { _restoreOff = null; _jumpInsist = null; goToPage(curPage() - 1, true); e.stopImmediatePropagation(); e.preventDefault(); }
-        else if (xr > 0.7) { _restoreOff = null; _jumpInsist = null; goToPage(curPage() + 1, true); e.stopImmediatePropagation(); e.preventDefault(); }
-        else { document.body.classList.add('jing-immersive'); e.stopImmediatePropagation(); e.preventDefault(); }
+        if (followMode && xr >= 0.3 && xr <= 0.7 && e.target.closest('.jing-para')) return; /* 中区点段：点播 */
+        if (xr < 0.3) { manualTurn(-1); e.stopImmediatePropagation(); e.preventDefault(); }
+        else if (xr > 0.7) { manualTurn(1); e.stopImmediatePropagation(); e.preventDefault(); }
+        else if (!followMode || !e.target.closest('.jing-para')) { document.body.classList.add('jing-immersive'); e.stopImmediatePropagation(); e.preventDefault(); }
       }, true);
-      /* 滑动翻页＝真分页（v262 失效主因之二）：旧实现 touch 监听全 passive、
-         不接管手势，触摸期间原生横滚自由滑过多页，touchend 再按已被滑走的
-         scrollLeft 算页叠加翻页，填充锚点又反向拽回——三方对打。现行：
-         touchmove 非被动接管，拖动跟手且位移硬钳在起始页 ±1 页（超限橡皮
-         筋），松手按位移>20% 页宽或速度>0.4px/ms 判翻、至多一页 */
+      /* 统一拖动（切片引擎）：纵向拖动跟手（scrollTop 随指，硬钳起始页
+         ±1 页、超限橡皮筋）；横向拖动不跟手（切片是纵向呈现，横滑只在
+         松手时按位移/速度判翻）——两种拖动松手判定同口径：位移 >48px 或
+         速度 >0.35px/ms 判翻一页，竖向 flick（用户习惯：上 flick 下一页、
+         下 flick 上一页）与横滑（左滑下一页）等价。跟读开启时同样有效 */
       var _drag = null;
       scEl.addEventListener('touchstart', function (e) {
         cancelInsist();
-        if (!isPaged() || !currentId || followMode) { _drag = null; return; }
+        if (!isPaged() || !currentId) { _drag = null; return; }
         if (e.touches.length !== 1) { _drag = null; return; }
         if (e.target.closest('button, a, select, .dz-fig')) { _drag = null; return; }
         var sel = window.getSelection();
         if (sel && !sel.isCollapsed) { _drag = null; return; }
         var t = e.touches[0];
-        _drag = { x0: t.clientX, y0: t.clientY, x: t.clientX, baseLeft: scEl.scrollLeft, basePage: curPage(), t: Date.now(), moved: false };
+        _drag = { x0: t.clientX, y0: t.clientY, x: t.clientX, y: t.clientY, baseTop: scEl.scrollTop, basePage: curPage(), t: Date.now(), axis: '', moved: false,
+                  edge: (t.clientX <= 14 || t.clientX >= window.innerWidth - 14) };
+        if (_pgTween) { cancelAnimationFrame(_pgTween); _pgTween = null; }
       }, { passive: true });
       scEl.addEventListener('touchmove', function (e) {
         if (!_drag || !isPaged()) return;
         var t = e.touches[0]; if (!t) return;
-        _drag.x = t.clientX;
+        _drag.x = t.clientX; _drag.y = t.clientY;
         var dx = t.clientX - _drag.x0, dy = t.clientY - _drag.y0;
-        if (!_drag.moved) {
-          if (Math.abs(dx) > 9 && Math.abs(dx) > Math.abs(dy) * 1.2) _drag.moved = true;
-          else if (Math.abs(dy) > 14) { _drag = null; return; } /* 纵向意图（选词等）：放行 */
+        if (!_drag.axis) {
+          if (Math.abs(dy) >= 10 && Math.abs(dy) > Math.abs(dx) * 1.15) _drag.axis = 'v';
+          else if (Math.abs(dx) >= 10 && Math.abs(dx) > Math.abs(dy) * 1.15) _drag.axis = 'h';
+          if (_drag.axis) _drag.moved = true;
         }
-        if (_drag.moved) {
+        if (_drag.axis === 'v') {
           e.preventDefault();
           _dragUntil = Date.now() + 250; /* 拖动期填充让路标记 */
-          var w = pageW(); if (!w) return;
-          var lo = (_drag.basePage - 1) * w, hi = (_drag.basePage + 1) * w;
-          var nl = _drag.baseLeft - dx;
-          if (nl < lo) nl = lo + (nl - lo) * 0.3;
-          if (nl > hi) nl = hi + (nl - hi) * 0.3;
-          var maxL = Math.max(0, scEl.scrollWidth - w);
-          scEl.scrollLeft = Math.max(0, Math.min(nl, maxL));
+          if (!_pgReady) return;
+          var lo = pgTopFor(Math.max(0, _drag.basePage - 1)), hi = pgTopFor(Math.min(pageCount() - 1, _drag.basePage + 1));
+          var nt = _drag.baseTop - dy;
+          if (nt < lo) nt = lo + (nt - lo) * 0.3;
+          if (nt > hi) nt = hi + (nt - hi) * 0.3;
+          var maxT2 = Math.max(0, _pgTotalH - pageH());
+          scEl.scrollTop = Math.max(0, Math.min(nt, maxT2));
+        } else if (_drag.axis === 'h') {
+          e.preventDefault(); /* 横滑接管：防触发页面级手势/滚动链 */
+          _dragUntil = Date.now() + 250;
         }
       }, { passive: false });
       var dragEnd = function (e) {
         if (!_drag) return;
         var d = _drag; _drag = null;
-        if (!d.moved || !isPaged() || !currentId) return;
+        if (!isPaged() || !currentId) return;
         var t = (e.changedTouches && e.changedTouches[0]) || null;
-        var dx = (t ? t.clientX : d.x) - d.x0;
+        var dx = (t ? t.clientX : d.x) - d.x0, dy = (t ? t.clientY : d.y) - d.y0;
         var dt = Math.max(1, Date.now() - d.t);
-        var v = Math.abs(dx) / dt, w = pageW();
-        var target = d.basePage;
-        if (w && (Math.abs(dx) > w * 0.2 || v > 0.4)) target = d.basePage + (dx < 0 ? 1 : -1);
+        /* 未成拖动＝点按：不得盖 _lastDragEnd——那会把点按自己的合成 click
+           当作「拖动尾巴」吞掉（点按将无反应，本批探针实证） */
+        if (!d.moved) { if (d.edge) edgeHintMaybe(); return; }
         _lastDragEnd = Date.now();
         _dragUntil = Date.now() + 350;
+        var delta = 0;
+        if (d.axis === 'v') { if (Math.abs(dy) > 48 || Math.abs(dy) / dt > 0.35) delta = dy < 0 ? 1 : -1; }
+        else if (d.axis === 'h') { if (Math.abs(dx) > 48 || Math.abs(dx) / dt > 0.35) delta = dx < 0 ? 1 : -1; }
         _restoreOff = null; _jumpInsist = null;
-        goToPage(target, true);
+        _manualHoldUntil = Date.now() + 6000;
+        if (delta) goToPage(d.basePage + delta, true);
+        else if (d.axis === 'v') goToPage(d.basePage, true); /* 未过阈：弹回起始页 */
       };
       scEl.addEventListener('touchend', dragEnd);
       scEl.addEventListener('touchcancel', function () {
+        if (_drag && _drag.edge) edgeHintMaybe();
         if (_drag && _drag.moved && isPaged()) { var bp = _drag.basePage; _lastDragEnd = Date.now(); goToPage(bp, true); }
         _drag = null;
       });
-      /* 滚轮/触控板横扫：一手势一页（400ms 锁） */
+      /* 滚轮/触控板扫动：一手势一页（400ms 锁） */
       var _wheelLock = 0;
       scEl.addEventListener('wheel', function (e) {
         cancelInsist();
-        if (!isPaged() || !currentId || followMode) return;
+        if (!isPaged() || !currentId) return;
         var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
         if (!d) return;
         e.preventDefault();
         var now = Date.now();
         if (now - _wheelLock < 400) return;
         _wheelLock = now;
-        _restoreOff = null; _jumpInsist = null;
-        goToPage(curPage() + (d > 0 ? 1 : -1), true);
+        manualTurn(d > 0 ? 1 : -1);
       }, { passive: false });
       /* 方向键翻页（桌面/外接键盘） */
       document.addEventListener('keydown', function (e) {
         if (!isPaged() || !currentId) return;
         var reader = $('#jing-reader');
         if (!reader || reader.hidden) return;
-        if (e.key === 'ArrowRight') { _restoreOff = null; goToPage(curPage() + 1, true); }
-        else if (e.key === 'ArrowLeft') { _restoreOff = null; goToPage(curPage() - 1, true); }
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { _restoreOff = null; goToPage(curPage() + 1, true); }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { _restoreOff = null; goToPage(curPage() - 1, true); }
       });
     }
+
     $('#jing-speak').addEventListener('click', speakAll);
     var ttsSetBtn = $('#jing-tts-set');
     if (ttsSetBtn) ttsSetBtn.addEventListener('click', function () {
