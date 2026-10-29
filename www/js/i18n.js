@@ -1397,7 +1397,15 @@ try { langPref = localStorage.getItem(LANG_KEY) || 'auto';} catch (e) {}
 
 function sysLang() {
 var nv = (navigator.language || navigator.userLanguage || 'zh-CN').toLowerCase();
-if (nv.indexOf('zh-tw') === 0 || nv.indexOf('zh-hk') === 0) return 'zh-TW';
+if (nv.indexOf('zh-tw') === 0 || nv.indexOf('zh-hk') === 0 || nv.indexOf('zh-mo') === 0 || nv.indexOf('hant') >= 0) return 'zh-TW';
+/* 系统语言列表里任一繁体标记（zh-Hant-* 等）亦从繁体（2026-10-29 与经文简繁跟随同批） */
+try {
+var ls = navigator.languages || [];
+for (var i = 0; i < ls.length; i++) {
+var x = String(ls[i] || '').toLowerCase();
+if (x.indexOf('hant') >= 0 || x.indexOf('zh-tw') === 0 || x.indexOf('zh-hk') === 0 || x.indexOf('zh-mo') === 0) return 'zh-TW';
+}
+} catch (e) {}
 return 'zh-CN';
 }
 function curLang() {

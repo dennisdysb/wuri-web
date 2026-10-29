@@ -95,6 +95,7 @@ const ASSETS = [
   './js/qimen-render3d.js',
   './js/qimen-app.js',
   './js/t2s.js',
+  './js/s2t.js',
   './js/t2s_map.json',
   './js/yearview.js',
   './js/zhishen-data.js',

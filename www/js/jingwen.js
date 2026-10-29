@@ -124,22 +124,81 @@ var JingWen = (function () {
   function $(s) { return document.querySelector(s); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function isPro() { return window.WuriPro && WuriPro.isPro(); }
-  /* 经文简繁转换：经文源文件为繁体；繁体模式直接显示，简体模式转简体 */
-  function txScript(s) {
+  /* 经文简繁转换（显示层，底本数据一字不动；2026-10-29 定版「简繁跟随系统语言」）：
+   * 简体模式一律繁→简（window.t2s）；繁体模式下按底本分流——底本繁体的书直出底本
+   * 原字，底本简体的书走简→繁（window.s2t）。两向转换均等长（已全语料审计 0 违例），
+   * 注音下标、划线/书签 char 锚点天然不移。底本判定按书扫描简/繁标志字计数
+   * （bookSimpBase，KR 来源与道藏索引恒繁体底本）；无书上下文的短串（书名/例句）
+   * 走串级判定 fragLooksSimp。 */
+  var SCRIPT_TRAD_MARK = '靈麼爾眾廣國聖寶讓鑒範讚應門開關頭時說讀寫現長樂處觀來個們這為無師壇點聲氣萬與書經將實義禮體發陰陽龍鳳龜齊齋淨濟煉燈爐籙誦課講';
+  var SCRIPT_SIMP_MARK = '灵么尔众广国圣宝让鉴范赞应门开关头时说读写现长乐处观来个们这为无师坛点声气万与书经将实义礼体发阴阳龙凤龟齐斋净济炼灯炉箓诵课讲';
+  var _bookSimpCache = {};
+  function bookSimpBase(id) {
+    if (!id) return null;
+    if (Object.prototype.hasOwnProperty.call(_bookSimpCache, id)) return _bookSimpCache[id];
+    var r = null;
+    if (id.indexOf('KR') === 0 || (typeof JING_PUNCT_SRC !== 'undefined' && JING_PUNCT_SRC[id])) r = false;
+    else {
+      var it = null, _idx = window.JINGWEN_INDEX || [];
+      for (var _i = 0; _i < _idx.length; _i++) if (_idx[_i].id === id) { it = _idx[_i]; break; }
+      if (it && it.daozang) r = false;
+      else {
+        var d = window.JINGWEN && window.JINGWEN[id];
+        if (d && d.sections) {
+          var tc = 0, sc = 0;
+          for (var i = 0; i < d.sections.length; i++) {
+            var ps = d.sections[i].paras || [];
+            for (var j = 0; j < ps.length; j++) {
+              var t = typeof ps[j] === 'string' ? ps[j] : (ps[j].t || '');
+              for (var k = 0; k < t.length; k++) {
+                var ch = t.charAt(k);
+                if (SCRIPT_TRAD_MARK.indexOf(ch) >= 0) tc++;
+                else if (SCRIPT_SIMP_MARK.indexOf(ch) >= 0) sc++;
+              }
+            }
+            if (tc + sc >= 60) break;
+          }
+          r = (sc >= 3 && sc > tc);
+        }
+      }
+    }
+    if (r !== null) _bookSimpCache[id] = r;
+    return r;
+  }
+  /* 串级判定：含简体标志字且不含繁体标志字才判底本为简体 */
+  function fragLooksSimp(s) {
+    var hasS = false;
+    s = String(s || '');
+    for (var i = 0; i < s.length; i++) {
+      var ch = s.charAt(i);
+      if (SCRIPT_TRAD_MARK.indexOf(ch) >= 0) return false;
+      if (SCRIPT_SIMP_MARK.indexOf(ch) >= 0) hasS = true;
+    }
+    return hasS;
+  }
+  function txFor(s, id) {
     if (!s) return s;
     var lang = 'zh-CN';
     try {
       if (window.I18N && typeof window.curLang === 'function') lang = window.curLang();
       else if (document.documentElement.getAttribute('lang') === 'zh-TW') lang = 'zh-TW';
     } catch (e) {}
-    if (lang === 'zh-TW') {
-      // 繁体模式：源文已为繁体，直接返回（不再做 S2T，避免误转）
+    if (lang !== 'zh-TW') {
+      if (window.t2s && typeof window.t2s === 'function') return window.t2s(s);
       return s;
     }
-    // 简体模式：繁转简
-    if (window.t2s && typeof window.t2s === 'function') return window.t2s(s);
+    var b = bookSimpBase(id || currentId || null);
+    if (b === false) return s;
+    if (b === null && !fragLooksSimp(s)) return s;
+    if (window.s2t && typeof window.s2t === 'function') return window.s2t(s);
     return s;
   }
+  function txScript(s) { return txFor(s, null); }
+  /* 无当前书上下文的片段（列表书名、跨书条目）专用 */
+  function txFrag(s) { return txFor(s, '__frag__'); }
+  window.wuriTxFrag = txFrag;
+  window.wuriTxFor = txFor;
+  window.wuriBookSimpBase = bookSimpBase;
   /* 当前是否为简体显示模式（与 txScript 同口径） */
   function isSimpMode() {
     try {
@@ -231,7 +290,7 @@ var JingWen = (function () {
       + sorted.map(function (it) {
         return '<div class="jing-item" data-jing="' + it.id + '">'
           + '<span class="jing-book">' + esc(it.cat || '經') + '</span>'
-          + '<span class="jing-twrap"><span class="jing-title">' + esc(it.title) + '</span><span class="jing-sub"></span></span>'
+          + '<span class="jing-twrap"><span class="jing-title">' + esc(txFrag(it.title)) + '</span><span class="jing-sub"></span></span>'
           + '<span class="jing-go">›</span></div>';
       }).join('')
       + '</div></div>';
@@ -249,7 +308,7 @@ var JingWen = (function () {
         + neidanItems.map(function (it) {
           return '<div class="jing-item" data-jing="' + it.id + '">'
             + '<span class="jing-book">丹</span>'
-            + '<span class="jing-twrap"><span class="jing-title">' + esc(it.title) + '</span><span class="jing-sub"></span></span>'
+            + '<span class="jing-twrap"><span class="jing-title">' + esc(txFrag(it.title)) + '</span><span class="jing-sub"></span></span>'
             + (ndPro ? '' : '<span class="jing-locktag">高级版</span>')
             + '<span class="jing-go">›</span></div>';
         }).join('')
@@ -340,8 +399,12 @@ var JingWen = (function () {
     var out = '', pos = 0;
     sens.forEach(function (sen) {
       if (!sen) return;
-      var firstCh = sen.charAt(0);
-      var dispCh = txScript(firstCh);
+      /* 整句一次转换：词组级转换须整段命中（如 干支/斗姥 的保护形），逐字转会
+       * 只剩字表默认而误形；等长不变式下转换后下标与原文/py 仍逐字对齐，
+       * 万一不等长回落整句原字——宁可不转、不可错位 */
+      var senD = txScript(sen);
+      if (!senD || senD.length !== sen.length) senD = sen;
+      var dispCh = senD.charAt(0);
       // 找首字拼音
       var pyIdx = t.indexOf(sen, pos);
       var r = (pyIdx >= 0 && py[pyIdx]) ? py[pyIdx] : '';
@@ -350,8 +413,7 @@ var JingWen = (function () {
       // rest：去掉首字后的剩余部分
       var restHtml = '';
       for (var j = 1; j < sen.length; j++) {
-        var ch2 = sen[j], rr2 = (pyIdx >= 0) ? (py[pyIdx + j] || '') : '';
-        ch2 = txScript(ch2);
+        var ch2 = senD[j], rr2 = (pyIdx >= 0) ? (py[pyIdx + j] || '') : '';
         restHtml += rr2 ? '<ruby>' + esc(ch2) + '<rt>' + esc(rr2) + '</rt></ruby>' : esc(ch2);
       }
       out += '<span class="recite-sen">'
@@ -1670,11 +1732,16 @@ var JingWen = (function () {
           var dzSuffix = '';
           if (d.daozang) {
             dzSuffix = d.punctMode
-              ? '｜机器标点 · 未经校订' + (d.punctPartial ? '（已标 ' + d.punctPartial.done + '/' + d.punctPartial.total + ' 卷）' : '') + '｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : '')
-              : '｜底本直出 · 未经校订｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : '');
+              ? '｜机器标点 · 未经校订' + (d.punctPartial ? '（已标 ' + d.punctPartial.done + '/' + d.punctPartial.total + ' 卷）' : '') + '｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : (!isSimpMode() && bookSimpBase(currentId) ? '｜繁体由简体底本机器转换' : ''))
+              : '｜底本直出 · 未经校订｜注音为机器标注加审读表校正，多音字可能有误' + (isSimpMode() ? '｜简体由繁体底本机器转换' : (!isSimpMode() && bookSimpBase(currentId) ? '｜繁体由简体底本机器转换' : ''));
           } else if (d.punctMode) {
             /* 精选内丹标点版：只标标点口径（底本口径已在 note 内） */
             dzSuffix = '｜机器标点 · 未经校订';
+          } else if (isSimpMode() && bookSimpBase(currentId) === false) {
+            /* 精选繁体底本书在简体模式下同样经显示层转换，与道藏分支同口径标注 */
+            dzSuffix = '｜简体由繁体底本机器转换';
+          } else if (!isSimpMode() && bookSimpBase(currentId)) {
+            dzSuffix = '｜繁体由简体底本机器转换';
           }
           jnote.textContent = txScript(d.note + dzSuffix);
           jnote.hidden = false;
@@ -2600,6 +2667,7 @@ var JingWen = (function () {
       var title = it.title || '';
       var hit = title.indexOf(q) >= 0;
       if (!hit && window.t2s) { try { hit = window.t2s(title).indexOf(q) >= 0; } catch (e) {} }
+      if (!hit && window.s2t) { try { hit = window.s2t(title).indexOf(q) >= 0; } catch (e) {} }
       if (!hit) {
         for (var i = 0; i < aliases.length; i++) {
           if (aliases[i].indexOf(q) >= 0 || q.indexOf(aliases[i]) >= 0) { hit = true; break; }
@@ -2619,10 +2687,15 @@ var JingWen = (function () {
         sec.paras.forEach(function (p, pi) {
           if (!p.t) return; /* 图版段无正文不参与全文检索 */
           var i = p.t.indexOf(q);
+          /* 简繁归一兜底（2026-10-29）：转换等长、命中下标可直接投影回原文切片——
+           * 简体查询命中繁体底本（t2s 归一）、繁体查询命中简体底本（s2t 归一） */
+          if (i < 0 && window.t2s) { try { i = window.t2s(p.t).indexOf(window.t2s(q)); } catch (e) {} }
+          if (i < 0 && window.s2t) { try { i = window.s2t(p.t).indexOf(q); } catch (e) {} }
           if (i >= 0) {
             var s = Math.max(0, i - 14), e = Math.min(p.t.length, i + q.length + 14);
             var snip = (s > 0 ? '…' : '') + p.t.slice(s, e) + (e < p.t.length ? '…' : '');
-            snip = esc(snip).replace(esc(q), '<b>' + esc(q) + '</b>');
+            var seg = p.t.substr(i, q.length);
+            snip = esc(snip).replace(esc(seg), '<b>' + esc(seg) + '</b>');
             out.push({ id: it.id, title: d.title, sec: sec.h || '', si: si, snip: snip });
           }
         });
@@ -3805,9 +3878,25 @@ var JingWen = (function () {
         e.target.click();
       }
     });
-    /* 语言切换时目录随之重渲（三段标题简繁、全藏目录显示口径跟随系统语言） */
+    /* 语言切换时目录随之重渲（三段标题简繁、全藏目录显示口径跟随系统语言）；
+     * 正在读的书正文一并即时重渲（简繁跟随系统，2026-10-29）：沿用高亮重渲同款
+     * 锚点机制（_jingAnchorY＋展开集）恢复阅读位置，不重载、不丢位 */
     var prevRr = window.__wuri_rerender;
-    window.__wuri_rerender = function () { if (prevRr) prevRr(); renderCatalog(); };
+    window.__wuri_rerender = function () {
+      if (prevRr) prevRr();
+      renderCatalog();
+      try {
+        if (currentId && window.JINGWEN && window.JINGWEN[currentId] && !$('#jing-reader').hidden) {
+          var sc = window.scrollY || 0;
+          if (sc > 0) {
+            window._jingAnchorY = sc;
+            window._jingAnchorExp = collectExpandedSecs();
+            window._jingAnchorTs = Date.now();
+          }
+          renderReaderBody(currentId, window.JINGWEN[currentId]);
+        }
+      } catch (e) {}
+    };
     applyReaderPrefs();
     syncFontPanel();
 
@@ -4700,7 +4789,10 @@ var JingWen = (function () {
     if (!text) return null;
     var secT = '';
     if (sid) { try { secT = getSectionTitle(sid, sec); } catch (e) {} }
-    return { text: text, book: sid ? getBookTitle(sid) : '', secTitle: secT || '' };
+    /* 分享物料按当前语言设置出字（简繁跟随系统，2026-10-29）：正文/书名/节名
+     * 都走显示层转换（getSectionTitle/getBookTitle 均返回底本原字、未转） */
+    var _txFor = window.wuriTxFor || function (s) { return s; };
+    return { text: _txFor(text, sid), book: sid ? _txFor(getBookTitle(sid), sid) : '', secTitle: secT ? _txFor(secT, sid) : '' };
   }
   function buildShareText() {
     var p = getShareParts();
@@ -4935,7 +5027,7 @@ var JingWen = (function () {
       });
     }
     modal.setAttribute('data-hl-id', highlightId);
-    $('#note-quote').textContent = '「' + hl.text + '」';
+    $('#note-quote').textContent = '「' + (window.wuriTxFor || function (s) { return s; })(hl.text || '', hl.sid) + '」';
     $('#note-input').value = existing ? existing.text : '';
     modal.hidden = false;
     setTimeout(function () { $('#note-input').focus(); }, 100);
@@ -5264,10 +5356,11 @@ var JingWen = (function () {
   }
 
   function titleOf(sid) {
+    var _txf = window.wuriTxFrag || function (s) { return s; };
     var idx = window.JINGWEN_INDEX || [];
-    for (var i = 0; i < idx.length; i++) if (idx[i].id === sid) return idx[i].title;
+    for (var i = 0; i < idx.length; i++) if (idx[i].id === sid) return _txf(idx[i].title);
     var dz = window.DAOZANG_INDEX && window.DAOZANG_INDEX.works;
-    if (dz) for (var j = 0; j < dz.length; j++) if (dz[j].id === sid) return dz[j].title;
+    if (dz) for (var j = 0; j < dz.length; j++) if (dz[j].id === sid) return _txf(dz[j].title);
     return sid;
   }
   // 暴露给外部调用（每日经文推荐等）
@@ -5366,8 +5459,9 @@ var JingWen = (function () {
         html += '<div class="hl-meta" style="padding:8px 14px 0">' + esc(titleOf(sid)) + '</div>';
         bySid[sid].forEach(function (h) {
           var c = colors[h.color] || colors.yellow || {};
+          var _txH = window.wuriTxFor || function (s) { return s; };
           html += '<div class="jing-hl-item" data-open-hl="' + h.id + '" data-sid="' + h.sid + '">'
-            + '<div><span class="hl-text hl-' + (h.color || 'yellow') + '">' + esc(h.text) + '</span></div>'
+            + '<div><span class="hl-text hl-' + (h.color || 'yellow') + '">' + esc(_txH(h.text, h.sid)) + '</span></div>'
             + '<div class="hl-meta">' + esc(c.label || '') + ' · ' + fmtDate(h.ts) + ' · 点击定位原文</div>'
             + '<span class="hl-del" data-del-hl="' + h.id + '">删除</span>'
             + '</div>';
@@ -5389,8 +5483,8 @@ var JingWen = (function () {
         var preview = n.text.length > 60 ? n.text.slice(0, 60) + '…' : n.text;
         html += '<div class="jing-hl-item" data-open-note="' + n.id + '" data-hl="' + n.highlightId + '" data-sid="' + n.sid + '">'
           + '<div class="note-preview">' + esc(preview) + '</div>'
-          + '<div class="note-quote">' + esc('「' + (n.highlightText || '').slice(0, 50) + '」') + '</div>'
-          + '<div class="hl-meta">' + esc(n.bookTitle || titleOf(n.sid)) + ' · ' + fmtTime(n.updatedAt || n.createdAt) + ' · 点击回到原文</div>'
+          + '<div class="note-quote">' + esc('「' + ((window.wuriTxFor || function (s) { return s; })(n.highlightText || '', n.sid)).slice(0, 50) + '」') + '</div>'
+          + '<div class="hl-meta">' + esc(n.bookTitle ? (window.wuriTxFor || function (s) { return s; })(n.bookTitle, n.sid) : titleOf(n.sid)) + ' · ' + fmtTime(n.updatedAt || n.createdAt) + ' · 点击回到原文</div>'
           + '<span class="hl-del" data-del-note="' + n.id + '">删除</span>'
           + '</div>';
       });
@@ -5420,8 +5514,19 @@ var JingWen = (function () {
       var q = linesQ;
       hls = hls.filter(function (h) {
         var note = JM.getNoteForHighlight(h.id);
-        return (h.text || '').indexOf(q) >= 0 || titleOf(h.sid).indexOf(q) >= 0 ||
-          (note && note.text.indexOf(q) >= 0);
+        if ((h.text || '').indexOf(q) >= 0 || titleOf(h.sid).indexOf(q) >= 0 ||
+          (note && note.text.indexOf(q) >= 0)) return true;
+        /* 简繁归一兜底：原文/显示文/查询词任一字形不同都应命中（与全库搜索同口径） */
+        try {
+          if (window.t2s) {
+            var nq = window.t2s(q);
+            if (window.t2s(h.text || '').indexOf(nq) >= 0) return true;
+            if (window.t2s(titleOf(h.sid)).indexOf(nq) >= 0) return true;
+          }
+          var _txH = window.wuriTxFor || function (s) { return s; };
+          if (_txH(h.text || '', h.sid).indexOf(q) >= 0) return true;
+        } catch (e) {}
+        return false;
       });
     }
     var bySid = {}, order = [];
@@ -5449,6 +5554,7 @@ var JingWen = (function () {
   function renderLinesList(JM) {
     var data = linesData(JM);
     var colors = JM.HL_COLORS || {};
+    var _txL = window.wuriTxFor || function (s) { return s; };
     if (!data.total) return '<p class="hint">没有符合条件的划线。</p>';
     var html = '';
     data.order.forEach(function (sid) {
@@ -5458,7 +5564,7 @@ var JingWen = (function () {
         var note = JM.getNoteForHighlight(h.id);
         html += '<div class="jing-hl-item" data-open-hl="' + h.id + '" data-sid="' + h.sid + '">'
           + '<div><span class="hl-dot" style="background:' + (HL_DOT[h.color] || HL_DOT.yellow) + '"></span>'
-          + '<span class="hl-text hl-' + (h.color || 'yellow') + '">' + esc(h.text) + '</span></div>'
+          + '<span class="hl-text hl-' + (h.color || 'yellow') + '">' + esc(_txL(h.text, h.sid)) + '</span></div>'
           + (note ? '<div class="note-preview" style="margin-top:4px">✎ ' + esc(note.text.length > 80 ? note.text.slice(0, 80) + '…' : note.text) + '</div>' : '')
           + '<div class="hl-meta">' + esc(c.label || '') + ' · ' + linesSecLabel(h) + fmtDate(h.ts) + ' · 点击定位原文</div>'
           + '<span class="hl-del" data-del-hl="' + h.id + '">删除</span>'
@@ -5500,7 +5606,7 @@ var JingWen = (function () {
         var c = (JM.HL_COLORS || {})[h.color] || {};
         var d = new Date(h.ts || 0);
         var dstr = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
-        out.push((md ? '- ' : '· ') + '「' + (h.text || '') + '」（' + (c.label || '') + ' · ' + linesSecLabel(h).replace(/ · $/, '') + (linesSecLabel(h) ? ' · ' : '') + dstr + '）');
+        out.push((md ? '- ' : '· ') + '「' + ((window.wuriTxFor || function (s) { return s; })(h.text || '', h.sid)) + '」（' + (c.label || '') + ' · ' + linesSecLabel(h).replace(/ · $/, '') + (linesSecLabel(h) ? ' · ' : '') + dstr + '）');
         var note = JM.getNoteForHighlight(h.id);
         if (note) out.push((md ? '  - 心得：' : '  心得：') + note.text);
       });

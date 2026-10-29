@@ -415,6 +415,10 @@ var POEM_BUCKET_NAMES = { star: '星空', xiudao: '修道游仙', gongguan: '宫
  * 简体模式走 t2s 呈现层转换；只动渲染、底本数据一字不改 */
 function txPoem(s) {
   if (!s) return s;
+  /* 简繁跟随系统（2026-10-29）：繁体模式下，底本为简体的片段（每日一经取自简体
+   * 底本书的节题/题解）走 jingwen 的片段转换（串级判定＋简转繁）；诗底本恒繁体、
+   * 串级判定不命中、原样直出。jingwen 未就绪时回落原口径。 */
+  if (window.wuriTxFrag) { try { return window.wuriTxFrag(s); } catch (e) {} }
   try {
     var lang = (window.I18N && typeof window.curLang === 'function') ? window.curLang()
       : (document.documentElement.getAttribute('lang') === 'zh-TW' ? 'zh-TW' : 'zh-CN');
@@ -1646,7 +1650,7 @@ function bindRemind() {
           }
         } catch (e) {}
       }
-      if (titleEl) titleEl.textContent = jt;
+      if (titleEl) titleEl.textContent = txPoem(jt);
       if (unitEl) {
         unitEl.textContent = rec.secTitle
           ? txPoem(rec.secTitle) + (rec.minutes ? ' · 约' + rec.minutes + '分钟' : '')
