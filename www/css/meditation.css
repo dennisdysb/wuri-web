@@ -186,11 +186,21 @@
 .med-mix-chip.on{background:#e8c877;border-color:transparent;color:#1a1a1a;font-weight:600}
 .med-mix-vol{flex:1;width:auto}
 .med-mix-vol:disabled{opacity:.3}
-.med-mix-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
-.med-mix-recipe-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
-.med-mix-recipe{position:relative;border:1px solid rgba(232,200,119,.55);background:rgba(232,200,119,.12);
+.med-mix-foot{display:flex;align-items:center;gap:8px;margin-top:8px}
+/* 配方专属区（2026-10-29 重排）：按钮行下方独立成区，零配方 [hidden] 整区不显；
+ * chip 区限高 64px（约两行）超出内部纵向滚动——面板总高有界、轨道列表只被有限挤压。 */
+.med-mix-recipes{margin-top:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:8px}
+.med-mix-recipes[hidden]{display:none}
+.med-mix-recipes-head{display:flex;align-items:baseline;gap:6px;margin-bottom:6px}
+.med-mix-recipes-title{color:#f5f1e6;font-size:.8rem;letter-spacing:.14em}
+.med-mix-recipes-count{color:#e8c877;font-size:.78rem}
+.med-mix-recipe-chips{display:flex;gap:6px;flex-wrap:wrap;max-height:64px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;padding:1px}
+.med-mix-recipe{position:relative;display:inline-flex;align-items:center;max-width:46%;
+  border:1px solid rgba(232,200,119,.55);background:rgba(232,200,119,.12);
   color:#f5f1e6;border-radius:999px;padding:4px 10px;font-size:.78rem}
-.med-mix-recipe-del{margin-left:6px;opacity:.75;font-size:.72rem}
+.med-mix-recipe-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.med-mix-recipe-del{flex:none;margin-left:6px;opacity:.75;font-size:.72rem}
 .med-mix-hint{color:#e8c877;font-size:.76rem;min-height:1em;margin:6px 0 0}
 
 /* ---------- 主界面三键＋设置 sheet（2026-10-28 改版） ----------

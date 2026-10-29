@@ -975,11 +975,21 @@ var Meditation = (function () {
     var host = $('#med-mix-recipe-chips');
     if (!host) return;
     host.innerHTML = '';
-    mixRecipes().forEach(function (rcp, idx) {
+    var list = mixRecipes();
+    /* 配方专属区（2026-10-29 重排）：零配方整区不显、不占位；计数随渲染同步。 */
+    var sec = $('#med-mix-recipes');
+    if (sec) sec.hidden = !list.length;
+    var cnt = $('#med-mix-recipes-count');
+    if (cnt) cnt.textContent = list.length ? String(list.length) : '';
+    list.forEach(function (rcp, idx) {
       var chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'med-mix-recipe';
-      chip.textContent = rcp.name;
+      chip.title = rcp.name;
+      var nm = document.createElement('span');
+      nm.className = 'med-mix-recipe-name';
+      nm.textContent = rcp.name;
+      chip.appendChild(nm);
       chip.addEventListener('click', function () {
         mix.tracks = {};
         for (var k in rcp.tracks) mix.tracks[k] = rcp.tracks[k];

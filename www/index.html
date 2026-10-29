@@ -2584,9 +2584,18 @@
       </div>
       <div class="med-mix-listwrap"><div id="med-mix-list"></div></div>
       <div class="med-mix-foot">
-        <div class="med-mix-recipe-chips" id="med-mix-recipe-chips"></div>
         <button class="med-seg" id="med-mix-save">存为配方</button>
         <button class="med-seg" id="med-mix-clear">清空</button>
+      </div>
+      <!-- 配方专属区（2026-10-29 用户真机反馈重排）：原与按钮同行 flex-wrap，多了叠高、
+           长自动名撑成大块。现独立成区置按钮行下方：小标题＋计数，零配方整区不显；
+           chip 区限高约两行、超出内部滚动，面板总高有界；chip 限宽省略、title 带全名。 -->
+      <div class="med-mix-recipes" id="med-mix-recipes" hidden>
+        <div class="med-mix-recipes-head">
+          <span class="med-mix-recipes-title">我的配方</span>
+          <span class="med-mix-recipes-count" id="med-mix-recipes-count"></span>
+        </div>
+        <div class="med-mix-recipe-chips" id="med-mix-recipe-chips"></div>
       </div>
       <p class="med-mix-hint" id="med-mix-hint"></p>
     </div>
