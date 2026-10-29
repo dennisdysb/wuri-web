@@ -85,7 +85,7 @@ function generateICS(opts) {
   /* timings: array like ['day1', 'today', 'custom:3'] */
 
   var Lunar = window.Lunar;
-  if (!Lunar) { alert('历法库未加载'); return null; }
+  if (!Lunar) { WuriDlg.alert('历法库未加载'); return null; }
 
   /* SHENDAN 从 app.js 取（全局 var） */
   var SHENDAN = {};
@@ -210,7 +210,7 @@ function init() {
       var n = parseInt((document.getElementById('ics-custom-num') || {}).value || '3', 10) || 3;
       timings.push('custom:' + n);
     }
-    if (!timings.length) { alert('请至少选择一种提醒时机'); return; }
+    if (!timings.length) { WuriDlg.alert('请至少选择一种提醒时机'); return; }
     var opts = {
       ming: !!(document.getElementById('ics-ming') || {}).checked,
       anwu: !!(document.getElementById('ics-anwu') || {}).checked,
@@ -226,7 +226,7 @@ function init() {
       remindTime: (document.getElementById('ics-remind-time') || {}).value || '08:00'
     };
     var anyType = opts.ming || opts.anwu || opts.baidou || opts.chuyishiwu || opts.shendan || opts.gengshen || opts.jiazi || opts.bajie || opts.sanyuan || opts.wula;
-    if (!anyType) { alert('请至少勾选一种提醒类型'); return; }
+    if (!anyType) { WuriDlg.alert('请至少勾选一种提醒类型'); return; }
 
     btn.textContent = '生成中…';
     btn.disabled = true;
@@ -237,10 +237,10 @@ function init() {
           downloadICS(r.text, 'wuri-custom.ics');
           document.getElementById('ics-gen-info').textContent = '已生成 ' + r.count + ' 个事件，请在下载完成后导入到系统日历。';
         } else {
-          alert('生成失败，请重试');
+          WuriDlg.alert('生成失败，请重试');
         }
       } catch (e) {
-        alert('生成出错：' + e.message);
+        WuriDlg.alert('生成出错：' + e.message);
       }
       btn.textContent = '生成我的日历';
       btn.disabled = false;

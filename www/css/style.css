@@ -2743,6 +2743,12 @@ body.sky-red .hd-pick-row.on .hd-pick-sub { color:#f2c1b2; }
 .hd-dlg-danger { background:var(--cinnabar); border:1px solid var(--cinnabar); color:#fff; }
 body.sky-red .hd-dlg-danger { color:#ffe9e2; }
 
+/* 全站自有弹窗 WuriDlg（js/dialog.js，代原生 alert/confirm/prompt）：
+   复用 .hd-pick-* 底部层视觉，仅自立 z 序（须压过阅读器目录抽屉 10002、
+   照片查看器 300 与家宅弹层 400）与多行文案保留换行 */
+.wdlg-mask { z-index:100200; }
+.wdlg-msg { white-space:pre-line; }
+
 /* ===== 户型编辑（第二批 A，house-editor.js） ===== */
 .hpe-card { padding-bottom:14px; }
 .hpe-orow { display:flex; gap:10px; align-items:flex-start; margin-top:10px; }

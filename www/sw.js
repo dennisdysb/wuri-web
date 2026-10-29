@@ -57,6 +57,7 @@ const ASSETS = [
   './js/citydata.js',
   './js/deities-data.js',
   './js/deities.js',
+  './js/dialog.js',
   './js/today-sky.js',
   './js/stars.js',
   './js/vendor/astronomy.js',

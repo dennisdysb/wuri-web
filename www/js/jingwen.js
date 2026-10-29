@@ -1326,15 +1326,17 @@ var JingWen = (function () {
       var text = '重置阅读统计？\n\n将清零本机的阅读时长、读完本数与连读天数'
         + (logged ? '，并清除本设备在云端的统计备份' : '')
         + '，重置后不可恢复。\n阅读进度、书签、划线和生词本不受影响。';
-      if (!confirm(text)) return;
-      var msg = document.getElementById('stats-reset-msg');
-      rsBtn.disabled = true;
-      rpResetStats().then(function (cloudOk) {
-        rsBtn.disabled = false;
-        if (!msg) return;
-        if (!logged) msg.textContent = '已重置：本机阅读统计已清零。';
-        else if (cloudOk) msg.textContent = '已重置：本机与本设备云端统计已清零。';
-        else msg.textContent = '本机统计已清零；云端清除未完成，下次同步时会自动补清。';
+      WuriDlg.confirm(text, '重置').then(function (ok) {
+        if (!ok) return;
+        var msg = document.getElementById('stats-reset-msg');
+        rsBtn.disabled = true;
+        rpResetStats().then(function (cloudOk) {
+          rsBtn.disabled = false;
+          if (!msg) return;
+          if (!logged) msg.textContent = '已重置：本机阅读统计已清零。';
+          else if (cloudOk) msg.textContent = '已重置：本机与本设备云端统计已清零。';
+          else msg.textContent = '本机统计已清零；云端清除未完成，下次同步时会自动补清。';
+        });
       });
     });
   });
@@ -5473,12 +5475,13 @@ var JingWen = (function () {
         var did = pendingHlId;
         var dsid = window._jingCurrentId;
         hideHlPop();
-        if (did && confirm('删除这条高亮？它的心得也会一起删除。')) {
+        if (did) WuriDlg.confirm('删除这条高亮？它的心得也会一起删除。', '删除').then(function (ok) {
+          if (!ok) return;
           deleteHighlight(did);
           rebuildHlRanges(dsid);
           var evt3 = new CustomEvent('jing-rerender');
           document.dispatchEvent(evt3);
-        }
+        });
         return;
       }
       // 点击别处隐藏 popup
@@ -6060,7 +6063,7 @@ var JingWen = (function () {
       try {
         trioToggleMarks();
       } catch (e) {
-        alert('我的标记出错：' + (e && e.message));
+        WuriDlg.alert('我的标记出错：' + (e && e.message));
       }
     });
 
@@ -6112,20 +6115,22 @@ var JingWen = (function () {
       var delHl = e.target.closest('[data-del-hl]');
       if (delHl) {
         e.stopPropagation();
-        if (confirm('删除这条高亮？它的心得也会一起删除。')) {
+        WuriDlg.confirm('删除这条高亮？它的心得也会一起删除。', '删除').then(function (ok) {
+          if (!ok) return;
           if (window.JingMark) window.JingMark.deleteHighlight(delHl.getAttribute('data-del-hl'));
           showMarks();
-        }
+        });
         return;
       }
       // 删除心得
       var delNote = e.target.closest('[data-del-note]');
       if (delNote) {
         e.stopPropagation();
-        if (confirm('删除这条心得？')) {
+        WuriDlg.confirm('删除这条心得？', '删除').then(function (ok) {
+          if (!ok) return;
           if (window.JingMark) window.JingMark.deleteNote(delNote.getAttribute('data-del-note'));
           showMarks();
-        }
+        });
         return;
       }
       // 点击书签打开经文
@@ -6220,7 +6225,7 @@ var JingWen = (function () {
       window._jingMarksUserRequested = true;
       showMarks(tab || 'bookmark');
     } catch (e) {
-      alert('我的标记出错：' + (e && e.message));
+      WuriDlg.alert('我的标记出错：' + (e && e.message));
     }
   };
 })();

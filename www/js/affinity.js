@@ -438,7 +438,7 @@
     if (!payload) return;
     copyText(payload.url, function (ok) {
       var msg = T(ok ? 'aff_link_copied' : 'aff_link_copy_fail');
-      if (window.toast) window.toast(msg); else alert(msg);
+      if (window.toast) window.toast(msg); else WuriDlg.alert(msg);
     });
   }
   /* 系统分享（微信/Facebook 等走系统面板）；环境不支持时回退复制链接 */
@@ -559,7 +559,7 @@
           E.modalImg.src = cv.toDataURL('image/png');
           E.modal.hidden = false;
         } catch (e) {
-          if (window.toast) window.toast(T('aff_share_fail')); else alert(T('aff_share_fail'));
+          if (window.toast) window.toast(T('aff_share_fail')); else WuriDlg.alert(T('aff_share_fail'));
         }
       }
       if (withQR) {

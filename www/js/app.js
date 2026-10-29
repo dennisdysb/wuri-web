@@ -852,7 +852,7 @@ function saveMyDays(a) {
 function exportMyDaysICS() {
   try {
     var days = getMyDays();
-    if (!days.length) { alert('还没有添加自定义日子'); return; }
+    if (!days.length) { WuriDlg.alert('还没有添加自定义日子'); return; }
     var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//wuri//我的日子//CN',
       'NAME:我的日子', 'X-WR-CALNAME:我的日子', 'X-WR-TIMEZONE:America/Toronto',
       'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
@@ -891,7 +891,7 @@ function exportMyDaysICS() {
     a.download = 'wuri-我的日子.ics';
     document.body.appendChild(a); a.click();
     setTimeout(function () { try { URL.revokeObjectURL(a.href); a.remove(); } catch (e) {} }, 1000);
-  } catch (e) { alert('导出失败'); }
+  } catch (e) { WuriDlg.alert('导出失败'); }
 }
 /* 返回某农历日命中的自定义日子 */
 function myDaysOn(l) {
@@ -932,9 +932,11 @@ function renderMyDayList() {
     var id = el.getAttribute('data-id');
     el.querySelector('[data-act="edit"]').addEventListener('click', function () { openMyDayForm(id); });
     el.querySelector('[data-act="del"]').addEventListener('click', function () {
-      if (!confirm('删除这个日子吗？')) return;
-      saveMyDays(getMyDays().filter(function (x) { return String(x.id) !== String(id); }));
-      renderMyDayList(); window.__wuri_rerender();
+      WuriDlg.confirm('删除这个日子吗？', '删除').then(function (ok) {
+        if (!ok) return;
+        saveMyDays(getMyDays().filter(function (x) { return String(x.id) !== String(id); }));
+        renderMyDayList(); window.__wuri_rerender();
+      });
     });
   });
 }
@@ -1009,7 +1011,7 @@ function initMyDays() {
   });
   document.querySelector('#myday-save').addEventListener('click', function () {
     var name = (document.querySelector('#myday-name').value || '').trim();
-    if (!name) { alert('请填写名称'); return; }
+    if (!name) { WuriDlg.alert('请填写名称'); return; }
     var m = parseInt(document.querySelector('#myday-month').value, 10), d = parseInt(document.querySelector('#myday-day').value, 10);
     // 提醒设置
     var remindOn = document.querySelector('#myday-remind-on').checked;

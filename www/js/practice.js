@@ -243,11 +243,14 @@ var Practice = (function () {
       var del = el.querySelector('[data-dact="del"]');
       if (del) del.addEventListener('click', function (e) {
         e.stopPropagation();
-        if (!confirm('确定删除「' + (getHabit(hid) || {}).name + '」吗？历史打卡记录会保留。')) return;
-        var h = getHabit(hid);
-        if (h) cancelRemind(h);
-        saveHabits(getHabits().filter(function (x) { return x.id !== hid; }));
-        renderAll();
+        var hName = (getHabit(hid) || {}).name;
+        WuriDlg.confirm('确定删除「' + hName + '」吗？历史打卡记录会保留。', '删除').then(function (ok) {
+          if (!ok) return;
+          var h = getHabit(hid);
+          if (h) cancelRemind(h);
+          saveHabits(getHabits().filter(function (x) { return x.id !== hid; }));
+          renderAll();
+        });
       });
       // 点整行也可打卡（计次类）；计时类点行可再开一局
       el.addEventListener('click', function () {
@@ -510,7 +513,7 @@ var Practice = (function () {
   }
   function saveForm() {
     var name = $('#df-name').value.trim();
-    if (!name) { alert('请填写名称'); return; }
+    if (!name) { WuriDlg.alert('请填写名称'); return; }
     var h = {
       id: uid(),
       name: name,

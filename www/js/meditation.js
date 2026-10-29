@@ -1100,14 +1100,14 @@ var Meditation = (function () {
     save.className = 'med-breath-chip med-preset-chip med-preset-save';
     save.textContent = '＋ 存当前';
     save.addEventListener('click', function () {
-      var name = '';
-      try { name = window.prompt('预设名（如：晚课前）', ''); } catch (e) {}
-      if (!name || !name.trim()) return;
-      name = name.trim();
-      var list = userPresets().filter(function (x) { return x.name !== name; });
-      list.push(capturePreset(name));
-      lsSet(LS_PRESETS, JSON.stringify(list));
-      renderPresetChips();
+      WuriDlg.prompt('预设名（如：晚课前）', '', '保存').then(function (name) {
+        if (!name || !name.trim()) return;
+        name = name.trim();
+        var list = userPresets().filter(function (x) { return x.name !== name; });
+        list.push(capturePreset(name));
+        lsSet(LS_PRESETS, JSON.stringify(list));
+        renderPresetChips();
+      });
     });
     host.appendChild(save);
   }

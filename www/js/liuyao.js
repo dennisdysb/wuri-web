@@ -683,7 +683,7 @@ var LiuYao = (function () {
         try {
           if (!localStorage.getItem('ly_history_full_warned')) {
             localStorage.setItem('ly_history_full_warned', '1');
-            setTimeout(function () { alert('占卜历史已满300条，新记录将覆盖最早的记录。'); }, 500);
+            setTimeout(function () { WuriDlg.alert('占卜历史已满300条，新记录将覆盖最早的记录。'); }, 500);
           }
         } catch (e) {}
       }
@@ -716,7 +716,7 @@ var LiuYao = (function () {
         return '<option value="' + o.k + '"' + (o.k === lyTopic.cat ? ' selected' : '') + '>' + o.label + '</option>';
       }).join('');
       var headerHtml = '<div class="ly-head-pro">'
-        + '<div class="ly-head-row"><span class="ly-head-label">占问</span><span class="ly-head-val" id="ly-zhanwen-disp" onclick="(function(){var cur="";try{cur=localStorage.getItem("wuri_ly_zhanwen")||"";}catch(e){}var v=prompt("占问事由",cur);if(v!==null){try{localStorage.setItem("wuri_ly_zhanwen",v);}catch(e){}document.getElementById("ly-zhanwen-disp").textContent=v||"点击此处编辑占问事由";}})()" style="cursor:pointer">' + (zhanwen ? escHtml(zhanwen) : '点击此处编辑占问事由') + '</span></div>'
+        + '<div class="ly-head-row"><span class="ly-head-label">占问</span><span class="ly-head-val" id="ly-zhanwen-disp" style="cursor:pointer">' + (zhanwen ? escHtml(zhanwen) : '点击此处编辑占问事由') + '</span></div>'
         + '<div class="ly-head-row"><span class="ly-head-label">分类</span><select id="ly-cat-sel" class="ly-cat-sel">' + catOpts + '</select></div>'
         + '<div class="ly-head-row"><span class="ly-head-label">归档</span><span class="ly-head-val" id="ly-cat-disp">' + curCat + '</span></div>'
         + '<div class="ly-head-row"><span class="ly-head-label">时间</span><span class="ly-head-val">' + timeStr + lunarStr + '</span></div>'
@@ -734,6 +734,20 @@ var LiuYao = (function () {
             var d = $('ly-cat-disp');
             if (d) d.textContent = topicLabel(lyTopic.cat);
             renderResult(true);
+          });
+        }
+        /* 占问事由编辑：原内联 onclick 的原生 prompt 换自有弹窗（点一次绑一次） */
+        var zw = $('ly-zhanwen-disp');
+        if (zw && !zw._lyBound) {
+          zw._lyBound = true;
+          zw.addEventListener('click', function () {
+            var cur = '';
+            try { cur = localStorage.getItem('wuri_ly_zhanwen') || ''; } catch (e) {}
+            WuriDlg.prompt('占问事由', cur, '保存').then(function (v) {
+              if (v === null) return;
+              try { localStorage.setItem('wuri_ly_zhanwen', v); } catch (e) {}
+              zw.textContent = v || '点击此处编辑占问事由';
+            });
           });
         }
       }, 100);

@@ -458,10 +458,10 @@ var Bazi = (function () {
 
   function doPaipan() {
     var date = $('#bz-date').value;
-    if (!date) { alert('请选择出生日期'); return; }
+    if (!date) { WuriDlg.alert('请选择出生日期'); return; }
     var a = date.split('-'), y = +a[0], m = +a[1], d = +a[2];
     var now = new Date(); now.setHours(0, 0, 0, 0);
-    if (new Date(y, m - 1, d) > now) { alert('出生日期不能是未来'); return; }
+    if (new Date(y, m - 1, d) > now) { WuriDlg.alert('出生日期不能是未来'); return; }
     var timeStr = $('#bz-time').value, hasTime = !!timeStr, hh = 0, mm = 0;
     if (hasTime) { var ta = timeStr.split(':'); hh = +ta[0]; mm = +ta[1]; }
     var g = document.querySelector('input[name="bz-gender"]:checked');
@@ -483,7 +483,7 @@ var Bazi = (function () {
       group: (function(){ var s=$('#bz-group'), cu=$('#bz-group-custom'); if(s && s.value==='__custom' && cu) return (cu.value||'').trim(); return ((s&&s.value)||'').trim(); })()
     };
     var data;
-    try { data = buildData(p); } catch (e) { alert('排盘失败：' + e.message); return; }
+    try { data = buildData(p); } catch (e) { WuriDlg.alert('排盘失败：' + e.message); return; }
 
     if ($('#bz-save').checked) {
       var hist = loadHist();
@@ -499,7 +499,7 @@ var Bazi = (function () {
         try {
           if (!localStorage.getItem('wuri_bazi_hist_warned')) {
             localStorage.setItem('wuri_bazi_hist_warned', '1');
-            setTimeout(function () { alert('八字历史已满300条，新记录将覆盖最早的记录。'); }, 500);
+            setTimeout(function () { WuriDlg.alert('八字历史已满300条，新记录将覆盖最早的记录。'); }, 500);
           }
         } catch (e) {}
       }
@@ -920,7 +920,7 @@ var Bazi = (function () {
       y: it.y, m: it.m, d: it.d, hh: it.hh, mm: it.mm, hasTime: it.hasTime,
       useTrue: it.useTrue, lon: it.lon, cityName: it.cityName, group: it.group
     };
-    try { curData = buildData(p); } catch (e) { alert('排盘失败：' + e.message); return; }
+    try { curData = buildData(p); } catch (e) { WuriDlg.alert('排盘失败：' + e.message); return; }
     selDayunIdx = 0; privacyOn = false;
     renderResult();
     showTab('result');
