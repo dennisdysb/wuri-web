@@ -2454,7 +2454,10 @@ var JingWen = (function () {
    * 整书，只把已填充节体的段落内容在原 DOM 上按新模式换一遍（节展开
    * 集、覆盖账本、滚动锚点全部原样保留），未填充的懒卷不碰、其后展开
    * 时 dzFillSection 按现行模式出；切换前锚住视口顶边正看的那一段，
-   * 切换后轮询把该段拉回同一视口位置，用户手势接管即停手。锚点选段
+   * 切换在同一同步任务内完成换段＋定位（settleReciteAnchorNow）、其后
+   * rAF 看守逐帧兜底（原 120ms 轮询纠偏会画出约 140ms 错位帧、真机
+   * 报「闪一下」，2026-10-29 15:53 四报已改，见 settleReciteAnchorNow
+   * 上方注），用户手势接管即停手。锚点选段
    * 不用进度口径的 120px 顶线：两形态段高悬殊，跨线段会随形态换人
    * （实测进背时锚点段本人在原位、跨线段却后移两段，退出再锚错段、
    * 视图漂移数行）——按视口顶边（bottom>0 的第一段）选段，身份与形态
@@ -2517,6 +2520,32 @@ var JingWen = (function () {
       else if (tries > 50) clearInterval(iv);
     }, 200);
   }
+  /* 背诵切换「闪一下」消除（2026-10-29 15:53 真机四报：落点已对，但
+   * 切换瞬间先闪一下才转到锚点）：逐帧采样（rAF 逐帧记 scrollY＋锚点段
+   * rect＋视口顶段身份，s04 同构场景）实证成因不在换段、也不在看守——
+   * 换段在点击任务内同步完成，但定位全靠 insistReciteAnchor 的
+   * 120ms 间隔轮询：点击后首帧（+61ms）起连续约 6 帧（≈140ms）画的是
+   * 「新形态＋旧滚动位」（锚点段被顶到视口上方 −1306px、视口里是下一
+   * 节的段），直到轮询首拍（+271ms）一次 scrollBy 才落位——闪＝这段
+   * 错位帧、跳＝那拍纠偏。修：①settleReciteAnchorNow 在换段＋
+   * applyReaderPrefs 之后、同一同步任务内强制同步布局并一次定位
+   * （量→滚→再量迭代至 |delta|≤1，全程无绘制机会，首帧即对位）；
+   * ②insistReciteAnchor 改 rAF 逐帧看守：回调在每帧绘制前执行，
+   * 已对位则零动作（纯兜底不可见）；晚到位移（字体切片迟到改高）
+   * 在位移被画出之前的同一帧纠回，不再有 120ms 粒度可见跳动。 */
+  function settleReciteAnchorNow(anchor) {
+    if (!anchor || !anchor.el || !anchor.el.isConnected) return false;
+    for (var i = 0; i < 6; i++) {
+      var r = anchor.el.getBoundingClientRect(); /* 读 rect 强制同步布局 */
+      var want = Math.max(anchor.top, -(Math.max(0, r.height - 80)));
+      var delta = r.top - want;
+      if (Math.abs(delta) <= 1) return true;
+      window.scrollBy(0, delta);
+    }
+    var r2 = anchor.el.getBoundingClientRect();
+    var want2 = Math.max(anchor.top, -(Math.max(0, r2.height - 80)));
+    return Math.abs(r2.top - want2) <= 2;
+  }
   function insistReciteAnchor(anchor, sid) {
     var gen = ++_reciteAnchorGen;
     var hits = 0, cancelled = false, converged = false;
@@ -2525,7 +2554,7 @@ var JingWen = (function () {
     window.addEventListener('touchstart', onGesture, { passive: true });
     window.addEventListener('wheel', onGesture, { passive: true });
     window.addEventListener('mousedown', onGesture);
-    var iv = setInterval(function () {
+    function frame() {
       var done = cancelled || gen !== _reciteAnchorGen || window._jingCurrentId !== sid
         || !anchor.el || !anchor.el.isConnected || Date.now() > watchUntil;
       if (!done) {
@@ -2536,18 +2565,20 @@ var JingWen = (function () {
           if (Math.abs(delta) <= 2) { hits++; if (hits >= 2) converged = true; }
           else { hits = 0; window.scrollBy(0, delta); }
         } else if (Math.abs(delta) > 48) {
-          /* 看守期晚到位移：重新纠回（字体切片迟到等无手势改高） */
+          /* 看守期晚到位移：本帧绘制前纠回（字体切片迟到等无手势改高） */
           converged = false; hits = 0;
           window.scrollBy(0, delta);
         }
       }
       if (done) {
-        clearInterval(iv);
         window.removeEventListener('touchstart', onGesture);
         window.removeEventListener('wheel', onGesture);
         window.removeEventListener('mousedown', onGesture);
+        return;
       }
-    }, 120);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   }
   function reciteSwapInPlace(d) {
     /* 先刷新高亮范围表（rubyPara 渲染时读它）：退出背诵回普通排版时
@@ -2582,6 +2613,7 @@ var JingWen = (function () {
     if (d && d.sections && domLive) {
       reciteSwapInPlace(d);
       applyReaderPrefs();
+      settleReciteAnchorNow(anchor);
       if (anchor) insistReciteAnchor(anchor, currentId);
       setTimeout(updateReadUI, 60);
       return;
@@ -2600,7 +2632,10 @@ var JingWen = (function () {
           clearInterval(iv);
           reciteSwapInPlace(dd);
           applyReaderPrefs();
-          if (anchor && anchor.el && anchor.el.isConnected) insistReciteAnchor(anchor, sid);
+          if (anchor && anchor.el && anchor.el.isConnected) {
+            settleReciteAnchorNow(anchor);
+            insistReciteAnchor(anchor, sid);
+          }
           else if (anchorPos) jumpToSec(anchorPos.sec, anchorPos.off);
           setTimeout(updateReadUI, 60);
         } else if (tries >= 20) {
