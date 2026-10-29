@@ -3294,3 +3294,37 @@ body.reader-open #tab-jing .appbar{display:none}
 .jmp-lab{font-size:.85rem;color:var(--muted)}
 .jmp-row .mini-btn{white-space:nowrap}
 .jmp-row select.mini-btn{max-width:110px}
+
+/* ===== 阅读器补全批一（2026-10-29）：字体版式/书内搜索/统计 ===== */
+#jing-content.rp-ff-kai{font-family:"Kaiti SC","STKaiti","KaiTi","DFKai-SB","Noto Serif CJK SC",serif}
+#jing-content.rp-ff-hei{font-family:var(--sans)}
+#jing-content.rp-lh-tight{line-height:1.8}
+#jing-content.rp-lh-tight .jing-para{line-height:1.8}
+#jing-content.rp-lh-wide{line-height:2.5}
+#jing-content.rp-lh-wide .jing-para{line-height:2.5}
+#jing-font-range{flex:1;min-width:110px;accent-color:var(--gold-deep,#8a6d2f)}
+.jmp-val{font-size:.85rem;color:var(--ink);min-width:2ch;text-align:right;font-variant-numeric:tabular-nums}
+.jmp-row .mini-btn.active{background:var(--gold-deep,#8a6d2f);color:#fff;border-color:transparent}
+#jing-findbar{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--card,#fff);border-bottom:1px solid var(--line,#e3dccb);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+#jing-findbar[hidden]{display:none}
+#jing-find-q{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--line,#e3dccb);border-radius:8px;background:var(--bg,#fff);color:var(--ink);font-size:.95rem}
+#jing-find-count{font-size:.82rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+::highlight(jingfind){background:rgba(217,169,22,.45)}
+::highlight(jingfindcur){background:rgba(217,90,22,.65);color:#fff}
+.jing-para.find-flash{animation:findFlash 1.2s ease}
+@keyframes findFlash{0%,60%{background:rgba(217,169,22,.35)}100%{background:transparent}}
+#jing-stats-detail{padding:10px 16px 14px;border-bottom:1px solid var(--line,#e3dccb);font-size:.92rem;color:var(--ink)}
+#jing-stats-detail[hidden]{display:none}
+#jing-stats-detail .sd-grid{display:flex;gap:18px;flex-wrap:wrap}
+#jing-stats-detail .sd-item b{display:block;font-size:1.05rem}
+#jing-stats-detail .sd-item span{color:var(--muted);font-size:.8rem}
+.hl-pop{flex-wrap:wrap}
+.hl-pop-card{flex-basis:100%;text-align:left;font-size:.85rem;line-height:1.5;max-height:5.2em;overflow:auto;padding:2px 2px 6px;border-bottom:1px solid rgba(255,255,255,.18)}
+.hl-pop-card .hl-pop-note{color:#ffd968;margin-top:2px;white-space:pre-wrap;word-break:break-word}
+.hl-pop-card .hl-pop-quote{word-break:break-word}
+/* ===== 第 0 步（2026-10-29）：统一底栏＋状态行搜索图标 ===== */
+.jd-btn{min-height:44px}
+@media (max-width:400px){.jing-dock-row{gap:3px;padding-left:6px;padding-right:6px}.jd-btn{font-size:.85rem;padding-left:1px;padding-right:1px}}
+#jing-find-ico{background:none;border:none;color:var(--muted);padding:5px 7px;margin:-3px -4px -3px 0;cursor:pointer;flex:none;display:flex;align-items:center;border-radius:8px}
+#jing-find-ico:active{color:var(--ink);background:rgba(0,0,0,.06)}
+.jing-res-group{padding:10px 14px 2px;font-size:.78rem;color:var(--muted);letter-spacing:.14em}

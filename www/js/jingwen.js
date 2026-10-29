@@ -112,6 +112,8 @@ var JingWen = (function () {
   var currentId = null;
   var pyOn = true;
   var fontPx = 17;
+  var fontFam = 'song'; /* 字体（批一）：song 宋体（默认栈）｜kai 楷体｜hei 黑体 */
+  var lhMode = 'mid'; /* 行距（批一）：tight 紧｜mid 中（默认 2.1）｜wide 宽 */
   var reciteMode = false; /* 背诵模式：只显示每句首字，点句显示全文 */
   var followMode = false; /* 跟读模式：点段落从该处开始播，播放时高亮跟随 */
   var followMap = null; /* tsIdx -> {el, start} */
@@ -331,7 +333,7 @@ var JingWen = (function () {
   /* 背诵模式：按句切分，每句只显示首字，点击展开全文 */
   function recitePara(p) {
     if (!p || p.img || p.t == null) return '';
-    var t = p.t, py = p.py;
+    var t = p.t, py = p.py || []; /* 未注音段 py 缺席时防抛错（统一底栏后全藏亦可背诵） */
     
     // 按 。！？；切句，保留标点
     var sens = t.match(/[^。！？；]+[。！？；]?/g) || [t];
@@ -1118,23 +1120,26 @@ var JingWen = (function () {
       // 标点版排版容器类（spec v1.1 §12：行高/段距/缩进走 .dz-punct 规则）
       var jcontent = $('#jing-content');
       if (jcontent) jcontent.classList.toggle('dz-punct', !!d.punctMode);
-      // 内丹书：隐藏背诵模式按钮；全藏无音频亦隐藏背诵
-      var rcb2 = $('#jing-recite');
-      if (rcb2) rcb2.hidden = isNeidan(id) || !!d.daozang;
       // 单节书无折叠概念：全展开/全收回钮隐藏（多节书恒显）
       var fb2 = $('#jing-foldall');
       if (fb2) fb2.hidden = !(d.sections && d.sections.length > 1);
-      /* 底栏分书类（反馈批第 11 条＋2026-10-29 修订）：内丹/道藏四钮＝
-         目录｜字｜全展开/全收回｜注音（无读/背诵；原最右「我的标记」底栏
-         钮已撤下，入口保留在字面板本书组）；常见经文维持五钮。注音钮
-         （#jing-pybtn）全书类恒显、由 applyReaderPrefs 统一管标签 */
-      var ndDz2 = isNeidan(id) || !!d.daozang;
-      var rb3 = $('#jing-read-btn'); if (rb3) rb3.hidden = ndDz2;
-      var tb3 = $('#jing-toc-btn'); if (tb3) tb3.hidden = !ndDz2;
+      /* 统一底栏（2026-10-29 第 0 步用户定版，supersede 反馈批第 11 条的
+         分书类底栏与 v318 的内丹/道藏四钮）：全书类同一套钮 目录｜读｜
+         背诵｜字｜全展开/全收回｜注音开/关（单节书隐藏全展开）；注音钮
+         按书的注音能力显隐（applyReaderPrefs 内以 py 数据判定，内丹无
+         注音数据→不显示）；「我的标记」不占底栏（入口＝目录面板首行
+         ＋字面板本书组，全书类一致） */
+      var rcb2 = $('#jing-recite');
+      if (rcb2) rcb2.hidden = false;
+      var rb3 = $('#jing-read-btn'); if (rb3) rb3.hidden = false;
+      var tb3 = $('#jing-toc-btn'); if (tb3) tb3.hidden = false;
       // 「全部展开」全藏多卷本同样显示（2026-10-26 用户定）：卷体按需填充，
       // 展开走 foldAll 内的渐进分片渲染防卡死，按钮不再按 lazy 隐藏
-      // 内丹书强制关闭背诵模式；全藏同理（背诵走逐字转换、无短语上下文）
-      if ((isNeidan(id) || d.daozang) && reciteMode) { reciteMode = false; }
+      /* 背诵全书类开放（第 0 步统一底栏）：旧口径对内丹/全藏强制关背诵
+         已废止；无标点底本按整段一句呈现（首字＋遮盖余文，点句展开） */
+      clearFind(); /* 换书清本书搜索态与计数 */
+      var fb9 = document.getElementById('jing-findbar');
+      if (fb9) fb9.hidden = true;
       applyReaderPrefs();
       // 重建高亮范围
       if (window._jingHlRebuild) window._jingHlRebuild(id);
@@ -1557,17 +1562,44 @@ var JingWen = (function () {
     return libApplyView();
   }
 
+  /* 当前书注音能力：已载段落任一段 py 含非空拼音即有（数据驱动，不设
+     书名名单）。懒载书以已填卷为准——首卷开卷时已注音，足够判定 */
+  function bookHasPy() {
+    var d = currentId && window.JINGWEN && JINGWEN[currentId];
+    if (!d || !d.sections) return false;
+    for (var si = 0; si < d.sections.length; si++) {
+      var ps = d.sections[si].paras || [];
+      for (var pi = 0; pi < ps.length; pi++) {
+        var py = ps[pi] && ps[pi].py;
+        if (py) for (var k = 0; k < py.length; k++) if (py[k]) return true;
+      }
+    }
+    return false;
+  }
+
   function applyReaderPrefs() {
     /* 平板/宽屏（≥768）：同档位字号 +2px 联动（版心限宽见 style.css 媒体查询） */
     var effPx = fontPx + ((window.innerWidth || 0) >= 768 ? 2 : 0);
     $('#jing-content').style.fontSize = effPx + 'px';
-    // 问题8修复：内丹书正文不渲染拼音（showPy 抑制，口径不变）
-    var isNd = currentId && isNeidan(currentId);
-    /* 注音钮全书类恒设（2026-10-29 修订，反馈批第 11 条旧口径废止）：
-       内丹/道藏底栏最右钮即此钮，与常见经文同一全局偏好、同一动作
-       标签；内丹正文不渲染注音只影响呈现、不影响开关本身 */
+    /* 字体/行距（批一）：类开关挂在 #jing-content，CSS 在 style.css 末尾
+       rp-ff 与 rp-lh 两段；宋体＝默认 var(--serif) 栈不挂类 */
+    var jcF = $('#jing-content');
+    if (jcF) {
+      jcF.classList.toggle('rp-ff-kai', fontFam === 'kai');
+      jcF.classList.toggle('rp-ff-hei', fontFam === 'hei');
+      jcF.classList.toggle('rp-lh-tight', lhMode === 'tight');
+      jcF.classList.toggle('rp-lh-wide', lhMode === 'wide');
+    }
+    syncFontPanel();
     var pyBtn = $('#jing-pybtn');
-    var showPy = pyOn && !isNd;
+    /* 注音钮按书的注音能力显隐（2026-10-29 07:08 用户定版，supersede
+       v318 的全书类恒显与更早的书类名单口径）：以当前书已载段落的 py
+       数据判定——任一段含非空拼音即有能力。内丹诸书 py 键在而全空
+       （实测 s18/s19/s23/s41 非空段数均为 0）→钮撤下；常见经文与道藏
+       （字典注音非空）→显示。showPy 不再按书类抑制：有数据才渲染得
+       出，无数据恒无 rt，呈现与能力天然一致 */
+    if (pyBtn) pyBtn.hidden = !bookHasPy();
+    var showPy = pyOn;
     $('#jing-content').classList.toggle('no-py', !showPy);
     /* 动作标签（2026-10-28 晚用户亲定）：钮面＝点了会发生什么——拼音
        正显示时钮写「注音关」（点了关掉），关着时写「注音开」 */
@@ -1577,6 +1609,38 @@ var JingWen = (function () {
     if (rb) rb.textContent = reciteMode ? t('jing_recite_on') : t('jing_recite');
     if (rb) rb.classList.toggle('active', reciteMode);
   }
+  /* ---------- 字体版式（批一第 2 项）：字号滑杆/字体/行距 ---------- */
+  function setFontPx(px) {
+    px = Math.max(14, Math.min(30, Math.round(px) || 17));
+    fontPx = px;
+    try { localStorage.setItem('wuri_jing_font', fontPx); } catch (e) {}
+    applyReaderPrefs();
+  }
+  function setFontFam(v) {
+    if (v !== 'kai' && v !== 'hei') v = 'song';
+    fontFam = v;
+    try { localStorage.setItem('wuri_jing_ff', v); } catch (e) {}
+    applyReaderPrefs();
+  }
+  function setLhMode(v) {
+    if (v !== 'tight' && v !== 'wide') v = 'mid';
+    lhMode = v;
+    try { localStorage.setItem('wuri_jing_lh', v); } catch (e) {}
+    applyReaderPrefs();
+  }
+  function syncFontPanel() {
+    var r = document.getElementById('jing-font-range');
+    if (r && +r.value !== fontPx) r.value = fontPx;
+    var val = document.getElementById('jing-font-val');
+    if (val) val.textContent = fontPx;
+    document.querySelectorAll('#jing-font-panel [data-ff]').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-ff') === fontFam);
+    });
+    document.querySelectorAll('#jing-font-panel [data-lh]').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-lh') === lhMode);
+    });
+  }
+
   function toggleRecite() {
     reciteMode = !reciteMode;
     try { localStorage.setItem('wuri_jing_recite', reciteMode ? '1' : '0'); } catch (e) {}
@@ -1972,6 +2036,202 @@ var JingWen = (function () {
     });
   }
 
+  /* ---------- 书内正文搜索（批一第 1 项①；第 0 步状态行搜索图标合流） ----------
+   * 口径与图版锚点一致：段文先剥标点（jpStrip）再经 t2s 归一，询问同路
+   * 归一——繁简/标点差异不挡命中，偏移恒在剥标点字序内、与底本 1:1。
+   * 命中导航：展开/填充目标卷→滚到段→CSS Highlight API  paint 命中串
+   * （不支持时退化为整段闪烁）。清除恢复原状。 */
+  var findHits = [], findIdx = -1;
+  function findNorm(s) {
+    var st = jpStrip(String(s || ''));
+    return window.t2s ? window.t2s(st) : st;
+  }
+  function clearFindPaint() {
+    try {
+      if (window.CSS && CSS.highlights) { CSS.highlights.delete('jingfindcur'); }
+    } catch (e) {}
+    document.querySelectorAll('#jing-content .jing-para.find-flash').forEach(function (el) {
+      el.classList.remove('find-flash');
+    });
+  }
+  function clearFind() {
+    findHits = []; findIdx = -1;
+    clearFindPaint();
+    var c = document.getElementById('jing-find-count');
+    if (c) c.textContent = '';
+  }
+  function buildFindHits(q) {
+    var d = window.JINGWEN && window.JINGWEN[currentId];
+    var hits = [];
+    if (!d || !d.sections || !q) return hits;
+    var nq = findNorm(q);
+    if (!nq) return hits;
+    d.sections.forEach(function (sec, si) {
+      (sec.paras || []).forEach(function (p, pi) {
+        if (!p || p.img || p.t == null) return;
+        var nt = findNorm(p.t);
+        var from = 0;
+        while (from <= nt.length - nq.length) {
+          var i = nt.indexOf(nq, from);
+          if (i < 0) break;
+          hits.push({ sec: si, para: pi, s: i, e: i + nq.length });
+          from = i + Math.max(1, nq.length);
+        }
+      });
+    });
+    return hits;
+  }
+  function findCountLabel() {
+    var c = document.getElementById('jing-find-count');
+    if (!c) return;
+    if (!findHits.length) { c.textContent = '0 处'; return; }
+    c.textContent = (findIdx + 1) + ' / ' + findHits.length + ' 处';
+  }
+  /* 剥标点字序 k → 显示串下标（与 dzCutIndex 同法） */
+  function findCutIdx(t, k) {
+    if (k <= 0) return 0;
+    var c = 0;
+    for (var i = 0; i < t.length; i++) {
+      if (!jpIsPunct(t[i])) { if (c === k) return i; c++; }
+    }
+    return t.length;
+  }
+  function paintFindHit(el, h) {
+    clearFindPaint();
+    el.classList.add('find-flash');
+    try {
+      if (!(window.CSS && CSS.highlights && window.Highlight && window.Range)) return;
+      var frag = document.createRange();
+      frag.selectNodeContents(el);
+      var clone = frag.cloneContents();
+      clone.querySelectorAll('rt, rp').forEach(function (n) { n.remove(); });
+      var disp = clone.textContent || '';
+      var dS = findCutIdx(disp, h.s), dE = findCutIdx(disp, h.e);
+      if (dE <= dS) return;
+      /* DOM 文本节点序（排除 rt/rp）与 disp 同序，逐节点累计定位 */
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) {
+          return (n.parentElement && n.parentElement.closest('rt, rp')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      var acc = 0, sNode = null, sOff = 0, eNode = null, eOff = 0, node;
+      while ((node = walker.nextNode())) {
+        var len = node.nodeValue.length;
+        if (sNode === null && acc + len > dS) { sNode = node; sOff = dS - acc; }
+        if (acc + len >= dE) { eNode = node; eOff = dE - acc; break; }
+        acc += len;
+      }
+      if (sNode && eNode) {
+        var rg = document.createRange();
+        rg.setStart(sNode, sOff);
+        rg.setEnd(eNode, eOff);
+        CSS.highlights.set('jingfindcur', new Highlight(rg));
+      }
+    } catch (e) {}
+  }
+  function findGo(i) {
+    if (!findHits.length) { findCountLabel(); return; }
+    findIdx = ((i % findHits.length) + findHits.length) % findHits.length;
+    var h = findHits[findIdx];
+    findCountLabel();
+    if (window.__wuri_dzFill) { try { window.__wuri_dzFill(h.sec); } catch (e) {} }
+    var secBody = document.querySelector('#jing-content .jing-sec[data-sec="' + h.sec + '"] .jing-sec-body');
+    if (secBody && secBody.hidden) secBody.hidden = false;
+    var tries = 0;
+    (function attempt() {
+      var el = document.querySelector('#jing-content .jing-para[data-sec="' + h.sec + '"][data-para="' + h.para + '"]');
+      if (!el) { if (++tries < 10) setTimeout(attempt, 250); return; }
+      if (window.__wuriReaderGoToPara && window.__wuriReaderGoToPara(el)) {}
+      else el.scrollIntoView({ block: 'center' });
+      setTimeout(function () { paintFindHit(el, h); }, 60);
+    })();
+  }
+  function runFind() {
+    var inp = document.getElementById('jing-find-q');
+    var q = inp ? inp.value.trim() : '';
+    clearFindPaint();
+    findHits = buildFindHits(q);
+    findIdx = -1;
+    if (findHits.length) findGo(0);
+    else findCountLabel();
+  }
+  function openFindBar() {
+    closeDockPanels();
+    var bar = document.getElementById('jing-findbar');
+    if (!bar) return;
+    bar.hidden = false;
+    var inp = document.getElementById('jing-find-q');
+    if (inp) {
+      inp.focus();
+      if (inp.value.trim()) runFind();
+    }
+  }
+  function closeFindBar() {
+    var bar = document.getElementById('jing-findbar');
+    if (bar) bar.hidden = true;
+    clearFind();
+  }
+  window.__wuriFind = {
+    open: openFindBar, close: closeFindBar, go: findGo, run: runFind,
+    hits: function () { return findHits; }, idx: function () { return findIdx; }
+  };
+  document.addEventListener('DOMContentLoaded', function () {
+    var ico = document.getElementById('jing-find-ico');
+    if (ico) ico.addEventListener('click', function (e) {
+      e.stopPropagation(); /* 状态行本体点击开目录，图标只开搜索 */
+      openFindBar();
+    });
+    var inp = document.getElementById('jing-find-q');
+    if (inp) {
+      var deb = null;
+      inp.addEventListener('input', function () {
+        if (deb) clearTimeout(deb);
+        deb = setTimeout(runFind, 220);
+      });
+      inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); findGo(findIdx + (e.shiftKey ? -1 : 1)); }
+      });
+    }
+    var pv = document.getElementById('jing-find-prev');
+    if (pv) pv.addEventListener('click', function () { findGo(findIdx - 1); });
+    var nx = document.getElementById('jing-find-next');
+    if (nx) nx.addEventListener('click', function () { findGo(findIdx + 1); });
+    var cl = document.getElementById('jing-find-close');
+    if (cl) cl.addEventListener('click', closeFindBar);
+  });
+  /* 道藏正文搜索命中跳转（批一第 1 项②）：结果行 data-dz-off 在捕获相位
+     先记偏移（daozang.js 的开卷委托随后触发），开卷落位后轮询兑现 */
+  document.addEventListener('click', function (e) {
+    var el = e.target && e.target.closest ? e.target.closest('[data-dz-off]') : null;
+    if (!el) return;
+    var id = el.getAttribute('data-dz-work');
+    var off = +el.getAttribute('data-dz-off');
+    if (!id || !(off >= 0)) return;
+    var tries = 0;
+    var iv = setInterval(function () {
+      tries++;
+      if (window._jingCurrentId === id && typeof _metrics !== 'undefined' && _metrics && _metrics.total) {
+        clearInterval(iv);
+        try { goToContentOffset(off); } catch (err) {}
+        setTimeout(function () {
+          var paras = document.querySelectorAll('#jing-content .jing-para');
+          var best = null;
+          for (var i = 0; i < paras.length; i++) {
+            var po = 0;
+            try { po = paraContentOff(paras[i]); } catch (err) { continue; }
+            if (po <= off) best = paras[i]; else break;
+          }
+          if (best) {
+            if (window.__wuriReaderGoToPara && window.__wuriReaderGoToPara(best)) {}
+            else best.scrollIntoView({ block: 'center' });
+            best.classList.add('find-flash');
+            setTimeout(function () { best.classList.remove('find-flash'); }, 1300);
+          }
+        }, 400);
+      } else if (tries > 26) clearInterval(iv);
+    }, 300);
+  }, true);
+
   /* ---------- MP3 诵读（Qwen3-TTS 预渲染） ---------- */
   var jingAudio = null;
   var _playToken = 0, _jingSrc = '', _playRetry = 0, _playErrToken = -1;
@@ -2013,15 +2273,19 @@ var JingWen = (function () {
   function isNeidan(sid) { return JING_NEIDAN.indexOf(sid) >= 0; }
   function hasAudio(sid) { return JING_HAS_AUDIO.indexOf(sid) >= 0; }
   function updateAudioButtons() {
+    var has = hasAudio(currentId);
     // 跟读依赖分段朗读时间戳：无音频的经（如内丹诸经）隐藏跟读按钮
     var flEl = document.getElementById('jing-follow');
-    if (flEl) flEl.style.display = hasAudio(currentId) ? '' : 'none';
-    /* 主行「读」钮显隐与旧口径一致：有音频（或免费版系统诵读可用）才
-       出现，免得点开空面板留假入口；播放行（暂停/停止）由播放态控制 */
+    if (flEl) flEl.style.display = has ? '' : 'none';
+    /* 统一底栏（第 0 步）：「读」钮全书类恒显，读面板按有无双声录音分流——
+       有录音 #jing-audio-grp（声线/诵读/跟读/下载），无录音 #jing-tts-grp
+       （系统朗读＋语速，TTS 本体批二接入 __wuriTTSStart） */
     var readBtn = document.getElementById('jing-read-btn');
+    var gA = document.getElementById('jing-audio-grp');
+    var gT = document.getElementById('jing-tts-grp');
     var isFree = window.IS_FREE_BUILD;
     if (isFree) {
-      // 免费版：只显示系统诵读相关，隐藏 MP3 专用
+      // 免费版：系统诵读即其朗读形态，维持旧口径（藏声线/下载、KR 藏诵读）
       ['jing-voice','jing-download'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -2031,15 +2295,18 @@ var JingWen = (function () {
       // 道藏全藏一律无音频：免费版口径下亦隐藏系统诵读
       var krFree = /^KR5/.test(currentId || '');
       if (krFree && sp) sp.style.display = 'none';
+      if (gA) gA.style.display = '';
+      if (gT) gT.hidden = true;
       if (readBtn) readBtn.style.display = krFree ? 'none' : '';
       return;
     }
-    var show = hasAudio(currentId);
+    if (gA) gA.style.display = has ? '' : 'none';
+    if (gT) gT.hidden = has;
     ['jing-speak','jing-voice','jing-download'].forEach(function(id) {
       var el = document.getElementById(id);
-      if (el) el.style.display = show ? '' : 'none';
+      if (el) el.style.display = has ? '' : 'none';
     });
-    if (readBtn) readBtn.style.display = show ? '' : 'none';
+    if (readBtn) readBtn.style.display = '';
   }
   // 免费版诵读：强制用系统 TTS
   var _origSpeak = null;
@@ -2631,8 +2898,15 @@ var JingWen = (function () {
     if (marksEl) marksEl.hidden = true;
     if (resultsEl) resultsEl.hidden = true;
     try { fontPx = +(localStorage.getItem('wuri_jing_font') || 17); } catch (e) {}
-    /* 校准到两种之一 */
-    fontPx = Math.abs(fontPx - 17) <= Math.abs(fontPx - 28) ? 17 : 28;
+    /* 字号无级滑杆（批一）：旧五档存值（14/17/20/24/29）直接沿用，不再
+       吸附到 17/28 两值；越界夹回 14–30 */
+    if (!(fontPx >= 14 && fontPx <= 30)) fontPx = Math.max(14, Math.min(30, fontPx || 17));
+    try {
+      fontFam = localStorage.getItem('wuri_jing_ff') || 'song';
+      if (fontFam !== 'kai' && fontFam !== 'hei') fontFam = 'song';
+      lhMode = localStorage.getItem('wuri_jing_lh') || 'mid';
+      if (lhMode !== 'tight' && lhMode !== 'wide') lhMode = 'mid';
+    } catch (e) {}
     try { pyOn = localStorage.getItem('wuri_jing_py') !== '0'; } catch (e) {}
     /* 翻页存量偏好迁移（2026-10-29）：左右翻页整体下线，wuri_jing_turn
        一律规范化为 scroll——存了 'page' 的用户开书直接滚动，不报错、
@@ -2651,11 +2925,7 @@ var JingWen = (function () {
     var prevRr = window.__wuri_rerender;
     window.__wuri_rerender = function () { if (prevRr) prevRr(); renderCatalog(); };
     applyReaderPrefs();
-    /* 初始化按钮高亮 */
-    var isBig = fontPx === 28;
-    var bd = $('#jing-font-dec'), bi = $('#jing-font-inc');
-    if (bd) bd.classList.toggle('active', !isBig);
-    if (bi) bi.classList.toggle('active', isBig);
+    syncFontPanel();
 
     document.addEventListener('click', function (e) {
       var ji = e.target.closest('[data-jing]');
@@ -2778,23 +3048,18 @@ var JingWen = (function () {
       var p = e.target.closest('.jing-para');
       if (p) { e.stopPropagation(); followSeek(p); }
     });
-    var FONT_SIZES = [14, 17, 20, 24, 29]; /* 五档字号，持久化 */
-    function fontIdx() {
-      var best = 1, bd = 1e9;
-      FONT_SIZES.forEach(function (s, i) { var dd = Math.abs(s - fontPx); if (dd < bd) { bd = dd; best = i; } });
-      return best;
-    }
-    function setFont(idx) {
-      idx = Math.max(0, Math.min(FONT_SIZES.length - 1, idx));
-      fontPx = FONT_SIZES[idx];
-      try { localStorage.setItem('wuri_jing_font', fontPx); } catch (e) {}
-      applyReaderPrefs();
-      // 更新按钮状态
-      $('#jing-font-dec').classList.toggle('active', idx === 0);
-      $('#jing-font-inc').classList.toggle('active', idx === FONT_SIZES.length - 1);
-    }
-    $('#jing-font-inc').addEventListener('click', function () { setFont(fontIdx() + 1); });
-    $('#jing-font-dec').addEventListener('click', function () { setFont(fontIdx() - 1); });
+    /* 字体版式控件（批一第 2 项，控件在字面板「显示」组续加三行；
+       字小/字大五档钮与翻页切换钮均已撤——前者由无级滑杆替代，后者
+       随 v318 撤翻页下线） */
+    var frEl = $('#jing-font-range');
+    if (frEl) frEl.addEventListener('input', function () { setFontPx(+frEl.value); });
+    document.querySelectorAll('#jing-font-panel [data-ff]').forEach(function (b) {
+      b.addEventListener('click', function () { setFontFam(b.getAttribute('data-ff')); });
+    });
+    document.querySelectorAll('#jing-font-panel [data-lh]').forEach(function (b) {
+      b.addEventListener('click', function () { setLhMode(b.getAttribute('data-lh')); });
+    });
+    syncFontPanel();
     /* 读/字双面板（2026-10-28 晚五钮主行）：互斥展开、点外关（收起逻辑
        在 closeDockPanels，播放开始/开目录/关阅读器时亦调用） */
     var readBtn = $('#jing-read-btn'), playPanel = $('#jing-play-panel');
@@ -2850,6 +3115,20 @@ var JingWen = (function () {
       openToc();
     });
     $('#jing-speak').addEventListener('click', speakAll);
+    /* 系统朗读（第 0 步先置入口与语速持久化；TTS 本体批二 __wuriTTSStart） */
+    var ttsBtn = $('#jing-tts-btn');
+    if (ttsBtn) ttsBtn.addEventListener('click', function () {
+      if (window.__wuriTTSStart) { window.__wuriTTSStart(); return; }
+      if (window.showToast) showToast('系统朗读随下一批上线');
+    });
+    var ttsSp = $('#jing-tts-speed');
+    if (ttsSp) {
+      try { var rv = localStorage.getItem('wuri_jing_tts_rate'); if (rv) ttsSp.value = rv; } catch (e) {}
+      ttsSp.addEventListener('change', function () {
+        try { localStorage.setItem('wuri_jing_tts_rate', ttsSp.value); } catch (e) {}
+        if (window.__wuriTTSSetRate) window.__wuriTTSSetRate(+ttsSp.value);
+      });
+    }
     var ttsSetBtn = $('#jing-tts-set');
     if (ttsSetBtn) ttsSetBtn.addEventListener('click', function () {
       var b = bridge();
