@@ -3334,3 +3334,14 @@ body.reader-open #tab-jing .appbar{display:none}
 .rp-stat-grid b{font-size:1rem;color:var(--ink)}
 .rp-stat-grid span{font-size:.72rem;color:var(--muted)}
 #jing-stats-detail{background:var(--card);border-radius:12px;margin:0 0 10px}
+/* 生词本（批二第 5 项） */
+#jing-vocab-panel{background:var(--card);border-radius:12px;margin:0 0 10px;padding:4px 0}
+.vocab-item{padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.06)}
+.vocab-item:last-child{border-bottom:none}
+.vocab-main{display:flex;align-items:baseline;gap:10px}
+.vocab-word{font-size:1.15rem;font-weight:600;color:var(--ink)}
+.vocab-py{color:var(--gold);font-size:.9rem}
+.vocab-del{margin-left:auto;background:none;border:1px solid rgba(0,0,0,.12);border-radius:8px;color:var(--muted);font-size:.75rem;padding:3px 10px;cursor:pointer;flex:none}
+.vocab-def{margin-top:4px;font-size:.9rem;color:var(--ink);line-height:1.6}
+.vocab-src{margin-top:3px;font-size:.75rem;color:var(--muted);line-height:1.5}
+.jmp-row .mini-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}

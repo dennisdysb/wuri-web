@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=325">
+<link rel="stylesheet" href="css/style.css?v=326">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=77">
 </head>
@@ -212,6 +212,8 @@
         <div class="jing-marks-row" id="jing-mymarks" role="button" tabindex="0" onclick="if(window.JingShowMarks)window.JingShowMarks('bookmark')"><span class="jing-marks-row-t" data-i18n="jing_marks">我的标记</span><span class="jing-marks-row-s" data-i18n="jing_marks_kinds">书签 · 高亮 · 笔记</span><span class="jing-marks-row-n" id="jing-marks-count"></span><span class="jing-go">›</span></div>
 <div class="jing-marks-row" id="jing-stats-row" role="button" tabindex="0" hidden><span class="jing-marks-row-t">阅读统计</span><span class="jing-marks-row-s" id="jing-stats-sum">今日 0 分钟 · 连读 0 天 · 读完 0 本</span><span class="jing-go">›</span></div>
 <div id="jing-stats-detail" hidden></div>
+<div class="jing-marks-row" id="jing-vocab-row" role="button" tabindex="0"><span class="jing-marks-row-t">生词本</span><span class="jing-marks-row-s" id="jing-vocab-count">0 词</span><span class="jing-go">›</span></div>
+<div id="jing-vocab-panel" hidden><div id="jing-vocab-list"></div></div>
 <div id="jing-list"></div>
 <div id="jing-results" hidden></div>
 <div id="jing-marks" hidden></div>
@@ -316,6 +318,12 @@
                 <button class="mini-btn tiny" data-lh="tight">紧</button>
                 <button class="mini-btn tiny" data-lh="mid">中</button>
                 <button class="mini-btn tiny" data-lh="wide">宽</button>
+              </div>
+              <div class="jmp-row">
+                <span class="jmp-lab">自动滚动</span>
+                <button class="mini-btn tiny" id="jing-scroll-toggle">开</button>
+                <button class="mini-btn tiny" data-as-spd="slow">慢</button>
+                <button class="mini-btn tiny" data-as-spd="mid">中</button>
               </div>
             </div>
             <div class="jmp-sec">
@@ -1013,7 +1021,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v325）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v326）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">

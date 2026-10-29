@@ -1052,10 +1052,90 @@ var JingWen = (function () {
       var pChars = Promise.all(chars.map(function (ch) { return D.lookupChar ? D.lookupChar(ch) : Promise.resolve(null); }));
       Promise.all([pWord, pChars]).then(function (rs) {
         showDictCard(word, rs[0], rs[1]);
+        /* 生词本自动入本（批二第 5 项）：有读音或释义才收，同词只更新 */
+        try {
+          var we = rs[0], ces = rs[1] || [];
+          var py = (we && we.py) || ces.map(function (c) { return c && c.py; }).filter(Boolean).join(' ');
+          var def = (we && (we.def || we.jingDef)) || (ces[0] && ces[0].def) || '';
+          if (py || def) {
+            var bk = '';
+            try { bk = (window.JINGWEN && JINGWEN[currentId] && JINGWEN[currentId].title) || ''; } catch (e) {}
+            var s0 = Math.max(0, info.start - 18), s1 = Math.min(info.paraText.length, info.end + 18);
+            rpVocabSave({
+              word: word, py: py, def: def, book: bk,
+              sentence: (s0 > 0 ? '…' : '') + info.paraText.slice(s0, s1) + (s1 < info.paraText.length ? '…' : ''),
+              ts: Date.now()
+            });
+          }
+        } catch (e) {}
       }).catch(function () { showDictCard(word, null, []); });
     };
     if (D.ready) { D.ready().then(doLookup).catch(doLookup); } else doLookup();
   }
+
+  /* ---------- 生词本（批二第 5 项） ----------
+   * 查字成功（有读音/释义）自动入本：词＋读音＋释义＋出处（书名/原句
+   * 节选）；同词重复查只更新时间不重复建条。存储 wuri_jing_vocab。
+   * 入口在经文页（阅读统计行下方），可翻看、可逐条删。 */
+  var RP_VOCAB_KEY = 'wuri_jing_vocab';
+  function rpVocabLoad() {
+    try { var a = JSON.parse(localStorage.getItem(RP_VOCAB_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+    catch (e) { return []; }
+  }
+  function rpVocabSave(entry) {
+    if (!entry || !entry.word) return;
+    var a = rpVocabLoad(), found = null;
+    a.forEach(function (x) { if (x.word === entry.word) found = x; });
+    if (found) {
+      found.ts = entry.ts;
+      found.py = entry.py || found.py;
+      found.def = entry.def || found.def;
+      found.book = entry.book || found.book;
+      found.sentence = entry.sentence || found.sentence;
+    } else a.push(entry);
+    try { localStorage.setItem(RP_VOCAB_KEY, JSON.stringify(a)); } catch (e) {}
+    rpVocabRender();
+  }
+  function rpVocabRemove(word) {
+    var a = rpVocabLoad().filter(function (x) { return x.word !== word; });
+    try { localStorage.setItem(RP_VOCAB_KEY, JSON.stringify(a)); } catch (e) {}
+    rpVocabRender();
+  }
+  function rpVocabRender() {
+    var a = rpVocabLoad();
+    var cnt = document.getElementById('jing-vocab-count');
+    if (cnt) cnt.textContent = a.length + ' 词';
+    var list = document.getElementById('jing-vocab-list');
+    if (!list) return;
+    if (!a.length) {
+      list.innerHTML = '<p class="hint">还没有生词。阅读时选中文字点查字，有释义的会自动收进来。</p>';
+      return;
+    }
+    var sorted = a.slice().sort(function (x, y) { return (y.ts || 0) - (x.ts || 0); });
+    list.innerHTML = sorted.map(function (x) {
+      return '<div class="vocab-item"><div class="vocab-main"><span class="vocab-word">' + esc(txScript(x.word)) + '</span>'
+        + (x.py ? '<span class="vocab-py">' + esc(x.py) + '</span>' : '')
+        + '<button class="vocab-del" data-vocab-del="' + esc(x.word) + '">删除</button></div>'
+        + (x.def ? '<div class="vocab-def">' + esc(x.def) + '</div>' : '')
+        + '<div class="vocab-src">' + esc(txScript(x.book || '')) + (x.sentence ? ' · ' + esc(txScript(x.sentence)) : '') + '</div></div>';
+    }).join('');
+  }
+  window.__wuriVocab = { list: rpVocabLoad, save: rpVocabSave, remove: rpVocabRemove, render: rpVocabRender };
+  document.addEventListener('DOMContentLoaded', function () {
+    var row = document.getElementById('jing-vocab-row');
+    if (row) row.addEventListener('click', function () {
+      var p = document.getElementById('jing-vocab-panel');
+      if (!p) return;
+      p.hidden = !p.hidden;
+      rpVocabRender();
+    });
+    var panel = document.getElementById('jing-vocab-panel');
+    if (panel) panel.addEventListener('click', function (e) {
+      var del = e.target.closest('[data-vocab-del]');
+      if (del) rpVocabRemove(del.getAttribute('data-vocab-del'));
+    });
+    rpVocabRender();
+  });
 
   document.addEventListener('DOMContentLoaded', function () {
     var toc = $('#jing-toc');
@@ -1751,6 +1831,84 @@ var JingWen = (function () {
     });
   }
 
+  /* ---------- 自动滚动（批二第 6 项） ----------
+   * 匀速滚动：慢 24px/s、中 48px/s（起步值）；手指触碰正文或滚轮即停；
+   * 到底自停；开关不持久化、速度档持久化（wuri_jing_as_speed）。
+   * 跟读优先：跟读中拒绝启动；滚动途中跟读开启则 tick 内立即停。 */
+  var asOn = false, asRaf = 0, asLast = 0, asStartTs = 0, asAcc = 0, asSpeedMode = 'slow';
+  try { asSpeedMode = localStorage.getItem('wuri_jing_as_speed') || 'slow'; } catch (e) {}
+  if (asSpeedMode !== 'mid') asSpeedMode = 'slow';
+  function asPxPerSec() { return asSpeedMode === 'mid' ? 48 : 24; }
+  function asSyncBtn() {
+    var b = document.getElementById('jing-scroll-toggle');
+    if (b) b.textContent = asOn ? '停' : '开';
+    document.querySelectorAll('#jing-font-panel [data-as-spd]').forEach(function (x) {
+      x.classList.toggle('active', x.getAttribute('data-as-spd') === asSpeedMode);
+    });
+  }
+  function asStop() {
+    asOn = false;
+    if (asRaf) cancelAnimationFrame(asRaf);
+    asRaf = 0;
+    asSyncBtn();
+  }
+  function asTick(ts) {
+    if (!asOn) return;
+    if (followMode || !currentId) { asStop(); return; }
+    var rd = document.getElementById('jing-reader');
+    if (!rd || rd.hidden) { asStop(); return; }
+    if (!asStartTs) asStartTs = ts;
+    if (asLast) {
+      var dt = Math.min(100, ts - asLast) / 1000;
+      if (dt > 0) {
+        /* 亚像素步进会被浏览器量化丢弃（实测 60×0.4px 纹丝不动）：
+           分数像素在 JS 里攒，满 1px 才整步滚 */
+        asAcc += asPxPerSec() * dt;
+        if (asAcc >= 1) {
+          var dy = Math.floor(asAcc);
+          asAcc -= dy;
+          window.scrollBy(0, dy);
+        }
+      }
+      var de = document.documentElement;
+      /* 到底自停；启动 800ms 内不判（布局未稳时 scrollHeight 不可信） */
+      if (ts - asStartTs > 800 && window.scrollY + window.innerHeight >= de.scrollHeight - 2) { asStop(); return; }
+    }
+    asLast = ts;
+    asRaf = requestAnimationFrame(asTick);
+  }
+  function asStart() {
+    if (followMode) { if (window.showToast) showToast('跟读进行中，自动滚动不可用'); return; }
+    asOn = true;
+    asLast = 0;
+    asStartTs = 0;
+    asAcc = 0;
+    asSyncBtn();
+    asRaf = requestAnimationFrame(asTick);
+  }
+  window.__wuriAutoScroll = {
+    start: asStart, stop: asStop,
+    on: function () { return asOn; },
+    setSpeed: function (m) {
+      asSpeedMode = m === 'mid' ? 'mid' : 'slow';
+      try { localStorage.setItem('wuri_jing_as_speed', asSpeedMode); } catch (e) {}
+      asSyncBtn();
+    }
+  };
+  document.addEventListener('DOMContentLoaded', function () {
+    var b = document.getElementById('jing-scroll-toggle');
+    if (b) b.addEventListener('click', function () { if (asOn) asStop(); else asStart(); });
+    document.querySelectorAll('#jing-font-panel [data-as-spd]').forEach(function (x) {
+      x.addEventListener('click', function () { window.__wuriAutoScroll.setSpeed(x.getAttribute('data-as-spd')); });
+    });
+    var content = document.getElementById('jing-content');
+    if (content) {
+      content.addEventListener('touchstart', function () { if (asOn) asStop(); }, { passive: true });
+      content.addEventListener('wheel', function () { if (asOn) asStop(); }, { passive: true });
+    }
+    asSyncBtn();
+  });
+
   function toggleRecite() {
     reciteMode = !reciteMode;
     try { localStorage.setItem('wuri_jing_recite', reciteMode ? '1' : '0'); } catch (e) {}
@@ -2379,6 +2537,128 @@ var JingWen = (function () {
       } else if (tries > 40) clearInterval(iv);
     }, 300);
   }, true);
+
+  /* ---------- 系统朗读 TTS（批二第 7 项） ----------
+   * 无双声录音的书经读面板「系统朗读」进入（面板分流在第 0 步搭好，
+   * #jing-tts-btn 的点击在 init 里转到 window.__wuriTTSStart）。
+   * 口径：朗读当前节（按当前偏移定节，懒载先填充）；逐句切分
+   * （。！？；…），逐句以所在段落为高亮单位（.follow-cur 呈现，需
+   * #jing-content 同挂 follow-on 类）并跟随滚动。推进以 utterance
+   * 的 onend 为准、估时看门狗兜底：估时＝字数÷(4.2 字/秒×语速)，
+   * 看门狗＝估时×1.6＋2 秒（下限 2.5 秒），防个别平台 onend 丢失
+   * 卡死；boundary 事件各平台支持不一，不依赖。无中文语音时如实
+   * toast 后以默认语音朗读。语速取读面板 #jing-tts-speed（持久化
+   * wuri_jing_tts_rate），改速在下一句生效。沙箱无语音：只验调用链。 */
+  var ttsState = null;
+  function ttsPlain(el) {
+    var r = document.createRange();
+    r.selectNodeContents(el);
+    return plainTextOfFrag(r.cloneContents());
+  }
+  function ttsSplitSentences(text) {
+    var out = [], cur = '';
+    for (var i = 0; i < text.length; i++) {
+      cur += text[i];
+      if ('。！？；…'.indexOf(text[i]) >= 0) { out.push(cur); cur = ''; }
+    }
+    if (cur) out.push(cur);
+    return out;
+  }
+  function ttsSetBtn(on) {
+    var b = document.getElementById('jing-tts-btn');
+    if (b) b.textContent = on ? '停止朗读' : '系统朗读';
+  }
+  function ttsStop() {
+    var st = ttsState;
+    ttsState = null;
+    if (st && st.watchdog) clearTimeout(st.watchdog);
+    try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) {}
+    if (st && st.curEl) st.curEl.classList.remove('follow-cur');
+    var jc = document.getElementById('jing-content');
+    if (jc && !followMode) jc.classList.remove('follow-on');
+    ttsSetBtn(false);
+  }
+  function ttsSpeakNext() {
+    var st = ttsState;
+    if (!st) return;
+    if (window._jingCurrentId !== st.book) { ttsStop(); return; }
+    if (st.idx >= st.queue.length) {
+      ttsStop();
+      if (window.showToast) showToast('本节朗读完毕');
+      return;
+    }
+    var item = st.queue[st.idx];
+    if (st.curEl && st.curEl !== item.el) st.curEl.classList.remove('follow-cur');
+    st.curEl = item.el;
+    if (item.el) {
+      item.el.classList.add('follow-cur');
+      var r = item.el.getBoundingClientRect();
+      if (r.top < 60 || r.bottom > window.innerHeight - 120) item.el.scrollIntoView({ block: 'center' });
+    }
+    var u;
+    try { u = new SpeechSynthesisUtterance(item.text); } catch (e) { ttsStop(); return; }
+    u.lang = 'zh-CN';
+    u.rate = st.rate || 1;
+    if (st.voice) { try { u.voice = st.voice; } catch (e) { /* 异常语音对象忽略 */ } }
+    var advanced = false;
+    var advance = function () {
+      if (advanced || ttsState !== st) return;
+      advanced = true;
+      if (st.watchdog) { clearTimeout(st.watchdog); st.watchdog = null; }
+      st.idx++;
+      ttsSpeakNext();
+    };
+    u.onend = advance;
+    u.onerror = advance;
+    var estMs = (item.text.length / (4.2 * (st.rate || 1))) * 1000;
+    st.watchdog = setTimeout(advance, Math.max(2500, estMs * 1.6 + 2000));
+    try { speechSynthesis.speak(u); } catch (e) { advance(); }
+  }
+  function ttsStart() {
+    if (ttsState) { ttsStop(); return; }
+    if (!('speechSynthesis' in window)) { if (window.showToast) showToast('本设备不支持系统朗读'); return; }
+    if (followMode) { if (window.showToast) showToast('跟读进行中，系统朗读不可用'); return; }
+    var d = window.JINGWEN && JINGWEN[currentId];
+    if (!d || !d.sections) return;
+    var secIdx = 0;
+    try { secIdx = secIdxAtOffset(currentContentOffset()); } catch (e) {}
+    if (window.__wuri_dzFill) { try { window.__wuri_dzFill(secIdx); } catch (e) {} }
+    var build = function () {
+      var secEl = document.querySelector('#jing-content .jing-sec[data-sec="' + secIdx + '"]');
+      var body = secEl && secEl.querySelector('.jing-sec-body');
+      if (body && body.hidden) body.hidden = false;
+      var queue = [];
+      if (body) body.querySelectorAll('.jing-para').forEach(function (p) {
+        ttsSplitSentences(ttsPlain(p)).forEach(function (s) {
+          if (s.trim()) queue.push({ el: p, text: s });
+        });
+      });
+      if (!queue.length) { if (window.showToast) showToast('本节暂无可朗读文字'); return; }
+      var voices = [];
+      try { voices = speechSynthesis.getVoices() || []; } catch (e) {}
+      var zh = null;
+      voices.forEach(function (v) { if (!zh && /^zh/i.test(v.lang || '')) zh = v; });
+      if (!zh && window.showToast) showToast('未检测到中文语音，将用默认语音朗读');
+      var rate = 1;
+      try { rate = +localStorage.getItem('wuri_jing_tts_rate') || 1; } catch (e) {}
+      var sel = document.getElementById('jing-tts-speed');
+      if (sel && sel.value) rate = +sel.value || rate;
+      try { speechSynthesis.cancel(); } catch (e) {}
+      ttsState = { book: currentId, queue: queue, idx: 0, rate: rate, voice: zh, curEl: null, watchdog: null };
+      var jc = document.getElementById('jing-content');
+      if (jc) jc.classList.add('follow-on');
+      ttsSetBtn(true);
+      closeDockPanels();
+      ttsSpeakNext();
+    };
+    if (d.lazy) setTimeout(build, 350); else build();
+  }
+  window.__wuriTTSStart = ttsStart;
+  window.__wuriTTSStop = ttsStop;
+  window.__wuriTTSSetRate = function (r) { if (ttsState && r > 0) ttsState.rate = r; };
+  window.__wuriTTSState = function () {
+    return ttsState ? { on: true, book: ttsState.book, idx: ttsState.idx, total: ttsState.queue.length } : { on: false };
+  };
 
   /* ---------- MP3 诵读（Qwen3-TTS 预渲染） ---------- */
   var jingAudio = null;
@@ -3864,6 +4144,7 @@ var JingWen = (function () {
         html += '<button class="hl-color-btn hl-' + c + '" data-hl-color="' + c + '" title="' + HL_COLORS[c].label + '">' + HL_COLORS[c].name + '</button>';
       });
       html += '<button id="hl-share">分享</button>';
+      html += '<button id="hl-card">图卡</button>';
       html += '<button id="hl-cancel">取消</button>';
     } else {
       // 已存在高亮：顶部小卡（原文＋想法摘要）＋写/改想法 / 分享 / 换色 / 删除
@@ -3877,6 +4158,7 @@ var JingWen = (function () {
       }
       html += '<button id="hl-note">' + (exNoteText ? '改想法' : '写想法') + '</button>';
       html += '<button id="hl-share">分享</button>';
+      html += '<button id="hl-card">图卡</button>';
       Object.keys(HL_COLORS).forEach(function (c) {
         html += '<button class="hl-color-btn hl-' + c + '" data-hl-recolor="' + c + '">' + HL_COLORS[c].name + '</button>';
       });
@@ -3905,7 +4187,7 @@ var JingWen = (function () {
 
   /* 分享（2026-10-29 追加）：选中原文＋出处一行（《书名》·节名）纯文本；
      优先系统分享通道 navigator.share，不支持时回落复制＋toast。不自建面板。 */
-  function buildShareText() {
+  function getShareParts() {
     var text = '', sid = null, sec = 0;
     if (pendingHlId) {
       var hl = getHighlightById(pendingHlId);
@@ -3923,13 +4205,103 @@ var JingWen = (function () {
     }
     text = String(text || '').trim();
     if (!text) return null;
-    if (sid) {
-      var secT = '';
-      try { secT = getSectionTitle(sid, sec); } catch (e) {}
-      text += '\n——《' + getBookTitle(sid) + '》' + (secT ? '·' + secT : '');
-    }
-    return text;
+    var secT = '';
+    if (sid) { try { secT = getSectionTitle(sid, sec); } catch (e) {} }
+    return { text: text, book: sid ? getBookTitle(sid) : '', secTitle: secT || '' };
   }
+  function buildShareText() {
+    var p = getShareParts();
+    if (!p) return null;
+    return p.text + (p.book ? '\n——《' + p.book + '》' + (p.secTitle ? '·' + p.secTitle : '') : '');
+  }
+  /* 分享图卡（批二第 8 项）：宣纸底＋原文＋出处＋「戊日不上香」落款，
+     Canvas 出图走系统分享（图片）或保存。图卡是对外物料，恒用日间
+     宣纸配色，不随夜间/红光变色。超长口径：字号自 40px 逐档降到
+     28px 仍超 12 行时，截断至 12 行、末行尾加「……」。 */
+  function drawShareCard(parts) {
+    var W = 750, PAD = 56;
+    var cv = document.createElement('canvas');
+    var ctx = cv.getContext('2d');
+    var FONT = '"Songti SC","STSong","Noto Serif CJK SC","SimSun",serif';
+    function wrap(fontPx) {
+      ctx.font = fontPx + 'px ' + FONT;
+      var maxW = W - PAD * 2, lines = [], line = '';
+      for (var i = 0; i < parts.text.length; i++) {
+        var ch = parts.text[i];
+        if (ch === '\n') { lines.push(line); line = ''; continue; }
+        if (line && ctx.measureText(line + ch).width > maxW) { lines.push(line); line = ch; }
+        else line += ch;
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+    var fontPx = 40, lines = wrap(fontPx);
+    while (lines.length > 12 && fontPx > 28) { fontPx -= 4; lines = wrap(fontPx); }
+    if (lines.length > 12) {
+      lines = lines.slice(0, 12);
+      lines[11] = lines[11].slice(0, -1) + '……';
+    }
+    var lh = Math.round(fontPx * 1.9);
+    var H = PAD + lines.length * lh + 30 + 46 + 44 + PAD - 16;
+    cv.width = W;
+    cv.height = H;
+    ctx = cv.getContext('2d');
+    ctx.fillStyle = '#f6efdb';
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#d8c391';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(14, 14, W - 28, H - 28);
+    ctx.fillStyle = '#2e2a20';
+    ctx.font = fontPx + 'px ' + FONT;
+    ctx.textBaseline = 'top';
+    var y = PAD;
+    lines.forEach(function (ln) { ctx.fillText(ln, PAD, y); y += lh; });
+    y += 30;
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#6b5a35';
+    ctx.font = '30px ' + FONT;
+    ctx.fillText('——《' + parts.book + '》' + (parts.secTitle ? '·' + parts.secTitle : ''), W - PAD, y);
+    y += 46;
+    ctx.fillStyle = '#a5874e';
+    ctx.font = '24px ' + FONT;
+    ctx.fillText('戊 日 不 上 香', W - PAD, y + 4);
+    ctx.textAlign = 'left';
+    return cv;
+  }
+  function shareCard() {
+    var parts = getShareParts(); // 先取文案：hideHlPop 会清空 pending 状态
+    hideHlPop();
+    try { window.getSelection().removeAllRanges(); } catch (e) {}
+    if (!parts) return;
+    var cv = drawShareCard(parts);
+    var saveFallback = function () {
+      try {
+        var a = document.createElement('a');
+        a.href = cv.toDataURL('image/png');
+        a.download = '戊日不上香图卡.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast('图卡已保存');
+      } catch (e) { showToast('图卡生成失败'); }
+    };
+    if (cv.toBlob) {
+      cv.toBlob(function (blob) {
+        if (!blob) { saveFallback(); return; }
+        var file = null;
+        try { file = new File([blob], 'wuri-card.png', { type: 'image/png' }); } catch (e) {}
+        if (file && navigator.canShare && navigator.canShare({ files: [file] }) && typeof navigator.share === 'function') {
+          navigator.share({ files: [file] }).then(function () {}, function () { /* 用户取消：不回落保存 */ });
+        } else saveFallback();
+      }, 'image/png');
+    } else saveFallback();
+  }
+  window.__wuriMakeCard = function () {
+    var parts = getShareParts();
+    if (!parts) return null;
+    var cv = drawShareCard(parts);
+    return { dataUrl: cv.toDataURL('image/png'), w: cv.width, h: cv.height };
+  };
   function copyTextFallback(text, done) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function () { done(true); }, function () { legacyCopy(text, done); });
@@ -4189,6 +4561,11 @@ var JingWen = (function () {
       // 分享（选中文字或已存在高亮皆可；文案与收尾在 shareSelection 内）
       if (e.target.closest('#hl-share')) {
         shareSelection();
+        return;
+      }
+      // 图卡（批二第 8 项，分享旁）
+      if (e.target.closest('#hl-card')) {
+        shareCard();
         return;
       }
       // 写心得
