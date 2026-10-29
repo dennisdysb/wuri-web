@@ -768,6 +768,12 @@ var JingWen = (function () {
   function rpRemoteSave(d) { try { localStorage.setItem(RP_REMOTE_KEY, JSON.stringify(d)); } catch (e) {} }
   function rpMergedStats() {
     var local = rpLoadStats();
+    /* 同步未开（未登录/已登出/关同步）：展示纯本地，不混缓存的远端桶 */
+    if (!rpSyncOn()) {
+      var lt = 0;
+      Object.keys(local.days).forEach(function (k) { lt += local.days[k] || 0; });
+      return { days: local.days, fin: local.fin, total: lt };
+    }
     var remote = rpRemoteLoad();
     var myId = rpMyDeviceId();
     var days = {}, fin = {};
@@ -2796,11 +2802,21 @@ var JingWen = (function () {
     if (b) b.textContent = !ttsState ? '系统朗读' : (ttsState.paused ? '继续朗读' : '暂停朗读');
     if (p) p.textContent = ttsState && ttsState.paused ? '继续' : '暂停';
   }
+  function ttsClampFab(el) {
+    /* 与诵读胶囊 clampFabIntoView 同口径（彼在本文件另一作用域，此处本地实现） */
+    if (!el || el.hidden) return;
+    var x = parseFloat(el.style.left), y = parseFloat(el.style.top);
+    if (!isFinite(x) || !isFinite(y)) return;
+    var w = el.offsetWidth || 150, h = el.offsetHeight || 48;
+    x = Math.max(4, Math.min(x, window.innerWidth - w - 4));
+    y = Math.max(4, Math.min(y, window.innerHeight - h - 4));
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+  }
   function syncTtsFab() {
     var fab = document.getElementById('jing-tts-fab');
     if (fab) {
       fab.hidden = !ttsState;
-      if (ttsState) clampFabIntoView(fab);
+      if (ttsState) ttsClampFab(fab);
     }
     ttsSetBtn();
   }
