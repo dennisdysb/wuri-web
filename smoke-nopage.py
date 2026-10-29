@@ -162,7 +162,7 @@ try:
     dv = s.ev(DOCKVIS)
     ok(dv == ["jing-read-btn", "jing-recite", "jing-font-btn", "jing-foldall", "jing-pybtn"], "N1: 常见经文底栏五钮 %s" % dv)
     f = s.ev(FABS)
-    ok(f["qing"]["show"] and f["back"]["show"] and f["bm"]["show"] and not f["ghost"], "N1/v316: s01 三悬浮钮齐现（磬闸：常见经文＋敲磬标注）")
+    ok(f["qing"]["show"] and f["back"]["show"] and f["bm"]["show"] and f["ghost"], "N1/v316: s01 三悬浮钮齐现（磬闸：常见经文＋敲磬标注；ghost 自 2026-10-29 全书类统一后常见亦在）")
     # 字面板：显示组仅字小/字大；本书组仅我的标记
     s.click("#jing-font-btn"); time.sleep(0.5)
     panel = s.ev("""(function(){var fp=document.getElementById('jing-font-panel');

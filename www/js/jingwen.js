@@ -3606,16 +3606,17 @@ var JingWen = (function () {
   /* ---------- 悬浮件拖动装配（反馈批第 1b/4 条共用一套机制） ----------
    * 位移 ≤8px 算点按（原 click 照常触发）；超阈值判拖动、吞掉随后合成
    * 的 click；松手按 storageKey 持久化 {x,y}（left/top，视口钳制）。
-   * 悬浮钮组共用键 wuri_jing_fabpos_v1（按元素分格 back/bm，三类书共用
-   * 一套坐标）；播放胶囊自用键。opts.always=true 恒可拖，否则仅当
-   * body.fabs-ghost（内丹/道藏模式）时可拖 */
+   * 悬浮钮组共用键 wuri_jing_fabpos_v1（按元素分格 back/bm/qing，
+   * 全书类共用一套坐标）；播放胶囊自用键。opts.always=true 恒可拖，
+   * 否则仅当 body.fabs-ghost（阅读器打开时恒置，2026-10-29 起全书类
+   * 统一，v315 的内丹/道藏规格推广至常见经文）时可拖 */
   window.__wuriMakeDraggable = function (el, storageKey, opts) {
     if (!el || el.__wuriDrag) return;
     el.__wuriDrag = true;
     var sx = 0, sy = 0, ox = 0, oy = 0, dragging = false, moved = false, pid = null;
     function enabled() { return !!(opts && opts.always) || document.body.classList.contains('fabs-ghost'); }
     function subKey() {
-      return el.id === 'jing-back-fab' ? 'back' : (el.id === 'jing-bookmark-fab' ? 'bm' : null);
+      return el.id === 'jing-back-fab' ? 'back' : (el.id === 'jing-bookmark-fab' ? 'bm' : (el.id === 'qing-btn' ? 'qing' : null));
     }
     function save(x, y) {
       try {
@@ -3669,8 +3670,9 @@ var JingWen = (function () {
       window.addEventListener('pointercancel', endDrag);
     });
   };
-  /* 悬浮钮书类模式（反馈批第 1 条）：ghost＝内丹/道藏（半透明＋可拖＋
-     恢复持久化位置）；common＝常见经文（固定右列、不透明、清行内位） */
+  /* 悬浮钮模式（反馈批第 1 条定内丹/道藏 ghost；2026-10-29 用户真机
+     定版推广全书类）：ghost＝阅读器打开即生效（半透明＋可拖＋恢复
+     持久化位置），与书类无关；fabIsNdDz 此后仅余磬显隐书类闸一职 */
   var _fabGhost = null;
   function fabIsNdDz(curId) {
     if (!curId) return false;
@@ -3698,14 +3700,15 @@ var JingWen = (function () {
     var reader = document.getElementById('jing-reader');
     var showReader = !!(reader && !reader.hidden);
     var curId = window._jingCurrentId;
-    var ghost = !!(showReader && fabIsNdDz(curId));
+    var ghost = !!showReader;
     if (ghost !== _fabGhost) {
       _fabGhost = ghost;
       document.body.classList.toggle('fabs-ghost', ghost);
       var bf = document.getElementById('jing-back-fab');
       var mf = document.getElementById('jing-bookmark-fab');
-      if (ghost) { applyFabPos(bf, storedFabPos('back')); applyFabPos(mf, storedFabPos('bm')); }
-      else { applyFabPos(bf, null); applyFabPos(mf, null); }
+      var qf = document.getElementById('qing-btn');
+      if (ghost) { applyFabPos(bf, storedFabPos('back')); applyFabPos(mf, storedFabPos('bm')); applyFabPos(qf, storedFabPos('qing')); }
+      else { applyFabPos(bf, null); applyFabPos(mf, null); applyFabPos(qf, null); }
     }
     /* 磬（反馈批第 2 条＋2026-10-28 晚收紧）：显示＝常见经文类 AND 数据
        判定有敲磬。数据判定在 renderReaderBody 扫描（window._jingHasQing）；
@@ -3759,12 +3762,15 @@ var JingWen = (function () {
     }
     /* 加书签入口已收敛为悬浮钮一个（反馈批第 7 条）：字面板「加书签」
        与状态行书签图标连同其接线一并删除 */
-    /* 悬浮钮拖动装配（内丹/道藏时生效，判定在装配器内） */
+    /* 悬浮钮拖动装配（全书类生效，判定在装配器内；磬同入一组，
+       分格 qing 与 back/bm 共用 wuri_jing_fabpos_v1） */
     if (window.__wuriMakeDraggable) {
       var bfD = document.getElementById('jing-back-fab');
       var mfD = document.getElementById('jing-bookmark-fab');
+      var qfD = document.getElementById('qing-btn');
       if (bfD) window.__wuriMakeDraggable(bfD, 'wuri_jing_fabpos_v1', {});
       if (mfD) window.__wuriMakeDraggable(mfD, 'wuri_jing_fabpos_v1', {});
+      if (qfD) window.__wuriMakeDraggable(qfD, 'wuri_jing_fabpos_v1', {});
     }
     // 六爻浮动返回：回到六爻主页面
     var lyBackFab = document.getElementById('liuyao-back-fab');
@@ -4214,11 +4220,26 @@ var JingWen = (function () {
     if (!p) return null;
     return p.text + (p.book ? '\n——《' + p.book + '》' + (p.secTitle ? '·' + p.secTitle : '') : '');
   }
-  /* 分享图卡（批二第 8 项）：宣纸底＋原文＋出处＋「戊日不上香」落款，
+  /* 分享图卡（批二第 8 项）：宣纸底＋原文＋出处＋品牌落款，
      Canvas 出图走系统分享（图片）或保存。图卡是对外物料，恒用日间
      宣纸配色，不随夜间/红光变色。超长口径：字号自 40px 逐档降到
-     28px 仍超 12 行时，截断至 12 行、末行尾加「……」。 */
-  function drawShareCard(parts) {
+     28px 仍超 12 行时，截断至 12 行、末行尾加「……」。
+     落款（2026-10-29 改版）：App 图标（香炉三炷香 icon-512）＋文字
+     「戊日不上香 APP」紧凑排布居右下；绘制必须等图标加载完成，
+     图标未就绪/失败绝不出图（不许出无图标版）。 */
+  var _cardIconPromise = null;
+  function loadCardIcon() {
+    if (_cardIconPromise) return _cardIconPromise;
+    _cardIconPromise = new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { reject(new Error('card icon load failed')); };
+      img.src = 'icon-512.png';
+    });
+    return _cardIconPromise;
+  }
+  try { loadCardIcon(); } catch (e) {} /* 预热：点图卡时多半已就绪 */
+  function drawShareCard(parts, iconImg) {
     var W = 750, PAD = 56;
     var cv = document.createElement('canvas');
     var ctx = cv.getContext('2d');
@@ -4262,9 +4283,28 @@ var JingWen = (function () {
     ctx.font = '30px ' + FONT;
     ctx.fillText('——《' + parts.book + '》' + (parts.secTitle ? '·' + parts.secTitle : ''), W - PAD, y);
     y += 46;
+    /* 品牌行：图标在左、文字在右，整组右对齐；文字正常字距，
+       「戊日不上香」与「APP」间一个普通空格 */
+    var brand = '戊日不上香 APP';
     ctx.fillStyle = '#a5874e';
     ctx.font = '24px ' + FONT;
-    ctx.fillText('戊 日 不 上 香', W - PAD, y + 4);
+    var brandW = ctx.measureText(brand).width;
+    var IS = 36, IGAP = 10;
+    var ix = Math.round(W - PAD - brandW - IGAP - IS);
+    var iy = Math.round(y + 4 + (24 - IS) / 2);
+    ctx.save();
+    ctx.beginPath();
+    var ir = 8;
+    ctx.moveTo(ix + ir, iy);
+    ctx.arcTo(ix + IS, iy, ix + IS, iy + IS, ir);
+    ctx.arcTo(ix + IS, iy + IS, ix, iy + IS, ir);
+    ctx.arcTo(ix, iy + IS, ix, iy, ir);
+    ctx.arcTo(ix, iy, ix + IS, iy, ir);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(iconImg, ix, iy, IS, IS);
+    ctx.restore();
+    ctx.fillText(brand, W - PAD, y + 4);
     ctx.textAlign = 'left';
     return cv;
   }
@@ -4273,34 +4313,39 @@ var JingWen = (function () {
     hideHlPop();
     try { window.getSelection().removeAllRanges(); } catch (e) {}
     if (!parts) return;
-    var cv = drawShareCard(parts);
-    var saveFallback = function () {
-      try {
-        var a = document.createElement('a');
-        a.href = cv.toDataURL('image/png');
-        a.download = '戊日不上香图卡.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showToast('图卡已保存');
-      } catch (e) { showToast('图卡生成失败'); }
-    };
-    if (cv.toBlob) {
-      cv.toBlob(function (blob) {
-        if (!blob) { saveFallback(); return; }
-        var file = null;
-        try { file = new File([blob], 'wuri-card.png', { type: 'image/png' }); } catch (e) {}
-        if (file && navigator.canShare && navigator.canShare({ files: [file] }) && typeof navigator.share === 'function') {
-          navigator.share({ files: [file] }).then(function () {}, function () { /* 用户取消：不回落保存 */ });
-        } else saveFallback();
-      }, 'image/png');
-    } else saveFallback();
+    /* 等图标加载完成再出图：图标失败则不出图（不许出无图标版） */
+    loadCardIcon().then(function (iconImg) {
+      var cv = drawShareCard(parts, iconImg);
+      var saveFallback = function () {
+        try {
+          var a = document.createElement('a');
+          a.href = cv.toDataURL('image/png');
+          a.download = '戊日不上香图卡.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast('图卡已保存');
+        } catch (e) { showToast('图卡生成失败'); }
+      };
+      if (cv.toBlob) {
+        cv.toBlob(function (blob) {
+          if (!blob) { saveFallback(); return; }
+          var file = null;
+          try { file = new File([blob], 'wuri-card.png', { type: 'image/png' }); } catch (e) {}
+          if (file && navigator.canShare && navigator.canShare({ files: [file] }) && typeof navigator.share === 'function') {
+            navigator.share({ files: [file] }).then(function () {}, function () { /* 用户取消：不回落保存 */ });
+          } else saveFallback();
+        }, 'image/png');
+      } else saveFallback();
+    }, function () { showToast('图卡生成失败'); });
   }
   window.__wuriMakeCard = function () {
     var parts = getShareParts();
-    if (!parts) return null;
-    var cv = drawShareCard(parts);
-    return { dataUrl: cv.toDataURL('image/png'), w: cv.width, h: cv.height };
+    if (!parts) return Promise.resolve(null);
+    return loadCardIcon().then(function (iconImg) {
+      var cv = drawShareCard(parts, iconImg);
+      return { dataUrl: cv.toDataURL('image/png'), w: cv.width, h: cv.height };
+    }, function () { return null; });
   };
   function copyTextFallback(text, done) {
     if (navigator.clipboard && navigator.clipboard.writeText) {

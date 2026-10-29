@@ -1083,6 +1083,10 @@ details.disc-foot .hint{margin-top:9px}
   z-index:990;display:none;transition:opacity .18s ease,transform .18s ease}
 .qing-fab.show{display:block}
 .qing-fab:active{transform:scale(.92)}
+/* 全书类统一 ghost（2026-10-29）：磬同入半透明＋可拖组。此二行须排在
+   下一行沉浸隐规则之前——同特异性时后行胜，沉浸态仍须把磬隐掉 */
+body.fabs-ghost #qing-btn{opacity:.55;touch-action:none}
+body.fabs-ghost #qing-btn:active{opacity:.85}
 body.jing-immersive #qing-btn{opacity:0;pointer-events:none;transform:translateY(12px)}
 /* 阅读器浮动返回钮（与磬成对，左下）：基类 .jing-back-fab 与星象子视图等共用，
    此处只以 id 定点覆盖阅读器这一枚的底距（与磬同为 94＋安全区，悬在底栏上方）
@@ -1093,7 +1097,8 @@ body.jing-immersive #qing-btn{opacity:0;pointer-events:none;transform:translateY
    共用、左下）不动，只用 #id 覆写阅读器这一枚。 */
 #jing-back-fab{left:auto;right:18px;bottom:calc(168px + env(safe-area-inset-bottom));z-index:999;transition:opacity .18s ease,transform .18s ease}
 #jing-bookmark-fab{left:auto;right:18px;bottom:calc(242px + env(safe-area-inset-bottom));z-index:999}
-/* 内丹/道藏：悬浮钮半透明＋可拖（body.fabs-ghost 由 updateFab 按书类切） */
+/* 全书类统一：悬浮钮半透明＋可拖（body.fabs-ghost 由 updateFab 在阅读器
+   打开时恒置；2026-10-29 起 v315 内丹/道藏规格推广至常见经文） */
 body.fabs-ghost #jing-back-fab,body.fabs-ghost #jing-bookmark-fab{opacity:.55;touch-action:none}
 body.fabs-ghost #jing-back-fab:active,body.fabs-ghost #jing-bookmark-fab:active{opacity:.85}
 /* 播放悬浮胶囊（第 4 条）：半透明、可拖、默认左下；沉浸同隐；
