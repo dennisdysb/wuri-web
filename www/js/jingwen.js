@@ -3089,11 +3089,14 @@ var JingWen = (function () {
     return out;
   }
   var TTS_VOICE_KEY = 'wuri_jing_tts_voice';
-  function ttsZhVoices() {
-    var vs = [];
-    try { vs = speechSynthesis.getVoices() || []; } catch (e) {}
-    return vs.filter(function (v) { return /^zh/i.test(v.lang || ''); });
+  function ttsRawVoices() {
+    try { return speechSynthesis.getVoices() || []; } catch (e) { return []; }
   }
+  /* 中文语音判定：lang 以 zh 开头（zh-CN/zh-TW/zh-HK…）；系统有语音但
+     lang 无一 zh 开头（如仅 en-US）＝无中文语音，语音组整组隐藏（见
+     ttsPopulateVoices 定型分支），朗读回落默认语音并在 ttsStart 时 toast */
+  function ttsIsZh(v) { return /^zh/i.test(v.lang || ''); }
+  function ttsZhVoices() { return ttsRawVoices().filter(ttsIsZh); }
   function ttsPickVoice() {
     /* 语音选择（反馈第二批第 5 项）：持久化 voiceURI 优先，失效回落首个
        中文语音；逐句调用，故面板改选下一句即生效。只按原名呈现、不贴
@@ -3106,13 +3109,45 @@ var JingWen = (function () {
     var zh = ttsZhVoices();
     return zh.length ? zh[0] : null;
   }
+  /* 语音表定型状态：Android Chrome/WebView 首调 getVoices() 常返回空表，
+     真表经 voiceschanged 异步到达。未见非空表＝未定型：先占位（下拉禁用
+     ＋「加载中…」），voiceschanged/开面板时重填；2.5s 仍无表按无中文语音
+     定型收起（无 TTS 引擎的设备不留假占位）。定型后若迟到中文语音，
+     voiceschanged 再触发本函数即补填并重新显示。 */
+  var ttsVoicesReady = false;
+  var ttsVoiceWaitTimer = null;
   function ttsPopulateVoices() {
     var sel = document.getElementById('jing-tts-voice');
     var row = document.getElementById('jing-tts-voice-row');
-    if (!sel) return;
-    var zh = ttsZhVoices();
-    if (row) row.hidden = !zh.length;
-    if (!zh.length) { sel.innerHTML = ''; return; }
+    if (!sel || !row) return;
+    var raw = ttsRawVoices();
+    if (raw.length) ttsVoicesReady = true;
+    var zh = raw.filter(ttsIsZh);
+    if (!zh.length) {
+      if (!ttsVoicesReady) {
+        row.hidden = false;
+        sel.disabled = true;
+        sel.innerHTML = '';
+        var ph = document.createElement('option');
+        ph.value = ''; ph.textContent = '加载中…';
+        sel.appendChild(ph);
+        if (!ttsVoiceWaitTimer) {
+          ttsVoiceWaitTimer = setTimeout(function () {
+            ttsVoiceWaitTimer = null;
+            ttsVoicesReady = true;
+            ttsPopulateVoices();
+          }, 2500);
+        }
+        return;
+      }
+      row.hidden = true;
+      sel.innerHTML = '';
+      sel.disabled = false;
+      return;
+    }
+    if (ttsVoiceWaitTimer) { clearTimeout(ttsVoiceWaitTimer); ttsVoiceWaitTimer = null; }
+    row.hidden = false;
+    sel.disabled = false;
     var want = '';
     try { want = localStorage.getItem(TTS_VOICE_KEY) || ''; } catch (e) {}
     var cur = zh[0];
@@ -4122,6 +4157,9 @@ var JingWen = (function () {
       if (!p || !b) return;
       var willOpen = p.hidden;
       p.hidden = !willOpen;
+      /* 开读面板时重填 TTS 语音表（异步到达的语音表在此刻兜底刷新，
+         未定型则占位、就绪由 voiceschanged 补填） */
+      if (willOpen && which === 'read' && window.__wuriTTSVoices) window.__wuriTTSVoices();
       b.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
       b.classList.toggle('on', willOpen);
       if (o) o.hidden = true;

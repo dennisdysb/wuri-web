@@ -3321,6 +3321,16 @@ body.reader-open #tab-jing .appbar{display:none}
 .jmp-lab{font-size:.85rem;color:var(--muted)}
 .jmp-row .mini-btn{white-space:nowrap}
 .jmp-row select.mini-btn{max-width:110px}
+/* 朗读行单行化（2026-10-29 真机反馈）：系统朗读＋语速＋语音同排不换行；
+   语音组（标签＋下拉）为内联组，可整体隐藏——旧版语音行是独立 .jmp-row，
+   display:flex 压过 hidden 的 UA 规则且无专属 [hidden] 规则，隐藏永不生效、
+   空下拉常驻第二行。本组显式补 [hidden] 规则（与全站同口径）。 */
+.jmp-row-tts{flex-wrap:nowrap}
+.jmp-row-tts>.mini-btn,.jmp-row-tts>.jmp-lab{flex:none}
+.jmp-voice-wrap{display:inline-flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0}
+#jing-tts-voice-row[hidden]{display:none}
+.jmp-voice-wrap .jmp-lab{flex:none}
+.jmp-row-tts select#jing-tts-voice{flex:1 1 auto;min-width:0;max-width:170px}
 
 /* ===== 阅读器补全批一（2026-10-29）：字体版式/书内搜索/统计 ===== */
 #jing-content.rp-ff-kai{font-family:"WuriKai","Kaiti SC","STKaiti","KaiTi","DFKai-SB","Noto Serif CJK SC",serif}

@@ -294,7 +294,7 @@
             </div>
             <div class="jmp-sec" id="jing-tts-grp" hidden>
               <div class="jmp-h">朗读</div>
-              <div class="jmp-row">
+              <div class="jmp-row jmp-row-tts">
                 <button class="mini-btn tiny" id="jing-tts-btn">系统朗读</button>
                 <span class="jmp-lab">语速</span>
                 <select id="jing-tts-speed" class="mini-btn tiny">
@@ -303,10 +303,10 @@
                   <option value="1.25">1.25×</option>
                   <option value="1.5">1.5×</option>
                 </select>
-              </div>
-              <div class="jmp-row" id="jing-tts-voice-row" hidden>
-                <span class="jmp-lab">语音</span>
-                <select id="jing-tts-voice" class="mini-btn tiny" aria-label="选择朗读语音"></select>
+                <span id="jing-tts-voice-row" class="jmp-voice-wrap" hidden>
+                  <span class="jmp-lab">语音</span>
+                  <select id="jing-tts-voice" class="mini-btn tiny" aria-label="选择朗读语音"></select>
+                </span>
               </div>
             </div>
           </div>
