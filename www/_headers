@@ -7,3 +7,7 @@
 
 /js/*
   Cache-Control: no-cache, must-revalidate
+
+# 阅读器网络字体切片（v1 目录内容固定不变，再切时换目录名）：长缓存
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable

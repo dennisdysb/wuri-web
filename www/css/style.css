@@ -866,7 +866,9 @@ details.disc-foot .hint{margin-top:9px}
 /* 阅读器吸顶工具栏：留出状态栏高度，避免按钮被系统栏挡住 */
 #jing-reader .jing-rhead { padding-top: max(28px, env(safe-area-inset-top)) !important; }
 .jing-content {
-  font-family: 'JingSerif', 'Songti SC', 'Noto Serif SC', serif;
+  /* 宋体（默认）：网络字体 WuriSong（思源宋体切片，css/webfonts.css）优先，
+     JingSerif（包内子集）与系统宋体栈回落——无系统宋体的安卓机亦真出宋体 */
+  font-family: 'WuriSong', 'JingSerif', 'Songti SC', 'Noto Serif SC', serif;
   line-height: 2.6;
   color: var(--ink);
   text-wrap: pretty; /* 避免孤字：宁可整句换行，不留单字 */
@@ -886,7 +888,7 @@ details.disc-foot .hint{margin-top:9px}
 .jing-content.no-py ruby rt { display: none; }
 /* 经名（一级标题） */
 .jing-book-title {
-  font-family: 'JingSerif', 'Songti SC', serif;
+  font-family: 'WuriSong', 'JingSerif', 'Songti SC', serif;
   text-align: center;
   font-size: 1.42em;
   letter-spacing: .14em;
@@ -905,7 +907,7 @@ details.disc-foot .hint{margin-top:9px}
 }
 /* 二级标题（各经各咒统一） */
 .jing-sec-h {
-  font-family: 'JingSerif', 'Songti SC', serif;
+  font-family: 'WuriSong', 'JingSerif', 'Songti SC', serif;
   font-size: 1.12em;
   letter-spacing: .1em;
   text-align: center;
@@ -3301,8 +3303,11 @@ body.reader-open #tab-jing .appbar{display:none}
 .jmp-row select.mini-btn{max-width:110px}
 
 /* ===== 阅读器补全批一（2026-10-29）：字体版式/书内搜索/统计 ===== */
-#jing-content.rp-ff-kai{font-family:"Kaiti SC","STKaiti","KaiTi","DFKai-SB","Noto Serif CJK SC",serif}
+#jing-content.rp-ff-kai{font-family:"WuriKai","Kaiti SC","STKaiti","KaiTi","DFKai-SB","Noto Serif CJK SC",serif}
 #jing-content.rp-ff-hei{font-family:var(--sans)}
+/* 标题跟随字体模式（与正文同族，避免楷体模式下标题仍是宋体） */
+#jing-content.rp-ff-kai .jing-book-title,#jing-content.rp-ff-kai .jing-sec-h{font-family:"WuriKai","Kaiti SC","STKaiti","KaiTi","DFKai-SB","Noto Serif CJK SC",serif}
+#jing-content.rp-ff-hei .jing-book-title,#jing-content.rp-ff-hei .jing-sec-h{font-family:var(--sans)}
 #jing-content.rp-lh-tight{line-height:1.8}
 #jing-content.rp-lh-tight .jing-para{line-height:1.8}
 #jing-content.rp-lh-wide{line-height:2.5}
