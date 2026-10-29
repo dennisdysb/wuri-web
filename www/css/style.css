@@ -1356,6 +1356,9 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
 :root{
   --hl-yellow:#fff3a3;--hl-green:#c8f0c8;--hl-blue:#c8e0f8;--hl-red:#f8c8c8;
   --hl-purple:#e3ccf5;--hl-orange:#fbe0bd;--hl-pink:#fbd3e0;--hl-teal:#c2ecec;
+  /* 搜索直达命中渐隐高亮色（RGB 三元组，paintHitFade 读变量拼 rgba 逐帧
+     降 alpha；红光覆写在 body.sky-red 块） */
+  --hitfade-rgb:217,169,22;
 }
 [data-theme="night"]{
   --hl-yellow:#7a6a1a;--hl-green:#2d6a2d;--hl-blue:#2a4d7a;--hl-red:#7a2d2d;
@@ -1364,6 +1367,7 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
 body.sky-red{
   --hl-yellow:#8a4a20;--hl-green:#6e2f16;--hl-blue:#5f2413;--hl-red:#93331f;
   --hl-purple:#4a1a10;--hl-orange:#a85424;--hl-pink:#b06a4a;--hl-teal:#c98a6a;
+  --hitfade-rgb:255,106,80;
 }
 .hl-pop .hl-yellow{background:var(--hl-yellow)}
 .hl-pop .hl-green{background:var(--hl-green)}
@@ -3397,6 +3401,9 @@ body.reader-open #tab-jing .appbar{display:none}
 #jing-find-count{font-size:.82rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 ::highlight(jingfind){background:rgba(217,169,22,.45)}
 ::highlight(jingfindcur){background:rgba(217,90,22,.65);color:#fff}
+/* 搜索直达命中渐隐高亮：静态底为起始帧，paintHitFade 经 #jing-hitfade-style
+   逐帧改写背景 alpha 至 0 后摘除；色值与 JS 同源 --hitfade-rgb */
+::highlight(jinghitfade){background:rgba(var(--hitfade-rgb),.55)}
 .jing-para.find-flash{animation:findFlash 1.2s ease}
 @keyframes findFlash{0%,60%{background:rgba(217,169,22,.35)}100%{background:transparent}}
 #jing-stats-detail{padding:10px 16px 14px;border-bottom:1px solid var(--line,#e3dccb);font-size:.92rem;color:var(--ink)}

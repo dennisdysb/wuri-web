@@ -2311,6 +2311,8 @@ var JingWen = (function () {
     window._jingCurrentId = null;
     $('#jing-reader').hidden = true;
     _jumpInsist = null;
+    pendingHitJump = null;
+    cancelHitFade();
     closeDockPanels();
     document.body.style.overflow = '';
     $('#jing-home').hidden = false;
@@ -3019,6 +3021,10 @@ var JingWen = (function () {
    *   解析结果驻 daozang.js 模块缓存，二次查询走内存。 */
   var searchSeq = 0;
   var searchTimer = null;
+  var lastSearchQ = '';
+  /* 全体搜索正文命中直达的待跳转意图（点结果时记下、开书后由
+     hitJumpPoll 兑现：只展开命中节＋收敛定位＋渐隐高亮） */
+  var pendingHitJump = null;
   function dzPreload() {
     if (window.__wuri_dzPreload) { try { window.__wuri_dzPreload(); } catch (e) {} }
   }
@@ -3059,7 +3065,14 @@ var JingWen = (function () {
             var snip = (s > 0 ? '…' : '') + p.t.slice(s, e) + (e < p.t.length ? '…' : '');
             var seg = p.t.substr(i, q.length);
             snip = esc(snip).replace(esc(seg), '<b>' + esc(seg) + '</b>');
-            out.push({ id: it.id, title: d.title, sec: sec.h || '', si: si, snip: snip });
+            /* 命中坐标一并带上（段序 pi＋段内剥标点字序起止 hs/he，与书内
+               搜索 buildFindHits 同口径）：点入直达只展开命中节、定位、
+               渐隐高亮全靠它——旧版只带书 id＋节序，坐标在此被丢弃 */
+            var hs = 0, he = 0;
+            for (var ci = 0; ci < i; ci++) if (!jpIsPunct(p.t[ci])) hs++;
+            he = hs;
+            for (var cj = i; cj < i + q.length && cj < p.t.length; cj++) if (!jpIsPunct(p.t[cj])) he++;
+            out.push({ id: it.id, title: d.title, sec: sec.h || '', si: si, pi: pi, hs: hs, he: he, snip: snip });
           }
         });
       });
@@ -3068,6 +3081,7 @@ var JingWen = (function () {
   }
   function search(q) {
     q = (q || '').trim();
+    lastSearchQ = q;
     var mySeq = ++searchSeq;
     var box = $('#jing-results');
     if (!q) { box.hidden = true; $('#jing-list').hidden = false; return; }
@@ -3088,7 +3102,8 @@ var JingWen = (function () {
         return;
       }
       function jingRow(r) {
-        return '<div class="jing-res" data-jing="' + r.id + '" data-sec="' + r.si + '">'
+        var hitAttrs = (r.pi != null) ? ' data-pi="' + r.pi + '" data-hs="' + r.hs + '" data-he="' + r.he + '"' : '';
+        return '<div class="jing-res" data-jing="' + r.id + '" data-sec="' + r.si + '"' + hitAttrs + '>'
           + '<div class="jing-res-t">' + esc(r.title) + (r.sec ? ' · ' + esc(r.sec) : '') + '</div>'
           + '<div class="jing-res-s">' + r.snip + '</div></div>';
       }
@@ -3159,6 +3174,7 @@ var JingWen = (function () {
     return window.t2s ? window.t2s(st) : st;
   }
   function clearFindPaint() {
+    cancelHitFade(); /* 搜索直达的渐隐高亮同属临时涂层，一并清 */
     try {
       if (window.CSS && CSS.highlights) { CSS.highlights.delete('jingfindcur'); }
     } catch (e) {}
@@ -3208,36 +3224,74 @@ var JingWen = (function () {
     }
     return t.length;
   }
-  function paintFindHit(el, h) {
-    clearFindPaint();
-    el.classList.add('find-flash');
+  /* 段内命中 Range 定位（paintFindHit 与 paintHitFade 共用）：h.s/h.e 为
+     剥标点字序坐标（findCutIdx 投影回显示串）；h.q 在场时先校验坐标处
+     文本归一后与查询一致，不一致（段切分/坐标口径漂移）就在本段内按
+     归一串重寻命中，寻不到返回 null 由调用方退化整段闪。
+     返回逐文本节点切分的 Range 数组：注音开启时每字是独立 ruby，单个
+     大 Range 横跨会把 rt 拼音也圈进涂层——逐节点切分后涂层只落在
+     汉字本体上（Range.toString 亦不再混入拼音） */
+  function hitRangesInPara(el, h) {
     try {
-      if (!(window.CSS && CSS.highlights && window.Highlight && window.Range)) return;
+      if (!window.Range) return null;
       var frag = document.createRange();
       frag.selectNodeContents(el);
       var clone = frag.cloneContents();
       clone.querySelectorAll('rt, rp').forEach(function (n) { n.remove(); });
       var disp = clone.textContent || '';
-      var dS = findCutIdx(disp, h.s), dE = findCutIdx(disp, h.e);
-      if (dE <= dS) return;
-      /* DOM 文本节点序（排除 rt/rp）与 disp 同序，逐节点累计定位 */
+      var s = h.s, e = h.e;
+      if (e <= s) return null;
+      if (h.q) {
+        var nq = findNorm(h.q);
+        var dS0 = findCutIdx(disp, s), dE0 = findCutIdx(disp, e);
+        var got = (dE0 > dS0) ? findNorm(disp.slice(dS0, dE0)) : '';
+        if (got !== nq) {
+          var ni = nq ? findNorm(disp).indexOf(nq) : -1;
+          if (ni < 0) return null;
+          s = ni; e = ni + nq.length;
+        }
+      }
+      var dS = findCutIdx(disp, s);
+      /* 终点取末位命中字的显示下标＋1（ astral 字 2 码元）：不能用
+         findCutIdx(disp, e)——那是下一内容字的下标，中间隔着标点时
+         涂层会把标点也吞进去（旧 paintFindHit 同病，如命中「真人」
+         涂出「真人，」） */
+      var dLast = findCutIdx(disp, e - 1);
+      var dE = dLast + (disp.codePointAt(dLast) > 0xFFFF ? 2 : 1);
+      if (dE <= dS) return null;
+      /* DOM 文本节点序（排除 rt/rp）与 disp 同序，逐节点累计切分 */
       var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
         acceptNode: function (n) {
           return (n.parentElement && n.parentElement.closest('rt, rp')) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
         }
       });
-      var acc = 0, sNode = null, sOff = 0, eNode = null, eOff = 0, node;
+      var acc = 0, node, out = [];
       while ((node = walker.nextNode())) {
         var len = node.nodeValue.length;
-        if (sNode === null && acc + len > dS) { sNode = node; sOff = dS - acc; }
-        if (acc + len >= dE) { eNode = node; eOff = dE - acc; break; }
+        var a = Math.max(dS, acc), b = Math.min(dE, acc + len);
+        if (b > a) {
+          var rg = document.createRange();
+          rg.setStart(node, a - acc);
+          rg.setEnd(node, b - acc);
+          out.push(rg);
+        }
         acc += len;
+        if (acc >= dE) break;
       }
-      if (sNode && eNode) {
-        var rg = document.createRange();
-        rg.setStart(sNode, sOff);
-        rg.setEnd(eNode, eOff);
-        CSS.highlights.set('jingfindcur', new Highlight(rg));
+      return out.length ? out : null;
+    } catch (e) {}
+    return null;
+  }
+  function paintFindHit(el, h) {
+    clearFindPaint();
+    el.classList.add('find-flash');
+    try {
+      if (!(window.CSS && CSS.highlights && window.Highlight)) return;
+      var rgs = hitRangesInPara(el, h);
+      if (rgs) {
+        var hl = new Highlight();
+        rgs.forEach(function (r) { hl.add(r); });
+        CSS.highlights.set('jingfindcur', hl);
       }
     } catch (e) {}
   }
@@ -3253,11 +3307,131 @@ var JingWen = (function () {
     (function attempt() {
       var el = document.querySelector('#jing-content .jing-para[data-sec="' + h.sec + '"][data-para="' + h.para + '"]');
       if (!el) { if (++tries < 10) setTimeout(attempt, 250); return; }
-      if (window.__wuriReaderGoToPara && window.__wuriReaderGoToPara(el)) {}
-      else el.scrollIntoView({ block: 'center' });
-      setTimeout(function () { paintFindHit(el, h); }, 60);
+      /* 落位与搜索直达同口径（同帧收敛＋rAF 看守）：旧单次 scrollIntoView
+         在懒填充/网络字体迟到改高时落点会被冲掉（__wuriReaderGoToPara
+         钩子从未兑现、恒走回落支） */
+      var anchor = { el: el, top: hitAnchorTop() };
+      settleReciteAnchorNow(anchor);
+      insistReciteAnchor(anchor, currentId);
+      paintFindHit(el, h);
     })();
   }
+  /* ---------- 搜索直达命中：展开＋收敛定位＋渐隐高亮（全体/道藏统一） ----------
+   * 用户规格（2026-10-29 18:28）：全体搜索点进长书，命中所在节没展开就
+   * 看不见——不要全展开，只展开有命中的那一节、定位到那块、命中文字
+   * 形成高亮、然后高亮慢慢灭下去。道藏正文点入旧实现已有展开＋跳锚＋
+   * 整段闪，本批把两路统一到此规格：定位走背诵落点的同帧收敛＋rAF
+   * 看守（settle/insistReciteAnchor），高亮走 paintHitFade。 */
+  function hitAnchorTop() { return Math.round((window.innerHeight || 0) * 0.30); }
+  /* 命中渐隐高亮：命中串鎏金底（--hitfade-rgb 变量，红光 body.sky-red
+     时自动变红）起、约 3 秒缓缓灭到无，结束彻底摘除。绘制走 CSS
+     Highlight API——不写 DOM、不入用户高亮/书签数据，临时涂层摘除后
+     无痕、划线偏移零漂移（不涉及 normalize）。不支持 Highlight API
+     时退化整段 find-flash 闪（旧道藏跳转同口径）。 */
+  var hitFadeState = null;
+  function cancelHitFade() {
+    if (hitFadeState) { hitFadeState.dead = true; hitFadeState = null; }
+    try { if (window.CSS && CSS.highlights) CSS.highlights.delete('jinghitfade'); } catch (e) {}
+    var st = document.getElementById('jing-hitfade-style');
+    if (st) st.textContent = '';
+  }
+  function paintHitFade(el, h) {
+    cancelHitFade();
+    clearFindPaint();
+    var rgs = null;
+    try { if (window.CSS && CSS.highlights && window.Highlight) rgs = hitRangesInPara(el, h); } catch (e) {}
+    if (!rgs) {
+      el.classList.add('find-flash');
+      setTimeout(function () { el.classList.remove('find-flash'); }, 1700);
+      return;
+    }
+    var hl = new Highlight();
+    rgs.forEach(function (r) { hl.add(r); });
+    CSS.highlights.set('jinghitfade', hl);
+    var rgb = '217,169,22';
+    try {
+      var v = getComputedStyle(document.body).getPropertyValue('--hitfade-rgb');
+      if (v && v.trim()) rgb = v.trim();
+    } catch (e) {}
+    var st = document.getElementById('jing-hitfade-style');
+    if (!st) {
+      st = document.createElement('style');
+      st.id = 'jing-hitfade-style';
+      document.head.appendChild(st);
+    }
+    var state = { dead: false };
+    hitFadeState = state;
+    var nowFn = function () { return (window.performance && performance.now) ? performance.now() : Date.now(); };
+    var t0 = nowFn(), DUR = 3000;
+    function frame(now) {
+      if (state.dead || hitFadeState !== state) return;
+      var t = ((now != null ? now : nowFn()) - t0) / DUR;
+      if (t >= 1) {
+        try { CSS.highlights.delete('jinghitfade'); } catch (e) {}
+        st.textContent = '';
+        if (hitFadeState === state) hitFadeState = null;
+        return;
+      }
+      var a = 0.55 * Math.pow(1 - t, 1.6);
+      st.textContent = '::highlight(jinghitfade){background:rgba(' + rgb + ',' + a.toFixed(3) + ')}';
+      requestAnimationFrame(frame);
+    }
+    frame(t0);
+  }
+  function landOnHitPara(PJ, el) {
+    var anchor = { el: el, top: hitAnchorTop() };
+    settleReciteAnchorNow(anchor); /* 同一同步任务内量→滚→再量，无错位帧 */
+    insistReciteAnchor(anchor, PJ.id); /* rAF 逐帧看守，晚到改高绘制前纠回 */
+    paintHitFade(el, PJ);
+  }
+  /* 开书是异步的（ensureLoaded/prepJingPunct/全藏取文）：轮询等本书
+     渲染就绪，命中节先填充（懒卷）后只展开该节（其余节折叠原样、
+     全展开态不动），段落到手即收敛落位 */
+  function hitJumpPoll() {
+    var PJ = pendingHitJump;
+    if (!PJ) return;
+    var tries = 0;
+    var iv = setInterval(function () {
+      tries++;
+      if (pendingHitJump !== PJ) { clearInterval(iv); return; }
+      if (window._jingCurrentId !== PJ.id) {
+        if (tries > 70) { clearInterval(iv); if (pendingHitJump === PJ) pendingHitJump = null; }
+        return;
+      }
+      var secEl = document.querySelector('#jing-content .jing-sec[data-sec="' + PJ.sec + '"]');
+      var body = secEl && secEl.querySelector('.jing-sec-body');
+      if (body) {
+        if (body.hasAttribute('data-lazy') && window.__wuri_dzFill) { try { window.__wuri_dzFill(PJ.sec); } catch (e) {} }
+        if (body.hidden) { body.hidden = false; updateFoldBtn(); }
+      }
+      var el = document.querySelector('#jing-content .jing-para[data-sec="' + PJ.sec + '"][data-para="' + PJ.para + '"]');
+      if (!el) {
+        if (tries > 40) {
+          clearInterval(iv);
+          if (pendingHitJump === PJ) pendingHitJump = null;
+          if (!PJ.retried) {
+            /* 坐标漂移兜底：以书内搜索同引擎在当前数据上重算命中，
+               取命中节内首处（再失败则退到节首跳转） */
+            var hs2 = buildFindHits(PJ.q);
+            var pick = null;
+            for (var i = 0; i < hs2.length; i++) { if (hs2[i].sec === PJ.sec) { pick = hs2[i]; break; } }
+            if (!pick && hs2.length) pick = hs2[0];
+            if (pick) {
+              pendingHitJump = { id: PJ.id, q: PJ.q, sec: pick.sec, para: pick.para, s: pick.s, e: pick.e, retried: true };
+              hitJumpPoll();
+              return;
+            }
+          }
+          jumpToSec(PJ.sec, 0);
+        }
+        return;
+      }
+      clearInterval(iv);
+      if (pendingHitJump === PJ) pendingHitJump = null;
+      landOnHitPara(PJ, el);
+    }, 150);
+  }
+
   function runFind() {
     var inp = document.getElementById('jing-find-q');
     var q = inp ? inp.value.trim() : '';
@@ -3340,8 +3514,21 @@ var JingWen = (function () {
           }
           if (target) {
             clearInterval(fIv);
-            target.classList.add('find-flash');
-            setTimeout(function () { target.classList.remove('find-flash'); }, 1600);
+            /* 命中串渐隐高亮（与全体搜索直达统一规格，取代旧整段闪）：
+               charOff 是节内内容字偏移，减目标段之前各段内容长得段内
+               偏移；查询词取最近一次检索词（lastSearchQ——产生这批结果
+               的词；读输入框现值会在编程式检索/改词未发时取错）。坐标
+               口径差异（DZ_STRIP_RE 与 JP 标点集不尽相同）由
+               paintHitFade 内校验重寻兜底，寻不到自动退化整段闪 */
+            var qv = lastSearchQ || '';
+            var accB = 0;
+            var sibs = body.querySelectorAll('p.jing-para');
+            for (var sb = 0; sb < sibs.length; sb++) {
+              if (sibs[sb] === target) break;
+              accB += dzContentLen(sibs[sb]);
+            }
+            var hOff = Math.max(0, charOff - accB);
+            paintHitFade(target, { s: hOff, e: hOff + (qv ? findNorm(qv).length : 0), q: qv });
           } else if (fTries > 40) clearInterval(fIv);
         }, 400);
       } else if (tries > 40) clearInterval(iv);
@@ -4319,6 +4506,28 @@ var JingWen = (function () {
         }
         /* 返回定位：记下出处（目录架/搜索结果），返回时回原位 */
         libCapture(jingId, ji);
+        var hitPi = ji.getAttribute('data-pi');
+        if (sec != null && sec !== '-1' && hitPi != null && ji.closest && ji.closest('#jing-results')) {
+          /* 全体搜索正文命中直达（2026-10-29 用户规格）：记下命中坐标，
+             开书后由 hitJumpPoll 兑现——只展开命中节＋收敛定位＋命中串
+             渐隐高亮。旧实现是开书后固定 300ms 一次性掀节＋滚到节题：
+             与异步取文/标点预处理赛跑，未渲染完即扑空；且开书未设直达
+             抑制，书签/自动位置恢复还会把落点抢走（用户实证：点进去
+             节没展开、没定位、没高亮） */
+          pendingHitJump = {
+            id: jingId, q: lastSearchQ, sec: +sec, para: +hitPi,
+            s: +(ji.getAttribute('data-hs') || 0), e: +(ji.getAttribute('data-he') || 0)
+          };
+          _posSuppressUntil = Date.now() + 12000; /* 与 openReaderAt 同口径 */
+          openReader(jingId);
+          hitJumpPoll();
+          setTimeout(function () {
+            var tip2 = $('#jing-loading-tip');
+            if (tip2) tip2.remove();
+          }, 3000);
+          return;
+        }
+        pendingHitJump = null;
         openReader(jingId);
         if (sec != null && sec !== '-1') {
           setTimeout(function () {
