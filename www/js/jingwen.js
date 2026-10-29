@@ -447,6 +447,14 @@ var JingWen = (function () {
     if (d.note && /KR5[a-z]\d{4}/.test(d.note)) return true;
     return false;
   }
+  /* 常见经文区判定（2026-10-29 用户定扩围，承 v352）：精选架非内丹、
+     非全藏条目即常见经文区；该区书头/页首一律不显示来源·底本标注
+     （#jing-srcnote 整框含其后缀），与道藏来源书口径一致。仅撤阅读页
+     显示层：feed 数据 note、关于页署名、列表页归属标注一律不动；
+     判定走数据（daozang 标记＋内丹名单），不按书名硬编码。 */
+  function isCommonShelf(d) {
+    return !!d && !d.daozang && !isNeidan(d.id);
+  }
   var JP_PUNCT_CHARS = '。，、；：？！·…—「」『』﹝﹞（）《》〈〉“”‘’％';
   function jpIsPunct(ch) { return JP_PUNCT_CHARS.indexOf(ch) >= 0 || /\s/.test(ch); }
   function jpStrip(s) {
@@ -1038,8 +1046,19 @@ var JingWen = (function () {
       var remote = rpRemoteLoad();
       var myId = rpMyDeviceId();
       var changed = false;
+      var barrier = rpResetBarrier();
       items.forEach(function (it) {
-        if (!it || it.dataset !== 'jing.stats' || it.deleted) return;
+        if (!it || it.dataset !== 'jing.stats') return;
+        /* 重置屏障：本设备桶在重置时刻之前的残影（tombstone 未送达时
+           云端仍是旧行）一律不入缓存、不回填，并补发 tombstone 自愈；
+           重置后的新快照 updated_at 必晚于屏障、不受影响 */
+        if (myId && it.key === myId && barrier && Date.parse(it.updated_at || '') <= barrier) {
+          if (it.deleted) {
+            if (remote[myId]) { delete remote[myId]; changed = true; }
+          } else { rpPushStatsTombstone(); }
+          return;
+        }
+        if (it.deleted) return;
         var v = null;
         try { v = JSON.parse(it.value); } catch (e) {}
         if (!v || typeof v !== 'object') return;
@@ -1079,6 +1098,44 @@ var JingWen = (function () {
   function rpSyncPushSoon() {
     if (rpPushTimer) clearTimeout(rpPushTimer);
     rpPushTimer = setTimeout(rpSyncPush, 4000);
+  }
+  /* ---------- 阅读统计重置（方案二，2026-10-29 用户裁定） ----------
+   * 存量 fin 无从可靠甄别（v349 结论），用户裁定整表重置。范围仅统计层：
+   * 本机 wuri_jing_stats_v1、远端缓存里的本设备桶、云端本设备桶；阅读
+   * 位置进度（AUTOPOS/pos）、书签、划线、心得、生词本不在统计层、不动。
+   * 云端清除复用 sync/push 既有 tombstone 语义（deleted=true 按
+   * (user, dataset, item_key) 标记删除），不新增后端端点；push 失败时
+   * 靠重置屏障（rpResetBarrier）在后续 pull 时拦残影并补发 tombstone。
+   * 周结旗标一并复位（删 WK_SHOWN_KEY）。 */
+  var RP_RESET_KEY = 'wuri_jing_stats_reset_at';
+  function rpResetBarrier() {
+    try { return parseInt(localStorage.getItem(RP_RESET_KEY) || '0', 10) || 0; } catch (e) { return 0; }
+  }
+  var rpTombBusy = false;
+  function rpPushStatsTombstone() {
+    var myId = rpMyDeviceId();
+    if (!myId || rpTombBusy) return Promise.resolve(false);
+    if (!(window.WuriAccount && WuriAccount._syncPushItems && WuriAccount.isLoggedIn && WuriAccount.isLoggedIn())) {
+      return Promise.resolve(false);
+    }
+    rpTombBusy = true;
+    return WuriAccount._syncPushItems([{ dataset: 'jing.stats', key: myId, value: '', deleted: true, updated_at: new Date().toISOString() }])
+      .then(function (r) { rpTombBusy = false; return !!(r && r.body && r.body.ok); })
+      .catch(function () { rpTombBusy = false; return false; });
+  }
+  function rpResetStats() {
+    if (rpPushTimer) { clearTimeout(rpPushTimer); rpPushTimer = null; }
+    rpPending = 0; /* 未落盘的在读秒数一并作废，防重置后被 flush 写回 */
+    try { localStorage.setItem(RP_RESET_KEY, String(Date.now())); } catch (e) {}
+    try { localStorage.removeItem(RP_STATS_KEY); } catch (e) {}
+    var myId = rpMyDeviceId();
+    if (myId) {
+      var remote = rpRemoteLoad();
+      if (remote[myId]) { delete remote[myId]; rpRemoteSave(remote); }
+    }
+    try { localStorage.removeItem(WK_SHOWN_KEY); } catch (e) {}
+    rpRenderStats();
+    return rpPushStatsTombstone();
   }
   /* ---------- 每周阅读总结（反馈第二批第 8 项） ----------
    * 口径：本地周一为周始；总结对象＝刚结束的上一周。数据读合并视图
@@ -1217,7 +1274,7 @@ var JingWen = (function () {
     }
     wkMaybeShow();
   }
-  window.__wuriStats = { load: rpLoadStats, render: rpRenderStats, finish: rpStatsFinish, flush: rpFlushStats, merged: rpMergedStats, pull: rpSyncPull, push: rpSyncPush, wkData: wkSummaryData, wkShow: wkShowSummary };
+  window.__wuriStats = { load: rpLoadStats, render: rpRenderStats, finish: rpStatsFinish, flush: rpFlushStats, merged: rpMergedStats, pull: rpSyncPull, push: rpSyncPush, reset: rpResetStats, wkData: wkSummaryData, wkShow: wkShowSummary };
   document.addEventListener('DOMContentLoaded', function () {
     ['touchstart', 'touchmove', 'scroll', 'click', 'keydown'].forEach(function (ev) {
       document.addEventListener(ev, function () { rpLastAct = Date.now(); }, { passive: true });
@@ -1258,6 +1315,25 @@ var JingWen = (function () {
     });
     rpRenderStats();
     rpSyncPull(); // 进页先拉一次（未登录/未开同步内部短路）
+    /* 设置页「重置阅读统计」（方案二）：入口在设置页最底部次级区、低调
+       小钮防误触；确认弹窗讲清范围与不可恢复，确认后才执行 rpResetStats */
+    var rsBtn = document.getElementById('stats-reset-btn');
+    if (rsBtn) rsBtn.addEventListener('click', function () {
+      var logged = !!(window.WuriAccount && WuriAccount.isLoggedIn && WuriAccount.isLoggedIn());
+      var text = '重置阅读统计？\n\n将清零本机的阅读时长、读完本数与连读天数'
+        + (logged ? '，并清除本设备在云端的统计备份' : '')
+        + '，重置后不可恢复。\n阅读进度、书签、划线和生词本不受影响。';
+      if (!confirm(text)) return;
+      var msg = document.getElementById('stats-reset-msg');
+      rsBtn.disabled = true;
+      rpResetStats().then(function (cloudOk) {
+        rsBtn.disabled = false;
+        if (!msg) return;
+        if (!logged) msg.textContent = '已重置：本机阅读统计已清零。';
+        else if (cloudOk) msg.textContent = '已重置：本机与本设备云端统计已清零。';
+        else msg.textContent = '本机统计已清零；云端清除未完成，下次同步时会自动补清。';
+      });
+    });
   });
   function secIdxAtOffset(off) {
     if (!_metrics) return 0;
@@ -1725,10 +1801,11 @@ var JingWen = (function () {
         else { jsub.hidden = true; }
       }
       // 来源标注（精选自家口径，书头显示；道藏全集不在书头显示，文末行交代；
-      // 精选 KR 转录书同口径不显示底本框，2026-10-29 用户定，判定见 isKrSourced）
+      // 精选 KR 转录书同口径不显示底本框，2026-10-29 用户定，判定见 isKrSourced；
+      // 常见经文区一律不显示来源·底本标注，2026-10-29 用户定扩围，判定见 isCommonShelf）
       var jnote = $('#jing-srcnote');
       if (jnote) {
-        if (d.note && !isKrSourced(d)) {
+        if (d.note && !isKrSourced(d) && !isCommonShelf(d)) {
           var dzSuffix = '';
           if (d.daozang) {
             dzSuffix = d.punctMode
