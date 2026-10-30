@@ -1112,18 +1112,21 @@ details.disc-foot .hint{margin-top:9px}
 [data-theme="night"] .daka-cal-d.lv4{background:#5daa5d;color:#fff}
 
 /* 敲磬悬浮按钮（2026-10-28 用户口径恢复圆形悬浮钮：底栏高 86＋间隙 8＝94，
-   悬在底部控制栏预留区上方；显隐随阅读器、沉浸时与底栏同收） */
+   悬在底部控制栏预留区上方；显隐随阅读器；沉浸时不收
+   （2026-10-29 21:14 用户定，见下方沉浸例外注） */
 .qing-fab{position:fixed;right:18px;bottom:calc(94px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
   background:var(--teal-deep);color:#fff;font-size:1.3rem;font-family:var(--serif);
   border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
   z-index:990;display:none;transition:opacity .18s ease,transform .18s ease}
 .qing-fab.show{display:block}
 .qing-fab:active{transform:scale(.92)}
-/* 全书类统一 ghost（2026-10-29）：磬同入半透明＋可拖组。此二行须排在
-   下一行沉浸隐规则之前——同特异性时后行胜，沉浸态仍须把磬隐掉 */
+/* 全书类统一 ghost（2026-10-29）：磬同入半透明＋可拖组。
+   沉浸例外（2026-10-29 21:14 用户真机定）：磬是法器不是界面杂物，
+   全屏/沉浸态保持可见可点，不与底栏、返回/书签钮同收——原
+   body.jing-immersive #qing-btn 隐规则已删，沉浸时磬沿用上方
+   ghost 半透明 .55 与点按/拖动口径 */
 body.fabs-ghost #qing-btn{opacity:.55;touch-action:none}
 body.fabs-ghost #qing-btn:active{opacity:.85}
-body.jing-immersive #qing-btn{opacity:0;pointer-events:none;transform:translateY(12px)}
 /* 阅读器浮动返回钮（与磬成对，左下）：基类 .jing-back-fab 与星象子视图等共用，
    此处只以 id 定点覆盖阅读器这一枚的底距（与磬同为 94＋安全区，悬在底栏上方）
    与沉浸联动，不动共享基类 */
