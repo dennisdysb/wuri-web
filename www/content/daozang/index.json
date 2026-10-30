@@ -1,15 +1,15 @@
 {
  "section": "daozang",
- "version": 57,
- "updated": "2026-10-27",
+ "version": 58,
+ "updated": "2026-10-30",
  "license": {
   "name": "CC BY-SA 4.0",
   "url": "https://creativecommons.org/licenses/by-sa/4.0/",
   "holder": "Kanseki Repository (Kanripo)",
   "note": "清洗稿（去 Mandoku 標記、合併斷行）同以 CC BY-SA 4.0 釋出"
  },
- "count": 1649,
- "totalChars": 31359596,
+ "count": 1650,
+ "totalChars": 31364960,
  "works": [
   {
    "id": "KR5a0001",
@@ -721,6 +721,15 @@
    "dz": "DZ0079",
    "juan": 1,
    "chars": 4857
+  },
+  {
+   "id": "KR5a0080",
+   "title": "雲篆度人妙經",
+   "bu": "洞真部",
+   "lei": "本文",
+   "dz": "DZ0080",
+   "juan": 1,
+   "chars": 5364
   },
   {
    "id": "KR5a0081",
@@ -14933,6 +14942,7 @@
   "KR5a0077",
   "KR5a0078",
   "KR5a0079",
+  "KR5a0080",
   "KR5a0081",
   "KR5a0082",
   "KR5a0083",
