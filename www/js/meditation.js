@@ -401,8 +401,9 @@ var Meditation = (function () {
    * cue-huqi/cue-pingzhu.mp3，旧单字三件下线，MED_CACHE 升 v6。同批四项联动：
    * ①首次手势解锁（见 primeAudio：全站无 AudioContext，音频皆 HTMLAudio 元素，
    * 以元素级静音预播取得播放授权；play() 被拒不再静默吞——cue 块内出可见提示）；
-   * ②引导音量默认值 45→70；③口令发声时背景（环境音＋混音）ducking 压到 35%、
-   * 口令结束恢复；④场景预设不再写回口令开关（见 applyPreset 注）。 */
+   * ②引导音量默认值 45→70；③口令发声时背景 ducking 压到 35%——已于 2026-10-29
+   * 晚被用户真机否决并当晚拆除（口令与背景音完全独立，见下方「无 ducking」注）；
+   * ④场景预设不再写回口令开关（见 applyPreset 注）。 */
   var CUE_VOICE_SRC = {
     inhale: 'audio/meditation/cue-xiqi.mp3?v=1',
     exhale: 'audio/meditation/cue-huqi.mp3?v=1',
@@ -431,7 +432,6 @@ var Meditation = (function () {
         try {
           var a = new Audio(CUE_VOICE_SRC[k]);
           a.preload = 'auto';
-          a.addEventListener('ended', function () { duckEnd(); });
           cue.els[k] = a;
         } catch (e) {}
       }
@@ -440,41 +440,11 @@ var Meditation = (function () {
     return cue.els;
   }
 
-  /* ---------- 口令发声时背景 ducking（压低环境音/混音，口令结束恢复） ----------
-   * 因子统一走 duckFactor()：环境音在各设值点（起播/音量滑杆）与混音在
-   * mixTrackVol() 乘因子，duck 启停时 duckApply() 按现行设定值重算各元素，
-   * 用户中途调音量也自动带因子、不会冲掉 duck。恢复双保险：口令元素 ended
-   * 事件＋发声后 durMs+600 的定时器（token 防旧定时器误恢复下一声的 duck）。 */
-  var DUCK_GAIN = 0.35;
-  var duck = { on: false, token: 0 };
-  function duckFactor() { return duck.on ? DUCK_GAIN : 1; }
-  function duckApply() {
-    if (fb.ambient) { try { fb.ambient.volume = volume() * duckFactor(); } catch (e) {} }
-    var b = bridge();
-    if (b && typeof b.medSetVolume === 'function') {
-      try { b.medSetVolume(volume() * duckFactor()); } catch (e) {}   /* 原生桥环境音同压 */
-    }
-    mixApplyVolumes();
-  }
-  function duckStart() {
-    duck.token++;
-    if (duck.on) return;
-    duck.on = true;
-    duckApply();
-  }
-  function duckEnd() {
-    if (!duck.on) return;
-    for (var k in cue.els) {
-      var a = cue.els[k];
-      if (a && !a.paused && !a.ended) return;   /* 还有口令在响，保持压低 */
-    }
-    duck.on = false;
-    duckApply();
-  }
-  function duckEndLater(ms) {
-    var t = duck.token;
-    setTimeout(function () { if (duck.token === t) duckEnd(); }, ms);
-  }
+  /* ---------- 无 ducking（用户 2026-10-29 晚真机裁定） ----------
+   * v401 曾在口令发声时把背景（环境音＋混音＋原生桥环境音）压到 35%，
+   * 用户真机明确否决：口令一说话就影响在播声音的大小、像同一音轨——口令
+   * 不应影响其他声音的音量。定案：口令与背景音完全独立，口令发声前后
+   * 背景各轨音量保持用户设定值不变，各设值点不乘任何 duck 因子。勿再引入。 */
 
   /* ---------- 首次手势解锁（移动端自动播放策略） ----------
    * 全站音频皆 HTMLAudio 元素、无 AudioContext；口令由呼吸定时器触发，
@@ -537,16 +507,14 @@ var Meditation = (function () {
       try { a.currentTime = 0; } catch (e) {}
       a.volume = cueVol();
       a.__realAt = Date.now();
-      duckStart();
       var p = a.play();
       if (p && p.then) {
         p.then(function () { if (cue.blocked) cueShowBlocked(false); },
-               function () { duckEnd(); cueShowBlocked(true); });
+               function () { cueShowBlocked(true); });
       }
       cue.last = CUE_WORD[key] || '';
       cue.plays++;
-      duckEndLater(durMs + 600);
-    } catch (e) { duckEnd(); }
+    } catch (e) {}
   }
   function cueStopAll() {
     for (var k in cue.els) {
@@ -555,8 +523,6 @@ var Meditation = (function () {
       try { a.pause(); } catch (e) {}
       try { a.currentTime = 0; } catch (e) {}
     }
-    duck.on = false;
-    duckApply();
     if (navigator.vibrate) { try { navigator.vibrate(0); } catch (e) {} }
   }
   function cueVibrate(kind, sec) {
@@ -739,7 +705,7 @@ var Meditation = (function () {
   function mixTrackVol(id) {
     var v = parseInt(mix.tracks[id], 10);
     v = Math.max(0, Math.min(100, isNaN(v) ? 70 : v));
-    return (v / 100) * volume() * duckFactor();
+    return (v / 100) * volume();
   }
   function mixApplyVolumes() {
     for (var id in mix.tracks) {
@@ -1404,7 +1370,7 @@ var Meditation = (function () {
       fb.ambient.src = s.loop;
       try { fb.ambient.load(); } catch (e2) {}
     }
-    fb.ambient.volume = volume() * duckFactor();
+    fb.ambient.volume = volume();
     try {
       var p = fb.ambient.play();
       if (p && p.catch) p.catch(function () {
@@ -1612,7 +1578,7 @@ var Meditation = (function () {
       if (b && typeof b.medSetVolume === 'function') {
         try { b.medSetVolume(v); } catch (e) {}
       }
-      if (fb.ambient) { try { fb.ambient.volume = v * duckFactor(); } catch (e) {} }
+      if (fb.ambient) { try { fb.ambient.volume = v; } catch (e) {} }
       mixApplyVolumes();
     });
     /* 混音开关/面板/配方 */
@@ -1759,7 +1725,8 @@ var Meditation = (function () {
         on: cueOn(), vib: cueVibOn(), vol: cueVol(),
         last: cue.last, plays: cue.plays, skips: cue.skips,
         nowPlaying: nowPlaying, live: nowPlaying ? 1 : 0,
-        duck: duck.on, blocked: cue.blocked, primed: cue.primed,
+        duck: false,   /* ducking 已按用户裁定拆除，字段保留恒 false 兼容旧冒烟 */
+        blocked: cue.blocked, primed: cue.primed,
         elapsedMs: Math.round(sessElapsedMs())
       };
     }
