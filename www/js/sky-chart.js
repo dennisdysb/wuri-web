@@ -161,9 +161,12 @@
       '<div class="sx-card sx-entry" data-sx2="tonight"><div><div class="e1">' + esc(t('sx2_tonight')) + '</div>' +
       '<div class="e2">' + esc(t('sx2_tonight_sub')) + '</div></div></div>' +
       '<div class="sx-card sx-entry" data-sx2="chart"><div><div class="e1">' + esc(t('sx2_chart')) + '</div>' +
-      '<div class="e2">' + esc(t('sx2_chart_sub')) + '</div></div></div>' +
+      '<div class="e2">' + esc(t('sx2_chart_sub')) + '</div></div></div>';
+      /* 地平朝向入口隐藏（2026-10-29 23:05 用户裁定「地平先隐藏吧」）：只摘
+         入口卡——sky-horizon.js 代码、视图与素材全保留，WuriSkyHorizon.open
+         委托分支不动；恢复时把下面两行加回上方模板即可。
       '<div class="sx-card sx-entry sx-entry-horizon" data-sx2="horizon"><div><div class="e1">' + esc(t('sx2_horizon')) + '</div>' +
-      '<div class="e2">' + esc(t('sx2_horizon_sub')) + '</div></div></div>';
+      '<div class="e2">' + esc(t('sx2_horizon_sub')) + '</div></div></div>' */
     host.appendChild(div);
   }
   function watchEntries() {

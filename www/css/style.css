@@ -1113,12 +1113,12 @@ details.disc-foot .hint{margin-top:9px}
 [data-theme="night"] .daka-cal-d.lv3{background:#4d8a4d}
 [data-theme="night"] .daka-cal-d.lv4{background:#5daa5d;color:#fff}
 
-/* 敲磬悬浮按钮（2026-10-28 用户口径恢复圆形悬浮钮：底栏高 86＋间隙 8＝94，
-   悬在底部控制栏预留区上方；显隐随阅读器；沉浸时不收
-   （2026-10-29 21:14 用户定，见下方沉浸例外注） */
-.qing-fab{position:fixed;right:18px;bottom:calc(94px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
+/* 敲磬悬浮按钮（2026-10-28 用户口径恢复圆形悬浮钮；2026-10-29 23:02 落位修正：
+   底栏组件实测高 90（状态行 30＋主栏 60），旧底距 94 仅余 4px、真机字体度量
+   稍涨即被状态行切——整列默认底距 +20 改 114，余量 24；已存拖拽位不迁移） */
+.qing-fab{position:fixed;right:18px;bottom:calc(114px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
   background:var(--teal-deep);color:#fff;font-size:1.3rem;font-family:var(--serif);
-  border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
+  border:2px solid rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(0,0,0,.32);
   z-index:990;display:none;transition:opacity .18s ease,transform .18s ease}
 .qing-fab.show{display:block}
 .qing-fab:active{transform:scale(.92)}
@@ -1126,28 +1126,29 @@ details.disc-foot .hint{margin-top:9px}
    沉浸例外（2026-10-29 21:14 用户真机定）：磬是法器不是界面杂物，
    全屏/沉浸态保持可见可点，不与底栏、返回/书签钮同收——原
    body.jing-immersive #qing-btn 隐规则已删，沉浸时磬沿用上方
-   ghost 半透明 .55 与点按/拖动口径 */
-body.fabs-ghost #qing-btn{opacity:.55;touch-action:none}
-body.fabs-ghost #qing-btn:active{opacity:.85}
+   ghost 半透明（2026-10-29 23:02 起 .85，原 .55 压字看不清）与点按/拖动口径 */
+body.fabs-ghost #qing-btn{opacity:.85;touch-action:none}
+body.fabs-ghost #qing-btn:active{opacity:1}
 /* 阅读器浮动返回钮（与磬成对，左下）：基类 .jing-back-fab 与星象子视图等共用，
    此处只以 id 定点覆盖阅读器这一枚的底距（与磬同为 94＋安全区，悬在底栏上方）
    与沉浸联动，不动共享基类 */
-/* 阅读器悬浮钮右侧竖列（2026-10-28 晚反馈批第 1/3 条）：底→上＝磬 94 /
-   返回 168 / 书签 242；层级 999 低于底栏与一切底部面板（dock 1000），
+/* 阅读器悬浮钮右侧竖列（2026-10-28 晚反馈批第 1/3 条；2026-10-29 23:02
+   随磬钮落位修正整列 +20）：底→上＝磬 114 / 返回 188 / 书签 262（间距
+   74＝钮 56＋间隙 18）；层级 999 低于底栏与一切底部面板（dock 1000），
    面板打开时被面板盖住、不挡面板内键。基类 .jing-back-fab（其他视图
-   共用、左下）不动，只用 #id 覆写阅读器这一枚。 */
-#jing-back-fab{left:auto;right:18px;bottom:calc(168px + env(safe-area-inset-bottom));z-index:999;transition:opacity .18s ease,transform .18s ease}
-#jing-bookmark-fab{left:auto;right:18px;bottom:calc(242px + env(safe-area-inset-bottom));z-index:999}
+   共用、左下）不动，只用 #id 覆写阅读器这一枚。描边/阴影同磬钮加强。 */
+#jing-back-fab{left:auto;right:18px;bottom:calc(188px + env(safe-area-inset-bottom));z-index:999;transition:opacity .18s ease,transform .18s ease;border-color:rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(0,0,0,.32)}
+#jing-bookmark-fab{left:auto;right:18px;bottom:calc(262px + env(safe-area-inset-bottom));z-index:999;border-color:rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(0,0,0,.32)}
 /* 全书类统一：悬浮钮半透明＋可拖（body.fabs-ghost 由 updateFab 在阅读器
    打开时恒置；2026-10-29 起 v315 内丹/道藏规格推广至常见经文） */
-body.fabs-ghost #jing-back-fab,body.fabs-ghost #jing-bookmark-fab{opacity:.55;touch-action:none}
-body.fabs-ghost #jing-back-fab:active,body.fabs-ghost #jing-bookmark-fab:active{opacity:.85}
+body.fabs-ghost #jing-back-fab,body.fabs-ghost #jing-bookmark-fab{opacity:.85;touch-action:none}
+body.fabs-ghost #jing-back-fab:active,body.fabs-ghost #jing-bookmark-fab:active{opacity:1}
 /* 播放悬浮胶囊（第 4 条）：半透明、可拖、默认左下；沉浸同隐；
    层级 999 同悬浮钮，受面板盖压规则约束 */
 /* 透明度与悬浮钮组同口径 .55（反馈第二批第 2 项）；TTS 胶囊同款（第 4 项），
    默认位在播放胶囊上方竖叠，各自可拖、位置独立持久化 */
-#jing-play-fab{position:fixed;left:18px;bottom:calc(94px + env(safe-area-inset-bottom));z-index:999;display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--teal-deep) 88%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28);touch-action:none;opacity:.55;transition:opacity .25s}
-#jing-tts-fab{position:fixed;left:18px;bottom:calc(152px + env(safe-area-inset-bottom));z-index:999;display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--teal-deep) 88%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28);touch-action:none;opacity:.55;transition:opacity .25s}
+#jing-play-fab{position:fixed;left:18px;bottom:calc(114px + env(safe-area-inset-bottom));z-index:999;display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--teal-deep) 88%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28);touch-action:none;opacity:.55;transition:opacity .25s}
+#jing-tts-fab{position:fixed;left:18px;bottom:calc(172px + env(safe-area-inset-bottom));z-index:999;display:flex;gap:2px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--teal-deep) 88%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28);touch-action:none;opacity:.55;transition:opacity .25s}
 #jing-play-fab[hidden],#jing-tts-fab[hidden]{display:none}
 #jing-play-fab .jpf-btn,#jing-tts-fab .jpf-btn{border:none;background:transparent;color:#fff;font:inherit;font-size:.9rem;padding:9px 16px;border-radius:999px;cursor:pointer}
 #jing-play-fab .jpf-btn:active,#jing-tts-fab .jpf-btn:active{background:rgba(255,255,255,.18)}
