@@ -3445,7 +3445,7 @@ body.reader-open #tab-jing .appbar{display:none}
 .vocab-src{margin-top:3px;font-size:.75rem;color:var(--muted);line-height:1.5}
 .jmp-row .mini-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
 
-/* ===== 地平朝向视图（内部 v401，2026-10-29 设计稿 v2 集成） =====
+/* ===== 地平朝向视图（内部 v403，2026-10-29 设计稿 v2 集成） =====
  * 场景恒深色（与日/夜主题脱钩），颜色走局部变量 --hz-*（挂 #view-sky-horizon）；
  * 红光：body.sky-red 重映射 --hz-* 为红谱 + .hz-inner 整层套全局红移滤镜（与 img/svg 同值）。 */
 .sx-duo.sx-duo3{display:grid;grid-template-columns:1fr 1fr}
