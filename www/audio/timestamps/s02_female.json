@@ -1,1 +1,5869 @@
-{"sid": "s02", "voice": "female", "total_duration": 3000.57, "segments": [{"para": 0, "start": 0.0, "duration": 1.83, "text": "全真早晚功课经"}, {"para": 1, "start": 1.83, "duration": 0.89, "text": "香赞"}, {"para": 2, "start": 2.72, "duration": 3.32, "text": "蓬瀛朝爽。参礼诸天。"}, {"para": 3, "start": 6.03, "duration": 2.43, "text": "玉清初日镜光圆。"}, {"para": 4, "start": 8.46, "duration": 2.9, "text": "晓气蔼祥烟。秘典心宣。"}, {"para": 5, "start": 11.36, "duration": 1.51, "text": "入道冀成仙。"}, {"para": 6, "start": 12.88, "duration": 2.85, "text": "太上无极三宝大天尊(三称)"}, {"para": 7, "start": 15.73, "duration": 1.12, "text": "开经偈"}, {"para": 8, "start": 16.85, "duration": 3.19, "text": "琳瑯振响。中界肃清。"}, {"para": 9, "start": 20.04, "duration": 2.48, "text": "河海静默。山岳吞云。"}, {"para": 10, "start": 22.52, "duration": 3.27, "text": "万灵拱伏。召请群真。"}, {"para": 11, "start": 25.78, "duration": 3.19, "text": "天无凶秽。地鲜妖氛。"}, {"para": 12, "start": 28.97, "duration": 2.61, "text": "空明洞慧。上达玉京。"}, {"para": 13, "start": 31.58, "duration": 2.66, "text": "常清常静天尊(三称)"}, {"para": 14, "start": 34.25, "duration": 4.94, "text": "真心清静道为宗。譬彼中天宝月同。"}, {"para": 15, "start": 39.18, "duration": 3.92, "text": "净扫迷云无点翳。一轮光满太虚空。"}, {"para": 16, "start": 43.1, "duration": 3.97, "text": "上药身中神炁精。人人具足匪亏盈。"}, {"para": 17, "start": 47.07, "duration": 5.36, "text": "能知混合回风道。金鼎黄芽日日生。"}, {"para": 18, "start": 52.43, "duration": 4.52, "text": "一柱真香本自然。黄庭炉内起祥烟。"}, {"para": 19, "start": 56.95, "duration": 4.81, "text": "空中结就浮云篆。上祝当今寿万年。"}, {"para": 20, "start": 61.75, "duration": 3.55, "text": "万古道为尊。宏开济世门。"}, {"para": 21, "start": 65.3, "duration": 3.5, "text": "煌煌昭大法。圣典至今存。"}, {"para": 22, "start": 68.8, "duration": 1.46, "text": "净心神咒"}, {"para": 23, "start": 70.27, "duration": 3.13, "text": "太上台星 应变无停 驱邪缚魅"}, {"para": 24, "start": 73.4, "duration": 3.21, "text": "保命护身 智慧明净 心神安宁"}, {"para": 25, "start": 76.61, "duration": 3.13, "text": "三魂永久 魄无丧倾 急急如律令"}, {"para": 26, "start": 79.75, "duration": 1.36, "text": "净口神咒"}, {"para": 27, "start": 81.11, "duration": 3.27, "text": "丹朱口神 吐秽除氛 舌神正伦"}, {"para": 28, "start": 84.37, "duration": 3.81, "text": "通命养神 罗千齿神 却邪卫真"}, {"para": 29, "start": 88.19, "duration": 3.19, "text": "喉神虎贲 气神引津 心神丹元"}, {"para": 30, "start": 91.37, "duration": 2.66, "text": "令我通真 思神炼液 道炁常存"}, {"para": 31, "start": 94.04, "duration": 1.54, "text": "急急如律令"}, {"para": 32, "start": 95.58, "duration": 1.54, "text": "净身神咒"}, {"para": 33, "start": 97.12, "duration": 3.21, "text": "灵宝天尊 安慰身形 弟子魂魄"}, {"para": 34, "start": 100.33, "duration": 2.85, "text": "五脏玄冥 青龙白虎 队仗纷纭"}, {"para": 35, "start": 103.18, "duration": 3.03, "text": "朱雀玄武 侍卫身形 急急如律令"}, {"para": 36, "start": 106.21, "duration": 1.36, "text": "安土地神咒"}, {"para": 37, "start": 107.57, "duration": 3.19, "text": "元始安镇 普告万灵 岳渎真官"}, {"para": 38, "start": 110.76, "duration": 2.95, "text": "土地祇灵 左社右稷 不得妄惊"}, {"para": 39, "start": 113.71, "duration": 2.72, "text": "回向正道 内外澄清 各安方位"}, {"para": 40, "start": 116.42, "duration": 3.21, "text": "备守坛庭 太上有命 搜捕邪精"}, {"para": 41, "start": 119.64, "duration": 2.95, "text": "护法神王 保卫诵经 皈依大道"}, {"para": 42, "start": 122.59, "duration": 2.06, "text": "元亨利贞 急急如律令"}, {"para": 43, "start": 124.65, "duration": 1.78, "text": "净天地解秽神咒"}, {"para": 44, "start": 126.43, "duration": 3.21, "text": "天地自然 秽气分散 洞中玄虚"}, {"para": 45, "start": 129.64, "duration": 2.77, "text": "晃朗太元 八方威神 使我自然"}, {"para": 46, "start": 132.41, "duration": 3.81, "text": "灵宝符命 普告九天 干罗答那"}, {"para": 47, "start": 136.22, "duration": 3.21, "text": "洞罡太玄 斩妖缚邪 杀鬼万千"}, {"para": 48, "start": 139.44, "duration": 3.37, "text": "中山神咒 元始玉文 持诵一遍"}, {"para": 49, "start": 142.81, "duration": 2.95, "text": "却病延年 按行五岳 八海知闻"}, {"para": 50, "start": 145.76, "duration": 3.79, "text": "魔王束首 侍卫我轩 凶秽消散"}, {"para": 51, "start": 149.55, "duration": 2.12, "text": "道炁常存 急急如律令"}, {"para": 52, "start": 151.66, "duration": 1.46, "text": "祝香神咒"}, {"para": 53, "start": 153.13, "duration": 3.21, "text": "道由心学 心假香传 香爇玉炉"}, {"para": 54, "start": 156.34, "duration": 3.92, "text": "心存帝前 真灵下盼 仙旆临轩"}, {"para": 55, "start": 160.26, "duration": 3.5, "text": "令臣关告 径达九天 急急如律令"}, {"para": 56, "start": 163.76, "duration": 1.12, "text": "金光神咒"}, {"para": 57, "start": 164.88, "duration": 3.13, "text": "天地玄宗 万炁本根 广修亿劫"}, {"para": 58, "start": 168.01, "duration": 3.27, "text": "证吾神通 三界内外 惟道独尊"}, {"para": 59, "start": 171.28, "duration": 3.19, "text": "体有金光 覆映吾身 视之不见"}, {"para": 60, "start": 174.47, "duration": 3.08, "text": "听之不闻 包罗天地 养育群生"}, {"para": 61, "start": 177.55, "duration": 2.79, "text": "受持万遍 身有光明 三界侍卫"}, {"para": 62, "start": 180.34, "duration": 2.3, "text": "五帝司迎 万神朝礼 役使雷霆"}, {"para": 63, "start": 182.64, "duration": 3.32, "text": "鬼妖丧胆 精怪忘形 内有霹雳"}, {"para": 64, "start": 185.96, "duration": 4.02, "text": "雷神隐名 洞慧交彻 五炁腾腾"}, {"para": 65, "start": 189.98, "duration": 2.72, "text": "金光速现 覆护真人 急急如律令"}, {"para": 66, "start": 192.7, "duration": 1.46, "text": "开经玄蕴咒"}, {"para": 67, "start": 194.16, "duration": 3.13, "text": "云篆太虚 浩劫之初 乍遐乍迩"}, {"para": 68, "start": 197.3, "duration": 2.95, "text": "或 沉 或浮 五方徘徊 一丈之余"}, {"para": 69, "start": 200.25, "duration": 2.48, "text": "天真皇人 按笔 迺 书 以演洞章"}, {"para": 70, "start": 202.73, "duration": 2.95, "text": "次书灵符 元始下降 真文诞敷"}, {"para": 71, "start": 205.68, "duration": 2.06, "text": "昭昭其有 冥冥其无"}, {"para": 72, "start": 207.75, "duration": 3.08, "text": "诵咒能医病 持经可出尘"}, {"para": 73, "start": 210.83, "duration": 2.56, "text": "利幽堪脱苦 了愿得成真"}, {"para": 74, "start": 213.39, "duration": 3.81, "text": "稽首皈依众妙道。至心恭敬二玄真。"}, {"para": 75, "start": 217.2, "duration": 3.5, "text": "今运一心心所礼。粗识此经经所因。"}, {"para": 76, "start": 220.7, "duration": 4.21, "text": "空色色空存本性。有无无有色空均。"}, {"para": 77, "start": 224.91, "duration": 3.37, "text": "慧风出自天尊力。扫除心界不遗尘。"}, {"para": 78, "start": 228.28, "duration": 4.34, "text": "唯愿神光常拥护。证盟今日守心人。"}, {"para": 79, "start": 232.61, "duration": 4.57, "text": "今日守心何所证。不失凡身得道身。"}, {"para": 80, "start": 237.18, "duration": 3.03, "text": "尔时。元始天尊。"}, {"para": 81, "start": 240.21, "duration": 3.08, "text": "在七宝林中。五明宫内。"}, {"para": 82, "start": 243.3, "duration": 3.27, "text": "与无极圣众。俱放无极光明。"}, {"para": 83, "start": 246.56, "duration": 3.81, "text": "照无极世界 观无极众生。受无极苦恼。"}, {"para": 84, "start": 250.38, "duration": 3.5, "text": "宛转世间。轮回生死。"}, {"para": 85, "start": 253.88, "duration": 4.39, "text": "漂浪爱河。流吹欲海 沉滞声色。"}, {"para": 86, "start": 258.27, "duration": 2.61, "text": "迷惑有无。无空有空。"}, {"para": 87, "start": 260.88, "duration": 3.08, "text": "无色有色。无无有无。"}, {"para": 88, "start": 263.96, "duration": 2.85, "text": "有有无有。终始暗昧。"}, {"para": 89, "start": 266.81, "duration": 2.01, "text": "不能自明。毕竟迷惑。"}, {"para": 90, "start": 268.82, "duration": 3.32, "text": "天尊告曰。汝等众生。"}, {"para": 91, "start": 272.14, "duration": 2.43, "text": "从不有中有。不无中无。"}, {"para": 92, "start": 274.56, "duration": 2.56, "text": "不色中色。不空中空。"}, {"para": 93, "start": 277.12, "duration": 2.38, "text": "非有为有。非无为无。"}, {"para": 94, "start": 279.5, "duration": 2.77, "text": "非色为色。非空为空。"}, {"para": 95, "start": 282.27, "duration": 2.9, "text": "空即是空。空无定空。"}, {"para": 96, "start": 285.17, "duration": 2.95, "text": "色即是色。色无定色。"}, {"para": 97, "start": 288.12, "duration": 2.77, "text": "即色是空。即空是色。"}, {"para": 98, "start": 290.89, "duration": 2.85, "text": "若能知空不空。知色不色。"}, {"para": 99, "start": 293.74, "duration": 1.18, "text": "名为照了。"}, {"para": 100, "start": 294.91, "duration": 3.19, "text": "始达妙音。识无空法。"}, {"para": 101, "start": 298.1, "duration": 3.13, "text": "洞观无碍。入众妙门。"}, {"para": 102, "start": 301.24, "duration": 2.72, "text": "自然解悟。离诸疑网。"}, {"para": 103, "start": 303.95, "duration": 3.03, "text": "不著空见。清净六根。"}, {"para": 104, "start": 306.98, "duration": 2.9, "text": "断诸邪障。我即为汝。"}, {"para": 105, "start": 309.88, "duration": 1.36, "text": "说是妙经。"}, {"para": 106, "start": 311.24, "duration": 3.32, "text": "名曰。护命济度众生。"}, {"para": 107, "start": 314.56, "duration": 2.53, "text": "传教世间。流通读诵。"}, {"para": 108, "start": 317.09, "duration": 2.77, "text": "即有飞天神王。破邪金刚。"}, {"para": 109, "start": 319.86, "duration": 2.77, "text": "护法灵童。救苦真人。"}, {"para": 110, "start": 322.63, "duration": 2.66, "text": "金精猛兽。各百亿万众。"}, {"para": 111, "start": 325.29, "duration": 3.55, "text": "俱侍卫是经。随所拥护。"}, {"para": 112, "start": 328.85, "duration": 4.02, "text": "捍厄扶衰。度一切众生离染著。"}, {"para": 113, "start": 332.87, "duration": 2.98, "text": "尔时。天尊即说偈曰。"}, {"para": 114, "start": 335.85, "duration": 2.48, "text": "视不见我。听不得闻。"}, {"para": 115, "start": 338.33, "duration": 2.53, "text": "离种种边。名为妙道。"}, {"para": 116, "start": 340.86, "duration": 1.28, "text": "老君曰："}, {"para": 117, "start": 342.14, "duration": 2.06, "text": "大道无形，生育天地；"}, {"para": 118, "start": 344.2, "duration": 2.35, "text": "大道无情，运行日月；"}, {"para": 119, "start": 346.56, "duration": 2.48, "text": "大道无名，长养万物；"}, {"para": 120, "start": 349.04, "duration": 2.85, "text": "吾不知其名，强名曰道。"}, {"para": 121, "start": 351.88, "duration": 1.46, "text": "夫道者："}, {"para": 122, "start": 353.35, "duration": 2.35, "text": "有清有浊，有动有静；"}, {"para": 123, "start": 355.7, "duration": 1.88, "text": "天清地浊，天动地静；"}, {"para": 124, "start": 357.58, "duration": 3.03, "text": "男清女浊，男动女静；"}, {"para": 125, "start": 360.61, "duration": 2.43, "text": "降本流末，而生万物。"}, {"para": 126, "start": 363.04, "duration": 2.3, "text": "清者，浊之源，"}, {"para": 127, "start": 365.34, "duration": 1.88, "text": "动者，静之基；"}, {"para": 128, "start": 367.22, "duration": 3.74, "text": "人能常清静，天地悉皆归。"}, {"para": 129, "start": 370.95, "duration": 2.14, "text": "夫人神好清，而心扰之；"}, {"para": 130, "start": 373.1, "duration": 2.43, "text": "人心好静，而欲牵之。"}, {"para": 131, "start": 375.52, "duration": 2.43, "text": "常能遣其欲，而心自静；"}, {"para": 132, "start": 377.95, "duration": 4.23, "text": "澄其心，而神自清；自然六欲不生，"}, {"para": 133, "start": 382.19, "duration": 2.9, "text": "三毒消灭。所以不能者，为心未澄，"}, {"para": 134, "start": 385.09, "duration": 2.98, "text": "欲未遣也；能遣之者："}, {"para": 135, "start": 388.06, "duration": 2.66, "text": "内观其心，心无其心；"}, {"para": 136, "start": 390.73, "duration": 2.66, "text": "外观其形，形无其形；"}, {"para": 137, "start": 393.39, "duration": 2.35, "text": "远观其物，物无其物；"}, {"para": 138, "start": 395.74, "duration": 2.85, "text": "三者既悟，唯见于空。"}, {"para": 139, "start": 398.59, "duration": 2.25, "text": "观空亦空，空无所空；"}, {"para": 140, "start": 400.84, "duration": 2.48, "text": "所空既无，无无亦无；"}, {"para": 141, "start": 403.32, "duration": 2.77, "text": "无无既无，湛然常寂。"}, {"para": 142, "start": 406.09, "duration": 2.9, "text": "寂无所寂，欲岂能生；"}, {"para": 143, "start": 408.99, "duration": 1.88, "text": "欲既不生，即是真静。"}, {"para": 144, "start": 410.87, "duration": 1.96, "text": "真常应物，真常得性；"}, {"para": 145, "start": 412.83, "duration": 2.77, "text": "常应常静，常清静矣。"}, {"para": 146, "start": 415.6, "duration": 2.9, "text": "如此清静，渐入真道；"}, {"para": 147, "start": 418.49, "duration": 1.96, "text": "既入真道，名为得道；"}, {"para": 148, "start": 420.45, "duration": 2.12, "text": "虽名得道，实无所得；"}, {"para": 149, "start": 422.57, "duration": 2.53, "text": "为化众生，名为得道；"}, {"para": 150, "start": 425.1, "duration": 2.72, "text": "能悟之者，可传圣道。"}, {"para": 151, "start": 427.82, "duration": 1.18, "text": "老君曰："}, {"para": 152, "start": 429.0, "duration": 1.93, "text": "上士无争，下士好争；"}, {"para": 153, "start": 430.93, "duration": 2.43, "text": "上德不德，下德执德；"}, {"para": 154, "start": 433.36, "duration": 2.77, "text": "执著之者，不名道德。"}, {"para": 155, "start": 436.13, "duration": 2.77, "text": "众生所以不得真道者，"}, {"para": 156, "start": 438.9, "duration": 2.85, "text": "为有妄心；既有妄心，"}, {"para": 157, "start": 441.74, "duration": 2.95, "text": "即惊其神；既惊其神，"}, {"para": 158, "start": 444.69, "duration": 2.79, "text": "即著万物；既著万物，"}, {"para": 159, "start": 447.49, "duration": 2.72, "text": "即生贪求；既生贪求，"}, {"para": 160, "start": 450.21, "duration": 2.72, "text": "即是烦恼；烦恼妄想，"}, {"para": 161, "start": 452.92, "duration": 2.95, "text": "忧苦身心；便遭浊辱，"}, {"para": 162, "start": 455.87, "duration": 2.61, "text": "流浪生死；常沉苦海，"}, {"para": 163, "start": 458.49, "duration": 1.83, "text": "永失真道。真常之道，"}, {"para": 164, "start": 460.32, "duration": 2.48, "text": "悟者自得；得悟道者，"}, {"para": 165, "start": 462.8, "duration": 1.65, "text": "常清静矣！"}, {"para": 166, "start": 464.44, "duration": 1.93, "text": "仙人葛翁曰："}, {"para": 167, "start": 466.38, "duration": 3.37, "text": "吾得真道，曾诵此经万遍。"}, {"para": 168, "start": 469.75, "duration": 3.08, "text": "此经是天人所习，不传下士。"}, {"para": 169, "start": 472.83, "duration": 4.47, "text": "吾昔受之于东华帝君，东华帝君受之于金阙帝君，"}, {"para": 170, "start": 477.29, "duration": 3.92, "text": "金阙帝君受之于西王母。西王母皆口口相传，"}, {"para": 171, "start": 481.21, "duration": 3.79, "text": "不记文字。吾今于世，书而录之。"}, {"para": 172, "start": 485.0, "duration": 4.81, "text": "上士悟之，升为天仙；中士修之，南宫列仙；"}, {"para": 173, "start": 489.81, "duration": 3.92, "text": "下士得之，在世长年。游行三界，升入金门。"}, {"para": 174, "start": 493.72, "duration": 1.83, "text": "左玄真人曰："}, {"para": 175, "start": 495.55, "duration": 4.44, "text": "学道之士，持诵此经者，即得十天善神，拥护其身。"}, {"para": 176, "start": 499.99, "duration": 6.56, "text": "然后玉符保神，金液链形。形神俱妙，与道合真。"}, {"para": 177, "start": 506.55, "duration": 1.41, "text": "正一真人曰："}, {"para": 178, "start": 507.96, "duration": 1.7, "text": "人家有此经，"}, {"para": 179, "start": 509.66, "duration": 2.61, "text": "悟解之者，灾障不干，"}, {"para": 180, "start": 512.27, "duration": 3.19, "text": "众圣护门。神升上界，"}, {"para": 181, "start": 515.46, "duration": 2.3, "text": "朝拜高真。功满德就，"}, {"para": 182, "start": 517.76, "duration": 2.95, "text": "相感帝君。诵持不退，"}, {"para": 183, "start": 520.71, "duration": 1.78, "text": "身腾紫云。"}, {"para": 184, "start": 522.48, "duration": 2.77, "text": "太上老君说常清静经卷终"}, {"para": 185, "start": 525.25, "duration": 2.53, "text": "无上玉皇心印妙经"}, {"para": 186, "start": 527.79, "duration": 3.21, "text": "上药三品 神与气精 恍恍惚惚"}, {"para": 187, "start": 531.0, "duration": 3.32, "text": "杳杳冥冥 存无守有 倾刻而成"}, {"para": 188, "start": 534.32, "duration": 2.66, "text": "回风混合 百日功灵 默朝上帝"}, {"para": 189, "start": 536.98, "duration": 2.85, "text": "一纪飞升 知者易悟 昧者难行"}, {"para": 190, "start": 539.83, "duration": 2.61, "text": "履践天光 呼吸育清 出玄入牝"}, {"para": 191, "start": 542.44, "duration": 3.03, "text": "若亡若存 绵绵不绝 固蒂深根"}, {"para": 192, "start": 545.47, "duration": 3.03, "text": "人各有精 精合其神 神合其炁"}, {"para": 193, "start": 548.5, "duration": 3.55, "text": "炁合体真 不得其真 皆是强名"}, {"para": 194, "start": 552.05, "duration": 3.4, "text": "神能入石 神能飞形 入水不溺"}, {"para": 195, "start": 555.45, "duration": 3.03, "text": "入火不焚 神依形生 精依炁盈"}, {"para": 196, "start": 558.48, "duration": 3.4, "text": "不凋不残 松柏青青 三品一理"}, {"para": 197, "start": 561.88, "duration": 3.19, "text": "妙不可听 其聚则有 其散则零"}, {"para": 198, "start": 565.06, "duration": 3.4, "text": "七窍相通 窍窍光明 圣日圣月"}, {"para": 199, "start": 568.46, "duration": 3.5, "text": "照耀金庭 一得永得 自然身轻"}, {"para": 200, "start": 571.96, "duration": 3.55, "text": "太和充溢 骨散寒琼 得丹则灵"}, {"para": 201, "start": 575.51, "duration": 2.61, "text": "不得则倾 丹在身中 非白非青"}, {"para": 202, "start": 578.12, "duration": 1.78, "text": "诵持万遍 妙理自明"}, {"para": 203, "start": 579.9, "duration": 3.6, "text": "《九天应元雷声普化天尊玉枢宝经》"}, {"para": 204, "start": 583.51, "duration": 4.1, "text": "尔时。九天应元雷声普化天尊。"}, {"para": 205, "start": 587.61, "duration": 2.95, "text": "在玉清天中。与十 方诸天帝 君。"}, {"para": 206, "start": 590.56, "duration": 1.83, "text": "会于玉虚九光之殿。"}, {"para": 207, "start": 592.39, "duration": 3.79, "text": "郁萧弥罗之馆。紫极曲密之房。"}, {"para": 208, "start": 596.17, "duration": 3.55, "text": "阅太幽碧瑶之笈。考洞微明晨之书。"}, {"para": 209, "start": 599.73, "duration": 2.61, "text": "交头接耳。细议重玄。"}, {"para": 210, "start": 602.34, "duration": 2.12, "text": "诸多陪臣左右踧踖。"}, {"para": 211, "start": 604.45, "duration": 2.77, "text": "天尊宴坐。朗诵洞章。"}, {"para": 212, "start": 607.22, "duration": 3.19, "text": "诸天帝君。长吟步虚。"}, {"para": 213, "start": 610.41, "duration": 2.9, "text": "彩女仙妹。散花旋绕。"}, {"para": 214, "start": 613.31, "duration": 2.85, "text": "复相引领。游戏翠宫。"}, {"para": 215, "start": 616.16, "duration": 2.95, "text": "群仙导前。先节后铁。"}, {"para": 216, "start": 619.11, "duration": 3.74, "text": "龙旅鸾辖。飘讽太空。"}, {"para": 217, "start": 622.84, "duration": 2.43, "text": "并集于玉梵七宝层台。"}, {"para": 218, "start": 625.27, "duration": 1.78, "text": "时有雷师皓翁。"}, {"para": 219, "start": 627.05, "duration": 1.88, "text": "于仙众中越班而出。"}, {"para": 220, "start": 628.93, "duration": 2.85, "text": "面天尊前。颤作礼。"}, {"para": 221, "start": 631.78, "duration": 3.03, "text": "勃变长跪。上白天尊言。"}, {"para": 222, "start": 634.81, "duration": 3.03, "text": "天尊大慈。天尊大圣。"}, {"para": 223, "start": 637.84, "duration": 2.9, "text": "为群生父。为万灵师。"}, {"para": 224, "start": 640.74, "duration": 2.56, "text": "今者诸天。咸此良觌。"}, {"para": 225, "start": 643.3, "duration": 2.35, "text": "适见天尊阅宝笈。"}, {"para": 226, "start": 645.65, "duration": 3.6, "text": "考琼书。于中秘颐。不可缕计。"}, {"para": 227, "start": 649.25, "duration": 4.34, "text": "唯有玉霄一府所统三十六天内院中司。"}, {"para": 228, "start": 653.59, "duration": 2.66, "text": "东西华台。玄绾妙阁。"}, {"para": 229, "start": 656.25, "duration": 2.53, "text": "四府六院。及诸有司。"}, {"para": 230, "start": 658.79, "duration": 1.36, "text": "各分曹局。"}, {"para": 231, "start": 660.15, "duration": 3.13, "text": "所以总司五雷天临三界者也。"}, {"para": 232, "start": 663.28, "duration": 3.6, "text": "天尊至皇。心亲庶政。"}, {"para": 233, "start": 666.89, "duration": 1.46, "text": "此等小兆。"}, {"para": 234, "start": 668.35, "duration": 2.19, "text": "以何因绿得以趋服。"}, {"para": 235, "start": 670.54, "duration": 1.65, "text": "愿告欲闻。"}, {"para": 236, "start": 672.19, "duration": 1.36, "text": "天尊言。"}, {"para": 237, "start": 673.55, "duration": 3.03, "text": "雷师皓翁。尔等仙卿。"}, {"para": 238, "start": 676.58, "duration": 3.03, "text": "储勋夙世。累行昨生。"}, {"para": 239, "start": 679.61, "duration": 3.03, "text": "故得玉府登庸。琼宫简录。"}, {"para": 240, "start": 682.64, "duration": 2.72, "text": "今玆勋行。视夙昨多。"}, {"para": 241, "start": 685.35, "duration": 3.6, "text": "尔其悉力雷司。委心火部。"}, {"para": 242, "start": 688.96, "duration": 3.37, "text": "日复日岁复岁。勋崇行著。"}, {"para": 243, "start": 692.33, "duration": 2.9, "text": "性霁神融。克证高真。"}, {"para": 244, "start": 695.23, "duration": 3.5, "text": "即阶妙道。惟是雷部鬼神。"}, {"para": 245, "start": 698.73, "duration": 2.85, "text": "昼劳夕役。动有捶楚。"}, {"para": 246, "start": 701.57, "duration": 2.95, "text": "大则考戮。屑云雕雪。"}, {"para": 247, "start": 704.53, "duration": 3.03, "text": "无有已时。檄龙命鸦。"}, {"para": 248, "start": 707.56, "duration": 2.12, "text": "此息彼作。彼所因故。"}, {"para": 249, "start": 709.67, "duration": 2.35, "text": "尔其耳焉。雷师皓翁。"}, {"para": 250, "start": 712.02, "duration": 2.95, "text": "及诸天诸仙。耸耳而默。"}, {"para": 251, "start": 714.98, "duration": 2.66, "text": "天尊所坐九凤丹霞之扆。"}, {"para": 252, "start": 717.64, "duration": 1.88, "text": "手举金光明之如意。"}, {"para": 253, "start": 719.52, "duration": 2.56, "text": "琅风清微。绮云郁丽。"}, {"para": 254, "start": 722.08, "duration": 1.7, "text": "天尊寂然良久。"}, {"para": 255, "start": 723.78, "duration": 1.28, "text": "天尊言。"}, {"para": 256, "start": 725.06, "duration": 2.25, "text": "吾昔于千五百劫。"}, {"para": 257, "start": 727.3, "duration": 2.43, "text": "以先心缝此道。"}, {"para": 258, "start": 729.73, "duration": 2.98, "text": "遂位上真。意酿此功。"}, {"para": 259, "start": 732.71, "duration": 4.28, "text": "遂权大化。尝于大罗元始天尊前。"}, {"para": 260, "start": 737.0, "duration": 2.43, "text": "以清浄心。发广大愿。"}, {"para": 261, "start": 739.43, "duration": 2.53, "text": "愿于未来世。一切众生。"}, {"para": 262, "start": 741.96, "duration": 2.95, "text": "天龙鬼神。一称吾名。"}, {"para": 263, "start": 744.91, "duration": 3.13, "text": "悉使超涣。如所否者。"}, {"para": 264, "start": 748.05, "duration": 2.12, "text": "吾当以身身之。"}, {"para": 265, "start": 750.16, "duration": 2.61, "text": "尔等洗心。为尔宣说。"}, {"para": 266, "start": 752.77, "duration": 1.36, "text": "天尊言。"}, {"para": 267, "start": 754.13, "duration": 2.95, "text": "尔诸天人。欲闻至道。"}, {"para": 268, "start": 757.08, "duration": 1.83, "text": "至道深窈。不在其他。"}, {"para": 269, "start": 758.91, "duration": 3.32, "text": "尔既欲闻。无闻者是无闻。"}, {"para": 270, "start": 762.23, "duration": 3.13, "text": "有见即是真道。闻见亦泯。"}, {"para": 271, "start": 765.36, "duration": 2.25, "text": "惟尔而已。尔尚非有。"}, {"para": 272, "start": 767.61, "duration": 3.03, "text": "何况于道。不闻而闻。"}, {"para": 273, "start": 770.64, "duration": 1.23, "text": "何道可谈。"}, {"para": 274, "start": 771.87, "duration": 1.51, "text": "天尊言。"}, {"para": 275, "start": 773.38, "duration": 3.4, "text": "道者。以诚而入。以默而守。"}, {"para": 276, "start": 776.78, "duration": 2.77, "text": "以柔而用。用诚似愚。"}, {"para": 277, "start": 779.55, "duration": 3.21, "text": "用默似讷。用柔似拙。"}, {"para": 278, "start": 782.76, "duration": 2.25, "text": "夫如是则可与忘形。"}, {"para": 279, "start": 785.01, "duration": 2.61, "text": "可与忘我。可与忘忘。"}, {"para": 280, "start": 787.62, "duration": 2.66, "text": "入道者知止。守道者知谨。"}, {"para": 281, "start": 790.28, "duration": 1.59, "text": "用道者知微。"}, {"para": 282, "start": 791.88, "duration": 2.79, "text": "能知微。则慧光生。"}, {"para": 283, "start": 794.67, "duration": 2.06, "text": "能知谨。则圣智全。"}, {"para": 284, "start": 796.74, "duration": 2.72, "text": "能知止。则泰定安。"}, {"para": 285, "start": 799.45, "duration": 2.77, "text": "泰定安。则圣智全。"}, {"para": 286, "start": 802.22, "duration": 2.72, "text": "圣智全。则慧光生。"}, {"para": 287, "start": 804.94, "duration": 2.72, "text": "慧光生。则与道为一。"}, {"para": 288, "start": 807.65, "duration": 3.13, "text": "是名真忘。惟其忘。"}, {"para": 289, "start": 810.79, "duration": 2.35, "text": "而不忘。忘无可忘。"}, {"para": 290, "start": 813.14, "duration": 1.31, "text": "无可忘者。"}, {"para": 291, "start": 814.45, "duration": 3.08, "text": "即是至道。道在天地。"}, {"para": 292, "start": 817.53, "duration": 2.61, "text": "天地不知。有情无情。"}, {"para": 293, "start": 820.14, "duration": 2.01, "text": "惟一无二。"}, {"para": 294, "start": 822.15, "duration": 1.28, "text": "天尊言。"}, {"para": 295, "start": 823.43, "duration": 3.55, "text": "吾今于世。何以利生。"}, {"para": 296, "start": 826.98, "duration": 2.72, "text": "为诸天人。演此妙宝。"}, {"para": 297, "start": 829.7, "duration": 3.92, "text": "得悟之者。俾跻仙阼。"}, {"para": 298, "start": 833.62, "duration": 2.48, "text": "学道之士。信有气数。"}, {"para": 299, "start": 836.1, "duration": 3.81, "text": "夫风土不同。则禀受自异。"}, {"para": 300, "start": 839.91, "duration": 2.48, "text": "故谓之气。智愚不同。"}, {"para": 301, "start": 842.4, "duration": 2.72, "text": "财清浊自异。故谓之数。"}, {"para": 302, "start": 845.11, "duration": 2.43, "text": "数系乎命。气系乎天。"}, {"para": 303, "start": 847.54, "duration": 2.56, "text": "气数所囿。天命所梏。"}, {"para": 304, "start": 850.1, "duration": 2.43, "text": "不得真道。愚可以智。"}, {"para": 305, "start": 852.53, "duration": 2.9, "text": "浊可以清。惟命俾之。"}, {"para": 306, "start": 855.43, "duration": 2.19, "text": "愚昏昏。独冥冥。"}, {"para": 307, "start": 857.62, "duration": 2.35, "text": "亦风土禀受之移之。"}, {"para": 308, "start": 859.98, "duration": 3.08, "text": "天地神其机。使人不知。"}, {"para": 309, "start": 863.06, "duration": 2.43, "text": "则日自然。使知其不知。"}, {"para": 310, "start": 865.49, "duration": 2.72, "text": "则亦日自然。自然之妙。"}, {"para": 311, "start": 868.2, "duration": 2.43, "text": "虽妙于知。而所以妙。"}, {"para": 312, "start": 870.63, "duration": 3.13, "text": "则自乎不知。然于道射未始。"}, {"para": 313, "start": 873.77, "duration": 1.78, "text": "有以愚之浊之。"}, {"para": 314, "start": 875.54, "duration": 2.98, "text": "诸天闻已。四众咸悦。"}, {"para": 315, "start": 878.52, "duration": 1.23, "text": "天尊言。"}, {"para": 316, "start": 879.75, "duration": 3.79, "text": "吾今所说。即是玉枢宝经。"}, {"para": 317, "start": 883.54, "duration": 3.27, "text": "若未来世。有诸众生。"}, {"para": 318, "start": 886.8, "duration": 3.45, "text": "得闻吾名。但冥心默想。"}, {"para": 319, "start": 890.25, "duration": 1.23, "text": "作是念。"}, {"para": 320, "start": 891.48, "duration": 3.32, "text": "言九天应元雷声普化天尊。"}, {"para": 321, "start": 894.8, "duration": 3.87, "text": "或一声。或五七声。或千百声。"}, {"para": 322, "start": 898.66, "duration": 3.79, "text": "吾即化形十方。运心三界。"}, {"para": 323, "start": 902.45, "duration": 2.79, "text": "使称名者。咸得如意。"}, {"para": 324, "start": 905.24, "duration": 3.13, "text": "十方三界。诸天诸地。"}, {"para": 325, "start": 908.38, "duration": 3.32, "text": "日月星辰。山河草木。"}, {"para": 326, "start": 911.7, "duration": 1.28, "text": "飞走蠢动。"}, {"para": 327, "start": 912.98, "duration": 2.35, "text": "若有知。若无知。"}, {"para": 328, "start": 915.33, "duration": 3.55, "text": "天龙鬼神。闻诸众生。"}, {"para": 329, "start": 918.88, "duration": 2.79, "text": "一称吾名。如有不顺者。"}, {"para": 330, "start": 921.68, "duration": 3.03, "text": "馘首剖心。化为微尘。"}, {"para": 331, "start": 924.71, "duration": 1.18, "text": "天尊言。"}, {"para": 332, "start": 925.88, "duration": 1.96, "text": "吾是九天贞明大圣。"}, {"para": 333, "start": 927.84, "duration": 2.95, "text": "每月初六。及旬中辛日。"}, {"para": 334, "start": 930.79, "duration": 2.72, "text": "监观万天。浮游三界。"}, {"para": 335, "start": 933.51, "duration": 1.93, "text": "若或有人欲学道。"}, {"para": 336, "start": 935.44, "duration": 2.3, "text": "欲希仙。欲这九玄。"}, {"para": 337, "start": 937.74, "duration": 3.03, "text": "欲释三灾。当命正一道士。"}, {"para": 338, "start": 940.77, "duration": 2.61, "text": "或自同亲友于楼观。"}, {"para": 339, "start": 943.38, "duration": 2.53, "text": "于家庭。于里社。"}, {"para": 340, "start": 945.92, "duration": 2.38, "text": "釂水馈花。课诵此经。"}, {"para": 341, "start": 948.29, "duration": 2.79, "text": "或一过。三五过。"}, {"para": 342, "start": 951.09, "duration": 1.59, "text": "乃至数十百过。"}, {"para": 343, "start": 952.68, "duration": 3.55, "text": "即得神清气爽。心广体胖。"}, {"para": 344, "start": 956.23, "duration": 3.32, "text": "凡所希求。悉应其感。"}, {"para": 345, "start": 959.55, "duration": 1.41, "text": "天尊言。"}, {"para": 346, "start": 960.96, "duration": 2.77, "text": "身中九灵。何不召之。"}, {"para": 347, "start": 963.73, "duration": 2.43, "text": "一曰天生。二曰无英。"}, {"para": 348, "start": 966.16, "duration": 2.72, "text": "三曰玄珠。四曰正中。"}, {"para": 349, "start": 968.88, "duration": 3.19, "text": "五曰孓丹。六曰回雷。"}, {"para": 350, "start": 972.06, "duration": 2.56, "text": "七曰丹元。八曰太渊。"}, {"para": 351, "start": 974.62, "duration": 2.85, "text": "九曰灵童。召之则吉。"}, {"para": 352, "start": 977.47, "duration": 2.43, "text": "身中三精。何不呼之。"}, {"para": 353, "start": 979.9, "duration": 2.56, "text": "一曰台光。二曰爽灵。"}, {"para": 354, "start": 982.46, "duration": 2.43, "text": "三日幽精。呼之则庆。"}, {"para": 355, "start": 984.89, "duration": 3.13, "text": "五心烦懑。六脉抢攘。"}, {"para": 356, "start": 988.02, "duration": 2.77, "text": "四肢失宁。百节告急。"}, {"para": 357, "start": 990.79, "duration": 1.59, "text": "宜诵此经。"}, {"para": 358, "start": 992.39, "duration": 1.1, "text": "天尊言。"}, {"para": 359, "start": 993.48, "duration": 3.37, "text": "若或有人。五行奇蹇。"}, {"para": 360, "start": 996.85, "duration": 3.74, "text": "九曜嵚崎。年逢刑冲。"}, {"para": 361, "start": 1000.59, "duration": 3.19, "text": "运值克战。孤辰寡宿。"}, {"para": 362, "start": 1003.78, "duration": 2.9, "text": "羊刃剑锋。劫煞亡神。"}, {"para": 363, "start": 1006.67, "duration": 2.77, "text": "鬼门钩绞。禄遭破败。"}, {"para": 364, "start": 1009.44, "duration": 3.03, "text": "马落空亡。动用凶危。"}, {"para": 365, "start": 1012.47, "duration": 2.43, "text": "行藏坎禀。即诵此经。"}, {"para": 366, "start": 1014.9, "duration": 2.85, "text": "上请。天官解天厄。"}, {"para": 367, "start": 1017.75, "duration": 3.27, "text": "地官解地厄。水官解水厄。"}, {"para": 368, "start": 1021.02, "duration": 3.63, "text": "五帝解五方厄。四圣解四时厄。"}, {"para": 369, "start": 1024.65, "duration": 4.21, "text": "南辰解本命厄。北斗解一切厄。"}, {"para": 370, "start": 1028.85, "duration": 1.18, "text": "天尊言。"}, {"para": 371, "start": 1030.03, "duration": 3.5, "text": "沉疴伏枕。症疾压身。"}, {"para": 372, "start": 1033.53, "duration": 2.72, "text": "积时弗廖。求医罔效。"}, {"para": 373, "start": 1036.24, "duration": 2.79, "text": "五神无主。四大不收。"}, {"para": 374, "start": 1039.04, "duration": 2.66, "text": "或是五帝。三官之前。"}, {"para": 375, "start": 1041.7, "duration": 2.85, "text": "日月星辰之前。山林草木之前。"}, {"para": 376, "start": 1044.55, "duration": 4.23, "text": "灵坛古迹之前。城隍社庙之前。"}, {"para": 377, "start": 1048.78, "duration": 3.37, "text": "里巷井灶之前。寺观塔楼之前。"}, {"para": 378, "start": 1052.15, "duration": 3.74, "text": "或地府三十六狱。冥官七十二司。"}, {"para": 379, "start": 1055.89, "duration": 3.92, "text": "有诸冤枉。至此牵缠。"}, {"para": 380, "start": 1059.81, "duration": 2.43, "text": "或盟诅咒誓之所招。"}, {"para": 381, "start": 1062.24, "duration": 2.25, "text": "或债垛负偿之所致。"}, {"para": 382, "start": 1064.48, "duration": 3.08, "text": "三世结衅。异劫兴仇。"}, {"para": 383, "start": 1067.56, "duration": 3.03, "text": "埒其咎尤。库其执对。"}, {"para": 384, "start": 1070.59, "duration": 2.48, "text": "皆当首谢。即诵此经。"}, {"para": 385, "start": 1073.08, "duration": 1.1, "text": "天尊言。"}, {"para": 386, "start": 1074.17, "duration": 2.77, "text": "天官符。地官符。"}, {"para": 387, "start": 1076.94, "duration": 3.19, "text": "年月日时。各有官符。"}, {"para": 388, "start": 1080.13, "duration": 3.13, "text": "方隅向背。各有官符。"}, {"para": 389, "start": 1083.26, "duration": 2.61, "text": "大则官符。小则口舌。"}, {"para": 390, "start": 1085.88, "duration": 2.43, "text": "是有赤口白舌之神以主之。"}, {"para": 391, "start": 1088.31, "duration": 1.83, "text": "凡诸动作兴举。"}, {"para": 392, "start": 1090.13, "duration": 2.53, "text": "出入起居。不知避忌。"}, {"para": 393, "start": 1092.67, "duration": 3.19, "text": "如遇官符口舌。则使人击聒。"}, {"para": 394, "start": 1095.85, "duration": 3.19, "text": "晓夜煎㛀。多招唇吻。"}, {"para": 395, "start": 1099.04, "duration": 2.38, "text": "面是背非。动致口牙。"}, {"para": 396, "start": 1101.42, "duration": 3.13, "text": "盟神诅佛。始于讟议。"}, {"para": 397, "start": 1104.55, "duration": 3.63, "text": "终于诟诋。由是狱讼生焉。"}, {"para": 398, "start": 1108.18, "duration": 2.48, "text": "刑宪存焉。若欲脱之。"}, {"para": 399, "start": 1110.67, "duration": 2.98, "text": "即诵此经。遂得口舌潜消。"}, {"para": 400, "start": 1113.64, "duration": 1.59, "text": "官符永息。"}, {"para": 401, "start": 1115.24, "duration": 1.23, "text": "天尊言。"}, {"para": 402, "start": 1116.46, "duration": 2.85, "text": "土皇九垒。其司千二百神。"}, {"para": 403, "start": 1119.31, "duration": 2.61, "text": "土侯土伯。土公土母。"}, {"para": 404, "start": 1121.92, "duration": 2.72, "text": "土子土孙。土家眷属。"}, {"para": 405, "start": 1124.64, "duration": 2.48, "text": "若太岁。若将军。"}, {"para": 406, "start": 1127.12, "duration": 2.43, "text": "若鹤神。若太白。"}, {"para": 407, "start": 1129.55, "duration": 2.25, "text": "若九良。若剑锋。"}, {"para": 408, "start": 1131.8, "duration": 2.9, "text": "若雌雄。若金神。"}, {"para": 409, "start": 1134.7, "duration": 2.43, "text": "若火血。若身黄。"}, {"para": 410, "start": 1137.13, "duration": 2.56, "text": "若撞命。若三煞。"}, {"para": 411, "start": 1139.69, "duration": 3.45, "text": "若七煞。若黄旛豹尾。"}, {"para": 412, "start": 1143.13, "duration": 4.02, "text": "若飞廉刀砧。如是等土家神煞。"}, {"para": 413, "start": 1147.16, "duration": 3.37, "text": "若人兴修卜筑。一或犯之。"}, {"para": 414, "start": 1150.53, "duration": 2.95, "text": "即致病患。以迄丧亡。"}, {"para": 415, "start": 1153.48, "duration": 2.56, "text": "才诵此经。则万神皆起。"}, {"para": 416, "start": 1156.04, "duration": 2.3, "text": "天无忌。地无忌。"}, {"para": 417, "start": 1158.34, "duration": 3.13, "text": "阴阳无忌。百无禁忌。"}, {"para": 418, "start": 1161.47, "duration": 1.36, "text": "天尊言。"}, {"para": 419, "start": 1162.83, "duration": 2.72, "text": "世人夫妇。其于婚合。"}, {"para": 420, "start": 1165.55, "duration": 2.3, "text": "或犯咸池。或犯天狗。"}, {"para": 421, "start": 1167.85, "duration": 3.74, "text": "三刑六害。隔角交加。"}, {"para": 422, "start": 1171.58, "duration": 2.98, "text": "孤阴寡阳。天罗地网。"}, {"para": 423, "start": 1174.56, "duration": 2.66, "text": "艰于嗣息。多是孤独。"}, {"para": 424, "start": 1177.22, "duration": 2.56, "text": "若欲求男。即诵此经。"}, {"para": 425, "start": 1179.78, "duration": 1.88, "text": "当有九天监生大神。"}, {"para": 426, "start": 1181.66, "duration": 2.77, "text": "招神摄风。遂生贤子。"}, {"para": 427, "start": 1184.43, "duration": 3.19, "text": "于其生产之时。太一在门。"}, {"para": 428, "start": 1187.62, "duration": 2.9, "text": "司命在庭。或有冤愆。"}, {"para": 429, "start": 1190.52, "duration": 2.95, "text": "或有鬼魅。或有禁忌。"}, {"para": 430, "start": 1193.47, "duration": 1.83, "text": "或有凶厄。致令难产。"}, {"para": 431, "start": 1195.3, "duration": 3.03, "text": "请诵此经。即得九天卫房。"}, {"para": 432, "start": 1198.33, "duration": 4.02, "text": "圣母默与抱送。故能临盆有庆。"}, {"para": 433, "start": 1202.35, "duration": 3.13, "text": "坐草无虞。凡有婴孩。"}, {"para": 434, "start": 1205.49, "duration": 3.03, "text": "在于襁褓。为栴檀神王。"}, {"para": 435, "start": 1208.52, "duration": 2.85, "text": "座下一十五种鬼。加诸恼害。"}, {"para": 436, "start": 1211.36, "duration": 2.61, "text": "因多惊痫。宜诵此经。"}, {"para": 437, "start": 1213.98, "duration": 1.41, "text": "天尊言。"}, {"para": 438, "start": 1215.39, "duration": 2.79, "text": "若人居止。乌鼠送妖。"}, {"para": 439, "start": 1218.18, "duration": 2.95, "text": "蛇虫嫁孽。抛砖掷瓦。"}, {"para": 440, "start": 1221.13, "duration": 3.5, "text": "惊鸡弄狗。邀求祭杞。"}, {"para": 441, "start": 1224.63, "duration": 3.27, "text": "以至影胁梦逼。及于奸盗。"}, {"para": 442, "start": 1227.9, "duration": 2.53, "text": "而敢据其所居。以为巢穴。"}, {"para": 443, "start": 1230.43, "duration": 3.13, "text": "遂使生人被惑。庭户不清。"}, {"para": 444, "start": 1233.57, "duration": 2.85, "text": "夜啸于梁。昼瞰其室。"}, {"para": 445, "start": 1236.41, "duration": 3.21, "text": "牛马犬豕。亦遭瘟疫。"}, {"para": 446, "start": 1239.63, "duration": 2.56, "text": "祸连骨肉。灾及孳生。"}, {"para": 447, "start": 1242.19, "duration": 2.72, "text": "淫祠祆社。党庇神奸。"}, {"para": 448, "start": 1244.9, "duration": 2.53, "text": "吊客频仍。丧车叠出。"}, {"para": 449, "start": 1247.44, "duration": 3.37, "text": "若诵此经。即使鬼精灭爽。"}, {"para": 450, "start": 1250.81, "duration": 1.65, "text": "人物咸宁。"}, {"para": 451, "start": 1252.45, "duration": 1.41, "text": "天尊曰。"}, {"para": 452, "start": 1253.86, "duration": 3.6, "text": "九天雷公将军。五方雷公将军。"}, {"para": 453, "start": 1257.47, "duration": 2.95, "text": "八方云雷将军。五方蛮雷使者。"}, {"para": 454, "start": 1260.42, "duration": 3.19, "text": "雷部总兵使者。莫赚判官。"}, {"para": 455, "start": 1263.61, "duration": 2.35, "text": "发号施令。疾如风火。"}, {"para": 456, "start": 1265.96, "duration": 2.98, "text": "有庙可伐。有坛可击。"}, {"para": 457, "start": 1268.94, "duration": 3.55, "text": "有妖可除。有祟可遣。"}, {"para": 458, "start": 1272.49, "duration": 2.9, "text": "季世末法。多诸巫觋。"}, {"para": 459, "start": 1275.39, "duration": 3.08, "text": "邪法流行。阴肆魇祷。"}, {"para": 460, "start": 1278.47, "duration": 1.51, "text": "是故上清。"}, {"para": 461, "start": 1279.99, "duration": 2.38, "text": "乃有天延禁鬼录奸之庭。"}, {"para": 462, "start": 1282.36, "duration": 2.53, "text": "帝由束妖考邪之房。"}, {"para": 463, "start": 1284.9, "duration": 2.72, "text": "能诵此经。其应如响。"}, {"para": 464, "start": 1287.61, "duration": 1.12, "text": "天尊言。"}, {"para": 465, "start": 1288.74, "duration": 2.48, "text": "天瘟地瘟。二十五瘟。"}, {"para": 466, "start": 1291.22, "duration": 2.01, "text": "天蛊地蛊。二十四蛊。"}, {"para": 467, "start": 1293.23, "duration": 2.72, "text": "天瘵地瘵。三十六瘵。"}, {"para": 468, "start": 1295.95, "duration": 3.6, "text": "能诵此经。即使瘟皇清浄。"}, {"para": 469, "start": 1299.55, "duration": 3.19, "text": "蛊毒消除。劳瘵平复。"}, {"para": 470, "start": 1302.74, "duration": 1.28, "text": "亦有其由。"}, {"para": 471, "start": 1304.02, "duration": 2.85, "text": "或者先亡复连。或者伏尸故气。"}, {"para": 472, "start": 1306.86, "duration": 2.9, "text": "或者冢讼墓注。或者死魂染惹。"}, {"para": 473, "start": 1309.76, "duration": 1.59, "text": "或者尸气感招。"}, {"para": 474, "start": 1311.36, "duration": 1.41, "text": "凡此鬼神。或悲思。"}, {"para": 475, "start": 1312.77, "duration": 2.14, "text": "或志恨牵连执证。"}, {"para": 476, "start": 1314.91, "duration": 3.6, "text": "并缘注射。并音塝射音石。"}, {"para": 477, "start": 1318.51, "duration": 3.32, "text": "乘隙伺间。间音谏。"}, {"para": 478, "start": 1321.83, "duration": 2.98, "text": "乃得其便。故此经者。"}, {"para": 479, "start": 1324.81, "duration": 2.72, "text": "上通三天。下彻九泉。"}, {"para": 480, "start": 1327.53, "duration": 2.95, "text": "可以追荐魂爽。超度祖玄。"}, {"para": 481, "start": 1330.48, "duration": 3.27, "text": "太上遣素车白马大将军以监之。"}, {"para": 482, "start": 1333.74, "duration": 1.36, "text": "天尊言。"}, {"para": 483, "start": 1335.1, "duration": 2.61, "text": "若或有人。治装远行。"}, {"para": 484, "start": 1337.71, "duration": 3.37, "text": "贼盗骋奸。五兵加害。"}, {"para": 485, "start": 1341.08, "duration": 2.48, "text": "陆行则虎狼魈蜮磨其牙。"}, {"para": 486, "start": 1343.57, "duration": 2.66, "text": "水行则蛟龙灶鼍张其颐。"}, {"para": 487, "start": 1346.23, "duration": 2.3, "text": "或难赖有幽枉之魂。"}, {"para": 488, "start": 1348.53, "duration": 2.19, "text": "或风涛有劫数之会。"}, {"para": 489, "start": 1350.72, "duration": 3.13, "text": "前亡后化。捉生代死。"}, {"para": 490, "start": 1353.86, "duration": 2.19, "text": "能于此经归命投诚。"}, {"para": 491, "start": 1356.05, "duration": 2.98, "text": "故得水陆平康。行藏协吉。"}, {"para": 492, "start": 1359.03, "duration": 3.19, "text": "天尊言。亢阳为虐。"}, {"para": 493, "start": 1362.22, "duration": 2.66, "text": "雨泽愆期。稽颡此经。"}, {"para": 494, "start": 1364.88, "duration": 2.38, "text": "应时甘澍。积阴为厉。"}, {"para": 495, "start": 1367.26, "duration": 2.85, "text": "雨水浸淫。稽颡此经。"}, {"para": 496, "start": 1370.1, "duration": 3.19, "text": "应时朗霁。祝融扇祸。"}, {"para": 497, "start": 1373.29, "duration": 2.56, "text": "飞火民居。赤鼠游城。"}, {"para": 498, "start": 1375.85, "duration": 2.9, "text": "惊热黎庶。此经可以禳之。"}, {"para": 499, "start": 1378.75, "duration": 2.43, "text": "海若失经。鱼龞妄行。"}, {"para": 500, "start": 1381.18, "duration": 2.61, "text": "洪水稽天。民生垫溺。"}, {"para": 501, "start": 1383.79, "duration": 1.7, "text": "此经可以止之。"}, {"para": 502, "start": 1385.49, "duration": 0.89, "text": "天尊言。"}, {"para": 503, "start": 1386.38, "duration": 2.9, "text": "世人欲免。三灾九横之厄。"}, {"para": 504, "start": 1389.28, "duration": 3.03, "text": "即于静夜。稽首北辰。"}, {"para": 505, "start": 1392.31, "duration": 3.03, "text": "北辰之上。上有三台。"}, {"para": 506, "start": 1395.34, "duration": 3.32, "text": "其星并踱。形如双目。"}, {"para": 507, "start": 1398.66, "duration": 3.45, "text": "叠为三级。以覆斗魁。"}, {"para": 508, "start": 1402.1, "duration": 1.31, "text": "是名天阶。"}, {"para": 509, "start": 1403.41, "duration": 3.5, "text": "若人见之。生前无刑囚之忧。"}, {"para": 510, "start": 1406.91, "duration": 1.7, "text": "身后不沦没之苦。"}, {"para": 511, "start": 1408.61, "duration": 3.37, "text": "斗中复有尊帝。二星大如车输。"}, {"para": 512, "start": 1411.98, "duration": 3.08, "text": "若人见之。留形住世。"}, {"para": 513, "start": 1415.06, "duration": 2.35, "text": "长生神仙。归命此经。"}, {"para": 514, "start": 1417.41, "duration": 2.35, "text": "投心北极。即有冥感。"}, {"para": 515, "start": 1419.76, "duration": 3.03, "text": "斗为天枢。中有天罡。"}, {"para": 516, "start": 1422.79, "duration": 3.37, "text": "在内则为廉贞。在外则为破军。"}, {"para": 517, "start": 1426.16, "duration": 3.68, "text": "雷城十二门。并随天罡之所指。"}, {"para": 518, "start": 1429.84, "duration": 2.35, "text": "罡星指丑。其身在未。"}, {"para": 519, "start": 1432.2, "duration": 2.61, "text": "所指者吉。所在者凶。"}, {"para": 520, "start": 1434.81, "duration": 2.61, "text": "余位皆然。若人见之。"}, {"para": 521, "start": 1437.42, "duration": 1.46, "text": "寿可千岁。"}, {"para": 522, "start": 1438.88, "duration": 1.23, "text": "天尊言。"}, {"para": 523, "start": 1440.11, "duration": 2.3, "text": "世衰道微。人无德行。"}, {"para": 524, "start": 1442.41, "duration": 2.43, "text": "不忠君王。不孝父母。"}, {"para": 525, "start": 1444.84, "duration": 1.78, "text": "不敬师长。不友兄弟。"}, {"para": 526, "start": 1446.61, "duration": 3.13, "text": "不诚夫妇。不义朋友。"}, {"para": 527, "start": 1449.75, "duration": 2.95, "text": "不畏天地。不惧神明。"}, {"para": 528, "start": 1452.7, "duration": 2.61, "text": "不礼三光。不重五谷。"}, {"para": 529, "start": 1455.31, "duration": 2.38, "text": "身三口四。大秤小斗。"}, {"para": 530, "start": 1457.69, "duration": 3.13, "text": "杀生害命。人百已千。"}, {"para": 531, "start": 1460.82, "duration": 3.03, "text": "奸私邪淫。妖诬叛逆。"}, {"para": 532, "start": 1463.86, "duration": 2.77, "text": "从微至著。三官鼓笔。"}, {"para": 533, "start": 1466.62, "duration": 3.19, "text": "太一移文。即付五雷斩勘之司。"}, {"para": 534, "start": 1469.81, "duration": 2.77, "text": "先斩其神。后勘其形。"}, {"para": 535, "start": 1472.58, "duration": 2.72, "text": "斩神诛魂。使之颠倒。"}, {"para": 536, "start": 1475.3, "duration": 2.72, "text": "人所鄙贱。人所嫌害。"}, {"para": 537, "start": 1478.01, "duration": 3.03, "text": "人所怨恶。以至勘形震尸。"}, {"para": 538, "start": 1481.04, "duration": 3.27, "text": "使之崩裂。驱其卷水。"}, {"para": 539, "start": 1484.31, "duration": 3.27, "text": "役其驱车。月窍旬校。"}, {"para": 540, "start": 1487.57, "duration": 3.5, "text": "复有考掠。一闻此经。"}, {"para": 541, "start": 1491.07, "duration": 3.79, "text": "其罪即灭。若或有人为雷所瞋。"}, {"para": 542, "start": 1494.86, "duration": 1.83, "text": "其尸不举。水火不受。"}, {"para": 543, "start": 1496.69, "duration": 2.72, "text": "即称九天应元雷声普化天尊。"}, {"para": 544, "start": 1499.41, "duration": 1.78, "text": "作是念言。"}, {"para": 545, "start": 1501.18, "duration": 3.21, "text": "万神稽首。咸听吾命。"}, {"para": 546, "start": 1504.4, "duration": 1.18, "text": "天尊言。"}, {"para": 547, "start": 1505.57, "duration": 2.53, "text": "此经功德。不可思议。"}, {"para": 548, "start": 1508.11, "duration": 1.41, "text": "往昔劫中。"}, {"para": 549, "start": 1509.52, "duration": 3.6, "text": "神霄玉清真王长生大帝所曾宣说。"}, {"para": 550, "start": 1513.12, "duration": 3.6, "text": "至士授经。皆当剸金置币。"}, {"para": 551, "start": 1516.73, "duration": 4.47, "text": "盟天以传。雷师皓翕。长跪拜兴。"}, {"para": 552, "start": 1521.19, "duration": 3.4, "text": "重白天尊言。是经在处。"}, {"para": 553, "start": 1524.59, "duration": 3.6, "text": "当令土地司命。随所守护。"}, {"para": 554, "start": 1528.19, "duration": 3.97, "text": "雷部按临。以时稽审。"}, {"para": 555, "start": 1532.16, "duration": 3.63, "text": "若人家有此经。至诚安奉。"}, {"para": 556, "start": 1535.79, "duration": 2.14, "text": "即得祥烟满庭。庆云荫轩。"}, {"para": 557, "start": 1537.94, "duration": 3.6, "text": "祸乱不萌。吉福来萃。"}, {"para": 558, "start": 1541.54, "duration": 2.95, "text": "于其亡没。不经地狱。"}, {"para": 559, "start": 1544.49, "duration": 2.72, "text": "所以者何。死即往生。"}, {"para": 560, "start": 1547.21, "duration": 2.77, "text": "生归善道。承天尊力。"}, {"para": 561, "start": 1549.98, "duration": 3.32, "text": "有此灵通。出入起居。"}, {"para": 562, "start": 1553.3, "duration": 2.53, "text": "佩带此经。众人所钦。"}, {"para": 563, "start": 1555.83, "duration": 3.21, "text": "鬼神所畏。遇诸险难。"}, {"para": 564, "start": 1559.04, "duration": 3.68, "text": "一心称名九天应元雷声普化天尊。"}, {"para": 565, "start": 1562.73, "duration": 1.46, "text": "悉得解脱。"}, {"para": 566, "start": 1564.19, "duration": 2.53, "text": "于是雷师皓翁对天尊前。"}, {"para": 567, "start": 1566.72, "duration": 1.41, "text": "而说偈曰。"}, {"para": 568, "start": 1568.13, "duration": 3.03, "text": "无上玉清王。统天三十六。"}, {"para": 569, "start": 1571.16, "duration": 2.53, "text": "九天普化君。化形十方界。"}, {"para": 570, "start": 1573.7, "duration": 3.27, "text": "披发骑麒麟。赤脚蹑层冰。"}, {"para": 571, "start": 1576.96, "duration": 3.5, "text": "手把九天炁。啸风鞭雷霆。"}, {"para": 572, "start": 1580.46, "duration": 3.19, "text": "能以智慧力。摄伏诸魔精。"}, {"para": 573, "start": 1583.65, "duration": 3.74, "text": "济度长夜魂。利益于众生。"}, {"para": 574, "start": 1587.38, "duration": 3.55, "text": "如彼银河水。千眼千月轮。"}, {"para": 575, "start": 1590.94, "duration": 3.13, "text": "誓于未来世。永扬天尊敬。"}, {"para": 576, "start": 1594.07, "duration": 2.06, "text": "时雷师皓翁说是偈已。"}, {"para": 577, "start": 1596.14, "duration": 0.99, "text": "天尊言。"}, {"para": 578, "start": 1597.13, "duration": 2.38, "text": "此经传世。世人未知。"}, {"para": 579, "start": 1599.5, "duration": 2.72, "text": "吾今所治九天应元府。"}, {"para": 580, "start": 1602.22, "duration": 2.12, "text": "府有九天雷门使者。"}, {"para": 581, "start": 1604.34, "duration": 2.9, "text": "以斜录典者。廉访典者佐之。"}, {"para": 582, "start": 1607.24, "duration": 3.87, "text": "复有四司。一曰掠剩司。"}, {"para": 583, "start": 1611.1, "duration": 3.37, "text": "二曰积逮司。三曰幽枉司。"}, {"para": 584, "start": 1614.47, "duration": 3.79, "text": "四曰报应司。各有大夫以掌其事。"}, {"para": 585, "start": 1618.26, "duration": 3.81, "text": "吾之所理。卿师使相咸赞元化。"}, {"para": 586, "start": 1622.07, "duration": 3.21, "text": "天尊说是经毕。玉梵七宝层台。"}, {"para": 587, "start": 1625.29, "duration": 2.61, "text": "天花缤纷。琼香缭绕。"}, {"para": 588, "start": 1627.9, "duration": 2.9, "text": "十 方诸天帝 君。咸称善哉。"}, {"para": 589, "start": 1630.8, "duration": 2.72, "text": "天龙鬼神。雷部官众。"}, {"para": 590, "start": 1633.52, "duration": 2.77, "text": "三界万灵。皆大欢喜。"}, {"para": 591, "start": 1636.28, "duration": 1.41, "text": "信受奉行。"}, {"para": 592, "start": 1637.69, "duration": 4.21, "text": "九天应元雷声普化天尊玉枢宝经终。"}, {"para": 593, "start": 1641.9, "duration": 1.18, "text": "《吕祖心经》"}, {"para": 594, "start": 1643.08, "duration": 1.23, "text": "吕祖曰。"}, {"para": 595, "start": 1644.3, "duration": 3.79, "text": "天生万物惟人最灵。匪人能灵实心是灵。"}, {"para": 596, "start": 1648.09, "duration": 4.57, "text": "心为主宰一身之君。役使百骸区处群情。"}, {"para": 597, "start": 1652.66, "duration": 4.75, "text": "物无其物形无其形。禀受于天良知良能。"}, {"para": 598, "start": 1657.42, "duration": 4.75, "text": "气拘欲蔽日失其真。此心即失此身亦倾。"}, {"para": 599, "start": 1662.17, "duration": 4.86, "text": "欲善其身先治其心。治心如何即心治心。"}, {"para": 600, "start": 1667.03, "duration": 4.23, "text": "以老老心治不孝心。以长长心治不悌心。"}, {"para": 601, "start": 1671.26, "duration": 3.63, "text": "以委致心治不忠心。以诚恪心治不信心。"}, {"para": 602, "start": 1674.89, "duration": 5.07, "text": "以恭敬心治无理心。以循理心治无意心。"}, {"para": 603, "start": 1679.96, "duration": 4.39, "text": "以清介心治无廉心。以自爱心治无耻心。"}, {"para": 604, "start": 1684.35, "duration": 4.62, "text": "以积德心治为恶心。以利济心治残贼心。"}, {"para": 605, "start": 1688.97, "duration": 4.62, "text": "以匡扶心治倾陷心。以仁慈心治暴戾心。"}, {"para": 606, "start": 1693.6, "duration": 4.02, "text": "以谦逊心治傲慢心。以损抑心治盈满心。"}, {"para": 607, "start": 1697.62, "duration": 4.81, "text": "以俭约心治骄奢心。以勤慎心治怠忽心。"}, {"para": 608, "start": 1702.42, "duration": 4.21, "text": "以坦夷心治危险心。以忠厚心治刻薄心。"}, {"para": 609, "start": 1706.63, "duration": 3.92, "text": "以和平心治忿恚心。以宽洪心治偏窄心。"}, {"para": 610, "start": 1710.55, "duration": 4.1, "text": "以伤身心治沈湎心。以妻女心治奸淫心。"}, {"para": 611, "start": 1714.65, "duration": 4.81, "text": "以果报心治谋夺心。以祸患心治斗狠心。"}, {"para": 612, "start": 1719.46, "duration": 4.81, "text": "以正教心治异端心。已至信心治大疑心。"}, {"para": 613, "start": 1724.26, "duration": 3.32, "text": "以悠久心治无恒心。以始终心治反复心。"}, {"para": 614, "start": 1727.58, "duration": 5.3, "text": "以施与心治悭吝心。以自然心治勉强心。"}, {"para": 615, "start": 1732.88, "duration": 4.02, "text": "以安分心治非望心。以顺受心治怨尤心。"}, {"para": 616, "start": 1736.91, "duration": 4.52, "text": "以推诚心治猜忌心。以镇定心治摇惑心。"}, {"para": 617, "start": 1741.42, "duration": 4.47, "text": "以中正心治偏袒心。以大体心治细务心。"}, {"para": 618, "start": 1745.89, "duration": 3.79, "text": "嗟乎人心不治不纯。如比乱丝不理不清。"}, {"para": 619, "start": 1749.68, "duration": 4.34, "text": "如彼古镜不磨不明。如彼劣马不勒不驯。"}, {"para": 620, "start": 1754.02, "duration": 4.44, "text": "我故说经欲治人心。人心得治天地清宁。"}, {"para": 621, "start": 1758.46, "duration": 1.04, "text": "偈曰。"}, {"para": 622, "start": 1759.5, "duration": 4.44, "text": "一切惟心心最危。范天围地发光辉。"}, {"para": 623, "start": 1763.94, "duration": 4.23, "text": "天心即在人心见。人合天心天弗违。"}, {"para": 624, "start": 1768.17, "duration": 2.98, "text": "人心皆散乱。一念便纯真。"}, {"para": 625, "start": 1771.15, "duration": 3.19, "text": "欲求无上道。大众转天尊。"}, {"para": 626, "start": 1774.34, "duration": 1.96, "text": "玉皇赦罪天尊。(三称)"}, {"para": 627, "start": 1776.3, "duration": 3.19, "text": "雷声普化天尊。(三称)"}, {"para": 628, "start": 1779.48, "duration": 3.08, "text": "向来诵经。念念存诚。"}, {"para": 629, "start": 1782.57, "duration": 3.03, "text": "千真拱听。万圣通灵。"}, {"para": 630, "start": 1785.6, "duration": 3.19, "text": "应元合炁。普化分形。"}, {"para": 631, "start": 1788.78, "duration": 2.43, "text": "九天有命。三界遵行。"}, {"para": 632, "start": 1791.21, "duration": 3.13, "text": "消灾忏罪。祈福延生。"}, {"para": 633, "start": 1794.35, "duration": 3.08, "text": "功圆行满。大道证盟。"}, {"para": 634, "start": 1797.43, "duration": 1.1, "text": "《邱祖忏悔文》"}, {"para": 635, "start": 1798.53, "duration": 4.81, "text": "经功浩力难思议。回向十方诸圣师。"}, {"para": 636, "start": 1803.33, "duration": 4.62, "text": "愿涤真心求忏悔。河沙罪障悉消离。"}, {"para": 637, "start": 1807.96, "duration": 2.85, "text": "职悔我等。自从曩劫。"}, {"para": 638, "start": 1810.8, "duration": 3.6, "text": "迺至今生。假火风地。"}, {"para": 639, "start": 1814.41, "duration": 2.48, "text": "水以成形。恋香味色。"}, {"para": 640, "start": 1816.89, "duration": 2.53, "text": "声而不悟。贪瞋忌妒。"}, {"para": 641, "start": 1819.42, "duration": 2.66, "text": "恶口妄言。杀盗邪淫。"}, {"para": 642, "start": 1822.09, "duration": 2.38, "text": "恣情纵欲。逆辱父母。"}, {"para": 643, "start": 1824.47, "duration": 3.5, "text": "悖负君师。不敬天地神祗。"}, {"para": 644, "start": 1827.97, "duration": 2.77, "text": "呵风骂雨。不信罪福因果。"}, {"para": 645, "start": 1830.73, "duration": 4.52, "text": "昧理欺心。遂致报对升沉。"}, {"para": 646, "start": 1835.25, "duration": 2.95, "text": "轮回展转。受诸苦恼。"}, {"para": 647, "start": 1838.21, "duration": 2.66, "text": "无有休停。皆由一念之差。"}, {"para": 648, "start": 1840.87, "duration": 3.81, "text": "障迷自性。妄认六尘之幻。"}, {"para": 649, "start": 1844.68, "duration": 3.81, "text": "沉溺爱河。今而既获人身。"}, {"para": 650, "start": 1848.5, "duration": 3.4, "text": "叨亲正教。岂非千生庆幸。"}, {"para": 651, "start": 1851.89, "duration": 2.66, "text": "一旦遭逢。自合省心。"}, {"para": 652, "start": 1854.56, "duration": 2.79, "text": "早求度世。若夫似前流荡。"}, {"para": 653, "start": 1857.35, "duration": 4.44, "text": "必竟迷失本来。一堕冥途。"}, {"para": 654, "start": 1861.79, "duration": 2.98, "text": "化为异类。是当思沉沦苦。"}, {"para": 655, "start": 1864.77, "duration": 2.48, "text": "发清净心。皈奉圣真。"}, {"para": 656, "start": 1867.25, "duration": 2.53, "text": "特求忏悔。乞怜愚昧。"}, {"para": 657, "start": 1869.79, "duration": 2.98, "text": "原赦罪愆。解释报冤。"}, {"para": 658, "start": 1872.76, "duration": 4.81, "text": "蠲消魔障。所冀命逢昌运。"}, {"para": 659, "start": 1877.57, "duration": 2.3, "text": "名注丹台。际遇真师。"}, {"para": 660, "start": 1879.87, "duration": 2.85, "text": "亲闻至道。精修善行。"}, {"para": 661, "start": 1882.72, "duration": 3.03, "text": "增长善芽。励志玄门。"}, {"para": 662, "start": 1885.75, "duration": 3.19, "text": "怡神真境。他日功成羽化。"}, {"para": 663, "start": 1888.93, "duration": 4.21, "text": "或更行满飞升。广看后学之成。"}, {"para": 664, "start": 1893.14, "duration": 2.72, "text": "咸通宿命。还证上乘之道。"}, {"para": 665, "start": 1895.86, "duration": 3.92, "text": "承侍虚皇。更愿国安民丰。"}, {"para": 666, "start": 1899.77, "duration": 2.98, "text": "时和岁稔。愿真风丕振。"}, {"para": 667, "start": 1902.75, "duration": 3.55, "text": "道化与行。愿凶恶化贤。"}, {"para": 668, "start": 1906.31, "duration": 3.6, "text": "邪魔归正。愿兵刑悉错。"}, {"para": 669, "start": 1909.91, "duration": 3.37, "text": "囹圄空闲。愿沉滞升迁。"}, {"para": 670, "start": 1913.28, "duration": 3.6, "text": "冤仇和释。愿参玄学者。"}, {"para": 671, "start": 1916.88, "duration": 3.32, "text": "入道成真。愿累劫宗亲。"}, {"para": 672, "start": 1920.2, "duration": 2.98, "text": "俱获超度。愿历世师友。"}, {"para": 673, "start": 1923.18, "duration": 3.32, "text": "同证真常。愿所有眷缘。"}, {"para": 674, "start": 1926.5, "duration": 2.61, "text": "增崇福慧。愿所伤物命。"}, {"para": 675, "start": 1929.11, "duration": 2.95, "text": "早生人天。愿绝食荤酒。"}, {"para": 676, "start": 1932.06, "duration": 2.9, "text": "不相杀害。愿持身端正。"}, {"para": 677, "start": 1934.96, "duration": 3.03, "text": "不履淫邪。愿悉破悭贪。"}, {"para": 678, "start": 1937.99, "duration": 3.5, "text": "永除险峻。愿言无诳妄。"}, {"para": 679, "start": 1941.49, "duration": 3.32, "text": "行皆真诚。愿弱己饶人。"}, {"para": 680, "start": 1944.81, "duration": 2.79, "text": "潜忍忿怒。愿慈心下气。"}, {"para": 681, "start": 1947.6, "duration": 3.27, "text": "恭敬一切。愿不履边陲。"}, {"para": 682, "start": 1950.87, "duration": 2.61, "text": "不堕邪见。愿结交仙友。"}, {"para": 683, "start": 1953.48, "duration": 3.37, "text": "栖集真虚。愿智慧开明。"}, {"para": 684, "start": 1956.85, "duration": 1.93, "text": "神通恢廓。愿广行方便。"}, {"para": 685, "start": 1958.78, "duration": 2.77, "text": "普济群生。愿永断执迷。"}, {"para": 686, "start": 1961.55, "duration": 3.27, "text": "咸归至道。尘劫有尽。"}, {"para": 687, "start": 1964.82, "duration": 3.45, "text": "我愿无穷。端望。帝真。"}, {"para": 688, "start": 1968.27, "duration": 3.13, "text": "曲垂济度。皈命礼谢。"}, {"para": 689, "start": 1971.4, "duration": 3.79, "text": "无上虚皇至真三宝。(三称)"}, {"para": 690, "start": 1975.19, "duration": 0.94, "text": "收赞"}, {"para": 691, "start": 1976.13, "duration": 2.85, "text": "全真演教。正一垂科。"}, {"para": 692, "start": 1978.98, "duration": 3.45, "text": "天仙法派吉祥多。位育在中和。"}, {"para": 693, "start": 1982.42, "duration": 3.37, "text": "道侣观摩。修炼永无魔。"}, {"para": 694, "start": 1985.79, "duration": 3.32, "text": "大圣回光普照大天尊(三称)"}, {"para": 695, "start": 1989.11, "duration": 1.04, "text": "三皈"}, {"para": 696, "start": 1990.16, "duration": 2.95, "text": "自皈依道。当愿众生。"}, {"para": 697, "start": 1993.11, "duration": 3.5, "text": "常侍天算。永脱轮回。"}, {"para": 698, "start": 1996.61, "duration": 3.32, "text": "自皈依经。当愿众生。"}, {"para": 699, "start": 1999.93, "duration": 3.4, "text": "生生世世。得闻正法。"}, {"para": 700, "start": 2003.32, "duration": 2.98, "text": "自皈依师。当愿众生。"}, {"para": 701, "start": 2006.3, "duration": 2.35, "text": "学最上乘。不落邪见。"}, {"para": 702, "start": 2008.65, "duration": 1.72, "text": "早坛功课经终。"}, {"para": 703, "start": 2010.37, "duration": 3.55, "text": "太上玄门功课经【大众登坛分班序立主经举】"}, {"para": 704, "start": 2013.93, "duration": 3.21, "text": "大道洞玄虚，有念无不契。"}, {"para": 705, "start": 2017.14, "duration": 3.74, "text": "炼质入仙真，遂成金刚体。"}, {"para": 706, "start": 2020.87, "duration": 2.53, "text": "超度三界难，地狱五苦解。"}, {"para": 707, "start": 2023.41, "duration": 2.9, "text": "悉皈太上经，静念稽首礼。"}, {"para": 708, "start": 2026.31, "duration": 1.1, "text": "【主经举】"}, {"para": 709, "start": 2027.41, "duration": 1.72, "text": "太乙救苦天尊"}, {"para": 710, "start": 2029.13, "duration": 3.19, "text": "灵音到处，灭罪消愆。"}, {"para": 711, "start": 2032.32, "duration": 2.85, "text": "宝号宣时，扶危救难。"}, {"para": 712, "start": 2035.16, "duration": 2.43, "text": "将当有讽经演教之偈。"}, {"para": 713, "start": 2037.59, "duration": 2.61, "text": "仰劳道众，随声应和。"}, {"para": 714, "start": 2040.2, "duration": 3.79, "text": "救苦天尊妙难求，身披霞衣屡劫修"}, {"para": 715, "start": 2043.99, "duration": 4.23, "text": "五色祥云生足下，九头狮子道前游"}, {"para": 716, "start": 2048.22, "duration": 4.28, "text": "盂中雸露时常洒，手内杨柳不记秋"}, {"para": 717, "start": 2052.51, "duration": 3.92, "text": "千处请师千处降，爱河常作度人舟"}, {"para": 718, "start": 2056.43, "duration": 4.34, "text": "诵经功德不可议，孤魂滞魄早超升"}, {"para": 719, "start": 2060.76, "duration": 2.3, "text": "香供养十方救苦天尊"}, {"para": 720, "start": 2063.06, "duration": 3.19, "text": "种种无名是苦根，苦根除尽善根存"}, {"para": 721, "start": 2066.25, "duration": 3.81, "text": "但凭慧剑威神力，跳出轮回五苦门"}, {"para": 722, "start": 2070.06, "duration": 3.63, "text": "道以无心度有情，一切方便是修真"}, {"para": 723, "start": 2073.69, "duration": 4.02, "text": "若皈圣智圆通地，便是生天得道人"}, {"para": 724, "start": 2077.72, "duration": 3.03, "text": "道场众等，人各恭敬。"}, {"para": 725, "start": 2080.75, "duration": 2.95, "text": "恭对道前，讽经如法。"}, {"para": 726, "start": 2083.7, "duration": 4.52, "text": "【宝经未开先持玄蕴伏魔神呪大众谨当持诵】"}, {"para": 727, "start": 2088.22, "duration": 1.23, "text": "开经偈"}, {"para": 728, "start": 2089.44, "duration": 3.03, "text": "寂寂至无宗，虚峙劫仞阿"}, {"para": 729, "start": 2092.47, "duration": 3.74, "text": "豁落洞玄文，谁测此幽遐"}, {"para": 730, "start": 2096.21, "duration": 2.61, "text": "一入大乘路，孰计年劫多"}, {"para": 731, "start": 2098.82, "duration": 2.98, "text": "不生亦不灭，欲生因莲花"}, {"para": 732, "start": 2101.8, "duration": 3.81, "text": "超凌三界途，慈心解世罗"}, {"para": 733, "start": 2105.61, "duration": 3.13, "text": "真人无上德，世世为仙家"}, {"para": 734, "start": 2108.75, "duration": 2.53, "text": "太上洞玄灵宝救苦妙经"}, {"para": 735, "start": 2111.28, "duration": 1.54, "text": "尔时 救苦天尊"}, {"para": 736, "start": 2112.82, "duration": 2.98, "text": "遍满十方界，常以威神力，"}, {"para": 737, "start": 2115.8, "duration": 3.03, "text": "救拔诸众生，得离于迷途，"}, {"para": 738, "start": 2118.83, "duration": 2.66, "text": "众生不知觉，如盲见日月。"}, {"para": 739, "start": 2121.5, "duration": 2.85, "text": "我本太无中，拔领无边际。"}, {"para": 740, "start": 2124.34, "duration": 3.5, "text": "庆云开生门，祥烟塞死户。"}, {"para": 741, "start": 2127.84, "duration": 3.13, "text": "初发玄元始，以统祥感机。"}, {"para": 742, "start": 2130.98, "duration": 2.25, "text": "救一切罪，度一切厄。"}, {"para": 743, "start": 2133.22, "duration": 3.03, "text": "渺渺超仙源，荡荡自然清。"}, {"para": 744, "start": 2136.25, "duration": 3.32, "text": "皆承大道力，以伏诸魔精。"}, {"para": 745, "start": 2139.57, "duration": 3.6, "text": "空中何灼灼，名曰泥丸仙。"}, {"para": 746, "start": 2143.18, "duration": 2.43, "text": "紫云覆黄老，是名三宝君。"}, {"para": 747, "start": 2145.61, "duration": 2.66, "text": "还将上天气，以制九天魂。"}, {"para": 748, "start": 2148.27, "duration": 2.98, "text": "救苦诸妙神，善见救苦时。"}, {"para": 749, "start": 2151.25, "duration": 2.38, "text": "天上混无分，天气归一身。"}, {"para": 750, "start": 2153.63, "duration": 2.79, "text": "皆成自然人，自然有别体。"}, {"para": 751, "start": 2156.42, "duration": 4.86, "text": "本在空洞中，空洞迹非迹，徧体皆虚空。"}, {"para": 752, "start": 2161.28, "duration": 3.92, "text": "第一委气立，第二顺气生，第三成万法，第四主光明。"}, {"para": 753, "start": 2165.2, "duration": 5.04, "text": "天上三十六，地下三十六，太玄无边际，妙哉大洞经。"}, {"para": 754, "start": 2170.24, "duration": 3.6, "text": "归命太上尊，能消一切罪。"}, {"para": 755, "start": 2173.84, "duration": 4.52, "text": "东方玉宝皇上天尊  南方玄真万福天尊"}, {"para": 756, "start": 2178.36, "duration": 3.63, "text": "西方太妙至极天尊  北方玄上玉宸天尊"}, {"para": 757, "start": 2181.99, "duration": 3.87, "text": "东北方度仙上圣天尊 东南方好生度命天尊"}, {"para": 758, "start": 2185.86, "duration": 4.34, "text": "西南方太灵虚皇天尊 西北方无量太华天尊"}, {"para": 759, "start": 2190.2, "duration": 3.87, "text": "上方玉虚明皇天尊 下方真皇洞神天尊"}, {"para": 760, "start": 2194.06, "duration": 3.13, "text": "十方诸天尊，其数如沙尘。"}, {"para": 761, "start": 2197.2, "duration": 2.9, "text": "化形十方界，普济度天人。"}, {"para": 762, "start": 2200.1, "duration": 3.32, "text": "委气聚功德，同声救罪魂。"}, {"para": 763, "start": 2203.41, "duration": 2.85, "text": "罪魂实可哀，我今说妙经。"}, {"para": 764, "start": 2206.26, "duration": 3.55, "text": "念诵无休息，归身不暂停。"}, {"para": 765, "start": 2209.81, "duration": 2.9, "text": "天堂享大福，地狱无苦声。"}, {"para": 766, "start": 2212.71, "duration": 3.68, "text": "火翳成清署，剑树化为骞。"}, {"para": 767, "start": 2216.4, "duration": 2.53, "text": "上登朱陵府，下入开光门。"}, {"para": 768, "start": 2218.93, "duration": 3.45, "text": "超度三界难，径上元始天。"}, {"para": 769, "start": 2222.38, "duration": 2.61, "text": "于是飞天神王、无鞅数众，"}, {"para": 770, "start": 2224.99, "duration": 2.98, "text": "瞻仰尊颜，而作颂曰："}, {"para": 771, "start": 2227.97, "duration": 3.13, "text": "天尊说经教，引接于浮生。"}, {"para": 772, "start": 2231.1, "duration": 3.32, "text": "勤修学无为，悟真道自成。"}, {"para": 773, "start": 2234.42, "duration": 3.92, "text": "不迷亦不荒，无我亦无名。"}, {"para": 774, "start": 2238.34, "duration": 3.27, "text": "朗咏罪福句，万徧心垢清。"}, {"para": 775, "start": 2241.6, "duration": 5.88, "text": "尔时飞天神王及诸仙众说是颂毕，稽首天尊，奉辞而退。"}, {"para": 776, "start": 2247.48, "duration": 2.43, "text": "太上洞玄灵宝救苦妙经"}, {"para": 777, "start": 2249.91, "duration": 2.72, "text": "元始天尊说生天得道真经"}, {"para": 778, "start": 2252.63, "duration": 6.06, "text": "尔时 元始天尊在大罗天上玉京山中，为诸天仙众说此《生天得道真"}, {"para": 779, "start": 2258.69, "duration": 7.08, "text": "经》。告诸仙曰：吾今为汝略启身心，明宣道要。十方得道神仙，皆从"}, {"para": 780, "start": 2265.77, "duration": 6.43, "text": "此经修行而通微奥。善男子、善女人，依凭斋戒，作是津梁，一切有"}, {"para": 781, "start": 2272.19, "duration": 5.88, "text": "为，显诸真路，体此法相，乃可受持。能屏众缘，永除染著，外想不"}, {"para": 782, "start": 2278.07, "duration": 6.71, "text": "入，内想不出，于正念中，皆得五脏清凉，六腑调泰。 三百六十骨节之"}, {"para": 783, "start": 2284.78, "duration": 7.5, "text": "间，有诸滞碍，十恶之业，百八十烦恼之业，众苦罪源，悉皆除荡。 即"}, {"para": 784, "start": 2292.28, "duration": 6.43, "text": "引太和真炁注润身田，五脏六腑，心目内观，真炁所有，清静光明， 虚"}, {"para": 785, "start": 2298.71, "duration": 6.95, "text": "白朗耀，杳杳冥冥，内外无事，昏昏默默，正达无为，古今常存，总持"}, {"para": 786, "start": 2305.65, "duration": 6.9, "text": "净念，从兹解悟，道力资扶，法药相助。 仍节饮食，驱遣鬼尸，安寂六"}, {"para": 787, "start": 2312.55, "duration": 7.31, "text": "根，净照八识，空其五蕴，证妙三元，得道成真，自然升度。尔时诸天"}, {"para": 788, "start": 2319.87, "duration": 6.71, "text": "仙众白天尊言：自从无始以来，至于今日，未闻如是大乘经典。我等缘"}, {"para": 789, "start": 2326.58, "duration": 4.52, "text": "兹幸会，广及一切，道果圆明而说偈曰："}, {"para": 790, "start": 2331.1, "duration": 3.92, "text": "杳杳冥冥清静道，昏昏默默太虚踪，"}, {"para": 791, "start": 2335.02, "duration": 3.97, "text": "体性湛然无所住，色心都寂一真宗。"}, {"para": 792, "start": 2338.99, "duration": 2.61, "text": "元始天尊说生天得道真经"}, {"para": 793, "start": 2341.6, "duration": 2.61, "text": "太上道君说解冤拔罪妙经"}, {"para": 794, "start": 2344.21, "duration": 80.77, "text": "尔时 太上道君，与诸圣众，在八骞林下，七宝台中，罗列威仪，敷陈道要，怡神默坐，于玉京山，放七宝光明，照福堂地狱，见福堂之内，男女善人，快乐无为，逍遥自在，复见诸地狱之中，饿鬼穷魂，以日继夜，受种种苦恼。悉无人形，五体坏烂，饥餐猛火，渇饮熔铜，足履刀山，身负铁杖，遍体流血，悲号彻天，是时，会中有一真人，名曰广信，从座而起，稽首前进。上白道君曰:不审此辈穷魂，生有何咎，而受兹苦。道君曰:受诸罪者，在世之时，不敬三光，欺负神理，十恶五逆，不忠不仁，不慈不孝，毁伤物命，杀害众生，福尽寿终，当受斯苦。是时广信真人，心生哀悯，欲其济拔，幸望妙力威光，许令开度，伏蒙道君，垂赐金言，广设法要，为诸众生，演说是经，名曰解冤拔罪，流布于世，利益存亡，若有善男子、善女人，一心专志，入静持斋，焚香行道，六时转念是经，吾当随愿，保佑其人，使宿世冤雠，乘福超度，幽魂苦爽，各获超升，真人广信，欢喜再拜。"}, {"para": 795, "start": 2424.98, "duration": 2.19, "text": "覶缕胜因而作颂曰："}, {"para": 796, "start": 2427.18, "duration": 3.13, "text": "伟哉大道君，常普无量功，"}, {"para": 797, "start": 2430.31, "duration": 2.95, "text": "舟楫生死海，济度超罗酆。"}, {"para": 798, "start": 2433.26, "duration": 3.19, "text": "罪对不复遇，福报与冥通，"}, {"para": 799, "start": 2436.45, "duration": 3.32, "text": "用神安可测，赞之焉能穷。"}, {"para": 800, "start": 2439.77, "duration": 6.74, "text": "是时，广信真人，与诸圣众，闻法将毕，各各稽首皈依，信受奉行。"}, {"para": 801, "start": 2446.51, "duration": 2.98, "text": "太上道君说解冤拔罪妙经"}, {"para": 802, "start": 2449.48, "duration": 2.12, "text": "斗母诰　志心皈命礼"}, {"para": 803, "start": 2451.6, "duration": 2.72, "text": "西天竺国，大智光中"}, {"para": 804, "start": 2454.32, "duration": 3.27, "text": "真空妙用法王师，无上玄元天母主"}, {"para": 805, "start": 2457.58, "duration": 2.77, "text": "金光烁处，日月潜辉"}, {"para": 806, "start": 2460.35, "duration": 2.85, "text": "宝杵旋时，鬼神失色"}, {"para": 807, "start": 2463.2, "duration": 3.5, "text": "显灵踪于尘世，衞圣驾于阎浮"}, {"para": 808, "start": 2466.7, "duration": 3.97, "text": "众生有难若称名，大士寻声来救苦"}, {"para": 809, "start": 2470.67, "duration": 2.06, "text": "大悲大愿，大圣大慈"}, {"para": 810, "start": 2472.73, "duration": 4.1, "text": "圣德巨光天后，摩利攴天大圣，先天斗母元君"}, {"para": 811, "start": 2476.83, "duration": 2.06, "text": "三官诰　志心皈命礼"}, {"para": 812, "start": 2478.9, "duration": 2.56, "text": "唯三圣人，乃一太极"}, {"para": 813, "start": 2481.46, "duration": 3.81, "text": "昔受浩劫家之命，鼎膺无量品之褒"}, {"para": 814, "start": 2485.27, "duration": 2.79, "text": "紫微淸虚洞阴，总领功过"}, {"para": 815, "start": 2488.06, "duration": 2.95, "text": "赐福赦罪解厄，溥济存亡"}, {"para": 816, "start": 2491.02, "duration": 2.35, "text": "道冠诸天，恩覃三界"}, {"para": 817, "start": 2493.37, "duration": 2.12, "text": "大悲大愿，大圣大慈"}, {"para": 818, "start": 2495.48, "duration": 2.19, "text": "三元三品，三官大帝"}, {"para": 819, "start": 2497.68, "duration": 2.35, "text": "三宫九府，应感天尊"}, {"para": 820, "start": 2500.03, "duration": 2.25, "text": "玄天诰　志心皈命礼"}, {"para": 821, "start": 2502.28, "duration": 2.25, "text": "混元六天，传法教主，"}, {"para": 822, "start": 2504.52, "duration": 2.3, "text": "修真悟道，济度群迷，"}, {"para": 823, "start": 2506.82, "duration": 2.14, "text": "普为众生，消除灾障，"}, {"para": 824, "start": 2508.96, "duration": 2.66, "text": "八十二化，三教祖师，"}, {"para": 825, "start": 2511.63, "duration": 2.06, "text": "大慈大悲，救苦救难，"}, {"para": 826, "start": 2513.69, "duration": 2.53, "text": "三元都总管，九天游奕使，"}, {"para": 827, "start": 2516.22, "duration": 2.98, "text": "佐天罡北极，右垣大将军，"}, {"para": 828, "start": 2519.2, "duration": 1.88, "text": "镇天助顺，真武灵应，"}, {"para": 829, "start": 2521.08, "duration": 2.43, "text": "福德衍庆，仁慈正烈，"}, {"para": 830, "start": 2523.51, "duration": 2.06, "text": "协运真君，治世福神，"}, {"para": 831, "start": 2525.58, "duration": 2.72, "text": "玉虚师相，玄天上帝，"}, {"para": 832, "start": 2528.29, "duration": 2.43, "text": "金阙化身，荡魔天尊。"}, {"para": 833, "start": 2530.72, "duration": 2.53, "text": "本来南土，上溯蜀都"}, {"para": 834, "start": 2533.26, "duration": 4.05, "text": "先获黄帝九鼎之丹书，后事老君两度于玉局"}, {"para": 835, "start": 2537.3, "duration": 3.63, "text": "千轴得修行之要，一时成吐纳之功"}, {"para": 836, "start": 2540.93, "duration": 2.56, "text": "法箓全成，受盟威品而结璘诀"}, {"para": 837, "start": 2543.49, "duration": 3.21, "text": "正邪两辨，奋福庭冶而化咸泉"}, {"para": 838, "start": 2546.71, "duration": 2.61, "text": "德就大丹，道齐七政"}, {"para": 839, "start": 2549.32, "duration": 2.3, "text": "大悲大愿，大圣大慈"}, {"para": 840, "start": 2551.62, "duration": 3.55, "text": "三天扶教，辅元体道大法天师"}, {"para": 841, "start": 2555.17, "duration": 2.53, "text": "雷霆都省，泰玄上相"}, {"para": 842, "start": 2557.71, "duration": 2.77, "text": "都天大法主，正一冲玄，"}, {"para": 843, "start": 2560.47, "duration": 1.96, "text": "神化静应显佑真君，"}, {"para": 844, "start": 2562.43, "duration": 3.6, "text": "六合无穷，高明大帝，降魔护道天尊"}, {"para": 845, "start": 2566.04, "duration": 2.56, "text": "吕祖诰　志心皈命礼"}, {"para": 846, "start": 2568.6, "duration": 2.85, "text": "玉淸内相，金阙选仙"}, {"para": 847, "start": 2571.45, "duration": 3.27, "text": "化身为三教之师，掌法判五雷之令"}, {"para": 848, "start": 2574.71, "duration": 2.72, "text": "黄梁梦觉，忘世上之功名"}, {"para": 849, "start": 2577.43, "duration": 2.56, "text": "宝剑光腾，扫人间之妖怪"}, {"para": 850, "start": 2579.99, "duration": 2.53, "text": "四生六道，有感必孚"}, {"para": 851, "start": 2582.52, "duration": 2.53, "text": "三界十方，无求不应"}, {"para": 852, "start": 2585.05, "duration": 3.32, "text": "黄鹄溪头留圣迹，玉淸殿内炼丹砂"}, {"para": 853, "start": 2588.37, "duration": 3.81, "text": "存道像于山崖，显仙迹于云洞"}, {"para": 854, "start": 2592.19, "duration": 3.6, "text": "阐法门之香火，作玄嗣之梯航"}, {"para": 855, "start": 2595.79, "duration": 2.25, "text": "大圣大慈，大仁大孝"}, {"para": 856, "start": 2598.04, "duration": 2.98, "text": "开山启教，灵应祖师"}, {"para": 857, "start": 2601.01, "duration": 3.21, "text": "天雷上相，灵宝真人"}, {"para": 858, "start": 2604.23, "duration": 2.48, "text": "燮元赞运，纯阳演正"}, {"para": 859, "start": 2606.71, "duration": 3.6, "text": "警化孚佑帝君，兴行妙道天尊"}, {"para": 860, "start": 2610.31, "duration": 2.43, "text": "萨真君诰　志心皈命礼"}, {"para": 861, "start": 2612.74, "duration": 2.9, "text": "派流西地，迹显龙兴"}, {"para": 862, "start": 2615.64, "duration": 4.1, "text": "施财合药济群生，积行累功修至道"}, {"para": 863, "start": 2619.74, "duration": 3.27, "text": "授铁师之教旨，掌玉府之雷书"}, {"para": 864, "start": 2623.01, "duration": 4.39, "text": "身披百衲伏魔衣，手执五明降鬼扇"}, {"para": 865, "start": 2627.4, "duration": 1.78, "text": "代之宣化，呪枣书符"}, {"para": 866, "start": 2629.17, "duration": 3.37, "text": "运风雷于咫尺之间，翦妖魔于斗罡之下"}, {"para": 867, "start": 2632.54, "duration": 2.95, "text": "道参太极，位列先天"}, {"para": 868, "start": 2635.5, "duration": 3.81, "text": "松筠野鹤任纵横，遐迩孤云常自在"}, {"para": 869, "start": 2639.31, "duration": 2.56, "text": "方方阐教，为万法之宗师"}, {"para": 870, "start": 2641.87, "duration": 2.43, "text": "处处开坛，作后人之模范"}, {"para": 871, "start": 2644.3, "duration": 3.79, "text": "都天宗主，一元无上，萨翁真君"}, {"para": 872, "start": 2648.09, "duration": 2.12, "text": "王灵官诰　志心皈命礼"}, {"para": 873, "start": 2650.2, "duration": 2.3, "text": "先天主将，一炁神君"}, {"para": 874, "start": 2652.5, "duration": 3.45, "text": "都天纠罚大灵官，三界无私猛吏将"}, {"para": 875, "start": 2655.95, "duration": 3.13, "text": "金睛朱发，号三五火车雷公"}, {"para": 876, "start": 2659.08, "duration": 2.98, "text": "凤嘴银牙，统百万貔貅神将"}, {"para": 877, "start": 2662.06, "duration": 2.53, "text": "飞腾云雾，号令雷霆"}, {"para": 878, "start": 2664.6, "duration": 2.56, "text": "降雨开晴，驱邪治病"}, {"para": 879, "start": 2667.16, "duration": 2.85, "text": "观过错于一十二年，授命玉帝"}, {"para": 880, "start": 2670.0, "duration": 3.21, "text": "积功动于百千万种，誓佐祖师"}, {"para": 881, "start": 2673.22, "duration": 3.81, "text": "至刚至勇，济死济生"}, {"para": 882, "start": 2677.03, "duration": 2.61, "text": "方方阐教，处处开坛"}, {"para": 883, "start": 2679.64, "duration": 2.06, "text": "豁落猛吏，三五火车"}, {"para": 884, "start": 2681.7, "duration": 2.01, "text": "大乙雷神应化天尊"}, {"para": 885, "start": 2683.72, "duration": 2.3, "text": "救苦诰　志心皈命礼"}, {"para": 886, "start": 2686.01, "duration": 3.08, "text": "靑华长乐界，东极妙严宫"}, {"para": 887, "start": 2689.1, "duration": 2.95, "text": "七宝芳骞林，九色莲花座"}, {"para": 888, "start": 2692.05, "duration": 2.98, "text": "万真环拱内，百亿瑞光中"}, {"para": 889, "start": 2695.03, "duration": 3.55, "text": "玉淸天宝尊，应化玄元始"}, {"para": 890, "start": 2698.58, "duration": 3.03, "text": "浩劫垂慈济，大千甘露门"}, {"para": 891, "start": 2701.61, "duration": 2.3, "text": "妙道真身，紫金瑞相"}, {"para": 892, "start": 2703.91, "duration": 1.88, "text": "随机赴感，誓愿无边"}, {"para": 893, "start": 2705.79, "duration": 2.9, "text": "大圣大慈，大悲大愿"}, {"para": 894, "start": 2708.69, "duration": 2.61, "text": "十方化号，普度众生"}, {"para": 895, "start": 2711.3, "duration": 2.53, "text": "亿亿劫中，度人无量"}, {"para": 896, "start": 2713.83, "duration": 4.86, "text": "寻声赴感，太乙救苦天尊靑玄上帝"}, {"para": 897, "start": 2718.69, "duration": 1.23, "text": "【主坛举】"}, {"para": 898, "start": 2719.92, "duration": 2.77, "text": "爱河千层浪  苦海万丈深"}, {"para": 899, "start": 2722.69, "duration": 2.9, "text": "欲免轮回苦  大众转天尊"}, {"para": 900, "start": 2725.59, "duration": 1.72, "text": "【大众出坛转念】"}, {"para": 901, "start": 2727.31, "duration": 1.93, "text": "太乙救苦天尊"}, {"para": 902, "start": 2729.25, "duration": 3.55, "text": "【转至孤魂处施食毕回坛跪念】"}, {"para": 903, "start": 2732.8, "duration": 5.28, "text": "靑华妙严，慈相亿千。身居长乐，尊座金莲。"}, {"para": 904, "start": 2738.08, "duration": 4.75, "text": "慧光无碍，照诸幽泉。甘露流润，徧洒空玄。"}, {"para": 905, "start": 2742.83, "duration": 5.64, "text": "朽骸枯骨，咸得光鲜。拔度沈溺，不滞寒渊。"}, {"para": 906, "start": 2748.47, "duration": 5.04, "text": "上请天官解天厄，地官解地厄，水官解水厄，五帝解五方厄，"}, {"para": 907, "start": 2753.51, "duration": 4.75, "text": "四圣解四时厄，南辰解本命厄，北斗解一切厄。"}, {"para": 908, "start": 2758.27, "duration": 2.53, "text": "于是七元君，大圣善通灵"}, {"para": 909, "start": 2760.8, "duration": 3.19, "text": "济度诸厄难，超出苦众生"}, {"para": 910, "start": 2763.99, "duration": 2.61, "text": "若有急吿者，持诵保安平"}, {"para": 911, "start": 2766.6, "duration": 3.08, "text": "尽凭生百福，咸契于五行"}, {"para": 912, "start": 2769.68, "duration": 2.98, "text": "三魂得安健，邪魅不能停，"}, {"para": 913, "start": 2772.66, "duration": 3.37, "text": "五方降真炁，万福自来骈"}, {"para": 914, "start": 2776.03, "duration": 2.79, "text": "长生超八难，皆由奉七星"}, {"para": 915, "start": 2778.83, "duration": 2.95, "text": "生生身自在，世世保神淸"}, {"para": 916, "start": 2781.78, "duration": 2.53, "text": "善似光中影，应如谷里声"}, {"para": 917, "start": 2784.31, "duration": 3.55, "text": "三元神共护，万圣眼同明"}, {"para": 918, "start": 2787.86, "duration": 3.19, "text": "无灾亦无障，永保道心宁"}, {"para": 919, "start": 2791.05, "duration": 2.25, "text": "报恩诰　志心皈命礼"}, {"para": 920, "start": 2793.3, "duration": 3.03, "text": "玄元应化，五曲分真"}, {"para": 921, "start": 2796.33, "duration": 3.19, "text": "垂念我等众生，有相脱生"}, {"para": 922, "start": 2799.51, "duration": 3.13, "text": "父母怀躭十月，乳哺三年"}, {"para": 923, "start": 2802.65, "duration": 2.56, "text": "辛苦百千，殷勤寸念"}, {"para": 924, "start": 2805.21, "duration": 2.19, "text": "怜我父母，日渐衰朽"}, {"para": 925, "start": 2807.4, "duration": 3.55, "text": "我今持念平等，悉灭崄峻贪嗔"}, {"para": 926, "start": 2810.96, "duration": 1.93, "text": "礼帝为师，祈恩报本"}, {"para": 927, "start": 2812.89, "duration": 1.65, "text": "愿我现在父母"}, {"para": 928, "start": 2814.53, "duration": 3.87, "text": "福夀增延，过去宗祖，早得超升"}, {"para": 929, "start": 2818.4, "duration": 2.19, "text": "大圣大慈，大仁大孝"}, {"para": 930, "start": 2820.59, "duration": 2.48, "text": "八十二化，报恩教主"}, {"para": 931, "start": 2823.08, "duration": 2.43, "text": "佑圣真武，治世福神"}, {"para": 932, "start": 2825.5, "duration": 2.85, "text": "玉虚师相，玄天上帝"}, {"para": 933, "start": 2828.35, "duration": 2.66, "text": "金阙化身，终劫济苦天尊"}, {"para": 934, "start": 2831.02, "duration": 3.08, "text": "一愿风调雨顺　　　二愿五谷丰登"}, {"para": 935, "start": 2834.1, "duration": 3.13, "text": "三愿皇王万岁　　　四愿国土淸平"}, {"para": 936, "start": 2837.23, "duration": 3.68, "text": "五愿民安物阜　　　六愿福夀康宁"}, {"para": 937, "start": 2840.92, "duration": 2.77, "text": "七愿灾消祸散　　　八愿水火无侵"}, {"para": 938, "start": 2843.69, "duration": 2.43, "text": "九愿聪明智慧　　　十愿学道成真"}, {"para": 939, "start": 2846.11, "duration": 3.37, "text": "十一愿诸神拥护　　十二愿亡者超升"}, {"para": 940, "start": 2849.48, "duration": 4.23, "text": "一切飞禽走兽　　　一切蝼蚁蛇虫"}, {"para": 941, "start": 2853.72, "duration": 2.53, "text": "一切冤家债主　　　一切男女孤魂"}, {"para": 942, "start": 2856.25, "duration": 2.56, "text": "四生六道，一切寒林，"}, {"para": 943, "start": 2858.81, "duration": 2.85, "text": "闻经听法，早得超升　【重三遍】"}, {"para": 944, "start": 2861.66, "duration": 3.08, "text": "靑华救主，太乙慈尊"}, {"para": 945, "start": 2864.74, "duration": 2.98, "text": "玉淸应化显金身，大千甘露门"}, {"para": 946, "start": 2867.72, "duration": 2.35, "text": "接引群生，永出爱河"}, {"para": 947, "start": 2870.07, "duration": 2.25, "text": "津接引群生，永出爱河津"}, {"para": 948, "start": 2872.31, "duration": 3.21, "text": "愿灭三障诸烦恼，愿得智慧心明了"}, {"para": 949, "start": 2875.53, "duration": 4.23, "text": "普愿灾障悉消除，世世常行无上道"}, {"para": 950, "start": 2879.76, "duration": 3.68, "text": "四恩三有均利益，十洲三岛任逍遥"}, {"para": 951, "start": 2883.44, "duration": 3.03, "text": "回向四府众龙神，礼谢道经师三宝"}, {"para": 952, "start": 2886.47, "duration": 3.4, "text": "向来诵经福无边，风调雨顺民安乐"}, {"para": 953, "start": 2889.87, "duration": 3.37, "text": "愿以此功德，普及于一切，"}, {"para": 954, "start": 2893.24, "duration": 3.13, "text": "诵经保平安，消灾增福夀"}, {"para": 955, "start": 2896.37, "duration": 2.72, "text": "此间土地，神之最灵"}, {"para": 956, "start": 2899.09, "duration": 1.78, "text": "升天达地，出幽入冥"}, {"para": 957, "start": 2900.87, "duration": 2.56, "text": "为吾关奏，不得留停"}, {"para": 958, "start": 2903.43, "duration": 2.43, "text": "有功之日，名书上淸"}, {"para": 959, "start": 2905.86, "duration": 2.06, "text": "向来诵经功德"}, {"para": 960, "start": 2907.92, "duration": 2.43, "text": "上奉高真，下保平安"}, {"para": 961, "start": 2910.35, "duration": 3.4, "text": "赐福消灾，同赖善功"}, {"para": 962, "start": 2913.74, "duration": 2.43, "text": "证无上道，一切信礼"}, {"para": 963, "start": 2916.17, "duration": 3.55, "text": "志心称念太乙救苦天尊不可思议功德"}, {"para": 964, "start": 2919.73, "duration": 1.12, "text": "【主经白】"}, {"para": 965, "start": 2920.85, "duration": 4.75, "text": "既诵经语，当解经意，各自省心，早求度世。"}, {"para": 966, "start": 2925.6, "duration": 5.69, "text": "人身不易得，正法最难遇，但念无常苦，各发清静志。"}, {"para": 967, "start": 2931.3, "duration": 5.04, "text": "扫除诸妄念，去却贪嗔痴， 忏悔往昔非，当求今日是。"}, {"para": 968, "start": 2936.34, "duration": 3.21, "text": "勇猛生精进，各用皈命礼。"}, {"para": 969, "start": 2939.55, "duration": 1.83, "text": "志心皈命礼"}, {"para": 970, "start": 2941.38, "duration": 17.89, "text": "青华圣境，东极上宫，十方化号度群生，百亿光中瞻妙相，九色莲花作慈航之彼岸，一枝杨柳开甘露之法门，九十九万亿同名同号圣，幢幡宝盖接引导师，大慈大悲，寻声赴感，太乙救苦天尊。"}, {"para": 971, "start": 2959.27, "duration": 1.93, "text": "志心皈命礼"}, {"para": 972, "start": 2961.21, "duration": 18.96, "text": "青华圣境，东极上宫，十方化号度群生，百亿光中瞻妙相，九色莲花作慈航之彼岸，一枝杨柳开甘露之法门，九十九万亿同名同号圣，幢幡宝盖接引导师，大慈大悲，寻声赴感，十方灵宝天尊。"}, {"para": 973, "start": 2980.17, "duration": 1.12, "text": "志心皈命礼"}, {"para": 974, "start": 2981.3, "duration": 15.15, "text": "青华圣境，东极上宫，十方化号度群生，百亿光中瞻妙相，九色莲花作慈航之彼岸，一枝杨柳开甘露之法门，九十九万亿同名同号圣，幢幡宝盖接引导师，大慈大悲，寻声赴感，随愿往生天尊。"}, {"para": 975, "start": 2996.45, "duration": 2.61, "text": "【以上各天尊一拜毕再三拜分班圆揖礼毕】"}, {"para": 976, "start": 2999.06, "duration": 1.51, "text": "晚坛功课经终"}]}
+{
+ "segments": [
+  {
+   "duration": 1.829,
+   "para": 0,
+   "start": 0.0,
+   "text": "全真早晚功课经"
+  },
+  {
+   "duration": 0.888,
+   "para": 1,
+   "start": 1.829,
+   "text": "香赞"
+  },
+  {
+   "duration": 3.318,
+   "para": 2,
+   "start": 2.717,
+   "text": "蓬瀛朝爽。参礼诸天。"
+  },
+  {
+   "duration": 2.429,
+   "para": 3,
+   "start": 6.035,
+   "text": "玉清初日镜光圆。"
+  },
+  {
+   "duration": 2.9,
+   "para": 4,
+   "start": 8.464,
+   "text": "晓气蔼祥烟。秘典心宣。"
+  },
+  {
+   "duration": 1.515,
+   "para": 5,
+   "start": 11.364,
+   "text": "入道冀成仙。"
+  },
+  {
+   "duration": 2.847,
+   "para": 6,
+   "start": 12.879,
+   "text": "太上无极三宝大天尊(三称)"
+  },
+  {
+   "duration": 1.123,
+   "para": 7,
+   "start": 15.726,
+   "text": "开经偈"
+  },
+  {
+   "duration": 3.187,
+   "para": 8,
+   "start": 16.849,
+   "text": "琳瑯振响。中界肃清。"
+  },
+  {
+   "duration": 2.482,
+   "para": 9,
+   "start": 20.036,
+   "text": "河海静默。山岳吞云。"
+  },
+  {
+   "duration": 3.265,
+   "para": 10,
+   "start": 22.518,
+   "text": "万灵拱伏。召请群真。"
+  },
+  {
+   "duration": 3.187,
+   "para": 11,
+   "start": 25.783,
+   "text": "天无凶秽。地鲜妖氛。"
+  },
+  {
+   "duration": 2.612,
+   "para": 12,
+   "start": 28.97,
+   "text": "空明洞慧。上达玉京。"
+  },
+  {
+   "duration": 2.664,
+   "para": 13,
+   "start": 31.582,
+   "text": "常清常静天尊(三称)"
+  },
+  {
+   "duration": 3.814,
+   "para": 14,
+   "start": 34.246,
+   "text": "真心清静道为宗。譬彼中天宝月同。"
+  },
+  {
+   "duration": 3.918,
+   "para": 15,
+   "start": 38.06,
+   "text": "净扫迷云无点翳。一轮光满太虚空。"
+  },
+  {
+   "duration": 3.971,
+   "para": 16,
+   "start": 41.978,
+   "text": "上药身中神炁精。人人具足匪亏盈。"
+  },
+  {
+   "duration": 5.355,
+   "para": 17,
+   "start": 45.949,
+   "text": "能知混合回风道。金鼎黄芽日日生。"
+  },
+  {
+   "duration": 4.519,
+   "para": 18,
+   "start": 51.304,
+   "text": "一柱真香本自然。黄庭炉内起祥烟。"
+  },
+  {
+   "duration": 4.807,
+   "para": 19,
+   "start": 55.823,
+   "text": "空中结就浮云篆。上祝当今寿万年。"
+  },
+  {
+   "duration": 3.265,
+   "para": 20,
+   "start": 60.63,
+   "text": "万古道为尊。宏开济世门。"
+  },
+  {
+   "duration": 3.5,
+   "para": 21,
+   "start": 63.895,
+   "text": "煌煌昭大法。圣典至今存。"
+  },
+  {
+   "duration": 1.463,
+   "para": 22,
+   "start": 67.395,
+   "text": "净心神咒"
+  },
+  {
+   "duration": 3.135,
+   "para": 23,
+   "start": 68.858,
+   "text": "太上台星 应变无停 驱邪缚魅"
+  },
+  {
+   "duration": 3.213,
+   "para": 24,
+   "start": 71.993,
+   "text": "保命护身 智慧明净 心神安宁"
+  },
+  {
+   "duration": 3.135,
+   "para": 25,
+   "start": 75.206,
+   "text": "三魂永久 魄无丧倾 急急如律令"
+  },
+  {
+   "duration": 1.358,
+   "para": 26,
+   "start": 78.341,
+   "text": "净口神咒"
+  },
+  {
+   "duration": 3.265,
+   "para": 27,
+   "start": 79.699,
+   "text": "丹朱口神 吐秽除氛 舌神正伦"
+  },
+  {
+   "duration": 3.814,
+   "para": 28,
+   "start": 82.964,
+   "text": "通命养神 罗千齿神 却邪卫真"
+  },
+  {
+   "duration": 3.187,
+   "para": 29,
+   "start": 86.778,
+   "text": "喉神虎贲 气神引津 心神丹元"
+  },
+  {
+   "duration": 2.664,
+   "para": 30,
+   "start": 89.965,
+   "text": "令我通真 思神炼液 道炁常存"
+  },
+  {
+   "duration": 1.541,
+   "para": 31,
+   "start": 92.629,
+   "text": "急急如律令"
+  },
+  {
+   "duration": 1.541,
+   "para": 32,
+   "start": 94.17,
+   "text": "净身神咒"
+  },
+  {
+   "duration": 3.213,
+   "para": 33,
+   "start": 95.711,
+   "text": "灵宝天尊 安慰身形 弟子魂魄"
+  },
+  {
+   "duration": 2.847,
+   "para": 34,
+   "start": 98.924,
+   "text": "五脏玄冥 青龙白虎 队仗纷纭"
+  },
+  {
+   "duration": 3.03,
+   "para": 35,
+   "start": 101.771,
+   "text": "朱雀玄武 侍卫身形 急急如律令"
+  },
+  {
+   "duration": 1.358,
+   "para": 36,
+   "start": 104.801,
+   "text": "安土地神咒"
+  },
+  {
+   "duration": 3.187,
+   "para": 37,
+   "start": 106.159,
+   "text": "元始安镇 普告万灵 岳渎真官"
+  },
+  {
+   "duration": 2.952,
+   "para": 38,
+   "start": 109.346,
+   "text": "土地祇灵 左社右稷 不得妄惊"
+  },
+  {
+   "duration": 2.717,
+   "para": 39,
+   "start": 112.298,
+   "text": "回向正道 内外澄清 各安方位"
+  },
+  {
+   "duration": 3.213,
+   "para": 40,
+   "start": 115.015,
+   "text": "备守坛庭 太上有命 搜捕邪精"
+  },
+  {
+   "duration": 2.952,
+   "para": 41,
+   "start": 118.228,
+   "text": "护法神王 保卫诵经 皈依大道"
+  },
+  {
+   "duration": 2.064,
+   "para": 42,
+   "start": 121.18,
+   "text": "元亨利贞 急急如律令"
+  },
+  {
+   "duration": 1.776,
+   "para": 43,
+   "start": 123.244,
+   "text": "净天地解秽神咒"
+  },
+  {
+   "duration": 3.213,
+   "para": 44,
+   "start": 125.02,
+   "text": "天地自然 秽气分散 洞中玄虚"
+  },
+  {
+   "duration": 2.769,
+   "para": 45,
+   "start": 128.233,
+   "text": "晃朗太元 八方威神 使我自然"
+  },
+  {
+   "duration": 3.814,
+   "para": 46,
+   "start": 131.002,
+   "text": "灵宝符命 普告九天 干罗答那"
+  },
+  {
+   "duration": 3.213,
+   "para": 47,
+   "start": 134.816,
+   "text": "洞罡太玄 斩妖缚邪 杀鬼万千"
+  },
+  {
+   "duration": 3.37,
+   "para": 48,
+   "start": 138.029,
+   "text": "中山神咒 元始玉文 持诵一遍"
+  },
+  {
+   "duration": 2.952,
+   "para": 49,
+   "start": 141.399,
+   "text": "却病延年 按行五岳 八海知闻"
+  },
+  {
+   "duration": 3.788,
+   "para": 50,
+   "start": 144.351,
+   "text": "魔王束首 侍卫我轩 凶秽消散"
+  },
+  {
+   "duration": 2.116,
+   "para": 51,
+   "start": 148.139,
+   "text": "道炁常存 急急如律令"
+  },
+  {
+   "duration": 1.463,
+   "para": 52,
+   "start": 150.255,
+   "text": "祝香神咒"
+  },
+  {
+   "duration": 3.213,
+   "para": 53,
+   "start": 151.718,
+   "text": "道由心学 心假香传 香爇玉炉"
+  },
+  {
+   "duration": 3.918,
+   "para": 54,
+   "start": 154.931,
+   "text": "心存帝前 真灵下盼 仙旆临轩"
+  },
+  {
+   "duration": 3.5,
+   "para": 55,
+   "start": 158.849,
+   "text": "令臣关告 径达九天 急急如律令"
+  },
+  {
+   "duration": 1.123,
+   "para": 56,
+   "start": 162.349,
+   "text": "金光神咒"
+  },
+  {
+   "duration": 3.135,
+   "para": 57,
+   "start": 163.472,
+   "text": "天地玄宗 万炁本根 广修亿劫"
+  },
+  {
+   "duration": 3.265,
+   "para": 58,
+   "start": 166.607,
+   "text": "证吾神通 三界内外 惟道独尊"
+  },
+  {
+   "duration": 3.187,
+   "para": 59,
+   "start": 169.872,
+   "text": "体有金光 覆映吾身 视之不见"
+  },
+  {
+   "duration": 3.082,
+   "para": 60,
+   "start": 173.059,
+   "text": "听之不闻 包罗天地 养育群生"
+  },
+  {
+   "duration": 2.795,
+   "para": 61,
+   "start": 176.141,
+   "text": "受持万遍 身有光明 三界侍卫"
+  },
+  {
+   "duration": 2.299,
+   "para": 62,
+   "start": 178.936,
+   "text": "五帝司迎 万神朝礼 役使雷霆"
+  },
+  {
+   "duration": 3.318,
+   "para": 63,
+   "start": 181.235,
+   "text": "鬼妖丧胆 精怪忘形 内有霹雳"
+  },
+  {
+   "duration": 4.023,
+   "para": 64,
+   "start": 184.553,
+   "text": "雷神隐名 洞慧交彻 五炁腾腾"
+  },
+  {
+   "duration": 2.717,
+   "para": 65,
+   "start": 188.576,
+   "text": "金光速现 覆护真人 急急如律令"
+  },
+  {
+   "duration": 1.463,
+   "para": 66,
+   "start": 191.293,
+   "text": "开经玄蕴咒"
+  },
+  {
+   "duration": 3.135,
+   "para": 67,
+   "start": 192.756,
+   "text": "云篆太虚 浩劫之初 乍遐乍迩"
+  },
+  {
+   "duration": 2.952,
+   "para": 68,
+   "start": 195.891,
+   "text": "或 沉 或浮 五方徘徊 一丈之余"
+  },
+  {
+   "duration": 2.482,
+   "para": 69,
+   "start": 198.843,
+   "text": "天真皇人 按笔 迺 书 以演洞章"
+  },
+  {
+   "duration": 2.952,
+   "para": 70,
+   "start": 201.325,
+   "text": "次书灵符 元始下降 真文诞敷"
+  },
+  {
+   "duration": 2.064,
+   "para": 71,
+   "start": 204.277,
+   "text": "昭昭其有 冥冥其无"
+  },
+  {
+   "duration": 3.082,
+   "para": 72,
+   "start": 206.341,
+   "text": "诵咒能医病 持经可出尘"
+  },
+  {
+   "duration": 2.56,
+   "para": 73,
+   "start": 209.423,
+   "text": "利幽堪脱苦 了愿得成真"
+  },
+  {
+   "duration": 3.814,
+   "para": 74,
+   "start": 211.983,
+   "text": "稽首皈依众妙道。至心恭敬二玄真。"
+  },
+  {
+   "duration": 3.5,
+   "para": 75,
+   "start": 215.797,
+   "text": "今运一心心所礼。粗识此经经所因。"
+  },
+  {
+   "duration": 4.206,
+   "para": 76,
+   "start": 219.297,
+   "text": "空色色空存本性。有无无有色空均。"
+  },
+  {
+   "duration": 3.37,
+   "para": 77,
+   "start": 223.503,
+   "text": "慧风出自天尊力。扫除心界不遗尘。"
+  },
+  {
+   "duration": 4.336,
+   "para": 78,
+   "start": 226.873,
+   "text": "唯愿神光常拥护。证盟今日守心人。"
+  },
+  {
+   "duration": 4.571,
+   "para": 79,
+   "start": 231.209,
+   "text": "今日守心何所证。不失凡身得道身。"
+  },
+  {
+   "duration": 3.03,
+   "para": 80,
+   "start": 235.78,
+   "text": "尔时。元始天尊。"
+  },
+  {
+   "duration": 3.082,
+   "para": 81,
+   "start": 238.81,
+   "text": "在七宝林中。五明宫内。"
+  },
+  {
+   "duration": 3.265,
+   "para": 82,
+   "start": 241.892,
+   "text": "与无极圣众。俱放无极光明。"
+  },
+  {
+   "duration": 3.814,
+   "para": 83,
+   "start": 245.157,
+   "text": "照无极世界 观无极众生。受无极苦恼。"
+  },
+  {
+   "duration": 3.5,
+   "para": 84,
+   "start": 248.971,
+   "text": "宛转世间。轮回生死。"
+  },
+  {
+   "duration": 4.389,
+   "para": 85,
+   "start": 252.471,
+   "text": "漂浪爱河。流吹欲海 沉滞声色。"
+  },
+  {
+   "duration": 2.612,
+   "para": 86,
+   "start": 256.86,
+   "text": "迷惑有无。无空有空。"
+  },
+  {
+   "duration": 3.082,
+   "para": 87,
+   "start": 259.472,
+   "text": "无色有色。无无有无。"
+  },
+  {
+   "duration": 2.847,
+   "para": 88,
+   "start": 262.554,
+   "text": "有有无有。终始暗昧。"
+  },
+  {
+   "duration": 2.011,
+   "para": 89,
+   "start": 265.401,
+   "text": "不能自明。毕竟迷惑。"
+  },
+  {
+   "duration": 3.318,
+   "para": 90,
+   "start": 267.412,
+   "text": "天尊告曰。汝等众生。"
+  },
+  {
+   "duration": 2.429,
+   "para": 91,
+   "start": 270.73,
+   "text": "从不有中有。不无中无。"
+  },
+  {
+   "duration": 2.56,
+   "para": 92,
+   "start": 273.159,
+   "text": "不色中色。不空中空。"
+  },
+  {
+   "duration": 2.377,
+   "para": 93,
+   "start": 275.719,
+   "text": "非有为有。非无为无。"
+  },
+  {
+   "duration": 3.213,
+   "para": 94,
+   "start": 278.096,
+   "text": "非色为色。非空为空。"
+  },
+  {
+   "duration": 2.9,
+   "para": 95,
+   "start": 281.309,
+   "text": "空即是空。空无定空。"
+  },
+  {
+   "duration": 2.952,
+   "para": 96,
+   "start": 284.209,
+   "text": "色即是色。色无定色。"
+  },
+  {
+   "duration": 2.769,
+   "para": 97,
+   "start": 287.161,
+   "text": "即色是空。即空是色。"
+  },
+  {
+   "duration": 2.847,
+   "para": 98,
+   "start": 289.93,
+   "text": "若能知空不空。知色不色。"
+  },
+  {
+   "duration": 1.463,
+   "para": 99,
+   "start": 292.777,
+   "text": "名为照了。"
+  },
+  {
+   "duration": 3.187,
+   "para": 100,
+   "start": 294.24,
+   "text": "始达妙音。识无空法。"
+  },
+  {
+   "duration": 3.135,
+   "para": 101,
+   "start": 297.427,
+   "text": "洞观无碍。入众妙门。"
+  },
+  {
+   "duration": 2.717,
+   "para": 102,
+   "start": 300.562,
+   "text": "自然解悟。离诸疑网。"
+  },
+  {
+   "duration": 3.03,
+   "para": 103,
+   "start": 303.279,
+   "text": "不著空见。清净六根。"
+  },
+  {
+   "duration": 2.717,
+   "para": 104,
+   "start": 306.309,
+   "text": "断诸邪障。我即为汝。"
+  },
+  {
+   "duration": 1.358,
+   "para": 105,
+   "start": 309.026,
+   "text": "说是妙经。"
+  },
+  {
+   "duration": 3.318,
+   "para": 106,
+   "start": 310.384,
+   "text": "名曰。护命济度众生。"
+  },
+  {
+   "duration": 2.534,
+   "para": 107,
+   "start": 313.702,
+   "text": "传教世间。流通读诵。"
+  },
+  {
+   "duration": 2.769,
+   "para": 108,
+   "start": 316.236,
+   "text": "即有飞天神王。破邪金刚。"
+  },
+  {
+   "duration": 2.769,
+   "para": 109,
+   "start": 319.005,
+   "text": "护法灵童。救苦真人。"
+  },
+  {
+   "duration": 2.664,
+   "para": 110,
+   "start": 321.774,
+   "text": "金精猛兽。各百亿万众。"
+  },
+  {
+   "duration": 3.553,
+   "para": 111,
+   "start": 324.438,
+   "text": "俱侍卫是经。随所拥护。"
+  },
+  {
+   "duration": 4.023,
+   "para": 112,
+   "start": 327.991,
+   "text": "捍厄扶衰。度一切众生离染著。"
+  },
+  {
+   "duration": 2.978,
+   "para": 113,
+   "start": 332.014,
+   "text": "尔时。天尊即说偈曰。"
+  },
+  {
+   "duration": 2.482,
+   "para": 114,
+   "start": 334.992,
+   "text": "视不见我。听不得闻。"
+  },
+  {
+   "duration": 2.429,
+   "para": 115,
+   "start": 337.474,
+   "text": "离种种边。名为妙道。"
+  },
+  {
+   "duration": 1.28,
+   "para": 116,
+   "start": 339.903,
+   "text": "老君曰："
+  },
+  {
+   "duration": 2.064,
+   "para": 117,
+   "start": 341.183,
+   "text": "大道无形，生育天地；"
+  },
+  {
+   "duration": 2.351,
+   "para": 118,
+   "start": 343.247,
+   "text": "大道无情，运行日月；"
+  },
+  {
+   "duration": 2.482,
+   "para": 119,
+   "start": 345.598,
+   "text": "大道无名，长养万物；"
+  },
+  {
+   "duration": 2.847,
+   "para": 120,
+   "start": 348.08,
+   "text": "吾不知其名，强名曰道。"
+  },
+  {
+   "duration": 1.463,
+   "para": 121,
+   "start": 350.927,
+   "text": "夫道者："
+  },
+  {
+   "duration": 2.351,
+   "para": 122,
+   "start": 352.39,
+   "text": "有清有浊，有动有静；"
+  },
+  {
+   "duration": 1.881,
+   "para": 123,
+   "start": 354.741,
+   "text": "天清地浊，天动地静；"
+  },
+  {
+   "duration": 3.03,
+   "para": 124,
+   "start": 356.622,
+   "text": "男清女浊，男动女静；"
+  },
+  {
+   "duration": 2.429,
+   "para": 125,
+   "start": 359.652,
+   "text": "降本流末，而生万物。"
+  },
+  {
+   "duration": 2.299,
+   "para": 126,
+   "start": 362.081,
+   "text": "清者，浊之源，"
+  },
+  {
+   "duration": 1.881,
+   "para": 127,
+   "start": 364.38,
+   "text": "动者，静之基；"
+  },
+  {
+   "duration": 3.736,
+   "para": 128,
+   "start": 366.261,
+   "text": "人能常清静，天地悉皆归。"
+  },
+  {
+   "duration": 2.142,
+   "para": 129,
+   "start": 369.997,
+   "text": "夫人神好清，而心扰之；"
+  },
+  {
+   "duration": 2.429,
+   "para": 130,
+   "start": 372.139,
+   "text": "人心好静，而欲牵之。"
+  },
+  {
+   "duration": 2.429,
+   "para": 131,
+   "start": 374.568,
+   "text": "常能遣其欲，而心自静；"
+  },
+  {
+   "duration": 4.232,
+   "para": 132,
+   "start": 376.997,
+   "text": "澄其心，而神自清；自然六欲不生，"
+  },
+  {
+   "duration": 2.9,
+   "para": 133,
+   "start": 381.229,
+   "text": "三毒消灭。所以不能者，为心未澄，"
+  },
+  {
+   "duration": 2.978,
+   "para": 134,
+   "start": 384.129,
+   "text": "欲未遣也；能遣之者："
+  },
+  {
+   "duration": 2.664,
+   "para": 135,
+   "start": 387.107,
+   "text": "内观其心，心无其心；"
+  },
+  {
+   "duration": 2.664,
+   "para": 136,
+   "start": 389.771,
+   "text": "外观其形，形无其形；"
+  },
+  {
+   "duration": 2.351,
+   "para": 137,
+   "start": 392.435,
+   "text": "远观其物，物无其物；"
+  },
+  {
+   "duration": 2.847,
+   "para": 138,
+   "start": 394.786,
+   "text": "三者既悟，唯见于空。"
+  },
+  {
+   "duration": 2.247,
+   "para": 139,
+   "start": 397.633,
+   "text": "观空亦空，空无所空；"
+  },
+  {
+   "duration": 2.482,
+   "para": 140,
+   "start": 399.88,
+   "text": "所空既无，无无亦无；"
+  },
+  {
+   "duration": 2.769,
+   "para": 141,
+   "start": 402.362,
+   "text": "无无既无，湛然常寂。"
+  },
+  {
+   "duration": 2.9,
+   "para": 142,
+   "start": 405.131,
+   "text": "寂无所寂，欲岂能生；"
+  },
+  {
+   "duration": 1.881,
+   "para": 143,
+   "start": 408.031,
+   "text": "欲既不生，即是真静。"
+  },
+  {
+   "duration": 2.665,
+   "para": 144,
+   "start": 409.912,
+   "text": "真常应物，真常得性；"
+  },
+  {
+   "duration": 2.482,
+   "para": 145,
+   "start": 412.577,
+   "text": "常应常静，常清静矣。"
+  },
+  {
+   "duration": 2.9,
+   "para": 146,
+   "start": 415.059,
+   "text": "如此清静，渐入真道；"
+  },
+  {
+   "duration": 1.959,
+   "para": 147,
+   "start": 417.959,
+   "text": "既入真道，名为得道；"
+  },
+  {
+   "duration": 2.116,
+   "para": 148,
+   "start": 419.918,
+   "text": "虽名得道，实无所得；"
+  },
+  {
+   "duration": 2.534,
+   "para": 149,
+   "start": 422.034,
+   "text": "为化众生，名为得道；"
+  },
+  {
+   "duration": 2.717,
+   "para": 150,
+   "start": 424.568,
+   "text": "能悟之者，可传圣道。"
+  },
+  {
+   "duration": 1.175,
+   "para": 151,
+   "start": 427.285,
+   "text": "老君曰："
+  },
+  {
+   "duration": 1.933,
+   "para": 152,
+   "start": 428.46,
+   "text": "上士无争，下士好争；"
+  },
+  {
+   "duration": 2.429,
+   "para": 153,
+   "start": 430.393,
+   "text": "上德不德，下德执德；"
+  },
+  {
+   "duration": 2.769,
+   "para": 154,
+   "start": 432.822,
+   "text": "执著之者，不名道德。"
+  },
+  {
+   "duration": 2.769,
+   "para": 155,
+   "start": 435.591,
+   "text": "众生所以不得真道者，"
+  },
+  {
+   "duration": 2.847,
+   "para": 156,
+   "start": 438.36,
+   "text": "为有妄心；既有妄心，"
+  },
+  {
+   "duration": 2.952,
+   "para": 157,
+   "start": 441.207,
+   "text": "即惊其神；既惊其神，"
+  },
+  {
+   "duration": 2.795,
+   "para": 158,
+   "start": 444.159,
+   "text": "即著万物；既著万物，"
+  },
+  {
+   "duration": 2.717,
+   "para": 159,
+   "start": 446.954,
+   "text": "即生贪求；既生贪求，"
+  },
+  {
+   "duration": 2.717,
+   "para": 160,
+   "start": 449.671,
+   "text": "即是烦恼；烦恼妄想，"
+  },
+  {
+   "duration": 2.952,
+   "para": 161,
+   "start": 452.388,
+   "text": "忧苦身心；便遭浊辱，"
+  },
+  {
+   "duration": 2.612,
+   "para": 162,
+   "start": 455.34,
+   "text": "流浪生死；常沉苦海，"
+  },
+  {
+   "duration": 1.829,
+   "para": 163,
+   "start": 457.952,
+   "text": "永失真道。真常之道，"
+  },
+  {
+   "duration": 2.482,
+   "para": 164,
+   "start": 459.781,
+   "text": "悟者自得；得悟道者，"
+  },
+  {
+   "duration": 1.646,
+   "para": 165,
+   "start": 462.263,
+   "text": "常清静矣！"
+  },
+  {
+   "duration": 1.933,
+   "para": 166,
+   "start": 463.909,
+   "text": "仙人葛翁曰："
+  },
+  {
+   "duration": 3.37,
+   "para": 167,
+   "start": 465.842,
+   "text": "吾得真道，曾诵此经万遍。"
+  },
+  {
+   "duration": 3.082,
+   "para": 168,
+   "start": 469.212,
+   "text": "此经是天人所习，不传下士。"
+  },
+  {
+   "duration": 4.467,
+   "para": 169,
+   "start": 472.294,
+   "text": "吾昔受之于东华帝君，东华帝君受之于金阙帝君，"
+  },
+  {
+   "duration": 3.918,
+   "para": 170,
+   "start": 476.761,
+   "text": "金阙帝君受之于西王母。西王母皆口口相传，"
+  },
+  {
+   "duration": 3.788,
+   "para": 171,
+   "start": 480.679,
+   "text": "不记文字。吾今于世，书而录之。"
+  },
+  {
+   "duration": 4.441,
+   "para": 172,
+   "start": 484.467,
+   "text": "上士悟之，升为天仙；中士修之，南宫列仙；"
+  },
+  {
+   "duration": 3.918,
+   "para": 173,
+   "start": 488.908,
+   "text": "下士得之，在世长年。游行三界，升入金门。"
+  },
+  {
+   "duration": 1.829,
+   "para": 174,
+   "start": 492.826,
+   "text": "左玄真人曰："
+  },
+  {
+   "duration": 4.441,
+   "para": 175,
+   "start": 494.655,
+   "text": "学道之士，持诵此经者，即得十天善神，拥护其身。"
+  },
+  {
+   "duration": 6.557,
+   "para": 176,
+   "start": 499.096,
+   "text": "然后玉符保神，金液链形。形神俱妙，与道合真。"
+  },
+  {
+   "duration": 1.411,
+   "para": 177,
+   "start": 505.653,
+   "text": "正一真人曰："
+  },
+  {
+   "duration": 1.698,
+   "para": 178,
+   "start": 507.064,
+   "text": "人家有此经，"
+  },
+  {
+   "duration": 2.612,
+   "para": 179,
+   "start": 508.762,
+   "text": "悟解之者，灾障不干，"
+  },
+  {
+   "duration": 3.187,
+   "para": 180,
+   "start": 511.374,
+   "text": "众圣护门。神升上界，"
+  },
+  {
+   "duration": 2.299,
+   "para": 181,
+   "start": 514.561,
+   "text": "朝拜高真。功满德就，"
+  },
+  {
+   "duration": 2.952,
+   "para": 182,
+   "start": 516.86,
+   "text": "相感帝君。诵持不退，"
+  },
+  {
+   "duration": 1.776,
+   "para": 183,
+   "start": 519.812,
+   "text": "身腾紫云。"
+  },
+  {
+   "duration": 2.769,
+   "para": 184,
+   "start": 521.588,
+   "text": "太上老君说常清静经卷终"
+  },
+  {
+   "duration": 2.534,
+   "para": 185,
+   "start": 524.357,
+   "text": "无上玉皇心印妙经"
+  },
+  {
+   "duration": 3.213,
+   "para": 186,
+   "start": 526.891,
+   "text": "上药三品 神与气精 恍恍惚惚"
+  },
+  {
+   "duration": 3.318,
+   "para": 187,
+   "start": 530.104,
+   "text": "杳杳冥冥 存无守有 倾刻而成"
+  },
+  {
+   "duration": 2.664,
+   "para": 188,
+   "start": 533.422,
+   "text": "回风混合 百日功灵 默朝上帝"
+  },
+  {
+   "duration": 2.847,
+   "para": 189,
+   "start": 536.086,
+   "text": "一纪飞升 知者易悟 昧者难行"
+  },
+  {
+   "duration": 2.612,
+   "para": 190,
+   "start": 538.933,
+   "text": "履践天光 呼吸育清 出玄入牝"
+  },
+  {
+   "duration": 3.03,
+   "para": 191,
+   "start": 541.545,
+   "text": "若亡若存 绵绵不绝 固蒂深根"
+  },
+  {
+   "duration": 3.03,
+   "para": 192,
+   "start": 544.575,
+   "text": "人各有精 精合其神 神合其炁"
+  },
+  {
+   "duration": 3.553,
+   "para": 193,
+   "start": 547.605,
+   "text": "炁合体真 不得其真 皆是强名"
+  },
+  {
+   "duration": 3.396,
+   "para": 194,
+   "start": 551.158,
+   "text": "神能入石 神能飞形 入水不溺"
+  },
+  {
+   "duration": 3.03,
+   "para": 195,
+   "start": 554.554,
+   "text": "入火不焚 神依形生 精依炁盈"
+  },
+  {
+   "duration": 3.396,
+   "para": 196,
+   "start": 557.584,
+   "text": "不凋不残 松柏青青 三品一理"
+  },
+  {
+   "duration": 3.187,
+   "para": 197,
+   "start": 560.98,
+   "text": "妙不可听 其聚则有 其散则零"
+  },
+  {
+   "duration": 3.396,
+   "para": 198,
+   "start": 564.167,
+   "text": "七窍相通 窍窍光明 圣日圣月"
+  },
+  {
+   "duration": 3.5,
+   "para": 199,
+   "start": 567.563,
+   "text": "照耀金庭 一得永得 自然身轻"
+  },
+  {
+   "duration": 3.553,
+   "para": 200,
+   "start": 571.063,
+   "text": "太和充溢 骨散寒琼 得丹则灵"
+  },
+  {
+   "duration": 2.612,
+   "para": 201,
+   "start": 574.616,
+   "text": "不得则倾 丹在身中 非白非青"
+  },
+  {
+   "duration": 1.776,
+   "para": 202,
+   "start": 577.228,
+   "text": "诵持万遍 妙理自明"
+  },
+  {
+   "duration": 3.265,
+   "para": 203,
+   "start": 579.004,
+   "text": "《九天应元雷声普化天尊玉枢宝经》"
+  },
+  {
+   "duration": 4.702,
+   "para": 204,
+   "start": 582.269,
+   "text": "尔时。九天应元雷声普化天尊。"
+  },
+  {
+   "duration": 2.952,
+   "para": 205,
+   "start": 586.971,
+   "text": "在玉清天中。与十 方诸天帝 君。"
+  },
+  {
+   "duration": 1.829,
+   "para": 206,
+   "start": 589.923,
+   "text": "会于玉虚九光之殿。"
+  },
+  {
+   "duration": 3.788,
+   "para": 207,
+   "start": 591.752,
+   "text": "郁萧弥罗之馆。紫极曲密之房。"
+  },
+  {
+   "duration": 3.553,
+   "para": 208,
+   "start": 595.54,
+   "text": "阅太幽碧瑶之笈。考洞微明晨之书。"
+  },
+  {
+   "duration": 2.612,
+   "para": 209,
+   "start": 599.093,
+   "text": "交头接耳。细议重玄。"
+  },
+  {
+   "duration": 2.116,
+   "para": 210,
+   "start": 601.705,
+   "text": "诸多陪臣左右踧踖。"
+  },
+  {
+   "duration": 2.769,
+   "para": 211,
+   "start": 603.821,
+   "text": "天尊宴坐。朗诵洞章。"
+  },
+  {
+   "duration": 3.187,
+   "para": 212,
+   "start": 606.59,
+   "text": "诸天帝君。长吟步虚。"
+  },
+  {
+   "duration": 2.9,
+   "para": 213,
+   "start": 609.777,
+   "text": "彩女仙妹。散花旋绕。"
+  },
+  {
+   "duration": 2.847,
+   "para": 214,
+   "start": 612.677,
+   "text": "复相引领。游戏翠宫。"
+  },
+  {
+   "duration": 2.952,
+   "para": 215,
+   "start": 615.524,
+   "text": "群仙导前。先节后铁。"
+  },
+  {
+   "duration": 3.736,
+   "para": 216,
+   "start": 618.476,
+   "text": "龙旅鸾辖。飘讽太空。"
+  },
+  {
+   "duration": 2.429,
+   "para": 217,
+   "start": 622.212,
+   "text": "并集于玉梵七宝层台。"
+  },
+  {
+   "duration": 1.776,
+   "para": 218,
+   "start": 624.641,
+   "text": "时有雷师皓翁。"
+  },
+  {
+   "duration": 1.881,
+   "para": 219,
+   "start": 626.417,
+   "text": "于仙众中越班而出。"
+  },
+  {
+   "duration": 2.847,
+   "para": 220,
+   "start": 628.298,
+   "text": "面天尊前。颤作礼。"
+  },
+  {
+   "duration": 3.03,
+   "para": 221,
+   "start": 631.145,
+   "text": "勃变长跪。上白天尊言。"
+  },
+  {
+   "duration": 3.03,
+   "para": 222,
+   "start": 634.175,
+   "text": "天尊大慈。天尊大圣。"
+  },
+  {
+   "duration": 3.5,
+   "para": 223,
+   "start": 637.205,
+   "text": "为群生父。为万灵师。"
+  },
+  {
+   "duration": 2.56,
+   "para": 224,
+   "start": 640.705,
+   "text": "今者诸天。咸此良觌。"
+  },
+  {
+   "duration": 2.351,
+   "para": 225,
+   "start": 643.265,
+   "text": "适见天尊阅宝笈。"
+  },
+  {
+   "duration": 3.605,
+   "para": 226,
+   "start": 645.616,
+   "text": "考琼书。于中秘颐。不可缕计。"
+  },
+  {
+   "duration": 4.336,
+   "para": 227,
+   "start": 649.221,
+   "text": "唯有玉霄一府所统三十六天内院中司。"
+  },
+  {
+   "duration": 2.664,
+   "para": 228,
+   "start": 653.557,
+   "text": "东西华台。玄绾妙阁。"
+  },
+  {
+   "duration": 2.534,
+   "para": 229,
+   "start": 656.221,
+   "text": "四府六院。及诸有司。"
+  },
+  {
+   "duration": 1.358,
+   "para": 230,
+   "start": 658.755,
+   "text": "各分曹局。"
+  },
+  {
+   "duration": 3.135,
+   "para": 231,
+   "start": 660.113,
+   "text": "所以总司五雷天临三界者也。"
+  },
+  {
+   "duration": 3.605,
+   "para": 232,
+   "start": 663.248,
+   "text": "天尊至皇。心亲庶政。"
+  },
+  {
+   "duration": 1.463,
+   "para": 233,
+   "start": 666.853,
+   "text": "此等小兆。"
+  },
+  {
+   "duration": 2.194,
+   "para": 234,
+   "start": 668.316,
+   "text": "以何因绿得以趋服。"
+  },
+  {
+   "duration": 1.646,
+   "para": 235,
+   "start": 670.51,
+   "text": "愿告欲闻。"
+  },
+  {
+   "duration": 1.358,
+   "para": 236,
+   "start": 672.156,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 3.03,
+   "para": 237,
+   "start": 673.514,
+   "text": "雷师皓翁。尔等仙卿。"
+  },
+  {
+   "duration": 3.03,
+   "para": 238,
+   "start": 676.544,
+   "text": "储勋夙世。累行昨生。"
+  },
+  {
+   "duration": 3.03,
+   "para": 239,
+   "start": 679.574,
+   "text": "故得玉府登庸。琼宫简录。"
+  },
+  {
+   "duration": 2.717,
+   "para": 240,
+   "start": 682.604,
+   "text": "今玆勋行。视夙昨多。"
+  },
+  {
+   "duration": 3.605,
+   "para": 241,
+   "start": 685.321,
+   "text": "尔其悉力雷司。委心火部。"
+  },
+  {
+   "duration": 3.37,
+   "para": 242,
+   "start": 688.926,
+   "text": "日复日岁复岁。勋崇行著。"
+  },
+  {
+   "duration": 2.9,
+   "para": 243,
+   "start": 692.296,
+   "text": "性霁神融。克证高真。"
+  },
+  {
+   "duration": 3.5,
+   "para": 244,
+   "start": 695.196,
+   "text": "即阶妙道。惟是雷部鬼神。"
+  },
+  {
+   "duration": 2.847,
+   "para": 245,
+   "start": 698.696,
+   "text": "昼劳夕役。动有捶楚。"
+  },
+  {
+   "duration": 2.952,
+   "para": 246,
+   "start": 701.543,
+   "text": "大则考戮。屑云雕雪。"
+  },
+  {
+   "duration": 3.03,
+   "para": 247,
+   "start": 704.495,
+   "text": "无有已时。檄龙命鸦。"
+  },
+  {
+   "duration": 2.116,
+   "para": 248,
+   "start": 707.525,
+   "text": "此息彼作。彼所因故。"
+  },
+  {
+   "duration": 2.351,
+   "para": 249,
+   "start": 709.641,
+   "text": "尔其耳焉。雷师皓翁。"
+  },
+  {
+   "duration": 2.952,
+   "para": 250,
+   "start": 711.992,
+   "text": "及诸天诸仙。耸耳而默。"
+  },
+  {
+   "duration": 2.664,
+   "para": 251,
+   "start": 714.944,
+   "text": "天尊所坐九凤丹霞之扆。"
+  },
+  {
+   "duration": 1.881,
+   "para": 252,
+   "start": 717.608,
+   "text": "手举金光明之如意。"
+  },
+  {
+   "duration": 2.56,
+   "para": 253,
+   "start": 719.489,
+   "text": "琅风清微。绮云郁丽。"
+  },
+  {
+   "duration": 1.698,
+   "para": 254,
+   "start": 722.049,
+   "text": "天尊寂然良久。"
+  },
+  {
+   "duration": 1.28,
+   "para": 255,
+   "start": 723.747,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.247,
+   "para": 256,
+   "start": 725.027,
+   "text": "吾昔于千五百劫。"
+  },
+  {
+   "duration": 2.429,
+   "para": 257,
+   "start": 727.274,
+   "text": "以先心缝此道。"
+  },
+  {
+   "duration": 2.978,
+   "para": 258,
+   "start": 729.703,
+   "text": "遂位上真。意酿此功。"
+  },
+  {
+   "duration": 4.284,
+   "para": 259,
+   "start": 732.681,
+   "text": "遂权大化。尝于大罗元始天尊前。"
+  },
+  {
+   "duration": 2.429,
+   "para": 260,
+   "start": 736.965,
+   "text": "以清浄心。发广大愿。"
+  },
+  {
+   "duration": 2.534,
+   "para": 261,
+   "start": 739.394,
+   "text": "愿于未来世。一切众生。"
+  },
+  {
+   "duration": 2.952,
+   "para": 262,
+   "start": 741.928,
+   "text": "天龙鬼神。一称吾名。"
+  },
+  {
+   "duration": 3.135,
+   "para": 263,
+   "start": 744.88,
+   "text": "悉使超涣。如所否者。"
+  },
+  {
+   "duration": 2.116,
+   "para": 264,
+   "start": 748.015,
+   "text": "吾当以身身之。"
+  },
+  {
+   "duration": 2.612,
+   "para": 265,
+   "start": 750.131,
+   "text": "尔等洗心。为尔宣说。"
+  },
+  {
+   "duration": 1.358,
+   "para": 266,
+   "start": 752.743,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.952,
+   "para": 267,
+   "start": 754.101,
+   "text": "尔诸天人。欲闻至道。"
+  },
+  {
+   "duration": 1.829,
+   "para": 268,
+   "start": 757.053,
+   "text": "至道深窈。不在其他。"
+  },
+  {
+   "duration": 3.318,
+   "para": 269,
+   "start": 758.882,
+   "text": "尔既欲闻。无闻者是无闻。"
+  },
+  {
+   "duration": 3.135,
+   "para": 270,
+   "start": 762.2,
+   "text": "有见即是真道。闻见亦泯。"
+  },
+  {
+   "duration": 2.247,
+   "para": 271,
+   "start": 765.335,
+   "text": "惟尔而已。尔尚非有。"
+  },
+  {
+   "duration": 3.03,
+   "para": 272,
+   "start": 767.582,
+   "text": "何况于道。不闻而闻。"
+  },
+  {
+   "duration": 1.228,
+   "para": 273,
+   "start": 770.612,
+   "text": "何道可谈。"
+  },
+  {
+   "duration": 1.515,
+   "para": 274,
+   "start": 771.84,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 3.396,
+   "para": 275,
+   "start": 773.355,
+   "text": "道者。以诚而入。以默而守。"
+  },
+  {
+   "duration": 2.769,
+   "para": 276,
+   "start": 776.751,
+   "text": "以柔而用。用诚似愚。"
+  },
+  {
+   "duration": 3.213,
+   "para": 277,
+   "start": 779.52,
+   "text": "用默似讷。用柔似拙。"
+  },
+  {
+   "duration": 2.247,
+   "para": 278,
+   "start": 782.733,
+   "text": "夫如是则可与忘形。"
+  },
+  {
+   "duration": 2.612,
+   "para": 279,
+   "start": 784.98,
+   "text": "可与忘我。可与忘忘。"
+  },
+  {
+   "duration": 2.664,
+   "para": 280,
+   "start": 787.592,
+   "text": "入道者知止。守道者知谨。"
+  },
+  {
+   "duration": 1.593,
+   "para": 281,
+   "start": 790.256,
+   "text": "用道者知微。"
+  },
+  {
+   "duration": 2.795,
+   "para": 282,
+   "start": 791.849,
+   "text": "能知微。则慧光生。"
+  },
+  {
+   "duration": 2.064,
+   "para": 283,
+   "start": 794.644,
+   "text": "能知谨。则圣智全。"
+  },
+  {
+   "duration": 2.717,
+   "para": 284,
+   "start": 796.708,
+   "text": "能知止。则泰定安。"
+  },
+  {
+   "duration": 2.769,
+   "para": 285,
+   "start": 799.425,
+   "text": "泰定安。则圣智全。"
+  },
+  {
+   "duration": 2.717,
+   "para": 286,
+   "start": 802.194,
+   "text": "圣智全。则慧光生。"
+  },
+  {
+   "duration": 2.717,
+   "para": 287,
+   "start": 804.911,
+   "text": "慧光生。则与道为一。"
+  },
+  {
+   "duration": 3.135,
+   "para": 288,
+   "start": 807.628,
+   "text": "是名真忘。惟其忘。"
+  },
+  {
+   "duration": 2.351,
+   "para": 289,
+   "start": 810.763,
+   "text": "而不忘。忘无可忘。"
+  },
+  {
+   "duration": 1.306,
+   "para": 290,
+   "start": 813.114,
+   "text": "无可忘者。"
+  },
+  {
+   "duration": 3.082,
+   "para": 291,
+   "start": 814.42,
+   "text": "即是至道。道在天地。"
+  },
+  {
+   "duration": 2.612,
+   "para": 292,
+   "start": 817.502,
+   "text": "天地不知。有情无情。"
+  },
+  {
+   "duration": 2.011,
+   "para": 293,
+   "start": 820.114,
+   "text": "惟一无二。"
+  },
+  {
+   "duration": 1.28,
+   "para": 294,
+   "start": 822.125,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 3.553,
+   "para": 295,
+   "start": 823.405,
+   "text": "吾今于世。何以利生。"
+  },
+  {
+   "duration": 2.717,
+   "para": 296,
+   "start": 826.958,
+   "text": "为诸天人。演此妙宝。"
+  },
+  {
+   "duration": 3.918,
+   "para": 297,
+   "start": 829.675,
+   "text": "得悟之者。俾跻仙阼。"
+  },
+  {
+   "duration": 2.482,
+   "para": 298,
+   "start": 833.593,
+   "text": "学道之士。信有气数。"
+  },
+  {
+   "duration": 3.814,
+   "para": 299,
+   "start": 836.075,
+   "text": "夫风土不同。则禀受自异。"
+  },
+  {
+   "duration": 2.482,
+   "para": 300,
+   "start": 839.889,
+   "text": "故谓之气。智愚不同。"
+  },
+  {
+   "duration": 2.717,
+   "para": 301,
+   "start": 842.371,
+   "text": "财清浊自异。故谓之数。"
+  },
+  {
+   "duration": 2.429,
+   "para": 302,
+   "start": 845.088,
+   "text": "数系乎命。气系乎天。"
+  },
+  {
+   "duration": 2.56,
+   "para": 303,
+   "start": 847.517,
+   "text": "气数所囿。天命所梏。"
+  },
+  {
+   "duration": 2.429,
+   "para": 304,
+   "start": 850.077,
+   "text": "不得真道。愚可以智。"
+  },
+  {
+   "duration": 2.9,
+   "para": 305,
+   "start": 852.506,
+   "text": "浊可以清。惟命俾之。"
+  },
+  {
+   "duration": 2.194,
+   "para": 306,
+   "start": 855.406,
+   "text": "愚昏昏。独冥冥。"
+  },
+  {
+   "duration": 2.351,
+   "para": 307,
+   "start": 857.6,
+   "text": "亦风土禀受之移之。"
+  },
+  {
+   "duration": 3.082,
+   "para": 308,
+   "start": 859.951,
+   "text": "天地神其机。使人不知。"
+  },
+  {
+   "duration": 2.429,
+   "para": 309,
+   "start": 863.033,
+   "text": "则日自然。使知其不知。"
+  },
+  {
+   "duration": 2.717,
+   "para": 310,
+   "start": 865.462,
+   "text": "则亦日自然。自然之妙。"
+  },
+  {
+   "duration": 2.429,
+   "para": 311,
+   "start": 868.179,
+   "text": "虽妙于知。而所以妙。"
+  },
+  {
+   "duration": 3.135,
+   "para": 312,
+   "start": 870.608,
+   "text": "则自乎不知。然于道射未始。"
+  },
+  {
+   "duration": 1.776,
+   "para": 313,
+   "start": 873.743,
+   "text": "有以愚之浊之。"
+  },
+  {
+   "duration": 2.978,
+   "para": 314,
+   "start": 875.519,
+   "text": "诸天闻已。四众咸悦。"
+  },
+  {
+   "duration": 1.228,
+   "para": 315,
+   "start": 878.497,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 3.788,
+   "para": 316,
+   "start": 879.725,
+   "text": "吾今所说。即是玉枢宝经。"
+  },
+  {
+   "duration": 3.265,
+   "para": 317,
+   "start": 883.513,
+   "text": "若未来世。有诸众生。"
+  },
+  {
+   "duration": 3.448,
+   "para": 318,
+   "start": 886.778,
+   "text": "得闻吾名。但冥心默想。"
+  },
+  {
+   "duration": 1.228,
+   "para": 319,
+   "start": 890.226,
+   "text": "作是念。"
+  },
+  {
+   "duration": 3.135,
+   "para": 320,
+   "start": 891.454,
+   "text": "言九天应元雷声普化天尊。"
+  },
+  {
+   "duration": 3.866,
+   "para": 321,
+   "start": 894.589,
+   "text": "或一声。或五七声。或千百声。"
+  },
+  {
+   "duration": 3.788,
+   "para": 322,
+   "start": 898.455,
+   "text": "吾即化形十方。运心三界。"
+  },
+  {
+   "duration": 2.795,
+   "para": 323,
+   "start": 902.243,
+   "text": "使称名者。咸得如意。"
+  },
+  {
+   "duration": 3.135,
+   "para": 324,
+   "start": 905.038,
+   "text": "十方三界。诸天诸地。"
+  },
+  {
+   "duration": 3.318,
+   "para": 325,
+   "start": 908.173,
+   "text": "日月星辰。山河草木。"
+  },
+  {
+   "duration": 1.28,
+   "para": 326,
+   "start": 911.491,
+   "text": "飞走蠢动。"
+  },
+  {
+   "duration": 2.351,
+   "para": 327,
+   "start": 912.771,
+   "text": "若有知。若无知。"
+  },
+  {
+   "duration": 3.553,
+   "para": 328,
+   "start": 915.122,
+   "text": "天龙鬼神。闻诸众生。"
+  },
+  {
+   "duration": 2.795,
+   "para": 329,
+   "start": 918.675,
+   "text": "一称吾名。如有不顺者。"
+  },
+  {
+   "duration": 2.847,
+   "para": 330,
+   "start": 921.47,
+   "text": "馘首剖心。化为微尘。"
+  },
+  {
+   "duration": 1.175,
+   "para": 331,
+   "start": 924.317,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 1.959,
+   "para": 332,
+   "start": 925.492,
+   "text": "吾是九天贞明大圣。"
+  },
+  {
+   "duration": 2.952,
+   "para": 333,
+   "start": 927.451,
+   "text": "每月初六。及旬中辛日。"
+  },
+  {
+   "duration": 2.717,
+   "para": 334,
+   "start": 930.403,
+   "text": "监观万天。浮游三界。"
+  },
+  {
+   "duration": 1.933,
+   "para": 335,
+   "start": 933.12,
+   "text": "若或有人欲学道。"
+  },
+  {
+   "duration": 2.299,
+   "para": 336,
+   "start": 935.053,
+   "text": "欲希仙。欲这九玄。"
+  },
+  {
+   "duration": 3.03,
+   "para": 337,
+   "start": 937.352,
+   "text": "欲释三灾。当命正一道士。"
+  },
+  {
+   "duration": 2.612,
+   "para": 338,
+   "start": 940.382,
+   "text": "或自同亲友于楼观。"
+  },
+  {
+   "duration": 2.534,
+   "para": 339,
+   "start": 942.994,
+   "text": "于家庭。于里社。"
+  },
+  {
+   "duration": 2.377,
+   "para": 340,
+   "start": 945.528,
+   "text": "釂水馈花。课诵此经。"
+  },
+  {
+   "duration": 2.795,
+   "para": 341,
+   "start": 947.905,
+   "text": "或一过。三五过。"
+  },
+  {
+   "duration": 1.593,
+   "para": 342,
+   "start": 950.7,
+   "text": "乃至数十百过。"
+  },
+  {
+   "duration": 3.553,
+   "para": 343,
+   "start": 952.293,
+   "text": "即得神清气爽。心广体胖。"
+  },
+  {
+   "duration": 2.717,
+   "para": 344,
+   "start": 955.846,
+   "text": "凡所希求。悉应其感。"
+  },
+  {
+   "duration": 1.411,
+   "para": 345,
+   "start": 958.563,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.769,
+   "para": 346,
+   "start": 959.974,
+   "text": "身中九灵。何不召之。"
+  },
+  {
+   "duration": 2.429,
+   "para": 347,
+   "start": 962.743,
+   "text": "一曰天生。二曰无英。"
+  },
+  {
+   "duration": 2.717,
+   "para": 348,
+   "start": 965.172,
+   "text": "三曰玄珠。四曰正中。"
+  },
+  {
+   "duration": 3.187,
+   "para": 349,
+   "start": 967.889,
+   "text": "五曰孓丹。六曰回雷。"
+  },
+  {
+   "duration": 2.56,
+   "para": 350,
+   "start": 971.076,
+   "text": "七曰丹元。八曰太渊。"
+  },
+  {
+   "duration": 2.847,
+   "para": 351,
+   "start": 973.636,
+   "text": "九曰灵童。召之则吉。"
+  },
+  {
+   "duration": 2.429,
+   "para": 352,
+   "start": 976.483,
+   "text": "身中三精。何不呼之。"
+  },
+  {
+   "duration": 2.56,
+   "para": 353,
+   "start": 978.912,
+   "text": "一曰台光。二曰爽灵。"
+  },
+  {
+   "duration": 2.429,
+   "para": 354,
+   "start": 981.472,
+   "text": "三日幽精。呼之则庆。"
+  },
+  {
+   "duration": 3.135,
+   "para": 355,
+   "start": 983.901,
+   "text": "五心烦懑。六脉抢攘。"
+  },
+  {
+   "duration": 2.769,
+   "para": 356,
+   "start": 987.036,
+   "text": "四肢失宁。百节告急。"
+  },
+  {
+   "duration": 1.593,
+   "para": 357,
+   "start": 989.805,
+   "text": "宜诵此经。"
+  },
+  {
+   "duration": 1.097,
+   "para": 358,
+   "start": 991.398,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 3.37,
+   "para": 359,
+   "start": 992.495,
+   "text": "若或有人。五行奇蹇。"
+  },
+  {
+   "duration": 3.736,
+   "para": 360,
+   "start": 995.865,
+   "text": "九曜嵚崎。年逢刑冲。"
+  },
+  {
+   "duration": 3.187,
+   "para": 361,
+   "start": 999.601,
+   "text": "运值克战。孤辰寡宿。"
+  },
+  {
+   "duration": 2.9,
+   "para": 362,
+   "start": 1002.788,
+   "text": "羊刃剑锋。劫煞亡神。"
+  },
+  {
+   "duration": 2.769,
+   "para": 363,
+   "start": 1005.688,
+   "text": "鬼门钩绞。禄遭破败。"
+  },
+  {
+   "duration": 3.03,
+   "para": 364,
+   "start": 1008.457,
+   "text": "马落空亡。动用凶危。"
+  },
+  {
+   "duration": 2.429,
+   "para": 365,
+   "start": 1011.487,
+   "text": "行藏坎禀。即诵此经。"
+  },
+  {
+   "duration": 2.847,
+   "para": 366,
+   "start": 1013.916,
+   "text": "上请。天官解天厄。"
+  },
+  {
+   "duration": 3.265,
+   "para": 367,
+   "start": 1016.763,
+   "text": "地官解地厄。水官解水厄。"
+  },
+  {
+   "duration": 3.631,
+   "para": 368,
+   "start": 1020.028,
+   "text": "五帝解五方厄。四圣解四时厄。"
+  },
+  {
+   "duration": 4.206,
+   "para": 369,
+   "start": 1023.659,
+   "text": "南辰解本命厄。北斗解一切厄。"
+  },
+  {
+   "duration": 1.175,
+   "para": 370,
+   "start": 1027.865,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 3.5,
+   "para": 371,
+   "start": 1029.04,
+   "text": "沉疴伏枕。症疾压身。"
+  },
+  {
+   "duration": 2.717,
+   "para": 372,
+   "start": 1032.54,
+   "text": "积时弗廖。求医罔效。"
+  },
+  {
+   "duration": 2.795,
+   "para": 373,
+   "start": 1035.257,
+   "text": "五神无主。四大不收。"
+  },
+  {
+   "duration": 2.664,
+   "para": 374,
+   "start": 1038.052,
+   "text": "或是五帝。三官之前。"
+  },
+  {
+   "duration": 2.847,
+   "para": 375,
+   "start": 1040.716,
+   "text": "日月星辰之前。山林草木之前。"
+  },
+  {
+   "duration": 4.232,
+   "para": 376,
+   "start": 1043.563,
+   "text": "灵坛古迹之前。城隍社庙之前。"
+  },
+  {
+   "duration": 3.37,
+   "para": 377,
+   "start": 1047.795,
+   "text": "里巷井灶之前。寺观塔楼之前。"
+  },
+  {
+   "duration": 3.736,
+   "para": 378,
+   "start": 1051.165,
+   "text": "或地府三十六狱。冥官七十二司。"
+  },
+  {
+   "duration": 3.918,
+   "para": 379,
+   "start": 1054.901,
+   "text": "有诸冤枉。至此牵缠。"
+  },
+  {
+   "duration": 2.429,
+   "para": 380,
+   "start": 1058.819,
+   "text": "或盟诅咒誓之所招。"
+  },
+  {
+   "duration": 2.247,
+   "para": 381,
+   "start": 1061.248,
+   "text": "或债垛负偿之所致。"
+  },
+  {
+   "duration": 3.082,
+   "para": 382,
+   "start": 1063.495,
+   "text": "三世结衅。异劫兴仇。"
+  },
+  {
+   "duration": 3.03,
+   "para": 383,
+   "start": 1066.577,
+   "text": "埒其咎尤。库其执对。"
+  },
+  {
+   "duration": 2.482,
+   "para": 384,
+   "start": 1069.607,
+   "text": "皆当首谢。即诵此经。"
+  },
+  {
+   "duration": 1.097,
+   "para": 385,
+   "start": 1072.089,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.769,
+   "para": 386,
+   "start": 1073.186,
+   "text": "天官符。地官符。"
+  },
+  {
+   "duration": 3.187,
+   "para": 387,
+   "start": 1075.955,
+   "text": "年月日时。各有官符。"
+  },
+  {
+   "duration": 3.135,
+   "para": 388,
+   "start": 1079.142,
+   "text": "方隅向背。各有官符。"
+  },
+  {
+   "duration": 2.612,
+   "para": 389,
+   "start": 1082.277,
+   "text": "大则官符。小则口舌。"
+  },
+  {
+   "duration": 2.429,
+   "para": 390,
+   "start": 1084.889,
+   "text": "是有赤口白舌之神以主之。"
+  },
+  {
+   "duration": 1.829,
+   "para": 391,
+   "start": 1087.318,
+   "text": "凡诸动作兴举。"
+  },
+  {
+   "duration": 2.534,
+   "para": 392,
+   "start": 1089.147,
+   "text": "出入起居。不知避忌。"
+  },
+  {
+   "duration": 3.187,
+   "para": 393,
+   "start": 1091.681,
+   "text": "如遇官符口舌。则使人击聒。"
+  },
+  {
+   "duration": 3.187,
+   "para": 394,
+   "start": 1094.868,
+   "text": "晓夜煎㛀。多招唇吻。"
+  },
+  {
+   "duration": 2.377,
+   "para": 395,
+   "start": 1098.055,
+   "text": "面是背非。动致口牙。"
+  },
+  {
+   "duration": 3.135,
+   "para": 396,
+   "start": 1100.432,
+   "text": "盟神诅佛。始于讟议。"
+  },
+  {
+   "duration": 3.631,
+   "para": 397,
+   "start": 1103.567,
+   "text": "终于诟诋。由是狱讼生焉。"
+  },
+  {
+   "duration": 2.482,
+   "para": 398,
+   "start": 1107.198,
+   "text": "刑宪存焉。若欲脱之。"
+  },
+  {
+   "duration": 2.978,
+   "para": 399,
+   "start": 1109.68,
+   "text": "即诵此经。遂得口舌潜消。"
+  },
+  {
+   "duration": 1.593,
+   "para": 400,
+   "start": 1112.658,
+   "text": "官符永息。"
+  },
+  {
+   "duration": 1.228,
+   "para": 401,
+   "start": 1114.251,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.847,
+   "para": 402,
+   "start": 1115.479,
+   "text": "土皇九垒。其司千二百神。"
+  },
+  {
+   "duration": 2.612,
+   "para": 403,
+   "start": 1118.326,
+   "text": "土侯土伯。土公土母。"
+  },
+  {
+   "duration": 2.717,
+   "para": 404,
+   "start": 1120.938,
+   "text": "土子土孙。土家眷属。"
+  },
+  {
+   "duration": 2.482,
+   "para": 405,
+   "start": 1123.655,
+   "text": "若太岁。若将军。"
+  },
+  {
+   "duration": 2.429,
+   "para": 406,
+   "start": 1126.137,
+   "text": "若鹤神。若太白。"
+  },
+  {
+   "duration": 2.247,
+   "para": 407,
+   "start": 1128.566,
+   "text": "若九良。若剑锋。"
+  },
+  {
+   "duration": 2.9,
+   "para": 408,
+   "start": 1130.813,
+   "text": "若雌雄。若金神。"
+  },
+  {
+   "duration": 2.429,
+   "para": 409,
+   "start": 1133.713,
+   "text": "若火血。若身黄。"
+  },
+  {
+   "duration": 2.56,
+   "para": 410,
+   "start": 1136.142,
+   "text": "若撞命。若三煞。"
+  },
+  {
+   "duration": 3.448,
+   "para": 411,
+   "start": 1138.702,
+   "text": "若七煞。若黄旛豹尾。"
+  },
+  {
+   "duration": 4.023,
+   "para": 412,
+   "start": 1142.15,
+   "text": "若飞廉刀砧。如是等土家神煞。"
+  },
+  {
+   "duration": 3.37,
+   "para": 413,
+   "start": 1146.173,
+   "text": "若人兴修卜筑。一或犯之。"
+  },
+  {
+   "duration": 2.952,
+   "para": 414,
+   "start": 1149.543,
+   "text": "即致病患。以迄丧亡。"
+  },
+  {
+   "duration": 2.56,
+   "para": 415,
+   "start": 1152.495,
+   "text": "才诵此经。则万神皆起。"
+  },
+  {
+   "duration": 2.299,
+   "para": 416,
+   "start": 1155.055,
+   "text": "天无忌。地无忌。"
+  },
+  {
+   "duration": 3.135,
+   "para": 417,
+   "start": 1157.354,
+   "text": "阴阳无忌。百无禁忌。"
+  },
+  {
+   "duration": 1.358,
+   "para": 418,
+   "start": 1160.489,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.717,
+   "para": 419,
+   "start": 1161.847,
+   "text": "世人夫妇。其于婚合。"
+  },
+  {
+   "duration": 2.299,
+   "para": 420,
+   "start": 1164.564,
+   "text": "或犯咸池。或犯天狗。"
+  },
+  {
+   "duration": 3.736,
+   "para": 421,
+   "start": 1166.863,
+   "text": "三刑六害。隔角交加。"
+  },
+  {
+   "duration": 2.978,
+   "para": 422,
+   "start": 1170.599,
+   "text": "孤阴寡阳。天罗地网。"
+  },
+  {
+   "duration": 2.664,
+   "para": 423,
+   "start": 1173.577,
+   "text": "艰于嗣息。多是孤独。"
+  },
+  {
+   "duration": 2.56,
+   "para": 424,
+   "start": 1176.241,
+   "text": "若欲求男。即诵此经。"
+  },
+  {
+   "duration": 1.881,
+   "para": 425,
+   "start": 1178.801,
+   "text": "当有九天监生大神。"
+  },
+  {
+   "duration": 2.769,
+   "para": 426,
+   "start": 1180.682,
+   "text": "招神摄风。遂生贤子。"
+  },
+  {
+   "duration": 3.187,
+   "para": 427,
+   "start": 1183.451,
+   "text": "于其生产之时。太一在门。"
+  },
+  {
+   "duration": 2.9,
+   "para": 428,
+   "start": 1186.638,
+   "text": "司命在庭。或有冤愆。"
+  },
+  {
+   "duration": 2.952,
+   "para": 429,
+   "start": 1189.538,
+   "text": "或有鬼魅。或有禁忌。"
+  },
+  {
+   "duration": 1.829,
+   "para": 430,
+   "start": 1192.49,
+   "text": "或有凶厄。致令难产。"
+  },
+  {
+   "duration": 3.03,
+   "para": 431,
+   "start": 1194.319,
+   "text": "请诵此经。即得九天卫房。"
+  },
+  {
+   "duration": 4.023,
+   "para": 432,
+   "start": 1197.349,
+   "text": "圣母默与抱送。故能临盆有庆。"
+  },
+  {
+   "duration": 3.135,
+   "para": 433,
+   "start": 1201.372,
+   "text": "坐草无虞。凡有婴孩。"
+  },
+  {
+   "duration": 2.978,
+   "para": 434,
+   "start": 1204.507,
+   "text": "在于襁褓。为栴檀神王。"
+  },
+  {
+   "duration": 2.847,
+   "para": 435,
+   "start": 1207.485,
+   "text": "座下一十五种鬼。加诸恼害。"
+  },
+  {
+   "duration": 2.612,
+   "para": 436,
+   "start": 1210.332,
+   "text": "因多惊痫。宜诵此经。"
+  },
+  {
+   "duration": 1.411,
+   "para": 437,
+   "start": 1212.944,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.795,
+   "para": 438,
+   "start": 1214.355,
+   "text": "若人居止。乌鼠送妖。"
+  },
+  {
+   "duration": 2.952,
+   "para": 439,
+   "start": 1217.15,
+   "text": "蛇虫嫁孽。抛砖掷瓦。"
+  },
+  {
+   "duration": 3.5,
+   "para": 440,
+   "start": 1220.102,
+   "text": "惊鸡弄狗。邀求祭杞。"
+  },
+  {
+   "duration": 3.265,
+   "para": 441,
+   "start": 1223.602,
+   "text": "以至影胁梦逼。及于奸盗。"
+  },
+  {
+   "duration": 2.534,
+   "para": 442,
+   "start": 1226.867,
+   "text": "而敢据其所居。以为巢穴。"
+  },
+  {
+   "duration": 3.135,
+   "para": 443,
+   "start": 1229.401,
+   "text": "遂使生人被惑。庭户不清。"
+  },
+  {
+   "duration": 2.847,
+   "para": 444,
+   "start": 1232.536,
+   "text": "夜啸于梁。昼瞰其室。"
+  },
+  {
+   "duration": 3.213,
+   "para": 445,
+   "start": 1235.383,
+   "text": "牛马犬豕。亦遭瘟疫。"
+  },
+  {
+   "duration": 2.56,
+   "para": 446,
+   "start": 1238.596,
+   "text": "祸连骨肉。灾及孳生。"
+  },
+  {
+   "duration": 2.717,
+   "para": 447,
+   "start": 1241.156,
+   "text": "淫祠祆社。党庇神奸。"
+  },
+  {
+   "duration": 2.534,
+   "para": 448,
+   "start": 1243.873,
+   "text": "吊客频仍。丧车叠出。"
+  },
+  {
+   "duration": 3.37,
+   "para": 449,
+   "start": 1246.407,
+   "text": "若诵此经。即使鬼精灭爽。"
+  },
+  {
+   "duration": 1.646,
+   "para": 450,
+   "start": 1249.777,
+   "text": "人物咸宁。"
+  },
+  {
+   "duration": 1.411,
+   "para": 451,
+   "start": 1251.423,
+   "text": "天尊曰。"
+  },
+  {
+   "duration": 3.605,
+   "para": 452,
+   "start": 1252.834,
+   "text": "九天雷公将军。五方雷公将军。"
+  },
+  {
+   "duration": 2.952,
+   "para": 453,
+   "start": 1256.439,
+   "text": "八方云雷将军。五方蛮雷使者。"
+  },
+  {
+   "duration": 3.187,
+   "para": 454,
+   "start": 1259.391,
+   "text": "雷部总兵使者。莫赚判官。"
+  },
+  {
+   "duration": 2.351,
+   "para": 455,
+   "start": 1262.578,
+   "text": "发号施令。疾如风火。"
+  },
+  {
+   "duration": 2.978,
+   "para": 456,
+   "start": 1264.929,
+   "text": "有庙可伐。有坛可击。"
+  },
+  {
+   "duration": 3.553,
+   "para": 457,
+   "start": 1267.907,
+   "text": "有妖可除。有祟可遣。"
+  },
+  {
+   "duration": 2.9,
+   "para": 458,
+   "start": 1271.46,
+   "text": "季世末法。多诸巫觋。"
+  },
+  {
+   "duration": 3.082,
+   "para": 459,
+   "start": 1274.36,
+   "text": "邪法流行。阴肆魇祷。"
+  },
+  {
+   "duration": 1.515,
+   "para": 460,
+   "start": 1277.442,
+   "text": "是故上清。"
+  },
+  {
+   "duration": 2.377,
+   "para": 461,
+   "start": 1278.957,
+   "text": "乃有天延禁鬼录奸之庭。"
+  },
+  {
+   "duration": 2.534,
+   "para": 462,
+   "start": 1281.334,
+   "text": "帝由束妖考邪之房。"
+  },
+  {
+   "duration": 2.717,
+   "para": 463,
+   "start": 1283.868,
+   "text": "能诵此经。其应如响。"
+  },
+  {
+   "duration": 1.123,
+   "para": 464,
+   "start": 1286.585,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.482,
+   "para": 465,
+   "start": 1287.708,
+   "text": "天瘟地瘟。二十五瘟。"
+  },
+  {
+   "duration": 2.011,
+   "para": 466,
+   "start": 1290.19,
+   "text": "天蛊地蛊。二十四蛊。"
+  },
+  {
+   "duration": 2.717,
+   "para": 467,
+   "start": 1292.201,
+   "text": "天瘵地瘵。三十六瘵。"
+  },
+  {
+   "duration": 3.605,
+   "para": 468,
+   "start": 1294.918,
+   "text": "能诵此经。即使瘟皇清浄。"
+  },
+  {
+   "duration": 3.187,
+   "para": 469,
+   "start": 1298.523,
+   "text": "蛊毒消除。劳瘵平复。"
+  },
+  {
+   "duration": 1.28,
+   "para": 470,
+   "start": 1301.71,
+   "text": "亦有其由。"
+  },
+  {
+   "duration": 2.847,
+   "para": 471,
+   "start": 1302.99,
+   "text": "或者先亡复连。或者伏尸故气。"
+  },
+  {
+   "duration": 2.9,
+   "para": 472,
+   "start": 1305.837,
+   "text": "或者冢讼墓注。或者死魂染惹。"
+  },
+  {
+   "duration": 1.593,
+   "para": 473,
+   "start": 1308.737,
+   "text": "或者尸气感招。"
+  },
+  {
+   "duration": 1.411,
+   "para": 474,
+   "start": 1310.33,
+   "text": "凡此鬼神。或悲思。"
+  },
+  {
+   "duration": 2.142,
+   "para": 475,
+   "start": 1311.741,
+   "text": "或志恨牵连执证。"
+  },
+  {
+   "duration": 3.605,
+   "para": 476,
+   "start": 1313.883,
+   "text": "并缘注射。并音塝射音石。"
+  },
+  {
+   "duration": 3.318,
+   "para": 477,
+   "start": 1317.488,
+   "text": "乘隙伺间。间音谏。"
+  },
+  {
+   "duration": 2.978,
+   "para": 478,
+   "start": 1320.806,
+   "text": "乃得其便。故此经者。"
+  },
+  {
+   "duration": 2.717,
+   "para": 479,
+   "start": 1323.784,
+   "text": "上通三天。下彻九泉。"
+  },
+  {
+   "duration": 2.952,
+   "para": 480,
+   "start": 1326.501,
+   "text": "可以追荐魂爽。超度祖玄。"
+  },
+  {
+   "duration": 3.265,
+   "para": 481,
+   "start": 1329.453,
+   "text": "太上遣素车白马大将军以监之。"
+  },
+  {
+   "duration": 1.358,
+   "para": 482,
+   "start": 1332.718,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.612,
+   "para": 483,
+   "start": 1334.076,
+   "text": "若或有人。治装远行。"
+  },
+  {
+   "duration": 3.37,
+   "para": 484,
+   "start": 1336.688,
+   "text": "贼盗骋奸。五兵加害。"
+  },
+  {
+   "duration": 2.482,
+   "para": 485,
+   "start": 1340.058,
+   "text": "陆行则虎狼魈蜮磨其牙。"
+  },
+  {
+   "duration": 2.664,
+   "para": 486,
+   "start": 1342.54,
+   "text": "水行则蛟龙灶鼍张其颐。"
+  },
+  {
+   "duration": 2.299,
+   "para": 487,
+   "start": 1345.204,
+   "text": "或难赖有幽枉之魂。"
+  },
+  {
+   "duration": 2.194,
+   "para": 488,
+   "start": 1347.503,
+   "text": "或风涛有劫数之会。"
+  },
+  {
+   "duration": 3.135,
+   "para": 489,
+   "start": 1349.697,
+   "text": "前亡后化。捉生代死。"
+  },
+  {
+   "duration": 2.194,
+   "para": 490,
+   "start": 1352.832,
+   "text": "能于此经归命投诚。"
+  },
+  {
+   "duration": 2.978,
+   "para": 491,
+   "start": 1355.026,
+   "text": "故得水陆平康。行藏协吉。"
+  },
+  {
+   "duration": 2.9,
+   "para": 492,
+   "start": 1358.004,
+   "text": "天尊言。亢阳为虐。"
+  },
+  {
+   "duration": 2.664,
+   "para": 493,
+   "start": 1360.904,
+   "text": "雨泽愆期。稽颡此经。"
+  },
+  {
+   "duration": 3.213,
+   "para": 494,
+   "start": 1363.568,
+   "text": "应时甘澍。积阴为厉。"
+  },
+  {
+   "duration": 2.847,
+   "para": 495,
+   "start": 1366.781,
+   "text": "雨水浸淫。稽颡此经。"
+  },
+  {
+   "duration": 3.187,
+   "para": 496,
+   "start": 1369.628,
+   "text": "应时朗霁。祝融扇祸。"
+  },
+  {
+   "duration": 2.56,
+   "para": 497,
+   "start": 1372.815,
+   "text": "飞火民居。赤鼠游城。"
+  },
+  {
+   "duration": 2.9,
+   "para": 498,
+   "start": 1375.375,
+   "text": "惊热黎庶。此经可以禳之。"
+  },
+  {
+   "duration": 2.429,
+   "para": 499,
+   "start": 1378.275,
+   "text": "海若失经。鱼龞妄行。"
+  },
+  {
+   "duration": 2.612,
+   "para": 500,
+   "start": 1380.704,
+   "text": "洪水稽天。民生垫溺。"
+  },
+  {
+   "duration": 1.698,
+   "para": 501,
+   "start": 1383.316,
+   "text": "此经可以止之。"
+  },
+  {
+   "duration": 0.888,
+   "para": 502,
+   "start": 1385.014,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.9,
+   "para": 503,
+   "start": 1385.902,
+   "text": "世人欲免。三灾九横之厄。"
+  },
+  {
+   "duration": 3.03,
+   "para": 504,
+   "start": 1388.802,
+   "text": "即于静夜。稽首北辰。"
+  },
+  {
+   "duration": 3.03,
+   "para": 505,
+   "start": 1391.832,
+   "text": "北辰之上。上有三台。"
+  },
+  {
+   "duration": 3.318,
+   "para": 506,
+   "start": 1394.862,
+   "text": "其星并踱。形如双目。"
+  },
+  {
+   "duration": 3.448,
+   "para": 507,
+   "start": 1398.18,
+   "text": "叠为三级。以覆斗魁。"
+  },
+  {
+   "duration": 1.306,
+   "para": 508,
+   "start": 1401.628,
+   "text": "是名天阶。"
+  },
+  {
+   "duration": 3.5,
+   "para": 509,
+   "start": 1402.934,
+   "text": "若人见之。生前无刑囚之忧。"
+  },
+  {
+   "duration": 1.698,
+   "para": 510,
+   "start": 1406.434,
+   "text": "身后不沦没之苦。"
+  },
+  {
+   "duration": 3.37,
+   "para": 511,
+   "start": 1408.132,
+   "text": "斗中复有尊帝。二星大如车输。"
+  },
+  {
+   "duration": 3.082,
+   "para": 512,
+   "start": 1411.502,
+   "text": "若人见之。留形住世。"
+  },
+  {
+   "duration": 2.351,
+   "para": 513,
+   "start": 1414.584,
+   "text": "长生神仙。归命此经。"
+  },
+  {
+   "duration": 2.351,
+   "para": 514,
+   "start": 1416.935,
+   "text": "投心北极。即有冥感。"
+  },
+  {
+   "duration": 3.553,
+   "para": 515,
+   "start": 1419.286,
+   "text": "斗为天枢。中有天罡。"
+  },
+  {
+   "duration": 3.37,
+   "para": 516,
+   "start": 1422.839,
+   "text": "在内则为廉贞。在外则为破军。"
+  },
+  {
+   "duration": 3.683,
+   "para": 517,
+   "start": 1426.209,
+   "text": "雷城十二门。并随天罡之所指。"
+  },
+  {
+   "duration": 2.351,
+   "para": 518,
+   "start": 1429.892,
+   "text": "罡星指丑。其身在未。"
+  },
+  {
+   "duration": 2.612,
+   "para": 519,
+   "start": 1432.243,
+   "text": "所指者吉。所在者凶。"
+  },
+  {
+   "duration": 2.612,
+   "para": 520,
+   "start": 1434.855,
+   "text": "余位皆然。若人见之。"
+  },
+  {
+   "duration": 1.463,
+   "para": 521,
+   "start": 1437.467,
+   "text": "寿可千岁。"
+  },
+  {
+   "duration": 1.228,
+   "para": 522,
+   "start": 1438.93,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.299,
+   "para": 523,
+   "start": 1440.158,
+   "text": "世衰道微。人无德行。"
+  },
+  {
+   "duration": 2.429,
+   "para": 524,
+   "start": 1442.457,
+   "text": "不忠君王。不孝父母。"
+  },
+  {
+   "duration": 1.776,
+   "para": 525,
+   "start": 1444.886,
+   "text": "不敬师长。不友兄弟。"
+  },
+  {
+   "duration": 3.135,
+   "para": 526,
+   "start": 1446.662,
+   "text": "不诚夫妇。不义朋友。"
+  },
+  {
+   "duration": 2.952,
+   "para": 527,
+   "start": 1449.797,
+   "text": "不畏天地。不惧神明。"
+  },
+  {
+   "duration": 2.612,
+   "para": 528,
+   "start": 1452.749,
+   "text": "不礼三光。不重五谷。"
+  },
+  {
+   "duration": 2.377,
+   "para": 529,
+   "start": 1455.361,
+   "text": "身三口四。大秤小斗。"
+  },
+  {
+   "duration": 3.135,
+   "para": 530,
+   "start": 1457.738,
+   "text": "杀生害命。人百已千。"
+  },
+  {
+   "duration": 3.03,
+   "para": 531,
+   "start": 1460.873,
+   "text": "奸私邪淫。妖诬叛逆。"
+  },
+  {
+   "duration": 2.769,
+   "para": 532,
+   "start": 1463.903,
+   "text": "从微至著。三官鼓笔。"
+  },
+  {
+   "duration": 3.187,
+   "para": 533,
+   "start": 1466.672,
+   "text": "太一移文。即付五雷斩勘之司。"
+  },
+  {
+   "duration": 2.769,
+   "para": 534,
+   "start": 1469.859,
+   "text": "先斩其神。后勘其形。"
+  },
+  {
+   "duration": 2.717,
+   "para": 535,
+   "start": 1472.628,
+   "text": "斩神诛魂。使之颠倒。"
+  },
+  {
+   "duration": 2.717,
+   "para": 536,
+   "start": 1475.345,
+   "text": "人所鄙贱。人所嫌害。"
+  },
+  {
+   "duration": 3.03,
+   "para": 537,
+   "start": 1478.062,
+   "text": "人所怨恶。以至勘形震尸。"
+  },
+  {
+   "duration": 3.265,
+   "para": 538,
+   "start": 1481.092,
+   "text": "使之崩裂。驱其卷水。"
+  },
+  {
+   "duration": 3.265,
+   "para": 539,
+   "start": 1484.357,
+   "text": "役其驱车。月窍旬校。"
+  },
+  {
+   "duration": 3.5,
+   "para": 540,
+   "start": 1487.622,
+   "text": "复有考掠。一闻此经。"
+  },
+  {
+   "duration": 3.788,
+   "para": 541,
+   "start": 1491.122,
+   "text": "其罪即灭。若或有人为雷所瞋。"
+  },
+  {
+   "duration": 1.829,
+   "para": 542,
+   "start": 1494.91,
+   "text": "其尸不举。水火不受。"
+  },
+  {
+   "duration": 3.082,
+   "para": 543,
+   "start": 1496.739,
+   "text": "即称九天应元雷声普化天尊。"
+  },
+  {
+   "duration": 1.776,
+   "para": 544,
+   "start": 1499.821,
+   "text": "作是念言。"
+  },
+  {
+   "duration": 3.213,
+   "para": 545,
+   "start": 1501.597,
+   "text": "万神稽首。咸听吾命。"
+  },
+  {
+   "duration": 1.175,
+   "para": 546,
+   "start": 1504.81,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.534,
+   "para": 547,
+   "start": 1505.985,
+   "text": "此经功德。不可思议。"
+  },
+  {
+   "duration": 1.411,
+   "para": 548,
+   "start": 1508.519,
+   "text": "往昔劫中。"
+  },
+  {
+   "duration": 3.605,
+   "para": 549,
+   "start": 1509.93,
+   "text": "神霄玉清真王长生大帝所曾宣说。"
+  },
+  {
+   "duration": 3.605,
+   "para": 550,
+   "start": 1513.535,
+   "text": "至士授经。皆当剸金置币。"
+  },
+  {
+   "duration": 4.467,
+   "para": 551,
+   "start": 1517.14,
+   "text": "盟天以传。雷师皓翕。长跪拜兴。"
+  },
+  {
+   "duration": 3.396,
+   "para": 552,
+   "start": 1521.607,
+   "text": "重白天尊言。是经在处。"
+  },
+  {
+   "duration": 3.605,
+   "para": 553,
+   "start": 1525.003,
+   "text": "当令土地司命。随所守护。"
+  },
+  {
+   "duration": 3.971,
+   "para": 554,
+   "start": 1528.608,
+   "text": "雷部按临。以时稽审。"
+  },
+  {
+   "duration": 3.631,
+   "para": 555,
+   "start": 1532.579,
+   "text": "若人家有此经。至诚安奉。"
+  },
+  {
+   "duration": 2.142,
+   "para": 556,
+   "start": 1536.21,
+   "text": "即得祥烟满庭。庆云荫轩。"
+  },
+  {
+   "duration": 3.605,
+   "para": 557,
+   "start": 1538.352,
+   "text": "祸乱不萌。吉福来萃。"
+  },
+  {
+   "duration": 3.631,
+   "para": 558,
+   "start": 1541.957,
+   "text": "于其亡没。不经地狱。"
+  },
+  {
+   "duration": 2.717,
+   "para": 559,
+   "start": 1545.588,
+   "text": "所以者何。死即往生。"
+  },
+  {
+   "duration": 2.769,
+   "para": 560,
+   "start": 1548.305,
+   "text": "生归善道。承天尊力。"
+  },
+  {
+   "duration": 3.318,
+   "para": 561,
+   "start": 1551.074,
+   "text": "有此灵通。出入起居。"
+  },
+  {
+   "duration": 2.534,
+   "para": 562,
+   "start": 1554.392,
+   "text": "佩带此经。众人所钦。"
+  },
+  {
+   "duration": 3.213,
+   "para": 563,
+   "start": 1556.926,
+   "text": "鬼神所畏。遇诸险难。"
+  },
+  {
+   "duration": 3.736,
+   "para": 564,
+   "start": 1560.139,
+   "text": "一心称名九天应元雷声普化天尊。"
+  },
+  {
+   "duration": 1.463,
+   "para": 565,
+   "start": 1563.875,
+   "text": "悉得解脱。"
+  },
+  {
+   "duration": 2.534,
+   "para": 566,
+   "start": 1565.338,
+   "text": "于是雷师皓翁对天尊前。"
+  },
+  {
+   "duration": 1.411,
+   "para": 567,
+   "start": 1567.872,
+   "text": "而说偈曰。"
+  },
+  {
+   "duration": 3.03,
+   "para": 568,
+   "start": 1569.283,
+   "text": "无上玉清王。统天三十六。"
+  },
+  {
+   "duration": 2.534,
+   "para": 569,
+   "start": 1572.313,
+   "text": "九天普化君。化形十方界。"
+  },
+  {
+   "duration": 3.265,
+   "para": 570,
+   "start": 1574.847,
+   "text": "披发骑麒麟。赤脚蹑层冰。"
+  },
+  {
+   "duration": 3.5,
+   "para": 571,
+   "start": 1578.112,
+   "text": "手把九天炁。啸风鞭雷霆。"
+  },
+  {
+   "duration": 3.187,
+   "para": 572,
+   "start": 1581.612,
+   "text": "能以智慧力。摄伏诸魔精。"
+  },
+  {
+   "duration": 3.736,
+   "para": 573,
+   "start": 1584.799,
+   "text": "济度长夜魂。利益于众生。"
+  },
+  {
+   "duration": 3.553,
+   "para": 574,
+   "start": 1588.535,
+   "text": "如彼银河水。千眼千月轮。"
+  },
+  {
+   "duration": 3.135,
+   "para": 575,
+   "start": 1592.088,
+   "text": "誓于未来世。永扬天尊敬。"
+  },
+  {
+   "duration": 2.064,
+   "para": 576,
+   "start": 1595.223,
+   "text": "时雷师皓翁说是偈已。"
+  },
+  {
+   "duration": 0.993,
+   "para": 577,
+   "start": 1597.287,
+   "text": "天尊言。"
+  },
+  {
+   "duration": 2.377,
+   "para": 578,
+   "start": 1598.28,
+   "text": "此经传世。世人未知。"
+  },
+  {
+   "duration": 2.665,
+   "para": 579,
+   "start": 1600.657,
+   "text": "吾今所治九天应元府。"
+  },
+  {
+   "duration": 2.116,
+   "para": 580,
+   "start": 1603.322,
+   "text": "府有九天雷门使者。"
+  },
+  {
+   "duration": 2.9,
+   "para": 581,
+   "start": 1605.438,
+   "text": "以斜录典者。廉访典者佐之。"
+  },
+  {
+   "duration": 3.866,
+   "para": 582,
+   "start": 1608.338,
+   "text": "复有四司。一曰掠剩司。"
+  },
+  {
+   "duration": 3.37,
+   "para": 583,
+   "start": 1612.204,
+   "text": "二曰积逮司。三曰幽枉司。"
+  },
+  {
+   "duration": 3.788,
+   "para": 584,
+   "start": 1615.574,
+   "text": "四曰报应司。各有大夫以掌其事。"
+  },
+  {
+   "duration": 3.814,
+   "para": 585,
+   "start": 1619.362,
+   "text": "吾之所理。卿师使相咸赞元化。"
+  },
+  {
+   "duration": 3.213,
+   "para": 586,
+   "start": 1623.176,
+   "text": "天尊说是经毕。玉梵七宝层台。"
+  },
+  {
+   "duration": 2.612,
+   "para": 587,
+   "start": 1626.389,
+   "text": "天花缤纷。琼香缭绕。"
+  },
+  {
+   "duration": 2.9,
+   "para": 588,
+   "start": 1629.001,
+   "text": "十 方诸天帝 君。咸称善哉。"
+  },
+  {
+   "duration": 2.717,
+   "para": 589,
+   "start": 1631.901,
+   "text": "天龙鬼神。雷部官众。"
+  },
+  {
+   "duration": 2.769,
+   "para": 590,
+   "start": 1634.618,
+   "text": "三界万灵。皆大欢喜。"
+  },
+  {
+   "duration": 1.411,
+   "para": 591,
+   "start": 1637.387,
+   "text": "信受奉行。"
+  },
+  {
+   "duration": 3.814,
+   "para": 592,
+   "start": 1638.798,
+   "text": "九天应元雷声普化天尊玉枢宝经终。"
+  },
+  {
+   "duration": 1.175,
+   "para": 593,
+   "start": 1642.612,
+   "text": "《吕祖心经》"
+  },
+  {
+   "duration": 1.228,
+   "para": 594,
+   "start": 1643.787,
+   "text": "吕祖曰。"
+  },
+  {
+   "duration": 3.788,
+   "para": 595,
+   "start": 1645.015,
+   "text": "天生万物惟人最灵。匪人能灵实心是灵。"
+  },
+  {
+   "duration": 4.571,
+   "para": 596,
+   "start": 1648.803,
+   "text": "心为主宰一身之君。役使百骸区处群情。"
+  },
+  {
+   "duration": 4.754,
+   "para": 597,
+   "start": 1653.374,
+   "text": "物无其物形无其形。禀受于天良知良能。"
+  },
+  {
+   "duration": 4.754,
+   "para": 598,
+   "start": 1658.128,
+   "text": "气拘欲蔽日失其真。此心即失此身亦倾。"
+  },
+  {
+   "duration": 4.859,
+   "para": 599,
+   "start": 1662.882,
+   "text": "欲善其身先治其心。治心如何即心治心。"
+  },
+  {
+   "duration": 4.232,
+   "para": 600,
+   "start": 1667.741,
+   "text": "以老老心治不孝心。以长长心治不悌心。"
+  },
+  {
+   "duration": 3.631,
+   "para": 601,
+   "start": 1671.973,
+   "text": "以委致心治不忠心。以诚恪心治不信心。"
+  },
+  {
+   "duration": 5.068,
+   "para": 602,
+   "start": 1675.604,
+   "text": "以恭敬心治无理心。以循理心治无意心。"
+  },
+  {
+   "duration": 4.389,
+   "para": 603,
+   "start": 1680.672,
+   "text": "以清介心治无廉心。以自爱心治无耻心。"
+  },
+  {
+   "duration": 3.736,
+   "para": 604,
+   "start": 1685.061,
+   "text": "以积德心治为恶心。以利济心治残贼心。"
+  },
+  {
+   "duration": 4.624,
+   "para": 605,
+   "start": 1688.797,
+   "text": "以匡扶心治倾陷心。以仁慈心治暴戾心。"
+  },
+  {
+   "duration": 4.023,
+   "para": 606,
+   "start": 1693.421,
+   "text": "以谦逊心治傲慢心。以损抑心治盈满心。"
+  },
+  {
+   "duration": 4.807,
+   "para": 607,
+   "start": 1697.444,
+   "text": "以俭约心治骄奢心。以勤慎心治怠忽心。"
+  },
+  {
+   "duration": 4.206,
+   "para": 608,
+   "start": 1702.251,
+   "text": "以坦夷心治危险心。以忠厚心治刻薄心。"
+  },
+  {
+   "duration": 3.918,
+   "para": 609,
+   "start": 1706.457,
+   "text": "以和平心治忿恚心。以宽洪心治偏窄心。"
+  },
+  {
+   "duration": 4.101,
+   "para": 610,
+   "start": 1710.375,
+   "text": "以伤身心治沈湎心。以妻女心治奸淫心。"
+  },
+  {
+   "duration": 4.807,
+   "para": 611,
+   "start": 1714.476,
+   "text": "以果报心治谋夺心。以祸患心治斗狠心。"
+  },
+  {
+   "duration": 4.807,
+   "para": 612,
+   "start": 1719.283,
+   "text": "以正教心治异端心。已至信心治大疑心。"
+  },
+  {
+   "duration": 3.318,
+   "para": 613,
+   "start": 1724.09,
+   "text": "以悠久心治无恒心。以始终心治反复心。"
+  },
+  {
+   "duration": 5.303,
+   "para": 614,
+   "start": 1727.408,
+   "text": "以施与心治悭吝心。以自然心治勉强心。"
+  },
+  {
+   "duration": 4.023,
+   "para": 615,
+   "start": 1732.711,
+   "text": "以安分心治非望心。以顺受心治怨尤心。"
+  },
+  {
+   "duration": 4.519,
+   "para": 616,
+   "start": 1736.734,
+   "text": "以推诚心治猜忌心。以镇定心治摇惑心。"
+  },
+  {
+   "duration": 4.467,
+   "para": 617,
+   "start": 1741.253,
+   "text": "以中正心治偏袒心。以大体心治细务心。"
+  },
+  {
+   "duration": 3.788,
+   "para": 618,
+   "start": 1745.72,
+   "text": "嗟乎人心不治不纯。如比乱丝不理不清。"
+  },
+  {
+   "duration": 4.336,
+   "para": 619,
+   "start": 1749.508,
+   "text": "如彼古镜不磨不明。如彼劣马不勒不驯。"
+  },
+  {
+   "duration": 4.441,
+   "para": 620,
+   "start": 1753.844,
+   "text": "我故说经欲治人心。人心得治天地清宁。"
+  },
+  {
+   "duration": 1.045,
+   "para": 621,
+   "start": 1758.285,
+   "text": "偈曰。"
+  },
+  {
+   "duration": 4.441,
+   "para": 622,
+   "start": 1759.33,
+   "text": "一切惟心心最危。范天围地发光辉。"
+  },
+  {
+   "duration": 4.232,
+   "para": 623,
+   "start": 1763.771,
+   "text": "天心即在人心见。人合天心天弗违。"
+  },
+  {
+   "duration": 2.978,
+   "para": 624,
+   "start": 1768.003,
+   "text": "人心皆散乱。一念便纯真。"
+  },
+  {
+   "duration": 3.187,
+   "para": 625,
+   "start": 1770.981,
+   "text": "欲求无上道。大众转天尊。"
+  },
+  {
+   "duration": 1.959,
+   "para": 626,
+   "start": 1774.168,
+   "text": "玉皇赦罪天尊。(三称)"
+  },
+  {
+   "duration": 3.187,
+   "para": 627,
+   "start": 1776.127,
+   "text": "雷声普化天尊。(三称)"
+  },
+  {
+   "duration": 3.082,
+   "para": 628,
+   "start": 1779.314,
+   "text": "向来诵经。念念存诚。"
+  },
+  {
+   "duration": 3.03,
+   "para": 629,
+   "start": 1782.396,
+   "text": "千真拱听。万圣通灵。"
+  },
+  {
+   "duration": 3.318,
+   "para": 630,
+   "start": 1785.426,
+   "text": "应元合炁。普化分形。"
+  },
+  {
+   "duration": 2.429,
+   "para": 631,
+   "start": 1788.744,
+   "text": "九天有命。三界遵行。"
+  },
+  {
+   "duration": 3.135,
+   "para": 632,
+   "start": 1791.173,
+   "text": "消灾忏罪。祈福延生。"
+  },
+  {
+   "duration": 3.082,
+   "para": 633,
+   "start": 1794.308,
+   "text": "功圆行满。大道证盟。"
+  },
+  {
+   "duration": 1.097,
+   "para": 634,
+   "start": 1797.39,
+   "text": "《邱祖忏悔文》"
+  },
+  {
+   "duration": 4.807,
+   "para": 635,
+   "start": 1798.487,
+   "text": "经功浩力难思议。回向十方诸圣师。"
+  },
+  {
+   "duration": 4.624,
+   "para": 636,
+   "start": 1803.294,
+   "text": "愿涤真心求忏悔。河沙罪障悉消离。"
+  },
+  {
+   "duration": 2.847,
+   "para": 637,
+   "start": 1807.918,
+   "text": "职悔我等。自从曩劫。"
+  },
+  {
+   "duration": 3.605,
+   "para": 638,
+   "start": 1810.765,
+   "text": "迺至今生。假火风地。"
+  },
+  {
+   "duration": 2.482,
+   "para": 639,
+   "start": 1814.37,
+   "text": "水以成形。恋香味色。"
+  },
+  {
+   "duration": 2.534,
+   "para": 640,
+   "start": 1816.852,
+   "text": "声而不悟。贪瞋忌妒。"
+  },
+  {
+   "duration": 2.664,
+   "para": 641,
+   "start": 1819.386,
+   "text": "恶口妄言。杀盗邪淫。"
+  },
+  {
+   "duration": 2.377,
+   "para": 642,
+   "start": 1822.05,
+   "text": "恣情纵欲。逆辱父母。"
+  },
+  {
+   "duration": 3.5,
+   "para": 643,
+   "start": 1824.427,
+   "text": "悖负君师。不敬天地神祗。"
+  },
+  {
+   "duration": 2.769,
+   "para": 644,
+   "start": 1827.927,
+   "text": "呵风骂雨。不信罪福因果。"
+  },
+  {
+   "duration": 4.519,
+   "para": 645,
+   "start": 1830.696,
+   "text": "昧理欺心。遂致报对升沉。"
+  },
+  {
+   "duration": 2.952,
+   "para": 646,
+   "start": 1835.215,
+   "text": "轮回展转。受诸苦恼。"
+  },
+  {
+   "duration": 2.664,
+   "para": 647,
+   "start": 1838.167,
+   "text": "无有休停。皆由一念之差。"
+  },
+  {
+   "duration": 3.814,
+   "para": 648,
+   "start": 1840.831,
+   "text": "障迷自性。妄认六尘之幻。"
+  },
+  {
+   "duration": 3.814,
+   "para": 649,
+   "start": 1844.645,
+   "text": "沉溺爱河。今而既获人身。"
+  },
+  {
+   "duration": 3.396,
+   "para": 650,
+   "start": 1848.459,
+   "text": "叨亲正教。岂非千生庆幸。"
+  },
+  {
+   "duration": 2.664,
+   "para": 651,
+   "start": 1851.855,
+   "text": "一旦遭逢。自合省心。"
+  },
+  {
+   "duration": 2.795,
+   "para": 652,
+   "start": 1854.519,
+   "text": "早求度世。若夫似前流荡。"
+  },
+  {
+   "duration": 4.441,
+   "para": 653,
+   "start": 1857.314,
+   "text": "必竟迷失本来。一堕冥途。"
+  },
+  {
+   "duration": 3.082,
+   "para": 654,
+   "start": 1861.755,
+   "text": "化为异类。是当思沉沦苦。"
+  },
+  {
+   "duration": 2.482,
+   "para": 655,
+   "start": 1864.837,
+   "text": "发清净心。皈奉圣真。"
+  },
+  {
+   "duration": 2.534,
+   "para": 656,
+   "start": 1867.319,
+   "text": "特求忏悔。乞怜愚昧。"
+  },
+  {
+   "duration": 2.978,
+   "para": 657,
+   "start": 1869.853,
+   "text": "原赦罪愆。解释报冤。"
+  },
+  {
+   "duration": 4.807,
+   "para": 658,
+   "start": 1872.831,
+   "text": "蠲消魔障。所冀命逢昌运。"
+  },
+  {
+   "duration": 2.299,
+   "para": 659,
+   "start": 1877.638,
+   "text": "名注丹台。际遇真师。"
+  },
+  {
+   "duration": 2.847,
+   "para": 660,
+   "start": 1879.937,
+   "text": "亲闻至道。精修善行。"
+  },
+  {
+   "duration": 3.03,
+   "para": 661,
+   "start": 1882.784,
+   "text": "增长善芽。励志玄门。"
+  },
+  {
+   "duration": 3.187,
+   "para": 662,
+   "start": 1885.814,
+   "text": "怡神真境。他日功成羽化。"
+  },
+  {
+   "duration": 4.206,
+   "para": 663,
+   "start": 1889.001,
+   "text": "或更行满飞升。广看后学之成。"
+  },
+  {
+   "duration": 2.9,
+   "para": 664,
+   "start": 1893.207,
+   "text": "咸通宿命。还证上乘之道。"
+  },
+  {
+   "duration": 3.918,
+   "para": 665,
+   "start": 1896.107,
+   "text": "承侍虚皇。更愿国安民丰。"
+  },
+  {
+   "duration": 2.978,
+   "para": 666,
+   "start": 1900.025,
+   "text": "时和岁稔。愿真风丕振。"
+  },
+  {
+   "duration": 3.553,
+   "para": 667,
+   "start": 1903.003,
+   "text": "道化与行。愿凶恶化贤。"
+  },
+  {
+   "duration": 3.605,
+   "para": 668,
+   "start": 1906.556,
+   "text": "邪魔归正。愿兵刑悉错。"
+  },
+  {
+   "duration": 3.37,
+   "para": 669,
+   "start": 1910.161,
+   "text": "囹圄空闲。愿沉滞升迁。"
+  },
+  {
+   "duration": 3.605,
+   "para": 670,
+   "start": 1913.531,
+   "text": "冤仇和释。愿参玄学者。"
+  },
+  {
+   "duration": 3.318,
+   "para": 671,
+   "start": 1917.136,
+   "text": "入道成真。愿累劫宗亲。"
+  },
+  {
+   "duration": 2.978,
+   "para": 672,
+   "start": 1920.454,
+   "text": "俱获超度。愿历世师友。"
+  },
+  {
+   "duration": 3.318,
+   "para": 673,
+   "start": 1923.432,
+   "text": "同证真常。愿所有眷缘。"
+  },
+  {
+   "duration": 2.612,
+   "para": 674,
+   "start": 1926.75,
+   "text": "增崇福慧。愿所伤物命。"
+  },
+  {
+   "duration": 2.952,
+   "para": 675,
+   "start": 1929.362,
+   "text": "早生人天。愿绝食荤酒。"
+  },
+  {
+   "duration": 2.9,
+   "para": 676,
+   "start": 1932.314,
+   "text": "不相杀害。愿持身端正。"
+  },
+  {
+   "duration": 3.03,
+   "para": 677,
+   "start": 1935.214,
+   "text": "不履淫邪。愿悉破悭贪。"
+  },
+  {
+   "duration": 3.5,
+   "para": 678,
+   "start": 1938.244,
+   "text": "永除险峻。愿言无诳妄。"
+  },
+  {
+   "duration": 3.318,
+   "para": 679,
+   "start": 1941.744,
+   "text": "行皆真诚。愿弱己饶人。"
+  },
+  {
+   "duration": 2.795,
+   "para": 680,
+   "start": 1945.062,
+   "text": "潜忍忿怒。愿慈心下气。"
+  },
+  {
+   "duration": 3.265,
+   "para": 681,
+   "start": 1947.857,
+   "text": "恭敬一切。愿不履边陲。"
+  },
+  {
+   "duration": 2.612,
+   "para": 682,
+   "start": 1951.122,
+   "text": "不堕邪见。愿结交仙友。"
+  },
+  {
+   "duration": 3.37,
+   "para": 683,
+   "start": 1953.734,
+   "text": "栖集真虚。愿智慧开明。"
+  },
+  {
+   "duration": 1.933,
+   "para": 684,
+   "start": 1957.104,
+   "text": "神通恢廓。愿广行方便。"
+  },
+  {
+   "duration": 2.769,
+   "para": 685,
+   "start": 1959.037,
+   "text": "普济群生。愿永断执迷。"
+  },
+  {
+   "duration": 3.318,
+   "para": 686,
+   "start": 1961.806,
+   "text": "咸归至道。尘劫有尽。"
+  },
+  {
+   "duration": 3.448,
+   "para": 687,
+   "start": 1965.124,
+   "text": "我愿无穷。端望。帝真。"
+  },
+  {
+   "duration": 3.135,
+   "para": 688,
+   "start": 1968.572,
+   "text": "曲垂济度。皈命礼谢。"
+  },
+  {
+   "duration": 3.788,
+   "para": 689,
+   "start": 1971.707,
+   "text": "无上虚皇至真三宝。(三称)"
+  },
+  {
+   "duration": 0.94,
+   "para": 690,
+   "start": 1975.495,
+   "text": "收赞"
+  },
+  {
+   "duration": 2.847,
+   "para": 691,
+   "start": 1976.435,
+   "text": "全真演教。正一垂科。"
+  },
+  {
+   "duration": 3.448,
+   "para": 692,
+   "start": 1979.282,
+   "text": "天仙法派吉祥多。位育在中和。"
+  },
+  {
+   "duration": 3.37,
+   "para": 693,
+   "start": 1982.73,
+   "text": "道侣观摩。修炼永无魔。"
+  },
+  {
+   "duration": 3.318,
+   "para": 694,
+   "start": 1986.1,
+   "text": "大圣回光普照大天尊(三称)"
+  },
+  {
+   "duration": 1.045,
+   "para": 695,
+   "start": 1989.418,
+   "text": "三皈"
+  },
+  {
+   "duration": 2.952,
+   "para": 696,
+   "start": 1990.463,
+   "text": "自皈依道。当愿众生。"
+  },
+  {
+   "duration": 3.5,
+   "para": 697,
+   "start": 1993.415,
+   "text": "常侍天算。永脱轮回。"
+  },
+  {
+   "duration": 3.318,
+   "para": 698,
+   "start": 1996.915,
+   "text": "自皈依经。当愿众生。"
+  },
+  {
+   "duration": 3.396,
+   "para": 699,
+   "start": 2000.233,
+   "text": "生生世世。得闻正法。"
+  },
+  {
+   "duration": 2.978,
+   "para": 700,
+   "start": 2003.629,
+   "text": "自皈依师。当愿众生。"
+  },
+  {
+   "duration": 2.351,
+   "para": 701,
+   "start": 2006.607,
+   "text": "学最上乘。不落邪见。"
+  },
+  {
+   "duration": 1.724,
+   "para": 702,
+   "start": 2008.958,
+   "text": "早坛功课经终。"
+  },
+  {
+   "duration": 3.553,
+   "para": 703,
+   "start": 2010.682,
+   "text": "太上玄门功课经【大众登坛分班序立主经举】"
+  },
+  {
+   "duration": 3.213,
+   "para": 704,
+   "start": 2014.235,
+   "text": "大道洞玄虚，有念无不契。"
+  },
+  {
+   "duration": 3.736,
+   "para": 705,
+   "start": 2017.448,
+   "text": "炼质入仙真，遂成金刚体。"
+  },
+  {
+   "duration": 2.534,
+   "para": 706,
+   "start": 2021.184,
+   "text": "超度三界难，地狱五苦解。"
+  },
+  {
+   "duration": 2.9,
+   "para": 707,
+   "start": 2023.718,
+   "text": "悉皈太上经，静念稽首礼。"
+  },
+  {
+   "duration": 1.097,
+   "para": 708,
+   "start": 2026.618,
+   "text": "【主经举】"
+  },
+  {
+   "duration": 1.724,
+   "para": 709,
+   "start": 2027.715,
+   "text": "太乙救苦天尊"
+  },
+  {
+   "duration": 3.187,
+   "para": 710,
+   "start": 2029.439,
+   "text": "灵音到处，灭罪消愆。"
+  },
+  {
+   "duration": 2.847,
+   "para": 711,
+   "start": 2032.626,
+   "text": "宝号宣时，扶危救难。"
+  },
+  {
+   "duration": 2.429,
+   "para": 712,
+   "start": 2035.473,
+   "text": "将当有讽经演教之偈。"
+  },
+  {
+   "duration": 2.612,
+   "para": 713,
+   "start": 2037.902,
+   "text": "仰劳道众，随声应和。"
+  },
+  {
+   "duration": 3.788,
+   "para": 714,
+   "start": 2040.514,
+   "text": "救苦天尊妙难求，身披霞衣屡劫修"
+  },
+  {
+   "duration": 4.232,
+   "para": 715,
+   "start": 2044.302,
+   "text": "五色祥云生足下，九头狮子道前游"
+  },
+  {
+   "duration": 4.284,
+   "para": 716,
+   "start": 2048.534,
+   "text": "盂中雸露时常洒，手内杨柳不记秋"
+  },
+  {
+   "duration": 3.918,
+   "para": 717,
+   "start": 2052.818,
+   "text": "千处请师千处降，爱河常作度人舟"
+  },
+  {
+   "duration": 4.336,
+   "para": 718,
+   "start": 2056.736,
+   "text": "诵经功德不可议，孤魂滞魄早超升"
+  },
+  {
+   "duration": 2.299,
+   "para": 719,
+   "start": 2061.072,
+   "text": "香供养十方救苦天尊"
+  },
+  {
+   "duration": 4.336,
+   "para": 720,
+   "start": 2063.371,
+   "text": "种种无名是苦根，苦根除尽善根存"
+  },
+  {
+   "duration": 3.814,
+   "para": 721,
+   "start": 2067.707,
+   "text": "但凭慧剑威神力，跳出轮回五苦门"
+  },
+  {
+   "duration": 3.631,
+   "para": 722,
+   "start": 2071.521,
+   "text": "道以无心度有情，一切方便是修真"
+  },
+  {
+   "duration": 4.023,
+   "para": 723,
+   "start": 2075.152,
+   "text": "若皈圣智圆通地，便是生天得道人"
+  },
+  {
+   "duration": 3.03,
+   "para": 724,
+   "start": 2079.175,
+   "text": "道场众等，人各恭敬。"
+  },
+  {
+   "duration": 2.952,
+   "para": 725,
+   "start": 2082.205,
+   "text": "恭对道前，讽经如法。"
+  },
+  {
+   "duration": 4.519,
+   "para": 726,
+   "start": 2085.157,
+   "text": "【宝经未开先持玄蕴伏魔神呪大众谨当持诵】"
+  },
+  {
+   "duration": 1.228,
+   "para": 727,
+   "start": 2089.676,
+   "text": "开经偈"
+  },
+  {
+   "duration": 3.03,
+   "para": 728,
+   "start": 2090.904,
+   "text": "寂寂至无宗，虚峙劫仞阿"
+  },
+  {
+   "duration": 3.736,
+   "para": 729,
+   "start": 2093.934,
+   "text": "豁落洞玄文，谁测此幽遐"
+  },
+  {
+   "duration": 2.612,
+   "para": 730,
+   "start": 2097.67,
+   "text": "一入大乘路，孰计年劫多"
+  },
+  {
+   "duration": 2.978,
+   "para": 731,
+   "start": 2100.282,
+   "text": "不生亦不灭，欲生因莲花"
+  },
+  {
+   "duration": 3.814,
+   "para": 732,
+   "start": 2103.26,
+   "text": "超凌三界途，慈心解世罗"
+  },
+  {
+   "duration": 3.03,
+   "para": 733,
+   "start": 2107.074,
+   "text": "真人无上德，世世为仙家"
+  },
+  {
+   "duration": 2.534,
+   "para": 734,
+   "start": 2110.104,
+   "text": "太上洞玄灵宝救苦妙经"
+  },
+  {
+   "duration": 1.541,
+   "para": 735,
+   "start": 2112.638,
+   "text": "尔时 救苦天尊"
+  },
+  {
+   "duration": 2.978,
+   "para": 736,
+   "start": 2114.179,
+   "text": "遍满十方界，常以威神力，"
+  },
+  {
+   "duration": 3.03,
+   "para": 737,
+   "start": 2117.157,
+   "text": "救拔诸众生，得离于迷途，"
+  },
+  {
+   "duration": 2.664,
+   "para": 738,
+   "start": 2120.187,
+   "text": "众生不知觉，如盲见日月。"
+  },
+  {
+   "duration": 2.847,
+   "para": 739,
+   "start": 2122.851,
+   "text": "我本太无中，拔领无边际。"
+  },
+  {
+   "duration": 3.5,
+   "para": 740,
+   "start": 2125.698,
+   "text": "庆云开生门，祥烟塞死户。"
+  },
+  {
+   "duration": 3.135,
+   "para": 741,
+   "start": 2129.198,
+   "text": "初发玄元始，以统祥感机。"
+  },
+  {
+   "duration": 2.247,
+   "para": 742,
+   "start": 2132.333,
+   "text": "救一切罪，度一切厄。"
+  },
+  {
+   "duration": 3.03,
+   "para": 743,
+   "start": 2134.58,
+   "text": "渺渺超仙源，荡荡自然清。"
+  },
+  {
+   "duration": 3.318,
+   "para": 744,
+   "start": 2137.61,
+   "text": "皆承大道力，以伏诸魔精。"
+  },
+  {
+   "duration": 3.605,
+   "para": 745,
+   "start": 2140.928,
+   "text": "空中何灼灼，名曰泥丸仙。"
+  },
+  {
+   "duration": 2.429,
+   "para": 746,
+   "start": 2144.533,
+   "text": "紫云覆黄老，是名三宝君。"
+  },
+  {
+   "duration": 2.9,
+   "para": 747,
+   "start": 2146.962,
+   "text": "还将上天气，以制九天魂。"
+  },
+  {
+   "duration": 2.978,
+   "para": 748,
+   "start": 2149.862,
+   "text": "救苦诸妙神，善见救苦时。"
+  },
+  {
+   "duration": 2.377,
+   "para": 749,
+   "start": 2152.84,
+   "text": "天上混无分，天气归一身。"
+  },
+  {
+   "duration": 2.795,
+   "para": 750,
+   "start": 2155.217,
+   "text": "皆成自然人，自然有别体。"
+  },
+  {
+   "duration": 4.859,
+   "para": 751,
+   "start": 2158.012,
+   "text": "本在空洞中，空洞迹非迹，徧体皆虚空。"
+  },
+  {
+   "duration": 3.918,
+   "para": 752,
+   "start": 2162.871,
+   "text": "第一委气立，第二顺气生，第三成万法，第四主光明。"
+  },
+  {
+   "duration": 5.042,
+   "para": 753,
+   "start": 2166.789,
+   "text": "天上三十六，地下三十六，太玄无边际，妙哉大洞经。"
+  },
+  {
+   "duration": 3.605,
+   "para": 754,
+   "start": 2171.831,
+   "text": "归命太上尊，能消一切罪。"
+  },
+  {
+   "duration": 4.519,
+   "para": 755,
+   "start": 2175.436,
+   "text": "东方玉宝皇上天尊  南方玄真万福天尊"
+  },
+  {
+   "duration": 3.631,
+   "para": 756,
+   "start": 2179.955,
+   "text": "西方太妙至极天尊  北方玄上玉宸天尊"
+  },
+  {
+   "duration": 3.866,
+   "para": 757,
+   "start": 2183.586,
+   "text": "东北方度仙上圣天尊 东南方好生度命天尊"
+  },
+  {
+   "duration": 4.336,
+   "para": 758,
+   "start": 2187.452,
+   "text": "西南方太灵虚皇天尊 西北方无量太华天尊"
+  },
+  {
+   "duration": 3.866,
+   "para": 759,
+   "start": 2191.788,
+   "text": "上方玉虚明皇天尊 下方真皇洞神天尊"
+  },
+  {
+   "duration": 3.135,
+   "para": 760,
+   "start": 2195.654,
+   "text": "十方诸天尊，其数如沙尘。"
+  },
+  {
+   "duration": 2.9,
+   "para": 761,
+   "start": 2198.789,
+   "text": "化形十方界，普济度天人。"
+  },
+  {
+   "duration": 3.318,
+   "para": 762,
+   "start": 2201.689,
+   "text": "委气聚功德，同声救罪魂。"
+  },
+  {
+   "duration": 2.847,
+   "para": 763,
+   "start": 2205.007,
+   "text": "罪魂实可哀，我今说妙经。"
+  },
+  {
+   "duration": 3.553,
+   "para": 764,
+   "start": 2207.854,
+   "text": "念诵无休息，归身不暂停。"
+  },
+  {
+   "duration": 2.9,
+   "para": 765,
+   "start": 2211.407,
+   "text": "天堂享大福，地狱无苦声。"
+  },
+  {
+   "duration": 3.605,
+   "para": 766,
+   "start": 2214.307,
+   "text": "火翳成清署，剑树化为骞。"
+  },
+  {
+   "duration": 2.534,
+   "para": 767,
+   "start": 2217.912,
+   "text": "上登朱陵府，下入开光门。"
+  },
+  {
+   "duration": 3.448,
+   "para": 768,
+   "start": 2220.446,
+   "text": "超度三界难，径上元始天。"
+  },
+  {
+   "duration": 2.612,
+   "para": 769,
+   "start": 2223.894,
+   "text": "于是飞天神王、无鞅数众，"
+  },
+  {
+   "duration": 2.978,
+   "para": 770,
+   "start": 2226.506,
+   "text": "瞻仰尊颜，而作颂曰："
+  },
+  {
+   "duration": 3.135,
+   "para": 771,
+   "start": 2229.484,
+   "text": "天尊说经教，引接于浮生。"
+  },
+  {
+   "duration": 3.318,
+   "para": 772,
+   "start": 2232.619,
+   "text": "勤修学无为，悟真道自成。"
+  },
+  {
+   "duration": 3.918,
+   "para": 773,
+   "start": 2235.937,
+   "text": "不迷亦不荒，无我亦无名。"
+  },
+  {
+   "duration": 3.265,
+   "para": 774,
+   "start": 2239.855,
+   "text": "朗咏罪福句，万徧心垢清。"
+  },
+  {
+   "duration": 5.878,
+   "para": 775,
+   "start": 2243.12,
+   "text": "尔时飞天神王及诸仙众说是颂毕，稽首天尊，奉辞而退。"
+  },
+  {
+   "duration": 2.429,
+   "para": 776,
+   "start": 2248.998,
+   "text": "太上洞玄灵宝救苦妙经"
+  },
+  {
+   "duration": 2.717,
+   "para": 777,
+   "start": 2251.427,
+   "text": "元始天尊说生天得道真经"
+  },
+  {
+   "duration": 6.06,
+   "para": 778,
+   "start": 2254.144,
+   "text": "尔时 元始天尊在大罗天上玉京山中，为诸天仙众说此《生天得道真"
+  },
+  {
+   "duration": 7.079,
+   "para": 779,
+   "start": 2260.204,
+   "text": "经》。告诸仙曰：吾今为汝略启身心，明宣道要。十方得道神仙，皆从"
+  },
+  {
+   "duration": 6.426,
+   "para": 780,
+   "start": 2267.283,
+   "text": "此经修行而通微奥。善男子、善女人，依凭斋戒，作是津梁，一切有"
+  },
+  {
+   "duration": 7.131,
+   "para": 781,
+   "start": 2273.709,
+   "text": "为，显诸真路，体此法相，乃可受持。能屏众缘，永除染著，外想不"
+  },
+  {
+   "duration": 6.713,
+   "para": 782,
+   "start": 2280.84,
+   "text": "入，内想不出，于正念中，皆得五脏清凉，六腑调泰。 三百六十骨节之"
+  },
+  {
+   "duration": 7.497,
+   "para": 783,
+   "start": 2287.553,
+   "text": "间，有诸滞碍，十恶之业，百八十烦恼之业，众苦罪源，悉皆除荡。 即"
+  },
+  {
+   "duration": 6.426,
+   "para": 784,
+   "start": 2295.05,
+   "text": "引太和真炁注润身田，五脏六腑，心目内观，真炁所有，清静光明， 虚"
+  },
+  {
+   "duration": 6.949,
+   "para": 785,
+   "start": 2301.476,
+   "text": "白朗耀，杳杳冥冥，内外无事，昏昏默默，正达无为，古今常存，总持"
+  },
+  {
+   "duration": 6.896,
+   "para": 786,
+   "start": 2308.425,
+   "text": "净念，从兹解悟，道力资扶，法药相助。 仍节饮食，驱遣鬼尸，安寂六"
+  },
+  {
+   "duration": 7.314,
+   "para": 787,
+   "start": 2315.321,
+   "text": "根，净照八识，空其五蕴，证妙三元，得道成真，自然升度。尔时诸天"
+  },
+  {
+   "duration": 6.713,
+   "para": 788,
+   "start": 2322.635,
+   "text": "仙众白天尊言：自从无始以来，至于今日，未闻如是大乘经典。我等缘"
+  },
+  {
+   "duration": 4.519,
+   "para": 789,
+   "start": 2329.348,
+   "text": "兹幸会，广及一切，道果圆明而说偈曰："
+  },
+  {
+   "duration": 3.918,
+   "para": 790,
+   "start": 2333.867,
+   "text": "杳杳冥冥清静道，昏昏默默太虚踪，"
+  },
+  {
+   "duration": 3.971,
+   "para": 791,
+   "start": 2337.785,
+   "text": "体性湛然无所住，色心都寂一真宗。"
+  },
+  {
+   "duration": 2.612,
+   "para": 792,
+   "start": 2341.756,
+   "text": "元始天尊说生天得道真经"
+  },
+  {
+   "duration": 2.612,
+   "para": 793,
+   "start": 2344.368,
+   "text": "太上道君说解冤拔罪妙经"
+  },
+  {
+   "duration": 81.789,
+   "para": 794,
+   "start": 2346.98,
+   "text": "尔时 太上道君，与诸圣众，在八骞林下，七宝台中，罗列威仪，敷陈道要，怡神默坐，于玉京山，放七宝光明，照福堂地狱，见福堂之内，男女善人，快乐无为，逍遥自在，复见诸地狱之中，饿鬼穷魂，以日继夜，受种种苦恼。悉无人形，五体坏烂，饥餐猛火，渇饮熔铜，足履刀山，身负铁杖，遍体流血，悲号彻天，是时，会中有一真人，名曰广信，从座而起，稽首前进。上白道君曰:不审此辈穷魂，生有何咎，而受兹苦。道君曰:受诸罪者，在世之时，不敬三光，欺负神理，十恶五逆，不忠不仁，不慈不孝，毁伤物命，杀害众生，福尽寿终，当受斯苦。是时广信真人，心生哀悯，欲其济拔，幸望妙力威光，许令开度，伏蒙道君，垂赐金言，广设法要，为诸众生，演说是经，名曰解冤拔罪，流布于世，利益存亡，若有善男子、善女人，一心专志，入静持斋，焚香行道，六时转念是经，吾当随愿，保佑其人，使宿世冤雠，乘福超度，幽魂苦爽，各获超升，真人广信，欢喜再拜。"
+  },
+  {
+   "duration": 2.194,
+   "para": 795,
+   "start": 2428.769,
+   "text": "覶缕胜因而作颂曰："
+  },
+  {
+   "duration": 3.135,
+   "para": 796,
+   "start": 2430.963,
+   "text": "伟哉大道君，常普无量功，"
+  },
+  {
+   "duration": 2.952,
+   "para": 797,
+   "start": 2434.098,
+   "text": "舟楫生死海，济度超罗酆。"
+  },
+  {
+   "duration": 3.187,
+   "para": 798,
+   "start": 2437.05,
+   "text": "罪对不复遇，福报与冥通，"
+  },
+  {
+   "duration": 3.318,
+   "para": 799,
+   "start": 2440.237,
+   "text": "用神安可测，赞之焉能穷。"
+  },
+  {
+   "duration": 6.74,
+   "para": 800,
+   "start": 2443.555,
+   "text": "是时，广信真人，与诸圣众，闻法将毕，各各稽首皈依，信受奉行。"
+  },
+  {
+   "duration": 2.978,
+   "para": 801,
+   "start": 2450.295,
+   "text": "太上道君说解冤拔罪妙经"
+  },
+  {
+   "duration": 2.116,
+   "para": 802,
+   "start": 2453.273,
+   "text": "斗母诰　志心皈命礼"
+  },
+  {
+   "duration": 2.717,
+   "para": 803,
+   "start": 2455.389,
+   "text": "西天竺国，大智光中"
+  },
+  {
+   "duration": 3.265,
+   "para": 804,
+   "start": 2458.106,
+   "text": "真空妙用法王师，无上玄元天母主"
+  },
+  {
+   "duration": 2.769,
+   "para": 805,
+   "start": 2461.371,
+   "text": "金光烁处，日月潜辉"
+  },
+  {
+   "duration": 2.847,
+   "para": 806,
+   "start": 2464.14,
+   "text": "宝杵旋时，鬼神失色"
+  },
+  {
+   "duration": 3.5,
+   "para": 807,
+   "start": 2466.987,
+   "text": "显灵踪于尘世，衞圣驾于阎浮"
+  },
+  {
+   "duration": 3.971,
+   "para": 808,
+   "start": 2470.487,
+   "text": "众生有难若称名，大士寻声来救苦"
+  },
+  {
+   "duration": 2.064,
+   "para": 809,
+   "start": 2474.458,
+   "text": "大悲大愿，大圣大慈"
+  },
+  {
+   "duration": 4.101,
+   "para": 810,
+   "start": 2476.522,
+   "text": "圣德巨光天后，摩利攴天大圣，先天斗母元君"
+  },
+  {
+   "duration": 2.064,
+   "para": 811,
+   "start": 2480.623,
+   "text": "三官诰　志心皈命礼"
+  },
+  {
+   "duration": 2.56,
+   "para": 812,
+   "start": 2482.687,
+   "text": "唯三圣人，乃一太极"
+  },
+  {
+   "duration": 3.814,
+   "para": 813,
+   "start": 2485.247,
+   "text": "昔受浩劫家之命，鼎膺无量品之褒"
+  },
+  {
+   "duration": 2.795,
+   "para": 814,
+   "start": 2489.061,
+   "text": "紫微淸虚洞阴，总领功过"
+  },
+  {
+   "duration": 2.952,
+   "para": 815,
+   "start": 2491.856,
+   "text": "赐福赦罪解厄，溥济存亡"
+  },
+  {
+   "duration": 2.351,
+   "para": 816,
+   "start": 2494.808,
+   "text": "道冠诸天，恩覃三界"
+  },
+  {
+   "duration": 2.116,
+   "para": 817,
+   "start": 2497.159,
+   "text": "大悲大愿，大圣大慈"
+  },
+  {
+   "duration": 2.194,
+   "para": 818,
+   "start": 2499.275,
+   "text": "三元三品，三官大帝"
+  },
+  {
+   "duration": 2.429,
+   "para": 819,
+   "start": 2501.469,
+   "text": "三宫九府，应感天尊"
+  },
+  {
+   "duration": 2.247,
+   "para": 820,
+   "start": 2503.898,
+   "text": "玄天诰　志心皈命礼"
+  },
+  {
+   "duration": 2.247,
+   "para": 821,
+   "start": 2506.145,
+   "text": "混元六天，传法教主，"
+  },
+  {
+   "duration": 2.299,
+   "para": 822,
+   "start": 2508.392,
+   "text": "修真悟道，济度群迷，"
+  },
+  {
+   "duration": 2.142,
+   "para": 823,
+   "start": 2510.691,
+   "text": "普为众生，消除灾障，"
+  },
+  {
+   "duration": 2.664,
+   "para": 824,
+   "start": 2512.833,
+   "text": "八十二化，三教祖师，"
+  },
+  {
+   "duration": 2.064,
+   "para": 825,
+   "start": 2515.497,
+   "text": "大慈大悲，救苦救难，"
+  },
+  {
+   "duration": 2.534,
+   "para": 826,
+   "start": 2517.561,
+   "text": "三元都总管，九天游奕使，"
+  },
+  {
+   "duration": 2.978,
+   "para": 827,
+   "start": 2520.095,
+   "text": "佐天罡北极，右垣大将军，"
+  },
+  {
+   "duration": 2.534,
+   "para": 828,
+   "start": 2523.073,
+   "text": "镇天助顺，真武灵应，"
+  },
+  {
+   "duration": 2.429,
+   "para": 829,
+   "start": 2525.607,
+   "text": "福德衍庆，仁慈正烈，"
+  },
+  {
+   "duration": 2.064,
+   "para": 830,
+   "start": 2528.036,
+   "text": "协运真君，治世福神，"
+  },
+  {
+   "duration": 2.717,
+   "para": 831,
+   "start": 2530.1,
+   "text": "玉虚师相，玄天上帝，"
+  },
+  {
+   "duration": 2.429,
+   "para": 832,
+   "start": 2532.817,
+   "text": "金阙化身，荡魔天尊。"
+  },
+  {
+   "duration": 2.534,
+   "para": 833,
+   "start": 2535.246,
+   "text": "本来南土，上溯蜀都"
+  },
+  {
+   "duration": 4.049,
+   "para": 834,
+   "start": 2537.78,
+   "text": "先获黄帝九鼎之丹书，后事老君两度于玉局"
+  },
+  {
+   "duration": 3.631,
+   "para": 835,
+   "start": 2541.829,
+   "text": "千轴得修行之要，一时成吐纳之功"
+  },
+  {
+   "duration": 2.56,
+   "para": 836,
+   "start": 2545.46,
+   "text": "法箓全成，受盟威品而结璘诀"
+  },
+  {
+   "duration": 3.213,
+   "para": 837,
+   "start": 2548.02,
+   "text": "正邪两辨，奋福庭冶而化咸泉"
+  },
+  {
+   "duration": 2.612,
+   "para": 838,
+   "start": 2551.233,
+   "text": "德就大丹，道齐七政"
+  },
+  {
+   "duration": 2.299,
+   "para": 839,
+   "start": 2553.845,
+   "text": "大悲大愿，大圣大慈"
+  },
+  {
+   "duration": 3.553,
+   "para": 840,
+   "start": 2556.144,
+   "text": "三天扶教，辅元体道大法天师"
+  },
+  {
+   "duration": 2.534,
+   "para": 841,
+   "start": 2559.697,
+   "text": "雷霆都省，泰玄上相"
+  },
+  {
+   "duration": 2.769,
+   "para": 842,
+   "start": 2562.231,
+   "text": "都天大法主，正一冲玄，"
+  },
+  {
+   "duration": 2.534,
+   "para": 843,
+   "start": 2565.0,
+   "text": "神化静应显佑真君，"
+  },
+  {
+   "duration": 3.605,
+   "para": 844,
+   "start": 2567.534,
+   "text": "六合无穷，高明大帝，降魔护道天尊"
+  },
+  {
+   "duration": 2.56,
+   "para": 845,
+   "start": 2571.139,
+   "text": "吕祖诰　志心皈命礼"
+  },
+  {
+   "duration": 2.847,
+   "para": 846,
+   "start": 2573.699,
+   "text": "玉淸内相，金阙选仙"
+  },
+  {
+   "duration": 3.631,
+   "para": 847,
+   "start": 2576.546,
+   "text": "化身为三教之师，掌法判五雷之令"
+  },
+  {
+   "duration": 2.717,
+   "para": 848,
+   "start": 2580.177,
+   "text": "黄梁梦觉，忘世上之功名"
+  },
+  {
+   "duration": 2.56,
+   "para": 849,
+   "start": 2582.894,
+   "text": "宝剑光腾，扫人间之妖怪"
+  },
+  {
+   "duration": 2.534,
+   "para": 850,
+   "start": 2585.454,
+   "text": "四生六道，有感必孚"
+  },
+  {
+   "duration": 2.194,
+   "para": 851,
+   "start": 2587.988,
+   "text": "三界十方，无求不应"
+  },
+  {
+   "duration": 3.318,
+   "para": 852,
+   "start": 2590.182,
+   "text": "黄鹄溪头留圣迹，玉淸殿内炼丹砂"
+  },
+  {
+   "duration": 3.814,
+   "para": 853,
+   "start": 2593.5,
+   "text": "存道像于山崖，显仙迹于云洞"
+  },
+  {
+   "duration": 3.605,
+   "para": 854,
+   "start": 2597.314,
+   "text": "阐法门之香火，作玄嗣之梯航"
+  },
+  {
+   "duration": 2.247,
+   "para": 855,
+   "start": 2600.919,
+   "text": "大圣大慈，大仁大孝"
+  },
+  {
+   "duration": 2.978,
+   "para": 856,
+   "start": 2603.166,
+   "text": "开山启教，灵应祖师"
+  },
+  {
+   "duration": 3.213,
+   "para": 857,
+   "start": 2606.144,
+   "text": "天雷上相，灵宝真人"
+  },
+  {
+   "duration": 2.482,
+   "para": 858,
+   "start": 2609.357,
+   "text": "燮元赞运，纯阳演正"
+  },
+  {
+   "duration": 3.605,
+   "para": 859,
+   "start": 2611.839,
+   "text": "警化孚佑帝君，兴行妙道天尊"
+  },
+  {
+   "duration": 2.429,
+   "para": 860,
+   "start": 2615.444,
+   "text": "萨真君诰　志心皈命礼"
+  },
+  {
+   "duration": 2.9,
+   "para": 861,
+   "start": 2617.873,
+   "text": "派流西地，迹显龙兴"
+  },
+  {
+   "duration": 4.232,
+   "para": 862,
+   "start": 2620.773,
+   "text": "施财合药济群生，积行累功修至道"
+  },
+  {
+   "duration": 3.265,
+   "para": 863,
+   "start": 2625.005,
+   "text": "授铁师之教旨，掌玉府之雷书"
+  },
+  {
+   "duration": 4.389,
+   "para": 864,
+   "start": 2628.27,
+   "text": "身披百衲伏魔衣，手执五明降鬼扇"
+  },
+  {
+   "duration": 1.776,
+   "para": 865,
+   "start": 2632.659,
+   "text": "代之宣化，呪枣书符"
+  },
+  {
+   "duration": 3.37,
+   "para": 866,
+   "start": 2634.435,
+   "text": "运风雷于咫尺之间，翦妖魔于斗罡之下"
+  },
+  {
+   "duration": 2.952,
+   "para": 867,
+   "start": 2637.805,
+   "text": "道参太极，位列先天"
+  },
+  {
+   "duration": 3.814,
+   "para": 868,
+   "start": 2640.757,
+   "text": "松筠野鹤任纵横，遐迩孤云常自在"
+  },
+  {
+   "duration": 2.612,
+   "para": 869,
+   "start": 2644.571,
+   "text": "方方阐教，为万法之宗师"
+  },
+  {
+   "duration": 3.5,
+   "para": 870,
+   "start": 2647.183,
+   "text": "处处开坛，作后人之模范"
+  },
+  {
+   "duration": 3.788,
+   "para": 871,
+   "start": 2650.683,
+   "text": "都天宗主，一元无上，萨翁真君"
+  },
+  {
+   "duration": 2.116,
+   "para": 872,
+   "start": 2654.471,
+   "text": "王灵官诰　志心皈命礼"
+  },
+  {
+   "duration": 2.299,
+   "para": 873,
+   "start": 2656.587,
+   "text": "先天主将，一炁神君"
+  },
+  {
+   "duration": 3.448,
+   "para": 874,
+   "start": 2658.886,
+   "text": "都天纠罚大灵官，三界无私猛吏将"
+  },
+  {
+   "duration": 3.135,
+   "para": 875,
+   "start": 2662.334,
+   "text": "金睛朱发，号三五火车雷公"
+  },
+  {
+   "duration": 2.978,
+   "para": 876,
+   "start": 2665.469,
+   "text": "凤嘴银牙，统百万貔貅神将"
+  },
+  {
+   "duration": 2.534,
+   "para": 877,
+   "start": 2668.447,
+   "text": "飞腾云雾，号令雷霆"
+  },
+  {
+   "duration": 2.56,
+   "para": 878,
+   "start": 2670.981,
+   "text": "降雨开晴，驱邪治病"
+  },
+  {
+   "duration": 2.847,
+   "para": 879,
+   "start": 2673.541,
+   "text": "观过错于一十二年，授命玉帝"
+  },
+  {
+   "duration": 3.213,
+   "para": 880,
+   "start": 2676.388,
+   "text": "积功动于百千万种，誓佐祖师"
+  },
+  {
+   "duration": 3.814,
+   "para": 881,
+   "start": 2679.601,
+   "text": "至刚至勇，济死济生"
+  },
+  {
+   "duration": 2.612,
+   "para": 882,
+   "start": 2683.415,
+   "text": "方方阐教，处处开坛"
+  },
+  {
+   "duration": 2.064,
+   "para": 883,
+   "start": 2686.027,
+   "text": "豁落猛吏，三五火车"
+  },
+  {
+   "duration": 2.247,
+   "para": 884,
+   "start": 2688.091,
+   "text": "大乙雷神应化天尊"
+  },
+  {
+   "duration": 2.299,
+   "para": 885,
+   "start": 2690.338,
+   "text": "救苦诰　志心皈命礼"
+  },
+  {
+   "duration": 3.082,
+   "para": 886,
+   "start": 2692.637,
+   "text": "靑华长乐界，东极妙严宫"
+  },
+  {
+   "duration": 2.952,
+   "para": 887,
+   "start": 2695.719,
+   "text": "七宝芳骞林，九色莲花座"
+  },
+  {
+   "duration": 2.978,
+   "para": 888,
+   "start": 2698.671,
+   "text": "万真环拱内，百亿瑞光中"
+  },
+  {
+   "duration": 3.396,
+   "para": 889,
+   "start": 2701.649,
+   "text": "玉淸天宝尊，应化玄元始"
+  },
+  {
+   "duration": 3.03,
+   "para": 890,
+   "start": 2705.045,
+   "text": "浩劫垂慈济，大千甘露门"
+  },
+  {
+   "duration": 2.299,
+   "para": 891,
+   "start": 2708.075,
+   "text": "妙道真身，紫金瑞相"
+  },
+  {
+   "duration": 1.881,
+   "para": 892,
+   "start": 2710.374,
+   "text": "随机赴感，誓愿无边"
+  },
+  {
+   "duration": 2.9,
+   "para": 893,
+   "start": 2712.255,
+   "text": "大圣大慈，大悲大愿"
+  },
+  {
+   "duration": 2.612,
+   "para": 894,
+   "start": 2715.155,
+   "text": "十方化号，普度众生"
+  },
+  {
+   "duration": 2.534,
+   "para": 895,
+   "start": 2717.767,
+   "text": "亿亿劫中，度人无量"
+  },
+  {
+   "duration": 4.859,
+   "para": 896,
+   "start": 2720.301,
+   "text": "寻声赴感，太乙救苦天尊靑玄上帝"
+  },
+  {
+   "duration": 1.228,
+   "para": 897,
+   "start": 2725.16,
+   "text": "【主坛举】"
+  },
+  {
+   "duration": 2.769,
+   "para": 898,
+   "start": 2726.388,
+   "text": "爱河千层浪  苦海万丈深"
+  },
+  {
+   "duration": 2.9,
+   "para": 899,
+   "start": 2729.157,
+   "text": "欲免轮回苦  大众转天尊"
+  },
+  {
+   "duration": 1.724,
+   "para": 900,
+   "start": 2732.057,
+   "text": "【大众出坛转念】"
+  },
+  {
+   "duration": 1.933,
+   "para": 901,
+   "start": 2733.781,
+   "text": "太乙救苦天尊"
+  },
+  {
+   "duration": 3.553,
+   "para": 902,
+   "start": 2735.714,
+   "text": "【转至孤魂处施食毕回坛跪念】"
+  },
+  {
+   "duration": 5.277,
+   "para": 903,
+   "start": 2739.267,
+   "text": "靑华妙严，慈相亿千。身居长乐，尊座金莲。"
+  },
+  {
+   "duration": 4.754,
+   "para": 904,
+   "start": 2744.544,
+   "text": "慧光无碍，照诸幽泉。甘露流润，徧洒空玄。"
+  },
+  {
+   "duration": 5.642,
+   "para": 905,
+   "start": 2749.298,
+   "text": "朽骸枯骨，咸得光鲜。拔度沈溺，不滞寒渊。"
+  },
+  {
+   "duration": 5.042,
+   "para": 906,
+   "start": 2754.94,
+   "text": "上请天官解天厄，地官解地厄，水官解水厄，五帝解五方厄，"
+  },
+  {
+   "duration": 4.754,
+   "para": 907,
+   "start": 2759.982,
+   "text": "四圣解四时厄，南辰解本命厄，北斗解一切厄。"
+  },
+  {
+   "duration": 2.534,
+   "para": 908,
+   "start": 2764.736,
+   "text": "于是七元君，大圣善通灵"
+  },
+  {
+   "duration": 3.187,
+   "para": 909,
+   "start": 2767.27,
+   "text": "济度诸厄难，超出苦众生"
+  },
+  {
+   "duration": 2.612,
+   "para": 910,
+   "start": 2770.457,
+   "text": "若有急吿者，持诵保安平"
+  },
+  {
+   "duration": 3.03,
+   "para": 911,
+   "start": 2773.069,
+   "text": "尽凭生百福，咸契于五行"
+  },
+  {
+   "duration": 2.978,
+   "para": 912,
+   "start": 2776.099,
+   "text": "三魂得安健，邪魅不能停，"
+  },
+  {
+   "duration": 3.37,
+   "para": 913,
+   "start": 2779.077,
+   "text": "五方降真炁，万福自来骈"
+  },
+  {
+   "duration": 2.795,
+   "para": 914,
+   "start": 2782.447,
+   "text": "长生超八难，皆由奉七星"
+  },
+  {
+   "duration": 2.952,
+   "para": 915,
+   "start": 2785.242,
+   "text": "生生身自在，世世保神淸"
+  },
+  {
+   "duration": 2.769,
+   "para": 916,
+   "start": 2788.194,
+   "text": "善似光中影，应如谷里声"
+  },
+  {
+   "duration": 3.553,
+   "para": 917,
+   "start": 2790.963,
+   "text": "三元神共护，万圣眼同明"
+  },
+  {
+   "duration": 3.187,
+   "para": 918,
+   "start": 2794.516,
+   "text": "无灾亦无障，永保道心宁"
+  },
+  {
+   "duration": 2.247,
+   "para": 919,
+   "start": 2797.703,
+   "text": "报恩诰　志心皈命礼"
+  },
+  {
+   "duration": 2.247,
+   "para": 920,
+   "start": 2799.95,
+   "text": "玄元应化，五曲分真"
+  },
+  {
+   "duration": 2.665,
+   "para": 921,
+   "start": 2802.197,
+   "text": "垂念我等众生，有相脱生"
+  },
+  {
+   "duration": 3.135,
+   "para": 922,
+   "start": 2804.862,
+   "text": "父母怀躭十月，乳哺三年"
+  },
+  {
+   "duration": 2.56,
+   "para": 923,
+   "start": 2807.997,
+   "text": "辛苦百千，殷勤寸念"
+  },
+  {
+   "duration": 2.194,
+   "para": 924,
+   "start": 2810.557,
+   "text": "怜我父母，日渐衰朽"
+  },
+  {
+   "duration": 3.553,
+   "para": 925,
+   "start": 2812.751,
+   "text": "我今持念平等，悉灭崄峻贪嗔"
+  },
+  {
+   "duration": 2.56,
+   "para": 926,
+   "start": 2816.304,
+   "text": "礼帝为师，祈恩报本"
+  },
+  {
+   "duration": 1.646,
+   "para": 927,
+   "start": 2818.864,
+   "text": "愿我现在父母"
+  },
+  {
+   "duration": 3.866,
+   "para": 928,
+   "start": 2820.51,
+   "text": "福夀增延，过去宗祖，早得超升"
+  },
+  {
+   "duration": 2.194,
+   "para": 929,
+   "start": 2824.376,
+   "text": "大圣大慈，大仁大孝"
+  },
+  {
+   "duration": 2.482,
+   "para": 930,
+   "start": 2826.57,
+   "text": "八十二化，报恩教主"
+  },
+  {
+   "duration": 2.429,
+   "para": 931,
+   "start": 2829.052,
+   "text": "佑圣真武，治世福神"
+  },
+  {
+   "duration": 2.847,
+   "para": 932,
+   "start": 2831.481,
+   "text": "玉虚师相，玄天上帝"
+  },
+  {
+   "duration": 2.664,
+   "para": 933,
+   "start": 2834.328,
+   "text": "金阙化身，终劫济苦天尊"
+  },
+  {
+   "duration": 3.082,
+   "para": 934,
+   "start": 2836.992,
+   "text": "一愿风调雨顺　　　二愿五谷丰登"
+  },
+  {
+   "duration": 3.135,
+   "para": 935,
+   "start": 2840.074,
+   "text": "三愿皇王万岁　　　四愿国土淸平"
+  },
+  {
+   "duration": 3.683,
+   "para": 936,
+   "start": 2843.209,
+   "text": "五愿民安物阜　　　六愿福夀康宁"
+  },
+  {
+   "duration": 2.769,
+   "para": 937,
+   "start": 2846.892,
+   "text": "七愿灾消祸散　　　八愿水火无侵"
+  },
+  {
+   "duration": 2.429,
+   "para": 938,
+   "start": 2849.661,
+   "text": "九愿聪明智慧　　　十愿学道成真"
+  },
+  {
+   "duration": 3.37,
+   "para": 939,
+   "start": 2852.09,
+   "text": "十一愿诸神拥护　　十二愿亡者超升"
+  },
+  {
+   "duration": 4.232,
+   "para": 940,
+   "start": 2855.46,
+   "text": "一切飞禽走兽　　　一切蝼蚁蛇虫"
+  },
+  {
+   "duration": 2.534,
+   "para": 941,
+   "start": 2859.692,
+   "text": "一切冤家债主　　　一切男女孤魂"
+  },
+  {
+   "duration": 2.56,
+   "para": 942,
+   "start": 2862.226,
+   "text": "四生六道，一切寒林，"
+  },
+  {
+   "duration": 2.847,
+   "para": 943,
+   "start": 2864.786,
+   "text": "闻经听法，早得超升　【重三遍】"
+  },
+  {
+   "duration": 3.082,
+   "para": 944,
+   "start": 2867.633,
+   "text": "靑华救主，太乙慈尊"
+  },
+  {
+   "duration": 3.396,
+   "para": 945,
+   "start": 2870.715,
+   "text": "玉淸应化显金身，大千甘露门"
+  },
+  {
+   "duration": 2.351,
+   "para": 946,
+   "start": 2874.111,
+   "text": "接引群生，永出爱河"
+  },
+  {
+   "duration": 2.247,
+   "para": 947,
+   "start": 2876.462,
+   "text": "津接引群生，永出爱河津"
+  },
+  {
+   "duration": 3.213,
+   "para": 948,
+   "start": 2878.709,
+   "text": "愿灭三障诸烦恼，愿得智慧心明了"
+  },
+  {
+   "duration": 4.232,
+   "para": 949,
+   "start": 2881.922,
+   "text": "普愿灾障悉消除，世世常行无上道"
+  },
+  {
+   "duration": 3.683,
+   "para": 950,
+   "start": 2886.154,
+   "text": "四恩三有均利益，十洲三岛任逍遥"
+  },
+  {
+   "duration": 3.03,
+   "para": 951,
+   "start": 2889.837,
+   "text": "回向四府众龙神，礼谢道经师三宝"
+  },
+  {
+   "duration": 3.396,
+   "para": 952,
+   "start": 2892.867,
+   "text": "向来诵经福无边，风调雨顺民安乐"
+  },
+  {
+   "duration": 3.37,
+   "para": 953,
+   "start": 2896.263,
+   "text": "愿以此功德，普及于一切，"
+  },
+  {
+   "duration": 3.135,
+   "para": 954,
+   "start": 2899.633,
+   "text": "诵经保平安，消灾增福夀"
+  },
+  {
+   "duration": 2.717,
+   "para": 955,
+   "start": 2902.768,
+   "text": "此间土地，神之最灵"
+  },
+  {
+   "duration": 1.776,
+   "para": 956,
+   "start": 2905.485,
+   "text": "升天达地，出幽入冥"
+  },
+  {
+   "duration": 2.56,
+   "para": 957,
+   "start": 2907.261,
+   "text": "为吾关奏，不得留停"
+  },
+  {
+   "duration": 2.429,
+   "para": 958,
+   "start": 2909.821,
+   "text": "有功之日，名书上淸"
+  },
+  {
+   "duration": 2.064,
+   "para": 959,
+   "start": 2912.25,
+   "text": "向来诵经功德"
+  },
+  {
+   "duration": 2.429,
+   "para": 960,
+   "start": 2914.314,
+   "text": "上奉高真，下保平安"
+  },
+  {
+   "duration": 3.396,
+   "para": 961,
+   "start": 2916.743,
+   "text": "赐福消灾，同赖善功"
+  },
+  {
+   "duration": 2.429,
+   "para": 962,
+   "start": 2920.139,
+   "text": "证无上道，一切信礼"
+  },
+  {
+   "duration": 3.553,
+   "para": 963,
+   "start": 2922.568,
+   "text": "志心称念太乙救苦天尊不可思议功德"
+  },
+  {
+   "duration": 1.123,
+   "para": 964,
+   "start": 2926.121,
+   "text": "【主经白】"
+  },
+  {
+   "duration": 4.754,
+   "para": 965,
+   "start": 2927.244,
+   "text": "既诵经语，当解经意，各自省心，早求度世。"
+  },
+  {
+   "duration": 5.695,
+   "para": 966,
+   "start": 2931.998,
+   "text": "人身不易得，正法最难遇，但念无常苦，各发清静志。"
+  },
+  {
+   "duration": 5.042,
+   "para": 967,
+   "start": 2937.693,
+   "text": "扫除诸妄念，去却贪嗔痴， 忏悔往昔非，当求今日是。"
+  },
+  {
+   "duration": 3.213,
+   "para": 968,
+   "start": 2942.735,
+   "text": "勇猛生精进，各用皈命礼。"
+  },
+  {
+   "duration": 1.829,
+   "para": 969,
+   "start": 2945.948,
+   "text": "志心皈命礼"
+  },
+  {
+   "duration": 17.894,
+   "para": 970,
+   "start": 2947.777,
+   "text": "青华圣境，东极上宫，十方化号度群生，百亿光中瞻妙相，九色莲花作慈航之彼岸，一枝杨柳开甘露之法门，九十九万亿同名同号圣，幢幡宝盖接引导师，大慈大悲，寻声赴感，太乙救苦天尊。"
+  },
+  {
+   "duration": 1.933,
+   "para": 971,
+   "start": 2965.671,
+   "text": "志心皈命礼"
+  },
+  {
+   "duration": 18.965,
+   "para": 972,
+   "start": 2967.604,
+   "text": "青华圣境，东极上宫，十方化号度群生，百亿光中瞻妙相，九色莲花作慈航之彼岸，一枝杨柳开甘露之法门，九十九万亿同名同号圣，幢幡宝盖接引导师，大慈大悲，寻声赴感，十方灵宝天尊。"
+  },
+  {
+   "duration": 1.123,
+   "para": 973,
+   "start": 2986.569,
+   "text": "志心皈命礼"
+  },
+  {
+   "duration": 15.151,
+   "para": 974,
+   "start": 2987.692,
+   "text": "青华圣境，东极上宫，十方化号度群生，百亿光中瞻妙相，九色莲花作慈航之彼岸，一枝杨柳开甘露之法门，九十九万亿同名同号圣，幢幡宝盖接引导师，大慈大悲，寻声赴感，随愿往生天尊。"
+  },
+  {
+   "duration": 2.612,
+   "para": 975,
+   "start": 3002.843,
+   "text": "【以上各天尊一拜毕再三拜分班圆揖礼毕】"
+  },
+  {
+   "duration": 1.515,
+   "para": 976,
+   "start": 3005.455,
+   "text": "晚坛功课经终"
+  }
+ ],
+ "sid": "s02",
+ "total_duration": 3006.97,
+ "voice": "female"
+}

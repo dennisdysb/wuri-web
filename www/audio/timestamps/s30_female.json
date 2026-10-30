@@ -1,1 +1,265 @@
-{"sid": "s30", "voice": "female", "total_duration": 137.58, "segments": [{"para": 0, "start": 0.0, "duration": 3.03, "text": "太上洞玄灵宝救苦妙经"}, {"para": 1, "start": 3.03, "duration": 1.83, "text": "尔时 救苦天尊"}, {"para": 2, "start": 4.86, "duration": 2.85, "text": "遍满十方界，常以威神力，"}, {"para": 3, "start": 7.71, "duration": 2.43, "text": "救拔诸众生，得离于迷途，"}, {"para": 4, "start": 10.14, "duration": 2.9, "text": "众生不知觉，如盲见日月。"}, {"para": 5, "start": 13.03, "duration": 3.08, "text": "我本太无中，拔领无边际。"}, {"para": 6, "start": 16.12, "duration": 3.03, "text": "庆云开生门，祥烟塞死户。"}, {"para": 7, "start": 19.15, "duration": 3.5, "text": "初发玄元始，以统祥感机。"}, {"para": 8, "start": 22.65, "duration": 2.35, "text": "救一切罪，度一切厄。"}, {"para": 9, "start": 25.0, "duration": 3.45, "text": "渺渺超仙源，荡荡自然清。"}, {"para": 10, "start": 28.45, "duration": 2.95, "text": "皆承大道力，以伏诸魔精。"}, {"para": 11, "start": 31.4, "duration": 3.13, "text": "空中何灼灼，名曰泥丸仙。"}, {"para": 12, "start": 34.53, "duration": 2.56, "text": "紫云覆黄老，是名三宝君。"}, {"para": 13, "start": 37.09, "duration": 2.38, "text": "还将上天气，以制九天魂。"}, {"para": 14, "start": 39.47, "duration": 2.66, "text": "救苦诸妙神，善见救苦时。"}, {"para": 15, "start": 42.13, "duration": 2.43, "text": "天上混无分，天气归一身。"}, {"para": 16, "start": 44.56, "duration": 2.48, "text": "皆成自然人，自然有别体。"}, {"para": 17, "start": 47.05, "duration": 3.55, "text": "本在空洞中，空洞迹非迹，徧体皆虚空。"}, {"para": 18, "start": 50.6, "duration": 4.86, "text": "第一委气立，第二顺气生，第三成万法，第四主光明。"}, {"para": 19, "start": 55.46, "duration": 4.44, "text": "天上三十六，地下三十六，太玄无边际，妙哉大洞经。"}, {"para": 20, "start": 59.9, "duration": 3.4, "text": "归命太上尊，能消一切罪。"}, {"para": 21, "start": 63.29, "duration": 3.32, "text": "东方玉宝皇上天尊 南方玄真万福天尊"}, {"para": 22, "start": 66.61, "duration": 2.79, "text": "西方太妙至极天尊 北方玄上玉宸天尊"}, {"para": 23, "start": 69.41, "duration": 3.79, "text": "东北方度仙上圣天尊 东南方好生度命天尊"}, {"para": 24, "start": 73.19, "duration": 4.21, "text": "西南方太灵虚皇天尊 西北方无量太华天尊"}, {"para": 25, "start": 77.4, "duration": 5.04, "text": "上方玉虚明皇天尊 下方真皇洞神天尊"}, {"para": 26, "start": 82.44, "duration": 2.77, "text": "十方诸天尊，其数如沙尘。"}, {"para": 27, "start": 85.21, "duration": 2.61, "text": "化形十方界，普济度天人。"}, {"para": 28, "start": 87.82, "duration": 4.15, "text": "委气聚功德，同声救罪魂。"}, {"para": 29, "start": 91.97, "duration": 3.08, "text": "罪魂实可哀，我今说妙经。"}, {"para": 30, "start": 95.06, "duration": 2.38, "text": "念诵无休息，归身不暂停。"}, {"para": 31, "start": 97.43, "duration": 3.21, "text": "天堂享大福，地狱无苦声。"}, {"para": 32, "start": 100.65, "duration": 3.32, "text": "火翳成清署，剑树化为骞。"}, {"para": 33, "start": 103.96, "duration": 2.77, "text": "上登朱陵府，下入开光门。"}, {"para": 34, "start": 106.73, "duration": 3.27, "text": "超度三界难，径上元始天。"}, {"para": 35, "start": 110.0, "duration": 2.19, "text": "于是飞天神王、无鞅数众，"}, {"para": 36, "start": 112.19, "duration": 2.66, "text": "瞻仰尊颜，而作颂曰："}, {"para": 37, "start": 114.86, "duration": 3.79, "text": "天尊说经教，引接于浮生。"}, {"para": 38, "start": 118.64, "duration": 3.21, "text": "勤修学无为，悟真道自成。"}, {"para": 39, "start": 121.86, "duration": 3.32, "text": "不迷亦不荒，无我亦无名。"}, {"para": 40, "start": 125.18, "duration": 4.02, "text": "朗咏罪福句，万徧心垢清。"}, {"para": 41, "start": 129.2, "duration": 5.41, "text": "尔时飞天神王及诸仙众说是颂毕，稽首天尊，奉辞而退。"}, {"para": 42, "start": 134.61, "duration": 2.98, "text": "太上洞玄灵宝救苦妙经"}]}
+{
+ "segments": [
+  {
+   "duration": 3.03,
+   "para": 0,
+   "start": 0.0,
+   "text": "太上洞玄灵宝救苦妙经"
+  },
+  {
+   "duration": 1.829,
+   "para": 1,
+   "start": 3.03,
+   "text": "尔时 救苦天尊"
+  },
+  {
+   "duration": 2.847,
+   "para": 2,
+   "start": 4.859,
+   "text": "遍满十方界，常以威神力，"
+  },
+  {
+   "duration": 2.429,
+   "para": 3,
+   "start": 7.706,
+   "text": "救拔诸众生，得离于迷途，"
+  },
+  {
+   "duration": 2.9,
+   "para": 4,
+   "start": 10.135,
+   "text": "众生不知觉，如盲见日月。"
+  },
+  {
+   "duration": 3.082,
+   "para": 5,
+   "start": 13.035,
+   "text": "我本太无中，拔领无边际。"
+  },
+  {
+   "duration": 3.03,
+   "para": 6,
+   "start": 16.117,
+   "text": "庆云开生门，祥烟塞死户。"
+  },
+  {
+   "duration": 3.5,
+   "para": 7,
+   "start": 19.147,
+   "text": "初发玄元始，以统祥感机。"
+  },
+  {
+   "duration": 2.351,
+   "para": 8,
+   "start": 22.647,
+   "text": "救一切罪，度一切厄。"
+  },
+  {
+   "duration": 3.448,
+   "para": 9,
+   "start": 24.998,
+   "text": "渺渺超仙源，荡荡自然清。"
+  },
+  {
+   "duration": 2.952,
+   "para": 10,
+   "start": 28.446,
+   "text": "皆承大道力，以伏诸魔精。"
+  },
+  {
+   "duration": 3.135,
+   "para": 11,
+   "start": 31.398,
+   "text": "空中何灼灼，名曰泥丸仙。"
+  },
+  {
+   "duration": 2.56,
+   "para": 12,
+   "start": 34.533,
+   "text": "紫云覆黄老，是名三宝君。"
+  },
+  {
+   "duration": 3.736,
+   "para": 13,
+   "start": 37.093,
+   "text": "还将上天气，以制九天魂。"
+  },
+  {
+   "duration": 2.664,
+   "para": 14,
+   "start": 40.829,
+   "text": "救苦诸妙神，善见救苦时。"
+  },
+  {
+   "duration": 2.429,
+   "para": 15,
+   "start": 43.493,
+   "text": "天上混无分，天气归一身。"
+  },
+  {
+   "duration": 2.482,
+   "para": 16,
+   "start": 45.922,
+   "text": "皆成自然人，自然有别体。"
+  },
+  {
+   "duration": 3.553,
+   "para": 17,
+   "start": 48.404,
+   "text": "本在空洞中，空洞迹非迹，徧体皆虚空。"
+  },
+  {
+   "duration": 4.859,
+   "para": 18,
+   "start": 51.957,
+   "text": "第一委气立，第二顺气生，第三成万法，第四主光明。"
+  },
+  {
+   "duration": 4.441,
+   "para": 19,
+   "start": 56.816,
+   "text": "天上三十六，地下三十六，太玄无边际，妙哉大洞经。"
+  },
+  {
+   "duration": 3.396,
+   "para": 20,
+   "start": 61.257,
+   "text": "归命太上尊，能消一切罪。"
+  },
+  {
+   "duration": 3.318,
+   "para": 21,
+   "start": 64.653,
+   "text": "东方玉宝皇上天尊 南方玄真万福天尊"
+  },
+  {
+   "duration": 2.795,
+   "para": 22,
+   "start": 67.971,
+   "text": "西方太妙至极天尊 北方玄上玉宸天尊"
+  },
+  {
+   "duration": 3.788,
+   "para": 23,
+   "start": 70.766,
+   "text": "东北方度仙上圣天尊 东南方好生度命天尊"
+  },
+  {
+   "duration": 4.206,
+   "para": 24,
+   "start": 74.554,
+   "text": "西南方太灵虚皇天尊 西北方无量太华天尊"
+  },
+  {
+   "duration": 5.042,
+   "para": 25,
+   "start": 78.76,
+   "text": "上方玉虚明皇天尊 下方真皇洞神天尊"
+  },
+  {
+   "duration": 2.769,
+   "para": 26,
+   "start": 83.802,
+   "text": "十方诸天尊，其数如沙尘。"
+  },
+  {
+   "duration": 2.612,
+   "para": 27,
+   "start": 86.571,
+   "text": "化形十方界，普济度天人。"
+  },
+  {
+   "duration": 4.154,
+   "para": 28,
+   "start": 89.183,
+   "text": "委气聚功德，同声救罪魂。"
+  },
+  {
+   "duration": 3.082,
+   "para": 29,
+   "start": 93.337,
+   "text": "罪魂实可哀，我今说妙经。"
+  },
+  {
+   "duration": 2.377,
+   "para": 30,
+   "start": 96.419,
+   "text": "念诵无休息，归身不暂停。"
+  },
+  {
+   "duration": 3.213,
+   "para": 31,
+   "start": 98.796,
+   "text": "天堂享大福，地狱无苦声。"
+  },
+  {
+   "duration": 3.265,
+   "para": 32,
+   "start": 102.009,
+   "text": "火翳成清署，剑树化为骞。"
+  },
+  {
+   "duration": 2.769,
+   "para": 33,
+   "start": 105.274,
+   "text": "上登朱陵府，下入开光门。"
+  },
+  {
+   "duration": 3.265,
+   "para": 34,
+   "start": 108.043,
+   "text": "超度三界难，径上元始天。"
+  },
+  {
+   "duration": 2.194,
+   "para": 35,
+   "start": 111.308,
+   "text": "于是飞天神王、无鞅数众，"
+  },
+  {
+   "duration": 2.664,
+   "para": 36,
+   "start": 113.502,
+   "text": "瞻仰尊颜，而作颂曰："
+  },
+  {
+   "duration": 3.788,
+   "para": 37,
+   "start": 116.166,
+   "text": "天尊说经教，引接于浮生。"
+  },
+  {
+   "duration": 3.213,
+   "para": 38,
+   "start": 119.954,
+   "text": "勤修学无为，悟真道自成。"
+  },
+  {
+   "duration": 3.318,
+   "para": 39,
+   "start": 123.167,
+   "text": "不迷亦不荒，无我亦无名。"
+  },
+  {
+   "duration": 4.023,
+   "para": 40,
+   "start": 126.485,
+   "text": "朗咏罪福句，万徧心垢清。"
+  },
+  {
+   "duration": 5.407,
+   "para": 41,
+   "start": 130.508,
+   "text": "尔时飞天神王及诸仙众说是颂毕，稽首天尊，奉辞而退。"
+  },
+  {
+   "duration": 2.978,
+   "para": 42,
+   "start": 135.915,
+   "text": "太上洞玄灵宝救苦妙经"
+  }
+ ],
+ "sid": "s30",
+ "total_duration": 138.893,
+ "voice": "female"
+}
