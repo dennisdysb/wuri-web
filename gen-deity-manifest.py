@@ -19,22 +19,38 @@ IMG_DIR = os.path.join(ROOT, "www", "img", "deities")
 OUT = os.path.join(IMG_DIR, "manifest.json")
 
 
+def entry_images(d):
+    """一条目的全部图：可选 images 数组（多图，第一张与 image 同名）优先，
+    缺省回落单张 image。"""
+    imgs = d.get("images")
+    if isinstance(imgs, list) and imgs:
+        return [x for x in imgs if isinstance(x, str) and x]
+    img = d.get("image")
+    return [img] if img else []
+
+
 def main():
     with open(FEED, encoding="utf-8") as f:
         feed = json.load(f)
     names, seen = [], set()
+    n_deities = 0
     for group in feed.get("groups", []):
         for d in group.get("deities", []) if isinstance(group, dict) else []:
-            img = d.get("image")
-            if img and img not in seen:
-                seen.add(img)
-                names.append(img)
+            imgs = entry_images(d)
+            if imgs: n_deities += 1
+            for img in imgs:
+                if img not in seen:
+                    seen.add(img)
+                    names.append(img)
     if not names:  # feed 结构兜底：顶层 deities 列表
+        n_deities = 0
         for d in feed.get("deities", []):
-            img = d.get("image")
-            if img and img not in seen:
-                seen.add(img)
-                names.append(img)
+            imgs = entry_images(d)
+            if imgs: n_deities += 1
+            for img in imgs:
+                if img not in seen:
+                    seen.add(img)
+                    names.append(img)
     files, total, missing = {}, 0, []
     for name in names:
         p = os.path.join(IMG_DIR, name)
@@ -46,10 +62,10 @@ def main():
     if missing:
         print("缺图 %d 张，清单未生成：%s" % (len(missing), ", ".join(missing)), file=sys.stderr)
         return 1
-    manifest = {"count": len(files), "totalBytes": total, "files": files}
+    manifest = {"count": len(files), "deities": n_deities, "totalBytes": total, "files": files}
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=1, sort_keys=True)
-    print("manifest 已生成：%d 张 · %d 字节（%.1f MB）→ %s" % (len(files), total, total / 1048576, OUT))
+    print("manifest 已生成：%d 位 · %d 张 · %d 字节（%.1f MB）→ %s" % (n_deities, len(files), total, total / 1048576, OUT))
     return 0
 
 

@@ -328,8 +328,10 @@
         if (dj && dj.deities) {
           dj.deities.forEach(function (d) {
             /* 神图外置（v2.0.0 (2)）：预取只带缩略图，全图走「图鉴素材」单独下载，
-             * 不再随音频一键下载整包拉回（否则外置瘦身被预取抵消） */
-            if (d.image) rels.push('img/deities/thumbs/' + d.image);
+             * 不再随音频一键下载整包拉回（否则外置瘦身被预取抵消）。
+             * 多图条目（images 数组）缩略图一并预取，详情切图不空等。 */
+            var dimgs = (d.images && d.images.length) ? d.images : (d.image ? [d.image] : []);
+            dimgs.forEach(function (n) { if (n) rels.push('img/deities/thumbs/' + n); });
           });
         }
         var uniq = [];
@@ -525,7 +527,7 @@
    * 失败回落兜底表（呈现版上线字节数，构建时实算，非估算）。删除只删全图条目，
    * 不动同缓存里的音频/正文。 */
   var DEITY_LS = 'wuri_deity_dl_v1';
-  var DEITY_FALLBACK_SIZES = {"baosheng.webp": 227964, "beidou.webp": 181270, "beiyue.webp": 226862, "bigan.webp": 217512, "bishuiyu.webp": 270218, "bixia.webp": 217648, "biyuewu.webp": 271516, "caoguojiu.webp": 189292, "changsheng.webp": 252624, "chenghuang.webp": 168268, "daode.webp": 168802, "diguan.webp": 188590, "dituhe.webp": 247930, "donghua.webp": 287960, "dongyue.webp": 258310, "doumu.webp": 178204, "doumuxie.webp": 362496, "erlang.webp": 193512, "fangritu.webp": 262874, "fengdu.webp": 243928, "gexuan.webp": 207172, "gouchen.webp": 221498, "guandi.webp": 215984, "guangze.webp": 241440, "guijinyang.webp": 294318, "hanxiangzi.webp": 177168, "hehe.webp": 209356, "hexiangu.webp": 131568, "houtu.webp": 188512, "huaguang.webp": 252268, "jiaomujiao.webp": 340744, "jingmugan.webp": 299832, "jishuibao.webp": 272674, "kangjinlong.webp": 300718, "kuimulang.webp": 272864, "kuixing.webp": 247098, "lancaihe.webp": 199452, "lingbao.webp": 202738, "linshui.webp": 247016, "lishan.webp": 191760, "liuhai.webp": 207310, "liutuzhang.webp": 296968, "longwang.webp": 267182, "loujingou.webp": 286124, "luban.webp": 193126, "lvdongbin.webp": 146838, "magu.webp": 223710, "maoriji.webp": 297230, "mazu.webp": 172962, "nandou.webp": 186588, "nanyue.webp": 233270, "nezha.webp": 216902, "niujinniu.webp": 280428, "nvtufu.webp": 237912, "puhua.webp": 233604, "qiuchuji.webp": 161208, "sanmao.webp": 180386, "sashoujian.webp": 207310, "shennong.webp": 273024, "shenshuiyuan.webp": 291734, "shihuozhu.webp": 266400, "shuiguan.webp": 194126, "taisui.webp": 242290, "taiyang.webp": 266428, "taiyi.webp": 221068, "taiyin.webp": 184960, "tianguan.webp": 184670, "tieguai.webp": 168592, "tudi.webp": 222826, "wangchongyang.webp": 187944, "wanglingguan.webp": 194316, "wangmu.webp": 241030, "weihuohu.webp": 283210, "weituzhi.webp": 274596, "weiyueyan.webp": 278350, "wenchang.webp": 163870, "wenqiong.webp": 223304, "xingrima.webp": 258098, "xinyuehu.webp": 282966, "xiyue.webp": 228918, "xuannv.webp": 211486, "xurishu.webp": 268168, "xuxun.webp": 222616, "yaowang.webp": 198222, "yihuoshe.webp": 304192, "yuanshi.webp": 200448, "yuelao.webp": 184452, "yuhuang.webp": 245560, "zaojun.webp": 171822, "zhangdaoling.webp": 169728, "zhangguolao.webp": 145226, "zhangsanfeng.webp": 165022, "zhangyuelu.webp": 245732, "zhaogongming.webp": 200574, "zhenshuiyin.webp": 257790, "zhenwu.webp": 195020, "zhongkui.webp": 179212, "zhongli.webp": 200756, "zhongyue.webp": 262486, "zhusheng.webp": 230742, "zihuohou.webp": 305390, "ziwei.webp": 198404};
+  var DEITY_FALLBACK_SIZES = {"baosheng.webp": 227964, "beidou.webp": 181270, "beiyue.webp": 226862, "bigan.webp": 217512, "bishuiyu.webp": 270218, "bixia.webp": 217648, "biyuewu.webp": 271516, "caoguojiu.webp": 189292, "changsheng.webp": 252624, "chenghuang.webp": 168268, "daode.webp": 168802, "diguan.webp": 188590, "dituhe.webp": 247930, "donghua.webp": 287960, "dongyue.webp": 258310, "doumu.webp": 178204, "doumuxie.webp": 362496, "erlang.webp": 243936, "erlang-2.webp": 185460, "fangritu.webp": 262874, "fengdu.webp": 243928, "gexuan.webp": 207172, "gouchen.webp": 221498, "guandi.webp": 215984, "guangze.webp": 241440, "guijinyang.webp": 294318, "hanxiangzi.webp": 177168, "hehe.webp": 209356, "hexiangu.webp": 131568, "houtu.webp": 188512, "huaguang.webp": 252268, "jiaomujiao.webp": 340744, "jingmugan.webp": 299832, "jishuibao.webp": 272674, "kangjinlong.webp": 300718, "kuimulang.webp": 272864, "kuixing.webp": 247098, "lancaihe.webp": 199452, "lingbao.webp": 202738, "linshui.webp": 247016, "lishan.webp": 191760, "liuhai.webp": 207310, "liutuzhang.webp": 296968, "longwang.webp": 267182, "loujingou.webp": 286124, "luban.webp": 193126, "lvdongbin.webp": 146838, "magu.webp": 223710, "maoriji.webp": 297230, "mazu.webp": 172962, "nandou.webp": 186588, "nanyue.webp": 233270, "nezha.webp": 216902, "niujinniu.webp": 280428, "nvtufu.webp": 237912, "puhua.webp": 233604, "qiuchuji.webp": 161208, "sanmao.webp": 180386, "sashoujian.webp": 207310, "shennong.webp": 273024, "shenshuiyuan.webp": 291734, "shihuozhu.webp": 266400, "shuiguan.webp": 194126, "taisui.webp": 242290, "taiyang.webp": 266428, "taiyi.webp": 221068, "taiyin.webp": 184960, "tianguan.webp": 184670, "tieguai.webp": 168592, "tudi.webp": 222826, "wangchongyang.webp": 187944, "wanglingguan.webp": 194316, "wangmu.webp": 241030, "weihuohu.webp": 283210, "weituzhi.webp": 274596, "weiyueyan.webp": 278350, "wenchang.webp": 163870, "wenqiong.webp": 223304, "xingrima.webp": 258098, "xinyuehu.webp": 282966, "xiyue.webp": 228918, "xuannv.webp": 211486, "xurishu.webp": 268168, "xuxun.webp": 222616, "yaowang.webp": 198222, "yihuoshe.webp": 304192, "yuanshi.webp": 200448, "yuelao.webp": 184452, "yuhuang.webp": 245560, "zaojun.webp": 171822, "zhangdaoling.webp": 169728, "zhangguolao.webp": 145226, "zhangsanfeng.webp": 165022, "zhangyuelu.webp": 245732, "zhaogongming.webp": 200574, "zhenshuiyin.webp": 257790, "zhenwu.webp": 195020, "zhongkui.webp": 179212, "zhongli.webp": 200756, "zhongyue.webp": 262486, "zhusheng.webp": 230742, "zihuohou.webp": 305390, "ziwei.webp": 198404};
   var deityRunning = false;
   var deityAbort = false;
   var deitySizeMap = null;
@@ -534,7 +536,11 @@
     var D = window.DEITIES_DATA;
     var out = [], seen = {};
     if (D && D.deities) D.deities.forEach(function (d) {
-      if (d.image && !seen[d.image]) { seen[d.image] = 1; out.push(d.image); }
+      /* 多图条目：images 数组含全部图（第一张与 image 同名）；缺省单张 */
+      var imgs = (d.images && d.images.length) ? d.images : (d.image ? [d.image] : []);
+      imgs.forEach(function (n) {
+        if (n && !seen[n]) { seen[n] = 1; out.push(n); }
+      });
     });
     return out;
   }
@@ -769,13 +775,16 @@
       deitySyncCard();
     });
   }
-  /* 设置页素材栏文案数字读清单渲染（张数＋总大小与下载总量同源） */
+  /* 设置页素材栏文案数字：位数＝图鉴条目数（数据层），张数＋总大小＝清单
+   * 实数（清单驱动）。多图条目下张数＞位数，两数各归其源、不再混用。 */
   function deityPaintDesc() {
     var el = $('deity-dl-desc');
     if (!el) return;
     deityManifest().then(function (m) {
+      var deityN = (typeof m.deities === 'number') ? m.deities
+        : ((window.DEITIES_DATA && window.DEITIES_DATA.deities) ? window.DEITIES_DATA.deities.length : m.count);
       el.textContent = '神祇图鉴的全图平时从服务器按需加载，看过的会自动留在本机。点下面按钮可一次把全部 ' +
-        m.count + ' 位尊神的全图（约 ' + fmtMB(m.totalBytes) + '）下载到本机，断网也能慢慢看；不需要时可随时删除腾出空间。';
+        deityN + ' 位尊神的 ' + m.count + ' 张全图（约 ' + fmtMB(m.totalBytes) + '）下载到本机，断网也能慢慢看；不需要时可随时删除腾出空间。';
     });
   }
   function deityInit() {

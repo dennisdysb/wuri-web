@@ -6,10 +6,14 @@ feed 名单×磁盘字节重算严格一致（count/totalBytes/逐文件）；�
 （fetch＋LS 缓存键＋deityPaintDesc）且设置页文案元素带 id。
 ②运行时：设置页「图鉴素材」栏显示的张数/MB 与清单计算值严格相等。
 ③管线演练：临时加一张图（＋feed 临时条目）→ 重跑生成器 → 清单变化 →
-页面刷新后数字跟随（103 张）；恢复后回到 102 张。演练文件全程备份还原。
+页面刷新后数字跟随（基线＋1 张）；恢复后回到基线张数。演练文件全程备份还原。
 跑法：python3 smoke-deity-manifest.py
 """
 import importlib.util, json, os, re, shutil, subprocess, sys, time, urllib.request, base64 as b64mod
+import hashlib
+_WG = "/tmp/wuri-webgl-policy.txt"
+open(_WG, "w").write("hatch-webgl-all-origins-v1\n")
+_WG_SHA = hashlib.sha256(open(_WG, "rb").read()).hexdigest()
 spec = importlib.util.spec_from_file_location("smoke_base", os.path.expanduser("~/workspace/wuri-app/smoke-test.py"))
 base = importlib.util.module_from_spec(spec); sys.modules["smoke_base"] = base; spec.loader.exec_module(base)
 
@@ -29,11 +33,14 @@ def expected():
     feed = json.load(open(FEED, encoding="utf-8"))
     names, seen = [], set()
     for d in feed.get("deities", []):
-        img = d.get("image")
-        if img and img not in seen:
-            seen.add(img); names.append(img)
+        imgs = d.get("images") or ([d["image"]] if d.get("image") else [])
+        for img in imgs:
+            if img and img not in seen:
+                seen.add(img); names.append(img)
     files = {n: os.path.getsize(os.path.join(IMG_DIR, n)) for n in names}
-    return {"count": len(files), "totalBytes": sum(files.values()), "files": files}
+    n_deities = sum(1 for d in feed.get("deities", [])
+                    if (d.get("images") or ([d["image"]] if d.get("image") else [])))
+    return {"count": len(files), "deities": n_deities, "totalBytes": sum(files.values()), "files": files}
 
 # ---------- 静态 ----------
 gen = os.path.join(ROOT, "gen-deity-manifest.py")
@@ -53,6 +60,9 @@ ok("静态 运行时读清单（fetch＋LS 缓存＋回落推导＋文案渲染�
 PORT = base.free_port()
 chrome = subprocess.Popen([base.CHROME, "--headless=old", "--no-sandbox", "--disable-gpu",
                            "--allow-file-access-from-files",
+                           "--hatch-webgl-allowed-domains-file=" + _WG,
+                           "--hatch-webgl-allowed-domains-sha256=" + _WG_SHA,
+                           "--user-data-dir=/tmp/chrome-deityman-%d" % PORT,
                            "--remote-debugging-port=%d" % PORT, "about:blank"],
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 feed_backup = open(FEED, "rb").read()
@@ -91,13 +101,18 @@ try:
         return ev("document.getElementById('deity-dl-desc').textContent")
     def parse_desc(txt):
         m1 = re.search(r"全部 (\d+) 位", txt or "")
+        m3 = re.search(r"的 (\d+) 张", txt or "")
         m2 = re.search(r"约 ([\d.]+ MB)", txt or "")
-        return (int(m1.group(1)) if m1 else None, m2.group(1) if m2 else None)
+        return (int(m1.group(1)) if m1 else None,
+                int(m3.group(1)) if m3 else None,
+                m2.group(1) if m2 else None)
+    import json as _json
+    n_deities0 = len(_json.loads(feed_backup.decode("utf-8"))["deities"])
 
     txt = load_and_read_desc()
-    cnt, mb = parse_desc(txt)
-    ok("运行时 设置页数字＝清单计算值（%d 张 · %s）" % (exp0["count"], fmt_mb(exp0["totalBytes"])),
-       cnt == exp0["count"] and mb == fmt_mb(exp0["totalBytes"]), str(txt)[:80])
+    cnt, img_n, mb = parse_desc(txt)
+    ok("运行时 设置页数字＝位数（%d 位）＋清单计算值（%d 张 · %s）" % (n_deities0, exp0["count"], fmt_mb(exp0["totalBytes"])),
+       cnt == n_deities0 and img_n == exp0["count"] and mb == fmt_mb(exp0["totalBytes"]), str(txt)[:80])
 
     # ---- 管线演练：加一张图 → 重跑生成 → 页面数字跟随 ----
     src_webp = min(exp0["files"], key=lambda k: exp0["files"][k])
@@ -109,13 +124,13 @@ try:
     r = subprocess.run([sys.executable, gen], capture_output=True, text=True)
     man2 = json.load(open(MANIFEST, encoding="utf-8"))
     exp2 = expected()
-    ok("演练 重跑生成后清单变化且自洽（103 张）",
+    ok("演练 重跑生成后清单变化且自洽（%d 张）" % exp2["count"],
        r.returncode == 0 and man2["count"] == exp0["count"] + 1 and man2 == exp2,
        (r.stdout + r.stderr)[:120])
     txt2 = load_and_read_desc()
-    cnt2, mb2 = parse_desc(txt2)
-    ok("演练 页面数字跟随清单（103 张 · %s）" % fmt_mb(exp2["totalBytes"]),
-       cnt2 == exp2["count"] and mb2 == fmt_mb(exp2["totalBytes"]), str(txt2)[:80])
+    cnt2, img_n2, mb2 = parse_desc(txt2)
+    ok("演练 页面数字跟随清单（%d 位 · %d 张 · %s）" % (n_deities0 + 1, exp2["count"], fmt_mb(exp2["totalBytes"])),
+       cnt2 == n_deities0 + 1 and img_n2 == exp2["count"] and mb2 == fmt_mb(exp2["totalBytes"]), str(txt2)[:80])
 finally:
     # 恢复演练现场（无论成败）：删临时图、还原 feed、重跑生成回到基线
     try:

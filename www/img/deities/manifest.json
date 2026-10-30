@@ -1,5 +1,6 @@
 {
- "count": 102,
+ "count": 103,
+ "deities": 102,
  "files": {
   "baosheng.webp": 227964,
   "beidou.webp": 181270,
@@ -18,7 +19,8 @@
   "dongyue.webp": 258310,
   "doumu.webp": 178204,
   "doumuxie.webp": 362496,
-  "erlang.webp": 193512,
+  "erlang-2.webp": 185460,
+  "erlang.webp": 243936,
   "fangritu.webp": 262874,
   "fengdu.webp": 243928,
   "gexuan.webp": 207172,
@@ -104,5 +106,5 @@
   "zihuohou.webp": 305390,
   "ziwei.webp": 198404
  },
- "totalBytes": 23254786
+ "totalBytes": 23490670
 }

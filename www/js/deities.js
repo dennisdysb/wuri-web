@@ -104,6 +104,8 @@ window.WuriImg = window.WuriImg || (function () {
     pos: document.getElementById('deity-detail-pos'),
     navPrev: document.getElementById('deity-nav-prev'),
     navNext: document.getElementById('deity-nav-next'),
+    imgPrev: document.getElementById('deity-img-prev'),
+    imgNext: document.getElementById('deity-img-next'),
     hint: document.getElementById('deity-swipe-hint'),
     birthday: document.getElementById('deity-f-birthday'),
     temple: document.getElementById('deity-f-temple'),
@@ -128,7 +130,26 @@ window.WuriImg = window.WuriImg || (function () {
   var navOrigin = null; /* {views:[viewId...], scroll:{viewId: top}} | null */
   var detailToken = 0;
 
-  function loadDetailImage(d) {
+  /* 条目全部图（通用多图支持）：数据层可选 images 数组（含全部图、第一张
+   * 与 image 同名、详情默认先显第一张）；缺省即单张 image。切图箭头仅在
+   * 多图条目显形，单图条目界面与旧版一致。 */
+  var curImgIdx = 0;
+  function deityImages(d) {
+    if (d && d.images && d.images.length) return d.images;
+    return (d && d.image) ? [d.image] : [];
+  }
+  function syncImgArrows(d) {
+    var multi = deityImages(d).length > 1;
+    if (F.imgPrev) F.imgPrev.hidden = !multi;
+    if (F.imgNext) F.imgNext.hidden = !multi;
+  }
+
+  function loadDetailImage(d, idx) {
+    var imgs = deityImages(d);
+    if (!imgs.length) return;
+    curImgIdx = Math.max(0, Math.min(idx || 0, imgs.length - 1));
+    var name = imgs[curImgIdx];
+    syncImgArrows(d);
     var my = ++detailToken;
     F.img.alt = d.name;
     var box = F.img.closest ? F.img.closest('.deity-img-box') : null;
@@ -139,22 +160,33 @@ window.WuriImg = window.WuriImg || (function () {
     var tImg = new Image();
     tImg.onload = function () {
       if (my !== detailToken) return;
-      F.img.src = WuriImg.thumb(d.image);
+      F.img.src = WuriImg.thumb(name);
       F.img.hidden = false;
       if (box) box.classList.add('ph-off');
       var fImg = new Image();
-      fImg.onload = function () { if (my === detailToken) F.img.src = WuriImg.full(d.image); };
+      fImg.onload = function () { if (my === detailToken) F.img.src = WuriImg.full(name); };
       fImg.onerror = function () { /* 全图不到货：停在缩略图，不裂图 */ };
-      fImg.src = WuriImg.full(d.image);
+      fImg.src = WuriImg.full(name);
     };
     tImg.onerror = function () { /* 缩略图也失败：留宣纸底＋名号占位 */ };
-    tImg.src = WuriImg.thumb(d.image);
+    tImg.src = WuriImg.thumb(name);
   }
+
+  /* 图内切图（循环）：与换神的滑动/中部箭头互不干扰 */
+  function switchImage(step) {
+    if (curIdx < 0 || !order[curIdx]) return;
+    var d = byId[order[curIdx]];
+    var imgs = deityImages(d);
+    if (!d || imgs.length < 2) return;
+    loadDetailImage(d, (curImgIdx + step + imgs.length) % imgs.length);
+  }
+  if (F.imgPrev) F.imgPrev.addEventListener('click', function () { switchImage(-1); });
+  if (F.imgNext) F.imgNext.addEventListener('click', function () { switchImage(1); });
 
   function openDetail(id) {
     var d = byId[id];
     if (!d) return;
-    loadDetailImage(d);
+    loadDetailImage(d, 0);
     F.name.textContent = d.name;
     F.title.textContent = d.title;
     F.birthday.textContent = d.birthday;
@@ -261,7 +293,7 @@ window.WuriImg = window.WuriImg || (function () {
   /* 图鉴素材下载完成后，若详情正开着，重走一遍图片解析（原生本地文件优先） */
   document.addEventListener('wuri-deity-dl-done', function () {
     if (!detailView.hidden && curIdx >= 0 && order[curIdx] && byId[order[curIdx]]) {
-      loadDetailImage(byId[order[curIdx]]);
+      loadDetailImage(byId[order[curIdx]], curImgIdx);
     }
   });
 
