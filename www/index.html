@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=402">
+<link rel="stylesheet" href="css/style.css?v=403">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -1041,7 +1041,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v402）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v2.3.0（内部 v403）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -2165,6 +2165,17 @@
     <div class="tab-spacer"></div>
   </main>
 
+  <!-- ============ 地平朝向（内部 v401：道观全景地景＋随太阳变光＋点官跟踪） ============ -->
+  <main id="view-sky-horizon" class="view" hidden>
+    <header class="appbar brand">
+      <button class="mini-btn" id="sky-horizon-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="sx2_horizon">地平朝向</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+    <div id="sx-horizon" class="sx-main"></div>
+    <div class="tab-spacer"></div>
+  </main>
+
   <!-- ============ 相机认星（v2.1.0 (2) 二期第二步：相机实景＋星官连线叠加） ============ -->
   <main id="view-sky-ar" class="view" hidden>
     <header class="appbar brand">
@@ -2723,6 +2734,7 @@
 <script src="js/stars.js"></script>
 <script src="js/sky-chart.js"></script>
 <script src="js/sky-ar.js"></script>
+<script src="js/sky-horizon.js"></script>
 <script src="js/fengshui-data.js"></script>
 <script src="js/vendor/soul-fengshui.js"></script>
 <script src="js/fengshui.js"></script>

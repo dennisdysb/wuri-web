@@ -3444,3 +3444,75 @@ body.reader-open #tab-jing .appbar{display:none}
 .vocab-def{margin-top:4px;font-size:.9rem;color:var(--ink);line-height:1.6}
 .vocab-src{margin-top:3px;font-size:.75rem;color:var(--muted);line-height:1.5}
 .jmp-row .mini-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* ===== 地平朝向视图（内部 v401，2026-10-29 设计稿 v2 集成） =====
+ * 场景恒深色（与日/夜主题脱钩），颜色走局部变量 --hz-*（挂 #view-sky-horizon）；
+ * 红光：body.sky-red 重映射 --hz-* 为红谱 + .hz-inner 整层套全局红移滤镜（与 img/svg 同值）。 */
+.sx-duo.sx-duo3{display:grid;grid-template-columns:1fr 1fr}
+.sx-duo3 .sx-entry-horizon{grid-column:1/-1}
+#view-sky-horizon{--hz-gold:#c9a86a;--hz-goldink:#f3d9a4;--hz-ink:#eee7d2;--hz-sub:#b9b096;--hz-line:rgba(201,168,106,.45);--hz-panel:rgba(10,14,26,.78)}
+body.sky-red #view-sky-horizon{--hz-gold:#e0563a;--hz-goldink:#ffbfa8;--hz-ink:#f2c1b2;--hz-sub:rgba(242,193,178,.72);--hz-line:rgba(255,96,72,.55);--hz-panel:rgba(26,8,6,.85)}
+.hz-scene{position:relative;overflow:hidden;border-radius:14px;background:#04060d;user-select:none;-webkit-user-select:none;touch-action:none;height:min(60dvh,150vw);margin-top:10px;border:1px solid var(--line-soft)}
+@media(min-width:768px){.hz-scene{height:min(64dvh,150vw)}}
+.hz-inner{position:absolute;inset:0}
+body.sky-red .hz-inner{filter:brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2)}
+.hz-sky{position:absolute;inset:0}
+.hz-halo,.hz-moonhalo{position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen;transform:translate(-50%,-50%)}
+.hz-cv{position:absolute;inset:0}
+.hz-band{position:absolute;left:0;right:0;bottom:0;background-repeat:repeat-x;
+  -webkit-mask-image:linear-gradient(to bottom,rgba(0,0,0,.16) 0%,rgba(0,0,0,1) 58%);
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.16) 0%,rgba(0,0,0,1) 58%)}
+.hz-dirlab{position:absolute;transform:translateX(-50%);color:#e0483e;font-size:14px;letter-spacing:.2em;text-shadow:0 1px 6px #000;pointer-events:none;white-space:nowrap;font-family:var(--sans)}
+.hz-vtop{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:10px 12px;z-index:6;pointer-events:none}
+.hz-vread{color:#e8e2cf;font-size:13px;text-shadow:0 1px 5px #000;font-family:var(--sans);line-height:1.6}
+.hz-vread b{color:var(--hz-gold);font-weight:600}
+.hz-info{pointer-events:auto;position:relative;background:var(--hz-panel);border:1px solid var(--hz-line);border-radius:10px;color:var(--hz-ink);padding:10px 14px;min-width:212px;backdrop-filter:blur(3px);font-family:var(--sans)}
+.hz-info h4{margin:0 0 4px;font-size:16px;color:var(--hz-gold);letter-spacing:.14em;font-family:var(--serif)}
+.hz-info .hz-row{display:flex;justify-content:space-between;gap:14px;font-size:13px;margin:2px 0}
+.hz-info .hz-row span:first-child{color:var(--hz-sub)}
+.hz-info-x{position:absolute;top:4px;right:6px;background:none;border:0;color:var(--hz-sub);font-size:13px;padding:4px;cursor:pointer}
+.hz-culm{margin-top:8px;width:100%;padding:7px 0;border-radius:7px;border:1px solid var(--hz-gold);background:rgba(201,168,106,.16);color:var(--hz-goldink);font-size:14px;letter-spacing:.2em;font-family:inherit;cursor:pointer}
+body.sky-red .hz-culm{background:rgba(192,64,46,.25)}
+.hz-layerbar{position:absolute;left:0;right:0;bottom:0;z-index:6;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px 8px;background:linear-gradient(to top,rgba(0,0,0,.55),transparent)}
+.hz-layerbar button{flex:0 0 auto;white-space:nowrap;border:1px solid rgba(232,226,207,.35);background:rgba(12,16,28,.55);color:#cfc8ae;border-radius:999px;padding:5px 16px;font-size:13.5px;letter-spacing:.12em;font-family:var(--sans);cursor:pointer}
+.hz-layerbar button.on{border-color:var(--hz-gold);color:var(--hz-goldink);background:rgba(201,168,106,.20)}
+body.sky-red .hz-layerbar button.on{background:rgba(192,64,46,.25)}
+.hz-layerbar button.hz-redbtn.on{border-color:#e0684e;color:#ffb59d;background:rgba(192,64,46,.25)}
+@media(max-width:520px){
+  .hz-info{min-width:0;width:58%;padding:8px 10px}
+  .hz-vread{font-size:11px;max-width:38%}
+  .hz-layerbar button{padding:4px 10px;font-size:12px}
+}
+/* 时间控制条：恒深色卡（同 .sx-entry-book 口径），红光下换红谱底 */
+.hz-ctl{background:linear-gradient(160deg,#101725,#1d2c42 55%,#0c1420);border:1px solid rgba(201,168,106,.35);border-radius:14px;padding:12px 14px;margin-top:12px;color:#EDE4C8;font-family:var(--sans)}
+body.sky-red .hz-ctl{background:linear-gradient(160deg,#0d0303,#1e0603 55%,#070202);border-color:rgba(255,96,72,.4);color:#eda88f}
+.hz-trow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hz-btn{border:1px solid var(--hz-line);background:rgba(201,168,106,.12);color:var(--hz-goldink);border-radius:8px;padding:7px 13px;font-size:13.5px;font-family:inherit;cursor:pointer}
+body.sky-red .hz-btn{background:rgba(192,64,46,.18)}
+.hz-btn.hz-play{min-width:46px;text-align:center}
+.hz-sel{border-radius:8px;border:1px solid var(--hz-line);background:#1d2c42;color:var(--hz-ink);padding:7px 8px;font-size:13.5px;font-family:inherit}
+body.sky-red .hz-sel{background:#1a0503}
+.hz-datelab{margin-left:auto;font-size:13.5px;color:var(--hz-ink);letter-spacing:.04em}
+.hz-tlrow{display:flex;align-items:center;gap:10px;margin-top:12px}
+.hz-tlrow label{font-size:12.5px;color:var(--hz-sub);white-space:nowrap}
+.hz-tlrow input[type=range]{flex:1;accent-color:var(--hz-gold);min-width:0}
+.hz-tlval{font-size:13px;color:var(--hz-goldink);min-width:52px;text-align:right}
+.hz-panel{margin-top:12px;border-top:1px solid var(--hz-line);padding-top:10px}
+.hz-tabs{display:flex;gap:6px;margin-bottom:10px}
+.hz-tabs span{font-size:12.5px;padding:4px 12px;border-radius:6px;background:rgba(237,228,200,.10);color:var(--hz-sub);cursor:pointer}
+.hz-tabs span.act{background:rgba(201,168,106,.30);color:var(--hz-goldink)}
+body.sky-red .hz-tabs span.act{background:rgba(192,64,46,.35)}
+.hz-steppers{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.hz-sgrp{display:flex;align-items:center;gap:5px}
+.hz-cap{font-size:12px;color:var(--hz-sub)}
+.hz-field{display:flex;align-items:stretch;background:#f4f2ec;border-radius:7px;overflow:hidden}
+.hz-field input{border:0;background:transparent;text-align:center;font-size:16px;color:#222;padding:6px 0 6px 4px;font-family:inherit;appearance:textfield;-moz-appearance:textfield}
+.hz-field input::-webkit-outer-spin-button,.hz-field input::-webkit-inner-spin-button{-webkit-appearance:none}
+.hz-ud{display:flex;flex-direction:column}
+.hz-ud button{flex:1;border:0;background:#e3e0d4;color:#555;font-size:9px;line-height:1;padding:2px 7px;cursor:pointer}
+body.sky-red .hz-field{background:#1a0503}
+body.sky-red .hz-field input{color:#f2c1b2}
+body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
+.hz-sep{font-size:16px;color:var(--hz-sub);padding-top:6px}
+.hz-lunar{font-size:14px;line-height:1.9;color:var(--hz-ink)}
+.hz-hint{color:var(--muted);font-size:.78rem;line-height:1.6;margin-top:10px;font-family:var(--sans)}

@@ -156,12 +156,14 @@
   function injectEntries() {
     var host = $('sx-home'); if (!host || $('sx2-entries')) return;
     var div = document.createElement('div');
-    div.id = 'sx2-entries'; div.className = 'sx-duo';
+    div.id = 'sx2-entries'; div.className = 'sx-duo sx-duo3';
     div.innerHTML =
       '<div class="sx-card sx-entry" data-sx2="tonight"><div><div class="e1">' + esc(t('sx2_tonight')) + '</div>' +
       '<div class="e2">' + esc(t('sx2_tonight_sub')) + '</div></div></div>' +
       '<div class="sx-card sx-entry" data-sx2="chart"><div><div class="e1">' + esc(t('sx2_chart')) + '</div>' +
-      '<div class="e2">' + esc(t('sx2_chart_sub')) + '</div></div></div>';
+      '<div class="e2">' + esc(t('sx2_chart_sub')) + '</div></div></div>' +
+      '<div class="sx-card sx-entry sx-entry-horizon" data-sx2="horizon"><div><div class="e1">' + esc(t('sx2_horizon')) + '</div>' +
+      '<div class="e2">' + esc(t('sx2_horizon_sub')) + '</div></div></div>';
     host.appendChild(div);
   }
   function watchEntries() {
@@ -1398,13 +1400,17 @@
   document.addEventListener('click', function (e) {
     var el = e.target && e.target.closest ? e.target.closest('[data-sx2]') : null;
     if (el) {
-      if (el.getAttribute('data-sx2') === 'tonight') openTonight(); else openChart();
+      var sxa = el.getAttribute('data-sx2');
+      if (sxa === 'tonight') openTonight();
+      else if (sxa === 'horizon') { if (skyGate() && window.WuriSkyHorizon) WuriSkyHorizon.open(); }
+      else openChart();
       return;
     }
-    /* 切标签时收起本页两个子视图（与 Stars.activate 收子视图的语义一致） */
+    /* 切标签时收起本页三个子视图（与 Stars.activate 收子视图的语义一致） */
     var tab = e.target && e.target.closest ? e.target.closest('#tabbar button') : null;
     if (tab) {
-      hide('view-sky-tonight'); hide('view-sky-chart');
+      hide('view-sky-tonight'); hide('view-sky-chart'); hide('view-sky-horizon');
+      if (window.WuriSkyHorizon) WuriSkyHorizon.close();
       if (chart.play.on) setPlaying(false);
       if (chart.sensor) setSensor(false);
     }
@@ -1428,9 +1434,10 @@
     if (prev) prev();
     var d = $('sx2-entries'); if (d) d.remove();
     injectEntries();
-    var tv = $('view-sky-tonight'), cv = $('view-sky-chart');
+    var tv = $('view-sky-tonight'), cv = $('view-sky-chart'), hv = $('view-sky-horizon');
     if (tv && !tv.hidden) renderTonight();
     if (cv && !cv.hidden) renderChartView();
+    if (hv && !hv.hidden && window.WuriSkyHorizon) WuriSkyHorizon.rerender();
   };
 
   window.WuriSkyChart = { openTonight: openTonight, openChart: openChart,
@@ -1452,6 +1459,7 @@
     /* 冒烟/调试：星图综合状态（聚焦/信息条/播放/传感器/线开关/星等/时间偏移） */
     state: function () {
       return { focus: chart.focus, focusBody: chart.focusBody, focusStar: chart.focusStar, infoKey: chart.infoKey, infoBody: chart.infoBody, playing: chart.play.on,
+        speed: chart.play.speed,
         offsetMin: Math.round(chart.offsetMin * 10) / 10, sensor: chart.sensor,
         spin: chart.spin, zoom: chart.zoom, lines: { ecl: chart.lines.ecl, equ: chart.lines.equ },
         labelMode: chart.labelMode, layers: { lines: chart.layers.lines, labelsOn: chart.layers.labelsOn, fenye: chart.layers.fenye, grid: chart.layers.grid, milky: chart.layers.milky },
@@ -1478,5 +1486,27 @@
         return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
       }
       return null;
+    },
+    /* 地平朝向视图（sky-horizon.js）共用面：同一观测地/图层/时间状态，零新增时间状态。
+     * setOffsetMin(quiet) 在地平视图播放时逐帧回写用——quiet 跳过星图重绘（星图视图此时必隐藏）。 */
+    locBarHTML: locBarHTML,
+    bindLocBar: bindLocBar,
+    obsState: function () { return obsState; },
+    setLayer: function (k, v) {
+      if (!(k in chart.layers)) return;
+      chart.layers[k] = !!v; saveLayers();
+      if (chartEls && XG) drawChart();
+    },
+    setOffsetMin: function (v, quiet) {
+      chart.offsetMin = +v || 0;
+      if (quiet) return;
+      var s = $('sk-time');
+      if (s) s.value = String(Math.max(-720, Math.min(720, Math.round(chart.offsetMin))));
+      if (chartEls && XG) drawChart();
+    },
+    setPlaying: function (on) { setPlaying(!!on); },
+    setSpeed: function (v) {
+      chart.play.speed = +v || 300;
+      var sp = $('sk-speed'); if (sp) sp.value = String(chart.play.speed);
     } };
 })();
