@@ -747,18 +747,19 @@ details.disc-foot .hint{margin-top:9px}
 .deity-img-ph{height:320px;display:flex;align-items:center;justify-content:center;background:var(--paper-2);border:1px solid var(--line);border-radius:14px}
 .deity-img-ph span{font-family:var(--serif);font-size:1.55rem;letter-spacing:.3em;text-indent:.3em;color:var(--muted);text-align:center;padding:0 12px}
 .deity-img-box.ph-off .deity-img-ph{display:none}
-.deity-detail-img{display:block;width:100%;max-width:420px;margin:0 auto;border-radius:14px;border:1px solid var(--line)}
+.deity-detail-img{display:block;width:100%;max-width:420px;margin:0 auto;border-radius:14px;border:1px solid var(--line);aspect-ratio:1/2;object-fit:contain}
 .deity-nav-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:38px;height:38px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:1.35rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.55;box-shadow:0 1px 5px rgba(60,45,20,.12)}
 .deity-nav-arrow.prev{left:8px}
 .deity-nav-arrow.next{right:8px}
 .deity-nav-arrow:active{opacity:.85}
 .deity-nav-arrow:disabled{opacity:.15;cursor:default;box-shadow:none}
-/* 多图条目切图箭头（图下缘左右角，小而虚，与中部换神箭头分工；仅多图条目由 JS 显形） */
-.deity-img-arrow{position:absolute;bottom:10px;z-index:3;width:30px;height:30px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:1.05rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.42;box-shadow:0 1px 4px rgba(60,45,20,.10)}
+/* 多图条目切图箭头（图片左右边缘垂直居中，小而虚；多图时换神箭头让位上缘两角，见 has-multi 规则；仅多图条目由 JS 显形） */
+.deity-img-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:30px;height:30px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:1.05rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.42;box-shadow:0 1px 4px rgba(60,45,20,.10)}
 .deity-img-arrow.prev{left:8px}
 .deity-img-arrow.next{right:8px}
 .deity-img-arrow:active{opacity:.75}
 .deity-img-arrow[hidden]{display:none}
+.deity-img-box.has-multi .deity-nav-arrow{top:10px;transform:none}
 .deity-swipe-hint{text-align:center;color:var(--muted);font-size:.74rem;letter-spacing:.14em;margin:10px 0 0}
 .deity-swipe-hint[hidden]{display:none}
 .deity-detail-name{text-align:center;font-size:1.5rem;font-weight:700;color:var(--ink);margin:16px 0 2px;letter-spacing:.12em}

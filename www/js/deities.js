@@ -142,6 +142,8 @@ window.WuriImg = window.WuriImg || (function () {
     var multi = deityImages(d).length > 1;
     if (F.imgPrev) F.imgPrev.hidden = !multi;
     if (F.imgNext) F.imgNext.hidden = !multi;
+    var box = F.img && F.img.closest ? F.img.closest('.deity-img-box') : null;
+    if (box) box.classList.toggle('has-multi', multi);
   }
 
   function loadDetailImage(d, idx) {
