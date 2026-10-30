@@ -107,6 +107,8 @@
 .med-cue-label{color:rgba(255,255,255,.92);font-size:.82rem;text-shadow:0 1px 6px rgba(0,0,0,.6);white-space:nowrap}
 .med-cue-vol{width:min(46%,170px)}
 .med-cue-volrow.off{opacity:.38}
+.med-cue-hint{color:#e8c877;font-size:.78rem;text-align:center;text-shadow:0 1px 6px rgba(0,0,0,.6);max-width:86%}
+.med-cue-hint[hidden]{display:none}
 .med-switch{position:relative;display:inline-block;width:44px;height:25px;flex:none}
 .med-switch input{opacity:0;width:0;height:0}
 .med-switch-ui{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.25);transition:.25s;

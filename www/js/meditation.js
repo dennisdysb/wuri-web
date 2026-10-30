@@ -395,15 +395,22 @@ var Meditation = (function () {
    * 与原生服务/降级定时器同口径（两路间隔磬都按已播时长每 INTERVAL_SEC 一鸣）。
    * 2026-10-27 二次换素材：首版单字（各约 0.54s）真机评「话不自然」，换 C 单字
    * 改良版（放慢 0.70–0.72＋省略号柔化收尾＋淡入淡出，0.57–0.86s）同名替换，
-   * 引用 ?v=2、MED_CACHE 升 v4 强制全端换新；引擎逻辑零改动。 */
+   * 引用 ?v=2、MED_CACHE 升 v4 强制全端换新；引擎逻辑零改动。
+   * 2026-10-29 三次换素材（用户定版）：C 版真机复听仍被否，改双字词目＋再慢一档——
+   * 「吸气/呼气/屏住」0.62 档合成（同锁定女声，0.92–1.03s），新文件 cue-xiqi/
+   * cue-huqi/cue-pingzhu.mp3，旧单字三件下线，MED_CACHE 升 v6。同批四项联动：
+   * ①首次手势解锁（见 primeAudio：全站无 AudioContext，音频皆 HTMLAudio 元素，
+   * 以元素级静音预播取得播放授权；play() 被拒不再静默吞——cue 块内出可见提示）；
+   * ②引导音量默认值 45→70；③口令发声时背景（环境音＋混音）ducking 压到 35%、
+   * 口令结束恢复；④场景预设不再写回口令开关（见 applyPreset 注）。 */
   var CUE_VOICE_SRC = {
-    inhale: 'audio/meditation/cue-xi.mp3?v=2',
-    exhale: 'audio/meditation/cue-hu.mp3?v=2',
-    holdIn: 'audio/meditation/cue-ting.mp3?v=2',
-    holdOut: 'audio/meditation/cue-ting.mp3?v=2'
+    inhale: 'audio/meditation/cue-xiqi.mp3?v=1',
+    exhale: 'audio/meditation/cue-huqi.mp3?v=1',
+    holdIn: 'audio/meditation/cue-pingzhu.mp3?v=1',
+    holdOut: 'audio/meditation/cue-pingzhu.mp3?v=1'
   };
-  var CUE_WORD = { inhale: '吸', exhale: '呼', holdIn: '停', holdOut: '停' };
-  var cue = { els: {}, last: '', plays: 0, skips: 0 };
+  var CUE_WORD = { inhale: '吸气', exhale: '呼气', holdIn: '屏住', holdOut: '屏住' };
+  var cue = { els: {}, last: '', plays: 0, skips: 0, blocked: false, primed: false };
   var sess = { base: 0, since: 0 };
   function sessElapsedMs() { return sess.since ? sess.base + (Date.now() - sess.since) : sess.base; }
   function sessReset() { sess.base = 0; sess.since = 0; }
@@ -411,12 +418,12 @@ var Meditation = (function () {
   function cueVibOn() { var t = $('#med-cue-vib'); return t ? t.checked : false; }
   function cueVol() {
     var el = $('#med-cue-vol');
-    var v = parseInt((el ? el.value : '45'), 10);
-    return Math.max(0, Math.min(100, isNaN(v) ? 45 : v)) / 100;
+    var v = parseInt((el ? el.value : '70'), 10);
+    return Math.max(0, Math.min(100, isNaN(v) ? 70 : v)) / 100;
   }
   function cueEnsureEls() {
     /* 预加载三条口令（独立通道，与环境音/磬的 Audio 元素分开）：首次开启引导
-       或恢复出已开启状态时调用，preload=auto 拉全量（每条约 5KB）。 */
+       或恢复出已开启状态时调用，preload=auto 拉全量（每条约 10KB）。 */
     var keys = ['inhale', 'exhale', 'holdIn'];
     for (var i = 0; i < keys.length; i++) {
       var k = keys[i];
@@ -424,12 +431,92 @@ var Meditation = (function () {
         try {
           var a = new Audio(CUE_VOICE_SRC[k]);
           a.preload = 'auto';
+          a.addEventListener('ended', function () { duckEnd(); });
           cue.els[k] = a;
         } catch (e) {}
       }
     }
     if (cue.els.holdIn && !cue.els.holdOut) cue.els.holdOut = cue.els.holdIn;
     return cue.els;
+  }
+
+  /* ---------- 口令发声时背景 ducking（压低环境音/混音，口令结束恢复） ----------
+   * 因子统一走 duckFactor()：环境音在各设值点（起播/音量滑杆）与混音在
+   * mixTrackVol() 乘因子，duck 启停时 duckApply() 按现行设定值重算各元素，
+   * 用户中途调音量也自动带因子、不会冲掉 duck。恢复双保险：口令元素 ended
+   * 事件＋发声后 durMs+600 的定时器（token 防旧定时器误恢复下一声的 duck）。 */
+  var DUCK_GAIN = 0.35;
+  var duck = { on: false, token: 0 };
+  function duckFactor() { return duck.on ? DUCK_GAIN : 1; }
+  function duckApply() {
+    if (fb.ambient) { try { fb.ambient.volume = volume() * duckFactor(); } catch (e) {} }
+    var b = bridge();
+    if (b && typeof b.medSetVolume === 'function') {
+      try { b.medSetVolume(volume() * duckFactor()); } catch (e) {}   /* 原生桥环境音同压 */
+    }
+    mixApplyVolumes();
+  }
+  function duckStart() {
+    duck.token++;
+    if (duck.on) return;
+    duck.on = true;
+    duckApply();
+  }
+  function duckEnd() {
+    if (!duck.on) return;
+    for (var k in cue.els) {
+      var a = cue.els[k];
+      if (a && !a.paused && !a.ended) return;   /* 还有口令在响，保持压低 */
+    }
+    duck.on = false;
+    duckApply();
+  }
+  function duckEndLater(ms) {
+    var t = duck.token;
+    setTimeout(function () { if (duck.token === t) duckEnd(); }, ms);
+  }
+
+  /* ---------- 首次手势解锁（移动端自动播放策略） ----------
+   * 全站音频皆 HTMLAudio 元素、无 AudioContext；口令由呼吸定时器触发，
+   * 未经手势授权时 play() 会被浏览器拒绝——旧实现把拒绝静默吞掉，用户只
+   * 会觉得「没声音」。现口径：首次 pointerdown 时对口令元素做静音预播
+   * （play→pause 回零）取得该元素的播放授权；play() 被拒时点亮 cue 块内
+   * 提示行（可见化），下一次手势自动重试预播，成功出声后提示自行熄灭。 */
+  function primeOne(a) {
+    if (!a || !a.paused || a.__primed) return;
+    a.__primed = true;
+    a.__primeAt = Date.now();
+    try {
+      a.muted = true;
+      var p = a.play();
+      if (p && p.then) {
+        p.then(function () {
+          /* 真口令已接管该元素（cueVoice 在预播后起播）时只解静音、不掐播；
+             否则回零暂停，预播全程无声。 */
+          var taken = a.__realAt && a.__realAt >= a.__primeAt;
+          try { if (!taken) { a.pause(); try { a.currentTime = 0; } catch (e) {} } } catch (e) {}
+          a.muted = false;
+        }, function () { a.muted = false; });
+      } else { a.muted = false; }
+    } catch (e) { try { a.muted = false; } catch (e2) {} }
+  }
+  function primeAudio() {
+    if (cueOn()) {
+      var els = cueEnsureEls();
+      for (var k in els) primeOne(els[k]);
+    }
+    if (fb.bellAudio) primeOne(fb.bellAudio);
+    cue.primed = true;
+  }
+  function cueShowBlocked(show) {
+    cue.blocked = !!show;
+    var h = $('#med-cue-hint');
+    if (h) h.hidden = !show;
+    if (show) {
+      /* 被拒后允许下一次手势重新预播 */
+      cue.primed = false;
+      for (var k in cue.els) { if (cue.els[k]) cue.els[k].__primed = false; }
+    }
   }
   function cueBellClash(durMs) {
     if (!bellOn() || !sess.since) return false;
@@ -442,18 +529,24 @@ var Meditation = (function () {
   function cueVoice(key) {
     var a = cueEnsureEls()[key];
     if (!a) return;
-    /* 让行窗口按口令实长（未载完时以 800ms 保守估），与 v179 同口径判定 */
-    var durMs = (a.duration && isFinite(a.duration) && a.duration > 0) ? a.duration * 1000 : 800;
+    /* 让行窗口按口令实长（未载完时以 1100ms 保守估），与 v179 同口径判定 */
+    var durMs = (a.duration && isFinite(a.duration) && a.duration > 0) ? a.duration * 1000 : 1100;
     if (cueBellClash(durMs)) { cue.skips++; return; }
     try {
       a.pause();
       try { a.currentTime = 0; } catch (e) {}
       a.volume = cueVol();
+      a.__realAt = Date.now();
+      duckStart();
       var p = a.play();
-      if (p && p.catch) p.catch(function () {});
+      if (p && p.then) {
+        p.then(function () { if (cue.blocked) cueShowBlocked(false); },
+               function () { duckEnd(); cueShowBlocked(true); });
+      }
       cue.last = CUE_WORD[key] || '';
       cue.plays++;
-    } catch (e) {}
+      duckEndLater(durMs + 600);
+    } catch (e) { duckEnd(); }
   }
   function cueStopAll() {
     for (var k in cue.els) {
@@ -462,6 +555,8 @@ var Meditation = (function () {
       try { a.pause(); } catch (e) {}
       try { a.currentTime = 0; } catch (e) {}
     }
+    duck.on = false;
+    duckApply();
     if (navigator.vibrate) { try { navigator.vibrate(0); } catch (e) {} }
   }
   function cueVibrate(kind, sec) {
@@ -594,7 +689,7 @@ var Meditation = (function () {
     $('#med-bell-toggle').checked = lsGet(LS_BELL, '1') === '1';
     $('#med-vol').value = lsGet(LS_VOL, '70');
     var cueT = $('#med-cue-toggle'); if (cueT) cueT.checked = lsGet(LS_CUE, '0') === '1';
-    var cueV = $('#med-cue-vol'); if (cueV) cueV.value = lsGet(LS_CUE_VOL, '45');
+    var cueV = $('#med-cue-vol'); if (cueV) cueV.value = lsGet(LS_CUE_VOL, '70');
     try { localStorage.removeItem('wuri_med_cuepad'); } catch (e) {}  /* 「屏息垫音」键随语音改版废弃，顺手清掉 */
     if (cueT && cueT.checked) cueEnsureEls();   /* 已开启引导：进页即预加载口令 */
     var cueVb = $('#med-cue-vib'); if (cueVb) cueVb.checked = lsGet(LS_CUE_VIB, '0') === '1';
@@ -644,7 +739,7 @@ var Meditation = (function () {
   function mixTrackVol(id) {
     var v = parseInt(mix.tracks[id], 10);
     v = Math.max(0, Math.min(100, isNaN(v) ? 70 : v));
-    return (v / 100) * volume();
+    return (v / 100) * volume() * duckFactor();
   }
   function mixApplyVolumes() {
     for (var id in mix.tracks) {
@@ -1050,13 +1145,10 @@ var Meditation = (function () {
     selectBreath(p.breath || 'off');
     var bt = $('#med-bell-toggle');
     if (bt) { bt.checked = !!p.bell; lsSet(LS_BELL, p.bell ? '1' : '0'); }
-    var ct = $('#med-cue-toggle');
-    if (ct) {
-      ct.checked = !!p.cue;
-      lsSet(LS_CUE, p.cue ? '1' : '0');
-      renderCueVolState();
-      if (p.cue) cueEnsureEls();
-    }
+    /* 口令开关不随预设（2026-10-29 用户定）：此前这里按 p.cue 覆写开关与
+       LS_CUE，用户切个场景预设口令就被静默开/关，属暗坑。现预设只管时长/
+       呼吸/场景/磬/混音，口令保持用户自己设定的值；capturePreset 里的 cue
+       字段仅作存档元数据，不再回放。 */
     startPlayback(getSelectedDuration());
   }
   function capturePreset(name) {
@@ -1312,7 +1404,7 @@ var Meditation = (function () {
       fb.ambient.src = s.loop;
       try { fb.ambient.load(); } catch (e2) {}
     }
-    fb.ambient.volume = volume();
+    fb.ambient.volume = volume() * duckFactor();
     try {
       var p = fb.ambient.play();
       if (p && p.catch) p.catch(function () {
@@ -1520,7 +1612,7 @@ var Meditation = (function () {
       if (b && typeof b.medSetVolume === 'function') {
         try { b.medSetVolume(v); } catch (e) {}
       }
-      if (fb.ambient) { try { fb.ambient.volume = v; } catch (e) {} }
+      if (fb.ambient) { try { fb.ambient.volume = v * duckFactor(); } catch (e) {} }
       mixApplyVolumes();
     });
     /* 混音开关/面板/配方 */
@@ -1595,9 +1687,13 @@ var Meditation = (function () {
     $('#med-cue-toggle').addEventListener('change', function () {
       lsSet(LS_CUE, this.checked ? '1' : '0');
       renderCueVolState();
-      if (this.checked) cueEnsureEls();
-      else cueStopAll();
+      if (this.checked) { cueEnsureEls(); primeAudio(); }   /* 开关动作即手势：顺势解锁 */
+      else { cueStopAll(); cueShowBlocked(false); }
     });
+    /* 首次手势解锁：口令元素静音预播取得播放授权；曾被拒则每次手势重试 */
+    document.addEventListener('pointerdown', function () {
+      if (!cue.primed || cue.blocked) primeAudio();
+    }, true);
     $('#med-cue-vol').addEventListener('input', function () {
       lsSet(LS_CUE_VOL, this.value);   /* 口令播放时按当下值取 volume，滑杆即时生效于下一声 */
     });
@@ -1645,7 +1741,7 @@ var Meditation = (function () {
         amb = { paused: fb.ambient.paused, src: (fb.ambient.src || '').split('/').pop(), vol: Math.round(fb.ambient.volume * 100) };
       }
       var mx = [];
-      for (var k in mixEls) mx.push({ id: k, paused: mixEls[k].paused });
+      for (var k in mixEls) mx.push({ id: k, paused: mixEls[k].paused, vol: Math.round(mixEls[k].volume * 100) });
       var cu = [];
       for (var k2 in cue.els) { var a = cue.els[k2]; if (a) cu.push({ k: k2, paused: a.paused, ended: a.ended }); }
       return { ambient: amb, mixEls: mx, cueEls: cu,
@@ -1663,6 +1759,7 @@ var Meditation = (function () {
         on: cueOn(), vib: cueVibOn(), vol: cueVol(),
         last: cue.last, plays: cue.plays, skips: cue.skips,
         nowPlaying: nowPlaying, live: nowPlaying ? 1 : 0,
+        duck: duck.on, blocked: cue.blocked, primed: cue.primed,
         elapsedMs: Math.round(sessElapsedMs())
       };
     }

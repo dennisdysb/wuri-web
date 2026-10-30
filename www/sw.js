@@ -3,7 +3,7 @@ const CACHE = 'wuri-v400-20261029-v400';
 /* 冥想资产专用缓存（场景图 10＋环境音/磬 11，约 28MB）：安装期整包预缓存，
  * 播放/显示一律本地出（用户 2026-10-25 定调「下载 App 时就该下载下来」）。
  * 与主缓存分开：单件失败不拖垮整版 SW 更新，缺件运行时回落网络现拉。 */
-const MED_CACHE = 'wuri-med-v5';
+const MED_CACHE = 'wuri-med-v6';
 const MED_ASSETS = [
   './img/meditation/bg-rain.webp?v=3',
   './img/meditation/bg-thunder.webp?v=3',
@@ -26,9 +26,9 @@ const MED_ASSETS = [
   './audio/meditation/loop-bowl.mp3?v=4',
   './audio/meditation/bell-interval.mp3?v=3',
   './audio/meditation/bell-ending.mp3?v=3',
-  './audio/meditation/cue-xi.mp3?v=2',
-  './audio/meditation/cue-hu.mp3?v=2',
-  './audio/meditation/cue-ting.mp3?v=2'
+  './audio/meditation/cue-xiqi.mp3?v=1',
+  './audio/meditation/cue-huqi.mp3?v=1',
+  './audio/meditation/cue-pingzhu.mp3?v=1'
 ];
 /* 离线下载专用缓存（一键下载的音频/正文/图鉴）：版本更新时绝不清除，
  * 否则用户下好的几百 MB 音频会在每次发版后被 activate 误删（2026-10-21） */
