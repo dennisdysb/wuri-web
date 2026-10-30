@@ -1118,7 +1118,7 @@ details.disc-foot .hint{margin-top:9px}
    稍涨即被状态行切——整列默认底距 +20 改 114，余量 24；已存拖拽位不迁移） */
 .qing-fab{position:fixed;right:18px;bottom:calc(114px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;
   background:var(--teal-deep);color:#fff;font-size:1.3rem;font-family:var(--serif);
-  border:2px solid rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(0,0,0,.32);
+  border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
   z-index:990;display:none;transition:opacity .18s ease,transform .18s ease}
 .qing-fab.show{display:block}
 .qing-fab:active{transform:scale(.92)}
@@ -1126,9 +1126,10 @@ details.disc-foot .hint{margin-top:9px}
    沉浸例外（2026-10-29 21:14 用户真机定）：磬是法器不是界面杂物，
    全屏/沉浸态保持可见可点，不与底栏、返回/书签钮同收——原
    body.jing-immersive #qing-btn 隐规则已删，沉浸时磬沿用上方
-   ghost 半透明（2026-10-29 23:02 起 .85，原 .55 压字看不清）与点按/拖动口径 */
-body.fabs-ghost #qing-btn{opacity:.85;touch-action:none}
-body.fabs-ghost #qing-btn:active{opacity:1}
+   ghost 半透明（2026-10-30 用户真机定：回道藏/内丹原规格 .55；
+   2026-10-29 23:02 的 .85＋描边阴影加强整套作废）与点按/拖动口径 */
+body.fabs-ghost #qing-btn{opacity:.55;touch-action:none}
+body.fabs-ghost #qing-btn:active{opacity:.85}
 /* 阅读器浮动返回钮（与磬成对，左下）：基类 .jing-back-fab 与星象子视图等共用，
    此处只以 id 定点覆盖阅读器这一枚的底距（与磬同为 94＋安全区，悬在底栏上方）
    与沉浸联动，不动共享基类 */
@@ -1136,13 +1137,13 @@ body.fabs-ghost #qing-btn:active{opacity:1}
    随磬钮落位修正整列 +20）：底→上＝磬 114 / 返回 188 / 书签 262（间距
    74＝钮 56＋间隙 18）；层级 999 低于底栏与一切底部面板（dock 1000），
    面板打开时被面板盖住、不挡面板内键。基类 .jing-back-fab（其他视图
-   共用、左下）不动，只用 #id 覆写阅读器这一枚。描边/阴影同磬钮加强。 */
-#jing-back-fab{left:auto;right:18px;bottom:calc(188px + env(safe-area-inset-bottom));z-index:999;transition:opacity .18s ease,transform .18s ease;border-color:rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(0,0,0,.32)}
-#jing-bookmark-fab{left:auto;right:18px;bottom:calc(262px + env(safe-area-inset-bottom));z-index:999;border-color:rgba(255,255,255,.55);box-shadow:0 4px 14px rgba(0,0,0,.32)}
+   共用、左下）不动，只用 #id 覆写阅读器这一枚。描边/阴影同磬钮原规格。 */
+#jing-back-fab{left:auto;right:18px;bottom:calc(188px + env(safe-area-inset-bottom));z-index:999;transition:opacity .18s ease,transform .18s ease;border-color:rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25)}
+#jing-bookmark-fab{left:auto;right:18px;bottom:calc(262px + env(safe-area-inset-bottom));z-index:999;border-color:rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25)}
 /* 全书类统一：悬浮钮半透明＋可拖（body.fabs-ghost 由 updateFab 在阅读器
    打开时恒置；2026-10-29 起 v315 内丹/道藏规格推广至常见经文） */
-body.fabs-ghost #jing-back-fab,body.fabs-ghost #jing-bookmark-fab{opacity:.85;touch-action:none}
-body.fabs-ghost #jing-back-fab:active,body.fabs-ghost #jing-bookmark-fab:active{opacity:1}
+body.fabs-ghost #jing-back-fab,body.fabs-ghost #jing-bookmark-fab{opacity:.55;touch-action:none}
+body.fabs-ghost #jing-back-fab:active,body.fabs-ghost #jing-bookmark-fab:active{opacity:.85}
 /* 播放悬浮胶囊（第 4 条）：半透明、可拖、默认左下；沉浸同隐；
    层级 999 同悬浮钮，受面板盖压规则约束 */
 /* 透明度与悬浮钮组同口径 .55（反馈第二批第 2 项）；TTS 胶囊同款（第 4 项），
