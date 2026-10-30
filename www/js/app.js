@@ -1693,8 +1693,10 @@ function applyTheme() {
   document.documentElement.setAttribute('data-theme', night ? 'night' : 'day');
   syncColorScheme(night);
   try {
+    /* theme-color 取 body 底色原值（style.css --paper：夜 #060608／日 #F5F1E5），与页面同色；
+     * manifest theme_color 同步夜值——旧值 #1a3c34 深绿是独立模式下系统导航区绿带来源（2026-10-29 用户再报）。 */
     var mc = document.querySelector('meta[name=theme-color]');
-    if (mc) mc.setAttribute('content', night ? '#060608' : '#F5F1E6');
+    if (mc) mc.setAttribute('content', night ? '#060608' : '#F5F1E5');
     /* 红光正开时状态栏跟随红光（stars.js WuriRedlight 口径 #080201），
      * 主题切换不得把红盖回日夜色；红光关时本函数的日夜值即恢复值。 */
     if (mc && window.WuriRedlight && WuriRedlight.on()) mc.setAttribute('content', '#080201');

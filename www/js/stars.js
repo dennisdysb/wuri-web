@@ -1778,14 +1778,14 @@
   }
   /* theme-color 联动（2026-10-25 用户报障：红光下系统状态栏一带仍白底）：
    * 开红光→ #080201（即 tabbar 红光底 rgba(8,2,1) 的实色）；关红光→按当前
-   * 日/夜主题恢复（与 app.js applyTheme 同口径：夜 #060608／日 #F5F1E6，不写死单一值）。
+   * 日/夜主题恢复（与 app.js applyTheme 同口径：夜 #060608／日 #F5F1E5，不写死单一值）。
    * applyTheme 侧亦有同口径回压（系统主题切换时不把红盖掉）。 */
   function redThemeColor(v) {
     try {
       var mc = document.querySelector('meta[name=theme-color]');
       if (!mc) return;
       if (v) mc.setAttribute('content', '#080201');
-      else mc.setAttribute('content', document.documentElement.getAttribute('data-theme') === 'night' ? '#060608' : '#F5F1E6');
+      else mc.setAttribute('content', document.documentElement.getAttribute('data-theme') === 'night' ? '#060608' : '#F5F1E5');
     } catch (e) {}
   }
   function redSet(v) {
