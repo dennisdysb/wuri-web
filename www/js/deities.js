@@ -142,6 +142,10 @@ window.WuriImg = window.WuriImg || (function () {
     var multi = deityImages(d).length > 1;
     if (F.imgPrev) F.imgPrev.hidden = !multi;
     if (F.imgNext) F.imgNext.hidden = !multi;
+    /* 多图条目给图框加 has-multi：换神箭头让位到图片上缘两角，
+       切图箭头占左右中部（CSS .deity-img-box.has-multi 规则）；单图零变化 */
+    var box = F.img && F.img.closest ? F.img.closest('.deity-img-box') : null;
+    if (box) box.classList.toggle('has-multi', multi);
   }
 
   function loadDetailImage(d, idx) {
