@@ -1949,6 +1949,12 @@ var JingWen = (function () {
           }
           return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + txt + '</p>';
         }).join('');
+        /* 卷首错绑注记（bindingNote，数据驱动）：呈现层独立元素，不带
+           data-sec/data-para、不入正文字符流——char 偏移、锚点、高亮、
+           搜索与阅读进度的段定位一律零影响；仅首卷卷首一行 */
+        if (si === 0 && d.bindingNote) {
+          paras = '<p class="dz-binding-note">' + esc(txScript(d.bindingNote)) + '</p>' + paras;
+        }
         var secH = sec.h || ('第' + (si + 1) + '节');
         secH = txScript(secH);
         if (singleSec) {

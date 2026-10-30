@@ -578,6 +578,10 @@
           /* 分类/编号不在书头显示（2026-10-27 用户定）：随 dzMeta 交阅读器，文末一行小字交代 */
           dzMeta: { bu: w.bu, lei: w.lei || '', dz: w.dz || '' },
           note: w.note, daozang: true, lazy: (w.volumes.length > 1),
+          /* 卷首错绑注记（数据驱动，feed 文本 JSON 的 binding_note 字段；
+             仅错绑部有值，如 a0277 首葉被他經顶替。注记只在呈现层渲染，
+             绝不进入正文段流——char 偏移/锚点/高亮/搜索/进度零影响） */
+          bindingNote: w.binding_note || (pw && pw.binding_note) || '',
           hasPunct: !!(pw && pw.volumes && pw.volumes.length),
           punctPartial: null,
           sectionsOrig: buildOrigSections(w),

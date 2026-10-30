@@ -2341,6 +2341,7 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .jing-srcnote{font-size:.8em;color:var(--ink-2);line-height:1.55;margin:2px 0 10px;padding:8px 10px;border:1px dashed var(--line-soft);border-radius:8px}
 /* 道藏全集文末行：分类编号＋底本＋标点口径（书头已撤，2026-10-27） */
 .dz-endnote{font-size:.78em;color:var(--muted);text-align:center;line-height:1.6;margin:28px 0 8px;padding-top:12px;border-top:1px dashed var(--line-soft)}
+.dz-binding-note{font-size:.82em;color:var(--ink-2);line-height:1.65;margin:2px 0 16px;padding:8px 10px;border:1px dashed var(--line-soft);border-radius:8px}
 /* 道藏图版（原书插图按原文位置内嵌）：居中、与上下文段落留呼吸间距；
    图题小字居中走变量色（日/夜随主题变量）。红光：不另设规则——
    body.sky-red img 全局滤镜（brightness(.78) sepia(1) hue-rotate(-52deg)
