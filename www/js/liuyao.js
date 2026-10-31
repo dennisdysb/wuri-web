@@ -109,6 +109,47 @@ var LiuYao = (function () {
   // 纳干：[外卦干, 内卦干]，key 为经卦三爻自下而上的二进制（与 GUA key 同序，不可反转）
   // 乾内甲外壬、坤内乙外癸、震庚、巽辛、坎戊、离己、艮丙、兑丁
   var NA_GAN = { '111': ['壬', '甲'], '000': ['癸', '乙'], '100': ['庚', '庚'], '011': ['辛', '辛'], '010': ['戊', '戊'], '101': ['己', '己'], '001': ['丙', '丙'], '110': ['丁', '丁'] };
+  /* 纳甲流派（2026-10-31 用户拍板，照八字晚子时流派开关同例）：
+   * 流派1＝京房纳甲固定表（默认，与此前一致）；流派2＝二老时迁，宗《易冒》
+   * 「二老时迁，三少不变，则干支六十，可得而具焉」：仅乾、坤（二老）纳干随
+   * 阴阳遁换位，纳支全不动，其余六卦（三少）两派一致。
+   * 阳遁（冬至时刻起→次年夏至时刻前）：同固定表——乾内甲外壬、坤内乙外癸；
+   * 阴遁（夏至时刻起→冬至时刻前）：乾内壬外甲、坤内癸外乙（即下表：固定表乾坤内外干互换）。
+   * 遁期按起卦时间的夏至/冬至精确时刻判定（lunar-javascript 节气表，精确到秒），不用日期粗判。 */
+  var NA_GAN_YIN = { '111': ['甲', '壬'], '000': ['乙', '癸'] };  // 阴遁乾坤：[外干, 内干]
+  var lySect = 1;
+  try { var _lySectSaved = +localStorage.getItem('wuri_ly_sect'); if (_lySectSaved === 1 || _lySectSaved === 2) lySect = _lySectSaved; } catch (e) {}
+  /* 起卦时刻是否阴遁：取起卦年及前后一年节气表内全部夏至/冬至精确时刻
+   * （表内同一节气有中文键与英文键两份，值同为 Solar 精确时刻，按 名|时刻 去重），
+   * 最近一个已过至点为夏至→阴遁、为冬至→阳遁。跨年天然成立：1 月回溯到上年 12 月冬至（阳遁）、
+   * 12 月冬至后亦然；至点本刻起入新遁（<= 含本刻）。 */
+  function lyIsYinDun(date) {
+    try {
+      if (!date || !window.Lunar) return false;
+      var t = date.getTime();
+      var seen = {}, sols = [];
+      for (var dy = -1; dy <= 1; dy++) {
+        var table = window.Lunar.fromDate(new Date(date.getFullYear() + dy, 5, 15, 12, 0, 0)).getJieQiTable();
+        for (var k in table) {
+          var nm = (k === 'XIA_ZHI') ? '夏至' : ((k === 'DONG_ZHI') ? '冬至' : k);
+          if (nm !== '夏至' && nm !== '冬至') continue;
+          var so = table[k];  // 本版 Solar 无 toDate()，按字段组装本地时刻（与全站设备本地时间口径同）
+          var st = new Date(so.getYear(), so.getMonth() - 1, so.getDay(), so.getHour(), so.getMinute(), so.getSecond()).getTime();
+          var skey = nm + '|' + st;
+          if (!seen[skey]) { seen[skey] = 1; sols.push({ name: nm, t: st }); }
+        }
+      }
+      var best = null;
+      for (var si = 0; si < sols.length; si++) if (sols[si].t <= t && (!best || sols[si].t > best.t)) best = sols[si];
+      return !!best && best.name === '夏至';
+    } catch (e) { return false; }
+  }
+  /* 纳干查表（唯一入口）：流派2＋阴遁＋乾/坤才换，其余一律固定表。
+   * date 缺省（无从定遁期的内部调用）→固定表，保证流派1 与旧行为逐字不变。 */
+  function naGanOf(guaKey3, date) {
+    if (lySect === 2 && (guaKey3 === '111' || guaKey3 === '000') && date && lyIsYinDun(date)) return NA_GAN_YIN[guaKey3];
+    return NA_GAN[guaKey3];
+  }
   // 纳支起支：[内卦起支, 外卦起支]（京房纳甲正表，内外必须分开起）
   // 内：乾子 坤未 震子 巽丑 坎寅 离卯 艮辰 兑巳
   // 外：乾午 坤丑 震午 巽未 坎申 离酉 艮戌 兑亥
@@ -158,21 +199,23 @@ var LiuYao = (function () {
   // 纳甲装卦：返回每爻 {gan, zhi}（自下而上）
   // guaKey 为 6 位、下爻在前；经卦 key 直接取前/后 3 位（自下而上），严禁反转——
   // 反转会把巽(011)认成兑、震(100)认成艮（2026-10-22 已修复的历史错误）
-  function najia(guaKey) {
+  function najia(guaKey, date) {
     var lowerKey = guaKey.slice(0, 3);
     var upperKey = guaKey.slice(3, 6);
     var res = [];
     var zi = zhiIdx(NA_ZHI_START[lowerKey][0]);
     var neiYang = !!YANG_GUA[lowerKey];
+    var ganNei = naGanOf(lowerKey, date);
     for (var i = 0; i < 3; i++) {
       // 内卦初二三爻：隔位跳（阳顺 子→寅→辰；阴逆 未→巳→卯）
-      res.push({ gan: NA_GAN[lowerKey][1], zhi: ZHI[(zi + (neiYang ? i * 2 : -i * 2) + 24) % 12] });
+      res.push({ gan: ganNei[1], zhi: ZHI[(zi + (neiYang ? i * 2 : -i * 2) + 24) % 12] });
     }
     zi = zhiIdx(NA_ZHI_START[upperKey][1]);
     var waiYang = !!YANG_GUA[upperKey];
+    var ganWai = naGanOf(upperKey, date);
     for (var j = 0; j < 3; j++) {
       // 外卦四五上爻：自外卦起支另起（乾外午、坤外丑……），不可与内卦同起点
-      res.push({ gan: NA_GAN[upperKey][0], zhi: ZHI[(zi + (waiYang ? j * 2 : -j * 2) + 24) % 12] });
+      res.push({ gan: ganWai[0], zhi: ZHI[(zi + (waiYang ? j * 2 : -j * 2) + 24) % 12] });
     }
     return res;
   }
@@ -251,7 +294,7 @@ var LiuYao = (function () {
   var DG_NAMES = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
 
   /* 伏神（与盘面同一算法：本宫首卦中、本卦所缺六亲对应的爻位） */
-  function computeFu(key, gong, nj) {
+  function computeFu(key, gong, nj, date) {
     var out = [];
     try {
       var pureKey = null;
@@ -259,7 +302,7 @@ var LiuYao = (function () {
         if (BAGONG[bi][0] === gong.name) { pureKey = BAGONG[bi][2][0]; break; }
       }
       if (!pureKey) return out;
-      var pureNj = najia(pureKey);
+      var pureNj = najia(pureKey, date);
       var curQin = {};
       for (var ci = 0; ci < 6; ci++) curQin[liuqin(gong.wx, ZHI_WX[nj[ci].zhi])] = 1;
       for (var fi = 0; fi < 6; fi++) {
@@ -332,7 +375,7 @@ var LiuYao = (function () {
     var key = guaKey(linesArr);
     var gong = getGong(key);
     var sy = getShiYing(key);
-    var nj = najia(key);
+    var nj = najia(key, info.date || null);
     var monthZhi = info.monthZhi || '', dayGz = info.dayGz || '', xk = info.xk || '';
     var beasts = [];
     try { beasts = liushou(info.dayGan || '甲') || []; } catch (e) {}
@@ -340,7 +383,7 @@ var LiuYao = (function () {
     var bianNj = null, bianKey = null;
     if (hasDong) {
       bianKey = guaKey(linesArr.map(function (l) { return { yao: l.dong ? (1 - l.yao) : l.yao }; }));
-      bianNj = najia(bianKey);
+      bianNj = najia(bianKey, info.date || null);
     }
     var Y = [];
     for (var i = 0; i < 6; i++) {
@@ -387,7 +430,7 @@ var LiuYao = (function () {
               + (beasts[y.i] && DG_BEAST_NOTE[beasts[y.i]] ? '，临' + beasts[y.i] + '（六神定性：' + DG_BEAST_NOTE[beasts[y.i]] + '，仅作辅助参考）' : ''));
           });
         } else {
-          if (!fuList) fuList = computeFu(key, gong, nj);
+          if (!fuList) fuList = computeFu(key, gong, nj, info.date || null);
           var fus = fuList.filter(function (f) { return f.qin === m.qin; });
           if (fus.length) {
             var f0 = fus[0];
@@ -544,7 +587,7 @@ var LiuYao = (function () {
   }
   /* 对外（含回归测试）：给定爻象、日期、事类直接算判读 */
   function duanFor(linesArr, date, topic, gender) {
-    var info = { monthZhi: '', dayGz: '', dayGan: '甲', xk: '' };
+    var info = { monthZhi: '', dayGz: '', dayGan: '甲', xk: '', date: date || null };
     try {
       if (window.Lunar) {
         var l = window.Lunar.fromDate(date);
@@ -555,6 +598,10 @@ var LiuYao = (function () {
       }
     } catch (e) {}
     return computeDuan(linesArr, info, topic || '', gender || 'm');
+  }
+  /* 纳甲流派单选回填（保存值/默认流派1；照八字 bz-sect 同例） */
+  function syncLySectUI() {
+    document.querySelectorAll('input[name="ly-sect"]').forEach(function (r) { r.checked = (+r.value === lySect); });
   }
   function syncTopicUI() {
     var ts = $('ly-topic-sel'); if (ts) ts.value = lyTopic.cat;
@@ -670,6 +717,7 @@ var LiuYao = (function () {
       var rec = {
         time: effNow().toISOString(),
         src: lyMode,
+        sect: lySect,
         question: q ? q.value.trim() : '',
         gua: guaName,
         bian: bianName || '',
@@ -769,7 +817,8 @@ var LiuYao = (function () {
     var names = ['初', '二', '三', '四', '五', '上'];
     var gong = getGong(key);
     var sy = getShiYing(key);
-    var nj = najia(key);
+    var lyDate = effNow();   // 起卦时间：纳甲流派二老时迁的遁期判定与历法同源
+    var nj = najia(key, lyDate);
     // 日辰：用当前日期的干支（lunar-javascript）
     var dayGz = '', dayGan = '甲', monthZhi = '';
     try {
@@ -809,7 +858,7 @@ var LiuYao = (function () {
         if (BAGONG[bi][0] === gong.name) { pureKey = BAGONG[bi][2][0]; break; }
       }
       if (pureKey) {
-        var pureNj = najia(pureKey);
+        var pureNj = najia(pureKey, lyDate);
         var curQin = {};
         for (var ci = 0; ci < 6; ci++) curQin[liuqin(gong.wx, ZHI_WX[nj[ci].zhi])] = 1;
         for (var fi = 0; fi < 6; fi++) {
@@ -822,7 +871,7 @@ var LiuYao = (function () {
     var bianLines = hasDong ? lines.map(function (l) { return { yao: l.dong ? (1 - l.yao) : l.yao }; }) : null;
     var bianKey = hasDong ? guaKey(bianLines) : null;
     var bianG = hasDong ? GUA[bianKey] : null;
-    var bianNj = hasDong ? najia(bianKey) : null;
+    var bianNj = hasDong ? najia(bianKey, lyDate) : null;
     var bianGong = hasDong ? getGong(bianKey) : null;
     var bianSy = hasDong ? getShiYing(bianKey) : null;
     // 标题：四柱+旬空
@@ -897,7 +946,7 @@ var LiuYao = (function () {
     html += '<div class="ly-hcz">互卦：' + (hg ? hg[0] : '?') + '　错卦：' + (cg ? cg[0] : '?') + '　综卦：' + (zg ? zg[0] : '?') + '</div>';
     // 断卦层：卦象判读卡（结构判读引擎，与 AI 文本同一口径）
     try {
-      var dgRes = computeDuan(lines, { monthZhi: monthZhi, dayGz: dayGz, dayGan: dayGan, xk: xk }, lyTopic.cat, lyTopic.gender);
+      var dgRes = computeDuan(lines, { monthZhi: monthZhi, dayGz: dayGz, dayGan: dayGan, xk: xk, date: lyDate }, lyTopic.cat, lyTopic.gender);
       html += duanCardHtml(dgRes);
     } catch (e) {}
     detail.innerHTML = html;
@@ -1205,8 +1254,10 @@ var LiuYao = (function () {
           if (l.coins && l.coins.length === 3) return coinResult(l.coins.slice());
           return { yao: l.yao, dong: l.dong, coins: [] };
         });
-        /* 手动记录按其所填时间回放，保证与原盘一致；旧/摇卦记录维持原口径（当前时间） */
-        if (r.src === 'manual' && r.time) setCastTime(new Date(r.time), true);
+        /* 手动记录按其所填时间回放，保证与原盘一致；旧/摇卦记录维持原口径（当前时间）。
+         * 手动记录同时恢复其起卦时的纳甲流派（仅页面内状态＋单选回填，不改写已保存的默认流派；
+         * 无 sect 字段的旧记录起卦时只有流派一，按流派一回放） */
+        if (r.src === 'manual' && r.time) { setCastTime(new Date(r.time), true); lySect = (r.sect === 2) ? 2 : 1; syncLySectUI(); }
         else setCastTime(null, true);
         renderLines();
         renderResult(true);
@@ -1261,6 +1312,16 @@ var LiuYao = (function () {
       refreshDuanIfShown();
     });
     syncTopicUI();
+    /* 纳甲流派（流派一京房固定／流派二二老时迁）：回填保存值，切换即存并整盘重排 */
+    syncLySectUI();
+    document.querySelectorAll('input[name="ly-sect"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        if (!r.checked) return;
+        lySect = +r.value;
+        try { localStorage.setItem('wuri_ly_sect', String(lySect)); } catch (e) {}
+        refreshDuanIfShown();
+      });
+    });
     /* iOS 摇一摇权限按钮：必须在用户直接点击中申请（2026-10-10 fix #5） */
     var mp = $('ly-motion-perm');
     if (mp) {
@@ -1328,10 +1389,11 @@ var LiuYao = (function () {
         try { txt += '农历：' + lq.getYearInChinese() + '年' + lq.getMonthInChinese() + '月' + lq.getDayInChinese() + '\n'; } catch (e) {}
       }
     } catch (e) {}
+    if (lySect === 2) txt += '纳甲流派：流派二 · 二老时迁（《易冒》）——乾、坤纳干随阴阳遁换位，本盘已按起卦时刻所属遁期装卦；纳支与流派一同。\n';
     txt += '\n本卦：' + (g ? g[0] : '?') + '（' + gong.name + '宫，宫五行 ' + gong.wx + '）\n';
     if (g && g[1]) txt += '卦辞：' + g[1] + '\n';
     var names = ['初爻', '二爻', '三爻', '四爻', '五爻', '上爻'];
-    var nj = najia(key);
+    var nj = najia(key, nowQ);
     var sy = getShiYing(key);
     var beasts = [];
     try { beasts = liushou(dayGan) || []; } catch (e) {}
@@ -1343,7 +1405,7 @@ var LiuYao = (function () {
         if (BAGONG[bi][0] === gong.name) { pureKey = BAGONG[bi][2][0]; break; }
       }
       if (pureKey) {
-        var pureNj = najia(pureKey);
+        var pureNj = najia(pureKey, nowQ);
         var curQin = {};
         for (var ci = 0; ci < 6; ci++) curQin[liuqin(gong.wx, ZHI_WX[nj[ci].zhi])] = 1;
         for (var fi = 0; fi < 6; fi++) {
@@ -1372,7 +1434,7 @@ var LiuYao = (function () {
       var bianKey = guaKey(bianLines);
       var bianG = GUA[bianKey];
       var bianGong = getGong(bianKey);
-      var bianNj = najia(bianKey);
+      var bianNj = najia(bianKey, nowQ);
       var bianSy = getShiYing(bianKey);
       var dongIdx = [];
       lines.forEach(function (x, di) { if (x.dong) dongIdx.push(names[di]); });
@@ -1394,7 +1456,7 @@ var LiuYao = (function () {
     } catch (e) {}
     /* 结构判读（本站规则引擎，与盘面判读卡同一结论；只述结构与状态，不下吉凶断语） */
     try {
-      var dgAi = computeDuan(lines, { monthZhi: monthZhi, dayGz: dayGz, dayGan: dayGan, xk: xk }, lyTopic.cat, lyTopic.gender);
+      var dgAi = computeDuan(lines, { monthZhi: monthZhi, dayGz: dayGz, dayGan: dayGan, xk: xk, date: nowQ }, lyTopic.cat, lyTopic.gender);
       txt += '\n【结构判读】（规则引擎判读，供参考，勿与卦象数据冲突）\n';
       dgAi.rows.forEach(function (r) {
         txt += r.label + '：' + r.items.join(' ') + '\n';

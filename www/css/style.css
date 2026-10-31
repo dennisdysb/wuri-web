@@ -1658,6 +1658,11 @@ body.sky-red{
 .ly-topic-row label{color:var(--ink-2);font-size:.92rem}
 .ly-topic-sel{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:.95rem}
 .ly-topic-hint{margin:0 0 10px}
+.ly-sect-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:2px;flex-wrap:wrap}
+.ly-sect-row>label:first-child{color:var(--ink-2);font-size:.92rem}
+.ly-sect-row .radio{display:inline-flex;align-items:center;gap:6px;margin:0;padding:6px 0;font-size:.95rem;color:var(--ink);cursor:pointer}
+.ly-sect-row .radio input{width:18px;height:18px;accent-color:var(--teal-deep);margin:0}
+.ly-sect-hint{margin:0 0 12px}
 /* 断卦层判读卡：卦象表下方，分段（用神/旺衰/世应/动爻/格局）呈现，卡尾固定免责小字 */
 .ly-duan{margin-top:14px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:12px 14px;text-align:left}
 .ly-duan-title{font-weight:700;color:var(--gold);font-size:1rem;letter-spacing:.12em;margin-bottom:6px}

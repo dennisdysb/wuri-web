@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=504">
+<link rel="stylesheet" href="css/style.css?v=505">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -557,6 +557,12 @@
         <input type="datetime-local" id="ly-dt">
         <button type="button" class="btn small" id="ly-dt-now">此刻</button>
       </div>
+      <div class="ly-sect-row">
+        <label data-i18n="ly_sect_label">纳甲流派</label>
+        <label class="radio"><input type="radio" name="ly-sect" value="1" checked> <span data-i18n="ly_sect_1">流派一 · 京房纳甲（固定）</span></label>
+        <label class="radio"><input type="radio" name="ly-sect" value="2"> <span data-i18n="ly_sect_2">流派二 · 二老时迁（《易冒》）</span></label>
+      </div>
+      <p class="hint ly-sect-hint" data-i18n="ly_sect_hint">仅乾、坤两卦的纳干有别：流派一全年固定（乾内甲外壬、坤内乙外癸）；流派二宗《易冒》「二老时迁」——夏至后至冬至前（阴遁）乾内壬外甲、坤内癸外乙，冬至后至夏至前（阳遁）同流派一；纳支两派全同。默认流派一，与此前一致。</p>
       <div class="ly-stage" id="ly-stage">
         <div class="ly-tortoise-wrap">
           <img class="ly-tortoise" id="ly-tortoise" src="img/liuyao/tortoise-shell.png" alt="龟壳">
@@ -1045,7 +1051,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v504）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v505）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
