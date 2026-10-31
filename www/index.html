@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=459">
+<link rel="stylesheet" href="css/style.css?v=460">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -91,8 +91,16 @@
       </div>
     </section>
 
-    <!-- 神祇图鉴入口：2026-10-30 用户裁定首页不再放图鉴卡（图鉴自有入口），整卡移除；
-         deities.js 对 #deities-enter/#deities-count-cn 均有空守卫，app.js fwd 同理，移除无副作用 -->
+    <!-- 神祇图鉴（免费）入口 -->
+    <section class="hero2 h2-deity" id="deities-entry-card">
+      <div class="h2-bg h2-bg-deity" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title">神祇图鉴</div>
+        <p class="h2-sub">道教尊神：神诞、道场、职掌、生平事迹与造像特征，免费恭览。</p>
+        <div class="h2-gold"><span><span id="deities-count-cn">七十四</span>位尊神</span></div>
+      </div>
+      <button class="btn primary hero-enter" id="deities-enter" hidden>进入图鉴</button>
+    </section>
 
     <!-- 风水入口（2026-10-26 立项：主页最下面一张 → #view-fengshui 专页） -->
     <section class="hero2" id="fengshui-entry-card">
@@ -201,6 +209,21 @@
     </div>
     <div id="jing-body">
       <div id="jing-home">
+        <!-- 每日经文推荐（网页版位置：经文页顶部——删卡/挪底部系 iOS 专属口径，网页恢复顶部原位；
+             必须留在 #jing-home 内：打开阅读器时 jing-home 整体隐藏，卡绝不跟进阅读器（bug 修复保留）；
+             填充逻辑 app.js bindRemind 按 id 全局取元，不受位置影响） -->
+        <section class="card" id="jingrec-card">
+          <div class="card-title">每日经文推荐</div>
+          <div class="jingrec-body">
+            <div class="jingrec-book" id="jingrec-title">加载中…</div>
+            <div class="jingrec-unit" id="jingrec-unit"></div>
+            <div class="jingrec-gloss" id="jingrec-gloss"></div>
+          </div>
+          <div class="jingrec-foot">
+            <button class="btn primary" id="jingrec-go">去读经</button>
+            <span class="jingrec-reason" id="jingrec-reason"></span>
+          </div>
+        </section>
         <div class="jing-search"><input id="jing-q" data-i18n-ph="jing_search_ph" placeholder="搜索经文…" aria-label="搜索经文"><button id="jing-q-clear" class="jing-q-clear" hidden aria-label="清除搜索"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.2 2.2 L9.8 9.8 M9.8 2.2 L2.2 9.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></button></div>
         <!-- 标记/统计/生词三入口收成一行三格（2026-10-29 反馈第二批第 7 项）：
              每格 名＋关键数字；id 沿用旧行 id，JS 写入点不变。三格一律
@@ -219,20 +242,6 @@
 <div id="jing-list"></div>
 <div id="jing-results" hidden></div>
 <div id="jing-marks" hidden></div>
-        <!-- 每日经文推荐（2026-10-30 用户裁定：只在经文列表页最底部出现；
-             置于 #jing-home 内——打开阅读器时 jing-home 整体隐藏，推荐卡绝不跟进阅读器） -->
-        <section class="card" id="jingrec-card">
-          <div class="card-title">每日经文推荐</div>
-          <div class="jingrec-body">
-            <div class="jingrec-book" id="jingrec-title">加载中…</div>
-            <div class="jingrec-unit" id="jingrec-unit"></div>
-            <div class="jingrec-gloss" id="jingrec-gloss"></div>
-          </div>
-          <div class="jingrec-foot">
-            <button class="btn primary" id="jingrec-go">去读经</button>
-            <span class="jingrec-reason" id="jingrec-reason"></span>
-          </div>
-        </section>
       </div>
       <div id="jing-reader" hidden>
         <div class="jing-prog-top" aria-hidden="true"><i id="jing-prog-fill"></i></div>
@@ -499,8 +508,7 @@
       </div>
       <p class="hint">添加后会在黄历日历上显示彩色标记，也可以在年览中看到。</p>
     </section>
-    <!-- 每日经文推荐卡已移至经文页 #jing-home 底部（2026-10-30 用户裁定：
-         只在经文列表页最下面出现，绝不进阅读器；填充逻辑 app.js bindRemind 按 id 全局取元，不受位置影响） -->
+    <!-- 每日经文推荐卡在经文页 #jing-home 顶部（网页版口径；填充逻辑 app.js bindRemind 按 id 全局取元，不受位置影响） -->
     <div class="tab-spacer"></div>
   </main>
 
@@ -1037,7 +1045,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v459）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v460）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
