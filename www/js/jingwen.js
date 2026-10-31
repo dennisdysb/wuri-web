@@ -560,6 +560,10 @@ var JingWen = (function () {
         h: sec.h, _punct: true,
         paras: pv.paras.map(function (t, pi) {
           var o = { t: t };
+          /* 内丹逐字注音（2026-10-31 批）：标点段注音由精选数据 pyPunct 供给
+             （与标点分片逐段逐字对位生成），等长才采信、不等长不注（防错位） */
+          var pp = d.pyPunct && d.pyPunct[si] && d.pyPunct[si][pi];
+          if (pp && pp.length === t.length) o.py = pp;
           var cls = jpParaCls(t, pi === 0);
           if (cls) o.cls = cls;
           return o;
