@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=506">
+<link rel="stylesheet" href="css/style.css?v=507">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -1053,7 +1053,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v506）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v507）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -1264,9 +1264,16 @@
       <div class="card-title">隐私与计算方式</div>
       <div class="privacy">
         <p>全部排盘计算均在你的设备本地完成，计算过程不联网。排盘时输入的出生时间、地点、所问之事以及排盘记录，默认只保存在本机本地存储中，不会自动上传到任何服务器；只有当你登录并主动开启云同步时，这些记录才会按下方《账号与云同步》一条所列范围上传保存一份，用于换设备恢复。点击「AI 分析」等需联网功能时，相关内容才会按该功能说明发送，这一点不变。</p>
-        <p>隐私政策（生效日期：2026年10月26日）：除你主动使用联网功能、或登录并开启云同步的情况外，本应用不收集、不存储、不上传、不分享你的任何个人信息；提醒通知由手机系统本地调度，不经过任何服务器。</p>
-        <p>本应用仅申请以下系统权限，且仅用于提醒功能：通知权限，用于在戊日及斋醮日发出本地提醒；精确闹钟权限，用于准时触发提醒。</p>
-        <p>本应用不包含广告，不包含第三方数据分析工具。如有疑问，请通过「我的 → 关于」中的联系邮箱联系开发者。</p>
+        <p><b><span data-i18n="privacy">隐私政策</span></b>（<span data-i18n="privacy_effective">生效日期：2026年10月31日</span>）</p>
+        <p><b data-i18n="priv_h1">1. 本地优先：不用账号、不开同步，就没有任何数据离开你的设备</b><br><span data-i18n="priv_p1">本应用的全部计算（农历、干支、节气、八字、紫微、六爻、奇门、星象）均在你的设备本地离线完成。本应用可以完全不用账号使用；只要你不注册/登录账号、不开启云同步，你的任何个人信息都不会被收集、上传或分享。提醒通知由设备系统本地调度，不经过任何服务器。</span></p>
+        <p><b data-i18n="priv_h2">2. 账号（可选）：你提供的信息与存储方式</b><br><span data-i18n="priv_p2">当你选择注册账号时，我们收集：用户名与密码（用户名＋密码登录），或电子邮箱（验证码登录）；两种方式可并行、可互相绑定。密码不明文存储：服务器只保存经 PBKDF2-SHA256 加盐哈希（10 万次迭代）处理后的结果，我们无法看到你的密码原文。邮箱验证码由邮件服务商 Resend 发送，验证码本身只以哈希形式短时保存。登录会话令牌只保存哈希；为防止账号被共享滥用，我们还会记录：一个由应用在你的设备上生成的设备标识（服务端只保存其哈希）、粗粒度设备标签（如「Android · Chrome」）、登录时间与 IP 地址（用于防爆破与安全审计）。同一账号最多同时在 3 台设备登录。账号的用途只有：让你在多台设备上使用同一身份、恢复云同步数据、以及让高级版权益跟随账号。我们不把账号信息用于广告、用户画像或出售。</span></p>
+        <p><b data-i18n="priv_h3">3. 云同步（可选，默认关闭）：同步什么、存到哪里</b><br><span data-i18n="priv_p3">只有当你登录并主动打开「云同步」开关后，以下数据才会经加密连接（HTTPS）传到云端保存一份：经文书签/高亮/心得、八字/紫微/六爻/奇门的历史记录、修行打卡与纪念日、应用设置，以及家宅档案（房屋与楼层、住户姓名与生日等档案信息、罗盘测量记录——其中可能包含测量时的 GPS 经纬度、户型图与房屋照片）。云端存储与传输由 Cloudflare 提供，数据可能存储在加拿大境外。云同步的用途只有跨设备恢复与权益跟随；关掉开关后，新数据只保存在本机。请注意：家宅档案里可能包含他人（例如你的客户）的姓名、住址与照片。把这类档案同步到云端之前，请确认你已取得相关人员的同意。</span></p>
+        <p><b data-i18n="priv_h4">4. 购买与高级版权益</b><br><span data-i18n="priv_p4">通过 Google Play 购买高级版时，付款由 Google 处理，我们不接触你的银行卡信息；我们只接收购买状态以开通高级版。购买记录（订单标识）可能与你的账号关联保存，用于换设备时核对权益。通过官方网站购买激活码时，付款由 Stripe 处理；我们保存订单邮箱与激活码的绑定关系，用于发码、找回与防重复绑定。人工付款（微信/支付宝转账）时，你提交的付款截图仅用于核对并发码。</span></p>
+        <p><b data-i18n="priv_h5">5. 需要联网的单项功能</b><br><span data-i18n="priv_p5">户型图 AI 识别：当你使用「拍照/选图生成户型」时，你选择的图片会经我们的服务器转发给 AI 模型服务（DeepInfra）进行识别，结果返回到你的设备。不要上传包含无关个人信息的图片。相机认星：相机画面只在设备本地处理，不上传。点击「AI 分析」等明确标注需联网的功能时，相关内容才会按该功能说明发送。</span></p>
+        <p><b data-i18n="priv_h6">6. 权限说明</b><br><span data-i18n="priv_p6">本应用申请的系统权限及用途：</span><br><span data-i18n="priv_perm1">通知权限：用于在戊日及斋醮日发出本地提醒；</span><br><span data-i18n="priv_perm2">精确闹钟权限：用于准时触发提醒；</span><br><span data-i18n="priv_perm3">相机权限：用于相机认星与拍摄户型照片（仅本地处理或经你主动用于 AI 识别）；</span><br><span data-i18n="priv_perm4">位置权限：仅在你于家宅测量中主动记录定位时使用，用于把测量地点的经纬度存入该条测量记录；星象功能只使用你保存的观测地坐标，不申请定位权限。</span></p>
+        <p><b data-i18n="priv_h7">7. 你的权利：导出与删除</b><br><span data-i18n="priv_p7">你可以随时在应用内：导出你的全部云端数据；删除账号并删除全部云端数据（账号页内操作、立即生效）。删号会删除你的账号信息、云同步数据与云端照片，并解除购买记录与邮箱的关联；为防欺诈与审计需要，绑定操作日志在去除身份标识后保留。退出登录、关闭云同步、删除云端数据，都不会删除你设备本地的数据。删除网页通道：https://pay.shengboyu.ca/delete-account.html（在网页上用账号邮箱验证码登录后，同样可删除账号与全部云端数据）。云服务商的备份副本将在其滚动周期内清除。</span></p>
+        <p><b data-i18n="priv_h8">8. 第三方与广告</b><br><span data-i18n="priv_p8">本应用不包含广告，不包含第三方数据分析或广告追踪工具。我们仅出于上述明确用途与以下服务商合作（它们只按我们的指令处理数据）：Cloudflare（云存储与传输）、Resend（验证码邮件）、Stripe（网页购码支付）、Google（Play 内购买结算）、DeepInfra（户型图 AI 识别）。</span></p>
+        <p><b data-i18n="priv_h9">9. 联系我们</b><br><span data-i18n="priv_p9">如对本政策或你的数据有疑问，或需行使查阅、更正、删除等权利，请联系开发者（兼隐私负责人）：dennisdysb@gmail.com。本政策更新时将在应用内与政策页面同步公布新的生效日期。</span></p>
       </div>
     </section>
 
