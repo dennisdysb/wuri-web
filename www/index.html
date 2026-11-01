@@ -209,21 +209,6 @@
     </div>
     <div id="jing-body">
       <div id="jing-home">
-        <!-- 每日经文推荐（网页版位置：经文页顶部——删卡/挪底部系 iOS 专属口径，网页恢复顶部原位；
-             必须留在 #jing-home 内：打开阅读器时 jing-home 整体隐藏，卡绝不跟进阅读器（bug 修复保留）；
-             填充逻辑 app.js bindRemind 按 id 全局取元，不受位置影响） -->
-        <section class="card" id="jingrec-card">
-          <div class="card-title">每日经文推荐</div>
-          <div class="jingrec-body">
-            <div class="jingrec-book" id="jingrec-title">加载中…</div>
-            <div class="jingrec-unit" id="jingrec-unit"></div>
-            <div class="jingrec-gloss" id="jingrec-gloss"></div>
-          </div>
-          <div class="jingrec-foot">
-            <button class="btn primary" id="jingrec-go">去读经</button>
-            <span class="jingrec-reason" id="jingrec-reason"></span>
-          </div>
-        </section>
         <div class="jing-search"><input id="jing-q" data-i18n-ph="jing_search_ph" placeholder="搜索经文…" aria-label="搜索经文"><button id="jing-q-clear" class="jing-q-clear" hidden aria-label="清除搜索"><svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.2 2.2 L9.8 9.8 M9.8 2.2 L2.2 9.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></button></div>
         <!-- 标记/统计/生词三入口收成一行三格（2026-10-29 反馈第二批第 7 项）：
              每格 名＋关键数字；id 沿用旧行 id，JS 写入点不变。三格一律
@@ -240,6 +225,21 @@
 <div id="jing-stats-detail" hidden></div>
 <div id="jing-vocab-panel" hidden><div id="jing-vocab-list"></div></div>
 <div id="jing-list"></div>
+        <!-- 每日经文推荐（2026-11-01 用户亲令：网页版卡片挪到经文页最底部、书架之下；
+             必须留在 #jing-home 内：打开阅读器时 jing-home 整体隐藏，卡绝不跟进阅读器（bug 修复保留）；
+             填充逻辑 app.js bindRemind 按 id 全局取元，不受位置影响） -->
+        <section class="card" id="jingrec-card">
+          <div class="card-title">每日经文推荐</div>
+          <div class="jingrec-body">
+            <div class="jingrec-book" id="jingrec-title">加载中…</div>
+            <div class="jingrec-unit" id="jingrec-unit"></div>
+            <div class="jingrec-gloss" id="jingrec-gloss"></div>
+          </div>
+          <div class="jingrec-foot">
+            <button class="btn primary" id="jingrec-go">去读经</button>
+            <span class="jingrec-reason" id="jingrec-reason"></span>
+          </div>
+        </section>
 <div id="jing-results" hidden></div>
 <div id="jing-marks" hidden></div>
       </div>
