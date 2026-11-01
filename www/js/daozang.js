@@ -187,6 +187,7 @@
       if (en.type === 'toggle') {
         ov.span = en.span; ov.decoded = en.decoded_text;
         ov.groupSize = en.group_size || 5;
+        ov.stream = (en.grouping === 'stream'); ov.phase = en.phase || 0;
         ov.unresolved = en.unresolved || [];
         ov.statusLabel = en.status_label || ''; ov.flagNotes = en.flag_notes || [];
         var hp = dzOvFindPara(entry.sectionsPunct, en.vol, en.para, anchorS, true);
@@ -209,6 +210,24 @@
     for (var i = 0; i < t.length; i++) out[i] = py[i] || '';
     if (!ov.span) return out;
     var a = ov.span[0], b = ov.span[1], g = ov.groupSize || 5;
+    if (ov.stream) {
+      /* R4 流式解倒（grouping:"stream"）：标点与方括号编辑记号不入流、原位不动，
+         拼音只在 span 内的流位之间、按流内分组（首组长 (g-phase)%g）逐组倒序搬运，
+         与离线考订口径（r4-merge build_merge.py 的 derive）逐字同构。 */
+      var tok = new Array(t.length), m;
+      var re = /\[[^\]]*\]/g;
+      while ((m = re.exec(t))) for (var q = m.index; q < m.index + m[0].length; q++) tok[q] = 1;
+      var pos = [];
+      for (var i = a; i < b; i++) if (!tok[i] && !dzIsPunct(t[i])) pos.push(i);
+      var phase = ov.phase || 0, first = (g - phase) % g || g, k = 0;
+      while (k < pos.length) {
+        var bl = (k === 0) ? first : g;
+        var grp = pos.slice(k, k + bl);
+        for (var n = 0; n < grp.length; n++) out[grp[grp.length - 1 - n]] = py[grp[n]] || '';
+        k += bl;
+      }
+      return out;
+    }
     for (var j = a; j < b; j++) {
       var g0 = a + Math.floor((j - a) / g) * g;
       var g1 = Math.min(g0 + g, b);
