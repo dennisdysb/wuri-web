@@ -225,9 +225,13 @@
 <div id="jing-stats-detail" hidden></div>
 <div id="jing-vocab-panel" hidden><div id="jing-vocab-list"></div></div>
 <div id="jing-list"></div>
+<div id="jing-results" hidden></div>
         <!-- 每日经文推荐（2026-11-01 用户亲令：网页版卡片挪到经文页最底部、书架之下；
              必须留在 #jing-home 内：打开阅读器时 jing-home 整体隐藏，卡绝不跟进阅读器（bug 修复保留）；
-             填充逻辑 app.js bindRemind 按 id 全局取元，不受位置影响） -->
+             填充逻辑 app.js bindRemind 按 id 全局取元，不受位置影响；
+             2026-11-01 续修：卡必须排在 #jing-results 之后——搜索态 jingwen.js 隐藏 #jing-list、
+             改显 #jing-results，卡若居其前则压在全部搜索结果之上（用户真机报障），
+             现位置使默认态（书架之下）与搜索态（全部结果之下）同为结果流末位） -->
         <section class="card" id="jingrec-card">
           <div class="card-title">每日经文推荐</div>
           <div class="jingrec-body">
@@ -240,7 +244,6 @@
             <span class="jingrec-reason" id="jingrec-reason"></span>
           </div>
         </section>
-<div id="jing-results" hidden></div>
 <div id="jing-marks" hidden></div>
       </div>
       <div id="jing-reader" hidden>
@@ -1053,7 +1056,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v524）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v525）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
