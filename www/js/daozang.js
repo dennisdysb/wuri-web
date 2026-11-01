@@ -137,6 +137,261 @@
       cbs.forEach(function (f) { try { f && f({ version: 1, works: {} }); } catch (e) {} });
     });
   }
+  /* ---------- Item6 呈现层（overlay-item6.json） ----------
+   * 用户 2026-11-01 裁丙案：倒排隐语段（KR5i0056）加「旋正查看」开关、
+   * 玉字隐文段（KR5d0003/KR5d0006）加可展开「解读区」；原文一字不动，
+   * 呈现全走附加数据层（content/daozang/overlay-item6.json）。
+   * 契约：{version, works:{<KRID>:{entries:[{vol,para,basis,type,...}]}}}，
+   * vol＝0 起卷序、para＝标点版段序（0 起，与草案/分片数组下标同口径）。
+   * 懒加载：与图清单同路（开卷时并行拉、600ms 竞速、失败不缓存下次重试），
+   * 一次会话只拉一次；无条目之部零 DOM 改动。新条目（如后续解倒批次）
+   * 只改此 JSON、不改代码。 */
+  var ovData = null;        // overlay-item6.json 解析结果
+  var ovLoading = null;     // 在途回调队列
+  function ensureOverlay(cb) {
+    if (ovData) { cb && cb(ovData); return; }
+    if (ovLoading) { ovLoading.push(cb); return; }
+    ovLoading = [cb];
+    fetch(FEED_DIR + 'overlay-item6.json').then(function (r) { return r.json(); }).then(function (d) {
+      ovData = (d && d.works) ? d : { version: 1, works: {} };
+      var cbs = ovLoading; ovLoading = null;
+      cbs.forEach(function (f) { try { f && f(ovData); } catch (e) {} });
+    }).catch(function () {
+      var cbs = ovLoading; ovLoading = null;
+      cbs.forEach(function (f) { try { f && f({ version: 1, works: {} }); } catch (e) {} });
+    });
+  }
+  /* 段定位：先按 (vol, para) 直取并以 anchor（段/串的剥标点形）验位，
+     不合则在本卷内按 anchor 扫描兜底——索引口径漂移时宁可扫描不错位 */
+  function dzOvFindPara(sections, vol, para, anchorS, exact) {
+    var sec = sections && sections[vol];
+    if (!sec || !anchorS) return null;
+    function hit(p) {
+      if (!p || p.t == null) return false;
+      var s = dzStripPunct(p.t);
+      return exact ? (s === anchorS) : (s.indexOf(anchorS) >= 0);
+    }
+    if (hit(sec.paras[para])) return sec.paras[para];
+    for (var i = 0; i < sec.paras.length; i++) if (hit(sec.paras[i])) return sec.paras[i];
+    return null;
+  }
+  /* 把条目挂到段对象（p._ov6）：随 dzSpliceImages 传播、渲染层在段后出控件。
+     旋正开关换正文，只挂标点段且须整段与草案原文全等（exact）才挂；
+     解读区纯附加，标点/原文两套都挂（原文回落时仍在），定位用串包含判定。 */
+  function dzAttachOverlay(entry, ovw) {
+    if (!ovw || !ovw.entries || !ovw.entries.length) return;
+    ovw.entries.forEach(function (en) {
+      var anchorS = dzStripPunct(en.anchor || '');
+      if (!anchorS) return;
+      var ov = { type: en.type, id: en.id, status: en.status || '' };
+      if (en.type === 'toggle') {
+        ov.span = en.span; ov.decoded = en.decoded_text;
+        ov.groupSize = en.group_size || 5;
+        ov.unresolved = en.unresolved || [];
+        ov.statusLabel = en.status_label || ''; ov.flagNotes = en.flag_notes || [];
+        var hp = dzOvFindPara(entry.sectionsPunct, en.vol, en.para, anchorS, true);
+        if (hp) hp._ov6 = ov;
+      } else if (en.type === 'decode-zone') {
+        ov.zone = en.zone || {};
+        var zp = dzOvFindPara(entry.sectionsPunct, en.vol, en.para, anchorS, false);
+        if (zp) zp._ov6 = ov;
+        var zo = dzOvFindPara(entry.sectionsOrig, en.vol, en.para, anchorS, false);
+        if (zo) zo._ov6 = ov;
+      }
+    });
+  }
+  /* 解倒拼音置换：decoded_text 为原文在 span 内按 groupSize 分组逐组倒序的
+     纯置换（R3-L5 数据，离线断言 len/多重集/机械重导全等），故拼音数组按
+     同一置换搬运即逐字对位，不另造读音。 */
+  function dzOvPermutedPy(p, ov) {
+    var t = p.t || '', py = p.py || [];
+    var out = new Array(t.length);
+    for (var i = 0; i < t.length; i++) out[i] = py[i] || '';
+    if (!ov.span) return out;
+    var a = ov.span[0], b = ov.span[1], g = ov.groupSize || 5;
+    for (var j = a; j < b; j++) {
+      var g0 = a + Math.floor((j - a) / g) * g;
+      var g1 = Math.min(g0 + g, b);
+      out[g0 + (g1 - 1 - j)] = py[j] || '';
+    }
+    return out;
+  }
+  /* ---------- 呈现层渲染（jingwen.js 渲染钩子调用，段后兄弟元素，不入段内） ---------- */
+  var dzOvReg = {};                    // 'sec_para' -> {ov, p}（旋正开关点击时取数）
+  var dzOvOrigHtml = new WeakMap();    // 段元素 -> 原始 innerHTML（关开关时还原）
+  function dzOvBlockHtml(b) {
+    if (b.k === 'lead') return '<p class="ov6-lead">' + esc(dzTx(b.t)) + '</p>';
+    if (b.k === 'note') return '<p class="ov6-note2">' + esc(dzTx(b.t)) + '</p>';
+    if (b.k === 'src') return '<p class="ov6-src">' + esc(dzTx('出处：' + b.t)) + '</p>';
+    if (b.k === 'pending') {
+      return '<div class="ov6-pending"><span class="ov6-pending-t">'
+        + (b.range ? esc(dzTx(b.range)) + '：' : '') + esc(dzTx(b.t)) + '</span>'
+        + (b.note ? '<p class="ov6-note2">' + esc(dzTx(b.note)) + '</p>' : '') + '</div>';
+    }
+    if (b.k === 'units') {
+      return (b.units || []).map(function (u) {
+        var seg = u.segmentation || {};
+        var segTxt = ['姓', '諱', '字'].filter(function (k) { return seg[k]; })
+          .map(function (k) { return k + seg[k]; }).join(' · ');
+        return '<div class="ov6-unit"><span class="ov6-u-head">' + esc(dzTx(u.direction + ' · ' + u.deity)) + '</span>'
+          + '<span class="ov6-u-chain">' + esc(dzTx(u.chain_chars)) + '</span>'
+          + '<span class="ov6-u-seg">' + esc(dzTx(segTxt)) + '</span>'
+          + (u.variant_flag ? '<span class="ov6-flag">' + esc(dzTx('⚠ 此方諱字有異本存疑，詳見下注')) + '</span>' : '')
+          + '<span class="ov6-u-src">' + esc(dzTx('出处：' + (u.sources || []).join('；'))) + '</span></div>';
+      }).join('');
+    }
+    if (b.k === 'items') {
+      return '<div class="ov6-items">' + (b.items || []).map(function (it) {
+        var note = '';
+        if ((it.certainty || '').indexOf('DISPUTED') === 0) {
+          note = '<span class="ov6-flag">' + esc(dzTx('⚠ 对应存疑：出处作「' + it.source_form + '」，仅个别字可对，录以备考、不作定论')) + '</span>';
+        } else if (it.source_form && it.source_form !== it.chain_form) {
+          var m = /one-char variant (.+)$/.exec(it.certainty || '');
+          note = '<span class="ov6-i-note">' + esc(dzTx('出处作「' + it.source_form + '」' + (m ? '，一字之差（' + m[1] + '）' : ''))) + '</span>';
+        }
+        return '<div class="ov6-item"><span class="ov6-i-chain">' + esc(dzTx(it.chain_form)) + '</span>'
+          + '<span class="ov6-i-arrow">→</span><span class="ov6-i-gloss">' + esc(dzTx(it.gloss)) + '</span>' + note + '</div>';
+      }).join('') + '</div>';
+    }
+    if (b.k === 'lines') {
+      var h = '<div class="ov6-lines">' + (b.lines || []).map(function (ln) {
+        return '<span class="ov6-line">' + esc(dzTx(ln)) + '</span>';
+      }).join('') + '</div>';
+      if (b.variants && b.variants.length) {
+        h += '<ul class="ov6-vars">' + b.variants.map(function (v) {
+          return '<li>「' + esc(dzTx(v.line)) + '」' + esc(dzTx(v.note)) + '</li>';
+        }).join('') + '</ul>';
+      }
+      return h;
+    }
+    return '';
+  }
+  window.__wuri_dzOv6After = function (p, si, pi) {
+    if (!p || !p._ov6) return '';
+    var ov = p._ov6;
+    if (ov.type === 'toggle') {
+      dzOvReg[si + '_' + pi] = { ov: ov, p: p };
+      var flags = (ov.flagNotes || []).map(function (n) {
+        return '<div class="ov6-flagline">' + esc(dzTx(n)) + '</div>';
+      }).join('');
+      if (ov.unresolved && ov.unresolved.length) {
+        flags += '<div class="ov6-flagline">' + esc(dzTx('點式下線處考訂未決，存機械解倒')) + '</div>';
+      }
+      return '<div class="ov6-ctl" data-ov6-ctl>'
+        + '<button type="button" class="ov6-chip" data-ov6-tgl data-sec="' + si + '" data-para="' + pi + '" aria-pressed="false">' + esc(txUi('旋正查看')) + '</button>'
+        + '<span class="ov6-badge" hidden>' + esc(txUi('解倒')) + '</span>'
+        + '<div class="ov6-actnote" hidden>' + esc(txUi('解倒文本（考订）'))
+        + (ov.statusLabel ? '<span class="ov6-status">' + esc(dzTx(ov.statusLabel)) + '</span>' : '')
+        + flags + '</div></div>';
+    }
+    if (ov.type === 'decode-zone') {
+      var z = ov.zone || {};
+      return '<div class="ov6-zone" data-ov6-zone>'
+        + '<div class="ov6-zhead"><button type="button" class="ov6-chip" data-ov6-zonebtn aria-expanded="false">' + esc(txUi('解读')) + '</button>'
+        + (z.header_source ? '<span class="ov6-zsrc">' + esc(dzTx(z.header_source)) + '</span>' : '')
+        + '</div><div class="ov6-zone-body" hidden>'
+        + (z.blocks || []).map(dzOvBlockHtml).join('')
+        + '</div></div>';
+    }
+    return '';
+  };
+  /* 未決組標記：解倒態段內按段落絕對座標給未決範圍加點式下線。
+     rubyPara 產出為扁平子節點流（文字節點按字計、<ruby> 按 1 字計），
+     逐節點對位：文字節點按範圍切分包 span，ruby 直接掛 class。 */
+  function dzOvMarkUnresolved(para, ranges) {
+    if (!ranges || !ranges.length) return;
+    function hit(a, b) {
+      for (var k = 0; k < ranges.length; k++) if (a < ranges[k].b && b > ranges[k].a) return true;
+      return false;
+    }
+    var idx = 0;
+    Array.prototype.slice.call(para.childNodes).forEach(function (node) {
+      if (node.nodeType === 3) {
+        var txt = node.nodeValue, start = idx;
+        idx += txt.length;
+        if (!hit(start, start + txt.length)) return;
+        var frag = document.createDocumentFragment(), run = '', runHit = null;
+        function flush() {
+          if (!run) return;
+          if (runHit) {
+            var sp = document.createElement('span');
+            sp.className = 'ov6-unres'; sp.textContent = run;
+            frag.appendChild(sp);
+          } else frag.appendChild(document.createTextNode(run));
+          run = '';
+        }
+        for (var i = 0; i < txt.length; i++) {
+          var h = hit(start + i, start + i + 1);
+          if (runHit === null || h === runHit) { run += txt[i]; runHit = h; }
+          else { flush(); run = txt[i]; runHit = h; }
+        }
+        flush();
+        para.replaceChild(frag, node);
+      } else if (node.nodeType === 1) {
+        var st = idx; idx += 1;
+        if (hit(st, st + 1) && node.classList) node.classList.add('ov6-unres');
+      }
+    });
+  }
+  function dzOvToggle(btn) {
+    var si = btn.getAttribute('data-sec'), pi = btn.getAttribute('data-para');
+    var reg = dzOvReg[si + '_' + pi];
+    if (!reg) return;
+    var body = btn.closest('.jing-sec-body');
+    if (!body) return;
+    var para = body.querySelector('.jing-para[data-sec="' + si + '"][data-para="' + pi + '"]');
+    if (!para) return;
+    var ctl = btn.closest('[data-ov6-ctl]');
+    var badge = ctl ? ctl.querySelector('.ov6-badge') : null;
+    var note = ctl ? ctl.querySelector('.ov6-actnote') : null;
+    var on = btn.getAttribute('aria-pressed') === 'true';
+    if (on) {
+      if (dzOvOrigHtml.has(para)) para.innerHTML = dzOvOrigHtml.get(para);
+      btn.setAttribute('aria-pressed', 'false');
+      btn.classList.remove('on');
+      para.classList.remove('ov6-decoded');
+      if (badge) badge.hidden = true;
+      if (note) note.hidden = true;
+      return;
+    }
+    if (!dzOvOrigHtml.has(para)) dzOvOrigHtml.set(para, para.innerHTML);
+    var ov = reg.ov, html = null;
+    if (window.__wuri_dzRubyPara) {
+      /* 解倒态不沿用原文高亮范围（字序已变、偏移不对位）：渲染期间暂抑该段高亮 */
+      var key = si + '_' + pi, saved = null, had = false;
+      try {
+        if (window._jingHlRanges && window._jingHlRanges[key]) {
+          saved = window._jingHlRanges[key]; window._jingHlRanges[key] = []; had = true;
+        }
+        html = window.__wuri_dzRubyPara({ t: ov.decoded, py: dzOvPermutedPy(reg.p, ov), cls: reg.p.cls }, +si, +pi);
+      } catch (e) { html = null; }
+      if (had) window._jingHlRanges[key] = saved;
+    }
+    para.innerHTML = (html != null) ? html : esc(dzTx(ov.decoded));
+    dzOvMarkUnresolved(para, ov.unresolved);
+    btn.setAttribute('aria-pressed', 'true');
+    btn.classList.add('on');
+    para.classList.add('ov6-decoded');
+    if (badge) badge.hidden = false;
+    if (note) note.hidden = false;
+  }
+  document.addEventListener('click', function (e) {
+    if (!e.target || !e.target.closest) return;
+    var zb = e.target.closest('[data-ov6-zonebtn]');
+    if (zb) {
+      var zone = zb.closest('[data-ov6-zone]');
+      var zbBody = zone ? zone.querySelector('.ov6-zone-body') : null;
+      if (zbBody) {
+        zbBody.hidden = !zbBody.hidden;
+        zb.setAttribute('aria-expanded', String(!zbBody.hidden));
+        zb.classList.toggle('on', !zbBody.hidden);
+      }
+      return;
+    }
+    var tb = e.target.closest('[data-ov6-tgl]');
+    if (tb) dzOvToggle(tb);
+  });
+
   /* 段串内切点：内容字偏移 k（第 k 个内容字之前切）→ 串内下标。
      标点版段内标点不计内容字，逐字跳过即得该模式自己的切点。 */
   function dzCutIndex(t, k) {
@@ -169,11 +424,13 @@
       }
       if (!here.length) { out.push(p); cum += len; return; }
       var pos = 0; /* 串内已切下标 */
+      var ovDone = false; /* Item6 呈现层标记只随首个文字块走（与 cls 同路） */
       here.forEach(function (a, hi) {
         var cut = dzCutIndex(t, a.char - cum);
         if (cut > pos) {
           var chunk = { t: t.slice(pos, cut) };
           if (hi === 0 && p.cls) chunk.cls = p.cls; /* 排版分类只留首块 */
+          if (!ovDone && p._ov6) { chunk._ov6 = p._ov6; ovDone = true; }
           if (p.py) chunk.py = p.py.slice(pos, cut);
           out.push(chunk);
         }
@@ -182,6 +439,7 @@
       });
       if (pos < t.length) {
         var rest = { t: t.slice(pos) };
+        if (!ovDone && p._ov6) rest._ov6 = p._ov6;
         if (p.py) rest.py = p.py.slice(pos);
         out.push(rest);
       }
@@ -570,9 +828,21 @@
           if (!done) { done = true; res({ anchors: null, known: false }); }
         }, 600);
       });
-      Promise.all([pText, pPunct, pImg]).then(function (res) {
+      /* Item6 呈现层同路竞速：超时按无呈现层开卷且不入 workCache（下次重建补上） */
+      var pOv = new Promise(function (res) {
+        if (ovData) { res({ ovw: (ovData.works && ovData.works[id]) || null, known: true }); return; }
+        var done = false;
+        ensureOverlay(function (d) {
+          if (!done) { done = true; res({ ovw: (d && d.works && d.works[id]) || null, known: true }); }
+        });
+        setTimeout(function () {
+          if (!done) { done = true; res({ ovw: null, known: false }); }
+        }, 600);
+      });
+      Promise.all([pText, pPunct, pImg, pOv]).then(function (res) {
         workLoading[id] = false;
         var w = res[0], pw = res[1], anchors = res[2].anchors, imgKnown = res[2].known;
+        var ovw = res[3].ovw, ovKnown = res[3].known;
         var entry = {
           id: w.id, title: w.title,
           /* 分类/编号不在书头显示（2026-10-27 用户定）：随 dzMeta 交阅读器，文末一行小字交代 */
@@ -596,14 +866,17 @@
         }
         /* 图版预切分：orig/punct 两套段落各按本套字流换算同一锚点，
            落点文字位置恒一致；无图部零改动 */
+        /* Item6 呈现层挂接（须在图版预切分之前：_ov6 随切分传播到首块） */
+        if (ovw) dzAttachOverlay(entry, ovw);
         if (anchors && anchors.length) {
           entry.sectionsOrig = dzApplyImages(entry.sectionsOrig, anchors);
           if (entry.sectionsPunct) entry.sectionsPunct = dzApplyImages(entry.sectionsPunct, anchors);
         }
         applyDzMode(entry);
         /* 图清单竞速超时（imgKnown=false）时条目可能缺图：不入 workCache，
-           下次开卷时图清单多半已到、重建即补图（本次开卷内容不受影响） */
-        if (imgKnown) workCache[id] = entry;
+           下次开卷时图清单多半已到、重建即补图（本次开卷内容不受影响）；
+           呈现层竞速超时（ovKnown=false）同理不缓存 */
+        if (imgKnown && ovKnown) workCache[id] = entry;
         window.JINGWEN = window.JINGWEN || {};
         window.JINGWEN[id] = entry;
         settleRow();

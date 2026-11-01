@@ -459,6 +459,9 @@ var JingWen = (function () {
     }
     return out;
   }
+  /* Item6 呈现层（daozang.js）解倒态借道同一注音渲染：解倒文与原文同长、
+     拼音已由 daozang.js 按字序置换对位，此处只负责逐字成形 */
+  window.__wuri_dzRubyPara = rubyPara;
   /* 背诵模式：按句切分，每句只显示首字，点击展开全文 */
   function recitePara(p) {
     if (!p || p.img || p.t == null) return '';
@@ -1951,7 +1954,10 @@ var JingWen = (function () {
           if (isQingSec && pi === sec.paras.length - 1) {
             txt += ' <span class="qing-inline" data-qing title="此处叩磬">（敲磬）</span>';
           }
-          return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + txt + '</p>';
+          /* Item6 呈现层控件（daozang.js 挂 p._ov6）：段后兄弟元素，不入段内
+             ——段下标/高亮/搜索/注音一律零影响；无标记段返回空串 */
+          return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + txt + '</p>'
+            + (window.__wuri_dzOv6After ? window.__wuri_dzOv6After(p, si, pi) : '');
         }).join('');
         /* 卷首错绑注记（bindingNote，数据驱动）：呈现层独立元素，不带
            data-sec/data-para、不入正文字符流——char 偏移、锚点、高亮、
@@ -2071,7 +2077,8 @@ var JingWen = (function () {
     if (window.__wuri_dzAnnotate) { try { window.__wuri_dzAnnotate(d, si); } catch (e) {} }
     body.innerHTML = sec.paras.map(function (p, pi) {
       if (p.img) return dzFigHtml(p);
-      return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + (reciteMode ? recitePara(p) : rubyPara(p, si, pi)) + '</p>';
+      return '<p class="jing-para' + (p.cls ? ' ' + p.cls : '') + '" data-sec="' + si + '" data-para="' + pi + '">' + (reciteMode ? recitePara(p) : rubyPara(p, si, pi)) + '</p>'
+        + (window.__wuri_dzOv6After ? window.__wuri_dzOv6After(p, si, pi) : ''); /* Item6 呈现层，同首渲口径 */
     }).join('');
     body.removeAttribute('data-lazy');
     if (window._jingHlRebuild) { try { window._jingHlRebuild(currentId); } catch (e) {} }

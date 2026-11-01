@@ -2350,6 +2350,43 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 /* 道藏全集文末行：分类编号＋底本＋标点口径（书头已撤，2026-10-27） */
 .dz-endnote{font-size:.78em;color:var(--muted);text-align:center;line-height:1.6;margin:28px 0 8px;padding-top:12px;border-top:1px dashed var(--line-soft)}
 .dz-binding-note{font-size:.82em;color:var(--ink-2);line-height:1.65;margin:2px 0 16px;padding:8px 10px;border:1px dashed var(--line-soft);border-radius:8px}
+/* 道藏 Item6 呈现层（2026-11-01 用户裁丙案）：倒文段「旋正查看」开关＋隐文段「解读区」。
+   颜色全走变量链（--card/--line/--gold/--gold-wash/--ink/--muted），日/夜/红光
+   （body.sky-red 覆写同名变量）三态自动成立，不另设覆写。控件为段后兄弟元素。 */
+.ov6-ctl{margin:-4px 0 14px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.ov6-chip{font-family:var(--serif);font-size:.82em;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer}
+.ov6-chip.on{border-color:var(--gold);background:var(--gold-wash);color:var(--gold-deep);font-weight:700}
+.ov6-badge{font-size:.78em;color:var(--gold-deep);border:1px solid var(--gold);border-radius:6px;padding:1px 7px;letter-spacing:.12em}
+.ov6-actnote{flex-basis:100%;font-size:.8em;color:var(--ink-2);line-height:1.6}
+.ov6-actnote .ov6-status{color:var(--gold-deep);margin-left:8px}
+.ov6-flagline{color:var(--muted);font-size:.92em}
+.jing-para.ov6-decoded{background:var(--gold-wash);border-radius:6px}
+.ov6-unres{text-decoration:underline dotted var(--gold-deep);text-underline-offset:3px}
+.ov6-zone{margin:-4px 0 14px}
+.ov6-zhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ov6-zsrc{font-size:.78em;color:var(--muted);line-height:1.5}
+.ov6-zone-body{margin-top:8px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:10px;background:var(--card);font-size:.86em;line-height:1.75;color:var(--ink)}
+.ov6-lead{margin:0 0 8px}
+.ov6-note2{margin:0 0 8px;color:var(--ink-2);font-size:.94em}
+.ov6-src{margin:0 0 8px;color:var(--muted);font-size:.9em}
+.ov6-pending{border:1px dashed var(--line);border-radius:8px;padding:7px 10px;margin:0 0 8px}
+.ov6-pending-t{color:var(--gold-deep);font-weight:700;letter-spacing:.08em}
+.ov6-pending .ov6-note2{margin:4px 0 0}
+.ov6-unit{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--line-soft)}
+.ov6-unit:last-child{border-bottom:none}
+.ov6-u-head{font-weight:700;color:var(--ink)}
+.ov6-u-chain{font-family:var(--serif);letter-spacing:.06em}
+.ov6-u-seg{color:var(--ink-2)}
+.ov6-u-src{flex-basis:100%;color:var(--muted);font-size:.9em}
+.ov6-flag{color:var(--gold-deep);font-size:.92em}
+.ov6-items{margin:0 0 8px}
+.ov6-item{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;padding:3px 0}
+.ov6-i-chain{font-family:var(--serif);letter-spacing:.05em}
+.ov6-i-arrow{color:var(--muted)}
+.ov6-i-gloss{font-weight:700}
+.ov6-i-note{color:var(--muted);font-size:.92em}
+.ov6-lines{display:flex;flex-wrap:wrap;gap:2px 14px;margin:0 0 8px;font-family:var(--serif)}
+.ov6-vars{margin:0 0 8px;padding-left:18px;color:var(--muted);font-size:.92em}
 /* 道藏图版（原书插图按原文位置内嵌）：居中、与上下文段落留呼吸间距；
    图题小字居中走变量色（日/夜随主题变量）。红光：不另设规则——
    body.sky-red img 全局滤镜（brightness(.78) sepia(1) hue-rotate(-52deg)

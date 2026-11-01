@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v522-20261101-v522';
+const CACHE = 'wuri-v523-20261101-v523';
 /* 冥想资产专用缓存（场景图 10＋环境音/磬 11，约 28MB）：安装期整包预缓存，
  * 播放/显示一律本地出（用户 2026-10-25 定调「下载 App 时就该下载下来」）。
  * 与主缓存分开：单件失败不拖垮整版 SW 更新，缺件运行时回落网络现拉。 */
@@ -180,7 +180,7 @@ self.addEventListener('fetch', e => {
   // 响应存入同一 CACHE（同名键），升级后首开即命中存量缓存，向后兼容。
   var isDzContent = url.pathname.indexOf('/content/daozang/') !== -1 &&
     (url.pathname.indexOf('/texts/') !== -1 || url.pathname.indexOf('/texts-punct/') !== -1 ||
-     url.pathname.endsWith('/pinyin.json') || url.pathname.endsWith('/images.json'));
+     url.pathname.endsWith('/pinyin.json') || url.pathname.endsWith('/images.json') || url.pathname.endsWith('/overlay-item6.json'));
   if (isDzContent && e.request.method === 'GET') {
     e.respondWith(
       caches.open(CACHE).then(function (c) {
