@@ -1292,9 +1292,17 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
 .jing-back-fab.show{display:block}
 .jing-back-fab:active{transform:scale(.92)}
 /* 《步天歌》悬浮返回钮可拖动（内部 v534，用户 2026-11-01 真机反馈：固定左下压住导览
- * 面板左下间隔档「慢」钮）：仅 #butiange-fab 两条行为规则——触摸拖动不被页面滚动
+ * 面板左下间隔档「慢」钮）：仅 #butiange-fab 行为规则——触摸拖动不被页面滚动
  * 接管、拖动态取消按下缩放防测位偏移；颜色/透明度仍走 .jing-back-fab 既有变量链，
- * 日/夜/红光三态不写死。拖动/记忆逻辑在 js/stars.js 的 fabDragBoot。 */
+ * 日/夜/红光三态不写死。拖动/记忆逻辑在 js/stars.js 的 fabDragBoot。
+ * 默认落点（内部 v538）：改到左上 left:12/top:12（覆盖基类 left:18/bottom:90）。
+ * 导览面板 sticky 于视口顶（top:8）且满宽，面板外侧并无可容 56px 钮的左上空区，
+ * 此点在导览态只压面板静态标题行左角；面板全部控件钮恒在面板下部——按 CSS
+ * 尺寸链核算，最紧凑情形（短注文＋最矮星图）钮顶距视口顶 ≥281px，本钮底边 68px，
+ * 留白 ≥200px，任何状态不挡钮。书页未滚动时此点与 appbar 内 ‹ 返回 迷你钮同位
+ * 同功（本钮点击即转点该钮），滚动即让开。有拖动记忆（localStorage）时以内联
+ * 样式为准，本规则只管从未拖过的缺省位，不覆盖用户记忆。 */
+#butiange-fab{left:12px;top:12px;bottom:auto}
 #butiange-fab{touch-action:none}
 #butiange-fab.dragging{transform:none}
 

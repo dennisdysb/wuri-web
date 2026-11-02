@@ -1257,7 +1257,14 @@
     return out;
   }
   function tourPanelHTML() {
-    var btn = 'style="font-family:var(--sans)"';
+    /* 控制台固定两行、永不重排（内部 v538，用户 2026-11-02 07:22 真机反馈后定版）：
+     * 第一行［上一句］［播放/暂停］［下一句］、第二行［女声朗诵］［间隔 快/常/慢］
+     * ［退出导览］，每行三段等分（flex:1 1 0＋min-width:0＋nowrap），任何状态下
+     * 各钮尺寸恒定——旧版一整排 flex-wrap 加语音钮开态改字（钮面后缀「·开」）变宽，
+     * 会把下一句挤到下一行，本版钮面恒定四字、开态只走样式（见 tourSync）。 */
+    var cell = 'style="font-family:var(--sans);flex:1 1 0;min-width:0;padding-left:2px;padding-right:2px;text-align:center;white-space:nowrap"';
+    var spd = 'style="font-family:var(--sans);flex:1 1 0;min-width:0;padding-left:0;padding-right:0;text-align:center;white-space:nowrap"';
+    var row = 'style="display:flex;gap:8px;flex-wrap:nowrap;align-items:stretch;margin-top:8px"';
     return '<div id="sx-tour" style="position:sticky;top:8px;z-index:6;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 14px;box-shadow:0 8px 24px rgba(0,0,0,.14)">' +
       '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">' +
       '<span style="font-family:var(--serif);font-weight:700;font-size:1.05rem;color:var(--ink)">' + txEsc('步天歌导览') + '</span>' +
@@ -1265,16 +1272,20 @@
       '<div id="sx-tour-verse" style="font-family:var(--serif);font-size:1.3rem;letter-spacing:.08em;color:var(--cinnabar-deep);margin-top:6px;line-height:1.5"></div>' +
       '<div id="sx-tour-note" style="font-family:var(--sans);font-size:.76rem;color:var(--muted);margin-top:2px;line-height:1.6"></div>' +
       '<div id="sx-tour-chart"></div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">' +
-      '<button class="btn" ' + btn + ' data-sx-tour="prev">' + txEsc('上一句') + '</button>' +
-      '<button class="btn primary" ' + btn + ' id="sx-tour-play" data-sx-tour="play">' + txEsc('播放') + '</button>' +
-      '<button class="btn" ' + btn + ' id="sx-tour-voice" data-sx-tour="voice">' + txEsc('女声朗诵') + '</button>' +
-      '<button class="btn" ' + btn + ' data-sx-tour="next">' + txEsc('下一句') + '</button>' +
-      '<span style="font-family:var(--sans);font-size:.74rem;color:var(--muted)">' + txEsc('间隔') + '</span>' +
-      '<button class="btn" ' + btn + ' data-sx-tour="speed:1500" data-sx-tour-speed="1500">' + txEsc('快') + '</button>' +
-      '<button class="btn" ' + btn + ' data-sx-tour="speed:2400" data-sx-tour-speed="2400">' + txEsc('常') + '</button>' +
-      '<button class="btn" ' + btn + ' data-sx-tour="speed:4500" data-sx-tour-speed="4500">' + txEsc('慢') + '</button>' +
-      '<button class="btn" data-sx-tour="exit" style="font-family:var(--sans);margin-left:auto">' + txEsc('退出导览') + '</button>' +
+      '<div ' + row + '>' +
+      '<button class="btn" ' + cell + ' data-sx-tour="prev">' + txEsc('上一句') + '</button>' +
+      '<button class="btn primary" ' + cell + ' id="sx-tour-play" data-sx-tour="play">' + txEsc('播放') + '</button>' +
+      '<button class="btn" ' + cell + ' data-sx-tour="next">' + txEsc('下一句') + '</button>' +
+      '</div>' +
+      '<div ' + row + '>' +
+      '<button class="btn" ' + cell + ' id="sx-tour-voice" data-sx-tour="voice" aria-pressed="false">' + txEsc('女声朗诵') + '</button>' +
+      '<span style="flex:1 1 0;min-width:0;display:flex;gap:4px;flex-wrap:nowrap;align-items:stretch">' +
+      '<span style="font-family:var(--sans);font-size:.74rem;color:var(--muted);align-self:center;white-space:nowrap">' + txEsc('间隔') + '</span>' +
+      '<button class="btn" ' + spd + ' data-sx-tour="speed:1500" data-sx-tour-speed="1500">' + txEsc('快') + '</button>' +
+      '<button class="btn" ' + spd + ' data-sx-tour="speed:2400" data-sx-tour-speed="2400">' + txEsc('常') + '</button>' +
+      '<button class="btn" ' + spd + ' data-sx-tour="speed:4500" data-sx-tour-speed="4500">' + txEsc('慢') + '</button>' +
+      '</span>' +
+      '<button class="btn" ' + cell + ' data-sx-tour="exit">' + txEsc('退出导览') + '</button>' +
       '</div></div>';
   }
   /* 浮图高亮规则的内联复刻（.sx-pop .sx-hl/.sx-dim 同值，全走 var() 变量链） */
@@ -1366,10 +1377,14 @@
     });
     var vb = $('sx-tour-voice');
     if (vb) {
-      vb.textContent = T(st.voice ? '女声朗诵 · 开' : '女声朗诵');
+      /* 钮面恒定「女声朗诵」四字（v538 定版）：开态只走按下态样式＋aria-pressed，
+       * 不再拼后缀改字——改字会让钮变宽、挤动整排布局。色值全走变量链。 */
+      vb.textContent = T('女声朗诵');
       vb.style.borderColor = st.voice ? 'var(--cinnabar)' : '';
       vb.style.color = st.voice ? 'var(--cinnabar-deep)' : '';
       vb.style.fontWeight = st.voice ? '700' : '';
+      vb.style.background = st.voice ? 'var(--cinnabar-wash)' : '';
+      vb.setAttribute('aria-pressed', st.voice ? 'true' : 'false');
     }
   }
   function tourPause() {
@@ -1551,8 +1566,15 @@
       tourState.playing = false;
       if (tourState.timer) { clearInterval(tourState.timer); tourState.timer = null; }
       recitePause();
+      tourSync(false);
+      return;
     }
+    /* 开语音（v538 定版）：先停静音步进，立即从当前句开播——点开开关即出声，
+     * 不再要求用户补点一次播放钮。recitePlayToggle 内含加载/定位/失败提示。 */
+    if (tourState.timer) { clearInterval(tourState.timer); tourState.timer = null; }
+    tourState.playing = false;
     tourSync(false);
+    recitePlayToggle();
   }
 
   /* ---------------- s5+ 点句浮图（v2.3.0，作用域：POP_SECTIONS 已落图式层的段） ----------------
