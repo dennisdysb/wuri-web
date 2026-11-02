@@ -1291,6 +1291,12 @@ body.jing-immersive #jing-bookmark-fab{opacity:0;pointer-events:none;transform:t
   z-index:10001;display:none}
 .jing-back-fab.show{display:block}
 .jing-back-fab:active{transform:scale(.92)}
+/* 《步天歌》悬浮返回钮可拖动（内部 v534，用户 2026-11-01 真机反馈：固定左下压住导览
+ * 面板左下间隔档「慢」钮）：仅 #butiange-fab 两条行为规则——触摸拖动不被页面滚动
+ * 接管、拖动态取消按下缩放防测位偏移；颜色/透明度仍走 .jing-back-fab 既有变量链，
+ * 日/夜/红光三态不写死。拖动/记忆逻辑在 js/stars.js 的 fabDragBoot。 */
+#butiange-fab{touch-action:none}
+#butiange-fab.dragging{transform:none}
 
 /* 书签悬浮按钮（仅内丹书阅读时显示，层级同返回键） */
 .jing-bookmark-fab{position:fixed;left:18px;bottom:calc(164px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;

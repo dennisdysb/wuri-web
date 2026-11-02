@@ -1947,3 +1947,96 @@
   window.Stars = { openHome: openHome, activate: activate, openRegion: openRegion, openDetail: openDetail, openButiange: openButiange, renderTodaySky: renderTodaySky,
     openMansionAsterism: openMansionAsterism, openSunRegion: openSunRegion, sunMansion: sunMansion, openBeidouDetail: openBeidouDetail, loadFenye: loadFenye };
 })();
+
+/* ===== 《步天歌》导览悬浮返回钮可拖动（内部 v534，用户 2026-11-01 23:44 真机反馈）=====
+ * #butiange-fab 原随 .jing-back-fab 固定 left:18/bottom:90，在导览面板左下角压住
+ * 间隔档「慢」钮。改为可拖动，与阅读器悬浮钮同口径：拖动改位、位置记忆、轻点仍
+ * 是返回。手势判定：指针位移超 8px 判拖动（松手不触发返回），未超判点击、照常
+ * 返回（转点 #butiange-back，与原 inline onclick 完全等价）。位置以视口比例存
+ * localStorage（wuri_btg_fab_pos_v1），恢复与拖动均钳制在视口内（整钮不许出屏），
+ * 旋转/改尺寸后按比例还原并重钳。只绑这一个钮，不动其他视图的同名悬浮钮。 */
+(function fabDragBoot() {
+  var KEY = 'wuri_btg_fab_pos_v1';
+  var THRESH = 8; /* px，拖动判定阈值 */
+  function boot() {
+    var el = document.getElementById('butiange-fab');
+    if (!el) return;
+    function clamp(x, y) {
+      var w = el.offsetWidth || 56, h = el.offsetHeight || 56;
+      return {
+        x: Math.max(0, Math.min(x, Math.max(0, window.innerWidth - w))),
+        y: Math.max(0, Math.min(y, Math.max(0, window.innerHeight - h)))
+      };
+    }
+    function apply(x, y) {
+      var p = clamp(x, y);
+      el.style.left = p.x + 'px';
+      el.style.top = p.y + 'px';
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+      return p;
+    }
+    function save(x, y) {
+      try {
+        localStorage.setItem(KEY, JSON.stringify({
+          fx: x / Math.max(1, window.innerWidth),
+          fy: y / Math.max(1, window.innerHeight)
+        }));
+      } catch (e) {}
+    }
+    function restore() {
+      var o = null;
+      try { o = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+      if (!o || typeof o.fx !== 'number' || typeof o.fy !== 'number') return;
+      apply(o.fx * window.innerWidth, o.fy * window.innerHeight);
+    }
+    restore();
+    var rto = 0;
+    window.addEventListener('resize', function () {
+      if (!el.style.left) return; /* 从未拖动：保持 CSS 缺省位 */
+      clearTimeout(rto);
+      rto = setTimeout(function () {
+        restore(); /* 按记忆比例重放并钳制 */
+      }, 150);
+    });
+    var sx = 0, sy = 0, ox = 0, oy = 0, dragging = false, moved = false, suppress = false;
+    el.addEventListener('pointerdown', function (e) {
+      dragging = true; moved = false;
+      sx = e.clientX; sy = e.clientY;
+      el.classList.add('dragging'); /* 先取消 :active 缩放再测位，防首帧跳位 */
+      var r = el.getBoundingClientRect();
+      ox = r.left; oy = r.top;
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!moved && Math.sqrt(dx * dx + dy * dy) < THRESH) return;
+      moved = true;
+      if (e.cancelable) e.preventDefault();
+      apply(ox + dx, oy + dy);
+    });
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove('dragging');
+      if (moved) {
+        var r = el.getBoundingClientRect();
+        var p = apply(r.left, r.top);
+        save(p.x, p.y);
+        suppress = true; /* 紧随的 click 不得当作返回 */
+        setTimeout(function () { suppress = false; }, 50);
+      }
+      moved = false;
+    }
+    el.addEventListener('pointerup', endDrag);
+    el.addEventListener('pointercancel', endDrag);
+    el.addEventListener('click', function () {
+      if (suppress) { suppress = false; return; }
+      var b = document.getElementById('butiange-back');
+      if (b) b.click();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
