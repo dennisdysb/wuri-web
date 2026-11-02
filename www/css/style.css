@@ -3433,17 +3433,20 @@ body.reader-open #tab-jing .appbar{display:none}
 .jd-btn{flex:1 1 0;min-width:0;text-align:center;white-space:nowrap;min-height:40px;padding:7px 2px;font-size:.88rem;border-radius:10px;line-height:1.15}
 .jd-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
 .jd-btn[hidden]{display:none}
-/* 内丹/道藏底栏配宽（2026-11-02 删背换「我的标记」）：仅 dock-marks 态
-   （内丹/道藏书，renderReaderBody 按书类挂类）生效——四字钮占宽份额、
-   单字钮收窄、三字钮居中；常见经文底栏无此类、等分原样。390px 核算：
-   行内可用 363px（左右 padding 12＋gap 15），权重和 6.46 → 我的标记
-   ≈91px（文本 4 字×13.6px＋内距边框 ≈59px），余量足、无截字/换行 */
+/* 内丹/道藏底栏配宽（2026-11-02 删背换「我的标记」；v542 续令：标记钮
+   移至整排最右端，终版序 目录｜读｜字｜全展开/全收回｜注音开/关｜
+   我的标记）：仅 dock-marks 态（内丹/道藏书，renderReaderBody 按书类
+   挂类）生效——四字钮占宽份额、单字钮收窄、三字钮居中；配宽按 id 赋
+   权、与钮位无关，移位后权重不变；常见经文底栏无此类、等分原样。
+   390px 核算：行内可用 363px（左右 padding 12＋gap 15），权重和 6.46
+   → 我的标记 ≈91px（文本 4 字×13.6px＋内距边框 ≈59px），余量足、
+   无截字/换行（v542 新序复核同数） */
 #jing-dock-main.dock-marks #jing-toc-btn{flex:1 1 0}
 #jing-dock-main.dock-marks #jing-read-btn{flex:.78 1 0}
-#jing-dock-main.dock-marks #jing-marks-dock{flex:1.62 1 0}
 #jing-dock-main.dock-marks #jing-font-btn{flex:.78 1 0}
 #jing-dock-main.dock-marks #jing-foldall{flex:1.14 1 0}
 #jing-dock-main.dock-marks #jing-pybtn{flex:1.14 1 0}
+#jing-dock-main.dock-marks #jing-marks-dock{flex:1.62 1 0}
 /* 面板内开关态（跟读开等）：与主行 .on 同口径 */
 #jing-dock .mini-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
 /* 读/字面板：栏内向上展开，按播放/显示/本书分节带小标题 */

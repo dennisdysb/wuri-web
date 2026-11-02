@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=541">
+<link rel="stylesheet" href="css/style.css?v=542">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -226,12 +226,19 @@
 <div id="jing-vocab-panel" hidden><div id="jing-vocab-list"></div></div>
 <div id="jing-list"></div>
 <div id="jing-results" hidden></div>
-        <!-- 每日经文推荐（2026-11-01 用户亲令：网页版卡片挪到经文页最底部、书架之下；
-             必须留在 #jing-home 内：打开阅读器时 jing-home 整体隐藏，卡绝不跟进阅读器（bug 修复保留）；
-             填充逻辑 app.js bindRemind 按 id 全局取元，不受位置影响；
-             2026-11-01 续修：卡必须排在 #jing-results 之后——搜索态 jingwen.js 隐藏 #jing-list、
-             改显 #jing-results，卡若居其前则压在全部搜索结果之上（用户真机报障），
-             现位置使默认态（书架之下）与搜索态（全部结果之下）同为结果流末位） -->
+<div id="jing-marks" hidden></div>
+        <!-- 每日经文推荐卡【全域不变量 · 2026-11-02 用户亲令立规，内部 v542，
+             supersede v515（移至书架下）/v525（移至搜索结果后）两次局部修法】：
+             #jingrec-card 必须是 #jing-home 的最后一个子元素——在任何状态
+             下都恒居经文页最底部。#jing-home 内全部状态容器一律排在卡之前：
+             #jing-list（默认书架）、#jing-results（搜索结果，含 0 结果）、
+             #jing-marks（我的标记页）、#jing-stats-detail（阅读统计）、
+             #jing-vocab-panel（生词本）、#jing-wk-card；今后新增任何状态
+             容器也必须插到卡之前，绝不许置于卡后（v525 时 #jing-marks 独
+             居卡后，标记态卡遂压在标记内容之上，即本规矩所治）。
+             卡必须留在 #jing-home 内：打开阅读器时 jing-home 整体隐藏，
+             卡绝不跟进阅读器（bug 修复保留）；填充逻辑 app.js bindRemind
+             按 id 全局取元，不受位置影响。 -->
         <section class="card" id="jingrec-card">
           <div class="card-title">每日经文推荐</div>
           <div class="jingrec-body">
@@ -244,7 +251,6 @@
             <span class="jingrec-reason" id="jingrec-reason"></span>
           </div>
         </section>
-<div id="jing-marks" hidden></div>
       </div>
       <div id="jing-reader" hidden>
         <div class="jing-prog-top" aria-hidden="true"><i id="jing-prog-fill"></i></div>
@@ -369,10 +375,10 @@
             <button class="mini-btn jd-btn" id="jing-toc-btn" hidden>目录</button>
             <button class="mini-btn jd-btn" id="jing-read-btn" aria-expanded="false">读</button>
             <button class="mini-btn jd-btn" id="jing-recite" data-i18n="jing_recite">背</button>
-            <button class="mini-btn jd-btn" id="jing-marks-dock" data-i18n="jing_marks" hidden>我的标记</button>
             <button class="mini-btn jd-btn" id="jing-font-btn" aria-expanded="false">字</button>
             <button class="mini-btn jd-btn" id="jing-foldall">全展开</button>
             <button class="mini-btn jd-btn" id="jing-pybtn">注音开</button>
+            <button class="mini-btn jd-btn" id="jing-marks-dock" data-i18n="jing_marks" hidden>我的标记</button>
           </div>
         </div>
         <!-- 播放悬浮胶囊（2026-10-28 晚反馈批：暂停/停止不占底栏主行；
@@ -1057,7 +1063,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v541）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.1（内部 v542）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
