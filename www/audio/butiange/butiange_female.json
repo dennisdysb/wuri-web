@@ -1,0 +1,3617 @@
+{
+ "sid": "butiange",
+ "voice": "female",
+ "total_duration": 715.91,
+ "segments": [
+  {
+   "para": 0,
+   "section": "紫微垣",
+   "lidx": 0,
+   "group": 0,
+   "asterism": "北极",
+   "start": 0.0,
+   "duration": 1.89,
+   "text": "中元北极紫微宫"
+  },
+  {
+   "para": 1,
+   "section": "紫微垣",
+   "lidx": 1,
+   "group": 0,
+   "asterism": "北极",
+   "start": 1.89,
+   "duration": 1.89,
+   "text": "北极五星在其中"
+  },
+  {
+   "para": 2,
+   "section": "紫微垣",
+   "lidx": 2,
+   "group": 0,
+   "asterism": "北极",
+   "start": 3.77,
+   "duration": 1.89,
+   "text": "大帝之座第二珠"
+  },
+  {
+   "para": 3,
+   "section": "紫微垣",
+   "lidx": 3,
+   "group": 0,
+   "asterism": "北极",
+   "start": 5.66,
+   "duration": 1.89,
+   "text": "第三之星庶子居"
+  },
+  {
+   "para": 4,
+   "section": "紫微垣",
+   "lidx": 4,
+   "group": 0,
+   "asterism": "北极",
+   "start": 7.54,
+   "duration": 1.89,
+   "text": "第一号曰为太子"
+  },
+  {
+   "para": 5,
+   "section": "紫微垣",
+   "lidx": 5,
+   "group": 0,
+   "asterism": "北极",
+   "start": 9.43,
+   "duration": 1.89,
+   "text": "四为后宫五天枢"
+  },
+  {
+   "para": 6,
+   "section": "紫微垣",
+   "lidx": 6,
+   "group": 1,
+   "asterism": "四辅",
+   "start": 11.31,
+   "duration": 2.3,
+   "text": "左右四星是四辅"
+  },
+  {
+   "para": 7,
+   "section": "紫微垣",
+   "lidx": 7,
+   "group": 2,
+   "asterism": "天一、太一",
+   "start": 13.61,
+   "duration": 2.01,
+   "text": "天一太一当门户"
+  },
+  {
+   "para": 8,
+   "section": "紫微垣",
+   "lidx": 8,
+   "group": 3,
+   "asterism": "紫微左垣",
+   "start": 15.62,
+   "duration": 2.03,
+   "text": "左枢右枢夹南门"
+  },
+  {
+   "para": 9,
+   "section": "紫微垣",
+   "lidx": 9,
+   "group": 3,
+   "asterism": "紫微左垣",
+   "start": 17.65,
+   "duration": 1.99,
+   "text": "两面营卫一十五"
+  },
+  {
+   "para": 10,
+   "section": "紫微垣",
+   "lidx": 10,
+   "group": 4,
+   "asterism": "紫微左垣、紫微右垣",
+   "start": 19.64,
+   "duration": 1.46,
+   "text": "上宰少尉两相对"
+  },
+  {
+   "para": 11,
+   "section": "紫微垣",
+   "lidx": 11,
+   "group": 5,
+   "asterism": "紫微左垣",
+   "start": 21.11,
+   "duration": 1.76,
+   "text": "少宰上辅次少辅"
+  },
+  {
+   "para": 12,
+   "section": "紫微垣",
+   "lidx": 12,
+   "group": 5,
+   "asterism": "紫微左垣",
+   "start": 22.87,
+   "duration": 1.91,
+   "text": "上卫少卫次上丞"
+  },
+  {
+   "para": 13,
+   "section": "紫微垣",
+   "lidx": 13,
+   "group": 5,
+   "asterism": "紫微左垣",
+   "start": 24.78,
+   "duration": 1.63,
+   "text": "后门东边大赞府"
+  },
+  {
+   "para": 14,
+   "section": "紫微垣",
+   "lidx": 14,
+   "group": 6,
+   "asterism": "紫微右垣",
+   "start": 26.41,
+   "duration": 1.99,
+   "text": "门东唤作一少丞"
+  },
+  {
+   "para": 15,
+   "section": "紫微垣",
+   "lidx": 15,
+   "group": 6,
+   "asterism": "紫微右垣",
+   "start": 28.4,
+   "duration": 1.98,
+   "text": "以次却向前门数"
+  },
+  {
+   "para": 16,
+   "section": "紫微垣",
+   "lidx": 16,
+   "group": 7,
+   "asterism": "阴德",
+   "start": 30.38,
+   "duration": 2.43,
+   "text": "阴德门里两黄聚"
+  },
+  {
+   "para": 17,
+   "section": "紫微垣",
+   "lidx": 17,
+   "group": 8,
+   "asterism": "尚书",
+   "start": 32.81,
+   "duration": 1.65,
+   "text": "尚书以次其位五"
+  },
+  {
+   "para": 18,
+   "section": "紫微垣",
+   "lidx": 18,
+   "group": 9,
+   "asterism": "女史、柱史",
+   "start": 34.45,
+   "duration": 1.93,
+   "text": "女史柱史各一户"
+  },
+  {
+   "para": 19,
+   "section": "紫微垣",
+   "lidx": 19,
+   "group": 10,
+   "asterism": "御女、天柱",
+   "start": 36.39,
+   "duration": 1.93,
+   "text": "御女四星五天柱"
+  },
+  {
+   "para": 20,
+   "section": "紫微垣",
+   "lidx": 20,
+   "group": 11,
+   "asterism": "大理",
+   "start": 38.32,
+   "duration": 1.96,
+   "text": "大理两黄阴德边"
+  },
+  {
+   "para": 21,
+   "section": "紫微垣",
+   "lidx": 21,
+   "group": 12,
+   "asterism": "勾陈",
+   "start": 40.28,
+   "duration": 2.01,
+   "text": "勾陈尾指北极巅"
+  },
+  {
+   "para": 22,
+   "section": "紫微垣",
+   "lidx": 22,
+   "group": 13,
+   "asterism": "六甲",
+   "start": 42.29,
+   "duration": 2.38,
+   "text": "勾陈六星六甲前"
+  },
+  {
+   "para": 23,
+   "section": "紫微垣",
+   "lidx": 23,
+   "group": 14,
+   "asterism": "天皇大帝",
+   "start": 44.67,
+   "duration": 1.96,
+   "text": "天皇独在勾陈里"
+  },
+  {
+   "para": 24,
+   "section": "紫微垣",
+   "lidx": 24,
+   "group": 15,
+   "asterism": "五帝内座",
+   "start": 46.63,
+   "duration": 1.83,
+   "text": "五帝内座后门是"
+  },
+  {
+   "para": 25,
+   "section": "紫微垣",
+   "lidx": 25,
+   "group": 16,
+   "asterism": "华盖、杠",
+   "start": 48.46,
+   "duration": 2.47,
+   "text": "华盖并杠十六星"
+  },
+  {
+   "para": 26,
+   "section": "紫微垣",
+   "lidx": 26,
+   "group": 16,
+   "asterism": "华盖、杠",
+   "start": 50.92,
+   "duration": 2.05,
+   "text": "杠作柄象华盖形"
+  },
+  {
+   "para": 27,
+   "section": "紫微垣",
+   "lidx": 27,
+   "group": 17,
+   "asterism": "传舍",
+   "start": 52.97,
+   "duration": 2.02,
+   "text": "盖上连连九个星"
+  },
+  {
+   "para": 28,
+   "section": "紫微垣",
+   "lidx": 28,
+   "group": 17,
+   "asterism": "传舍",
+   "start": 55.0,
+   "duration": 2.0,
+   "text": "名曰传舍如连丁"
+  },
+  {
+   "para": 29,
+   "section": "紫微垣",
+   "lidx": 29,
+   "group": 18,
+   "asterism": "内阶、天厨",
+   "start": 57.0,
+   "duration": 1.59,
+   "text": "垣外左右各六珠"
+  },
+  {
+   "para": 30,
+   "section": "紫微垣",
+   "lidx": 30,
+   "group": 18,
+   "asterism": "内阶、天厨",
+   "start": 58.58,
+   "duration": 1.44,
+   "text": "右是内阶左天厨"
+  },
+  {
+   "para": 31,
+   "section": "紫微垣",
+   "lidx": 31,
+   "group": 19,
+   "asterism": "八谷",
+   "start": 60.03,
+   "duration": 1.88,
+   "text": "阶前八星名八谷"
+  },
+  {
+   "para": 32,
+   "section": "紫微垣",
+   "lidx": 32,
+   "group": 20,
+   "asterism": "天棓",
+   "start": 61.91,
+   "duration": 1.51,
+   "text": "厨下五个天棓宿"
+  },
+  {
+   "para": 33,
+   "section": "紫微垣",
+   "lidx": 33,
+   "group": 21,
+   "asterism": "天床",
+   "start": 63.42,
+   "duration": 2.53,
+   "text": "天床六星左枢右"
+  },
+  {
+   "para": 34,
+   "section": "紫微垣",
+   "lidx": 34,
+   "group": 22,
+   "asterism": "内厨",
+   "start": 65.96,
+   "duration": 1.78,
+   "text": "内厨两星右枢对"
+  },
+  {
+   "para": 35,
+   "section": "紫微垣",
+   "lidx": 35,
+   "group": 23,
+   "asterism": "文昌",
+   "start": 67.73,
+   "duration": 1.837,
+   "text": "文昌斗上半月形"
+  },
+  {
+   "para": 36,
+   "section": "紫微垣",
+   "lidx": 36,
+   "group": 23,
+   "asterism": "文昌",
+   "start": 69.567,
+   "duration": 1.663,
+   "text": "稀疏分明六个星"
+  },
+  {
+   "para": 37,
+   "section": "紫微垣",
+   "lidx": 37,
+   "group": 24,
+   "asterism": "三师",
+   "start": 71.23,
+   "duration": 2.01,
+   "text": "文昌之下曰三师"
+  },
+  {
+   "para": 38,
+   "section": "紫微垣",
+   "lidx": 38,
+   "group": 25,
+   "asterism": "太尊",
+   "start": 73.25,
+   "duration": 1.65,
+   "text": "太尊只向三公明"
+  },
+  {
+   "para": 39,
+   "section": "紫微垣",
+   "lidx": 39,
+   "group": 26,
+   "asterism": "天牢",
+   "start": 74.89,
+   "duration": 2.35,
+   "text": "天牢六星太尊边"
+  },
+  {
+   "para": 40,
+   "section": "紫微垣",
+   "lidx": 40,
+   "group": 27,
+   "asterism": "势",
+   "start": 77.24,
+   "duration": 2.12,
+   "text": "太阳之守四势前"
+  },
+  {
+   "para": 41,
+   "section": "紫微垣",
+   "lidx": 41,
+   "group": 28,
+   "asterism": "相",
+   "start": 79.36,
+   "duration": 2.06,
+   "text": "一个宰相太阳侧"
+  },
+  {
+   "para": 42,
+   "section": "紫微垣",
+   "lidx": 42,
+   "group": 29,
+   "asterism": "三公",
+   "start": 81.42,
+   "duration": 1.88,
+   "text": "更有三公相西边"
+  },
+  {
+   "para": 43,
+   "section": "紫微垣",
+   "lidx": 43,
+   "group": 30,
+   "asterism": "玄戈",
+   "start": 83.3,
+   "duration": 1.78,
+   "text": "即是玄戈一星圆"
+  },
+  {
+   "para": 44,
+   "section": "紫微垣",
+   "lidx": 44,
+   "group": 31,
+   "asterism": "天理",
+   "start": 85.08,
+   "duration": 2.01,
+   "text": "天理四星斗里暗"
+  },
+  {
+   "para": 45,
+   "section": "紫微垣",
+   "lidx": 45,
+   "group": 32,
+   "asterism": "辅",
+   "start": 87.09,
+   "duration": 2.48,
+   "text": "辅星近着开阳淡"
+  },
+  {
+   "para": 46,
+   "section": "紫微垣",
+   "lidx": 46,
+   "group": 33,
+   "asterism": "北斗",
+   "start": 89.57,
+   "duration": 1.39,
+   "text": "北斗之宿七星明"
+  },
+  {
+   "para": 47,
+   "section": "紫微垣",
+   "lidx": 47,
+   "group": 33,
+   "asterism": "北斗",
+   "start": 90.96,
+   "duration": 1.39,
+   "text": "第一主帝名枢精"
+  },
+  {
+   "para": 48,
+   "section": "紫微垣",
+   "lidx": 48,
+   "group": 33,
+   "asterism": "北斗",
+   "start": 92.35,
+   "duration": 1.39,
+   "text": "第二第三璇玑星"
+  },
+  {
+   "para": 49,
+   "section": "紫微垣",
+   "lidx": 49,
+   "group": 33,
+   "asterism": "北斗",
+   "start": 93.74,
+   "duration": 1.39,
+   "text": "第四名权第五衡"
+  },
+  {
+   "para": 50,
+   "section": "紫微垣",
+   "lidx": 50,
+   "group": 33,
+   "asterism": "北斗",
+   "start": 95.13,
+   "duration": 1.39,
+   "text": "开阳摇光六七名"
+  },
+  {
+   "para": 51,
+   "section": "紫微垣",
+   "lidx": 51,
+   "group": 34,
+   "asterism": "天枪",
+   "start": 96.52,
+   "duration": 2.3,
+   "text": "摇光左三天枪红"
+  },
+  {
+   "para": 52,
+   "section": "太微垣",
+   "lidx": 0,
+   "group": 35,
+   "asterism": "太微左垣",
+   "start": 98.82,
+   "duration": 1.74,
+   "text": "上元天庭太微宫"
+  },
+  {
+   "para": 53,
+   "section": "太微垣",
+   "lidx": 1,
+   "group": 35,
+   "asterism": "太微左垣",
+   "start": 100.56,
+   "duration": 1.72,
+   "text": "昭昭列象布苍穹"
+  },
+  {
+   "para": 54,
+   "section": "太微垣",
+   "lidx": 2,
+   "group": 35,
+   "asterism": "太微左垣",
+   "start": 102.28,
+   "duration": 1.66,
+   "text": "端门只是门之中"
+  },
+  {
+   "para": 55,
+   "section": "太微垣",
+   "lidx": 3,
+   "group": 36,
+   "asterism": "太微左垣、太微右垣",
+   "start": 103.94,
+   "duration": 2.06,
+   "text": "左右执法门东西"
+  },
+  {
+   "para": 56,
+   "section": "太微垣",
+   "lidx": 4,
+   "group": 37,
+   "asterism": "谒者",
+   "start": 106.0,
+   "duration": 3.4,
+   "text": "门左皂衣一谒者"
+  },
+  {
+   "para": 57,
+   "section": "太微垣",
+   "lidx": 5,
+   "group": 38,
+   "asterism": "三公",
+   "start": 109.4,
+   "duration": 2.25,
+   "text": "以次即是乌三公"
+  },
+  {
+   "para": 58,
+   "section": "太微垣",
+   "lidx": 6,
+   "group": 39,
+   "asterism": "九卿",
+   "start": 111.64,
+   "duration": 1.93,
+   "text": "三黑九卿公背旁"
+  },
+  {
+   "para": 59,
+   "section": "太微垣",
+   "lidx": 7,
+   "group": 40,
+   "asterism": "五诸侯",
+   "start": 113.58,
+   "duration": 2.25,
+   "text": "五黑诸侯卿后行"
+  },
+  {
+   "para": 60,
+   "section": "太微垣",
+   "lidx": 8,
+   "group": 41,
+   "asterism": "内屏",
+   "start": 115.82,
+   "duration": 1.83,
+   "text": "四个门西主轩屏"
+  },
+  {
+   "para": 61,
+   "section": "太微垣",
+   "lidx": 9,
+   "group": 42,
+   "asterism": "五帝座",
+   "start": 117.65,
+   "duration": 2.12,
+   "text": "五帝内座于正中"
+  },
+  {
+   "para": 62,
+   "section": "太微垣",
+   "lidx": 10,
+   "group": 43,
+   "asterism": "幸臣、太子、从官",
+   "start": 119.77,
+   "duration": 1.95,
+   "text": "幸臣太子并从官"
+  },
+  {
+   "para": 63,
+   "section": "太微垣",
+   "lidx": 11,
+   "group": 43,
+   "asterism": "幸臣、太子、从官",
+   "start": 121.72,
+   "duration": 1.78,
+   "text": "乌列帝后从东定"
+  },
+  {
+   "para": 64,
+   "section": "太微垣",
+   "lidx": 12,
+   "group": 44,
+   "asterism": "虎贲、郎将",
+   "start": 123.5,
+   "duration": 1.96,
+   "text": "郎将虎贲居左右"
+  },
+  {
+   "para": 65,
+   "section": "太微垣",
+   "lidx": 13,
+   "group": 45,
+   "asterism": "常陈、郎位",
+   "start": 125.46,
+   "duration": 1.96,
+   "text": "常陈郎位居其后"
+  },
+  {
+   "para": 66,
+   "section": "太微垣",
+   "lidx": 14,
+   "group": 46,
+   "asterism": "常陈",
+   "start": 127.42,
+   "duration": 2.43,
+   "text": "常陈七星不相误"
+  },
+  {
+   "para": 67,
+   "section": "太微垣",
+   "lidx": 15,
+   "group": 47,
+   "asterism": "郎位",
+   "start": 129.85,
+   "duration": 2.43,
+   "text": "郎位陈东一十五"
+  },
+  {
+   "para": 68,
+   "section": "太微垣",
+   "lidx": 16,
+   "group": 48,
+   "asterism": "太微左垣、太微右垣",
+   "start": 132.28,
+   "duration": 2.31,
+   "text": "两面宫垣十星布"
+  },
+  {
+   "para": 69,
+   "section": "太微垣",
+   "lidx": 17,
+   "group": 48,
+   "asterism": "太微左垣、太微右垣",
+   "start": 134.59,
+   "duration": 2.21,
+   "text": "左右执法是其数"
+  },
+  {
+   "para": 70,
+   "section": "太微垣",
+   "lidx": 18,
+   "group": 49,
+   "asterism": "明堂",
+   "start": 136.8,
+   "duration": 1.88,
+   "text": "宫外明堂布政宫"
+  },
+  {
+   "para": 71,
+   "section": "太微垣",
+   "lidx": 19,
+   "group": 50,
+   "asterism": "灵台",
+   "start": 138.68,
+   "duration": 1.78,
+   "text": "三个灵台候云雨"
+  },
+  {
+   "para": 72,
+   "section": "太微垣",
+   "lidx": 20,
+   "group": 51,
+   "asterism": "少微",
+   "start": 140.46,
+   "duration": 1.93,
+   "text": "少微四星西北隅"
+  },
+  {
+   "para": 73,
+   "section": "太微垣",
+   "lidx": 21,
+   "group": 52,
+   "asterism": "长垣",
+   "start": 142.39,
+   "duration": 2.48,
+   "text": "长垣双双微微西居"
+  },
+  {
+   "para": 74,
+   "section": "太微垣",
+   "lidx": 22,
+   "group": 53,
+   "asterism": "三台",
+   "start": 144.87,
+   "duration": 2.04,
+   "text": "北门西外接三台"
+  },
+  {
+   "para": 75,
+   "section": "太微垣",
+   "lidx": 23,
+   "group": 53,
+   "asterism": "三台",
+   "start": 146.91,
+   "duration": 1.98,
+   "text": "与垣相对无兵灾"
+  },
+  {
+   "para": 76,
+   "section": "天市垣",
+   "lidx": 0,
+   "group": 54,
+   "asterism": "天市左垣、天市右垣",
+   "start": 148.89,
+   "duration": 2.19,
+   "text": "下元一宫名天市"
+  },
+  {
+   "para": 77,
+   "section": "天市垣",
+   "lidx": 1,
+   "group": 54,
+   "asterism": "天市左垣、天市右垣",
+   "start": 151.09,
+   "duration": 2.43,
+   "text": "两扇垣墙二十二"
+  },
+  {
+   "para": 78,
+   "section": "天市垣",
+   "lidx": 2,
+   "group": 55,
+   "asterism": "市楼",
+   "start": 153.52,
+   "duration": 1.72,
+   "text": "当门六个黑市楼"
+  },
+  {
+   "para": 79,
+   "section": "天市垣",
+   "lidx": 3,
+   "group": 56,
+   "asterism": "车肆",
+   "start": 155.24,
+   "duration": 2.61,
+   "text": "门左两星是车肆"
+  },
+  {
+   "para": 80,
+   "section": "天市垣",
+   "lidx": 4,
+   "group": 57,
+   "asterism": "宗正、宗人",
+   "start": 157.85,
+   "duration": 1.93,
+   "text": "两个宗正四宗人"
+  },
+  {
+   "para": 81,
+   "section": "天市垣",
+   "lidx": 5,
+   "group": 58,
+   "asterism": "宗星",
+   "start": 159.79,
+   "duration": 1.78,
+   "text": "宗星一双亦依次"
+  },
+  {
+   "para": 82,
+   "section": "天市垣",
+   "lidx": 6,
+   "group": 59,
+   "asterism": "帛度、屠肆",
+   "start": 161.56,
+   "duration": 2.43,
+   "text": "帛度两星屠肆前"
+  },
+  {
+   "para": 83,
+   "section": "天市垣",
+   "lidx": 7,
+   "group": 60,
+   "asterism": "候",
+   "start": 163.99,
+   "duration": 1.93,
+   "text": "候星还在帝座边"
+  },
+  {
+   "para": 84,
+   "section": "天市垣",
+   "lidx": 8,
+   "group": 61,
+   "asterism": "帝座",
+   "start": 165.92,
+   "duration": 2.19,
+   "text": "帝座一星常光明"
+  },
+  {
+   "para": 85,
+   "section": "天市垣",
+   "lidx": 9,
+   "group": 62,
+   "asterism": "宦者",
+   "start": 168.12,
+   "duration": 1.83,
+   "text": "四个微茫宦者星"
+  },
+  {
+   "para": 86,
+   "section": "天市垣",
+   "lidx": 10,
+   "group": 63,
+   "asterism": "列肆",
+   "start": 169.95,
+   "duration": 2.01,
+   "text": "以肆两星名列肆"
+  },
+  {
+   "para": 87,
+   "section": "天市垣",
+   "lidx": 11,
+   "group": 64,
+   "asterism": "斗、斛",
+   "start": 171.96,
+   "duration": 2.15,
+   "text": "斗斛帝前依其次"
+  },
+  {
+   "para": 88,
+   "section": "天市垣",
+   "lidx": 12,
+   "group": 64,
+   "asterism": "斗、斛",
+   "start": 174.1,
+   "duration": 2.06,
+   "text": "斗是五星斛是四"
+  },
+  {
+   "para": 89,
+   "section": "天市垣",
+   "lidx": 13,
+   "group": 65,
+   "asterism": "贯索",
+   "start": 176.16,
+   "duration": 1.93,
+   "text": "垣北九个贯索星"
+  },
+  {
+   "para": 90,
+   "section": "天市垣",
+   "lidx": 14,
+   "group": 66,
+   "asterism": "七公",
+   "start": 178.1,
+   "duration": 2.12,
+   "text": "索口横着七公成"
+  },
+  {
+   "para": 91,
+   "section": "天市垣",
+   "lidx": 15,
+   "group": 67,
+   "asterism": "天纪",
+   "start": 180.21,
+   "duration": 2.19,
+   "text": "天纪恰似七公形"
+  },
+  {
+   "para": 92,
+   "section": "天市垣",
+   "lidx": 16,
+   "group": 67,
+   "asterism": "天纪",
+   "start": 182.4,
+   "duration": 1.91,
+   "text": "数着分明多两星"
+  },
+  {
+   "para": 93,
+   "section": "天市垣",
+   "lidx": 17,
+   "group": 68,
+   "asterism": "女床",
+   "start": 184.31,
+   "duration": 1.29,
+   "text": "纪北三星名女床"
+  },
+  {
+   "para": 94,
+   "section": "天市垣",
+   "lidx": 18,
+   "group": 68,
+   "asterism": "女床",
+   "start": 185.6,
+   "duration": 1.29,
+   "text": "此坐还依织女旁"
+  },
+  {
+   "para": 95,
+   "section": "天市垣",
+   "lidx": 19,
+   "group": 68,
+   "asterism": "女床",
+   "start": 186.89,
+   "duration": 1.29,
+   "text": "三元之象无相侵"
+  },
+  {
+   "para": 96,
+   "section": "天市垣",
+   "lidx": 20,
+   "group": 68,
+   "asterism": "女床",
+   "start": 188.18,
+   "duration": 1.29,
+   "text": "二十八宿随其阴"
+  },
+  {
+   "para": 97,
+   "section": "天市垣",
+   "lidx": 21,
+   "group": 68,
+   "asterism": "女床",
+   "start": 189.47,
+   "duration": 1.29,
+   "text": "水火木土并与金"
+  },
+  {
+   "para": 98,
+   "section": "天市垣",
+   "lidx": 22,
+   "group": 68,
+   "asterism": "女床",
+   "start": 190.76,
+   "duration": 1.47,
+   "text": "以此次第有五行吟"
+  },
+  {
+   "para": 99,
+   "section": "角宿",
+   "lidx": 0,
+   "group": 69,
+   "asterism": "角",
+   "start": 192.23,
+   "duration": 2.12,
+   "text": "南北两星正直著"
+  },
+  {
+   "para": 100,
+   "section": "角宿",
+   "lidx": 1,
+   "group": 70,
+   "asterism": "平道、天田",
+   "start": 194.35,
+   "duration": 2.3,
+   "text": "中有平道上天田"
+  },
+  {
+   "para": 101,
+   "section": "角宿",
+   "lidx": 2,
+   "group": 71,
+   "asterism": "天田",
+   "start": 196.64,
+   "duration": 1.59,
+   "text": "总是黑星两相连"
+  },
+  {
+   "para": 102,
+   "section": "角宿",
+   "lidx": 3,
+   "group": 72,
+   "asterism": "进贤",
+   "start": 198.24,
+   "duration": 1.78,
+   "text": "别有一乌名进贤"
+  },
+  {
+   "para": 103,
+   "section": "角宿",
+   "lidx": 4,
+   "group": 73,
+   "asterism": "平道、进贤",
+   "start": 200.01,
+   "duration": 2.19,
+   "text": "平道右畔独渊然"
+  },
+  {
+   "para": 104,
+   "section": "角宿",
+   "lidx": 5,
+   "group": 74,
+   "asterism": "周鼎",
+   "start": 202.21,
+   "duration": 1.83,
+   "text": "最上三星周鼎形"
+  },
+  {
+   "para": 105,
+   "section": "角宿",
+   "lidx": 6,
+   "group": 75,
+   "asterism": "天门、平星",
+   "start": 204.04,
+   "duration": 1.93,
+   "text": "角下天门左平星"
+  },
+  {
+   "para": 106,
+   "section": "角宿",
+   "lidx": 7,
+   "group": 75,
+   "asterism": "天门、平星",
+   "start": 205.97,
+   "duration": 1.94,
+   "text": "双双横于库楼上"
+  },
+  {
+   "para": 107,
+   "section": "角宿",
+   "lidx": 8,
+   "group": 76,
+   "asterism": "库楼",
+   "start": 207.9,
+   "duration": 2.19,
+   "text": "库楼十星屈曲明"
+  },
+  {
+   "para": 108,
+   "section": "角宿",
+   "lidx": 9,
+   "group": 77,
+   "asterism": "库楼、柱",
+   "start": 210.1,
+   "duration": 2.11,
+   "text": "楼中柱有十五星"
+  },
+  {
+   "para": 109,
+   "section": "角宿",
+   "lidx": 10,
+   "group": 77,
+   "asterism": "库楼、柱",
+   "start": 212.21,
+   "duration": 2.23,
+   "text": "三三相似如鼎形"
+  },
+  {
+   "para": 110,
+   "section": "角宿",
+   "lidx": 11,
+   "group": 78,
+   "asterism": "衡",
+   "start": 214.43,
+   "duration": 2.53,
+   "text": "其中四星别名衡"
+  },
+  {
+   "para": 111,
+   "section": "角宿",
+   "lidx": 12,
+   "group": 79,
+   "asterism": "南门",
+   "start": 216.97,
+   "duration": 2.01,
+   "text": "南门楼外两星横"
+  },
+  {
+   "para": 112,
+   "section": "亢宿",
+   "lidx": 0,
+   "group": 80,
+   "asterism": "亢",
+   "start": 218.98,
+   "duration": 1.65,
+   "text": "四星恰似弯弓状"
+  },
+  {
+   "para": 113,
+   "section": "亢宿",
+   "lidx": 1,
+   "group": 81,
+   "asterism": "大角",
+   "start": 220.62,
+   "duration": 1.93,
+   "text": "大角一星直上明"
+  },
+  {
+   "para": 114,
+   "section": "亢宿",
+   "lidx": 2,
+   "group": 82,
+   "asterism": "折威",
+   "start": 222.56,
+   "duration": 2.19,
+   "text": "折威七子亢下横"
+  },
+  {
+   "para": 115,
+   "section": "亢宿",
+   "lidx": 3,
+   "group": 83,
+   "asterism": "左摄提、右摄提",
+   "start": 224.75,
+   "duration": 1.66,
+   "text": "大角左右摄提星"
+  },
+  {
+   "para": 116,
+   "section": "亢宿",
+   "lidx": 4,
+   "group": 83,
+   "asterism": "左摄提、右摄提",
+   "start": 226.41,
+   "duration": 2.12,
+   "text": "三三相对如鼎形"
+  },
+  {
+   "para": 117,
+   "section": "亢宿",
+   "lidx": 5,
+   "group": 84,
+   "asterism": "顿顽",
+   "start": 228.54,
+   "duration": 2.08,
+   "text": "折威下左顿顽星"
+  },
+  {
+   "para": 118,
+   "section": "亢宿",
+   "lidx": 6,
+   "group": 84,
+   "asterism": "顿顽",
+   "start": 230.62,
+   "duration": 1.89,
+   "text": "两个斜安黄色精"
+  },
+  {
+   "para": 119,
+   "section": "亢宿",
+   "lidx": 7,
+   "group": 85,
+   "asterism": "阳门",
+   "start": 232.51,
+   "duration": 2.17,
+   "text": "顽西二星号阳门"
+  },
+  {
+   "para": 120,
+   "section": "亢宿",
+   "lidx": 8,
+   "group": 85,
+   "asterism": "阳门",
+   "start": 234.68,
+   "duration": 2.27,
+   "text": "色若顿顽直下存"
+  },
+  {
+   "para": 121,
+   "section": "氐宿",
+   "lidx": 0,
+   "group": 86,
+   "asterism": "氐",
+   "start": 236.95,
+   "duration": 2.19,
+   "text": "四星似斗侧量米"
+  },
+  {
+   "para": 122,
+   "section": "氐宿",
+   "lidx": 1,
+   "group": 87,
+   "asterism": "天乳",
+   "start": 239.14,
+   "duration": 2.11,
+   "text": "天乳氐上黑一星"
+  },
+  {
+   "para": 123,
+   "section": "氐宿",
+   "lidx": 2,
+   "group": 87,
+   "asterism": "天乳",
+   "start": 241.25,
+   "duration": 1.92,
+   "text": "世上不识称无名"
+  },
+  {
+   "para": 124,
+   "section": "氐宿",
+   "lidx": 3,
+   "group": 88,
+   "asterism": "招摇",
+   "start": 243.17,
+   "duration": 1.88,
+   "text": "一个招摇梗河上"
+  },
+  {
+   "para": 125,
+   "section": "氐宿",
+   "lidx": 4,
+   "group": 89,
+   "asterism": "梗河",
+   "start": 245.05,
+   "duration": 2.06,
+   "text": "梗河横列三星状"
+  },
+  {
+   "para": 126,
+   "section": "氐宿",
+   "lidx": 5,
+   "group": 90,
+   "asterism": "帝席",
+   "start": 247.11,
+   "duration": 2.19,
+   "text": "帝席三黑河之西"
+  },
+  {
+   "para": 127,
+   "section": "氐宿",
+   "lidx": 6,
+   "group": 91,
+   "asterism": "亢池",
+   "start": 249.3,
+   "duration": 2.01,
+   "text": "亢池六星近摄提"
+  },
+  {
+   "para": 128,
+   "section": "氐宿",
+   "lidx": 7,
+   "group": 92,
+   "asterism": "骑官",
+   "start": 251.32,
+   "duration": 2.138,
+   "text": "氐下众星骑官出"
+  },
+  {
+   "para": 129,
+   "section": "氐宿",
+   "lidx": 8,
+   "group": 92,
+   "asterism": "骑官",
+   "start": 253.458,
+   "duration": 1.624,
+   "text": "骑官之众二十七"
+  },
+  {
+   "para": 130,
+   "section": "氐宿",
+   "lidx": 9,
+   "group": 92,
+   "asterism": "骑官",
+   "start": 255.082,
+   "duration": 1.933,
+   "text": "三三相连十欠一"
+  },
+  {
+   "para": 131,
+   "section": "氐宿",
+   "lidx": 10,
+   "group": 93,
+   "asterism": "阵车",
+   "start": 257.01,
+   "duration": 2.48,
+   "text": "阵车氐下骑官次"
+  },
+  {
+   "para": 132,
+   "section": "氐宿",
+   "lidx": 11,
+   "group": 94,
+   "asterism": "车骑",
+   "start": 259.49,
+   "duration": 2.01,
+   "text": "骑官下三车骑位"
+  },
+  {
+   "para": 133,
+   "section": "氐宿",
+   "lidx": 12,
+   "group": 95,
+   "asterism": "天辐",
+   "start": 261.5,
+   "duration": 1.88,
+   "text": "天辐两星立阵傍"
+  },
+  {
+   "para": 134,
+   "section": "氐宿",
+   "lidx": 13,
+   "group": 96,
+   "asterism": "骑阵将军",
+   "start": 263.38,
+   "duration": 2.19,
+   "text": "将军阵里振威霜"
+  },
+  {
+   "para": 135,
+   "section": "房宿",
+   "lidx": 0,
+   "group": 97,
+   "asterism": "房",
+   "start": 265.58,
+   "duration": 1.41,
+   "text": "四星直下主明堂"
+  },
+  {
+   "para": 136,
+   "section": "房宿",
+   "lidx": 1,
+   "group": 98,
+   "asterism": "键闭",
+   "start": 266.99,
+   "duration": 1.83,
+   "text": "键闭一黄斜向上"
+  },
+  {
+   "para": 137,
+   "section": "房宿",
+   "lidx": 2,
+   "group": 99,
+   "asterism": "钩铃",
+   "start": 268.82,
+   "duration": 1.83,
+   "text": "钩钤两个近其傍"
+  },
+  {
+   "para": 138,
+   "section": "房宿",
+   "lidx": 3,
+   "group": 100,
+   "asterism": "罚",
+   "start": 270.65,
+   "duration": 1.59,
+   "text": "罚有三星直键上"
+  },
+  {
+   "para": 139,
+   "section": "房宿",
+   "lidx": 4,
+   "group": 101,
+   "asterism": "罚、东咸、西咸",
+   "start": 272.24,
+   "duration": 2.19,
+   "text": "两咸夹罚似房状"
+  },
+  {
+   "para": 140,
+   "section": "房宿",
+   "lidx": 5,
+   "group": 102,
+   "asterism": "日",
+   "start": 274.43,
+   "duration": 2.01,
+   "text": "房下一星号为日"
+  },
+  {
+   "para": 141,
+   "section": "房宿",
+   "lidx": 6,
+   "group": 103,
+   "asterism": "从官",
+   "start": 276.45,
+   "duration": 2.19,
+   "text": "从官两星日下出"
+  },
+  {
+   "para": 142,
+   "section": "心宿",
+   "lidx": 0,
+   "group": 104,
+   "asterism": "心",
+   "start": 278.64,
+   "duration": 1.65,
+   "text": "三星中央色最深"
+  },
+  {
+   "para": 143,
+   "section": "心宿",
+   "lidx": 1,
+   "group": 105,
+   "asterism": "积卒",
+   "start": 280.28,
+   "duration": 1.61,
+   "text": "下有积卒共十二"
+  },
+  {
+   "para": 144,
+   "section": "心宿",
+   "lidx": 2,
+   "group": 105,
+   "asterism": "积卒",
+   "start": 281.89,
+   "duration": 1.79,
+   "text": "三三相聚心下是"
+  },
+  {
+   "para": 145,
+   "section": "尾宿",
+   "lidx": 0,
+   "group": 106,
+   "asterism": "尾",
+   "start": 283.68,
+   "duration": 2.43,
+   "text": "九星如钩苍龙尾"
+  },
+  {
+   "para": 146,
+   "section": "尾宿",
+   "lidx": 1,
+   "group": 107,
+   "asterism": "龟",
+   "start": 286.11,
+   "duration": 1.36,
+   "text": "下头五点号龟星"
+  },
+  {
+   "para": 147,
+   "section": "尾宿",
+   "lidx": 2,
+   "group": 108,
+   "asterism": "天江",
+   "start": 287.47,
+   "duration": 3.03,
+   "text": "尾上天江四横是"
+  },
+  {
+   "para": 148,
+   "section": "尾宿",
+   "lidx": 3,
+   "group": 109,
+   "asterism": "傅说",
+   "start": 290.5,
+   "duration": 1.54,
+   "text": "尾东一个名傅说"
+  },
+  {
+   "para": 149,
+   "section": "尾宿",
+   "lidx": 4,
+   "group": 110,
+   "asterism": "鱼",
+   "start": 292.04,
+   "duration": 1.83,
+   "text": "傅说东畔一鱼子"
+  },
+  {
+   "para": 150,
+   "section": "尾宿",
+   "lidx": 5,
+   "group": 111,
+   "asterism": "神宫",
+   "start": 293.87,
+   "duration": 1.63,
+   "text": "尾西一室是神宫"
+  },
+  {
+   "para": 151,
+   "section": "尾宿",
+   "lidx": 6,
+   "group": 111,
+   "asterism": "神宫",
+   "start": 295.5,
+   "duration": 1.63,
+   "text": "所以列在后妃中"
+  },
+  {
+   "para": 152,
+   "section": "箕宿",
+   "lidx": 0,
+   "group": 112,
+   "asterism": "箕",
+   "start": 297.13,
+   "duration": 2.12,
+   "text": "四星其形似簸箕"
+  },
+  {
+   "para": 153,
+   "section": "箕宿",
+   "lidx": 1,
+   "group": 113,
+   "asterism": "杵",
+   "start": 299.25,
+   "duration": 1.88,
+   "text": "箕下三星名木杵"
+  },
+  {
+   "para": 154,
+   "section": "箕宿",
+   "lidx": 2,
+   "group": 114,
+   "asterism": "糠",
+   "start": 301.13,
+   "duration": 1.72,
+   "text": "箕前一黑是糠皮"
+  },
+  {
+   "para": 155,
+   "section": "斗宿",
+   "lidx": 0,
+   "group": 115,
+   "asterism": "斗",
+   "start": 302.85,
+   "duration": 2.12,
+   "text": "六星其状似北斗"
+  },
+  {
+   "para": 156,
+   "section": "斗宿",
+   "lidx": 1,
+   "group": 116,
+   "asterism": "建星",
+   "start": 304.97,
+   "duration": 1.83,
+   "text": "魁上建星三相对"
+  },
+  {
+   "para": 157,
+   "section": "斗宿",
+   "lidx": 2,
+   "group": 117,
+   "asterism": "天弁",
+   "start": 306.8,
+   "duration": 2.66,
+   "text": "天弁建上三三九"
+  },
+  {
+   "para": 158,
+   "section": "斗宿",
+   "lidx": 3,
+   "group": 118,
+   "asterism": "鳖",
+   "start": 309.46,
+   "duration": 2.31,
+   "text": "斗下团圆十四星"
+  },
+  {
+   "para": 159,
+   "section": "斗宿",
+   "lidx": 4,
+   "group": 118,
+   "asterism": "鳖",
+   "start": 311.77,
+   "duration": 2.13,
+   "text": "虽然名鳖贯索形"
+  },
+  {
+   "para": 160,
+   "section": "斗宿",
+   "lidx": 5,
+   "group": 119,
+   "asterism": "天鸡",
+   "start": 313.9,
+   "duration": 2.43,
+   "text": "天鸡建背双黑星"
+  },
+  {
+   "para": 161,
+   "section": "斗宿",
+   "lidx": 6,
+   "group": 120,
+   "asterism": "天籥",
+   "start": 316.33,
+   "duration": 1.88,
+   "text": "天籥柄前八黄精"
+  },
+  {
+   "para": 162,
+   "section": "斗宿",
+   "lidx": 7,
+   "group": 121,
+   "asterism": "狗国",
+   "start": 318.21,
+   "duration": 2.43,
+   "text": "狗国四方鸡下生"
+  },
+  {
+   "para": 163,
+   "section": "斗宿",
+   "lidx": 8,
+   "group": 122,
+   "asterism": "天渊",
+   "start": 320.64,
+   "duration": 1.96,
+   "text": "天渊十星鳖东边"
+  },
+  {
+   "para": 164,
+   "section": "斗宿",
+   "lidx": 9,
+   "group": 123,
+   "asterism": "狗",
+   "start": 322.6,
+   "duration": 1.72,
+   "text": "更有两狗斗魁前"
+  },
+  {
+   "para": 165,
+   "section": "斗宿",
+   "lidx": 10,
+   "group": 124,
+   "asterism": "农丈人",
+   "start": 324.33,
+   "duration": 2.35,
+   "text": "农家丈人斗下眠"
+  },
+  {
+   "para": 166,
+   "section": "斗宿",
+   "lidx": 11,
+   "group": 125,
+   "asterism": "天渊",
+   "start": 326.68,
+   "duration": 2.25,
+   "text": "天渊十黄狗色玄"
+  },
+  {
+   "para": 167,
+   "section": "牛宿",
+   "lidx": 0,
+   "group": 126,
+   "asterism": "牛",
+   "start": 328.92,
+   "duration": 1.86,
+   "text": "六星近在河岸头"
+  },
+  {
+   "para": 168,
+   "section": "牛宿",
+   "lidx": 1,
+   "group": 126,
+   "asterism": "牛",
+   "start": 330.79,
+   "duration": 1.86,
+   "text": "头上虽然有两角"
+  },
+  {
+   "para": 169,
+   "section": "牛宿",
+   "lidx": 2,
+   "group": 126,
+   "asterism": "牛",
+   "start": 332.65,
+   "duration": 1.86,
+   "text": "腹下从来欠一脚"
+  },
+  {
+   "para": 170,
+   "section": "牛宿",
+   "lidx": 3,
+   "group": 127,
+   "asterism": "天田",
+   "start": 334.51,
+   "duration": 1.93,
+   "text": "牛下九黑是天田"
+  },
+  {
+   "para": 171,
+   "section": "牛宿",
+   "lidx": 4,
+   "group": 128,
+   "asterism": "九坎",
+   "start": 336.45,
+   "duration": 1.93,
+   "text": "田下三三九坎连"
+  },
+  {
+   "para": 172,
+   "section": "牛宿",
+   "lidx": 5,
+   "group": 129,
+   "asterism": "河鼓",
+   "start": 338.38,
+   "duration": 2.72,
+   "text": "牛上直建三河鼓"
+  },
+  {
+   "para": 173,
+   "section": "牛宿",
+   "lidx": 6,
+   "group": 130,
+   "asterism": "织女",
+   "start": 341.1,
+   "duration": 2.01,
+   "text": "鼓上三星号织女"
+  },
+  {
+   "para": 174,
+   "section": "牛宿",
+   "lidx": 7,
+   "group": 131,
+   "asterism": "左旗",
+   "start": 343.11,
+   "duration": 2.12,
+   "text": "左旗右旗各九星"
+  },
+  {
+   "para": 175,
+   "section": "牛宿",
+   "lidx": 8,
+   "group": 132,
+   "asterism": "右旗",
+   "start": 345.22,
+   "duration": 2.14,
+   "text": "河鼓两畔右边明"
+  },
+  {
+   "para": 176,
+   "section": "牛宿",
+   "lidx": 9,
+   "group": 133,
+   "asterism": "天桴",
+   "start": 347.36,
+   "duration": 2.15,
+   "text": "更有四黄名天桴"
+  },
+  {
+   "para": 177,
+   "section": "牛宿",
+   "lidx": 10,
+   "group": 133,
+   "asterism": "天桴",
+   "start": 349.51,
+   "duration": 2.06,
+   "text": "河鼓直下如连珠"
+  },
+  {
+   "para": 178,
+   "section": "牛宿",
+   "lidx": 11,
+   "group": 134,
+   "asterism": "罗堰",
+   "start": 351.57,
+   "duration": 2.01,
+   "text": "罗堰三乌牛东居"
+  },
+  {
+   "para": 179,
+   "section": "牛宿",
+   "lidx": 12,
+   "group": 135,
+   "asterism": "渐台",
+   "start": 353.58,
+   "duration": 2.19,
+   "text": "渐台四星似口形"
+  },
+  {
+   "para": 180,
+   "section": "牛宿",
+   "lidx": 13,
+   "group": 136,
+   "asterism": "辇道",
+   "start": 355.78,
+   "duration": 2.16,
+   "text": "辇道东足连五丁"
+  },
+  {
+   "para": 181,
+   "section": "牛宿",
+   "lidx": 14,
+   "group": 136,
+   "asterism": "辇道",
+   "start": 357.94,
+   "duration": 2.16,
+   "text": "辇道渐台在何许"
+  },
+  {
+   "para": 182,
+   "section": "牛宿",
+   "lidx": 15,
+   "group": 136,
+   "asterism": "辇道",
+   "start": 360.09,
+   "duration": 2.16,
+   "text": "欲得见时近织女"
+  },
+  {
+   "para": 183,
+   "section": "女宿",
+   "lidx": 0,
+   "group": 137,
+   "asterism": "女",
+   "start": 362.25,
+   "duration": 2.25,
+   "text": "四星如箕主嫁娶"
+  },
+  {
+   "para": 184,
+   "section": "女宿",
+   "lidx": 1,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 364.5,
+   "duration": 1.51,
+   "text": "十二诸国在下陈"
+  },
+  {
+   "para": 185,
+   "section": "女宿",
+   "lidx": 2,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 366.01,
+   "duration": 1.51,
+   "text": "先从越国向东论"
+  },
+  {
+   "para": 186,
+   "section": "女宿",
+   "lidx": 3,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 367.51,
+   "duration": 1.51,
+   "text": "东西两周次二秦"
+  },
+  {
+   "para": 187,
+   "section": "女宿",
+   "lidx": 4,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 369.02,
+   "duration": 1.51,
+   "text": "雍州南下双雁门"
+  },
+  {
+   "para": 188,
+   "section": "女宿",
+   "lidx": 5,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 370.53,
+   "duration": 1.51,
+   "text": "代国向西一晋伸"
+  },
+  {
+   "para": 189,
+   "section": "女宿",
+   "lidx": 6,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 372.03,
+   "duration": 1.51,
+   "text": "韩魏各一晋北轮"
+  },
+  {
+   "para": 190,
+   "section": "女宿",
+   "lidx": 7,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 373.54,
+   "duration": 1.51,
+   "text": "楚之一国魏西屯"
+  },
+  {
+   "para": 191,
+   "section": "女宿",
+   "lidx": 8,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 375.05,
+   "duration": 1.51,
+   "text": "楚城南畔独燕军"
+  },
+  {
+   "para": 192,
+   "section": "女宿",
+   "lidx": 9,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 376.55,
+   "duration": 1.51,
+   "text": "燕西一郡是齐邻"
+  },
+  {
+   "para": 193,
+   "section": "女宿",
+   "lidx": 10,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 378.06,
+   "duration": 1.51,
+   "text": "齐北两邑平原君"
+  },
+  {
+   "para": 194,
+   "section": "女宿",
+   "lidx": 11,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 379.56,
+   "duration": 1.51,
+   "text": "欲知郑在越下存"
+  },
+  {
+   "para": 195,
+   "section": "女宿",
+   "lidx": 12,
+   "group": 138,
+   "asterism": "十二国",
+   "start": 381.07,
+   "duration": 1.51,
+   "text": "十六黄星细区分"
+  },
+  {
+   "para": 196,
+   "section": "女宿",
+   "lidx": 13,
+   "group": 139,
+   "asterism": "离珠",
+   "start": 382.58,
+   "duration": 2.53,
+   "text": "五个离珠女上星"
+  },
+  {
+   "para": 197,
+   "section": "女宿",
+   "lidx": 14,
+   "group": 140,
+   "asterism": "败瓜、瓠瓜",
+   "start": 385.11,
+   "duration": 1.88,
+   "text": "败瓜珠上瓠瓜明"
+  },
+  {
+   "para": 198,
+   "section": "女宿",
+   "lidx": 15,
+   "group": 141,
+   "asterism": "天津",
+   "start": 386.99,
+   "duration": 2.3,
+   "text": "天津九个弹弓形"
+  },
+  {
+   "para": 199,
+   "section": "女宿",
+   "lidx": 16,
+   "group": 141,
+   "asterism": "天津",
+   "start": 389.29,
+   "duration": 2.17,
+   "text": "两星入牛河中横"
+  },
+  {
+   "para": 200,
+   "section": "女宿",
+   "lidx": 17,
+   "group": 142,
+   "asterism": "奚仲",
+   "start": 391.46,
+   "duration": 2.19,
+   "text": "四个奚仲天津上"
+  },
+  {
+   "para": 201,
+   "section": "女宿",
+   "lidx": 18,
+   "group": 143,
+   "asterism": "扶筐",
+   "start": 393.65,
+   "duration": 1.88,
+   "text": "七个仲侧扶筐星"
+  },
+  {
+   "para": 202,
+   "section": "虚宿",
+   "lidx": 0,
+   "group": 144,
+   "asterism": "虚",
+   "start": 395.53,
+   "duration": 1.96,
+   "text": "上下各一如连珠"
+  },
+  {
+   "para": 203,
+   "section": "虚宿",
+   "lidx": 1,
+   "group": 145,
+   "asterism": "司命、司禄、司危、司非",
+   "start": 397.49,
+   "duration": 2.06,
+   "text": "命禄危非虚上呈"
+  },
+  {
+   "para": 204,
+   "section": "虚宿",
+   "lidx": 2,
+   "group": 146,
+   "asterism": "哭、泣",
+   "start": 399.56,
+   "duration": 1.79,
+   "text": "虚危之下哭泣星"
+  },
+  {
+   "para": 205,
+   "section": "虚宿",
+   "lidx": 3,
+   "group": 146,
+   "asterism": "哭、泣",
+   "start": 401.34,
+   "duration": 2.18,
+   "text": "哭泣双双下垒城"
+  },
+  {
+   "para": 206,
+   "section": "虚宿",
+   "lidx": 4,
+   "group": 147,
+   "asterism": "天垒城",
+   "start": 403.53,
+   "duration": 2.25,
+   "text": "天垒团圆十三星"
+  },
+  {
+   "para": 207,
+   "section": "虚宿",
+   "lidx": 5,
+   "group": 148,
+   "asterism": "败臼",
+   "start": 405.77,
+   "duration": 2.61,
+   "text": "败臼四星城下横"
+  },
+  {
+   "para": 208,
+   "section": "虚宿",
+   "lidx": 6,
+   "group": 149,
+   "asterism": "离瑜",
+   "start": 408.39,
+   "duration": 2.01,
+   "text": "臼西三个离瑜明"
+  },
+  {
+   "para": 209,
+   "section": "危宿",
+   "lidx": 0,
+   "group": 150,
+   "asterism": "危",
+   "start": 410.4,
+   "duration": 2.66,
+   "text": "三星不直旧先知"
+  },
+  {
+   "para": 210,
+   "section": "危宿",
+   "lidx": 1,
+   "group": 151,
+   "asterism": "人星",
+   "start": 413.06,
+   "duration": 1.93,
+   "text": "危上五黑号人星"
+  },
+  {
+   "para": 211,
+   "section": "危宿",
+   "lidx": 2,
+   "group": 152,
+   "asterism": "杵、臼",
+   "start": 414.99,
+   "duration": 2.35,
+   "text": "人畔三四杵臼形"
+  },
+  {
+   "para": 212,
+   "section": "危宿",
+   "lidx": 3,
+   "group": 153,
+   "asterism": "车府",
+   "start": 417.35,
+   "duration": 2.53,
+   "text": "人上七乌号车府"
+  },
+  {
+   "para": 213,
+   "section": "危宿",
+   "lidx": 4,
+   "group": 154,
+   "asterism": "天钩",
+   "start": 419.88,
+   "duration": 2.9,
+   "text": "府上天钩九黄晶"
+  },
+  {
+   "para": 214,
+   "section": "危宿",
+   "lidx": 5,
+   "group": 155,
+   "asterism": "造父",
+   "start": 422.78,
+   "duration": 1.83,
+   "text": "钩下五鸦字造父"
+  },
+  {
+   "para": 215,
+   "section": "危宿",
+   "lidx": 6,
+   "group": 156,
+   "asterism": "坟墓",
+   "start": 424.61,
+   "duration": 2.14,
+   "text": "危下四星号坟墓"
+  },
+  {
+   "para": 216,
+   "section": "危宿",
+   "lidx": 7,
+   "group": 157,
+   "asterism": "虚梁",
+   "start": 426.75,
+   "duration": 2.25,
+   "text": "墓下四星斜虚梁"
+  },
+  {
+   "para": 217,
+   "section": "危宿",
+   "lidx": 8,
+   "group": 158,
+   "asterism": "危、天钱",
+   "start": 429.0,
+   "duration": 1.72,
+   "text": "十个天钱深下黄"
+  },
+  {
+   "para": 218,
+   "section": "危宿",
+   "lidx": 9,
+   "group": 159,
+   "asterism": "盖屋",
+   "start": 430.72,
+   "duration": 2.3,
+   "text": "墓傍两星能盖屋"
+  },
+  {
+   "para": 219,
+   "section": "危宿",
+   "lidx": 10,
+   "group": 160,
+   "asterism": "危",
+   "start": 433.02,
+   "duration": 1.83,
+   "text": "身着黑衣危下宿"
+  },
+  {
+   "para": 220,
+   "section": "室宿",
+   "lidx": 0,
+   "group": 161,
+   "asterism": "离宫",
+   "start": 434.85,
+   "duration": 2.07,
+   "text": "两星上有离宫出"
+  },
+  {
+   "para": 221,
+   "section": "室宿",
+   "lidx": 1,
+   "group": 161,
+   "asterism": "离宫",
+   "start": 436.91,
+   "duration": 2.14,
+   "text": "绕室三双有六星"
+  },
+  {
+   "para": 222,
+   "section": "室宿",
+   "lidx": 2,
+   "group": 162,
+   "asterism": "雷电",
+   "start": 439.05,
+   "duration": 1.78,
+   "text": "下头六个雷电形"
+  },
+  {
+   "para": 223,
+   "section": "室宿",
+   "lidx": 3,
+   "group": 163,
+   "asterism": "垒壁阵",
+   "start": 440.83,
+   "duration": 2.03,
+   "text": "垒壁阵次十二星"
+  },
+  {
+   "para": 224,
+   "section": "室宿",
+   "lidx": 4,
+   "group": 163,
+   "asterism": "垒壁阵",
+   "start": 442.86,
+   "duration": 1.65,
+   "text": "十二两头大似井"
+  },
+  {
+   "para": 225,
+   "section": "室宿",
+   "lidx": 5,
+   "group": 164,
+   "asterism": "羽林军",
+   "start": 444.51,
+   "duration": 2.05,
+   "text": "阵下分布羽林军"
+  },
+  {
+   "para": 226,
+   "section": "室宿",
+   "lidx": 6,
+   "group": 164,
+   "asterism": "羽林军",
+   "start": 446.56,
+   "duration": 2.0,
+   "text": "四十五卒三为群"
+  },
+  {
+   "para": 227,
+   "section": "室宿",
+   "lidx": 7,
+   "group": 164,
+   "asterism": "羽林军",
+   "start": 448.57,
+   "duration": 1.89,
+   "text": "军西四星多难论"
+  },
+  {
+   "para": 228,
+   "section": "室宿",
+   "lidx": 8,
+   "group": 164,
+   "asterism": "羽林军",
+   "start": 450.45,
+   "duration": 1.84,
+   "text": "仔细历历看区分"
+  },
+  {
+   "para": 229,
+   "section": "室宿",
+   "lidx": 9,
+   "group": 165,
+   "asterism": "室、铁钺",
+   "start": 452.3,
+   "duration": 1.96,
+   "text": "三粒黄金为铁钺"
+  },
+  {
+   "para": 230,
+   "section": "室宿",
+   "lidx": 10,
+   "group": 166,
+   "asterism": "北落师门",
+   "start": 454.25,
+   "duration": 1.72,
+   "text": "一颗珍珠北落门"
+  },
+  {
+   "para": 231,
+   "section": "室宿",
+   "lidx": 11,
+   "group": 167,
+   "asterism": "八魁",
+   "start": 455.98,
+   "duration": 2.35,
+   "text": "门东八魁九个子"
+  },
+  {
+   "para": 232,
+   "section": "室宿",
+   "lidx": 12,
+   "group": 168,
+   "asterism": "天纲",
+   "start": 458.33,
+   "duration": 2.06,
+   "text": "门西一宿天纲是"
+  },
+  {
+   "para": 233,
+   "section": "室宿",
+   "lidx": 13,
+   "group": 169,
+   "asterism": "土公吏",
+   "start": 460.39,
+   "duration": 1.78,
+   "text": "电傍两黑土公吏"
+  },
+  {
+   "para": 234,
+   "section": "室宿",
+   "lidx": 14,
+   "group": 170,
+   "asterism": "腾蛇",
+   "start": 462.17,
+   "duration": 1.51,
+   "text": "腾蛇室上二十二"
+  },
+  {
+   "para": 235,
+   "section": "壁宿",
+   "lidx": 0,
+   "group": 171,
+   "asterism": "壁、霹雳",
+   "start": 463.68,
+   "duration": 1.88,
+   "text": "两星下头是霹雳"
+  },
+  {
+   "para": 236,
+   "section": "壁宿",
+   "lidx": 1,
+   "group": 172,
+   "asterism": "霹雳",
+   "start": 465.57,
+   "duration": 2.35,
+   "text": "霹雳五星横着行"
+  },
+  {
+   "para": 237,
+   "section": "壁宿",
+   "lidx": 2,
+   "group": 173,
+   "asterism": "云雨",
+   "start": 467.92,
+   "duration": 2.38,
+   "text": "云雨之次曰四方"
+  },
+  {
+   "para": 238,
+   "section": "壁宿",
+   "lidx": 3,
+   "group": 174,
+   "asterism": "天厩",
+   "start": 470.29,
+   "duration": 2.56,
+   "text": "壁上天厩十圆黄"
+  },
+  {
+   "para": 239,
+   "section": "壁宿",
+   "lidx": 4,
+   "group": 175,
+   "asterism": "铁镬",
+   "start": 472.85,
+   "duration": 2.01,
+   "text": "铁镬五星羽林傍"
+  },
+  {
+   "para": 240,
+   "section": "壁宿",
+   "lidx": 5,
+   "group": 176,
+   "asterism": "土公",
+   "start": 474.86,
+   "duration": 2.12,
+   "text": "土公两黑壁下藏"
+  },
+  {
+   "para": 241,
+   "section": "奎宿",
+   "lidx": 0,
+   "group": 177,
+   "asterism": "奎",
+   "start": 476.98,
+   "duration": 2.11,
+   "text": "腰细头尖似破鞋"
+  },
+  {
+   "para": 242,
+   "section": "奎宿",
+   "lidx": 1,
+   "group": 177,
+   "asterism": "奎",
+   "start": 479.1,
+   "duration": 2.17,
+   "text": "一十六星绕鞋生"
+  },
+  {
+   "para": 243,
+   "section": "奎宿",
+   "lidx": 2,
+   "group": 178,
+   "asterism": "外屏",
+   "start": 481.26,
+   "duration": 2.43,
+   "text": "外屏七乌奎下横"
+  },
+  {
+   "para": 244,
+   "section": "奎宿",
+   "lidx": 3,
+   "group": 179,
+   "asterism": "天溷",
+   "start": 483.69,
+   "duration": 1.96,
+   "text": "屏下七星天溷明"
+  },
+  {
+   "para": 245,
+   "section": "奎宿",
+   "lidx": 4,
+   "group": 180,
+   "asterism": "土司空",
+   "start": 485.65,
+   "duration": 2.12,
+   "text": "司空左畔土之精"
+  },
+  {
+   "para": 246,
+   "section": "奎宿",
+   "lidx": 5,
+   "group": 181,
+   "asterism": "军南门",
+   "start": 487.77,
+   "duration": 2.01,
+   "text": "奎上一宿军南门"
+  },
+  {
+   "para": 247,
+   "section": "奎宿",
+   "lidx": 6,
+   "group": 182,
+   "asterism": "阁道",
+   "start": 489.78,
+   "duration": 1.46,
+   "text": "河中六个阁道行"
+  },
+  {
+   "para": 248,
+   "section": "奎宿",
+   "lidx": 7,
+   "group": 183,
+   "asterism": "附路",
+   "start": 491.24,
+   "duration": 2.12,
+   "text": "附路一星道傍明"
+  },
+  {
+   "para": 249,
+   "section": "奎宿",
+   "lidx": 8,
+   "group": 184,
+   "asterism": "王良",
+   "start": 493.36,
+   "duration": 1.83,
+   "text": "五个吐花王良星"
+  },
+  {
+   "para": 250,
+   "section": "奎宿",
+   "lidx": 9,
+   "group": 185,
+   "asterism": "策",
+   "start": 495.19,
+   "duration": 2.12,
+   "text": "良星近上一策明"
+  },
+  {
+   "para": 251,
+   "section": "娄宿",
+   "lidx": 0,
+   "group": 186,
+   "asterism": "娄",
+   "start": 497.3,
+   "duration": 1.93,
+   "text": "三星不匀近一头"
+  },
+  {
+   "para": 252,
+   "section": "娄宿",
+   "lidx": 1,
+   "group": 187,
+   "asterism": "娄、左更、右更",
+   "start": 499.24,
+   "duration": 2.12,
+   "text": "左更右更乌夹娄"
+  },
+  {
+   "para": 253,
+   "section": "娄宿",
+   "lidx": 2,
+   "group": 188,
+   "asterism": "天仓",
+   "start": 501.35,
+   "duration": 2.38,
+   "text": "天仓六个娄下头"
+  },
+  {
+   "para": 254,
+   "section": "娄宿",
+   "lidx": 3,
+   "group": 189,
+   "asterism": "天庾",
+   "start": 503.73,
+   "duration": 1.88,
+   "text": "天庾三星仓东脚"
+  },
+  {
+   "para": 255,
+   "section": "娄宿",
+   "lidx": 4,
+   "group": 190,
+   "asterism": "天大将军",
+   "start": 505.61,
+   "duration": 1.88,
+   "text": "娄上十一将军侯"
+  },
+  {
+   "para": 256,
+   "section": "胃宿",
+   "lidx": 0,
+   "group": 191,
+   "asterism": "胃",
+   "start": 507.49,
+   "duration": 2.12,
+   "text": "三星鼎足河之次"
+  },
+  {
+   "para": 257,
+   "section": "胃宿",
+   "lidx": 1,
+   "group": 192,
+   "asterism": "天廪",
+   "start": 509.61,
+   "duration": 2.12,
+   "text": "天廪胃下斜四星"
+  },
+  {
+   "para": 258,
+   "section": "胃宿",
+   "lidx": 2,
+   "group": 193,
+   "asterism": "天囷",
+   "start": 511.72,
+   "duration": 1.96,
+   "text": "天囷十三如乙形"
+  },
+  {
+   "para": 259,
+   "section": "胃宿",
+   "lidx": 3,
+   "group": 194,
+   "asterism": "大陵",
+   "start": 513.68,
+   "duration": 1.93,
+   "text": "河中八星名大陵"
+  },
+  {
+   "para": 260,
+   "section": "胃宿",
+   "lidx": 4,
+   "group": 195,
+   "asterism": "天船",
+   "start": 515.61,
+   "duration": 1.7,
+   "text": "陵北九个天船名"
+  },
+  {
+   "para": 261,
+   "section": "胃宿",
+   "lidx": 5,
+   "group": 196,
+   "asterism": "积尸",
+   "start": 517.31,
+   "duration": 2.12,
+   "text": "陵中积尸一个星"
+  },
+  {
+   "para": 262,
+   "section": "胃宿",
+   "lidx": 6,
+   "group": 197,
+   "asterism": "积水",
+   "start": 519.43,
+   "duration": 1.41,
+   "text": "积水船中一黑精"
+  },
+  {
+   "para": 263,
+   "section": "昴宿",
+   "lidx": 0,
+   "group": 198,
+   "asterism": "昴",
+   "start": 520.84,
+   "duration": 1.65,
+   "text": "七星一聚实不少"
+  },
+  {
+   "para": 264,
+   "section": "昴宿",
+   "lidx": 1,
+   "group": 199,
+   "asterism": "天阿、月",
+   "start": 522.48,
+   "duration": 2.19,
+   "text": "阿西月东各一星"
+  },
+  {
+   "para": 265,
+   "section": "昴宿",
+   "lidx": 2,
+   "group": 200,
+   "asterism": "天阴",
+   "start": 524.68,
+   "duration": 1.96,
+   "text": "阿下五黄天阴名"
+  },
+  {
+   "para": 266,
+   "section": "昴宿",
+   "lidx": 3,
+   "group": 201,
+   "asterism": "刍藁",
+   "start": 526.64,
+   "duration": 2.12,
+   "text": "阴下六乌刍藁营"
+  },
+  {
+   "para": 267,
+   "section": "昴宿",
+   "lidx": 4,
+   "group": 202,
+   "asterism": "天苑",
+   "start": 528.75,
+   "duration": 1.96,
+   "text": "营南十六天苑形"
+  },
+  {
+   "para": 268,
+   "section": "昴宿",
+   "lidx": 5,
+   "group": 203,
+   "asterism": "卷舌",
+   "start": 530.71,
+   "duration": 1.93,
+   "text": "河中六星名卷舌"
+  },
+  {
+   "para": 269,
+   "section": "昴宿",
+   "lidx": 6,
+   "group": 204,
+   "asterism": "天谗",
+   "start": 532.65,
+   "duration": 2.38,
+   "text": "舌中黑点天谗星"
+  },
+  {
+   "para": 270,
+   "section": "昴宿",
+   "lidx": 7,
+   "group": 205,
+   "asterism": "砺石",
+   "start": 535.02,
+   "duration": 2.77,
+   "text": "砺石舌傍斜四丁"
+  },
+  {
+   "para": 271,
+   "section": "毕宿",
+   "lidx": 0,
+   "group": 206,
+   "asterism": "毕",
+   "start": 537.79,
+   "duration": 1.86,
+   "text": "恰似爪叉八星出"
+  },
+  {
+   "para": 272,
+   "section": "毕宿",
+   "lidx": 1,
+   "group": 206,
+   "asterism": "毕",
+   "start": 539.65,
+   "duration": 1.77,
+   "text": "附耳毕股一星光"
+  },
+  {
+   "para": 273,
+   "section": "毕宿",
+   "lidx": 2,
+   "group": 207,
+   "asterism": "天街",
+   "start": 541.42,
+   "duration": 1.88,
+   "text": "天街两星毕背旁"
+  },
+  {
+   "para": 274,
+   "section": "毕宿",
+   "lidx": 3,
+   "group": 208,
+   "asterism": "天节",
+   "start": 543.3,
+   "duration": 1.7,
+   "text": "天节耳下八乌幢"
+  },
+  {
+   "para": 275,
+   "section": "毕宿",
+   "lidx": 4,
+   "group": 209,
+   "asterism": "诸王",
+   "start": 545.0,
+   "duration": 1.78,
+   "text": "毕上横列六诸王"
+  },
+  {
+   "para": 276,
+   "section": "毕宿",
+   "lidx": 5,
+   "group": 210,
+   "asterism": "天高",
+   "start": 546.78,
+   "duration": 2.43,
+   "text": "王下四皂天高星"
+  },
+  {
+   "para": 277,
+   "section": "毕宿",
+   "lidx": 6,
+   "group": 211,
+   "asterism": "九州殊口",
+   "start": 549.21,
+   "duration": 2.53,
+   "text": "节下团圆九州城"
+  },
+  {
+   "para": 278,
+   "section": "毕宿",
+   "lidx": 7,
+   "group": 212,
+   "asterism": "五车",
+   "start": 551.74,
+   "duration": 2.01,
+   "text": "毕口斜对五车口"
+  },
+  {
+   "para": 279,
+   "section": "毕宿",
+   "lidx": 8,
+   "group": 213,
+   "asterism": "柱",
+   "start": 553.75,
+   "duration": 1.96,
+   "text": "车有三柱任纵横"
+  },
+  {
+   "para": 280,
+   "section": "毕宿",
+   "lidx": 9,
+   "group": 214,
+   "asterism": "天潢",
+   "start": 555.71,
+   "duration": 2.19,
+   "text": "车中五个天潢精"
+  },
+  {
+   "para": 281,
+   "section": "毕宿",
+   "lidx": 10,
+   "group": 215,
+   "asterism": "咸池",
+   "start": 557.9,
+   "duration": 1.88,
+   "text": "潢畔咸池三黑星"
+  },
+  {
+   "para": 282,
+   "section": "毕宿",
+   "lidx": 11,
+   "group": 216,
+   "asterism": "天关",
+   "start": 559.79,
+   "duration": 2.12,
+   "text": "天关一星车脚边"
+  },
+  {
+   "para": 283,
+   "section": "毕宿",
+   "lidx": 12,
+   "group": 217,
+   "asterism": "参旗",
+   "start": 561.9,
+   "duration": 1.93,
+   "text": "参旗九个参车间"
+  },
+  {
+   "para": 284,
+   "section": "毕宿",
+   "lidx": 13,
+   "group": 218,
+   "asterism": "九斿",
+   "start": 563.83,
+   "duration": 1.7,
+   "text": "旗下直建九斿连"
+  },
+  {
+   "para": 285,
+   "section": "毕宿",
+   "lidx": 14,
+   "group": 219,
+   "asterism": "天园",
+   "start": 565.53,
+   "duration": 2.9,
+   "text": "斿下十三乌天园"
+  },
+  {
+   "para": 286,
+   "section": "毕宿",
+   "lidx": 15,
+   "group": 220,
+   "asterism": "九斿、天园",
+   "start": 568.43,
+   "duration": 1.88,
+   "text": "九斿天园参脚边"
+  },
+  {
+   "para": 287,
+   "section": "觜宿",
+   "lidx": 0,
+   "group": 221,
+   "asterism": "觜",
+   "start": 570.31,
+   "duration": 2.43,
+   "text": "三星相近作参蕊"
+  },
+  {
+   "para": 288,
+   "section": "觜宿",
+   "lidx": 1,
+   "group": 222,
+   "asterism": "座旗",
+   "start": 572.74,
+   "duration": 2.07,
+   "text": "觜上座旗直指天"
+  },
+  {
+   "para": 289,
+   "section": "觜宿",
+   "lidx": 2,
+   "group": 222,
+   "asterism": "座旗",
+   "start": 574.81,
+   "duration": 2.14,
+   "text": "尊卑之位九相连"
+  },
+  {
+   "para": 290,
+   "section": "觜宿",
+   "lidx": 3,
+   "group": 223,
+   "asterism": "司怪",
+   "start": 576.95,
+   "duration": 2.29,
+   "text": "司怪曲立座旗边"
+  },
+  {
+   "para": 291,
+   "section": "觜宿",
+   "lidx": 4,
+   "group": 223,
+   "asterism": "司怪",
+   "start": 579.24,
+   "duration": 2.28,
+   "text": "四鸦大近井钺前"
+  },
+  {
+   "para": 292,
+   "section": "参宿",
+   "lidx": 0,
+   "group": 224,
+   "asterism": "参",
+   "start": 581.52,
+   "duration": 1.94,
+   "text": "总是七星觜相侵"
+  },
+  {
+   "para": 293,
+   "section": "参宿",
+   "lidx": 1,
+   "group": 224,
+   "asterism": "参",
+   "start": 583.46,
+   "duration": 1.94,
+   "text": "两肩双足三为心"
+  },
+  {
+   "para": 294,
+   "section": "参宿",
+   "lidx": 2,
+   "group": 224,
+   "asterism": "参",
+   "start": 585.4,
+   "duration": 1.94,
+   "text": "伐有三星足里深"
+  },
+  {
+   "para": 295,
+   "section": "参宿",
+   "lidx": 3,
+   "group": 225,
+   "asterism": "玉井",
+   "start": 587.34,
+   "duration": 1.93,
+   "text": "玉井四星右足阴"
+  },
+  {
+   "para": 296,
+   "section": "参宿",
+   "lidx": 4,
+   "group": 226,
+   "asterism": "屏星",
+   "start": 589.28,
+   "duration": 1.96,
+   "text": "屏星两扇井南襟"
+  },
+  {
+   "para": 297,
+   "section": "参宿",
+   "lidx": 5,
+   "group": 227,
+   "asterism": "军井",
+   "start": 591.24,
+   "duration": 2.43,
+   "text": "军井四星屏上吟"
+  },
+  {
+   "para": 298,
+   "section": "参宿",
+   "lidx": 6,
+   "group": 228,
+   "asterism": "天厕",
+   "start": 593.67,
+   "duration": 2.01,
+   "text": "左足下四天厕临"
+  },
+  {
+   "para": 299,
+   "section": "参宿",
+   "lidx": 7,
+   "group": 229,
+   "asterism": "天屎",
+   "start": 595.68,
+   "duration": 1.46,
+   "text": "厕下一物天屎沉"
+  },
+  {
+   "para": 300,
+   "section": "井宿",
+   "lidx": 0,
+   "group": 230,
+   "asterism": "井",
+   "start": 597.14,
+   "duration": 2.19,
+   "text": "八星横列河中静"
+  },
+  {
+   "para": 301,
+   "section": "井宿",
+   "lidx": 1,
+   "group": 230,
+   "asterism": "井",
+   "start": 599.33,
+   "duration": 2.2,
+   "text": "一星名钺井边安"
+  },
+  {
+   "para": 302,
+   "section": "井宿",
+   "lidx": 2,
+   "group": 231,
+   "asterism": "北河、南河",
+   "start": 601.53,
+   "duration": 1.7,
+   "text": "两河各三南北正"
+  },
+  {
+   "para": 303,
+   "section": "井宿",
+   "lidx": 3,
+   "group": 232,
+   "asterism": "天樽",
+   "start": 603.23,
+   "duration": 2.53,
+   "text": "天樽三星井上头"
+  },
+  {
+   "para": 304,
+   "section": "井宿",
+   "lidx": 4,
+   "group": 233,
+   "asterism": "五诸侯",
+   "start": 605.76,
+   "duration": 2.43,
+   "text": "樽上横列五诸侯"
+  },
+  {
+   "para": 305,
+   "section": "井宿",
+   "lidx": 5,
+   "group": 234,
+   "asterism": "积水",
+   "start": 608.19,
+   "duration": 2.12,
+   "text": "侯上北河西积水"
+  },
+  {
+   "para": 306,
+   "section": "井宿",
+   "lidx": 6,
+   "group": 235,
+   "asterism": "积薪",
+   "start": 610.3,
+   "duration": 2.01,
+   "text": "欲觅积薪东畔是"
+  },
+  {
+   "para": 307,
+   "section": "井宿",
+   "lidx": 7,
+   "group": 236,
+   "asterism": "水府",
+   "start": 612.32,
+   "duration": 2.48,
+   "text": "钺下四星名水府"
+  },
+  {
+   "para": 308,
+   "section": "井宿",
+   "lidx": 8,
+   "group": 237,
+   "asterism": "水位",
+   "start": 614.8,
+   "duration": 2.12,
+   "text": "水位东边四星序"
+  },
+  {
+   "para": 309,
+   "section": "井宿",
+   "lidx": 9,
+   "group": 238,
+   "asterism": "四渎",
+   "start": 616.91,
+   "duration": 2.38,
+   "text": "四渎横列南河里"
+  },
+  {
+   "para": 310,
+   "section": "井宿",
+   "lidx": 10,
+   "group": 239,
+   "asterism": "军市",
+   "start": 619.29,
+   "duration": 2.17,
+   "text": "南河下头是军市"
+  },
+  {
+   "para": 311,
+   "section": "井宿",
+   "lidx": 11,
+   "group": 239,
+   "asterism": "军市",
+   "start": 621.46,
+   "duration": 2.22,
+   "text": "军市团圆十三星"
+  },
+  {
+   "para": 312,
+   "section": "井宿",
+   "lidx": 12,
+   "group": 240,
+   "asterism": "野鸡",
+   "start": 623.68,
+   "duration": 1.88,
+   "text": "中有一个野鸡精"
+  },
+  {
+   "para": 313,
+   "section": "井宿",
+   "lidx": 13,
+   "group": 241,
+   "asterism": "丈人、子、孙",
+   "start": 625.56,
+   "duration": 1.7,
+   "text": "孙子丈人市下列"
+  },
+  {
+   "para": 314,
+   "section": "井宿",
+   "lidx": 14,
+   "group": 241,
+   "asterism": "丈人、子、孙",
+   "start": 627.26,
+   "duration": 1.7,
+   "text": "各立两星从东说"
+  },
+  {
+   "para": 315,
+   "section": "井宿",
+   "lidx": 15,
+   "group": 242,
+   "asterism": "阙丘",
+   "start": 628.96,
+   "duration": 2.35,
+   "text": "阙丘两星南河东"
+  },
+  {
+   "para": 316,
+   "section": "井宿",
+   "lidx": 16,
+   "group": 243,
+   "asterism": "狼星",
+   "start": 631.31,
+   "duration": 2.25,
+   "text": "丘下一狼光蓬茸"
+  },
+  {
+   "para": 317,
+   "section": "井宿",
+   "lidx": 17,
+   "group": 244,
+   "asterism": "弧矢",
+   "start": 633.55,
+   "duration": 2.19,
+   "text": "左畔九个弯弧弓"
+  },
+  {
+   "para": 318,
+   "section": "井宿",
+   "lidx": 18,
+   "group": 244,
+   "asterism": "弧矢",
+   "start": 635.75,
+   "duration": 2.27,
+   "text": "一矢拟射顽狼胸"
+  },
+  {
+   "para": 319,
+   "section": "井宿",
+   "lidx": 19,
+   "group": 245,
+   "asterism": "老人",
+   "start": 638.02,
+   "duration": 1.54,
+   "text": "有个老人南极中"
+  },
+  {
+   "para": 320,
+   "section": "井宿",
+   "lidx": 20,
+   "group": 245,
+   "asterism": "老人",
+   "start": 639.56,
+   "duration": 1.54,
+   "text": "春秋出入寿无穷"
+  },
+  {
+   "para": 321,
+   "section": "鬼宿",
+   "lidx": 0,
+   "group": 246,
+   "asterism": "鬼",
+   "start": 641.1,
+   "duration": 2.35,
+   "text": "四星册方似木柜"
+  },
+  {
+   "para": 322,
+   "section": "鬼宿",
+   "lidx": 1,
+   "group": 247,
+   "asterism": "积尸气",
+   "start": 643.45,
+   "duration": 2.01,
+   "text": "中央白者积尸气"
+  },
+  {
+   "para": 323,
+   "section": "鬼宿",
+   "lidx": 2,
+   "group": 248,
+   "asterism": "爟",
+   "start": 645.46,
+   "duration": 2.12,
+   "text": "鬼上四星是爟位"
+  },
+  {
+   "para": 324,
+   "section": "鬼宿",
+   "lidx": 3,
+   "group": 249,
+   "asterism": "天狗",
+   "start": 647.58,
+   "duration": 1.93,
+   "text": "天狗七星鬼下是"
+  },
+  {
+   "para": 325,
+   "section": "鬼宿",
+   "lidx": 4,
+   "group": 250,
+   "asterism": "外厨",
+   "start": 649.51,
+   "duration": 2.19,
+   "text": "外厨六间柳星次"
+  },
+  {
+   "para": 326,
+   "section": "鬼宿",
+   "lidx": 5,
+   "group": 251,
+   "asterism": "天社",
+   "start": 651.71,
+   "duration": 2.43,
+   "text": "天社六星弧东倚"
+  },
+  {
+   "para": 327,
+   "section": "鬼宿",
+   "lidx": 6,
+   "group": 252,
+   "asterism": "天纪",
+   "start": 654.14,
+   "duration": 1.59,
+   "text": "社东一星名天纪"
+  },
+  {
+   "para": 328,
+   "section": "柳宿",
+   "lidx": 0,
+   "group": 253,
+   "asterism": "柳",
+   "start": 655.73,
+   "duration": 1.96,
+   "text": "八星曲头垂似柳"
+  },
+  {
+   "para": 329,
+   "section": "柳宿",
+   "lidx": 1,
+   "group": 254,
+   "asterism": "酒旗",
+   "start": 657.69,
+   "duration": 1.699,
+   "text": "近上三星号为酒"
+  },
+  {
+   "para": 330,
+   "section": "柳宿",
+   "lidx": 2,
+   "group": 254,
+   "asterism": "酒旗",
+   "start": 659.389,
+   "duration": 1.619,
+   "text": "宴享大脯五星守"
+  },
+  {
+   "para": 331,
+   "section": "星宿",
+   "lidx": 0,
+   "group": 255,
+   "asterism": "星",
+   "start": 661.01,
+   "duration": 2.14,
+   "text": "七星如钩柳下生"
+  },
+  {
+   "para": 332,
+   "section": "星宿",
+   "lidx": 1,
+   "group": 256,
+   "asterism": "轩辕",
+   "start": 663.15,
+   "duration": 2.38,
+   "text": "星上十七轩辕形"
+  },
+  {
+   "para": 333,
+   "section": "星宿",
+   "lidx": 2,
+   "group": 257,
+   "asterism": "内平",
+   "start": 665.53,
+   "duration": 1.83,
+   "text": "轩辕东头四内平"
+  },
+  {
+   "para": 334,
+   "section": "星宿",
+   "lidx": 3,
+   "group": 258,
+   "asterism": "天相",
+   "start": 667.35,
+   "duration": 1.88,
+   "text": "平下三个名天相"
+  },
+  {
+   "para": 335,
+   "section": "星宿",
+   "lidx": 4,
+   "group": 259,
+   "asterism": "天稷",
+   "start": 669.23,
+   "duration": 1.96,
+   "text": "相下稷星横五灵"
+  },
+  {
+   "para": 336,
+   "section": "张宿",
+   "lidx": 0,
+   "group": 260,
+   "asterism": "张",
+   "start": 671.19,
+   "duration": 2.06,
+   "text": "六星似轸在星旁"
+  },
+  {
+   "para": 337,
+   "section": "张宿",
+   "lidx": 1,
+   "group": 261,
+   "asterism": "天庙",
+   "start": 673.26,
+   "duration": 1.84,
+   "text": "张下只是有天庙"
+  },
+  {
+   "para": 338,
+   "section": "张宿",
+   "lidx": 2,
+   "group": 261,
+   "asterism": "天庙",
+   "start": 675.1,
+   "duration": 1.84,
+   "text": "十四之星册四方"
+  },
+  {
+   "para": 339,
+   "section": "张宿",
+   "lidx": 3,
+   "group": 261,
+   "asterism": "天庙",
+   "start": 676.95,
+   "duration": 1.84,
+   "text": "长垣少微虽向上"
+  },
+  {
+   "para": 340,
+   "section": "张宿",
+   "lidx": 4,
+   "group": 261,
+   "asterism": "天庙",
+   "start": 678.79,
+   "duration": 1.84,
+   "text": "星数欹在太微旁"
+  },
+  {
+   "para": 341,
+   "section": "张宿",
+   "lidx": 5,
+   "group": 261,
+   "asterism": "天庙",
+   "start": 680.63,
+   "duration": 1.84,
+   "text": "太尊一星直上黄"
+  },
+  {
+   "para": 342,
+   "section": "翼宿",
+   "lidx": 0,
+   "group": 262,
+   "asterism": "翼",
+   "start": 682.48,
+   "duration": 1.59,
+   "text": "二十二星太难识"
+  },
+  {
+   "para": 343,
+   "section": "翼宿",
+   "lidx": 1,
+   "group": 262,
+   "asterism": "翼",
+   "start": 684.07,
+   "duration": 1.59,
+   "text": "上五下五横着行"
+  },
+  {
+   "para": 344,
+   "section": "翼宿",
+   "lidx": 2,
+   "group": 262,
+   "asterism": "翼",
+   "start": 685.67,
+   "duration": 1.59,
+   "text": "中心六个恰如张"
+  },
+  {
+   "para": 345,
+   "section": "翼宿",
+   "lidx": 3,
+   "group": 262,
+   "asterism": "翼",
+   "start": 687.26,
+   "duration": 1.59,
+   "text": "更有六星在何处"
+  },
+  {
+   "para": 346,
+   "section": "翼宿",
+   "lidx": 4,
+   "group": 262,
+   "asterism": "翼",
+   "start": 688.85,
+   "duration": 1.59,
+   "text": "三三相连张畔附"
+  },
+  {
+   "para": 347,
+   "section": "翼宿",
+   "lidx": 5,
+   "group": 262,
+   "asterism": "翼",
+   "start": 690.45,
+   "duration": 1.59,
+   "text": "必若不能分处所"
+  },
+  {
+   "para": 348,
+   "section": "翼宿",
+   "lidx": 6,
+   "group": 262,
+   "asterism": "翼",
+   "start": 692.04,
+   "duration": 1.59,
+   "text": "更请向前看野取"
+  },
+  {
+   "para": 349,
+   "section": "翼宿",
+   "lidx": 7,
+   "group": 263,
+   "asterism": "东瓯",
+   "start": 693.63,
+   "duration": 2.04,
+   "text": "五个黑星翼下头"
+  },
+  {
+   "para": 350,
+   "section": "翼宿",
+   "lidx": 8,
+   "group": 263,
+   "asterism": "东瓯",
+   "start": 695.68,
+   "duration": 1.87,
+   "text": "欲知名字是东瓯"
+  },
+  {
+   "para": 351,
+   "section": "轸宿",
+   "lidx": 0,
+   "group": 264,
+   "asterism": "轸",
+   "start": 697.55,
+   "duration": 1.86,
+   "text": "四星似张翼相近"
+  },
+  {
+   "para": 352,
+   "section": "轸宿",
+   "lidx": 1,
+   "group": 264,
+   "asterism": "轸",
+   "start": 699.41,
+   "duration": 1.46,
+   "text": "中央一个长沙子"
+  },
+  {
+   "para": 353,
+   "section": "轸宿",
+   "lidx": 2,
+   "group": 264,
+   "asterism": "轸",
+   "start": 700.87,
+   "duration": 1.73,
+   "text": "左辖右辖附两星"
+  },
+  {
+   "para": 354,
+   "section": "轸宿",
+   "lidx": 3,
+   "group": 265,
+   "asterism": "军门",
+   "start": 702.59,
+   "duration": 2.01,
+   "text": "军门两黄近翼是"
+  },
+  {
+   "para": 355,
+   "section": "轸宿",
+   "lidx": 4,
+   "group": 266,
+   "asterism": "土司空",
+   "start": 704.6,
+   "duration": 1.83,
+   "text": "门下四个土司空"
+  },
+  {
+   "para": 356,
+   "section": "轸宿",
+   "lidx": 5,
+   "group": 267,
+   "asterism": "青丘",
+   "start": 706.43,
+   "duration": 1.83,
+   "text": "门东七乌青丘子"
+  },
+  {
+   "para": 357,
+   "section": "轸宿",
+   "lidx": 6,
+   "group": 268,
+   "asterism": "器府",
+   "start": 708.26,
+   "duration": 2.09,
+   "text": "青丘之下名器府"
+  },
+  {
+   "para": 358,
+   "section": "轸宿",
+   "lidx": 7,
+   "group": 268,
+   "asterism": "器府",
+   "start": 710.36,
+   "duration": 1.76,
+   "text": "器府之星三十二"
+  },
+  {
+   "para": 359,
+   "section": "轸宿",
+   "lidx": 8,
+   "group": 268,
+   "asterism": "器府",
+   "start": 712.11,
+   "duration": 1.82,
+   "text": "已上便为太微宫"
+  },
+  {
+   "para": 360,
+   "section": "轸宿",
+   "lidx": 9,
+   "group": 268,
+   "asterism": "器府",
+   "start": 713.93,
+   "duration": 1.96,
+   "text": "黄道向上看取是"
+  }
+ ]
+}

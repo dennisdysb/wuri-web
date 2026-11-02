@@ -1268,6 +1268,7 @@
       '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">' +
       '<button class="btn" ' + btn + ' data-sx-tour="prev">' + txEsc('上一句') + '</button>' +
       '<button class="btn primary" ' + btn + ' id="sx-tour-play" data-sx-tour="play">' + txEsc('播放') + '</button>' +
+      '<button class="btn" ' + btn + ' id="sx-tour-voice" data-sx-tour="voice">' + txEsc('女声朗诵') + '</button>' +
       '<button class="btn" ' + btn + ' data-sx-tour="next">' + txEsc('下一句') + '</button>' +
       '<span style="font-family:var(--sans);font-size:.74rem;color:var(--muted)">' + txEsc('间隔') + '</span>' +
       '<button class="btn" ' + btn + ' data-sx-tour="speed:1500" data-sx-tour-speed="1500">' + txEsc('快') + '</button>' +
@@ -1360,12 +1361,22 @@
       b.style.borderColor = on ? 'var(--cinnabar)' : '';
       b.style.color = on ? 'var(--cinnabar-deep)' : '';
       b.style.fontWeight = on ? '700' : '';
+      b.style.opacity = st.voice ? '.38' : ''; /* 语音模式间隔档不适用，置灰禁点 */
+      b.style.pointerEvents = st.voice ? 'none' : '';
     });
+    var vb = $('sx-tour-voice');
+    if (vb) {
+      vb.textContent = T(st.voice ? '女声朗诵 · 开' : '女声朗诵');
+      vb.style.borderColor = st.voice ? 'var(--cinnabar)' : '';
+      vb.style.color = st.voice ? 'var(--cinnabar-deep)' : '';
+      vb.style.fontWeight = st.voice ? '700' : '';
+    }
   }
   function tourPause() {
     if (!tourState) return;
     tourState.playing = false;
     if (tourState.timer) { clearInterval(tourState.timer); tourState.timer = null; }
+    recitePause(); /* 语音模式同步停音频（位置保留，与静音导览同口径） */
     var pb = $('sx-tour-play');
     if (pb) pb.textContent = T('播放');
   }
@@ -1381,6 +1392,7 @@
   }
   function tourPlayToggle() {
     if (!tourState) return;
+    if (tourState.voice) { recitePlayToggle(); return; }
     if (tourState.playing) { tourPause(); return; }
     if (tourState.pos >= tourState.flat.length - 1) tourState.pos = 0; /* 末句按播放＝从头重播 */
     tourState.playing = true;
@@ -1389,6 +1401,7 @@
   }
   function tourSetSpeed(ms) {
     if (!tourState || !ms) return;
+    if (tourState.voice) return; /* 语音模式下间隔档不适用（面板钮已置灰） */
     tourState.speed = ms;
     if (tourState.playing) tourStartTimer();
     tourSync(false);
@@ -1400,24 +1413,146 @@
     if (n > tourState.flat.length - 1) n = tourState.flat.length - 1;
     tourState.pos = n;
     tourSync(true);
+    if (tourState.voice) reciteSeek(tourState.pos); /* 语音模式步进＝音频同步跳句 */
   }
   function tourJump(pos) {
     if (!tourState || typeof pos !== 'number' || pos < 0 || pos >= tourState.flat.length) return;
     tourState.pos = pos;
     tourSync(true);
+    if (tourState.voice) reciteSeek(tourState.pos); /* 点行跳句＝音频同步跳句 */
   }
   function enterTour() {
     if (!BT || !secOrder.length) return;
     closeVersePop();
-    tourState = { flat: tourFlat(), pos: 0, playing: false, timer: null, speed: 2400, chartKey: '' };
+    tourState = { flat: tourFlat(), pos: 0, playing: false, timer: null, speed: 2400, chartKey: '', voice: false };
     if (!tourState.flat.length) { tourState = null; return; }
     renderBook();
     tourSync(true);
   }
   function exitTour() {
     tourPause();
+    reciteStopAll(); /* 退出导览：音频全停并复位 */
     tourState = null;
     renderBook(); /* 回普通典籍页：展开状态复归 bookOpen 原状，导览面板与全量展开一并撤下 */
+  }
+
+  /* ---------------- s5+++ 《步天歌》女声朗诵（导览语音模式） ----------------
+   * 音频 audio/butiange/butiange_female.mp3：Fish Audio 锁定女声（与经文诵读
+   * 同一声线、同一 s1 参数），按星官段整段合成（段内整段一遍过、韵律均匀）
+   * 后拼接成整歌；时间戳 audio/butiange/butiange_female.json 与经文跟读同构
+   * （segments 逐句 start/duration），且与导览 flat 同序（secOrder × 区内行
+   * 序），segments[i] 即全歌第 i 句。音频走相对路径托管（与经文音频同模式，
+   * 不进安装包）。语音开时：播放/暂停/步进/点行跳转全走音频时钟，逐句推进、
+   * 当前句高亮、示意图星官高亮仍由 tourSync 统一绘制（本段只管音频与位置）；
+   * 关语音回静音步进、tourPause 各离开路径同步停音频、退出导览全停复位。 */
+  var REC = { audio: null, segs: null, timer: 0, loading: false };
+  var REC_MP3 = 'audio/butiange/butiange_female.mp3';
+  var REC_TS = 'audio/butiange/butiange_female.json';
+
+  function reciteEnsure(cb) {
+    if (REC.segs && REC.audio) { cb(true); return; }
+    if (REC.loading) return;
+    REC.loading = true;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', REC_TS, true);
+    xhr.onload = function () {
+      REC.loading = false;
+      if (xhr.status === 200) {
+        try {
+          var j = JSON.parse(xhr.responseText);
+          if (j && j.segments && j.segments.length) {
+            REC.segs = j.segments;
+            if (!REC.audio) {
+              var a = new Audio();
+              a.preload = 'auto';
+              a.src = REC_MP3;
+              a.addEventListener('ended', function () {
+                if (tourState && tourState.voice) {
+                  tourState.playing = false;
+                  clearInterval(REC.timer);
+                  tourSync(false);
+                }
+              });
+              REC.audio = a;
+            }
+            cb(true); return;
+          }
+        } catch (e) {}
+      }
+      cb(false);
+    };
+    xhr.onerror = function () { REC.loading = false; cb(false); };
+    xhr.send();
+  }
+  function reciteSeek(pos) {
+    if (!REC.audio || !REC.segs || !REC.segs[pos]) return;
+    try { REC.audio.currentTime = REC.segs[pos].start + 0.02; } catch (e) {}
+  }
+  function reciteFindIdx(time) {
+    var segs = REC.segs, lo = 0, hi = segs.length - 1, ans = 0;
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1;
+      if (segs[mid].start <= time) { ans = mid; lo = mid + 1; } else hi = mid - 1;
+    }
+    return ans;
+  }
+  function reciteTick() {
+    if (!tourState || !tourState.voice || !tourState.playing || !REC.audio) return;
+    var i = reciteFindIdx(REC.audio.currentTime);
+    if (i !== tourState.pos && i < tourState.flat.length) {
+      tourState.pos = i;
+      tourSync(true);
+    }
+  }
+  function recitePlayToggle() {
+    if (!tourState || !tourState.voice) return;
+    if (tourState.playing) { tourPause(); return; }
+    if (tourState.pos >= tourState.flat.length - 1 && REC.audio &&
+        REC.audio.currentTime >= (REC.segs ? REC.segs[REC.segs.length - 1].start : 0)) {
+      tourState.pos = 0; /* 末句按播放＝从头重播（与静音导览同口径） */
+    }
+    reciteEnsure(function (ok) {
+      if (!ok || !tourState || !tourState.voice) {
+        var note = $('sx-tour-note');
+        if (note && !ok) note.textContent = T('朗诵音频加载失败，请检查网络后重试。');
+        return;
+      }
+      tourState.playing = true;
+      reciteSeek(tourState.pos);
+      var p = REC.audio.play();
+      if (p && p.catch) p.catch(function () { tourPause(); });
+      clearInterval(REC.timer);
+      REC.timer = setInterval(reciteTick, 200);
+      try {
+        if (navigator.mediaSession && window.MediaMetadata) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: T('步天歌 · 女声朗诵'), artist: T('戊日不上香')
+          });
+          navigator.mediaSession.setActionHandler('play', function () { tourPlayToggle(); });
+          navigator.mediaSession.setActionHandler('pause', function () { tourPlayToggle(); });
+        }
+      } catch (e) {}
+      tourSync(false);
+    });
+  }
+  function recitePause() {
+    clearInterval(REC.timer);
+    if (REC.audio) { try { REC.audio.pause(); } catch (e) {} }
+  }
+  function reciteStopAll() {
+    recitePause();
+    if (REC.audio) { try { REC.audio.currentTime = 0; } catch (e) {} }
+  }
+  function tourVoiceToggle() {
+    if (!tourState) return;
+    tourState.voice = !tourState.voice;
+    if (!tourState.voice) {
+      /* 关语音：停音频与静音定时器，位置保留，可切回或按间隔静音续行 */
+      tourState.playing = false;
+      if (tourState.timer) { clearInterval(tourState.timer); tourState.timer = null; }
+      recitePause();
+    }
+    tourSync(false);
   }
 
   /* ---------------- s5+ 点句浮图（v2.3.0，作用域：POP_SECTIONS 已落图式层的段） ----------------
@@ -1638,6 +1773,7 @@
       else if (act === 'prev') tourGo(-1);
       else if (act === 'next') tourGo(1);
       else if (act === 'play') tourPlayToggle();
+      else if (act === 'voice') tourVoiceToggle();
       else if (act.indexOf('speed:') === 0) tourSetSpeed(parseInt(act.slice(6), 10));
       return;
     }
