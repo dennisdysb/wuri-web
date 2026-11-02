@@ -1925,16 +1925,34 @@ var JingWen = (function () {
          背｜字｜全展开/全收回｜注音开/关（单节书隐藏全展开；钮名 2026-10-29
          晚回单字，见 applyReaderPrefs 背诵钮注）；注音钮
          按书的注音能力显隐（applyReaderPrefs 内以 py 数据判定，内丹无
-         注音数据→不显示）；「我的标记」不占底栏（入口＝目录面板首行
-         ＋字面板本书组，全书类一致） */
+         注音数据→不显示）；「我的标记」原不占底栏（入口＝目录面板首行
+         ＋字面板本书组）——2026-11-02 用户改定（见下）：内丹/道藏底栏
+         删背、原位换「我的标记」，常见经文维持本统一底栏原样 */
+      /* 底栏分书类（2026-11-02 用户拍板）：没人背道藏/内丹——这两类删
+         「背」、原位换「我的标记」（点开本书标记页，与目录首行/字面板
+         本书组同一 fromReader 路径）；背诵代码本体不删，常见经文仍用。
+         底栏行加 dock-marks 类走弹性配宽（style.css，四字钮占宽份额、
+         单字钮收窄），常见经文行无此类、等分原样 */
+      var noRecite = isNeidan(id) || !!d.daozang;
       var rcb2 = $('#jing-recite');
-      if (rcb2) rcb2.hidden = false;
+      if (rcb2) rcb2.hidden = noRecite;
+      var mdb2 = $('#jing-marks-dock');
+      if (mdb2) mdb2.hidden = !noRecite;
+      var dockMain = $('#jing-dock-main');
+      if (dockMain) dockMain.classList.toggle('dock-marks', noRecite);
+      /* 背诵态回落：内丹/道藏已无背诵入口，若全局背诵偏好（wuri_jing_
+         recite）开着，本书强制回阅读模式渲染，不得卡在无入口的背诵态；
+         偏好本身不动——回到常见经文时在此按偏好恢复内存态 */
+      if (noRecite) { if (reciteMode) reciteMode = false; }
+      else {
+        var rpPref = false;
+        try { rpPref = localStorage.getItem('wuri_jing_recite') === '1'; } catch (e) {}
+        reciteMode = rpPref;
+      }
       var rb3 = $('#jing-read-btn'); if (rb3) rb3.hidden = false;
       var tb3 = $('#jing-toc-btn'); if (tb3) tb3.hidden = false;
       // 「全部展开」全藏多卷本同样显示（2026-10-26 用户定）：卷体按需填充，
       // 展开走 foldAll 内的渐进分片渲染防卡死，按钮不再按 lazy 隐藏
-      /* 背诵全书类开放（第 0 步统一底栏）：旧口径对内丹/全藏强制关背诵
-         已废止；无标点底本按整段一句呈现（首字＋遮盖余文，点句展开） */
       clearFind(); /* 换书清本书搜索态与计数 */
       var fb9 = document.getElementById('jing-findbar');
       if (fb9) fb9.hidden = true;
@@ -4734,6 +4752,14 @@ var JingWen = (function () {
        本书原位（反馈批第 6 条，不再退出阅读器回书架） */
     var mkB = $('#jing-marks-btn');
     if (mkB) mkB.addEventListener('click', function () {
+      closeDockPanels();
+      if (window.__wuriOpenMarksFromReader) window.__wuriOpenMarksFromReader('lines');
+    });
+    /* 底栏·我的标记（2026-11-02：内丹/道藏底栏删背换标记，显隐在
+       renderReaderBody 按书类切换）：与字面板本书组钮同一路径——关面板、
+       从阅读页进标记页、返回回本书原位（行为与既有标记入口一致） */
+    var mkD = $('#jing-marks-dock');
+    if (mkD) mkD.addEventListener('click', function () {
       closeDockPanels();
       if (window.__wuriOpenMarksFromReader) window.__wuriOpenMarksFromReader('lines');
     });
