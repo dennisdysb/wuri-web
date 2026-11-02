@@ -1261,7 +1261,10 @@
      * 第一行［上一句］［播放/暂停］［下一句］、第二行［女声朗诵］［间隔 快/常/慢］
      * ［退出导览］，每行三段等分（flex:1 1 0＋min-width:0＋nowrap），任何状态下
      * 各钮尺寸恒定——旧版一整排 flex-wrap 加语音钮开态改字（钮面后缀「·开」）变宽，
-     * 会把下一句挤到下一行，本版钮面恒定四字、开态只走样式（见 tourSync）。 */
+     * 会把下一句挤到下一行，本版钮面恒定四字、开态只走样式（见 tourSync）。
+     * v539（用户 2026-11-02 08:04 真机反馈）：中格「间隔」可见标签去除——标签占位
+     * 把快/常/慢三钮挤得太窄难按；删标签后三钮（spd 样式 flex:1 1 0）占满中格等分
+     * 变宽，组容器保留 role=group＋aria-label「间隔」保无障碍、不渲染可见文字。 */
     var cell = 'style="font-family:var(--sans);flex:1 1 0;min-width:0;padding-left:2px;padding-right:2px;text-align:center;white-space:nowrap"';
     var spd = 'style="font-family:var(--sans);flex:1 1 0;min-width:0;padding-left:0;padding-right:0;text-align:center;white-space:nowrap"';
     var row = 'style="display:flex;gap:8px;flex-wrap:nowrap;align-items:stretch;margin-top:8px"';
@@ -1279,8 +1282,7 @@
       '</div>' +
       '<div ' + row + '>' +
       '<button class="btn" ' + cell + ' id="sx-tour-voice" data-sx-tour="voice" aria-pressed="false">' + txEsc('女声朗诵') + '</button>' +
-      '<span style="flex:1 1 0;min-width:0;display:flex;gap:4px;flex-wrap:nowrap;align-items:stretch">' +
-      '<span style="font-family:var(--sans);font-size:.74rem;color:var(--muted);align-self:center;white-space:nowrap">' + txEsc('间隔') + '</span>' +
+      '<span role="group" aria-label="' + txEsc('间隔') + '" style="flex:1 1 0;min-width:0;display:flex;gap:4px;flex-wrap:nowrap;align-items:stretch">' +
       '<button class="btn" ' + spd + ' data-sx-tour="speed:1500" data-sx-tour-speed="1500">' + txEsc('快') + '</button>' +
       '<button class="btn" ' + spd + ' data-sx-tour="speed:2400" data-sx-tour-speed="2400">' + txEsc('常') + '</button>' +
       '<button class="btn" ' + spd + ' data-sx-tour="speed:4500" data-sx-tour-speed="4500">' + txEsc('慢') + '</button>' +
