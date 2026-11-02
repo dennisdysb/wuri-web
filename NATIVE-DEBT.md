@@ -1,5 +1,26 @@
 # 原生端欠账（网页版已修、原生待随下一期联合更新带上）
 
+## 2026-11-02 · 注音纠错批（内部 v540）：上白 bǐng／沉疴 chén kē／传承经音专项
+
+- **网页版修复**：内部 v540 已上线。裁定与全量清单见
+  `~/workspace/wuri-app/RUBY-FIX-1102.md`。要点：①「上白/啟白/奏白/再白」作禀告
+  动词读 bǐng（功课经注音本传承经音，用户 2026-11-02 拍板）；②沉疴/沈痾读
+  chén kē（《现代汉语词典》）；③玉枢咒链「唵吽吒唎萨嚩囉」读 ōng hōng zhā lì
+  sà wā lā（用户提供的诵念传统）；④南無真 namo 位点读 nā mó、般若读 bō rě、
+  沈（沉义）注 shěn 改 chén 等同类扫查。
+- **数据面**：精选/内丹静态注音 28 个文件（www/jing＋www/content/jing 两套，
+  含 pyPunct）；道藏 `content/daozang/pinyin.json`（dict 痾 ē→kē＋审读表
+  442→525 条）；诵读音频 8 部整书 mp3＋时间戳重拼（s01 双声、s03 男、s16 男、
+  s29 双声、s36 双声，共 12 段同音喂读重合成）；`js/offline-download.js`
+  FALLBACK_SIZES 同步 8 个文件字节数。
+- **欠账范围**：CN 版、Play 版、iOS 版的经文注音数据、道藏词表与上述音频
+  全部未同步，下一期原生联合更新时一并带上（iOS 无道藏全集与占卜无关部分
+  按既有口径取舍：经文注音与音频属非占卜内容，可同步）。
+- **原生侧修法**：原生分叉 `~/workspace/wuri-app/www` 按网页版同批文件整覆：
+  content/jing 与 jing 两套同名文件、content/daozang/pinyin.json、audio/jing
+  与 audio/timestamps 的 8+8 个文件、offline-download.js 的 FALLBACK_SIZES
+  8 个数值；移植后抽验 s29 咒链注音（ōng/wā/lā）与玉枢沈痾（chén/kē）两处。
+
 ## 2026-11-01 · 经文页每日经文推荐卡在搜索态压在搜索结果之上
 
 - **现象**：经文页搜索时，每日经文推荐卡（#jingrec-card）出现在全部搜索结果上方；
