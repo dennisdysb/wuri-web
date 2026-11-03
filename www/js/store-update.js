@@ -88,7 +88,14 @@
     var go = document.createElement('button');
     go.className = 'btn primary';
     go.textContent = opts.cta;
-    go.addEventListener('click', function () { window.open(opts.url, '_system'); });
+    go.addEventListener('click', function () {
+      /* 原生壳 WebView 未启用多窗口：与 pro.js 同款三段兜底（'_system' →
+         '_blank' → 本页跳转），保证商店按钮在壳内必然有去处（原生联合更新定点补丁） */
+      var w = null;
+      try { w = window.open(opts.url, '_system'); } catch (e) {}
+      if (!w) { try { w = window.open(opts.url, '_blank'); } catch (e) {} }
+      if (!w) { location.href = opts.url; }
+    });
     var no = document.createElement('button');
     no.className = 'btn';
     no.textContent = '暂不';
