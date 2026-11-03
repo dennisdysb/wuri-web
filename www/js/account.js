@@ -75,6 +75,7 @@
     sources: lsJSON(K.sources, [])
   };
   var bindPromptCode = null; /* 登录后绑码提示条当前预填的 WURI 码（规范化） */
+  var bindManualOpen = false; /* 已绑态下手动绑码表单的展开状态（纯呈现，不落盘） */
   function isLoggedIn() { return !!state.token; }
 
   /* ---------------- 同步清单：localStorage 键组 ---------------- */
@@ -1102,7 +1103,16 @@
   function applyBindSuccess(body) {
     if (body) applyEntitlement({ pro: body.pro != null ? !!body.pro : true, sources: body.sources });
     bindPromptCode = null;
+    bindManualOpen = false; /* 绑成后回到收起态（呈现状态复位） */
     render();
+  }
+  function toggleBindManual() {
+    bindManualOpen = !bindManualOpen;
+    var bTg = $('acct-bind-toggle'), bMan = $('acct-bind-manual');
+    if (bMan) bMan.hidden = !bindManualOpen;
+    if (bTg) bTg.setAttribute('aria-expanded', bindManualOpen ? 'true' : 'false');
+    var bArrow = $('acct-bind-toggle-arrow');
+    if (bArrow) bArrow.textContent = bindManualOpen ? '▾' : '▸';
   }
   function postBindCode(code, purchaseEmail, withLocalEvidence) {
     var body = { code: code };
@@ -1239,12 +1249,26 @@
       var unRow = $('acct-username-row');
       if (state.username) { unRow.hidden = false; $('acct-username').textContent = state.username; }
       else unRow.hidden = true;
-      $('acct-prow').textContent = lsGet(K.pro) === '1' ? bindStatusText() : T('acct_prow_none');
+      var prowText = lsGet(K.pro) === '1' ? bindStatusText() : T('acct_prow_none');
+      $('acct-prow').textContent = prowText;
       var bsRow = $('acct-bind-status-row');
       if (bsRow) {
-        bsRow.hidden = false;
+        var bsText = bindStatusText();
         var bsEl = $('acct-bind-status');
-        if (bsEl) bsEl.textContent = bindStatusText();
+        if (bsEl) bsEl.textContent = bsText;
+        /* 去重：与高级版行同文案时只留一处（用户 2026-11-02 真机反馈「看起来有点多」） */
+        bsRow.hidden = (bsText === prowText);
+      }
+      /* 已绑态收纳：手动绑码表单默认收起，只留「更换或补绑」入口（用户 2026-11-02）；
+         未绑态不收，表单全量可见。状态只读既有 sources 数据源，不新造。 */
+      var bindBound = (state.sources || []).length > 0;
+      var bTg = $('acct-bind-toggle'), bMan = $('acct-bind-manual');
+      if (bTg && bMan) {
+        bTg.hidden = !bindBound;
+        bMan.hidden = bindBound && !bindManualOpen;
+        bTg.setAttribute('aria-expanded', bindManualOpen ? 'true' : 'false');
+        var bArrow = $('acct-bind-toggle-arrow');
+        if (bArrow) bArrow.textContent = bindManualOpen ? '▾' : '▸';
       }
       checkBindPrompt();
       /* 手动绑码预填：仅在输入框为空时填本机存码，不覆盖用户输入 */
@@ -1694,6 +1718,7 @@
       var el = $('acct-bind-prompt'); if (el) el.hidden = true;
     });
     on('acct-bind-btn', 'click', doBindManual);
+    on('acct-bind-toggle', 'click', toggleBindManual);
     on('acct-sync-toggle', 'change', function () {
       var tg = $('acct-sync-toggle');
       if (tg.checked) {
