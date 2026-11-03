@@ -91,3 +91,28 @@
   `<li data-i18n="pay_f1">` 整条）。原生下一期须连同 pay_f1 一并删：
   各端分叉源码内删除 pay_f1 的 i18n 键（简/繁）与付费墙 `<li>` 整条；
   此前「原生勿擅自连带删除」的注脚作废。
+
+## 更新流渠道分流（2026-11-02 晚，用户真机反馈＋亲裁分流）
+
+- **事故**：CN 暂存包内 `cn-update.js` 的 `CURRENT_CODE` 常量人工同步漏更、
+  停在 34 而 feed 已 37，导致全体 CN 用户（含最新 3.0.1/code 37 本人）被
+  「发现新版 v3.0.1」同版误报；模块零渠道守卫、文案为 CN/下载站口径。
+  详见 `~/workspace/wuri-app/UPDATE-CHANNEL-FIX-1102.md`。
+- **网页侧（已上 v559）**：新增 `js/store-update.js`（iOS 查 App Store
+  Lookup、Play 查 feed 的 play 块、原生标记缺失即静默、网页环境退出），
+  提示卡改底部 sheet（贴底栏上方＋遮罩，变量配色三态）。Play feed 块已
+  上线（version.json 加 play 字段，CN 字段未动）。
+- **CN 下期构建必带**：`prepare_cn_www.py` 模板已换代（渠道守卫＋
+  code×版号双保险比较＋底部 sheet＋包内真实进度条：半透明/可拖动/✕，
+  回调链与 jingwen.js 按文件名分发）＋CURRENT_CODE/NAME 改构建期自
+  AndroidManifest-cn.xml 自动注入硬校验；JsBridge 已备料 cancelDownload
+  （断连真取消）与 installApk（FileProvider＋files-path＋CN 清单
+  REQUEST_INSTALL_PACKAGES）——构建时须冒烟：同版不弹、进度真实、
+  ✕ 真停、完成可安装。
+- **Play 下期构建必带**：`prepare_play_www.py` 已备料注入
+  `js/wuri-channel.js`（WURI_CHANNEL='play'＋清单 versionName）＋
+  store-update.js 拷贝与脚本标签；冒烟：Play 弹卡只跳 Google Play 页。
+- **iOS 下期构建必带**：按 UPDATE-CHANNEL-FIX-1102.md 第四节接线
+  （store-update.js＋wuri-channel.js 注入 'ios'＋MARKETING_VERSION），
+  并加构建期断言：iOS www 内 grep `cn-update` 与 `apk/version.json`
+  必须 0 命中。现提审 build 18 经逐包核验无任何更新模块，无此问题。
