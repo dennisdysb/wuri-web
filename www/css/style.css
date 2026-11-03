@@ -2165,17 +2165,23 @@ body.bugang-open{overflow:hidden}
 .sk-ctl-lab{flex:none;color:var(--ink-2)}
 .sk-toggles{flex-wrap:wrap}
 .sk-controls .mini-btn.on{border-color:var(--gold);color:var(--gold-deep);font-weight:700}
-/* 图层面板排版整改（内部 v555）：旧版 .sk-layers/.sk-layer-row/.sk-layer-note
- * 在全站样式表里零规则——行是块级 div、标签与胶囊按文本基线内联排布，
- * 逐行阶梯错位、按钮起始列随标签字宽漂移、.on 态也无规则可达（面板不在
- * .sk-controls 内）。现整行 flex 垂直居中、标签列定宽成列、行高统一；
- * 星名三档并作分段控件（.sk-seg）；开关态与 .sk-controls 既有胶囊同式；
- * 脚注降为弱化小字。颜色全走变量链（日/夜/红光三态自适应）。 */
-.sk-layers{padding:6px 2px 0;font-family:var(--sans)}
+/* 图层面板排版整改（v555 立规、v556 设计收官）：旧版 .sk-layers/.sk-layer-row/
+ * .sk-layer-note 在全站样式表里零规则——行是块级 div、标签与胶囊按文本基线
+ * 内联排布，逐行阶梯错位、按钮起始列随标签字宽漂移、.on 态也无规则可达
+ * （面板不在 .sk-controls 内）、各胶囊长得一样分不清开关。现：面板成卡
+ * （卡面/描边/圆角与全站卡片同语言），内分图层开关组与星名密度组（组间
+ * 细线分隔），整行 flex 垂直居中、标签列定宽成列、行高统一；状态语言全行
+ * 统一——ON＝金实心填充＋--on-accent 字，OFF＝弱描边＋弱字，分段控件同规；
+ * 红光下不靠色相、靠填充与明度差分选中（--gold/--faint/--muted/--on-accent
+ * 均在变量链内，--gold/--faint/--muted 均有 body.sky-red 重映射）；脚注
+ * 降为弱化小字。 */
+.sk-layers{margin-top:8px;padding:8px 12px 6px;background:var(--card);border:1px solid var(--line);border-radius:14px;font-family:var(--sans)}
 .sk-layers[hidden]{display:none}
+.sk-layer-group + .sk-layer-group{border-top:1px solid var(--line-soft);margin-top:2px;padding-top:2px}
 .sk-layer-row{display:flex;align-items:center;gap:8px;min-height:42px;padding:3px 0}
 .sk-layer-row .sk-ctl-lab{flex:0 0 3.6em;font-size:.85rem;letter-spacing:.06em;white-space:nowrap}
-.sk-layers .mini-btn.on{border-color:var(--gold);color:var(--gold-deep);font-weight:700}
+.sk-layers .mini-btn{color:var(--muted);border-color:var(--faint)}
+.sk-layers .mini-btn.on{background:var(--gold);border-color:var(--gold);color:var(--on-accent);font-weight:700}
 .sk-seg{display:inline-flex;align-items:center}
 .sk-seg .mini-btn{border-radius:0;margin-left:-1px;position:relative}
 .sk-seg .mini-btn:first-child{border-radius:10px 0 0 10px;margin-left:0}

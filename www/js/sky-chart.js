@@ -637,14 +637,18 @@
       return '<button class="mini-btn tiny' + (chart.labelMode === m ? ' on' : '') + '" data-lmode="' + m + '">' + esc(t('sx2_ar_label_' + m)) + '</button>';
     }
     return '<div class="sk-layers" id="sk-layers" hidden>' +
+      '<div class="sk-layer-group">' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('连线')) + '</span>' + tg('lines', L.lines, esc(T('连线'))) + '</div>' +
-      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('星名')) + '</span>' +
-      '<span class="sk-seg" role="group" aria-label="' + esc(T('星名')) + '">' + lmBtn('smart') + lmBtn('all') + lmBtn('major') + '</span></div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('参考线')) + '</span>' +
       tg('ecl', chart.lines.ecl, esc(t('sx2_ecliptic'))) + tg('equ', chart.lines.equ, esc(t('sx2_equator'))) + '</div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(t('sx_fenye')) + '</span>' + tg('fenye', L.fenye, esc(t('sx_fenye'))) + '</div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('银河')) + '</span>' + tg('milky', L.milky, esc(T('银河（示意）'))) + '</div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('网格')) + '</span>' + tg('grid', L.grid, esc(T('网格'))) + '</div>' +
+      '</div>' +
+      '<div class="sk-layer-group">' +
+      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('星名')) + '</span>' +
+      '<span class="sk-seg" role="group" aria-label="' + esc(T('星名')) + '">' + lmBtn('smart') + lmBtn('all') + lmBtn('major') + '</span></div>' +
+      '</div>' +
       '<div class="sk-layer-note">' + esc(T('银河按银道面绘示意带，非实测轮廓；星名密度与相机认星共用一档。')) + '</div></div>';
   }
 
