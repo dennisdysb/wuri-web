@@ -638,14 +638,14 @@
     }
     return '<div class="sk-layers" id="sk-layers" hidden>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('连线')) + '</span>' + tg('lines', L.lines, esc(T('连线'))) + '</div>' +
-      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('星名')) + '</span>' + tg('labelsOn', L.labelsOn, esc(T('星名'))) +
-      lmBtn('smart') + lmBtn('all') + lmBtn('major') + '</div>' +
+      '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('星名')) + '</span>' +
+      '<span class="sk-seg" role="group" aria-label="' + esc(T('星名')) + '">' + lmBtn('smart') + lmBtn('all') + lmBtn('major') + '</span></div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('参考线')) + '</span>' +
       tg('ecl', chart.lines.ecl, esc(t('sx2_ecliptic'))) + tg('equ', chart.lines.equ, esc(t('sx2_equator'))) + '</div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(t('sx_fenye')) + '</span>' + tg('fenye', L.fenye, esc(t('sx_fenye'))) + '</div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('银河')) + '</span>' + tg('milky', L.milky, esc(T('银河（示意）'))) + '</div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('网格')) + '</span>' + tg('grid', L.grid, esc(T('网格'))) + '</div>' +
-      '<div class="sk-layer-note">' + esc(T('银河按银道面绘示意带，非实测轮廓；星名密度与相机认星共用一档（wuri_sky_label_mode_v1）。')) + '</div></div>';
+      '<div class="sk-layer-note">' + esc(T('银河按银道面绘示意带，非实测轮廓；星名密度与相机认星共用一档。')) + '</div></div>';
   }
 
   function chartSkeleton() {
@@ -1107,6 +1107,10 @@
       var lm2 = b.getAttribute('data-lmode');
       if (lm2) {
         chart.labelMode = lm2; saveLabelMode();
+        /* 星名行整改（v555）：原 labelsOn 独立胶囊已并入三档分段控件，
+         * 点档即视为要看星名——旧版存量 labelsOn=false 时顺手复位，
+         * 免得分段控件点了没反应（键与渲染逻辑本身不变） */
+        if (!chart.layers.labelsOn) { chart.layers.labelsOn = true; saveLayers(); }
         var btns = lp.querySelectorAll('[data-lmode]');
         for (var bi = 0; bi < btns.length; bi++) btns[bi].classList.toggle('on', btns[bi].getAttribute('data-lmode') === lm2);
         drawChart(); return;

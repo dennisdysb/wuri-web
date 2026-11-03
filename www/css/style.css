@@ -2165,6 +2165,23 @@ body.bugang-open{overflow:hidden}
 .sk-ctl-lab{flex:none;color:var(--ink-2)}
 .sk-toggles{flex-wrap:wrap}
 .sk-controls .mini-btn.on{border-color:var(--gold);color:var(--gold-deep);font-weight:700}
+/* 图层面板排版整改（内部 v555）：旧版 .sk-layers/.sk-layer-row/.sk-layer-note
+ * 在全站样式表里零规则——行是块级 div、标签与胶囊按文本基线内联排布，
+ * 逐行阶梯错位、按钮起始列随标签字宽漂移、.on 态也无规则可达（面板不在
+ * .sk-controls 内）。现整行 flex 垂直居中、标签列定宽成列、行高统一；
+ * 星名三档并作分段控件（.sk-seg）；开关态与 .sk-controls 既有胶囊同式；
+ * 脚注降为弱化小字。颜色全走变量链（日/夜/红光三态自适应）。 */
+.sk-layers{padding:6px 2px 0;font-family:var(--sans)}
+.sk-layers[hidden]{display:none}
+.sk-layer-row{display:flex;align-items:center;gap:8px;min-height:42px;padding:3px 0}
+.sk-layer-row .sk-ctl-lab{flex:0 0 3.6em;font-size:.85rem;letter-spacing:.06em;white-space:nowrap}
+.sk-layers .mini-btn.on{border-color:var(--gold);color:var(--gold-deep);font-weight:700}
+.sk-seg{display:inline-flex;align-items:center}
+.sk-seg .mini-btn{border-radius:0;margin-left:-1px;position:relative}
+.sk-seg .mini-btn:first-child{border-radius:10px 0 0 10px;margin-left:0}
+.sk-seg .mini-btn:last-child{border-radius:0 10px 10px 0}
+.sk-seg .mini-btn.on{z-index:1}
+.sk-layer-note{font-size:.72rem;color:var(--muted);line-height:1.65;padding:6px 0 2px}
 .sk-ecliptic{fill:none;stroke:#d8a03c;stroke-width:1.1;stroke-dasharray:6 4;opacity:.85}
 .sk-eqline{fill:none;stroke:#7d94b8;stroke-width:1;stroke-dasharray:2 4;opacity:.8}
 .sk-sun{fill:#f5b301;stroke:#fff2c0;stroke-width:1}
