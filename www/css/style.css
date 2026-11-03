@@ -2380,6 +2380,8 @@ body.sky-red #toast{background:rgba(26,8,6,.92);color:#f2c1b2}
 .settings-entry:active{filter:brightness(.97)}
 .entry-arrow{margin-left:auto;align-self:center;font-size:1.35rem;line-height:1;color:var(--ink-2)}
 .about-more{margin-top:2px}
+/* 鸣谢折叠兜底：收起态非 summary 子元素一律不渲染，不单靠 details 原生隐藏（个别 WebView 引擎下曾出现正文外露）；展开后本规则失效、走原生渲染。仅作用于 .about-more，不影响其他 details。 */
+.about-more:not([open])>:not(summary){display:none!important}
 .settings-entry .entry-arrow{flex:none}
 
 /* 道藏全藏（v135）：来源标注 + 全藏浏览层 */
