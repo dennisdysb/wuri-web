@@ -447,6 +447,31 @@ var JingWen = (function () {
     }
     for (var i = 0; i < t.length; i++) {
       var ch = t[i], r = py[i] || '';
+      /* 星平面字（代理对）并作一格：两半拆散各自成串即成孤代理元（替换符）；
+         读音存于首单位 py[i]，高亮取两单位并集（任一半命中即整字一格包裹）。
+         BMP 字路径与旧版逐字等价（注音普查星平面机制 A′，用户 2026-11-02 裁示） */
+      var ac0 = t.charCodeAt(i);
+      if (ac0 >= 0xD800 && ac0 <= 0xDBFF && i + 1 < t.length) {
+        var ac1 = t.charCodeAt(i + 1);
+        if (ac1 >= 0xDC00 && ac1 <= 0xDFFF) {
+          var pch = t.substr(i, 2);
+          if (dt) {
+            if (dt.charCodeAt(i) >= 0xD800 && dt.charCodeAt(i) <= 0xDBFF &&
+                dt.charCodeAt(i + 1) >= 0xDC00 && dt.charCodeAt(i + 1) <= 0xDFFF) pch = dt.substr(i, 2);
+          } else {
+            var pcv = txScript(pch);
+            if (pcv && pcv.length === 2) pch = pcv;
+          }
+          var pcell = r ? '<ruby>' + esc(pch) + '<rt>' + esc(r) + '</rt></ruby>' : esc(pch);
+          var phr = hlAt(i) || hlAt(i + 1);
+          if (phr) {
+            pcell = '<span class="hl hl-' + (phr.color || 'yellow') + '" data-hl-id="' + (phr.id || '') + '">' + pcell + '</span>';
+          }
+          out += pcell;
+          i++;
+          continue;
+        }
+      }
       ch = dt ? dt[i] : txScript(ch);
       var cell = r ? '<ruby>' + esc(ch) + '<rt>' + esc(r) + '</rt></ruby>' : esc(ch);
       var hr = hlAt(i);
@@ -477,7 +502,19 @@ var JingWen = (function () {
        * 万一不等长回落整句原字——宁可不转、不可错位 */
       var senD = txScript(sen);
       if (!senD || senD.length !== sen.length) senD = sen;
+      /* 首字若为星平面字（代理对），并作一字显示、读音取首单位 py[pyIdx]
+         （注音普查星平面机制 A′，与 rubyPara 同口径，用户 2026-11-02 裁示） */
+      var headLen = 1;
+      if (sen.length >= 2) {
+        var hc0 = sen.charCodeAt(0), hc1 = sen.charCodeAt(1);
+        if (hc0 >= 0xD800 && hc0 <= 0xDBFF && hc1 >= 0xDC00 && hc1 <= 0xDFFF) headLen = 2;
+      }
       var dispCh = senD.charAt(0);
+      if (headLen === 2) {
+        dispCh = (senD.charCodeAt(0) >= 0xD800 && senD.charCodeAt(0) <= 0xDBFF &&
+          senD.charCodeAt(1) >= 0xDC00 && senD.charCodeAt(1) <= 0xDFFF)
+          ? senD.substr(0, 2) : sen.substr(0, 2);
+      }
       // 找首字拼音
       var pyIdx = t.indexOf(sen, pos);
       var r = (pyIdx >= 0 && py[pyIdx]) ? py[pyIdx] : '';
@@ -485,8 +522,21 @@ var JingWen = (function () {
       // 全文其余部分（隐藏，点击显示）
       // rest：去掉首字后的剩余部分
       var restHtml = '';
-      for (var j = 1; j < sen.length; j++) {
+      for (var j = headLen; j < sen.length; j++) {
         var ch2 = senD[j], rr2 = (pyIdx >= 0) ? (py[pyIdx + j] || '') : '';
+        /* 句中星平面字同样并作一格：读音取首单位、次单位跳过（A′ 同口径） */
+        var rc0 = sen.charCodeAt(j);
+        if (rc0 >= 0xD800 && rc0 <= 0xDBFF && j + 1 < sen.length) {
+          var rc1 = sen.charCodeAt(j + 1);
+          if (rc1 >= 0xDC00 && rc1 <= 0xDFFF) {
+            ch2 = (senD.charCodeAt(j) >= 0xD800 && senD.charCodeAt(j) <= 0xDBFF &&
+              senD.charCodeAt(j + 1) >= 0xDC00 && senD.charCodeAt(j + 1) <= 0xDFFF)
+              ? senD.substr(j, 2) : sen.substr(j, 2);
+            restHtml += rr2 ? '<ruby>' + esc(ch2) + '<rt>' + esc(rr2) + '</rt></ruby>' : esc(ch2);
+            j++;
+            continue;
+          }
+        }
         restHtml += rr2 ? '<ruby>' + esc(ch2) + '<rt>' + esc(rr2) + '</rt></ruby>' : esc(ch2);
       }
       out += '<span class="recite-sen">'

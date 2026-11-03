@@ -546,7 +546,9 @@
     while (i < t.length) {
       var matched = false;
       if (ovr) {
-        var maxL = Math.min(6, t.length - i);
+        /* 键长上限 7 单位：存量键最长 6 单位（注音普查 2026-11-02 实测分布 2–6 单位），
+           第 7 单位只为容纳含星平面字的全链键（如「唵吽吒唎𡄳嚩」7 单位），存量匹配零变化 */
+        var maxL = Math.min(7, t.length - i);
         for (var L = maxL; L >= 2; L--) {
           var ov = ovr[t.substr(i, L)];
           if (ov) {
@@ -556,6 +558,19 @@
         }
       }
       if (matched) continue;
+      /* 星平面字（UTF-16 代理对）：dict 键是完整字，须并作一字查表、读音写入首单位、
+         次单位留空（渲染层 rubyPara/recitePara 并格呈现）；BMP 字与旧版逐字等价
+         （注音普查星平面机制 A′，用户 2026-11-02 裁示） */
+      var c0 = t.charCodeAt(i);
+      if (c0 >= 0xD800 && c0 <= 0xDBFF && i + 1 < t.length) {
+        var c1 = t.charCodeAt(i + 1);
+        if (c1 >= 0xDC00 && c1 <= 0xDFFF) {
+          out[i] = (dict && dict[t.substr(i, 2)]) || '';
+          out[i + 1] = '';
+          i += 2;
+          continue;
+        }
+      }
       out[i] = (dict && dict[t[i]]) || '';
       i++;
     }
