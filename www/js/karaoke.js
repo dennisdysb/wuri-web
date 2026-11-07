@@ -37,6 +37,12 @@
     var m = Math.floor(sec / 60), s = sec % 60;
     return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
   }
+  /* 悬浮时间框用：mm:ss.d（1 位小数），与主显原始秒数并列 */
+  function fmt1(sec) {
+    sec = Math.max(0, sec || 0);
+    var m = Math.floor(sec / 60), s = sec - m * 60;
+    return m + ':' + (s < 10 ? '0' : '') + s.toFixed(1);
+  }
 
   /* ---------- 常量 ---------- */
   var BASE_TEXT_URL = 'content/karaoke/base_text.json';
@@ -315,6 +321,76 @@
     var d = audio.duration || 0, c = audio.currentTime || 0;
     if (bar) bar.style.width = (d > 0 ? (c / d * 100) : 0) + '%';
     if (tm) tm.textContent = fmt(c) + ' / ' + fmt(d);
+    updateTimebox(c); /* 悬浮时间框随同一 tick 更新（播放中／暂停都跟） */
+  }
+
+  /* ---------- 跟唱测试用悬浮时间框（v586：测试阶段临时工具，耳核完成后可删） ----------
+   * 主显原始秒数（1 位小数，如 115.3s），旁附 mm:ss.d（如 1:55.3）。
+   * 拖动＋持久化照抄读经器 #qing-btn 的 __wuriMakeDraggable 模式（8px 阈值判拖动、
+   * 松手存 localStorage、视口钳制），自用键 wuri_karaoke_timebox_v1，恒可拖
+   * （测试工具，不设 fabs-ghost 门）；元素放在 #karaoke-view 之外（见 index.html），
+   * 显隐由 open()/close() 的 .show 管理。 */
+  var TIMEBOX_KEY = 'wuri_karaoke_timebox_v1';
+  function updateTimebox(time) {
+    var sec = $('karaoke-timebox-sec'), mmss = $('karaoke-timebox-mmss');
+    if (!sec && !mmss) return;
+    var t = Math.max(0, time || 0);
+    if (sec) sec.textContent = t.toFixed(1) + 's';
+    if (mmss) mmss.textContent = fmt1(t);
+  }
+  function applyTimeboxPos() {
+    var box = $('karaoke-timebox');
+    if (!box) return;
+    try {
+      var pos = JSON.parse(localStorage.getItem(TIMEBOX_KEY) || 'null');
+      if (pos && typeof pos.x === 'number' && typeof pos.y === 'number') {
+        var w = box.offsetWidth || 110, h = box.offsetHeight || 56;
+        box.style.left = Math.max(4, Math.min(pos.x, window.innerWidth - w - 4)) + 'px';
+        box.style.top = Math.max(4, Math.min(pos.y, window.innerHeight - h - 4)) + 'px';
+        box.style.right = 'auto';
+      }
+    } catch (e) {}
+  }
+  function bindTimeboxDrag() {
+    var box = $('karaoke-timebox');
+    if (!box || box.__wuriTimeboxDrag) return;
+    box.__wuriTimeboxDrag = true;
+    var sx = 0, sy = 0, ox = 0, oy = 0, dragging = false, moved = false, pid = null;
+    function onMove(e) {
+      if (!dragging || e.pointerId !== pid) return;
+      var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!moved && Math.sqrt(dx * dx + dy * dy) < 8) return;
+      moved = true;
+      if (e.cancelable) e.preventDefault();
+      var w = box.offsetWidth || 110, h = box.offsetHeight || 56;
+      var nx = Math.max(4, Math.min(ox + dx, window.innerWidth - w - 4));
+      var ny = Math.max(4, Math.min(oy + dy, window.innerHeight - h - 4));
+      box.style.left = nx + 'px'; box.style.top = ny + 'px';
+      box.style.right = 'auto';
+    }
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', endDrag);
+      window.removeEventListener('pointercancel', endDrag);
+      if (moved) {
+        var r = box.getBoundingClientRect();
+        try { localStorage.setItem(TIMEBOX_KEY, JSON.stringify({ x: Math.round(r.left), y: Math.round(r.top) })); } catch (e) {}
+        var swallow = function (ev) { ev.stopImmediatePropagation(); ev.preventDefault(); };
+        box.addEventListener('click', swallow, { capture: true, once: true });
+        setTimeout(function () { box.removeEventListener('click', swallow, { capture: true }); }, 350);
+      }
+      moved = false;
+    }
+    box.addEventListener('pointerdown', function (e) {
+      pid = e.pointerId; dragging = true; moved = false;
+      sx = e.clientX; sy = e.clientY;
+      var r = box.getBoundingClientRect(); ox = r.left; oy = r.top;
+      window.addEventListener('pointermove', onMove, { passive: false });
+      window.addEventListener('pointerup', endDrag);
+      window.addEventListener('pointercancel', endDrag);
+    });
   }
   function jumpToLine(n, autoplay) {
     if (!data || n < 0 || n >= data.items.length) return;
@@ -676,6 +752,8 @@
     opened = true;
     var qfab = $('karaoke-qing-fab');
     if (qfab) qfab.classList.add('show'); /* 悬浮磬钮在视图之外，显隐由 open/close 管理 */
+    var tbox = $('karaoke-timebox');
+    if (tbox) { applyTimeboxPos(); tbox.classList.add('show'); updateTimebox(audio ? (audio.currentTime || 0) : 0); }
     layoutSticky(); /* 显形后再算吸顶偏移：hidden 时 offsetHeight 为 0，须先显形再实测（C 线 §1.6 原意不变） */
     updateScoringUI(); /* 重开复位：状态条、提示、按钮文案回到未打分态 */
     updateTopBtn();
@@ -705,6 +783,8 @@
     try { if (qingAudio) qingAudio.pause(); } catch (e) {}
     var qbtn = $('karaoke-qing-fab');
     if (qbtn) qbtn.classList.remove('qing-near', 'qing-hit', 'show');
+    var tbox2 = $('karaoke-timebox');
+    if (tbox2) tbox2.classList.remove('show');
     if (scoring || arming) disarmScoring(false);
     updateTopBtn();
     var host = $('karaoke-score');
@@ -755,6 +835,7 @@
     });
     var qingBtn = $('karaoke-qing-fab');
     if (qingBtn) qingBtn.addEventListener('click', function () { strikeQing(); });
+    bindTimeboxDrag(); /* 悬浮时间框拖动（v586 测试工具；恒可拖） */
     var spd = $('karaoke-speed');
     if (spd) spd.addEventListener('change', function () {
       audio.playbackRate = parseFloat(spd.value) || 1;
@@ -814,5 +895,5 @@
   }
   window.__wuriKaraoke = { open: open, close: close, loadData: loadData,
     /* 供冒烟测试的纯函数／入口（生产不调用） */
-    _test: { detectPitch: detectPitch, median: median, showScore: showScore, scoreLines: scoreLines, strikeQing: strikeQing, buildQingTimes: buildQingTimes, seekBy: seekBy, setLoop: setLoop, findLine: findLine } };
+    _test: { detectPitch: detectPitch, median: median, showScore: showScore, scoreLines: scoreLines, strikeQing: strikeQing, buildQingTimes: buildQingTimes, seekBy: seekBy, setLoop: setLoop, findLine: findLine, updateTimebox: updateTimebox, applyTimeboxPos: applyTimeboxPos } };
 })();

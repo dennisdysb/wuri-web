@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=585">
+<link rel="stylesheet" href="css/style.css?v=586">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -260,8 +260,8 @@
             <div class="jingrec-gloss" id="jingrec-gloss"></div>
           </div>
           <div class="jingrec-foot">
-            <button class="btn primary" id="jingrec-go">去读经</button>
             <span class="jingrec-reason" id="jingrec-reason"></span>
+            <button class="btn small" id="jingrec-go">去读经</button>
           </div>
         </section>
       </div>
@@ -482,6 +482,13 @@
            open()/close() 管理，不用 hidden 属性以保留淡入淡出过渡。落位照读经器口径
            bottom 114px，回顶钮在 20px，竖向不重叠。 -->
       <button class="karaoke-qing-fab" id="karaoke-qing-fab" type="button" aria-label="敲磬" title="敲磬">磬</button>
+      <!-- 跟唱测试用悬浮时间框（v586：用户 2026-11-07 亲口要，测试阶段临时工具，
+           耳核完成后可删，先不做隐藏开关。必须放在 #karaoke-view 之外——fixed
+           元素放进可滚动的 fixed 容器内，旧版 iOS WebView 会按 absolute 处理
+           （跟着内容滚走），与回顶钮／磬钮同理；显隐由 JS（.show）在 open()/
+           close() 管理。主显原始秒数（1 位小数），旁附 mm:ss.d；可拖动，
+           位置持久化 localStorage（照抄读经器 #qing-btn 拖动模式）。 -->
+      <div class="karaoke-timebox" id="karaoke-timebox" role="timer" aria-label="当前播放时间"><span class="karaoke-timebox-sec" id="karaoke-timebox-sec">0.0s</span><span class="karaoke-timebox-mmss" id="karaoke-timebox-mmss">0:00.0</span></div>
   </main>
 
   <!-- ============ 提醒 ============ -->
@@ -1148,7 +1155,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v585）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v586）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
