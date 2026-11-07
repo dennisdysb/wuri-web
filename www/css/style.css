@@ -3638,6 +3638,8 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-head-t{min-width:0}
 .karaoke-head-title{font-family:var(--serif);font-weight:700;font-size:18px;color:var(--ink)}
 .karaoke-head-sub{color:var(--muted);font-size:13px;margin-top:3px}
+/* 返回键（v583：跟读经器返回钮同色）：实底 --teal-deep、白字；只改色，pill 形态与头栏位置不动 */
+#karaoke-back{background:var(--teal-deep);color:#fff;border-color:var(--teal-deep)}
 /* 段选择：2×2 等分网格（v577：竖排四行改网格，标签再长也不乱） */
 .karaoke-seg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 0}
 .karaoke-seg-row .karaoke-seg{width:100%;text-align:center;padding:9px 6px;line-height:1.45}
@@ -3650,21 +3652,6 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-ctl{flex:0 1 auto;min-width:0;height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
 .karaoke-ctl:active{transform:scale(.97)}
 .karaoke-ctl.active{background:var(--gold);color:#fff;border-color:var(--gold)}
-/* 敲磬圆按钮（B 线设计稿）：46px 正圆，与控制条同高；
- * 颜色只走 --gold / --card 变量链（日/夜/红光三态由变量覆写接管，不得写死色值；
- * 刻意不用 --gold-wash——红光未覆写它，浅色晕会在红光底上浮现）。 */
-.karaoke-qing-btn{flex:0 0 auto;width:46px;height:46px;border-radius:50%;
-  border:1.5px solid var(--gold);background:var(--card);color:var(--gold);
-  font-family:var(--serif);font-size:20px;font-weight:700;line-height:1;
-  cursor:pointer;touch-action:manipulation;position:relative;padding:0}
-.karaoke-qing-btn:active{transform:scale(.94)}
-.karaoke-qing-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-/* 临近磬点：金底白字（与 .karaoke-ctl.active 同配方）＋脉冲环 */
-.karaoke-qing-btn.qing-near,.karaoke-qing-btn.qing-hit{background:var(--gold);color:#fff;border-color:var(--gold)}
-.karaoke-qing-btn.qing-near::after{content:"";position:absolute;inset:-1.5px;border-radius:50%;
-  border:2px solid var(--gold);animation:karaoke-qing-pulse 1.2s ease-out infinite;pointer-events:none}
-@keyframes karaoke-qing-pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.35);opacity:0}}
-@media (prefers-reduced-motion:reduce){.karaoke-qing-btn.qing-near::after{animation:none}}
 /* ---- 打分悬浮停控制：吸顶状态条（C 线 §1） ----
  * 颜色只走 --card / --gold / --ink / --cinnabar 变量链（日/夜/红光三态由变量覆写接管；
  * 刻意不用 --gold-wash——红光未覆写它，会浮米白光晕，见 B 线 §2.2）。 */
@@ -3696,6 +3683,26 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
   transition:opacity .2s ease,transform .2s ease,visibility .2s}
 .karaoke-top-btn.show{opacity:1;visibility:visible;transform:none}
 .karaoke-top-btn:active{transform:scale(.92)}
+/* 浮动敲磬钮（v583：控制条圆钮删除，改与读经器 #qing-btn 同款的绿色悬浮钮）：
+ * 56px 正圆、深绿 --teal-deep 底、白字磬、右下 bottom 114px（读经器口径；
+ * 回顶钮在 20px，竖向不重叠）、ghost 透明度 .55（:active 亮到 .85）；
+ * 颜色只走 --teal-deep / --gold 变量链（日/夜/红光三态由变量覆写接管，不得写死色值；
+ * 白字 #fff 与 2px 半透白描边照抄读经器 .qing-fab 原规格）。 */
+.karaoke-qing-fab{position:fixed;right:18px;bottom:calc(114px + env(safe-area-inset-bottom));
+  z-index:70;width:56px;height:56px;border-radius:50%;
+  background:var(--teal-deep);color:#fff;font-size:1.3rem;font-family:var(--serif);
+  border:2px solid rgba(255,255,255,.3);box-shadow:0 4px 12px rgba(0,0,0,.25);
+  cursor:pointer;padding:0;line-height:1;opacity:0;visibility:hidden;transform:translateY(8px);
+  transition:opacity .2s ease,transform .2s ease,visibility .2s}
+.karaoke-qing-fab.show{opacity:.55;visibility:visible;transform:none}
+.karaoke-qing-fab.show:active{opacity:.85;transform:scale(.92)}
+.karaoke-qing-fab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* 临近磬点：金底白字＋脉冲环（与旧圆钮、（罄）标记同配方） */
+.karaoke-qing-fab.show.qing-near,.karaoke-qing-fab.show.qing-hit{background:var(--gold);border-color:var(--gold);opacity:1}
+.karaoke-qing-fab.qing-near::after{content:"";position:absolute;inset:-1.5px;border-radius:50%;
+  border:2px solid var(--gold);animation:karaoke-qing-fab-pulse 1.2s ease-out infinite;pointer-events:none}
+@keyframes karaoke-qing-fab-pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+@media (prefers-reduced-motion:reduce){.karaoke-qing-fab.qing-near::after{animation:none}}
 [data-theme="night"] .karaoke-ctl,[data-theme="night"] .karaoke-speed{color:var(--teal)}
 #karaoke-view .mini-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
 /* 进度＋时间同一行（v577：进度条伸缩、时间右贴） */

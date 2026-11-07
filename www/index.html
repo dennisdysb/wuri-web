@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=582">
+<link rel="stylesheet" href="css/style.css?v=583">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -438,7 +438,6 @@
         </div>
         <div class="karaoke-controls">
           <button class="karaoke-play" id="karaoke-play" data-i18n="karaoke_play">播放</button>
-          <button class="karaoke-qing-btn" id="karaoke-qing" type="button" aria-label="敲磬" title="敲磬">磬</button>
           <select id="karaoke-speed" class="karaoke-speed" aria-label="变速">
             <option value="0.5">0.5×</option>
             <option value="0.75">0.75×</option>
@@ -467,6 +466,12 @@
            fixed 容器内，旧版 iOS WebView 会按 absolute 处理（跟着内容滚走）。
            显隐由 JS（.show class）管理，不用 hidden 属性以保留淡入淡出过渡。 -->
       <button class="karaoke-top-btn" id="karaoke-top-btn" type="button" aria-label="回到顶部" title="回到顶部">↑</button>
+      <!-- 浮动敲磬钮（v583：控制条圆钮删除，改与读经器 #qing-btn 同款的绿色悬浮钮；
+           必须放在 #karaoke-view 之外——与回顶钮同理，fixed 元素放进可滚动的 fixed 容器内，
+           旧版 iOS WebView 会按 absolute 处理（跟着内容滚走）；显隐由 JS（.show）在
+           open()/close() 管理，不用 hidden 属性以保留淡入淡出过渡。落位照读经器口径
+           bottom 114px，回顶钮在 20px，竖向不重叠。 -->
+      <button class="karaoke-qing-fab" id="karaoke-qing-fab" type="button" aria-label="敲磬" title="敲磬">磬</button>
   </main>
 
   <!-- ============ 提醒 ============ -->
@@ -1133,7 +1138,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v582）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v583）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">

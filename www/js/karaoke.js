@@ -52,11 +52,11 @@
   };
   var RMS_VOICED = 0.012;   /* 麦克风有声阈值（RMS） */
   var PITCH_MIN = 80, PITCH_MAX = 400; /* 人声基频搜索范围 Hz */
-  /* ---------- 敲磬（B 线设计稿） ----------
-   * 音源复用冥想区间隔磬 bell-interval.mp3（单声敲击）；
-   * 与冥想区同一 URL（含 ?v=3）即命中 SW 安装期预缓存，不新增下载、不改 sw.js。
+  /* ---------- 敲磬（v583：改与读经器同款） ----------
+   * 音源改用读经器 qing.mp3（v581 的 bell-interval.mp3 用户真机反馈听着像敲钵，不用）；
+   * 与读经器同一 URL（无 ?v），离线口径与读经器一致（运行期缓存，sw.js 预缓存未单列）。
    * QING_AUTO 预留自动敲开关：默认 false（手动 only，等用户定），本版不接线。 */
-  var QING_URL = 'audio/meditation/bell-interval.mp3?v=3';
+  var QING_URL = 'audio/qing.mp3';
   var QING_VOL = 0.6;            /* 磬固定音量（不跟冥想滑杆联动） */
   var QING_THROTTLE_MS = 500;    /* 防连点：500ms 内重复点按忽略 */
   var QING_NEAR_BEFORE = 2.0;    /* 临近提示窗：磬点前 2.0s 起亮 */
@@ -332,14 +332,14 @@
     if (p && p.catch) p.catch(function () {});
     /* 记一笔供打分剔除（媒体时间坐标，与 mic 样本的 s.t 同坐标） */
     if (audio) qingStrikes.push({ file: curFile, t: audio.currentTime || 0 });
-    var btn = $('karaoke-qing');
+    var btn = $('karaoke-qing-fab');
     if (btn) {
       btn.classList.add('qing-hit');
       setTimeout(function () { btn.classList.remove('qing-hit'); }, 300);
     }
   }
   function updateQingNear(time) {
-    var btn = $('karaoke-qing');
+    var btn = $('karaoke-qing-fab');
     if (!btn) return;
     var near = null, i, q;
     for (i = 0; i < qingTimes.length; i++) {
@@ -638,6 +638,8 @@
     if (!view) return;
     view.hidden = false;
     opened = true;
+    var qfab = $('karaoke-qing-fab');
+    if (qfab) qfab.classList.add('show'); /* 悬浮磬钮在视图之外，显隐由 open/close 管理 */
     layoutSticky(); /* 显形后再算吸顶偏移：hidden 时 offsetHeight 为 0，须先显形再实测（C 线 §1.6 原意不变） */
     updateScoringUI(); /* 重开复位：状态条、提示、按钮文案回到未打分态 */
     updateTopBtn();
@@ -665,8 +667,8 @@
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     if (audio) audio.pause();
     try { if (qingAudio) qingAudio.pause(); } catch (e) {}
-    var qbtn = $('karaoke-qing');
-    if (qbtn) qbtn.classList.remove('qing-near', 'qing-hit');
+    var qbtn = $('karaoke-qing-fab');
+    if (qbtn) qbtn.classList.remove('qing-near', 'qing-hit', 'show');
     if (scoring || arming) disarmScoring(false);
     updateTopBtn();
     var host = $('karaoke-score');
@@ -715,7 +717,7 @@
       if (audio.paused) audio.play().catch(function () {});
       else audio.pause();
     });
-    var qingBtn = $('karaoke-qing');
+    var qingBtn = $('karaoke-qing-fab');
     if (qingBtn) qingBtn.addEventListener('click', function () { strikeQing(); });
     var spd = $('karaoke-speed');
     if (spd) spd.addEventListener('change', function () {
