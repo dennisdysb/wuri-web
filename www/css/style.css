@@ -3623,33 +3623,48 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .hz-lunar{font-size:14px;line-height:1.9;color:var(--hz-ink)}
 .hz-hint{color:var(--muted);font-size:.78rem;line-height:1.6;margin-top:10px;font-family:var(--sans)}
 
-/* ===== 跟唱学唱区＋跟唱播放器（内部 v576，2026-11-06 跟唱样板） =====
+/* ===== 跟唱学唱区＋跟唱播放器（内部 v577，2026-11-06 跟唱样板；v577 排版重做） =====
  * 颜色一律走变量链（--gold 已唱字、--teal 好分、--cinnabar 差分、
  * --teal-wash 当前句底色），日间／夜间／红光三态由变量覆写自动适配。 */
-.karaoke-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--paper-2)}
+.karaoke-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--paper-2)}
 .karaoke-book{min-width:0}
-.karaoke-title{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--ink)}
-.karaoke-meta{color:var(--muted);font-size:13px;margin-top:4px}
+.karaoke-title{font-family:var(--serif);font-weight:700;font-size:17px;line-height:1.4;color:var(--ink)}
+.karaoke-meta{color:var(--muted);font-size:13px;line-height:1.6;margin-top:5px}
+#karaoke-sec .karaoke-card{margin-top:12px}
+#karaoke-open-btn{white-space:nowrap;min-width:68px;background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
 #karaoke-view{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 40px}
 #karaoke-view[hidden]{display:none}
 .karaoke-head{position:sticky;top:0;z-index:20;background:var(--paper);display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .karaoke-head-t{min-width:0}
 .karaoke-head-title{font-family:var(--serif);font-weight:700;font-size:18px;color:var(--ink)}
 .karaoke-head-sub{color:var(--muted);font-size:13px;margin-top:3px}
-.karaoke-seg-row{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px 0}
-.karaoke-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px 0}
+/* 段选择：2×2 等分网格（v577：竖排四行改网格，标签再长也不乱） */
+.karaoke-seg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 0}
+.karaoke-seg-row .karaoke-seg{width:100%;text-align:center;padding:9px 6px;line-height:1.45}
+/* 控制条：统一 46px 高、同一视觉语言（v577 重做）；主按钮金底白字，
+ * 变速／循环／打分描边 pill，循环开、打分中时金底白字（.active）。 */
+.karaoke-controls{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;padding:12px 14px 0}
+.karaoke-play{flex:1 1 auto;min-width:0;height:46px;border-radius:12px;background:var(--gold);color:#fff;border:1px solid var(--gold);font-size:1rem;font-weight:700;font-family:var(--sans);cursor:pointer}
+.karaoke-play:active{transform:scale(.97)}
+.karaoke-speed{flex:0 0 auto;height:46px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;padding:0 6px;font-family:var(--sans);cursor:pointer}
+.karaoke-ctl{flex:0 1 auto;min-width:0;height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
+.karaoke-ctl:active{transform:scale(.97)}
+.karaoke-ctl.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+[data-theme="night"] .karaoke-ctl,[data-theme="night"] .karaoke-speed{color:var(--teal)}
 #karaoke-view .mini-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
-.karaoke-progress{height:6px;border-radius:3px;background:var(--line-soft);margin:12px 14px 0;overflow:hidden}
+/* 进度＋时间同一行（v577：进度条伸缩、时间右贴） */
+.karaoke-progress-wrap{display:flex;align-items:center;gap:10px;padding:14px 14px 0}
+.karaoke-progress{flex:1;height:6px;border-radius:3px;background:var(--line-soft);overflow:hidden;margin:0}
 .karaoke-progress-bar{height:100%;width:0;background:var(--gold);border-radius:3px}
-.karaoke-time{color:var(--muted);font-size:12px;text-align:right;padding:6px 14px 0;font-family:var(--sans)}
+.karaoke-time{color:var(--muted);font-size:12px;font-family:var(--sans);white-space:nowrap;padding:0}
 #karaoke-lyrics{padding:8px 14px 0}
 .karaoke-sec{margin-bottom:18px}
 .karaoke-sec-h{font-family:var(--serif);font-weight:700;font-size:16px;color:var(--teal);margin:10px 0 4px}
 .karaoke-nonsing{color:var(--muted);font-size:13px;padding:4px 0}
 .karaoke-line{font-family:var(--serif);font-size:20px;line-height:2.3;color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
 .karaoke-line.active{background:var(--teal-wash);box-shadow:inset 3px 0 0 var(--gold)}
-.karaoke-line ruby{ruby-align:center}
-.karaoke-line rt{font-family:var(--sans);font-size:11px;color:var(--muted)}
+.karaoke-line ruby{ruby-align:center;margin:0 2px}
+.karaoke-line rt{font-family:var(--sans);font-size:11px;color:var(--muted);letter-spacing:.03em}
 .karaoke-ch.sung{color:var(--gold);font-weight:700}
 .karaoke-qing{display:inline-block;font-family:var(--sans);font-size:11px;line-height:1;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:2px 3px;margin:0 2px;vertical-align:middle}
 .karaoke-repeat{font-family:var(--sans);font-size:11px;color:var(--muted);margin-left:8px}

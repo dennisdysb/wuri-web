@@ -244,9 +244,12 @@
     if (!opened) return;
     rafId = requestAnimationFrame(tick);
     if (!audio) return;
-    /* 切走标签页时父容器不可见：停音，避免后台继续唱 */
+    /* 视图已关闭或切走标签页时停音，避免后台继续唱。
+     * 注意不用 offsetParent：#karaoke-view 是 position:fixed，fixed 元素的
+     * offsetParent 恒为 null，用它判可见性会在播放开始后一帧内误停
+     * （v576 真机 bug：点播放无反应，时长却正常显示 02:57）。 */
     var view = $('karaoke-view');
-    if (view && view.offsetParent === null && !audio.paused) { audio.pause(); return; }
+    if (view && (view.hidden || document.hidden) && !audio.paused) { audio.pause(); return; }
     var time = audio.currentTime || 0;
     /* 单句循环 */
     if (loopOne && lastLineIdx >= 0 && data) {
@@ -342,7 +345,7 @@
     startMic().then(function () {
       scoring = true;
       var btn = $('karaoke-score-btn');
-      if (btn) btn.textContent = t('karaoke_scoring');
+      if (btn) { btn.textContent = t('karaoke_scoring'); btn.classList.add('active'); }
       if (audio && audio.paused) audio.play().catch(function () {});
     }).catch(function () {
       scoring = false;
@@ -354,7 +357,7 @@
   function disarmScoring(show) {
     scoring = false;
     var btn = $('karaoke-score-btn');
-    if (btn) btn.textContent = t('karaoke_score');
+    if (btn) { btn.textContent = t('karaoke_score'); btn.classList.remove('active'); }
     var samples = mic ? mic.samples.slice() : [];
     stopMic();
     if (show) showScore(samples);
