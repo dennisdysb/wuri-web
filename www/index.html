@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=580">
+<link rel="stylesheet" href="css/style.css?v=581">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -438,6 +438,7 @@
         </div>
         <div class="karaoke-controls">
           <button class="karaoke-play" id="karaoke-play" data-i18n="karaoke_play">播放</button>
+          <button class="karaoke-qing-btn" id="karaoke-qing" type="button" aria-label="敲磬" title="敲磬">磬</button>
           <select id="karaoke-speed" class="karaoke-speed" aria-label="变速">
             <option value="0.5">0.5×</option>
             <option value="0.75">0.75×</option>
@@ -445,6 +446,13 @@
           </select>
           <button class="karaoke-ctl" id="karaoke-loop" data-i18n="karaoke_loop">单句循环</button>
           <button class="karaoke-ctl" id="karaoke-score-btn" data-i18n="karaoke_score">打分</button>
+        </div>
+        <!-- 打分悬浮停控制（C 线 §1）：吸顶状态条，仅计分中显示；停止按钮与控制条
+             打分按钮同一漏斗。hidden 属性须配 CSS .karaoke-score-float[hidden]{display:none}
+             （author 的 display:flex 会覆盖 UA 的 [hidden] 默认样式）。 -->
+        <div class="karaoke-score-float" id="karaoke-score-float" hidden>
+          <span class="karaoke-score-float-status"><span class="karaoke-score-dot"></span><span data-i18n="karaoke_scoring_now">打分中</span>&nbsp;<span id="karaoke-score-time">00:00</span></span>
+          <button class="karaoke-score-stop" id="karaoke-score-stop" type="button" data-i18n="karaoke_stop_score">停止并出分</button>
         </div>
         <p class="hint" id="karaoke-mic-hint" hidden data-i18n="karaoke_mic_hint">打分需开麦克风，建议戴耳机（评分更准）</p>
         <div class="karaoke-progress-wrap">
@@ -455,6 +463,10 @@
         <div id="karaoke-score" hidden></div>
         <audio id="karaoke-audio" preload="metadata"></audio>
       </div>
+      <!-- 回到顶部（C 线 §2）：必须放在 #karaoke-view 之外——fixed 元素放进可滚动的
+           fixed 容器内，旧版 iOS WebView 会按 absolute 处理（跟着内容滚走）。
+           显隐由 JS（.show class）管理，不用 hidden 属性以保留淡入淡出过渡。 -->
+      <button class="karaoke-top-btn" id="karaoke-top-btn" type="button" aria-label="回到顶部" title="回到顶部">↑</button>
   </main>
 
   <!-- ============ 提醒 ============ -->
@@ -1121,7 +1133,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v580）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v581）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">

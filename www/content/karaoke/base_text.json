@@ -24,7 +24,7 @@
     "sections": 16,
     "sing_sections": 14,
     "nonsing_sections": 2,
-    "sing_lines": 145,
+    "sing_lines": 146,
     "nonsing_lines": 12,
     "total_chars": 700,
     "sing_chars": 639,
@@ -95,23 +95,24 @@
         "m4a": "_____7_iqwa.m4a",
         "time": "约2:18–2:55（尾部）"
       },
-      "repeat": 3,
-      "note": "（三称）。三称大罗三宝天尊已证实（RETIME_SEG1.md §4：第 ③ 遍「三宝天尊」＋135.65–138.26 静默分界）。",
+      "note": "大罗三宝唱两遍、后接天尊（2026-11-07 用户耳核＋声学三 run 验证；推翻 RETIME_SEG1.md §4「大罗三宝天尊三遍」旧说）。",
       "lines": [
         {
-          "text": "大罗三宝天尊",
+          "text": "大罗三宝",
           "py": [
             "dài",
             "luó",
             "sān",
-            "bǎo",
+            "bǎo"
+          ]
+        },
+        {
+          "text": "天尊",
+          "py": [
             "tiān",
             "zūn"
           ],
-          "qing": [
-            5
-          ],
-          "note": "大读 dài（用户 PDF 注音，ASR“待落三宝天尊”印证）；（罄）在天后"
+          "note": "（罄）在天后"
         }
       ]
     },

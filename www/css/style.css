@@ -3632,7 +3632,7 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-meta{color:var(--muted);font-size:13px;line-height:1.6;margin-top:5px}
 #karaoke-sec .karaoke-card{margin-top:12px}
 #karaoke-open-btn{white-space:nowrap;min-width:68px;background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700;font-size:.95rem;padding:9px 16px;border-radius:999px}
-#karaoke-view{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 40px}
+#karaoke-view{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 96px}
 #karaoke-view[hidden]{display:none}
 .karaoke-head{position:sticky;top:0;z-index:20;background:var(--paper);display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
 .karaoke-head-t{min-width:0}
@@ -3643,13 +3643,59 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-seg-row .karaoke-seg{width:100%;text-align:center;padding:9px 6px;line-height:1.45}
 /* 控制条：统一 46px 高、同一视觉语言（v577 重做）；主按钮金底白字，
  * 变速／循环／打分描边 pill，循环开、打分中时金底白字（.active）。 */
-.karaoke-controls{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;padding:12px 14px 0}
+.karaoke-controls{position:sticky;top:76px;z-index:15;background:var(--paper);display:flex;align-items:center;gap:6px;flex-wrap:nowrap;padding:12px 14px 10px;border-bottom:1px solid var(--line)}
 .karaoke-play{flex:1 1 auto;min-width:0;height:46px;border-radius:12px;background:var(--gold);color:#fff;border:1px solid var(--gold);font-size:1rem;font-weight:700;font-family:var(--sans);cursor:pointer}
 .karaoke-play:active{transform:scale(.97)}
 .karaoke-speed{flex:0 0 auto;height:46px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;padding:0 6px;font-family:var(--sans);cursor:pointer}
 .karaoke-ctl{flex:0 1 auto;min-width:0;height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
 .karaoke-ctl:active{transform:scale(.97)}
 .karaoke-ctl.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+/* 敲磬圆按钮（B 线设计稿）：46px 正圆，与控制条同高；
+ * 颜色只走 --gold / --card 变量链（日/夜/红光三态由变量覆写接管，不得写死色值；
+ * 刻意不用 --gold-wash——红光未覆写它，浅色晕会在红光底上浮现）。 */
+.karaoke-qing-btn{flex:0 0 auto;width:46px;height:46px;border-radius:50%;
+  border:1.5px solid var(--gold);background:var(--card);color:var(--gold);
+  font-family:var(--serif);font-size:20px;font-weight:700;line-height:1;
+  cursor:pointer;touch-action:manipulation;position:relative;padding:0}
+.karaoke-qing-btn:active{transform:scale(.94)}
+.karaoke-qing-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* 临近磬点：金底白字（与 .karaoke-ctl.active 同配方）＋脉冲环 */
+.karaoke-qing-btn.qing-near,.karaoke-qing-btn.qing-hit{background:var(--gold);color:#fff;border-color:var(--gold)}
+.karaoke-qing-btn.qing-near::after{content:"";position:absolute;inset:-1.5px;border-radius:50%;
+  border:2px solid var(--gold);animation:karaoke-qing-pulse 1.2s ease-out infinite;pointer-events:none}
+@keyframes karaoke-qing-pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+@media (prefers-reduced-motion:reduce){.karaoke-qing-btn.qing-near::after{animation:none}}
+/* ---- 打分悬浮停控制：吸顶状态条（C 线 §1） ----
+ * 颜色只走 --card / --gold / --ink / --cinnabar 变量链（日/夜/红光三态由变量覆写接管；
+ * 刻意不用 --gold-wash——红光未覆写它，会浮米白光晕，见 B 线 §2.2）。 */
+.karaoke-score-float{position:sticky;top:144px;z-index:16;display:flex;align-items:center;
+  gap:10px;width:fit-content;max-width:calc(100% - 28px);margin:10px auto 0;
+  padding:5px 6px 5px 14px;border-radius:999px;background:var(--card);
+  border:1.5px solid var(--gold);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.karaoke-score-float[hidden]{display:none}
+.karaoke-score-float-status{display:flex;align-items:center;gap:8px;min-width:0;
+  font-size:.92rem;color:var(--ink);white-space:nowrap}
+.karaoke-score-dot{flex:0 0 auto;width:10px;height:10px;border-radius:50%;
+  background:var(--cinnabar);animation:karaoke-score-pulse 1.2s ease-in-out infinite}
+@keyframes karaoke-score-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
+#karaoke-score-time{font-weight:700;font-variant-numeric:tabular-nums}
+.karaoke-score-stop{flex:0 0 auto;height:36px;padding:0 14px;border-radius:999px;
+  border:1px solid var(--gold);background:var(--gold);color:#fff;
+  font-size:.95rem;font-weight:700;font-family:var(--sans);cursor:pointer;white-space:nowrap}
+.karaoke-score-stop:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){.karaoke-score-dot{animation:none}}
+/* ---- 回到顶部悬浮按钮（C 线 §2）：全站 56px 悬浮钮档 ----
+ * 放在视图外、根层叠上下文 z-index:70（高于视图 60，低于 modal 200／toast 300）。
+ * 显隐只用 .show class（不用 hidden 属性，以免 display:none 杀掉淡入淡出过渡）；
+ * visibility:hidden 时自动不可点、不进 Tab 顺序。 */
+.karaoke-top-btn{position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom));
+  z-index:70;width:56px;height:56px;border-radius:50%;border:1.5px solid var(--gold);
+  background:var(--card);color:var(--gold);font-size:24px;line-height:1;font-family:var(--sans);
+  cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.22);
+  opacity:0;visibility:hidden;transform:translateY(8px);
+  transition:opacity .2s ease,transform .2s ease,visibility .2s}
+.karaoke-top-btn.show{opacity:1;visibility:visible;transform:none}
+.karaoke-top-btn:active{transform:scale(.92)}
 [data-theme="night"] .karaoke-ctl,[data-theme="night"] .karaoke-speed{color:var(--teal)}
 #karaoke-view .mini-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
 /* 进度＋时间同一行（v577：进度条伸缩、时间右贴） */
@@ -3667,6 +3713,8 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-line rt{font-family:var(--sans);font-size:11px;color:var(--muted);letter-spacing:.03em}
 .karaoke-ch.sung{color:var(--gold);font-weight:700}
 .karaoke-qing{display:inline-block;font-family:var(--sans);font-size:11px;line-height:1;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:2px 3px;margin:0 2px;vertical-align:middle}
+/* 正文（罄）标记临近态：沿用描边 pill 形态，只换填色 */
+.karaoke-qing.qing-near{background:var(--gold);color:#fff;border-color:var(--gold)}
 .karaoke-repeat{font-family:var(--sans);font-size:11px;color:var(--muted);margin-left:8px}
 .karaoke-score-card{margin:16px 14px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .karaoke-score-t{font-weight:700;font-size:15px;color:var(--ink)}
