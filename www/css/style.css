@@ -3631,7 +3631,7 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-title{font-family:var(--serif);font-weight:700;font-size:17px;line-height:1.4;color:var(--ink)}
 .karaoke-meta{color:var(--muted);font-size:13px;line-height:1.6;margin-top:5px}
 #karaoke-sec .karaoke-card{margin-top:12px}
-#karaoke-open-btn{white-space:nowrap;min-width:68px;background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700}
+#karaoke-open-btn{white-space:nowrap;min-width:68px;background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700;font-size:.95rem;padding:9px 16px;border-radius:999px}
 #karaoke-view{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 40px}
 #karaoke-view[hidden]{display:none}
 .karaoke-head{position:sticky;top:0;z-index:20;background:var(--paper);display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
