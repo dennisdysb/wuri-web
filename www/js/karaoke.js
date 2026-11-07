@@ -114,10 +114,16 @@
     if (!view) return;
     var head = view.querySelector('.karaoke-head');
     var ctl = view.querySelector('.karaoke-controls');
+    var seek = view.querySelector('.karaoke-seek-row');
     var pill = $('karaoke-score-float');
     var headH = head ? head.offsetHeight : 74;
     if (ctl) ctl.style.top = headH + 'px';
-    if (ctl && pill) pill.style.top = (headH + ctl.offsetHeight) + 'px';
+    var seekH = 0;
+    if (seek) {
+      seek.style.top = (headH + (ctl ? ctl.offsetHeight : 0)) + 'px';
+      seekH = seek.offsetHeight;
+    }
+    if (ctl && pill) pill.style.top = (headH + ctl.offsetHeight + seekH) + 'px';
   }
 
   /* ---------- 数据 ---------- */
@@ -317,6 +323,36 @@
     audio.currentTime = Math.max(0, it.t0 + 0.01);
     if (autoplay) audio.play().catch(function () {});
     paintLine(n, audio.currentTime);
+  }
+  /* ---------- 单句循环（v585：抽成 setLoop，供快进/退调用取消） ---------- */
+  function setLoop(on) {
+    loopOne = !!on;
+    var loopBtn = $('karaoke-loop');
+    if (loopBtn) {
+      loopBtn.textContent = loopOne ? t('karaoke_loop_on') : t('karaoke_loop');
+      loopBtn.classList.toggle('active', loopOne);
+    }
+  }
+  /* ---------- 快进/快退（v585：±5s/±10s） ----------
+   * 点一下把 currentTime 加/减 5 或 10 秒，夹在 [0, duration] 内；
+   * duration 未知（metadata 未到）时只夹下限，不夹上限。
+   * 播放中和暂停时都能用；点完立即按新位置重绘（tick 下一帧也会跟上，
+   * 往后退时行索引经 findLine 正确回退）。
+   * 若单句循环开着，取消它（避免循环目标与新位置打架）。
+   * 打分进行中：麦克风采样按 audio.currentTime 键控，从新位置继续采，无须改动。 */
+  function seekBy(seconds) {
+    if (!audio) return;
+    var nt = (audio.currentTime || 0) + seconds;
+    if (nt < 0) nt = 0;
+    var d = audio.duration;
+    if (isFinite(d) && d > 0 && nt > d) nt = d;
+    audio.currentTime = nt;
+    if (loopOne) setLoop(false);
+    if (data) {
+      paintLine(findLine(curFile, nt), nt);
+      updateQingNear(nt);
+    }
+    updateTime();
   }
   /* ---------- 敲磬 ---------- */
   function strikeQing() {
@@ -724,10 +760,13 @@
       audio.playbackRate = parseFloat(spd.value) || 1;
     });
     var loopBtn = $('karaoke-loop');
-    if (loopBtn) loopBtn.addEventListener('click', function () {
-      loopOne = !loopOne;
-      loopBtn.textContent = loopOne ? t('karaoke_loop_on') : t('karaoke_loop');
-      loopBtn.classList.toggle('active', loopOne);
+    if (loopBtn) loopBtn.addEventListener('click', function () { setLoop(!loopOne); });
+    /* 快进/快退（v585）：-10s/-5s/+5s/+10s，data-seek 存秒数 */
+    document.querySelectorAll('#karaoke-seek-row .karaoke-seek').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var s = parseInt(b.getAttribute('data-seek'), 10);
+        if (!isNaN(s)) seekBy(s);
+      });
     });
     var scoreBtn = $('karaoke-score-btn');
     if (scoreBtn) scoreBtn.addEventListener('click', function () {
@@ -775,5 +814,5 @@
   }
   window.__wuriKaraoke = { open: open, close: close, loadData: loadData,
     /* 供冒烟测试的纯函数／入口（生产不调用） */
-    _test: { detectPitch: detectPitch, median: median, showScore: showScore, scoreLines: scoreLines, strikeQing: strikeQing, buildQingTimes: buildQingTimes } };
+    _test: { detectPitch: detectPitch, median: median, showScore: showScore, scoreLines: scoreLines, strikeQing: strikeQing, buildQingTimes: buildQingTimes, seekBy: seekBy, setLoop: setLoop, findLine: findLine } };
 })();

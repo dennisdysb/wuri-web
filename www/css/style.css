@@ -3652,6 +3652,12 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-ctl{flex:0 1 auto;min-width:0;height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
 .karaoke-ctl:active{transform:scale(.97)}
 .karaoke-ctl.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+/* 快进/快退行（v585）：控制条下方另起一行，与控制条同为 sticky（top 默认
+ * 120px≈头栏 76＋控制条 44；karaoke.js layoutSticky() 打开时实测接力）。
+ * 四钮等宽 flex:1（.karaoke-seek 覆盖 .karaoke-ctl 的 flex:0 1 auto），
+ * 颜色只走变量链（--paper/--line/--teal/--card/--teal-deep），无写死色值。 */
+.karaoke-seek-row{position:sticky;top:120px;z-index:15;background:var(--paper);display:flex;align-items:center;gap:6px;padding:8px 14px 10px;border-bottom:1px solid var(--line)}
+.karaoke-seek{flex:1 1 0;min-width:0;padding:0 6px;text-align:center}
 /* ---- 打分悬浮停控制：吸顶状态条（C 线 §1） ----
  * 颜色只走 --card / --gold / --ink / --cinnabar 变量链（日/夜/红光三态由变量覆写接管；
  * 刻意不用 --gold-wash——红光未覆写它，会浮米白光晕，见 B 线 §2.2）。 */

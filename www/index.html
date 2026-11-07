@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=584">
+<link rel="stylesheet" href="css/style.css?v=585">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -445,6 +445,16 @@
           </select>
           <button class="karaoke-ctl" id="karaoke-loop" data-i18n="karaoke_loop">单句循环</button>
           <button class="karaoke-ctl" id="karaoke-score-btn" data-i18n="karaoke_score">打分</button>
+        </div>
+        <!-- 快进/快退行（v585：用户 2026-11-07 亲口要 ±5s/±10s，两个都要）：
+             控制条已满（播放／变速／循环／打分），4 钮另起一行；样式复用 .karaoke-ctl
+             pill，四钮等宽（.karaoke-seek flex:1），320px 屏每钮约 68px，点得准。
+             与控制条同为 sticky（top 由 karaoke.js layoutSticky() 接力算）。 -->
+        <div class="karaoke-seek-row" id="karaoke-seek-row">
+          <button class="karaoke-ctl karaoke-seek" data-seek="-10" type="button">-10s</button>
+          <button class="karaoke-ctl karaoke-seek" data-seek="-5" type="button">-5s</button>
+          <button class="karaoke-ctl karaoke-seek" data-seek="5" type="button">+5s</button>
+          <button class="karaoke-ctl karaoke-seek" data-seek="10" type="button">+10s</button>
         </div>
         <!-- 打分悬浮停控制（C 线 §1）：吸顶状态条，仅计分中显示；停止按钮与控制条
              打分按钮同一漏斗。hidden 属性须配 CSS .karaoke-score-float[hidden]{display:none}
@@ -1138,7 +1148,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v584）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v585）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
