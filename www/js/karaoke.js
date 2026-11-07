@@ -7,7 +7,7 @@
  *   唱诵拖腔多、音高比流行歌松，分数宽容。音高参考来自 timeline.json 的
  *   ref_pitch_hz（voiced_frac < 0.5 的句不计音高，只计完成度＋节奏）。
  * 数据：content/karaoke/base_text.json（底本，唱词＋注音）＋
- *       content/karaoke/timeline.json（逐句时间轴＋参考音高，153 条）。
+ *       content/karaoke/timeline.json（逐句时间轴＋参考音高，147 条）。
  * 音频：audio/karaoke/seg1|2|3.m4a（三段青玄录音）。
  * 颜色一律走 CSS 变量链（--gold 已唱字、--teal 好分、--cinnabar 差分），
  *   日间／夜间／红光三态由变量覆写自动适配，不得写死色值。
@@ -46,7 +46,7 @@
   /* （罄）显示位置 = 该位置前的字数（按底本 note 的显式表述，与 build_s06.py 一致；
      qing 数值数组在三处天尊句与 note 不符，以 note 为准） */
   var QING_POS = {
-    'chengqing|9': [4], 'ju_tianzun|0': [5], 'diaogua|6': [7],
+    'chengqing|3': [4], 'ju_tianzun|0': [5], 'diaogua|6': [7],
     'xiang_gongyang|0': [5], 'xiao_qiqing|3': [3], 'xiao_qiqing|4': [4, 6],
     'jingxin|0': [2], 'jingshen|0': [3]
   };
@@ -54,7 +54,7 @@
   var PITCH_MIN = 80, PITCH_MAX = 400; /* 人声基频搜索范围 Hz */
 
   /* ---------- 状态 ---------- */
-  var data = null;          /* {base, timeline, items:[153], sections:[{id,name,sing,items[]}]} */
+  var data = null;          /* {base, timeline, items:[147], sections:[{id,name,sing,items[]}]} */
   var seg = 'all';          /* 'all' | 'seg1' | 'seg2' | 'seg3' */
   var curFile = 'seg1';
   var loopOne = false;
