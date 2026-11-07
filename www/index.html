@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=575">
+<link rel="stylesheet" href="css/style.css?v=576">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -227,7 +227,21 @@
 <div id="jing-list"></div>
 <div id="jing-results" hidden></div>
 <div id="jing-marks" hidden></div>
-        <!-- 每日经文推荐卡【全域不变量 · 2026-11-02 用户亲令立规，内部 v575，
+        <!-- 跟唱学唱区（2026-11-06 用户亲令 · 网页版冻结例外）：经文列表下、每日经文推荐卡上；
+             推荐卡仍为 #jing-home 最后一个子元素（全域不变量），本区插在卡之前。 -->
+        <section class="card" id="karaoke-sec">
+          <div class="card-title" data-i18n="karaoke_sec_title">跟唱学唱区</div>
+          <p class="hint" data-i18n="karaoke_sec_sub">青玄道长唱诵示范 · 逐句跟学（青城韵）</p>
+          <div class="karaoke-card">
+            <div class="karaoke-book">
+              <div class="karaoke-title" data-i18n="karaoke_sample_title">太上玄门早坛功课经</div>
+              <div class="karaoke-meta" data-i18n="karaoke_sample_meta">早坛前段至玄蕴咒 · 约 14 分钟 · 全真玄门日诵</div>
+            </div>
+            <button class="btn small" id="karaoke-open-btn" data-i18n="karaoke_open">跟唱</button>
+          </div>
+          <p class="hint" data-i18n="karaoke_sec_note">唱诵示范由温哥华青玄道长提供；正文为全真玄门日诵，唱法为青城韵。跟唱后可打分。</p>
+        </section>
+        <!-- 每日经文推荐卡【全域不变量 · 2026-11-02 用户亲令立规，内部 v576，
              supersede v515（移至书架下）/v525（移至搜索结果后）两次局部修法】：
              #jingrec-card 必须是 #jing-home 的最后一个子元素——在任何状态
              下都恒居经文页最底部。#jing-home 内全部状态容器一律排在卡之前：
@@ -336,6 +350,13 @@
                 </span>
               </div>
             </div>
+            <div class="jmp-sec" id="jing-karaoke-grp" style="display:none">
+              <div class="jmp-h" data-i18n="karaoke_grp_h">跟唱</div>
+              <div class="jmp-row">
+                <button class="mini-btn tiny" id="jing-karaoke-btn" data-i18n="karaoke_open">跟唱</button>
+                <span class="jmp-lab" data-i18n="karaoke_reader_hint">青玄道长唱诵示范 · 逐句跟学（青城韵）</span>
+              </div>
+            </div>
           </div>
           <div class="jing-more-panel" id="jing-font-panel" hidden>
             <div class="jmp-sec">
@@ -400,6 +421,42 @@
       <div class="tab-spacer"></div>
     </div>
     <div class="tab-spacer"></div>
+      <!-- 跟唱播放器（2026-11-06 跟唱样板）：fixed 全屏覆盖层，由 js/karaoke.js 控制显隐；
+           从经文页跟唱区或阅读器跟唱入口进入，返回键关闭并停音。 -->
+      <div id="karaoke-view" hidden>
+        <div class="karaoke-head">
+          <button class="btn small" id="karaoke-back" data-i18n="karaoke_back">‹ 返回</button>
+          <div class="karaoke-head-t">
+            <div class="karaoke-head-title" data-i18n="karaoke_sample_title">太上玄门早坛功课经</div>
+            <div class="karaoke-head-sub" data-i18n="karaoke_sec_sub">青玄道长唱诵示范 · 逐句跟学（青城韵）</div>
+          </div>
+        </div>
+        <div class="karaoke-seg-row" id="karaoke-seg-row">
+          <button class="mini-btn tiny karaoke-seg active" data-seg="all" data-i18n="karaoke_seg_all">全部连唱</button>
+          <button class="mini-btn tiny karaoke-seg" data-seg="seg1" data-i18n="karaoke_seg1">第一段 · 澄清韵～举天尊</button>
+          <button class="mini-btn tiny karaoke-seg" data-seg="seg2" data-i18n="karaoke_seg2">第二段 · 吊挂韵～香供养</button>
+          <button class="mini-btn tiny karaoke-seg" data-seg="seg3" data-i18n="karaoke_seg3">第三段 · 大启请韵～玄蕴咒</button>
+        </div>
+        <div class="karaoke-controls">
+          <button class="btn" id="karaoke-play" data-i18n="karaoke_play">播放</button>
+          <span class="karaoke-speed">
+            <span class="jmp-lab" data-i18n="karaoke_speed_lab">变速</span>
+            <select id="karaoke-speed" class="mini-btn tiny" aria-label="变速">
+              <option value="0.5">0.5×</option>
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1×</option>
+            </select>
+          </span>
+          <button class="mini-btn tiny" id="karaoke-loop" data-i18n="karaoke_loop">单句循环</button>
+          <button class="mini-btn tiny" id="karaoke-score-btn" data-i18n="karaoke_score">打分</button>
+        </div>
+        <p class="hint" id="karaoke-mic-hint" hidden data-i18n="karaoke_mic_hint">打分需开麦克风，建议戴耳机（评分更准）</p>
+        <div class="karaoke-progress"><div class="karaoke-progress-bar" id="karaoke-progress-bar"></div></div>
+        <div class="karaoke-time" id="karaoke-time">00:00 / 00:00</div>
+        <div id="karaoke-lyrics"></div>
+        <div id="karaoke-score" hidden></div>
+        <audio id="karaoke-audio" preload="metadata"></audio>
+      </div>
   </main>
 
   <!-- ============ 提醒 ============ -->
@@ -1066,7 +1123,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v575）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v576）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -1086,7 +1143,7 @@
       <p class="hint" data-i18n="me_credit_bazhai">「八宅」排盘引擎采用开源项目 @soul-atelier/bazhai（© Soul Atelier，版本 0.2.1，依 MIT 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_xuankong">「玄空飞星」排盘引擎采用开源项目 @soul-atelier/xuankong（© Soul Atelier，版本 0.3.0，依 MIT 许可证使用），特此鸣谢。</p>
       <p class="hint" data-i18n="me_credit_dexie">「房屋档案」本地数据库采用开源库 Dexie.js（版本 4.0.11，依 Apache License 2.0 使用），特此鸣谢。</p>
-      <p class="hint">部分经文诵读音频由温哥华清玄道长提供，特此鸣谢。</p>
+      <p class="hint">部分经文诵读音频由温哥华青玄道长提供，特此鸣谢。</p>
       <p class="hint" data-i18n="me_about_hint">戊日不朝真。本应用按日柱天干推算戊日并提前提醒，农历、干支、节气、宜忌均由内置历法库离线计算。</p>
       </details>
       <p class="hint">使用中有问题或建议，欢迎发邮件反馈。</p>
@@ -2751,6 +2808,7 @@
 <script src="js/t2s.js"></script>
 <script src="js/s2t.js"></script>
 <script src="js/jingwen.js"></script>
+<script src="js/karaoke.js"></script>
 <script src="js/dict.js"></script>
 <script src="js/daozang.js"></script>
 <script src="js/deities-data.js"></script>

@@ -3622,3 +3622,49 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .hz-sep{font-size:16px;color:var(--hz-sub);padding-top:6px}
 .hz-lunar{font-size:14px;line-height:1.9;color:var(--hz-ink)}
 .hz-hint{color:var(--muted);font-size:.78rem;line-height:1.6;margin-top:10px;font-family:var(--sans)}
+
+/* ===== 跟唱学唱区＋跟唱播放器（内部 v576，2026-11-06 跟唱样板） =====
+ * 颜色一律走变量链（--gold 已唱字、--teal 好分、--cinnabar 差分、
+ * --teal-wash 当前句底色），日间／夜间／红光三态由变量覆写自动适配。 */
+.karaoke-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--paper-2)}
+.karaoke-book{min-width:0}
+.karaoke-title{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--ink)}
+.karaoke-meta{color:var(--muted);font-size:13px;margin-top:4px}
+#karaoke-view{position:fixed;inset:0;z-index:60;overflow-y:auto;background:var(--paper);padding:0 0 40px}
+#karaoke-view[hidden]{display:none}
+.karaoke-head{position:sticky;top:0;z-index:20;background:var(--paper);display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.karaoke-head-t{min-width:0}
+.karaoke-head-title{font-family:var(--serif);font-weight:700;font-size:18px;color:var(--ink)}
+.karaoke-head-sub{color:var(--muted);font-size:13px;margin-top:3px}
+.karaoke-seg-row{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px 0}
+.karaoke-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px 0}
+#karaoke-view .mini-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.karaoke-progress{height:6px;border-radius:3px;background:var(--line-soft);margin:12px 14px 0;overflow:hidden}
+.karaoke-progress-bar{height:100%;width:0;background:var(--gold);border-radius:3px}
+.karaoke-time{color:var(--muted);font-size:12px;text-align:right;padding:6px 14px 0;font-family:var(--sans)}
+#karaoke-lyrics{padding:8px 14px 0}
+.karaoke-sec{margin-bottom:18px}
+.karaoke-sec-h{font-family:var(--serif);font-weight:700;font-size:16px;color:var(--teal);margin:10px 0 4px}
+.karaoke-nonsing{color:var(--muted);font-size:13px;padding:4px 0}
+.karaoke-line{font-family:var(--serif);font-size:20px;line-height:2.3;color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer}
+.karaoke-line.active{background:var(--teal-wash);box-shadow:inset 3px 0 0 var(--gold)}
+.karaoke-line ruby{ruby-align:center}
+.karaoke-line rt{font-family:var(--sans);font-size:11px;color:var(--muted)}
+.karaoke-ch.sung{color:var(--gold);font-weight:700}
+.karaoke-qing{display:inline-block;font-family:var(--sans);font-size:11px;line-height:1;color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:2px 3px;margin:0 2px;vertical-align:middle}
+.karaoke-repeat{font-family:var(--sans);font-size:11px;color:var(--muted);margin-left:8px}
+.karaoke-score-card{margin:16px 14px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.karaoke-score-t{font-weight:700;font-size:15px;color:var(--ink)}
+.karaoke-score-num{font-family:var(--serif);font-size:44px;font-weight:700;line-height:1.2;text-align:center;margin-top:6px}
+.karaoke-score-num.good{color:var(--teal)}
+.karaoke-score-num.fair{color:var(--gold)}
+.karaoke-score-num.poor{color:var(--cinnabar)}
+.karaoke-score-grade{text-align:center;color:var(--muted);font-size:14px}
+.karaoke-score-list{margin-top:12px;border-top:1px solid var(--line)}
+.karaoke-score-row{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft)}
+.karaoke-score-text{flex:1;font-family:var(--serif);font-size:16px;color:var(--ink)}
+.karaoke-score-val{font-weight:700;font-size:16px}
+.karaoke-score-val.good{color:var(--teal)}
+.karaoke-score-val.fair{color:var(--gold)}
+.karaoke-score-val.poor{color:var(--cinnabar)}
+.karaoke-score-fb{color:var(--muted);font-size:12px;min-width:64px;text-align:right}

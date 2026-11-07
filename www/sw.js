@@ -1,5 +1,5 @@
 /* 戊日不上香 · Service Worker（离线缓存） */
-const CACHE = 'wuri-v575-20261102-v575';
+const CACHE = 'wuri-v576-20261102-v576';
 /* 冥想资产专用缓存（场景图 10＋环境音/磬 11，约 28MB）：安装期整包预缓存，
  * 播放/显示一律本地出（用户 2026-10-25 定调「下载 App 时就该下载下来」）。
  * 与主缓存分开：单件失败不拖垮整版 SW 更新，缺件运行时回落网络现拉。 */
@@ -81,6 +81,7 @@ const ASSETS = [
   './js/i18n.js',
   './js/iztro.min.js',
   './js/jingwen.js',
+  './js/karaoke.js',
   './js/dict.js',
   './js/offline-download.js',
   './js/account.js',
@@ -111,6 +112,7 @@ const ASSETS = [
   './jing/index.js',
   './jing/s01.js',
   './jing/s02.js',
+  './jing/s06.js',
   './jing/s03.js',
   './jing/s04.js',
   './jing/s05.js',

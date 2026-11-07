@@ -6,8 +6,8 @@ var JingWen = (function () {
   'use strict';
   /* 三派排序（用户指定顺序） */
   var JING_ORDER = {
-    all: ['s02','s01','s12','s13','s14','s10','s07','s11','s03','s04','s05','s09','s30','s31','s32','s15','s16','s17','s26','s27','s29','s28'],
-    quanzhen: ['s02','s12','s13','s10','s07','s11','s03','s04'],
+    all: ['s02','s06','s01','s12','s13','s14','s10','s07','s11','s03','s04','s05','s09','s30','s31','s32','s15','s16','s17','s26','s27','s29','s28'],
+    quanzhen: ['s02','s06','s12','s13','s10','s07','s11','s03','s04'],
     zhengyi: ['s01','s14','s10','s07','s11','s03','s04','s05','s09','s15','s16','s17']
   };
   /* 内丹书籍（单独折叠分类，不用背诵模式） */
@@ -48,6 +48,7 @@ var JingWen = (function () {
   var JING_ALIAS = {
     s01: ['正一功课经', '功课经', '正一早晚功课', '早晚功课经'],
     s02: ['全真功课经', '全真早晚功课'],
+    s06: ['玄门早坛功课经', '玄门日诵', '早坛功课经', '玄門早壇功課經'],
     s03: ['三官经', '三官', '三元经', '三元赐福经'],
     s04: ['北斗经', '北斗', '北斗本命经'],
     s05: ['真武经', '真武', '真武本传经'],
@@ -3905,6 +3906,9 @@ var JingWen = (function () {
   function hasAudio(sid) { return JING_HAS_AUDIO.indexOf(sid) >= 0; }
   function updateAudioButtons() {
     var has = hasAudio(currentId);
+    /* 跟唱入口：仅《太上玄门早坛功课经》（s06）显示（2026-11-06 跟唱样板） */
+    var kgEl = document.getElementById('jing-karaoke-grp');
+    if (kgEl) kgEl.style.display = (currentId === 's06') ? '' : 'none';
     // 跟读依赖分段朗读时间戳：无音频的经（如内丹诸经）隐藏跟读按钮
     var flEl = document.getElementById('jing-follow');
     if (flEl) flEl.style.display = has ? '' : 'none';
