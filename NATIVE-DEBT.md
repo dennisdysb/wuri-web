@@ -1,5 +1,24 @@
 # 原生端欠账（网页版已修、原生待随下一期联合更新带上）
 
+## 2026-11-08 · 道藏注音收尾 v589：84 枚新键（网页版已上线 v589，未打 APK）
+
+- **网页版改动**：内部 v589 已上线（commit `47420826`）。道藏注音表
+  `www/content/daozang/pinyin.json` 新增 overrides 84 枚（dict 15,327 不变，
+  overrides 1,397→1,481；新表 md5 `567b2c51762bc8f734e09ddb6ef0df5b`）。
+  构成：湯湯窄键 12 枚（五福湯湯／水流湯湯／水湯湯／湯湯之水／黄河湯湯／
+  沸沸湯湯／碧津之湯湯／汪汪焉湯湯／滉滉湯湯／四海湯湯／浩浩湯湯／水兮湯湯，
+  湯→shāng，15 处）＋梵唄 [fàn,bài]（13 处）＋年少徵 [nián,shào,zhǐ]
+  （1 处）＋姑射山 [gū,yè,shān]（31 处翻转）＋中風窄键 69 枚（前缀＋
+  后缀两组，绝无整词「中風」键，中→zhòng，262 处翻转）。裁定与全量清单
+  见 `~/workspace/wuri-app/ruby-census/v589/V589-CLOSING-REPORT.md`、
+  `v589/small-items-proposed-keys.json`、`v589/zhongfeng-proposed-keys.json`。
+- **欠账范围**：CN 版、Play 版、iOS 版道藏注音表均未同步（iOS 无道藏全集，
+  按既有口径取舍），下一期原生联合更新时一并带上；**本次不打 APK**。
+- **原生侧修法**：原生分叉 `~/workspace/wuri-app/www` 同步
+  `content/daozang/pinyin.json` 整文件（或等价追加 84 枚 overrides，须保
+  证 dict 15,327 不变、overrides 终态 1,481）；移植后抽验 姑射山（yè）、
+  梵唄（bài）、卒中風（zhòng）三处注音。
+
 ## 2026-11-02 · 阅读器底栏：道藏/内丹删「背」换「我的标记」（用户 11:22 拍板）
 
 - **网页版改动**：道藏、内丹两类书的阅读器底栏删掉「背」（背诵模式入口），
