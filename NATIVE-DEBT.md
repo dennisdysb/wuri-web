@@ -1,5 +1,11 @@
 # 原生端欠账（网页版已修、原生待随下一期联合更新带上）
 
+## 2026-11-08 · KR5a0083 小字改名 v592：神符→文本（网页版已上线 v592，未打 APK）
+
+- **网页版改动**：内部 v592 已上线（commit `10b85dab`）。KR5a0083《白羽黑翮靈飛玉符》原版核查无符图、纯文本，类签 神符 易误导读者期待符图，改为 文本：`www/content/daozang/index.json`（feed 版 64→65）、`texts/KR5a0083.json`、`texts-punct/KR5a0083.json` 三处 lei 神符→文本；其余 27 部神符類未动。显示：目录 pill 文本、文末小字「洞真部 · 文本类 · DZ0083」、搜索 snippet「道藏全集 · 洞真部 · 文本类 · 1 卷」。
+- **欠账范围**：CN 版、Play 版、iOS 版 index.json / texts 均未同步，下一期原生联合更新时一并带上；**本次不打 APK**。
+- **原生侧修法**：原生分叉 `~/workspace/wuri-app/www` 同步 index.json（feed 版 65）＋两处 KR5a0083.json 的 lei；移植后抽验该部文末小字与目录 pill。
+
 ## 2026-11-08 · 道藏图版重裁 v591：9 图尺寸变更（网页版已上线 v591，未打 APK）
 
 - **网页版改动**：内部 v591 已上线（commit `4086e352`）。KR5c0019《太上飛步南斗太微玉經》8 图重裁＋KR5a0081 太帝招魂符跨叶重拼；`www/content/daozang/images.json` md5 `6c7f580b0ab3dfae723ca8e4c4f5da80`。新尺寸：KR5c0019/01 420×880、02 425×900、03 462×905、04 411×885、05 435×885、06 428×1010、07 416×780、08 405×790；KR5a0081/10 444×1370。详见 `~/workspace/wuri-app/daozang-img-campaign/V591-CLOSING-REPORT.md`。
