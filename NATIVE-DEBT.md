@@ -1,5 +1,11 @@
 # 原生端欠账（网页版已修、原生待随下一期联合更新带上）
 
+## 2026-11-09 · 跟唱旋律引导 v594：音高线＋正弦提示音＋melody.json（网页版已上线 v594，未打 APK）
+
+- **网页版改动**：内部 v594 已上线（commit `f1b413d2`）。跟唱新增旋律引导（用户 2026-11-09 定：音高线与提示音两个都要）：新数据 `www/content/karaoke/melody.json`（454,902 B，md5 `5d4f52618df7a46f703eefd7eea5598d`），三段青玄录音 pyin 提取（fmin 65/fmax 500 Hz＋0.25s 中位平滑，10 fps，8,402 帧；低于 100 Hz 的 fmin 底噪帧按无声处理，停顿进 breaks——两处 seg2 行内停顿 50.24–53.96s、104.81–108.61s 已为空白段）；播放器 `www/js/karaoke.js` 新增音高线 strip（控制条下方，30s 窗口前 8s＋后 22s＋播放头，110–310 Hz 对数轴，颜色走 CSS 变量链）与正弦提示音（独立 AudioContext＋OscillatorNode，增益 0.2，控制条「提示音」钮，默认关；停顿／暂停／关闭时静音，与打分麦克风 Analyser 路径分开）；`www/index.html` 控制条加「提示音」钮＋strip 结构；`www/css/style.css` 加旋律条样式（变量配色，日间／夜间／红光三态）。测试 `~/workspace/wuri-app/karaoke/tests/test_v594_melody.js` 101/101 通过；全套其余回归仅 test_v588 C2 一处因 karaoke.js 内容变更而失效（v588 旧 md5 钉子，属预期内）。提取与验证见 `~/workspace/wuri-app/karaoke/melody/MELODY-EXTRACTION-REPORT.md`。timeline.json／base_text.json 未动（点按标记落表另走 v595，不冲突）。
+- **欠账范围**：CN 版、Play 版、iOS 版跟唱均未同步（melody.json＋播放器改动），下一期原生联合更新时一并带上；**本次不打 APK**。
+- **原生侧修法**：原生分叉 `~/workspace/wuri-app/www` 同步 melody.json＋karaoke.js／index.html／style.css 的旋律引导改动（注意 app.js／qimen-app.js 不移植口径与此无关，本次改的三个文件均在移植范围内）；移植后抽验：跟唱页音高线随播放走、提示音钮默认关、开后跟旋律出声、停顿处静音。
+
 ## 2026-11-08 · KR5a0148 caption 订正 v593：71/72 左右互换（网页版已上线 v593，未打 APK）
 
 - **网页版改动**：内部 v593 已上线（commit `2ab36a0c`）。KR5a0148《靈寶無量度人上品妙經符圖》71/72 caption 左右标反订正：71「天紀之圖（跨葉左）」→「天紀之圖（跨葉右）」，72「天紀之圖（跨葉右）・第一篇」→「天紀之圖（跨葉左）・第一篇」；仅改两处 caption 字符串，src/w/h/char/vol 不动，不增删条目；`www/content/daozang/images.json` md5 `1ed7f22559bd1f234fabf1987afd931b`。71/72/78 从今日 taolibrary 原版文件（c960067 img116/117/123）重裁校验：内容逐字一致，三图全部保留现生产文件，不替换、无尺寸/md5 变化（71 1200×1310 md5 `fd4a6966…`、72 1200×1342 `8fb1cd42…`、78 1200×1356 `12a42200…`）；71/72 统一纵向裁窗 [230,1574] 拼合验证成圆无 26px 台阶（仅验证用，不并入生产）。详见核查报告 `~/workspace/wuri-app/daozang-img-campaign/KR5a0148-INVESTIGATION.md` 与重裁比对 `~/workspace/wuri-app/daozang-img-campaign/.k148-scratch/V593-RECROP-COMPARISON.md`。
