@@ -3648,13 +3648,17 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 /* 段选择：2×2 等分网格（v577：竖排四行改网格，标签再长也不乱） */
 .karaoke-seg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 0}
 .karaoke-seg-row .karaoke-seg{width:100%;text-align:center;padding:9px 6px;line-height:1.45}
-/* 控制条：统一 46px 高、同一视觉语言（v577 重做）；主按钮金底白字，
- * 变速／循环／打分描边 pill，循环开、打分中时金底白字（.active）。 */
+/* 控制条：同一视觉语言（v577 重做）；v595 播放主钮 52px 高／1.15rem 横排、
+ * 变速 pill 缩至 38px（其余 pill 仍 46px，flex align-items:center 居中对齐）。
+ * 主按钮金底白字，变速／循环／打分描边 pill，循环开、打分中时金底白字（.active）。 */
 .karaoke-controls{position:sticky;top:76px;z-index:15;background:var(--paper);display:flex;align-items:center;gap:6px;flex-wrap:nowrap;padding:12px 14px 10px;border-bottom:1px solid var(--line)}
-.karaoke-play{flex:1 1 auto;min-width:0;height:46px;border-radius:12px;background:var(--gold);color:#fff;border:1px solid var(--gold);font-size:1rem;font-weight:700;font-family:var(--sans);cursor:pointer}
+.karaoke-play{flex:1 1 auto;min-width:0;height:52px;padding:0 12px;border-radius:12px;background:var(--gold);color:#fff;border:1px solid var(--gold);font-size:1.15rem;font-weight:700;font-family:var(--sans);cursor:pointer;white-space:nowrap}
 .karaoke-play:active{transform:scale(.97)}
-.karaoke-speed{flex:0 0 auto;height:46px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;padding:0 6px;font-family:var(--sans);cursor:pointer}
-.karaoke-ctl{flex:0 1 auto;min-width:0;height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
+/* v595：变速 pill 缩小（38px 高／.85rem／窄 padding＋max-width 60px），给播放钮腾宽；
+ * 提示音／循环／打分 pill 横 padding 12px→9px（同为给播放钮腾宽的适配，
+ * 快进退行不受影响：.karaoke-seek 另有 padding:0 6px 覆盖）。 */
+.karaoke-speed{flex:0 0 auto;height:38px;max-width:60px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.85rem;padding:0 2px;font-family:var(--sans);cursor:pointer}
+.karaoke-ctl{flex:0 1 auto;min-width:0;height:46px;padding:0 9px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
 .karaoke-ctl:active{transform:scale(.97)}
 .karaoke-ctl.active{background:var(--gold);color:#fff;border-color:var(--gold)}
 /* 快进/快退行（v585）：控制条下方另起一行，与控制条同为 sticky（top 默认
@@ -3663,11 +3667,14 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
  * 颜色只走变量链（--paper/--line/--teal/--card/--teal-deep），无写死色值。 */
 .karaoke-seek-row{position:sticky;top:120px;z-index:15;background:var(--paper);display:flex;align-items:center;gap:6px;padding:8px 14px 10px;border-bottom:1px solid var(--line)}
 .karaoke-seek{flex:1 1 0;min-width:0;padding:0 6px;text-align:center}
-/* ---- 旋律音高线（v594）：控制条／快进退行下方、进度条上方，非吸顶，随歌词滚动。
+/* ---- 旋律音高线（v594 建、v595 置顶 sticky）：控制条／快进退行下方、进度条上方，
+ * 吸顶（top 默认 210px≈头栏 76＋控制条 69＋快进退行 65；karaoke.js layoutSticky()
+ * 打开／音高线亮起／resize 时实测接力，贴在快进退行正下方、不重叠）。
+ * 须带 --paper 底＋下边框，否则歌词从条下滚过时会透出来；下 padding 8px 封口。
  * 颜色只走变量链（--gold 曲线、--cinnabar 播放头、--line-soft 网格线、
  * --card 底、--line 边框、--muted 注解），日/夜/红光三态由变量覆写接管。
  * melody.json 未到／损坏时整块 hidden，不留空框。 */
-.karaoke-melody{padding:10px 14px 0}
+.karaoke-melody{position:sticky;top:210px;z-index:15;background:var(--paper);padding:10px 14px 8px;border-bottom:1px solid var(--line)}
 .karaoke-melody[hidden]{display:none}
 .karaoke-melody-canvas{display:block;width:100%;height:64px;background:var(--card);border:1px solid var(--line);border-radius:10px}
 .karaoke-melody-cap{display:flex;justify-content:space-between;align-items:baseline;padding:4px 2px 0;color:var(--muted);font-size:12px}

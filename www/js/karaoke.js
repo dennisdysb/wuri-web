@@ -138,6 +138,7 @@
     var head = view.querySelector('.karaoke-head');
     var ctl = view.querySelector('.karaoke-controls');
     var seek = view.querySelector('.karaoke-seek-row');
+    var mel = $('karaoke-melody');
     var pill = $('karaoke-score-float');
     var headH = head ? head.offsetHeight : 74;
     if (ctl) ctl.style.top = headH + 'px';
@@ -146,7 +147,14 @@
       seek.style.top = (headH + (ctl ? ctl.offsetHeight : 0)) + 'px';
       seekH = seek.offsetHeight;
     }
-    if (ctl && pill) pill.style.top = (headH + ctl.offsetHeight + seekH) + 'px';
+    /* v595：音高线吸顶，贴在快进退行正下方（top＝头栏＋控制条＋快进退行）；
+     * hidden 时 offsetHeight 为 0，melH 计 0，打分状态条 top 退回 v594 口径。 */
+    var melH = 0;
+    if (mel) {
+      mel.style.top = (headH + (ctl ? ctl.offsetHeight : 0) + seekH) + 'px';
+      melH = mel.hidden ? 0 : mel.offsetHeight;
+    }
+    if (ctl && pill) pill.style.top = (headH + ctl.offsetHeight + seekH + melH) + 'px';
   }
 
   /* ---------- 数据 ---------- */
@@ -999,11 +1007,13 @@
       var host = $('karaoke-lyrics');
       if (host) host.innerHTML = '<p class="hint">' + esc(t('karaoke_loading')) + '</p>';
     });
-    /* 旋律懒加载：不阻塞播放器；到手才亮音高线，失败则整块保持 hidden */
+    /* 旋律懒加载：不阻塞播放器；到手才亮音高线，失败则整块保持 hidden。
+     * v595：亮起后重算 layoutSticky()——open() 时条仍 hidden、melH 按 0 计，
+     * 不重算则打分状态条会顶进音高线。 */
     loadMelody().then(function (m) {
       var strip = $('karaoke-melody');
       if (strip) strip.hidden = !m;
-      if (m) drawMelody(audio ? (audio.currentTime || 0) : 0);
+      if (m) { layoutSticky(); drawMelody(audio ? (audio.currentTime || 0) : 0); }
     });
     /* 预建磬 Audio（用户点击手势上下文，iOS 不拦截；沿冥想区 fbStart 预建口径） */
     try {
