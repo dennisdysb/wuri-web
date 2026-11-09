@@ -158,11 +158,20 @@
       "text": "上坛齐举步虚声",
       "audio": "seg2",
       "t0": 0.0,
-      "t1": 15.0,
+      "t1": 22.18,
+      "char_t0": [
+        0.88,
+        3.58,
+        6.57,
+        9.41,
+        15.66,
+        18.81,
+        21.68
+      ],
       "ref_pitch_hz": 199.0,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.957,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "diaogua",
@@ -171,11 +180,20 @@
       "text": "祝国迎祥竭寸诚",
       "audio": "seg2",
       "t0": 15.0,
-      "t1": 39.0,
+      "t1": 48.88,
+      "char_t0": [
+        27.88,
+        31.18,
+        33.9,
+        36.59,
+        42.62,
+        45.52,
+        48.38
+      ],
       "ref_pitch_hz": 213.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.967,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "diaogua",
@@ -184,11 +202,20 @@
       "text": "当日陈情金阙内",
       "audio": "seg2",
       "t0": 39.0,
-      "t1": 69.0,
+      "t1": 75.86,
+      "char_t0": [
+        54.64,
+        57.3,
+        60.47,
+        63.18,
+        69.17,
+        72.27,
+        75.36
+      ],
       "ref_pitch_hz": 196.7,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.853,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "diaogua",
@@ -197,11 +224,20 @@
       "text": "今朝香霭玉炉焚",
       "audio": "seg2",
       "t0": 69.0,
-      "t1": 108.0,
+      "t1": 109.89,
+      "char_t0": [
+        81.55,
+        84.87,
+        87.83,
+        90.74,
+        96.76,
+        99.81,
+        109.39
+      ],
       "ref_pitch_hz": 199.0,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.922,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "diaogua",
@@ -211,10 +247,19 @@
       "audio": "seg2",
       "t0": 108.0,
       "t1": 133.0,
+      "char_t0": [
+        109.18,
+        111.85,
+        115.08,
+        117.99,
+        124.16,
+        127.39,
+        130.75
+      ],
       "ref_pitch_hz": 204.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.946,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "diaogua",
@@ -224,10 +269,19 @@
       "audio": "seg2",
       "t0": 133.0,
       "t1": 163.0,
+      "char_t0": [
+        137.39,
+        140.59,
+        143.67,
+        146.65,
+        152.87,
+        156.06,
+        159.16
+      ],
       "ref_pitch_hz": 196.3,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.903,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "diaogua",
@@ -237,10 +291,19 @@
       "audio": "seg2",
       "t0": 163.0,
       "t1": 187.0,
+      "char_t0": [
+        164.23,
+        166.38,
+        169.33,
+        172.37,
+        178.48,
+        181.43,
+        184.42
+      ],
       "ref_pitch_hz": 181.0,
       "ref_pitch_note": "F#3",
       "voiced_frac": 0.975,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "diaogua",
@@ -250,10 +313,19 @@
       "audio": "seg2",
       "t0": 187.0,
       "t1": 213.0,
+      "char_t0": [
+        190.44,
+        193.7,
+        196.56,
+        199.47,
+        205.67,
+        208.89,
+        211.88
+      ],
       "ref_pitch_hz": 179.5,
       "ref_pitch_note": "F3",
       "voiced_frac": 0.975,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "xiang_gongyang",
@@ -263,6 +335,14 @@
       "audio": "seg2",
       "t0": 239.3,
       "t1": 252.15,
+      "char_t0": [
+        240.28,
+        241.41,
+        242.92,
+        244.49,
+        246.12,
+        249.49
+      ],
       "ref_pitch_hz": 179.4,
       "ref_pitch_note": "F3",
       "voiced_frac": 0.996,
@@ -276,10 +356,19 @@
       "audio": "seg3",
       "t0": 0.0,
       "t1": 18.0,
+      "char_t0": [
+        1.25,
+        2.58,
+        3.49,
+        4.28,
+        11.63,
+        12.35,
+        12.87
+      ],
       "ref_pitch_hz": 203.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.914,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "da_qiqing",
@@ -289,10 +378,19 @@
       "audio": "seg3",
       "t0": 18.0,
       "t1": 31.0,
+      "char_t0": [
+        18.8,
+        19.75,
+        20.45,
+        20.94,
+        23.08,
+        23.8,
+        27.1
+      ],
       "ref_pitch_hz": 167.1,
       "ref_pitch_note": "E3",
       "voiced_frac": 0.923,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "da_qiqing",
@@ -302,10 +400,19 @@
       "audio": "seg3",
       "t0": 31.0,
       "t1": 50.0,
+      "char_t0": [
+        31.99,
+        32.83,
+        34.46,
+        35.12,
+        42.99,
+        43.67,
+        44.14
+      ],
       "ref_pitch_hz": 203.8,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.95,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "da_qiqing",
@@ -315,10 +422,19 @@
       "audio": "seg3",
       "t0": 50.0,
       "t1": 63.0,
+      "char_t0": [
+        50.85,
+        51.83,
+        52.55,
+        53.19,
+        55.38,
+        56.5,
+        59.68
+      ],
       "ref_pitch_hz": 164.2,
       "ref_pitch_note": "E3",
       "voiced_frac": 0.977,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "da_qiqing",
@@ -328,10 +444,19 @@
       "audio": "seg3",
       "t0": 64.0,
       "t1": 84.0,
+      "char_t0": [
+        65.01,
+        67.8,
+        70.72,
+        73.69,
+        76.56,
+        79.34,
+        82.2
+      ],
       "ref_pitch_hz": 216.6,
       "ref_pitch_note": "A3",
       "voiced_frac": 0.968,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "da_qiqing",
@@ -340,11 +465,20 @@
       "text": "人人具足匪亏盈",
       "audio": "seg3",
       "t0": 84.0,
-      "t1": 100.0,
+      "t1": 106.37,
+      "char_t0": [
+        88.27,
+        91.15,
+        94.05,
+        97.05,
+        99.93,
+        102.96,
+        105.87
+      ],
       "ref_pitch_hz": 197.0,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.972,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "da_qiqing",
@@ -354,10 +488,19 @@
       "audio": "seg3",
       "t0": 100.0,
       "t1": 132.0,
+      "char_t0": [
+        111.81,
+        114.49,
+        117.8,
+        120.67,
+        123.85,
+        126.81,
+        129.83
+      ],
       "ref_pitch_hz": 204.0,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.953,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "da_qiqing",
@@ -367,10 +510,19 @@
       "audio": "seg3",
       "t0": 132.0,
       "t1": 156.0,
+      "char_t0": [
+        136.45,
+        139.27,
+        142.32,
+        145.44,
+        148.26,
+        149.76,
+        154.38
+      ],
       "ref_pitch_hz": 189.3,
       "ref_pitch_note": "F#3",
       "voiced_frac": 0.965,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "xiao_qiqing",
@@ -380,10 +532,16 @@
       "audio": "seg3",
       "t0": 156.0,
       "t1": 172.0,
+      "char_t0": [
+        160.26,
+        163.43,
+        166.53,
+        169.52
+      ],
       "ref_pitch_hz": 214.2,
       "ref_pitch_note": "A3",
       "voiced_frac": 0.947,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "xiao_qiqing",
@@ -393,10 +551,16 @@
       "audio": "seg3",
       "t0": 172.0,
       "t1": 187.0,
+      "char_t0": [
+        175.79,
+        179.03,
+        181.91,
+        185.21
+      ],
       "ref_pitch_hz": 190.2,
       "ref_pitch_note": "F#3",
       "voiced_frac": 0.967,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "xiao_qiqing",
@@ -406,10 +570,16 @@
       "audio": "seg3",
       "t0": 187.0,
       "t1": 203.0,
+      "char_t0": [
+        191,
+        194.37,
+        197.55,
+        200.67
+      ],
       "ref_pitch_hz": 217.6,
       "ref_pitch_note": "A3",
       "voiced_frac": 0.944,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "xiao_qiqing",
@@ -419,10 +589,16 @@
       "audio": "seg3",
       "t0": 203.0,
       "t1": 214.0,
+      "char_t0": [
+        207.14,
+        208.93,
+        210.48,
+        212.16
+      ],
       "ref_pitch_hz": 188.1,
       "ref_pitch_note": "F#3",
       "voiced_frac": 0.964,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "xiao_qiqing",
@@ -431,11 +607,19 @@
       "text": "大罗三宝天尊",
       "audio": "seg3",
       "t0": 218.0,
-      "t1": 223.0,
+      "t1": 223.78,
+      "char_t0": [
+        218.72,
+        218.86,
+        220.44,
+        221.3,
+        222.38,
+        223.28
+      ],
       "ref_pitch_hz": 191.5,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.94,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingxin",
@@ -444,11 +628,17 @@
       "text": "太上台星",
       "audio": "seg3",
       "t0": 223.0,
-      "t1": 226.0,
+      "t1": 226.61,
+      "char_t0": [
+        224.68,
+        225.08,
+        225.48,
+        226.11
+      ],
       "ref_pitch_hz": 249.8,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.883,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingxin",
@@ -458,10 +648,16 @@
       "audio": "seg3",
       "t0": 226.0,
       "t1": 229.0,
+      "char_t0": [
+        227.08,
+        227.66,
+        228.21,
+        228.84
+      ],
       "ref_pitch_hz": 197.5,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.983,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingxin",
@@ -470,11 +666,17 @@
       "text": "驱邪缚魅",
       "audio": "seg3",
       "t0": 229.0,
-      "t1": 231.0,
+      "t1": 231.57,
+      "char_t0": [
+        229.42,
+        229.99,
+        230.51,
+        231.07
+      ],
       "ref_pitch_hz": 208.1,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingxin",
@@ -483,11 +685,17 @@
       "text": "保命护身",
       "audio": "seg3",
       "t0": 231.0,
-      "t1": 233.0,
+      "t1": 233.99,
+      "char_t0": [
+        231.63,
+        232.29,
+        232.89,
+        233.49
+      ],
       "ref_pitch_hz": 206.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingxin",
@@ -496,11 +704,17 @@
       "text": "智慧明净",
       "audio": "seg3",
       "t0": 233.0,
-      "t1": 235.5,
+      "t1": 236.31,
+      "char_t0": [
+        234.2,
+        234.71,
+        235.24,
+        235.81
+      ],
       "ref_pitch_hz": 249.8,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.88,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingxin",
@@ -509,11 +723,17 @@
       "text": "心神安宁",
       "audio": "seg3",
       "t0": 235.5,
-      "t1": 238.0,
+      "t1": 238.72,
+      "char_t0": [
+        236.71,
+        237.2,
+        237.68,
+        238.22
+      ],
       "ref_pitch_hz": 209.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingxin",
@@ -522,11 +742,17 @@
       "text": "三魂永久",
       "audio": "seg3",
       "t0": 238.0,
-      "t1": 240.0,
+      "t1": 240.64,
+      "char_t0": [
+        238.9,
+        239.33,
+        239.75,
+        240.14
+      ],
       "ref_pitch_hz": 208.1,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.85,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingxin",
@@ -535,11 +761,17 @@
       "text": "魄无丧倾",
       "audio": "seg3",
       "t0": 240.0,
-      "t1": 242.0,
+      "t1": 242.53,
+      "char_t0": [
+        240.36,
+        241.08,
+        241.55,
+        242.03
+      ],
       "ref_pitch_hz": 204.8,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -548,11 +780,17 @@
       "text": "丹朱口神",
       "audio": "seg3",
       "t0": 242.0,
-      "t1": 243.5,
+      "t1": 244.31,
+      "char_t0": [
+        242.76,
+        243.1,
+        243.43,
+        243.81
+      ],
       "ref_pitch_hz": 253.2,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -561,11 +799,17 @@
       "text": "吐秽除氛",
       "audio": "seg3",
       "t0": 243.5,
-      "t1": 245.0,
+      "t1": 245.94,
+      "char_t0": [
+        243.92,
+        244.65,
+        245.04,
+        245.44
+      ],
       "ref_pitch_hz": 212.8,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -574,11 +818,17 @@
       "text": "舌神正伦",
       "audio": "seg3",
       "t0": 245.0,
-      "t1": 246.5,
+      "t1": 247.53,
+      "char_t0": [
+        245.4,
+        246.24,
+        246.6,
+        247.03
+      ],
       "ref_pitch_hz": 191.0,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -587,11 +837,17 @@
       "text": "通命养神",
       "audio": "seg3",
       "t0": 246.5,
-      "t1": 248.0,
+      "t1": 249.06,
+      "char_t0": [
+        247.43,
+        247.84,
+        248.2,
+        248.56
+      ],
       "ref_pitch_hz": 209.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -600,11 +856,17 @@
       "text": "罗千齿神",
       "audio": "seg3",
       "t0": 248.0,
-      "t1": 249.5,
+      "t1": 250.69,
+      "char_t0": [
+        249.02,
+        249.47,
+        249.82,
+        250.19
+      ],
       "ref_pitch_hz": 208.7,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -613,11 +875,17 @@
       "text": "却邪卫真",
       "audio": "seg3",
       "t0": 249.5,
-      "t1": 251.0,
+      "t1": 252.35,
+      "char_t0": [
+        250.66,
+        251.02,
+        251.44,
+        251.85
+      ],
       "ref_pitch_hz": 227.5,
       "ref_pitch_note": "A#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -626,11 +894,17 @@
       "text": "喉神虎贲",
       "audio": "seg3",
       "t0": 251.0,
-      "t1": 252.5,
+      "t1": 253.85,
+      "char_t0": [
+        252.2,
+        252.62,
+        252.98,
+        253.35
+      ],
       "ref_pitch_hz": 195.9,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -639,11 +913,17 @@
       "text": "炁神引津",
       "audio": "seg3",
       "t0": 252.5,
-      "t1": 254.0,
+      "t1": 255.44,
+      "char_t0": [
+        253.74,
+        254.14,
+        254.55,
+        254.94
+      ],
       "ref_pitch_hz": 211.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -652,11 +932,17 @@
       "text": "心神丹元",
       "audio": "seg3",
       "t0": 254.0,
-      "t1": 256.0,
+      "t1": 257.1,
+      "char_t0": [
+        255.39,
+        255.82,
+        256.19,
+        256.6
+      ],
       "ref_pitch_hz": 211.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.875,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -665,11 +951,17 @@
       "text": "令我通真",
       "audio": "seg3",
       "t0": 256.0,
-      "t1": 258.0,
+      "t1": 258.63,
+      "char_t0": [
+        257,
+        257.37,
+        257.74,
+        258.13
+      ],
       "ref_pitch_hz": 208.1,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -678,11 +970,17 @@
       "text": "思神炼液",
       "audio": "seg3",
       "t0": 258.0,
-      "t1": 259.5,
+      "t1": 260.37,
+      "char_t0": [
+        258.9,
+        259.17,
+        259.53,
+        259.87
+      ],
       "ref_pitch_hz": 206.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingkou",
@@ -691,11 +989,17 @@
       "text": "道炁常存",
       "audio": "seg3",
       "t0": 259.5,
-      "t1": 261.0,
+      "t1": 261.6,
+      "char_t0": [
+        259.8,
+        260.42,
+        260.76,
+        261.1
+      ],
       "ref_pitch_hz": 202.1,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingshen",
@@ -704,11 +1008,17 @@
       "text": "灵宝天尊",
       "audio": "seg3",
       "t0": 261.0,
-      "t1": 262.5,
+      "t1": 263.18,
+      "char_t0": [
+        261.87,
+        262.13,
+        262.38,
+        262.68
+      ],
       "ref_pitch_hz": 252.8,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.933,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingshen",
@@ -717,11 +1027,17 @@
       "text": "安慰身形",
       "audio": "seg3",
       "t0": 262.5,
-      "t1": 264.0,
+      "t1": 264.67,
+      "char_t0": [
+        263.29,
+        263.55,
+        263.84,
+        264.17
+      ],
       "ref_pitch_hz": 205.7,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingshen",
@@ -730,11 +1046,17 @@
       "text": "弟子魂魄",
       "audio": "seg3",
       "t0": 264.0,
-      "t1": 265.5,
+      "t1": 266.2,
+      "char_t0": [
+        264.92,
+        265.09,
+        265.4,
+        265.7
+      ],
       "ref_pitch_hz": 208.1,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingshen",
@@ -743,11 +1065,17 @@
       "text": "五脏玄冥",
       "audio": "seg3",
       "t0": 265.5,
-      "t1": 267.0,
+      "t1": 267.67,
+      "char_t0": [
+        266.19,
+        266.49,
+        266.81,
+        267.17
+      ],
       "ref_pitch_hz": 204.8,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingshen",
@@ -756,11 +1084,17 @@
       "text": "青龙白虎",
       "audio": "seg3",
       "t0": 267.0,
-      "t1": 268.5,
+      "t1": 269.3,
+      "char_t0": [
+        267.87,
+        268.14,
+        268.46,
+        268.8
+      ],
       "ref_pitch_hz": 249.8,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingshen",
@@ -769,11 +1103,17 @@
       "text": "队仗纷纭",
       "audio": "seg3",
       "t0": 268.5,
-      "t1": 270.0,
+      "t1": 270.78,
+      "char_t0": [
+        269.33,
+        269.6,
+        269.93,
+        270.28
+      ],
       "ref_pitch_hz": 203.9,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingshen",
@@ -782,11 +1122,17 @@
       "text": "朱雀玄武",
       "audio": "seg3",
       "t0": 270.0,
-      "t1": 271.5,
+      "t1": 272.23,
+      "char_t0": [
+        270.77,
+        271.07,
+        271.39,
+        271.73
+      ],
       "ref_pitch_hz": 200.6,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "jingshen",
@@ -795,11 +1141,17 @@
       "text": "侍卫身形",
       "audio": "seg3",
       "t0": 271.5,
-      "t1": 273.0,
+      "t1": 273.71,
+      "char_t0": [
+        272.36,
+        272.6,
+        272.89,
+        273.21
+      ],
       "ref_pitch_hz": 204.4,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -808,11 +1160,17 @@
       "text": "元始安镇",
       "audio": "seg3",
       "t0": 273.0,
-      "t1": 274.5,
+      "t1": 275.12,
+      "char_t0": [
+        273.34,
+        273.97,
+        274.27,
+        274.62
+      ],
       "ref_pitch_hz": 249.2,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -821,11 +1179,17 @@
       "text": "普告万灵",
       "audio": "seg3",
       "t0": 274.5,
-      "t1": 276.0,
+      "t1": 276.58,
+      "char_t0": [
+        275.23,
+        275.48,
+        275.75,
+        276.08
+      ],
       "ref_pitch_hz": 204.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -835,10 +1199,16 @@
       "audio": "seg3",
       "t0": 276.0,
       "t1": 277.5,
+      "char_t0": [
+        276.62,
+        276.91,
+        277.17,
+        277.42
+      ],
       "ref_pitch_hz": 205.9,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -848,10 +1218,16 @@
       "audio": "seg3",
       "t0": 277.5,
       "t1": 279.0,
+      "char_t0": [
+        278.07,
+        278.37,
+        278.62,
+        278.9
+      ],
       "ref_pitch_hz": 192.5,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -861,10 +1237,16 @@
       "audio": "seg3",
       "t0": 279.0,
       "t1": 280.5,
+      "char_t0": [
+        279.62,
+        279.86,
+        280.11,
+        280.37
+      ],
       "ref_pitch_hz": 246.4,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.867,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -874,10 +1256,16 @@
       "audio": "seg3",
       "t0": 280.5,
       "t1": 282.0,
+      "char_t0": [
+        280.89,
+        281.22,
+        281.5,
+        281.82
+      ],
       "ref_pitch_hz": 188.7,
       "ref_pitch_note": "F#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -887,10 +1275,16 @@
       "audio": "seg3",
       "t0": 282.0,
       "t1": 283.5,
+      "char_t0": [
+        282.34,
+        282.62,
+        282.93,
+        283.31
+      ],
       "ref_pitch_hz": 207.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -900,10 +1294,16 @@
       "audio": "seg3",
       "t0": 283.5,
       "t1": 285.0,
+      "char_t0": [
+        283.73,
+        284.07,
+        284.43,
+        284.83
+      ],
       "ref_pitch_hz": 189.8,
       "ref_pitch_note": "F#3",
       "voiced_frac": 0.9,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -913,10 +1313,16 @@
       "audio": "seg3",
       "t0": 285.0,
       "t1": 286.5,
+      "char_t0": [
+        285.35,
+        285.66,
+        285.93,
+        286.31
+      ],
       "ref_pitch_hz": 250.6,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.933,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -926,10 +1332,16 @@
       "audio": "seg3",
       "t0": 286.5,
       "t1": 288.0,
+      "char_t0": [
+        286.85,
+        287.12,
+        287.41,
+        287.77
+      ],
       "ref_pitch_hz": 184.4,
       "ref_pitch_note": "F#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -939,10 +1351,16 @@
       "audio": "seg3",
       "t0": 288.0,
       "t1": 289.5,
+      "char_t0": [
+        288.3,
+        288.51,
+        288.82,
+        289.11
+      ],
       "ref_pitch_hz": 208.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -952,10 +1370,16 @@
       "audio": "seg3",
       "t0": 289.5,
       "t1": 291.0,
+      "char_t0": [
+        289.71,
+        290.02,
+        290.33,
+        290.65
+      ],
       "ref_pitch_hz": 188.0,
       "ref_pitch_note": "F#3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "an_tudi",
@@ -965,10 +1389,16 @@
       "audio": "seg3",
       "t0": 291.0,
       "t1": 292.0,
+      "char_t0": [
+        291.0,
+        291.24,
+        291.56,
+        291.96
+      ],
       "ref_pitch_hz": 254.2,
       "ref_pitch_note": "C4",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "an_tudi",
@@ -978,10 +1408,16 @@
       "audio": "seg3",
       "t0": 292.0,
       "t1": 293.0,
+      "char_t0": [
+        292.0,
+        292.72,
+        292.96,
+        292.98
+      ],
       "ref_pitch_hz": 204.7,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "an_tudi",
@@ -991,10 +1427,16 @@
       "audio": "seg3",
       "t0": 293.0,
       "t1": 294.5,
+      "char_t0": [
+        293.0,
+        293.96,
+        294.44,
+        294.5
+      ],
       "ref_pitch_hz": 204.0,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "an_tudi",
@@ -1004,10 +1446,16 @@
       "audio": "seg3",
       "t0": 294.5,
       "t1": 296.0,
+      "char_t0": [
+        294.5,
+        295.46,
+        295.86,
+        296.0
+      ],
       "ref_pitch_hz": 208.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1017,10 +1465,16 @@
       "audio": "seg3",
       "t0": 296.0,
       "t1": 297.5,
+      "char_t0": [
+        296.0,
+        296.96,
+        297.28,
+        297.5
+      ],
       "ref_pitch_hz": 249.2,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1030,10 +1484,16 @@
       "audio": "seg3",
       "t0": 297.5,
       "t1": 299.0,
+      "char_t0": [
+        297.5,
+        298.38,
+        298.78,
+        299.0
+      ],
       "ref_pitch_hz": 209.9,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1043,10 +1503,16 @@
       "audio": "seg3",
       "t0": 299.0,
       "t1": 300.5,
+      "char_t0": [
+        299.48,
+        299.8,
+        300.2,
+        300.5
+      ],
       "ref_pitch_hz": 203.3,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1056,10 +1522,16 @@
       "audio": "seg3",
       "t0": 300.5,
       "t1": 302.0,
+      "char_t0": [
+        300.9,
+        301.3,
+        301.62,
+        301.94
+      ],
       "ref_pitch_hz": 204.0,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1069,10 +1541,16 @@
       "audio": "seg3",
       "t0": 302.0,
       "t1": 303.5,
+      "char_t0": [
+        302.4,
+        302.8,
+        303.12,
+        303.44
+      ],
       "ref_pitch_hz": 247.2,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1082,10 +1560,16 @@
       "audio": "seg3",
       "t0": 303.5,
       "t1": 305.0,
+      "char_t0": [
+        303.5,
+        304.22,
+        304.62,
+        304.94
+      ],
       "ref_pitch_hz": 205.4,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1095,10 +1579,16 @@
       "audio": "seg3",
       "t0": 305.0,
       "t1": 306.5,
+      "char_t0": [
+        305.0,
+        305.64,
+        305.96,
+        306.36
+      ],
       "ref_pitch_hz": 207.1,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1108,10 +1598,16 @@
       "audio": "seg3",
       "t0": 306.5,
       "t1": 308.0,
+      "char_t0": [
+        306.74,
+        307.06,
+        307.46,
+        307.78
+      ],
       "ref_pitch_hz": 193.4,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1121,10 +1617,16 @@
       "audio": "seg3",
       "t0": 308.0,
       "t1": 309.5,
+      "char_t0": [
+        308.16,
+        308.4,
+        308.96,
+        309.28
+      ],
       "ref_pitch_hz": 251.5,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.867,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1134,10 +1636,16 @@
       "audio": "seg3",
       "t0": 309.5,
       "t1": 311.0,
+      "char_t0": [
+        309.66,
+        309.98,
+        310.3,
+        310.62
+      ],
       "ref_pitch_hz": 191.5,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1147,10 +1655,16 @@
       "audio": "seg3",
       "t0": 311.0,
       "t1": 312.5,
+      "char_t0": [
+        311.0,
+        311.4,
+        311.72,
+        312.04
+      ],
       "ref_pitch_hz": 206.0,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1160,10 +1674,16 @@
       "audio": "seg3",
       "t0": 312.5,
       "t1": 314.0,
+      "char_t0": [
+        312.5,
+        312.82,
+        313.14,
+        313.46
+      ],
       "ref_pitch_hz": 184.0,
       "ref_pitch_note": "F#3",
       "voiced_frac": 0.967,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1173,10 +1693,16 @@
       "audio": "seg3",
       "t0": 314.0,
       "t1": 315.5,
+      "char_t0": [
+        314.0,
+        314.24,
+        314.56,
+        314.96
+      ],
       "ref_pitch_hz": 252.4,
       "ref_pitch_note": "B3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1186,10 +1712,16 @@
       "audio": "seg3",
       "t0": 315.5,
       "t1": 317.0,
+      "char_t0": [
+        315.5,
+        315.58,
+        316.06,
+        316.38
+      ],
       "ref_pitch_hz": 192.7,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.867,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1199,10 +1731,16 @@
       "audio": "seg3",
       "t0": 317.0,
       "t1": 318.5,
+      "char_t0": [
+        317.0,
+        317.08,
+        317.48,
+        317.8
+      ],
       "ref_pitch_hz": 207.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.967,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1212,10 +1750,16 @@
       "audio": "seg3",
       "t0": 318.5,
       "t1": 320.0,
+      "char_t0": [
+        318.5,
+        318.74,
+        318.98,
+        319.3
+      ],
       "ref_pitch_hz": 190.5,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1225,10 +1769,16 @@
       "audio": "seg3",
       "t0": 320.0,
       "t1": 321.0,
+      "char_t0": [
+        320.0,
+        320.2,
+        320.4,
+        320.64
+      ],
       "ref_pitch_hz": 256.8,
       "ref_pitch_note": "C4",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1238,10 +1788,16 @@
       "audio": "seg3",
       "t0": 321.0,
       "t1": 322.0,
+      "char_t0": [
+        321.08,
+        321.4,
+        321.72,
+        321.96
+      ],
       "ref_pitch_hz": 202.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1251,10 +1807,16 @@
       "audio": "seg3",
       "t0": 322.0,
       "t1": 323.5,
+      "char_t0": [
+        322.0,
+        322.88,
+        323.2,
+        323.44
+      ],
       "ref_pitch_hz": 204.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1264,10 +1826,16 @@
       "audio": "seg3",
       "t0": 323.5,
       "t1": 325.0,
+      "char_t0": [
+        323.5,
+        324.38,
+        324.7,
+        325.0
+      ],
       "ref_pitch_hz": 206.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.967,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1277,10 +1845,16 @@
       "audio": "seg3",
       "t0": 325.0,
       "t1": 326.5,
+      "char_t0": [
+        325.48,
+        325.88,
+        326.2,
+        326.5
+      ],
       "ref_pitch_hz": 250.6,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.8,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jing_tiandi",
@@ -1290,10 +1864,16 @@
       "audio": "seg3",
       "t0": 326.5,
       "t1": 328.0,
+      "char_t0": [
+        326.98,
+        327.3,
+        327.7,
+        328.0
+      ],
       "ref_pitch_hz": 206.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.967,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "zhu_xiang",
@@ -1303,10 +1883,16 @@
       "audio": "seg3",
       "t0": 328.0,
       "t1": 329.5,
+      "char_t0": [
+        328.48,
+        328.88,
+        329.2,
+        329.5
+      ],
       "ref_pitch_hz": 203.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "zhu_xiang",
@@ -1316,10 +1902,16 @@
       "audio": "seg3",
       "t0": 329.5,
       "t1": 331.0,
+      "char_t0": [
+        329.5,
+        329.58,
+        330.7,
+        331.0
+      ],
       "ref_pitch_hz": 208.0,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "zhu_xiang",
@@ -1329,10 +1921,16 @@
       "audio": "seg3",
       "t0": 331.0,
       "t1": 332.5,
+      "char_t0": [
+        331.4,
+        331.8,
+        332.28,
+        332.5
+      ],
       "ref_pitch_hz": 251.7,
       "ref_pitch_note": "B3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "zhu_xiang",
@@ -1342,10 +1940,16 @@
       "audio": "seg3",
       "t0": 332.5,
       "t1": 334.0,
+      "char_t0": [
+        332.9,
+        333.22,
+        333.62,
+        333.94
+      ],
       "ref_pitch_hz": 211.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "zhu_xiang",
@@ -1355,10 +1959,16 @@
       "audio": "seg3",
       "t0": 334.0,
       "t1": 335.5,
+      "char_t0": [
+        334.32,
+        334.8,
+        335.04,
+        335.44
+      ],
       "ref_pitch_hz": 204.9,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "zhu_xiang",
@@ -1368,10 +1978,16 @@
       "audio": "seg3",
       "t0": 335.5,
       "t1": 337.0,
+      "char_t0": [
+        335.82,
+        336.22,
+        336.54,
+        336.86
+      ],
       "ref_pitch_hz": 207.3,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "zhu_xiang",
@@ -1381,10 +1997,16 @@
       "audio": "seg3",
       "t0": 337.0,
       "t1": 338.5,
+      "char_t0": [
+        337.0,
+        337.64,
+        338.04,
+        338.44
+      ],
       "ref_pitch_hz": 250.0,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "zhu_xiang",
@@ -1394,10 +2016,16 @@
       "audio": "seg3",
       "t0": 338.5,
       "t1": 340.0,
+      "char_t0": [
+        338.5,
+        339.14,
+        339.46,
+        339.86
+      ],
       "ref_pitch_hz": 201.1,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1407,10 +2035,16 @@
       "audio": "seg3",
       "t0": 340.0,
       "t1": 341.5,
+      "char_t0": [
+        340.0,
+        340.24,
+        340.88,
+        341.28
+      ],
       "ref_pitch_hz": 206.7,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1420,10 +2054,16 @@
       "audio": "seg3",
       "t0": 341.5,
       "t1": 343.0,
+      "char_t0": [
+        341.66,
+        341.98,
+        342.38,
+        342.78
+      ],
       "ref_pitch_hz": 192.3,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1433,10 +2073,16 @@
       "audio": "seg3",
       "t0": 343.0,
       "t1": 344.5,
+      "char_t0": [
+        343.16,
+        343.48,
+        343.88,
+        344.2
+      ],
       "ref_pitch_hz": 252.7,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1446,10 +2092,16 @@
       "audio": "seg3",
       "t0": 344.5,
       "t1": 346.0,
+      "char_t0": [
+        344.58,
+        344.98,
+        345.3,
+        345.7
+      ],
       "ref_pitch_hz": 190.1,
       "ref_pitch_note": "F#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1459,10 +2111,16 @@
       "audio": "seg3",
       "t0": 346.0,
       "t1": 347.5,
+      "char_t0": [
+        346.0,
+        346.4,
+        346.72,
+        347.12
+      ],
       "ref_pitch_hz": 208.0,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1472,10 +2130,16 @@
       "audio": "seg3",
       "t0": 347.5,
       "t1": 349.0,
+      "char_t0": [
+        347.5,
+        347.82,
+        348.22,
+        348.54
+      ],
       "ref_pitch_hz": 192.3,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.9,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1485,10 +2149,16 @@
       "audio": "seg3",
       "t0": 349.0,
       "t1": 350.5,
+      "char_t0": [
+        349.0,
+        349.32,
+        349.64,
+        350.04
+      ],
       "ref_pitch_hz": 252.6,
       "ref_pitch_note": "B3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1498,10 +2168,16 @@
       "audio": "seg3",
       "t0": 350.5,
       "t1": 352.0,
+      "char_t0": [
+        350.5,
+        350.82,
+        351.14,
+        351.46
+      ],
       "ref_pitch_hz": 188.5,
       "ref_pitch_note": "F#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1511,10 +2187,16 @@
       "audio": "seg3",
       "t0": 352.0,
       "t1": 353.5,
+      "char_t0": [
+        352.0,
+        352.56,
+        352.72,
+        352.88
+      ],
       "ref_pitch_hz": 209.9,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1524,10 +2206,16 @@
       "audio": "seg3",
       "t0": 353.5,
       "t1": 355.0,
+      "char_t0": [
+        353.5,
+        353.66,
+        353.98,
+        354.38
+      ],
       "ref_pitch_hz": 192.1,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.8,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1537,10 +2225,16 @@
       "audio": "seg3",
       "t0": 355.0,
       "t1": 356.5,
+      "char_t0": [
+        355.0,
+        355.16,
+        355.48,
+        355.88
+      ],
       "ref_pitch_hz": 251.5,
       "ref_pitch_note": "B3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1550,10 +2244,16 @@
       "audio": "seg3",
       "t0": 356.5,
       "t1": 358.0,
+      "char_t0": [
+        356.5,
+        356.66,
+        356.98,
+        357.3
+      ],
       "ref_pitch_hz": 188.8,
       "ref_pitch_note": "F#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1563,10 +2263,16 @@
       "audio": "seg3",
       "t0": 358.0,
       "t1": 359.5,
+      "char_t0": [
+        358.0,
+        358.08,
+        358.48,
+        358.8
+      ],
       "ref_pitch_hz": 208.3,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.967,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1576,10 +2282,16 @@
       "audio": "seg3",
       "t0": 359.5,
       "t1": 361.0,
+      "char_t0": [
+        359.5,
+        359.58,
+        359.98,
+        360.22
+      ],
       "ref_pitch_hz": 198.9,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.8,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1589,10 +2301,16 @@
       "audio": "seg3",
       "t0": 361.0,
       "t1": 362.5,
+      "char_t0": [
+        361.0,
+        361.08,
+        361.48,
+        361.88
+      ],
       "ref_pitch_hz": 249.8,
       "ref_pitch_note": "B3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1602,10 +2320,16 @@
       "audio": "seg3",
       "t0": 362.5,
       "t1": 364.0,
+      "char_t0": [
+        362.5,
+        362.58,
+        362.9,
+        363.3
+      ],
       "ref_pitch_hz": 188.1,
       "ref_pitch_note": "F#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1615,10 +2339,16 @@
       "audio": "seg3",
       "t0": 364.0,
       "t1": 365.5,
+      "char_t0": [
+        364.0,
+        364.16,
+        364.32,
+        364.72
+      ],
       "ref_pitch_hz": 206.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1628,10 +2358,16 @@
       "audio": "seg3",
       "t0": 365.5,
       "t1": 367.0,
+      "char_t0": [
+        365.5,
+        365.66,
+        365.82,
+        366.14
+      ],
       "ref_pitch_hz": 207.8,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1641,10 +2377,16 @@
       "audio": "seg3",
       "t0": 367.0,
       "t1": 368.5,
+      "char_t0": [
+        367.0,
+        367.12,
+        367.24,
+        367.64
+      ],
       "ref_pitch_hz": 241.8,
       "ref_pitch_note": "B3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1654,10 +2396,16 @@
       "audio": "seg3",
       "t0": 368.5,
       "t1": 370.0,
+      "char_t0": [
+        368.5,
+        368.66,
+        368.82,
+        369.06
+      ],
       "ref_pitch_hz": 193.4,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1667,10 +2415,16 @@
       "audio": "seg3",
       "t0": 370.0,
       "t1": 371.5,
+      "char_t0": [
+        370.0,
+        370.88,
+        371.09,
+        371.29
+      ],
       "ref_pitch_hz": 208.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1680,10 +2434,16 @@
       "audio": "seg3",
       "t0": 371.5,
       "t1": 373.0,
+      "char_t0": [
+        371.5,
+        371.98,
+        372.32,
+        372.66
+      ],
       "ref_pitch_hz": 197.8,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.9,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1693,10 +2453,16 @@
       "audio": "seg3",
       "t0": 373.0,
       "t1": 374.5,
+      "char_t0": [
+        373.0,
+        373.08,
+        373.16,
+        373.48
+      ],
       "ref_pitch_hz": 211.5,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1706,10 +2472,16 @@
       "audio": "seg3",
       "t0": 374.5,
       "t1": 376.0,
+      "char_t0": [
+        374.5,
+        374.7,
+        374.9,
+        375.22
+      ],
       "ref_pitch_hz": 197.8,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1719,10 +2491,16 @@
       "audio": "seg3",
       "t0": 376.0,
       "t1": 377.5,
+      "char_t0": [
+        376.0,
+        376.08,
+        376.16,
+        376.32
+      ],
       "ref_pitch_hz": 208.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "jinguang",
@@ -1732,10 +2510,16 @@
       "audio": "seg3",
       "t0": 377.5,
       "t1": 379.0,
+      "char_t0": [
+        377.5,
+        377.58,
+        377.66,
+        377.82
+      ],
       "ref_pitch_hz": 200.0,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.733,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1745,10 +2529,16 @@
       "audio": "seg3",
       "t0": 379.0,
       "t1": 380.0,
+      "char_t0": [
+        379.0,
+        379.16,
+        379.28,
+        379.4
+      ],
       "ref_pitch_hz": 250.4,
       "ref_pitch_note": "B3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1758,10 +2548,16 @@
       "audio": "seg3",
       "t0": 380.0,
       "t1": 381.0,
+      "char_t0": [
+        380.0,
+        380.16,
+        380.56,
+        380.88
+      ],
       "ref_pitch_hz": 188.4,
       "ref_pitch_note": "F#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1771,10 +2567,16 @@
       "audio": "seg3",
       "t0": 381.0,
       "t1": 382.5,
+      "char_t0": [
+        381.24,
+        381.8,
+        381.88,
+        382.04
+      ],
       "ref_pitch_hz": 206.2,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1784,10 +2586,16 @@
       "audio": "seg3",
       "t0": 382.5,
       "t1": 384.0,
+      "char_t0": [
+        382.66,
+        382.98,
+        383.38,
+        383.7
+      ],
       "ref_pitch_hz": 191.9,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.933,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1797,10 +2605,16 @@
       "audio": "seg3",
       "t0": 384.0,
       "t1": 385.5,
+      "char_t0": [
+        384.16,
+        384.48,
+        384.8,
+        385.12
+      ],
       "ref_pitch_hz": 248.2,
       "ref_pitch_note": "B3",
       "voiced_frac": 0.9,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1810,10 +2624,16 @@
       "audio": "seg3",
       "t0": 385.5,
       "t1": 387.0,
+      "char_t0": [
+        385.5,
+        385.82,
+        386.22,
+        386.54
+      ],
       "ref_pitch_hz": 191.6,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1823,10 +2643,16 @@
       "audio": "seg3",
       "t0": 387.0,
       "t1": 388.5,
+      "char_t0": [
+        387.0,
+        387.24,
+        387.56,
+        387.88
+      ],
       "ref_pitch_hz": 211.9,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1836,10 +2662,16 @@
       "audio": "seg3",
       "t0": 388.5,
       "t1": 390.0,
+      "char_t0": [
+        388.5,
+        388.66,
+        388.98,
+        389.3
+      ],
       "ref_pitch_hz": 193.7,
       "ref_pitch_note": "G3",
       "voiced_frac": 0.867,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1849,10 +2681,16 @@
       "audio": "seg3",
       "t0": 390.0,
       "t1": 391.5,
+      "char_t0": [
+        390.0,
+        390.16,
+        390.4,
+        390.8
+      ],
       "ref_pitch_hz": 252.1,
       "ref_pitch_note": "B3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1862,10 +2700,16 @@
       "audio": "seg3",
       "t0": 391.5,
       "t1": 393.0,
+      "char_t0": [
+        391.5,
+        391.7,
+        391.9,
+        392.22
+      ],
       "ref_pitch_hz": 194.8,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1875,10 +2719,16 @@
       "audio": "seg3",
       "t0": 393.0,
       "t1": 394.5,
+      "char_t0": [
+        393.0,
+        393.16,
+        393.32,
+        393.64
+      ],
       "ref_pitch_hz": 207.9,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1888,10 +2738,16 @@
       "audio": "seg3",
       "t0": 394.5,
       "t1": 396.0,
+      "char_t0": [
+        394.5,
+        394.74,
+        394.9,
+        395.06
+      ],
       "ref_pitch_hz": 213.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.833,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1901,10 +2757,16 @@
       "audio": "seg3",
       "t0": 396.0,
       "t1": 397.5,
+      "char_t0": [
+        396.0,
+        396.16,
+        396.36,
+        396.56
+      ],
       "ref_pitch_hz": 212.6,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1914,10 +2776,16 @@
       "audio": "seg3",
       "t0": 397.5,
       "t1": 399.0,
+      "char_t0": [
+        397.5,
+        397.66,
+        397.98,
+        398.49
+      ],
       "ref_pitch_hz": 206.4,
       "ref_pitch_note": "G#3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1927,10 +2795,17 @@
       "audio": "seg3",
       "t0": 399.0,
       "t1": 402.0,
+      "char_t0": [
+        399.42,
+        399.61,
+        399.83,
+        400,
+        400.3
+      ],
       "ref_pitch_hz": 216.2,
       "ref_pitch_note": "A3",
       "voiced_frac": 0.983,
-      "align": "transcript"
+      "align": "measured"
     },
     {
       "section": "xuanyun",
@@ -1940,10 +2815,17 @@
       "audio": "seg3",
       "t0": 402.0,
       "t1": 405.0,
+      "char_t0": [
+        402.0,
+        402.72,
+        403.04,
+        403.36,
+        403.44
+      ],
       "ref_pitch_hz": 209.0,
       "ref_pitch_note": "G#3",
       "voiced_frac": 0.9,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1953,10 +2835,17 @@
       "audio": "seg3",
       "t0": 405.0,
       "t1": 406.5,
+      "char_t0": [
+        405.0,
+        405.16,
+        405.56,
+        405.88,
+        406.28
+      ],
       "ref_pitch_hz": 192.0,
       "ref_pitch_note": "G3",
       "voiced_frac": 1.0,
-      "align": "transcript"
+      "align": "aligned"
     },
     {
       "section": "xuanyun",
@@ -1966,10 +2855,17 @@
       "audio": "seg3",
       "t0": 406.5,
       "t1": 406.9,
+      "char_t0": [
+        406.5,
+        406.58,
+        406.82,
+        406.86,
+        406.9
+      ],
       "ref_pitch_hz": 170.5,
       "ref_pitch_note": "F3",
       "voiced_frac": 0.625,
-      "align": "transcript"
+      "align": "aligned"
     }
   ]
 }
