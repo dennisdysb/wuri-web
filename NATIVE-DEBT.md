@@ -1,5 +1,11 @@
 # 原生端欠账（网页版已修、原生待随下一期联合更新带上）
 
+## 2026-11-09 · 跟唱逐字时间轴落表＋播放器布局微调 v595：char_t0 全量落地＋倍速/播放/音高区置顶（网页版已上线 v595，未打 APK）
+
+- **网页版改动**：内部 v595 已上线（commits `7707e030`＋`e0d30dd7`）。逐字时间轴落表：`www/content/karaoke/timeline.json`（59,231 B，md5 `27af9e6570022319bd2f071fc0b06408`）147 行全量带 char_t0——用户点按实测 70 行（measured）＋hybrid 对齐 77 行（aligned）；idx 7 char_t0 [0.88, 3.58, 6.57, 9.41, 15.66, 18.81, 21.68] t1 22.18；idx 143（沉疴能自痊）[399.42, 399.61, 399.83, 400, 400.3] t1 402.0；t1 延展 35 行（末字超出行尾防截断），最大 +9.88s（idx 8：39.0 → 48.88）。melody.json 未动（md5 `5d4f52618df7a46f703eefd7eea5598d`）。播放器布局微调：倍速 pill 46→38px，播放钮 46→52px＋1.15rem＋white-space:nowrap（横排「播放」），音高区 position:sticky top:210px 置顶＋layoutSticky() melH 处理（`www/css/style.css`、`www/js/karaoke.js`）。版本 bump v595：sw.js `wuri-v595-20261109-v595`，index.html 64× `?v=595`／0× `?v=594`，i18n.js me_ver 简/繁各 2× 内部 v595。测试 test_v595.py 30/30；v594_melody 105/0（＋4 断言）；全套其余回归零新增失败。
+- **欠账范围**：CN 版、Play 版、iOS 版跟唱均未同步（timeline.json char_t0＋播放器布局微调），下一期原生联合更新时一并带上；**本次不打 APK**。
+- **原生侧修法**：原生分叉 `~/workspace/wuri-app/www` 同步 timeline.json 整文件＋karaoke.js／style.css 的布局改动（index.html 的 ?v= 随版本 bump 走，不单独移植）；移植后抽验：跟唱逐字变金与 char_t0 对齐（idx 7、idx 143 两处）、倍速 pill 38px、播放钮横排 52px、音高区滚动置顶。
+
 ## 2026-11-09 · 跟唱旋律引导 v594：音高线＋正弦提示音＋melody.json（网页版已上线 v594，未打 APK）
 
 - **网页版改动**：内部 v594 已上线（commit `f1b413d2`）。跟唱新增旋律引导（用户 2026-11-09 定：音高线与提示音两个都要）：新数据 `www/content/karaoke/melody.json`（454,902 B，md5 `5d4f52618df7a46f703eefd7eea5598d`），三段青玄录音 pyin 提取（fmin 65/fmax 500 Hz＋0.25s 中位平滑，10 fps，8,402 帧；低于 100 Hz 的 fmin 底噪帧按无声处理，停顿进 breaks——两处 seg2 行内停顿 50.24–53.96s、104.81–108.61s 已为空白段）；播放器 `www/js/karaoke.js` 新增音高线 strip（控制条下方，30s 窗口前 8s＋后 22s＋播放头，110–310 Hz 对数轴，颜色走 CSS 变量链）与正弦提示音（独立 AudioContext＋OscillatorNode，增益 0.2，控制条「提示音」钮，默认关；停顿／暂停／关闭时静音，与打分麦克风 Analyser 路径分开）；`www/index.html` 控制条加「提示音」钮＋strip 结构；`www/css/style.css` 加旋律条样式（变量配色，日间／夜间／红光三态）。测试 `~/workspace/wuri-app/karaoke/tests/test_v594_melody.js` 101/101 通过；全套其余回归仅 test_v588 C2 一处因 karaoke.js 内容变更而失效（v588 旧 md5 钉子，属预期内）。提取与验证见 `~/workspace/wuri-app/karaoke/melody/MELODY-EXTRACTION-REPORT.md`。timeline.json／base_text.json 未动（点按标记落表另走 v595，不冲突）。
