@@ -3648,33 +3648,34 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 /* 段选择：2×2 等分网格（v577：竖排四行改网格，标签再长也不乱） */
 .karaoke-seg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 0}
 .karaoke-seg-row .karaoke-seg{width:100%;text-align:center;padding:9px 6px;line-height:1.45}
-/* 控制条：同一视觉语言（v577 重做）；v595 播放主钮 52px 高／1.15rem 横排、
- * 变速 pill 缩至 38px（其余 pill 仍 46px，flex align-items:center 居中对齐）。
- * 主按钮金底白字，变速／循环／打分描边 pill，循环开、打分中时金底白字（.active）。 */
+/* 控制条：同一视觉语言（v577 重做）；四钮等宽等高（用户 2026-11-09 定：
+ * 顶栏按钮大小不一看着别扭）——播放／变速 select／循环／打分全部
+ * flex:1 1 0＋height:46px＋font-size:.95rem＋padding:0 6px，文字居中；
+ * 播放钮仍金底白字加粗，变速／循环／打分描边 pill，循环开、打分中时金底白字（.active）。
+ * 打分中… 实测（v596 口径 .95rem＝15.2px／字，border-box 全局）：
+ * 360px 屏：可用宽 (360−28 padding−18 gap)/4＝78.5px／钮；
+ * 需 4×15.2＋12 padding＋2 边框＝74.8px，余 3.7px，一行放得下；
+ * 320px 屏：(320−28−18)/4＝68.5px＜74.8px，一行放不下——≤344px 改两行
+ * （flex-basis 45%，每行两钮，约 143px／钮），等宽等高保持不变。
+ * 旧 v596 #karaoke-score-btn min-width:82px 已删（定宽单钮会破坏等宽）。 */
 .karaoke-controls{position:sticky;top:76px;z-index:15;background:var(--paper);display:flex;align-items:center;gap:6px;flex-wrap:nowrap;padding:12px 14px 10px;border-bottom:1px solid var(--line)}
-.karaoke-play{flex:1 1 auto;min-width:0;height:52px;padding:0 12px;border-radius:12px;background:var(--gold);color:#fff;border:1px solid var(--gold);font-size:1.15rem;font-weight:700;font-family:var(--sans);cursor:pointer;white-space:nowrap}
+.karaoke-play{flex:1 1 0;min-width:0;height:46px;padding:0 6px;text-align:center;border-radius:12px;background:var(--gold);color:#fff;border:1px solid var(--gold);font-size:.95rem;font-weight:700;font-family:var(--sans);cursor:pointer;white-space:nowrap}
 .karaoke-play:active{transform:scale(.97)}
-/* v595：变速 pill 缩小（38px 高／.85rem／窄 padding＋max-width 60px），给播放钮腾宽；
- * 提示音／循环／打分 pill 横 padding 12px→9px（同为给播放钮腾宽的适配，
- * 快进退行不受影响：.karaoke-seek 另有 padding:0 6px 覆盖）。 */
-.karaoke-speed{flex:0 0 auto;height:38px;max-width:60px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.85rem;padding:0 2px;font-family:var(--sans);cursor:pointer}
-.karaoke-ctl{flex:0 1 auto;min-width:0;height:46px;padding:0 9px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
+.karaoke-speed{flex:1 1 0;min-width:0;height:46px;text-align:center;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;padding:0 6px;font-family:var(--sans);cursor:pointer}
+.karaoke-ctl{flex:1 1 0;min-width:0;height:46px;padding:0 6px;text-align:center;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
 .karaoke-ctl:active{transform:scale(.97)}
 .karaoke-ctl.active{background:var(--gold);color:#fff;border-color:var(--gold)}
-/* v596 打分中不截断：打分钮按最长文案「打分中…」（i18n karaoke_scoring，4 字）
- * 定宽——flex:0 0 auto（不参与压缩）＋min-width:82px（文案 60＋padding 18＋
- * 边框 2＋2 余量，border-box 全局）；字体不缩小；打分／打分中同宽，点按不跳动。
- * 窄屏换行（≤440px）：单行条按 Noto Sans CJK SC 实测（.95rem＝15.2px／字），
- * 打分中…（82px）＋只听提示音（96px）同时出现时单行需 405px 内容宽，
- * 360px（用户手机）溢出 73px、320px 溢出 113px；定宽钮若硬塞单行只会把
- * 播放钮压到约 20px。≤440px 改自然换行（播放钮 flex:1 吸满首行，长钮换到
- * 次行），字号／padding 不动；吸顶 top 由 karaoke.js layoutSticky() 按
- * offsetHeight 实测接力，文案变化时 setToneMode／updateScoringUI 会重算。 */
-#karaoke-score-btn{flex:0 0 auto;min-width:82px}
-@media (max-width:440px){.karaoke-controls{flex-wrap:wrap}}
+/* 极窄屏（≤344px）换行档：单行算术放不下「打分中…」（见上），改 2×2 两行，
+ * 行内仍等宽等高；345px 及以上保持单行。 */
+@media (max-width:344px){.karaoke-controls{flex-wrap:wrap}.karaoke-play,.karaoke-speed,.karaoke-ctl{flex:1 1 45%}}
+/* ---- 打分耳机提示 toast：打分开始时弹一次，3s 自消失；
+ * fixed 居中于歌词区（top:50%），不贴控制条／快进退行；pointer-events:none
+ * 不拦截点按；颜色只走 --card/--ink/--line 变量链，日/夜/红光三态自动适配。 */
+.karaoke-toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:65;max-width:calc(100% - 28px);padding:10px 18px;border-radius:999px;background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.18);font-size:.95rem;white-space:nowrap;pointer-events:none}
+.karaoke-toast[hidden]{display:none}
 /* 快进/快退行（v585）：控制条下方另起一行，与控制条同为 sticky（top 默认
  * 120px≈头栏 76＋控制条 44；karaoke.js layoutSticky() 打开时实测接力）。
- * 四钮等宽 flex:1（.karaoke-seek 覆盖 .karaoke-ctl 的 flex:0 1 auto），
+ * 四钮等宽 flex:1 1 0（与控制条同口径），
  * 颜色只走变量链（--paper/--line/--teal/--card/--teal-deep），无写死色值。 */
 .karaoke-seek-row{position:sticky;top:120px;z-index:15;background:var(--paper);display:flex;align-items:center;gap:6px;padding:8px 14px 10px;border-bottom:1px solid var(--line)}
 .karaoke-seek{flex:1 1 0;min-width:0;padding:0 6px;text-align:center}

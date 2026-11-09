@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=596">
+<link rel="stylesheet" href="css/style.css?v=597">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -445,7 +445,6 @@
           </select>
           <button class="karaoke-ctl" id="karaoke-loop" data-i18n="karaoke_loop">单句循环</button>
           <button class="karaoke-ctl" id="karaoke-score-btn" data-i18n="karaoke_score">打分</button>
-          <button class="karaoke-ctl" id="karaoke-tone-btn" type="button" title="点按切换：提示音／只听提示音／关">提示音</button>
         </div>
         <!-- 快进/快退行（v585：用户 2026-11-07 亲口要 ±5s/±10s，两个都要）：
              控制条已满（播放／变速／循环／打分），4 钮另起一行；样式复用 .karaoke-ctl
@@ -459,7 +458,7 @@
         </div>
         <!-- 旋律音高线（v594）：当前段参考旋律曲线＋播放头，30s 窗口跟随播放；
              melody.json 缺失/损坏时保持 hidden，播放器其余功能不受影响。
-             提示音默认关（控制条「提示音」钮，点按三态循环：伴唱／只听提示音／关）。 -->
+             提示音声源已删（用户定：效果不好），音高线可视化保留。 -->
         <div class="karaoke-melody" id="karaoke-melody" hidden>
           <canvas class="karaoke-melody-canvas" id="karaoke-melody-canvas" height="64" aria-label="旋律音高线"></canvas>
           <div class="karaoke-melody-cap"><span>旋律音高</span><span class="karaoke-melody-note" id="karaoke-melody-note">—</span></div>
@@ -471,6 +470,9 @@
           <span class="karaoke-score-float-status"><span class="karaoke-score-dot"></span><span data-i18n="karaoke_scoring_now">打分中</span>&nbsp;<span id="karaoke-score-time">00:00</span></span>
           <button class="karaoke-score-stop" id="karaoke-score-stop" type="button" data-i18n="karaoke_stop_score">停止并出分</button>
         </div>
+        <!-- 打分耳机提示 toast：打分开始时由 karaoke.js 弹一次，3s 自消失；
+             fixed＋pointer-events:none，不挡控制条、不拦截点按，文案见 i18n karaoke_headphones_tip。 -->
+        <div class="karaoke-toast" id="karaoke-headphones-toast" hidden data-i18n="karaoke_headphones_tip">戴上耳机效果更好</div>
         <p class="hint" id="karaoke-mic-hint" hidden data-i18n="karaoke_mic_hint">打分需开麦克风，建议戴耳机（评分更准）</p>
         <div class="karaoke-progress-wrap">
           <div class="karaoke-progress"><div class="karaoke-progress-bar" id="karaoke-progress-bar"></div></div>
@@ -1163,7 +1165,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v596）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.0.2（内部 v597）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -2814,71 +2816,71 @@
   </div>
 </div>
 
-<script src="js/lunar.min.js?v=596"></script>
-<script src="js/capacitor.js?v=596"></script>
-<script src="js/ln-plugin.js?v=596"></script>
-<script src="js/i18n.js?v=596"></script>
-<script src="js/dialog.js?v=596"></script>
-<script src="js/zhishen-data.js?v=596"></script>
-<script src="js/pentads-data.js?v=596"></script>
-<script src="js/poems-data.js?v=596"></script>
-<script src="jing/index.js?v=596"></script>
-<script src="js/daily-jing.js?v=596"></script>
-<script src="js/app.js?v=596"></script>
-<script src="js/pro.js?v=596"></script>
-  <script src="js/liuyao.js?v=596"></script>
-<script src="js/yearview.js?v=596"></script>
-<script src="js/media-session.js?v=596"></script>
-<script src="js/practice.js?v=596"></script>
-<script src="js/bugang.js?v=596"></script>
-<script src="js/meditation.js?v=596"></script>
-<script src="js/citydata.js?v=596"></script>
-<script src="js/bazi.js?v=596"></script>
-<script src="js/iztro.min.js?v=596"></script>
-<script src="js/ziwei.js?v=596"></script>
-<script src="js/qimen-engine.js?v=596"></script>
-<script src="js/qimen-geju.js?v=596"></script>
-<script src="js/qimen-data.js?v=596"></script>
-<script src="js/qimen-cases.js?v=596"></script>
-<script src="js/qimen-cal.js?v=596"></script>
-<script src="js/qimen-render3d.js?v=596"></script>
-<script src="js/qimen-app.js?v=596"></script>
-<script src="js/ai-analysis.js?v=596"></script>
-<script src="js/ics-generator.js?v=596"></script>
-<script src="js/t2s.js?v=596"></script>
-<script src="js/s2t.js?v=596"></script>
-<script src="js/jingwen.js?v=596"></script>
-<script src="js/karaoke.js?v=596"></script>
-<script src="js/dict.js?v=596"></script>
-<script src="js/daozang.js?v=596"></script>
-<script src="js/deities-data.js?v=596"></script>
-<script src="js/deities.js?v=596"></script>
+<script src="js/lunar.min.js?v=597"></script>
+<script src="js/capacitor.js?v=597"></script>
+<script src="js/ln-plugin.js?v=597"></script>
+<script src="js/i18n.js?v=597"></script>
+<script src="js/dialog.js?v=597"></script>
+<script src="js/zhishen-data.js?v=597"></script>
+<script src="js/pentads-data.js?v=597"></script>
+<script src="js/poems-data.js?v=597"></script>
+<script src="jing/index.js?v=597"></script>
+<script src="js/daily-jing.js?v=597"></script>
+<script src="js/app.js?v=597"></script>
+<script src="js/pro.js?v=597"></script>
+  <script src="js/liuyao.js?v=597"></script>
+<script src="js/yearview.js?v=597"></script>
+<script src="js/media-session.js?v=597"></script>
+<script src="js/practice.js?v=597"></script>
+<script src="js/bugang.js?v=597"></script>
+<script src="js/meditation.js?v=597"></script>
+<script src="js/citydata.js?v=597"></script>
+<script src="js/bazi.js?v=597"></script>
+<script src="js/iztro.min.js?v=597"></script>
+<script src="js/ziwei.js?v=597"></script>
+<script src="js/qimen-engine.js?v=597"></script>
+<script src="js/qimen-geju.js?v=597"></script>
+<script src="js/qimen-data.js?v=597"></script>
+<script src="js/qimen-cases.js?v=597"></script>
+<script src="js/qimen-cal.js?v=597"></script>
+<script src="js/qimen-render3d.js?v=597"></script>
+<script src="js/qimen-app.js?v=597"></script>
+<script src="js/ai-analysis.js?v=597"></script>
+<script src="js/ics-generator.js?v=597"></script>
+<script src="js/t2s.js?v=597"></script>
+<script src="js/s2t.js?v=597"></script>
+<script src="js/jingwen.js?v=597"></script>
+<script src="js/karaoke.js?v=597"></script>
+<script src="js/dict.js?v=597"></script>
+<script src="js/daozang.js?v=597"></script>
+<script src="js/deities-data.js?v=597"></script>
+<script src="js/deities.js?v=597"></script>
 <script>window.exports = {};</script>
-<script src="js/vendor/astronomy.js?v=596"></script>
+<script src="js/vendor/astronomy.js?v=597"></script>
 <script>window.Astronomy = window.exports; /* exports 须保留：astronomy.js 内部在调用时动态解析该全局 */</script>
-<script src="js/vendor/d3-array.min.js?v=596"></script>
-<script src="js/vendor/d3-geo.min.js?v=596"></script>
-<script src="js/sky-engine.js?v=596"></script>
-<script src="js/today-sky.js?v=596"></script>
-<script src="js/stars.js?v=596"></script>
-<script src="js/sky-chart.js?v=596"></script>
-<script src="js/sky-ar.js?v=596"></script>
-<script src="js/sky-horizon.js?v=596"></script>
-<script src="js/fengshui-data.js?v=596"></script>
-<script src="js/vendor/soul-fengshui.js?v=596"></script>
-<script src="js/fengshui.js?v=596"></script>
-<script src="js/fengshui2.js?v=596"></script>
-<script src="js/jinsuo-data.js?v=596"></script>
-<script src="js/jinsuo.js?v=596"></script>
-<script src="js/vendor/dexie.js?v=596"></script>
-<script src="js/house.js?v=596"></script>
-<script src="js/house-editor.js?v=596"></script>
-<script src="js/affinity-data.js?v=596"></script>
-<script src="js/affinity.js?v=596"></script>
-<script src="js/content-feed.js?v=596"></script>
-<script src="js/offline-download.js?v=596"></script>
-<script src="js/account.js?v=596"></script>
-<script src="js/store-update.js?v=596"></script>
+<script src="js/vendor/d3-array.min.js?v=597"></script>
+<script src="js/vendor/d3-geo.min.js?v=597"></script>
+<script src="js/sky-engine.js?v=597"></script>
+<script src="js/today-sky.js?v=597"></script>
+<script src="js/stars.js?v=597"></script>
+<script src="js/sky-chart.js?v=597"></script>
+<script src="js/sky-ar.js?v=597"></script>
+<script src="js/sky-horizon.js?v=597"></script>
+<script src="js/fengshui-data.js?v=597"></script>
+<script src="js/vendor/soul-fengshui.js?v=597"></script>
+<script src="js/fengshui.js?v=597"></script>
+<script src="js/fengshui2.js?v=597"></script>
+<script src="js/jinsuo-data.js?v=597"></script>
+<script src="js/jinsuo.js?v=597"></script>
+<script src="js/vendor/dexie.js?v=597"></script>
+<script src="js/house.js?v=597"></script>
+<script src="js/house-editor.js?v=597"></script>
+<script src="js/affinity-data.js?v=597"></script>
+<script src="js/affinity.js?v=597"></script>
+<script src="js/content-feed.js?v=597"></script>
+<script src="js/offline-download.js?v=597"></script>
+<script src="js/account.js?v=597"></script>
+<script src="js/store-update.js?v=597"></script>
 <script>
 // PWA: 注册 Service Worker（原生壳内跳过，file:// 不支持 SW）
 if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.WuBridge) {
