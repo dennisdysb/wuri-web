@@ -1,5 +1,11 @@
 # 原生端欠账（网页版已修、原生待随下一期联合更新带上）
 
+## 2026-11-08 · KR5a0148 caption 订正 v593：71/72 左右互换（网页版已上线 v593，未打 APK）
+
+- **网页版改动**：内部 v593 已上线（commit `2ab36a0c`）。KR5a0148《靈寶無量度人上品妙經符圖》71/72 caption 左右标反订正：71「天紀之圖（跨葉左）」→「天紀之圖（跨葉右）」，72「天紀之圖（跨葉右）・第一篇」→「天紀之圖（跨葉左）・第一篇」；仅改两处 caption 字符串，src/w/h/char/vol 不动，不增删条目；`www/content/daozang/images.json` md5 `1ed7f22559bd1f234fabf1987afd931b`。71/72/78 从今日 taolibrary 原版文件（c960067 img116/117/123）重裁校验：内容逐字一致，三图全部保留现生产文件，不替换、无尺寸/md5 变化（71 1200×1310 md5 `fd4a6966…`、72 1200×1342 `8fb1cd42…`、78 1200×1356 `12a42200…`）；71/72 统一纵向裁窗 [230,1574] 拼合验证成圆无 26px 台阶（仅验证用，不并入生产）。详见核查报告 `~/workspace/wuri-app/daozang-img-campaign/KR5a0148-INVESTIGATION.md` 与重裁比对 `~/workspace/wuri-app/daozang-img-campaign/.k148-scratch/V593-RECROP-COMPARISON.md`。
+- **欠账范围**：CN 版、Play 版、iOS 版 images.json 两处 caption 均未同步，下一期原生联合更新时一并带上；图文件无变化，无需同步图片；**本次不打 APK**。
+- **原生侧修法**：原生分叉 `~/workspace/wuri-app/www` 同步 images.json 仅两处 caption；移植后抽验 KR5a0148/71 显示「天紀之圖（跨葉右）」、72 显示「天紀之圖（跨葉左）・第一篇」。
+
 ## 2026-11-08 · KR5a0083 小字改名 v592：神符→文本（网页版已上线 v592，未打 APK）
 
 - **网页版改动**：内部 v592 已上线（commit `10b85dab`）。KR5a0083《白羽黑翮靈飛玉符》原版核查无符图、纯文本，类签 神符 易误导读者期待符图，改为 文本：`www/content/daozang/index.json`（feed 版 64→65）、`texts/KR5a0083.json`、`texts-punct/KR5a0083.json` 三处 lei 神符→文本；其余 27 部神符類未动。显示：目录 pill 文本、文末小字「洞真部 · 文本类 · DZ0083」、搜索 snippet「道藏全集 · 洞真部 · 文本类 · 1 卷」。
