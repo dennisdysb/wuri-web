@@ -980,7 +980,7 @@
     });
     var sb = $('karaoke-share-card');
     if (sb) sb.addEventListener('click', function () { shareScoreCard(total100); });
-    showCelebration(total100); /* v599：小仙童打分特效（约 4s 自消，点按提前消散） */
+    showCelebration(total100); /* v600：小仙童写真帧特效（约 4s 自消，点按提前消散） */
   }
 
   /* ---------- 录音（v599） ----------
@@ -1380,102 +1380,74 @@
     });
   }
 
-  /* ---------- 打分特效：小仙童（v599） ----------
-   * 用户 2026-11-09 定：不用真神仙像（不敬），改用虚构小女孩——穿神仙衣服的
-   * 小仙童，原创卡通 SVG（内联手绘，无外部图、不用道藏真神仙像）。
-   * 四档动作各不相同（2026-11-09 15:35 用户定）：
-   *   90+ 跳起来鼓掌（cele-jump 大起伏＋胸前合掌＋花瓣＋最盛金光雨）；
-   *   75+ 正常鼓掌（返工标准：双掌掌心相对、胸前合拢分开、手指朝上、
-   *     带自然弧线和节奏；不用叠加手掌的做法）；
-   *   60+ 挥拳头加油（单臂举拳上下挥动）；<60 攥紧小拳头打气
-   *   （双拳收在胸前轻晃，「再练一遍」文案保留）。
-   *   做不好看宁可简单干净，不贴别扭的手。
-   *   顺序：小样也在返工，返工后以小样的最终做法为准核对本特效，
-   *   有出入列出来等下一步按小样调整——本特效不算定稿。
+  /* ---------- 打分特效：小仙童写真帧（v600） ----------
+   * 用户手绘草稿（1000124558_3_efrf.jpg）四格定稿：v599 的内联 SVG 鼓掌系列
+   * 由 8 帧 WebP 写真替换（www/content/karaoke/cele/，每档两帧 A/B 同取景、
+   * 只换表情与手势，交替即真动作；档位色光晕已 baked 在帧内）：
+   *   90+ 金袍大笑＋音符（gold-laugh / -b：星星眼大笑、双手胸前合掌）；
+   *   75+ 粉袍酷酷敬礼＋出拳＋星（pink-cool / -b：敬礼、拳头前伸／收势蓄力）；
+   *   60+ 青袍面无表情＋棒棒糖＋"……"（teal-meh / -b：棒棒糖移到唇边）；
+   *   <60 浅蓝袍气鼓鼓双手抱头＋咬牙（cheer-blow / -b：腮帮更鼓、带晃线）。
    * 透明度分层（2026-11-09 用户定）：人物层 opacity 1 实色不清透；
    *   半透明 50% 只是后面那层金光背景纱（veil），透出歌词；绝不给
    *   整个 overlay 一个统一的 0.5 opacity。覆盖层 pointer-events:none
    *   （CSS）、约 4s 自消，点按提前消散；金光粒子 canvas 读 --gold 变量，
-   *   红光下自动转红谱；光晕读 --cele-glow（JS 按档位写，红光下 CSS 覆写收成红谱）。 */
+   *   红光下自动转红谱；光晕读 --cele-glow（JS 按档位写，红光下 CSS 覆写收成红谱）。
+   * 两帧交替：CELE_FRAME_MS 与身体起伏 karaoke-cele-bob 同周期（1s），
+   *   硬切（无淡入淡出），与起伏同步才像真动作；减弱动效时不交替。 */
   var CELE_TIERS = {
-    excellent: { action: 'jump', robe: '#C9A227', robeDeep: '#8A6D1B', sash: '#E8C34A', glow: 'rgba(232,195,74,.55)', particles: 60, cap: 'karaoke_cele_gold' },
-    good: { action: 'clap', robe: '#E88CA0', robeDeep: '#B85C74', sash: '#F6C6D2', glow: 'rgba(232,140,160,.5)', particles: 40, cap: 'karaoke_cele_pink' },
-    fair: { action: 'fist', robe: '#5FA8A0', robeDeep: '#3E7A73', sash: '#BFE3DE', glow: 'rgba(95,168,160,.5)', particles: 24, cap: 'karaoke_cele_teal' },
-    retry: { action: 'cheer', robe: '#8FB8D8', robeDeep: '#5B7FA6', sash: '#CFE0F0', glow: 'rgba(143,184,216,.4)', particles: 12, cap: 'karaoke_cele_cheer' }
+    excellent: { frames: ['content/karaoke/cele/gold-laugh.webp', 'content/karaoke/cele/gold-laugh-b.webp'], sign: 'notes', glow: 'rgba(232,195,74,.55)', particles: 60, cap: 'karaoke_cele_gold' },
+    good: { frames: ['content/karaoke/cele/pink-cool.webp', 'content/karaoke/cele/pink-cool-b.webp'], sign: 'star', glow: 'rgba(232,140,160,.5)', particles: 40, cap: 'karaoke_cele_pink' },
+    fair: { frames: ['content/karaoke/cele/teal-meh.webp', 'content/karaoke/cele/teal-meh-b.webp'], sign: 'dots', glow: 'rgba(95,168,160,.5)', particles: 24, cap: 'karaoke_cele_teal' },
+    retry: { frames: ['content/karaoke/cele/cheer-blow.webp', 'content/karaoke/cele/cheer-blow-b.webp'], sign: 'steam', glow: 'rgba(143,184,216,.4)', particles: 12, cap: 'karaoke_cele_cheer' }
   };
+  var CELE_FRAME_MS = 1000; /* 两帧交替周期＝身体起伏周期（CSS karaoke-cele-bob 1s） */
   var CELE_MS = 4000;
-  var celeTimer = null, celeRaf = 0, celeParts = [], celeTapHide = null;
+  var celeTimer = null, celeRaf = 0, celeParts = [], celeTapHide = null, celeFrameTimer = 0, celeFrameIdx = 0;
   function tierOf(total100) {
     if (total100 >= 90) return 'excellent';
     if (total100 >= 75) return 'good';
     if (total100 >= 60) return 'fair';
     return 'retry';
   }
-  /* 原创小仙童 SVG：双髻＋金簪、圆脸、交领仙袍＋金腰带。
-   * 四档动作各不相同（2026-11-09 15:35 用户定）：
-   *   90+ 跳起来鼓掌（cele-jump 大起伏＋胸前合掌＋花瓣＋最盛金光雨）；
-   *   75+ 正常鼓掌（返工标准：双掌掌心相对、胸前合拢分开、手指朝上、
-   *     带自然弧线和节奏；不用叠加手掌的做法——手在胸前、掌面竖直，
-   *     合拢时掌心贴合，不做横向滑动叠掌）；
-   *   60+ 挥拳头加油（单臂举拳上下挥动）；
-   *   <60 攥紧小拳头打气（双拳收在胸前轻晃）。
-   * 做不好看宁可简单干净，不贴别扭的手。人物层不设任何透明。 */
-  function fairySVG(tier, cfg) {
-    var robe = cfg.robe, deep = cfg.robeDeep, sash = cfg.sash;
-    var bobCls = (cfg.action === 'jump') ? 'cele-jump' : 'cele-bob';
-    var arms = '';
-    if (cfg.action === 'jump' || cfg.action === 'clap') {
-      /* 胸前合掌：掌面竖直、手指朝上；左右掌各向中线合拢 4px＋上抬 3px
-       * （自然弧线），合掌瞬间掌心金光星一闪。 */
-      arms = '<g class="cele-arm-l"><path d="M42 78 Q40 92 50 94" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
-        '<rect x="46" y="72" width="11" height="22" rx="5.5" fill="#FFE3C2"/>' +
-        '<path d="M49 72 L49 68 M53 72 L53 68" stroke="#E8B48C" stroke-width="1.2" stroke-linecap="round"/></g>' +
-        '<g class="cele-arm-r"><path d="M78 78 Q80 92 70 94" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
-        '<rect x="63" y="72" width="11" height="22" rx="5.5" fill="#FFE3C2"/>' +
-        '<path d="M67 72 L67 68 M71 72 L71 68" stroke="#E8B48C" stroke-width="1.2" stroke-linecap="round"/></g>' +
-        '<g class="cele-spark"><path d="M60 62 L62.5 69.5 L70 72 L62.5 74.5 L60 82 L57.5 74.5 L50 72 L57.5 69.5 Z" fill="#FFD94A"/></g>';
-    } else if (cfg.action === 'fist') {
-      /* 挥拳头加油：右臂举拳上下挥动，左臂自然下垂 */
-      arms = '<path d="M42 78 Q36 96 40 110" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
-        '<circle cx="40" cy="112" r="6" fill="#FFE3C2"/>' +
-        '<g class="cele-fist"><path d="M78 76 Q84 60 90 52" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
-        '<rect x="84" y="44" width="12" height="8" rx="4" fill="' + sash + '"/>' +
-        '<circle cx="92" cy="42" r="7" fill="#FFE3C2"/></g>';
-    } else {
-      /* 攥紧小拳头打气：双拳收在胸前轻晃 */
-      arms = '<g class="cele-cheer">' +
-        '<path d="M42 78 Q40 88 48 90" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
-        '<circle cx="49" cy="88" r="6.5" fill="#FFE3C2"/>' +
-        '<path d="M78 78 Q80 88 72 90" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
-        '<circle cx="71" cy="88" r="6.5" fill="#FFE3C2"/></g>';
+  /* 档位签名元素（CSS 轻量覆盖层，不另出图；帧内已含草稿同款元素，
+   * 覆盖层只做动效点缀）：
+   *   notes（90+）：金色音符上飘＋花瓣飘落（金光雨另由粒子 canvas 出）；
+   *   star（75+）：拳头旁金星一闪一闪；
+   *   dots（60+）："……" 气泡逐点出现；
+   *   steam（<60）：头顶三缕热气上飘。
+   * 颜色只走 --gold/--card/--ink/--line/--muted/--cinnabar 变量链，
+   * 不写死档位色；人物层不设任何透明。 */
+  function celeSignHTML(sign) {
+    if (sign === 'notes') {
+      return '<div class="karaoke-cele-sign karaoke-cele-notes" aria-hidden="true">' +
+        '<span>♪</span><span>♫</span><span>♪</span></div>' +
+        '<div class="karaoke-cele-petals" aria-hidden="true">' +
+        '<span class="karaoke-cele-petal"></span><span class="karaoke-cele-petal"></span>' +
+        '<span class="karaoke-cele-petal"></span><span class="karaoke-cele-petal"></span></div>';
     }
-    var petals = '';
-    if (cfg.action === 'jump') {
-      petals = '<g class="cele-petals">' +
-        '<ellipse class="cele-petal" cx="22" cy="30" rx="4" ry="7" fill="#F6A8BC" style="animation-delay:0s"/>' +
-        '<ellipse class="cele-petal" cx="98" cy="22" rx="4" ry="7" fill="#E8C34A" style="animation-delay:.4s"/>' +
-        '<ellipse class="cele-petal" cx="108" cy="60" rx="4" ry="7" fill="#F6A8BC" style="animation-delay:.8s"/>' +
-        '<ellipse class="cele-petal" cx="12" cy="66" rx="4" ry="7" fill="#E8C34A" style="animation-delay:1.2s"/></g>';
+    if (sign === 'star') {
+      return '<div class="karaoke-cele-sign karaoke-cele-star" aria-hidden="true">✦</div>';
     }
-    return '<svg class="karaoke-cele-fairy" viewBox="0 0 120 160" role="img" aria-label="小仙童">' +
-      '<defs><radialGradient id="celeGlow" cx="50%" cy="42%" r="55%">' +
-      '<stop offset="0%" stop-color="' + sash + '" stop-opacity=".9"/><stop offset="100%" stop-color="' + sash + '" stop-opacity="0"/></radialGradient></defs>' +
-      '<circle cx="60" cy="66" r="56" fill="url(#celeGlow)"/>' +
-      '<g class="' + bobCls + '">' +
-      '<circle cx="44" cy="26" r="9" fill="#3A2E22"/><circle cx="76" cy="26" r="9" fill="#3A2E22"/>' +
-      '<path d="M52 14 Q60 4 68 14" stroke="#E8C34A" stroke-width="3" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="60" cy="8" r="3" fill="#E8C34A"/>' +
-      '<circle cx="60" cy="44" r="22" fill="#FFE3C2"/>' +
-      '<path d="M40 40 Q60 22 80 40 Q80 30 60 28 Q40 30 40 40Z" fill="#3A2E22"/>' +
-      '<circle cx="52" cy="44" r="2.4" fill="#2A251B"/><circle cx="68" cy="44" r="2.4" fill="#2A251B"/>' +
-      '<path d="M54 52 Q60 57 66 52" stroke="#B23A2B" stroke-width="2" fill="none" stroke-linecap="round"/>' +
-      '<circle cx="44" cy="51" r="3.4" fill="#F2A0A0" opacity=".7"/><circle cx="76" cy="51" r="3.4" fill="#F2A0A0" opacity=".7"/>' +
-      '<path d="M60 66 L40 74 Q34 96 38 132 L82 132 Q86 96 80 74 Z" fill="' + robe + '"/>' +
-      '<path d="M60 66 L48 76 L60 88 L72 76 Z" fill="' + sash + '"/>' +
-      '<path d="M38 132 L82 132 L84 142 L36 142 Z" fill="' + deep + '"/>' +
-      '<rect x="44" y="104" width="32" height="6" rx="3" fill="' + sash + '"/>' +
-      arms +
-      '</g>' + petals + '</svg>';
+    if (sign === 'dots') {
+      return '<div class="karaoke-cele-sign karaoke-cele-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></div>';
+    }
+    return '<div class="karaoke-cele-sign karaoke-cele-steam" aria-hidden="true"><span></span><span></span><span></span></div>';
+  }
+  function celeReducedMotion() {
+    try { return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; }
+  }
+  /* 两帧交替：每 CELE_FRAME_MS 硬切一次 A/B 帧（与身体起伏同周期，
+   * 同步才像真动作）；减弱动效时只留 A 帧静帧。B 帧由 showCelebration 预载。 */
+  function startCeleFrames(frames) {
+    celeFrameIdx = 0;
+    if (celeReducedMotion()) return;
+    celeFrameTimer = setInterval(function () {
+      var img = $('karaoke-cele-img');
+      if (!img) return;
+      celeFrameIdx = 1 - celeFrameIdx;
+      img.setAttribute('src', frames[celeFrameIdx]);
+    }, CELE_FRAME_MS);
   }
   function showCelebration(total100) {
     var host = $('karaoke-celebration');
@@ -1483,16 +1455,21 @@
     hideCelebration();
     var key = tierOf(total100);
     var cfg = CELE_TIERS[key];
+    /* 写真帧 A 首帧；B 帧预载（交替时不闪白），减弱动效时只留 A 帧静帧 */
+    try { var pre = new Image(); pre.src = cfg.frames[1]; } catch (e) {}
     host.innerHTML =
       '<div class="karaoke-cele-veil" style="opacity:.5"></div>' +
       '<canvas class="karaoke-cele-canvas" id="karaoke-cele-canvas"></canvas>' +
-      '<div class="karaoke-cele-card">' + fairySVG(key, cfg) +
+      '<div class="karaoke-cele-card"><div class="karaoke-cele-frame">' +
+      '<img class="karaoke-cele-img" id="karaoke-cele-img" src="' + cfg.frames[0] + '" alt="小仙童">' +
+      celeSignHTML(cfg.sign) +
+      '</div>' +
       '<div class="karaoke-cele-score">' + total100 + '</div>' +
       '<div class="karaoke-cele-cap">' + esc(t(cfg.cap)) + '</div>' +
       '<div class="karaoke-cele-sub">' + esc(t('karaoke_sample_title')) + '</div></div>';
     host.hidden = false;
     host.style.pointerEvents = 'none';
-    host.style.setProperty('--cele-glow', cfg.glow); /* 档位光晕：JS 只写变量，强度由 CSS drop-shadow 读出 */
+    host.style.setProperty('--cele-glow', cfg.glow); /* 档位光晕：JS 只写变量，强度由 CSS box-shadow 读出 */
     /* 点按提前消散：覆盖层 pointer-events:none 永不挡点按，点按落在下方
      * 视图／悬浮钮上；capture 监听 document——showCelebration 由出分按钮
      * click 同步触发，冒泡监听会在同一 click 冒到 document 时立刻误触，
@@ -1503,10 +1480,13 @@
       document.addEventListener('click', celeTapHide, true);
     }
     startCeleParticles(cfg.particles);
+    startCeleFrames(cfg.frames);
     celeTimer = setTimeout(function () { hideCelebration(); }, CELE_MS);
   }
   function hideCelebration() {
     if (celeTimer) { clearTimeout(celeTimer); celeTimer = null; }
+    if (celeFrameTimer) { clearInterval(celeFrameTimer); celeFrameTimer = 0; }
+    celeFrameIdx = 0;
     if (celeRaf) { try { cancelAnimationFrame(celeRaf); } catch (e) {} celeRaf = 0; }
     celeParts = [];
     if (celeTapHide) { document.removeEventListener('click', celeTapHide, true); celeTapHide = null; }
@@ -1516,7 +1496,7 @@
   function startCeleParticles(n) {
     var canvas = $('karaoke-cele-canvas');
     if (!canvas) return;
-    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* 静帧，不跑粒子 */
+    if (celeReducedMotion()) return; /* 静帧，不跑粒子 */
     var ctx = null;
     try { ctx = canvas.getContext('2d'); } catch (e) {}
     if (!ctx) return;
@@ -1742,9 +1722,10 @@
       drawMelody: drawMelody,
       /* 打分耳机提示 toast */
       showHeadphonesToast: showHeadphonesToast, hideHeadphonesToast: hideHeadphonesToast,
-      /* v599 录音＋分享＋小仙童打分特效（拍手动图；人物 opacity 1、背景纱 0.5） */
+      /* v600 录音＋分享＋小仙童写真帧特效（两帧交替；人物 opacity 1、背景纱 0.5） */
       tierOf: tierOf, CELE_TIERS: CELE_TIERS, CELE_MS: CELE_MS,
-      fairySVG: fairySVG, showCelebration: showCelebration, hideCelebration: hideCelebration,
+      CELE_FRAME_MS: CELE_FRAME_MS, celeSignHTML: celeSignHTML,
+      showCelebration: showCelebration, hideCelebration: hideCelebration,
       pickRecMime: pickRecMime, recSupported: recSupported, recExt: recExt, fmtSize: fmtSize,
       canShareFiles: canShareFiles, shareFile: shareFile, downloadBlob: downloadBlob,
       drawScoreCard: drawScoreCard, shareScoreCard: shareScoreCard,
