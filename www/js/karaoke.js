@@ -12,6 +12,8 @@
  * 旋律引导（v594）：content/karaoke/melody.json（懒加载，缺失不影响播放）提供
  *   参考音高曲线——音高线 strip（30s 窗口＋播放头）＋正弦提示音（默认关，
  *   独立 AudioContext，与打分麦克风 Analyser 路径完全分开）。
+ *   只听提示音（v596）：提示音钮三态循环（关→伴唱→只听）；只听态下原唱
+ *   元素继续播放但 volume=0（时钟／高亮／循环／跳转全不受影响），提示音增益 0.35。
  * 颜色一律走 CSS 变量链（--gold 已唱字、--teal 好分、--cinnabar 差分），
  *   日间／夜间／红光三态由变量覆写自动适配，不得写死色值。
  * 注意：打分时原唱经扬声器会进麦克风（回声消除仅能部分抑制），
@@ -54,6 +56,7 @@
   var MELODY_FMIN = 110, MELODY_FMAX = 310; /* 音高线显示窗 Hz（对数轴；实测旋律约 116–305 Hz） */
   var MELODY_WIN_BEFORE = 8, MELODY_WIN_AFTER = 22; /* 音高线窗口：当前时刻前 8s＋后 22s */
   var TONE_GAIN = 0.2;           /* 提示音增益（低音量，伴原唱） */
+  var TONE_ONLY_GAIN = 0.35;     /* v596 只听提示音增益（唯一声源，须清晰可闻） */
   var TONE_GLIDE_S = 0.05;       /* 提示音频率平滑时间常数（setTargetAtTime tau） */
   var AUDIO_URL = { seg1: 'audio/karaoke/seg1.m4a', seg2: 'audio/karaoke/seg2.m4a', seg3: 'audio/karaoke/seg3.m4a' };
   var SEG_ORDER = ['seg1', 'seg2', 'seg3'];
@@ -106,6 +109,8 @@
   var melodyPromise = null;  /* 懒加载缓存；失败也缓存为 null，不阻塞播放器 */
   var melodyFailed = false;
   var toneOn = false;        /* 提示音开关（默认关；只由控制条「提示音」钮改） */
+  var toneOnly = false;      /* v596 只听提示音态（toneOn 的子态：原唱静音、只剩提示音） */
+  var savedAudioVolume = null; /* v596 进只听提示音前存的原唱音量（退出时原样恢复） */
   var toneCtx = null, toneOsc = null, toneGain = null; /* 提示音独占 AudioContext＋节点（与麦克风分开） */
   var lastToneFreq = null;   /* 最近一次送给振荡器的频率（测试／诊断用） */
   var lastToneGain = 0;      /* 最近一次目标增益 */
@@ -125,6 +130,8 @@
     var hint = $('karaoke-mic-hint');
     if (hint) hint.hidden = !(scoring || arming);
     updateScoreTime();
+    /* v596：打分钮文案 打分↔打分中… 会改控制条行数（≤440px 换行），重算吸顶 top */
+    layoutSticky();
   }
   function updateScoreTime() {
     var tm = $('karaoke-score-time');
@@ -413,16 +420,53 @@
       else toneOsc.frequency.value = f0;
     } catch (e) {}
     lastToneFreq = f0;
-    toneSetGain(TONE_GAIN);
+    /* v596：只听提示音态用 0.35（唯一声源），伴唱态用 0.2 */
+    toneSetGain(toneOnly ? TONE_ONLY_GAIN : TONE_GAIN);
   }
-  function setTone(on) {
-    toneOn = !!on;
+  /* ---------- 只听提示音（v596） ----------
+   * 提示音钮三态循环：关 → 伴唱提示音（原唱＋0.2 提示音）→ 只听提示音
+   * （原唱继续播放但 volume=0、提示音 0.35）→ 关。原唱元素保持播放，
+   * 故时钟／tick／findLine／paintLine／循环／跳转／快进退全部原样工作，
+   * 歌词高亮与提示音同用 audio.currentTime，天然同步；打分麦克风路径独立，不受影响。
+   * 退出只听态时原唱音量原样恢复；关视图时暂恢复音量、重开时按保留的态重静音。 */
+  function applyToneUI() {
     var btn = $('karaoke-tone-btn');
-    if (btn) btn.classList.toggle('active', toneOn);
+    if (btn) {
+      btn.textContent = toneOnly ? '只听提示音' : '提示音';
+      btn.classList.toggle('active', toneOn);
+      btn.classList.toggle('tone-only', toneOnly);
+      btn.setAttribute('aria-pressed', toneOn ? 'true' : 'false');
+    }
+    if (audio) {
+      try {
+        if (toneOnly) {
+          if (savedAudioVolume == null) savedAudioVolume = audio.volume;
+          audio.volume = 0;
+        } else if (savedAudioVolume != null) {
+          audio.volume = savedAudioVolume;
+          savedAudioVolume = null;
+        }
+      } catch (e) {}
+    }
+  }
+  function setToneMode(mode) {
+    toneOnly = (mode === 'only');
+    toneOn = (mode === 'tone' || mode === 'only');
+    applyToneUI();
     if (toneOn) {
       /* 点按手势内建节点：iOS/Safari 的 AudioContext 须用户手势解锁 */
       if (ensureToneNodes()) updateTone(audio ? (audio.currentTime || 0) : 0);
     } else toneSilence();
+    /* v596：只听提示音文案（5 字）会改控制条行数（≤440px 换行），重算吸顶 top */
+    layoutSticky();
+  }
+  function cycleTone() {
+    if (!toneOn) setToneMode('tone');
+    else if (!toneOnly) setToneMode('only');
+    else setToneMode('off');
+  }
+  function setTone(on) {
+    setToneMode(on ? 'tone' : 'off');
   }
 
   /* ---------- 歌词渲染 ---------- */
@@ -998,6 +1042,7 @@
     if (tbox) { applyTimeboxPos(); tbox.classList.add('show'); updateTimebox(audio ? (audio.currentTime || 0) : 0); }
     layoutSticky(); /* 显形后再算吸顶偏移：hidden 时 offsetHeight 为 0，须先显形再实测（C 线 §1.6 原意不变） */
     updateScoringUI(); /* 重开复位：状态条、提示、按钮文案回到未打分态 */
+    applyToneUI(); /* v596：重开时按保留的提示音态重静音（只听态下原唱 volume 回 0） */
     updateTopBtn();
     renderLyrics();
     loadData().then(function () {
@@ -1031,6 +1076,10 @@
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     if (audio) audio.pause();
     toneSilence(); /* 关视图即停提示音（开关状态保留，重开后随播放恢复） */
+    /* v596：关视图暂把原唱音量还回去（只听态保留，重开时 applyToneUI 再静音） */
+    if (toneOnly && audio) {
+      try { if (savedAudioVolume != null) { audio.volume = savedAudioVolume; savedAudioVolume = null; } } catch (e) {}
+    }
     try { if (qingAudio) qingAudio.pause(); } catch (e) {}
     var qbtn = $('karaoke-qing-fab');
     if (qbtn) qbtn.classList.remove('qing-near', 'qing-hit', 'show');
@@ -1093,9 +1142,10 @@
     });
     var loopBtn = $('karaoke-loop');
     if (loopBtn) loopBtn.addEventListener('click', function () { setLoop(!loopOne); });
-    /* 提示音开关（v594）：默认关；点按手势内建 AudioContext 节点 */
+    /* 提示音开关（v594）：默认关；点按手势内建 AudioContext 节点
+     * v596：三态循环（关→伴唱提示音→只听提示音→关），见 setToneMode */
     var toneBtn = $('karaoke-tone-btn');
-    if (toneBtn) toneBtn.addEventListener('click', function () { setTone(!toneOn); });
+    if (toneBtn) toneBtn.addEventListener('click', function () { cycleTone(); });
     /* 快进/快退（v585）：-10s/-5s/+5s/+10s，data-seek 存秒数 */
     document.querySelectorAll('#karaoke-seek-row .karaoke-seek').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -1156,9 +1206,14 @@
       loadMelody: loadMelody, normalizeMelody: normalizeMelody, melodyF0At: melodyF0At,
       melodyNoteAt: melodyNoteAt, melodyWindow: melodyWindow, melodySeg: melodySeg,
       drawMelody: drawMelody, updateTone: updateTone, setTone: setTone,
+      /* v596 只听提示音（三态循环） */
+      setToneMode: setToneMode, cycleTone: cycleTone,
       isToneOn: function () { return toneOn; },
-      toneState: function () { return { on: toneOn, hasNodes: !!(toneOsc && toneGain && toneCtx), freq: lastToneFreq, gain: lastToneGain }; },
+      isToneOnly: function () { return toneOnly; },
+      toneMode: function () { return toneOnly ? 'only' : (toneOn ? 'tone' : 'off'); },
+      toneState: function () { return { on: toneOn, only: toneOnly, hasNodes: !!(toneOsc && toneGain && toneCtx), freq: lastToneFreq, gain: lastToneGain }; },
       melodyLoaded: function () { return melody; },
       MELODY_FMIN: MELODY_FMIN, MELODY_FMAX: MELODY_FMAX,
-      MELODY_WIN_BEFORE: MELODY_WIN_BEFORE, MELODY_WIN_AFTER: MELODY_WIN_AFTER, TONE_GAIN: TONE_GAIN } };
+      MELODY_WIN_BEFORE: MELODY_WIN_BEFORE, MELODY_WIN_AFTER: MELODY_WIN_AFTER, TONE_GAIN: TONE_GAIN,
+      TONE_ONLY_GAIN: TONE_ONLY_GAIN } };
 })();

@@ -3661,6 +3661,17 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-ctl{flex:0 1 auto;min-width:0;height:46px;padding:0 9px;border-radius:12px;border:1px solid var(--teal);background:var(--card);color:var(--teal-deep);font-size:.95rem;font-family:var(--sans);cursor:pointer;white-space:nowrap}
 .karaoke-ctl:active{transform:scale(.97)}
 .karaoke-ctl.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+/* v596 打分中不截断：打分钮按最长文案「打分中…」（i18n karaoke_scoring，4 字）
+ * 定宽——flex:0 0 auto（不参与压缩）＋min-width:82px（文案 60＋padding 18＋
+ * 边框 2＋2 余量，border-box 全局）；字体不缩小；打分／打分中同宽，点按不跳动。
+ * 窄屏换行（≤440px）：单行条按 Noto Sans CJK SC 实测（.95rem＝15.2px／字），
+ * 打分中…（82px）＋只听提示音（96px）同时出现时单行需 405px 内容宽，
+ * 360px（用户手机）溢出 73px、320px 溢出 113px；定宽钮若硬塞单行只会把
+ * 播放钮压到约 20px。≤440px 改自然换行（播放钮 flex:1 吸满首行，长钮换到
+ * 次行），字号／padding 不动；吸顶 top 由 karaoke.js layoutSticky() 按
+ * offsetHeight 实测接力，文案变化时 setToneMode／updateScoringUI 会重算。 */
+#karaoke-score-btn{flex:0 0 auto;min-width:82px}
+@media (max-width:440px){.karaoke-controls{flex-wrap:wrap}}
 /* 快进/快退行（v585）：控制条下方另起一行，与控制条同为 sticky（top 默认
  * 120px≈头栏 76＋控制条 44；karaoke.js layoutSticky() 打开时实测接力）。
  * 四钮等宽 flex:1（.karaoke-seek 覆盖 .karaoke-ctl 的 flex:0 1 auto），
