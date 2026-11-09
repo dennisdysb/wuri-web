@@ -15,6 +15,17 @@
  *   三态（v596）一并移除；旋律音高线不受影响。
  * 颜色一律走 CSS 变量链（--gold 已唱字、--teal 好分、--cinnabar 差分），
  *   日间／夜间／红光三态由变量覆写自动适配，不得写死色值。
+ * 录音＋分享＋打分特效（v599）：录音入口为右侧悬浮钮（磬钮上方垂直叠放，
+ *   用户 2026-11-09 15:24 定；左边不放，会盖歌词），顶栏四钮不动；录音只存
+ *   本机 IndexedDB（无 IDB 时退内存），不上传；成绩卡 canvas 现绘后走
+ *   navigator.share／下载回落。打分特效用虚构小仙童原创卡通 SVG（不用真
+ *   神仙像，用户 2026-11-09 定：不敬），四档同童、袍色＋光效区分；各档
+ *   动作不同（90+ 跳起来鼓掌＋花瓣、75+ 胸前正常鼓掌、60+ 挥拳头加油、
+ *   <60 攥紧小拳头打气），SVG/CSS 动图；最终以小样返工后的做法为准核对，
+ *   特效不算定稿。
+ *   透明度分层（2026-11-09 用户定）：人物 opacity 1 实色，半透明 50%
+ *   只是背景纱层，绝不给整个 overlay 统一 0.5 opacity。
+ *   打分公式与档位切分（90/75/60）冻结，不得改动。
  * 注意：打分时原唱经扬声器会进麦克风（回声消除仅能部分抑制），
  *   建议戴耳机打分；分数以节奏＋完成度为主，音高为辅。
  */
@@ -108,6 +119,21 @@
   /* 提示音已删（用户 2026-11-09 定：效果不好）。正弦振荡器／三态循环／
    * 只听提示音全部移除；旋律音高线（melody.json 可视化）保留，不受影响。 */
   var headphonesToastTimer = null; /* 打分耳机提示 toast 的 3s 自消失定时器 */
+  /* ---------- 录音（v599）状态 ----------
+   * recMode 持久化 localStorage；rec 为当前进行中的一次录音；
+   * chantSrcNode／recCtx／recDest 为合唱混音图（原唱元素一生只建一次
+   *   MediaElementSource，见 duetDest 守卫）。 */
+  var REC_DB_NAME = 'wuri-karaoke-recs';
+  var REC_DB_STORE = 'recs';
+  var REC_MODE_KEY = 'wuri_karaoke_rec_mode_v1';
+  var REC_MIMES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/ogg;codecs=opus'];
+  var recMode = 'solo'; /* 'solo' 独唱 | 'duet' 合唱 */
+  var rec = null; /* {stream, recorder, chunks, mime, startedAt, mode, timerId, bgInterrupted, micSrc, micGain} */
+  var recList = []; /* [{id, name, mode, mime, createdAt, durMs, bgInterrupted, blob, url}] */
+  var recDbPromise = null;
+  var chantSrcNode = null, recCtx = null, recDest = null, chantGain = null;
+  var recPlayEl = null; /* 当前试听的 <audio>（切歌／删项时停掉） */
+  try { var _rm = localStorage.getItem(REC_MODE_KEY); if (_rm === 'duet' || _rm === 'solo') recMode = _rm; } catch (e) {}
 
   /* 打分 UI 四处状态的唯一同步点（打分按钮文案/class、悬浮状态条、麦克风提示）。
    * 调用点只有 arm .then/.catch、disarmScoring、open/close——不散落手写（C 线 §1.4）。 */
@@ -935,11 +961,15 @@
     res.lines.forEach(function (r) {
       var s = Math.round(r.score * 100);
       var lc = s >= 75 ? 'good' : (s >= 60 ? 'fair' : 'poor');
-      html += '<div class="karaoke-score-row"><span class="karaoke-score-text">' +
+      /* v599：单句 90+ 行加小金光标记（✦＋金字），轻量、不改分 */
+      var great = s >= 90;
+      html += '<div class="karaoke-score-row' + (great ? ' karaoke-score-row-great' : '') + '"><span class="karaoke-score-text">' +
+        (great ? '<span class="karaoke-score-spark">✦</span>' : '') +
         esc(r.item.text) + '</span><span class="karaoke-score-val ' + lc + '">' + s +
         '</span><span class="karaoke-score-fb">' + esc(feedbackOf(r)) + '</span></div>';
     });
-    html += '</div><button class="btn small" id="karaoke-retry">' + esc(t('karaoke_retry')) + '</button></div>';
+    html += '</div><div class="karaoke-score-actions"><button class="btn small" id="karaoke-retry">' + esc(t('karaoke_retry')) + '</button>' +
+      '<button class="btn small" id="karaoke-share-card">' + esc(t('karaoke_share_card')) + '</button></div></div>';
     host.innerHTML = html;
     scrollToEl(host, { block: 'start' });
     var rb = $('karaoke-retry');
@@ -948,6 +978,573 @@
       if (audio) { audio.currentTime = 0; }
       armScoring();
     });
+    var sb = $('karaoke-share-card');
+    if (sb) sb.addEventListener('click', function () { shareScoreCard(total100); });
+    showCelebration(total100); /* v599：小仙童打分特效（约 4s 自消，点按提前消散） */
+  }
+
+  /* ---------- 录音（v599） ----------
+   * 入口：右侧悬浮钮 #karaoke-rec-fab（磬钮上方垂直叠放；左边不放，会盖歌词；
+   *   用户 2026-11-09 15:24 定），顶栏四钮不动。点按开始／再点停止；停止后
+   *   弹出录音面板（试听／下载／分享／删除）。
+   * 模式：独唱＝只录麦克风；合唱＝原唱（MediaElementSource）＋麦克风混音
+   *   → MediaStreamDestination → MediaRecorder。原唱元素一旦接
+   *   createMediaElementSource 就永久走 AudioContext 路由（只建一次，见
+   *   chantSrcNode 守卫），因此合唱首建后须在 audio 'play' 时 resume
+   *   recCtx，否则后台切回后原唱可能静音。
+   * 本地优先：录音存 IndexedDB（wuri-karaoke-recs），无 IDB 时退内存
+   *   （仅本次会话）；不上传服务器。切后台时 MediaRecorder 在部分
+   *   浏览器会暂停——只如实标记（bgInterrupted），不静默假装正常。
+   * 格式：MediaRecorder.isTypeSupported 链——webm/opus（Android/Chrome）
+   *   → mp4/aac（Safari/iOS）→ 默认；无 getUserMedia / 无 MediaRecorder
+   *   时按钮点按只提示，不崩播放器。 */
+  function recSupported() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+  }
+  function pickRecMime() {
+    if (!window.MediaRecorder) return null;
+    for (var i = 0; i < REC_MIMES.length; i++) {
+      try {
+        if (typeof MediaRecorder.isTypeSupported === 'function' && MediaRecorder.isTypeSupported(REC_MIMES[i])) return REC_MIMES[i];
+      } catch (e) {}
+    }
+    return ''; /* 默认编码（isTypeSupported 缺失的老实现也走这里） */
+  }
+  function recExt(mime) {
+    if ((mime || '').indexOf('mp4') >= 0) return '.m4a';
+    if ((mime || '').indexOf('ogg') >= 0) return '.ogg';
+    return '.webm';
+  }
+  function fmtSize(n) {
+    if (n == null) return '';
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(0) + ' KB';
+    return (n / 1048576).toFixed(1) + ' MB';
+  }
+  /* ---------- 录音本地库（IndexedDB，可缺省退内存） ---------- */
+  function openRecDb() {
+    if (recDbPromise) return recDbPromise;
+    recDbPromise = new Promise(function (resolve) {
+      var idb = null;
+      try { idb = window.indexedDB; } catch (e) {}
+      if (!idb) { resolve(null); return; }
+      var req;
+      try { req = idb.open(REC_DB_NAME, 1); } catch (e) { resolve(null); return; }
+      req.onupgradeneeded = function () {
+        try { if (!req.result.objectStoreNames.contains(REC_DB_STORE)) req.result.createObjectStore(REC_DB_STORE, { keyPath: 'id' }); } catch (e2) {}
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { resolve(null); };
+    });
+    return recDbPromise;
+  }
+  function recDbPut(item) {
+    return openRecDb().then(function (db) {
+      if (!db) return false;
+      return new Promise(function (resolve) {
+        try {
+          var tx = db.transaction(REC_DB_STORE, 'readwrite');
+          tx.objectStore(REC_DB_STORE).put({ id: item.id, name: item.name, mode: item.mode, mime: item.mime, createdAt: item.createdAt, durMs: item.durMs, bgInterrupted: !!item.bgInterrupted, blob: item.blob });
+          tx.oncomplete = function () { resolve(true); };
+          tx.onerror = function () { resolve(false); };
+        } catch (e) { resolve(false); }
+      });
+    });
+  }
+  function recDbDel(id) {
+    return openRecDb().then(function (db) {
+      if (!db) return false;
+      return new Promise(function (resolve) {
+        try {
+          var tx = db.transaction(REC_DB_STORE, 'readwrite');
+          tx.objectStore(REC_DB_STORE).delete(id);
+          tx.oncomplete = function () { resolve(true); };
+          tx.onerror = function () { resolve(false); };
+        } catch (e) { resolve(false); }
+      });
+    });
+  }
+  function recDbAll() {
+    return openRecDb().then(function (db) {
+      if (!db) return [];
+      return new Promise(function (resolve) {
+        try {
+          var out = [];
+          var tx = db.transaction(REC_DB_STORE, 'readonly');
+          var req = tx.objectStore(REC_DB_STORE).openCursor();
+          req.onsuccess = function () { var c = req.result; if (!c) { resolve(out); return; } out.push(c.value); c.continue(); };
+          req.onerror = function () { resolve(out); };
+        } catch (e) { resolve([]); }
+      });
+    });
+  }
+  /* ---------- 录音控制 ---------- */
+  function updateRecUI() {
+    var fab = $('karaoke-rec-fab');
+    if (fab) {
+      fab.textContent = rec ? t('karaoke_rec_stop') : t('karaoke_rec');
+      fab.classList.toggle('recording', !!rec);
+      fab.setAttribute('aria-label', rec ? t('karaoke_rec_stop') : t('karaoke_rec'));
+    }
+    var tm = $('karaoke-rec-time');
+    if (tm) tm.hidden = !rec;
+    if (rec) updateRecTime();
+    var status = $('karaoke-rec-status');
+    if (status && rec && rec.bgInterrupted) { status.hidden = false; status.textContent = t('karaoke_rec_bg_warn'); }
+    updateRecModeUI();
+  }
+  function updateRecTime() {
+    var tm = $('karaoke-rec-time');
+    if (tm && rec) tm.textContent = fmt((Date.now() - rec.startedAt) / 1000);
+  }
+  function updateRecModeUI() {
+    document.querySelectorAll('.karaoke-rec-mode-btn').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-mode') === recMode);
+    });
+  }
+  function setRecMode(mode) {
+    if (rec) return; /* 录制中不换模式 */
+    recMode = (mode === 'duet') ? 'duet' : 'solo';
+    try { localStorage.setItem(REC_MODE_KEY, recMode); } catch (e) {}
+    updateRecModeUI();
+  }
+  function showRecPanel(scroll) {
+    var p = $('karaoke-rec-panel');
+    if (!p) return;
+    p.hidden = false;
+    if (scroll) scrollToEl(p, { block: 'start' });
+  }
+  /* 合唱混音图：原唱 MediaElementSource（每元素一生一次）＋麦克风源
+   * → MediaStreamDestination。麦克风只进录音，不接扬声器（防啸叫／回声）。 */
+  function duetDest(stream, cur) {
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!recCtx) recCtx = new AC();
+      if (recCtx.state === 'suspended') recCtx.resume().catch(function () {});
+      if (!chantSrcNode) {
+        chantSrcNode = recCtx.createMediaElementSource(audio);
+        chantGain = recCtx.createGain();
+        chantGain.gain.value = 1;
+        chantSrcNode.connect(chantGain);
+        chantGain.connect(recCtx.destination);
+        recDest = recCtx.createMediaStreamDestination();
+        chantGain.connect(recDest);
+      }
+      var micSrc = recCtx.createMediaStreamSource(stream);
+      var micGain = recCtx.createGain();
+      micGain.gain.value = 1;
+      micSrc.connect(micGain);
+      micGain.connect(recDest);
+      cur.micSrc = micSrc; cur.micGain = micGain;
+      return recDest.stream;
+    } catch (e) { return null; }
+  }
+  function startRecording() {
+    if (rec) { stopRecording(); return; }
+    if (!recSupported()) { alert(t('karaoke_rec_unavailable')); return; }
+    var mode = recMode;
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (stream) {
+      var mime = pickRecMime();
+      var chunks = [];
+      var cur = { stream: stream, chunks: chunks, mime: (mime == null ? '' : mime), startedAt: Date.now(), mode: mode, bgInterrupted: false, timerId: 0, micSrc: null, micGain: null };
+      var recorder = null;
+      try {
+        if (mode === 'duet') {
+          var dest = duetDest(stream, cur);
+          if (!dest) throw new Error('no duet graph');
+          recorder = mime ? new MediaRecorder(dest, { mimeType: mime }) : new MediaRecorder(dest);
+        } else {
+          recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+        }
+      } catch (e) {
+        try { stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e2) {}
+        alert(t('karaoke_rec_failed'));
+        return;
+      }
+      cur.recorder = recorder;
+      recorder.ondataavailable = function (ev) { if (ev && ev.data && ev.data.size) chunks.push(ev.data); };
+      recorder.onstop = function () { finishRecording(cur); };
+      try { recorder.start(500); } catch (e) {
+        try { stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e2) {}
+        alert(t('karaoke_rec_failed'));
+        return;
+      }
+      rec = cur;
+      cur.timerId = setInterval(updateRecTime, 250);
+      showRecPanel(false);
+      updateRecUI();
+    }).catch(function () { alert(t('karaoke_rec_denied')); });
+  }
+  function stopRecording() {
+    if (!rec) return;
+    var cur = rec;
+    rec = null;
+    try { clearInterval(cur.timerId); } catch (e) {}
+    try {
+      if (cur.recorder && cur.recorder.state !== 'inactive') cur.recorder.stop();
+      else finishRecording(cur);
+    } catch (e) { finishRecording(cur); }
+    /* 停麦克风轨道；合唱图里 micSrc 断开（原唱节点保留，供下次合唱复用） */
+    try { if (cur.micSrc) cur.micSrc.disconnect(); } catch (e2) {}
+    try { if (cur.micGain) cur.micGain.disconnect(); } catch (e3) {}
+    try { cur.stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e4) {}
+    updateRecUI();
+  }
+  function finishRecording(cur) {
+    if (!cur || !cur.chunks) return;
+    var blob = null;
+    try { blob = new Blob(cur.chunks, { type: cur.mime || '' }); } catch (e) { return; }
+    if (!blob || !blob.size) return; /* 空录音不入库 */
+    var durMs = Date.now() - cur.startedAt;
+    var d = new Date(cur.startedAt);
+    var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+    var name = t('karaoke_rec') + ' ' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) +
+      '（' + (cur.mode === 'duet' ? t('karaoke_rec_mode_duet') : t('karaoke_rec_mode_solo')) + '）';
+    var item = { id: 'rec-' + cur.startedAt + '-' + Math.floor(Math.random() * 1000), name: name, mode: cur.mode, mime: cur.mime || blob.type || '', createdAt: cur.startedAt, durMs: durMs, bgInterrupted: !!cur.bgInterrupted, blob: blob, url: null };
+    try { item.url = URL.createObjectURL(blob); } catch (e) {}
+    recList.unshift(item);
+    recDbPut(item); /* 失败也不阻塞：内存里仍可试听／下载／分享 */
+    renderRecList();
+    showRecPanel(true);
+    var st = $('karaoke-rec-status');
+    if (st) { st.hidden = false; st.textContent = t('karaoke_rec_saved'); }
+  }
+  /* ---------- 录音列表 ---------- */
+  function findRec(id) { for (var i = 0; i < recList.length; i++) if (recList[i].id === id) return recList[i]; return null; }
+  function renderRecList() {
+    var host = $('karaoke-rec-list');
+    if (!host) return;
+    var empty = $('karaoke-rec-empty');
+    if (empty) empty.hidden = recList.length > 0;
+    var html = '';
+    recList.forEach(function (it) {
+      html += '<div class="karaoke-rec-item" data-id="' + esc(it.id) + '">' +
+        '<div class="karaoke-rec-name">' + esc(it.name) + '</div>' +
+        '<div class="karaoke-rec-meta">' + fmt(Math.round(it.durMs / 1000)) + ' · ' + fmtSize(it.blob ? it.blob.size : 0) +
+        (it.bgInterrupted ? ' · <span class="karaoke-rec-warn">' + esc(t('karaoke_rec_bg_warn')) + '</span>' : '') + '</div>' +
+        '<div class="karaoke-rec-actions">' +
+        '<button class="mini-btn tiny" data-act="play" type="button">' + esc(t('karaoke_rec_play')) + '</button>' +
+        '<button class="mini-btn tiny" data-act="download" type="button">' + esc(t('karaoke_rec_download')) + '</button>' +
+        '<button class="mini-btn tiny" data-act="share" type="button">' + esc(t('karaoke_rec_share')) + '</button>' +
+        '<button class="mini-btn tiny" data-act="delete" type="button">' + esc(t('karaoke_rec_delete')) + '</button>' +
+        '</div></div>';
+    });
+    host.innerHTML = html;
+    host.querySelectorAll('.karaoke-rec-item').forEach(function (row) {
+      var id = row.getAttribute('data-id');
+      row.querySelectorAll('[data-act]').forEach(function (btn) {
+        btn.addEventListener('click', function () { recItemAction(id, btn.getAttribute('data-act'), btn); });
+      });
+    });
+  }
+  function recAudioFor(it) {
+    if (it._audio) return it._audio;
+    if (!it.url) return null;
+    try { var a = new Audio(it.url); it._audio = a; return a; } catch (e) { return null; }
+  }
+  function recItemAction(id, act, btn) {
+    var it = findRec(id);
+    if (!it) return;
+    if (act === 'play') {
+      var au = recAudioFor(it);
+      if (!au) return;
+      if (recPlayEl && recPlayEl !== au) { try { recPlayEl.pause(); } catch (e) {} }
+      recPlayEl = au;
+      if (au.paused) {
+        var pp = au.play();
+        if (pp && pp.catch) pp.catch(function () {});
+        if (btn) btn.textContent = t('karaoke_rec_stop');
+      } else {
+        au.pause();
+        if (btn) btn.textContent = t('karaoke_rec_play');
+      }
+      au.onended = function () { if (btn) btn.textContent = t('karaoke_rec_play'); };
+    } else if (act === 'download') {
+      downloadBlob(it.blob, it.name + recExt(it.mime));
+    } else if (act === 'share') {
+      shareFile(it.blob, it.name + recExt(it.mime)).then(function (how) {
+        if (how === 'downloaded') { var st = $('karaoke-rec-status'); if (st) { st.hidden = false; st.textContent = t('karaoke_share_fallback'); } }
+      });
+    } else if (act === 'delete') {
+      if (!window.confirm || !window.confirm(t('karaoke_rec_confirm_del'))) return;
+      deleteRec(id);
+    }
+  }
+  function deleteRec(id) {
+    var it = findRec(id);
+    if (it) {
+      try { if (it._audio) it._audio.pause(); } catch (e) {}
+      try { if (it.url) URL.revokeObjectURL(it.url); } catch (e2) {}
+    }
+    recList = recList.filter(function (x) { return x.id !== id; });
+    recDbDel(id);
+    renderRecList();
+  }
+  function loadRecList() {
+    recDbAll().then(function (rows) {
+      if (!rows || !rows.length) return;
+      rows.sort(function (a, b) { return b.createdAt - a.createdAt; });
+      rows.forEach(function (r) {
+        if (!r.blob) return;
+        var it = { id: r.id, name: r.name, mode: r.mode, mime: r.mime || '', createdAt: r.createdAt, durMs: r.durMs || 0, bgInterrupted: !!r.bgInterrupted, blob: r.blob, url: null };
+        try { it.url = URL.createObjectURL(r.blob); } catch (e) {}
+        recList.push(it);
+      });
+      renderRecList();
+      showRecPanel(false);
+    });
+  }
+
+  /* ---------- 分享（v599） ----------
+   * 录音文件与成绩卡共用同一出口：navigator.share（files）优先——系统分享单
+   * 在支持的浏览器（Android Chrome／iOS Safari 15+）走原生分享；否则回落
+   * 下载。返回 'shared' / 'downloaded' / 'cancelled'，供调用方写状态行
+   * （不弹 alert）。不上传服务器。 */
+  function downloadBlob(blob, filename) {
+    return new Promise(function (resolve) {
+      var url = null;
+      try { url = URL.createObjectURL(blob); } catch (e) {}
+      if (!url) { resolve(false); return; }
+      var a = document.createElement('a');
+      a.href = url; a.download = filename;
+      try { document.body.appendChild(a); a.click(); a.remove(); } catch (e) {}
+      setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e2) {} resolve(true); }, 1000);
+    });
+  }
+  function canShareFiles(file) {
+    try {
+      return !!(navigator.share && navigator.canShare && navigator.canShare({ files: [file] }));
+    } catch (e) { return false; }
+  }
+  function shareFile(blob, filename) {
+    var file = null;
+    try { file = new File([blob], filename, { type: blob.type || '' }); } catch (e) {}
+    if (file && canShareFiles(file)) {
+      return navigator.share({ files: [file] }).then(function () { return 'shared'; }).catch(function (err) {
+        if (err && err.name === 'AbortError') return 'cancelled';
+        return downloadBlob(blob, filename).then(function () { return 'downloaded'; });
+      });
+    }
+    return downloadBlob(blob, filename).then(function () { return 'downloaded'; });
+  }
+  /* 成绩卡：canvas 现绘——标题＋总分＋档位＋小仙童贺词＋日期＋落款；颜色
+   * 读 CSS 变量（melodyCssVar），日/夜/红光三态跟随。画布 720×900，
+   * 导出 PNG 后走同一 shareFile（原生分享／下载回落），不上传服务器。 */
+  function drawScoreCard(total100) {
+    var canvas = document.createElement('canvas');
+    canvas.width = 720; canvas.height = 900;
+    var ctx = null;
+    try { ctx = canvas.getContext('2d'); } catch (e) {}
+    if (!ctx) return null;
+    var card = melodyCssVar('--card', '#FCFAF2');
+    var ink = melodyCssVar('--ink', '#2A251B');
+    var muted = melodyCssVar('--muted', '#8C8371');
+    var gold = melodyCssVar('--gold', '#A2813B');
+    var line = melodyCssVar('--line', '#E3DBC3');
+    ctx.fillStyle = card; ctx.fillRect(0, 0, 720, 900);
+    ctx.strokeStyle = gold; ctx.lineWidth = 4; ctx.strokeRect(28, 28, 664, 844);
+    ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.strokeRect(40, 40, 640, 820);
+    ctx.fillStyle = gold;
+    ctx.font = '700 34px serif'; ctx.textAlign = 'center';
+    ctx.fillText(t('karaoke_sample_title'), 360, 130);
+    ctx.fillStyle = muted;
+    ctx.font = '26px sans-serif';
+    ctx.fillText(t('karaoke_score_title'), 360, 180);
+    ctx.fillStyle = ink;
+    ctx.font = '700 150px serif';
+    ctx.fillText(String(total100), 360, 340);
+    ctx.fillStyle = gold;
+    ctx.font = '700 52px serif';
+    ctx.fillText(gradeOf(total100), 360, 420);
+    ctx.fillStyle = muted;
+    ctx.font = '28px sans-serif';
+    ctx.fillText(t(CELE_TIERS[tierOf(total100)].cap), 360, 490);
+    var d = new Date();
+    ctx.fillText(d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(), 360, 540);
+    ctx.fillText(t('app_title') + ' · ' + t('karaoke_open'), 360, 800);
+    return canvas;
+  }
+  function shareScoreCard(total100) {
+    var canvas = drawScoreCard(total100);
+    if (!canvas) return Promise.resolve('failed');
+    return new Promise(function (resolve) {
+      try {
+        if (canvas.toBlob) {
+          canvas.toBlob(function (blob) {
+            if (!blob) { resolve('failed'); return; }
+            shareFile(blob, 'karaoke-score-' + total100 + '.png').then(resolve);
+          }, 'image/png');
+        } else resolve('failed');
+      } catch (e) { resolve('failed'); }
+    });
+  }
+
+  /* ---------- 打分特效：小仙童（v599） ----------
+   * 用户 2026-11-09 定：不用真神仙像（不敬），改用虚构小女孩——穿神仙衣服的
+   * 小仙童，原创卡通 SVG（内联手绘，无外部图、不用道藏真神仙像）。
+   * 四档动作各不相同（2026-11-09 15:35 用户定）：
+   *   90+ 跳起来鼓掌（cele-jump 大起伏＋胸前合掌＋花瓣＋最盛金光雨）；
+   *   75+ 正常鼓掌（返工标准：双掌掌心相对、胸前合拢分开、手指朝上、
+   *     带自然弧线和节奏；不用叠加手掌的做法）；
+   *   60+ 挥拳头加油（单臂举拳上下挥动）；<60 攥紧小拳头打气
+   *   （双拳收在胸前轻晃，「再练一遍」文案保留）。
+   *   做不好看宁可简单干净，不贴别扭的手。
+   *   顺序：小样也在返工，返工后以小样的最终做法为准核对本特效，
+   *   有出入列出来等下一步按小样调整——本特效不算定稿。
+   * 透明度分层（2026-11-09 用户定）：人物层 opacity 1 实色不清透；
+   *   半透明 50% 只是后面那层金光背景纱（veil），透出歌词；绝不给
+   *   整个 overlay 一个统一的 0.5 opacity。覆盖层 pointer-events:none
+   *   （CSS）、约 4s 自消，点按提前消散；金光粒子 canvas 读 --gold 变量，
+   *   红光下自动转红谱；光晕读 --cele-glow（JS 按档位写，红光下 CSS 覆写收成红谱）。 */
+  var CELE_TIERS = {
+    excellent: { action: 'jump', robe: '#C9A227', robeDeep: '#8A6D1B', sash: '#E8C34A', glow: 'rgba(232,195,74,.55)', particles: 60, cap: 'karaoke_cele_gold' },
+    good: { action: 'clap', robe: '#E88CA0', robeDeep: '#B85C74', sash: '#F6C6D2', glow: 'rgba(232,140,160,.5)', particles: 40, cap: 'karaoke_cele_pink' },
+    fair: { action: 'fist', robe: '#5FA8A0', robeDeep: '#3E7A73', sash: '#BFE3DE', glow: 'rgba(95,168,160,.5)', particles: 24, cap: 'karaoke_cele_teal' },
+    retry: { action: 'cheer', robe: '#8FB8D8', robeDeep: '#5B7FA6', sash: '#CFE0F0', glow: 'rgba(143,184,216,.4)', particles: 12, cap: 'karaoke_cele_cheer' }
+  };
+  var CELE_MS = 4000;
+  var celeTimer = null, celeRaf = 0, celeParts = [], celeTapHide = null;
+  function tierOf(total100) {
+    if (total100 >= 90) return 'excellent';
+    if (total100 >= 75) return 'good';
+    if (total100 >= 60) return 'fair';
+    return 'retry';
+  }
+  /* 原创小仙童 SVG：双髻＋金簪、圆脸、交领仙袍＋金腰带。
+   * 四档动作各不相同（2026-11-09 15:35 用户定）：
+   *   90+ 跳起来鼓掌（cele-jump 大起伏＋胸前合掌＋花瓣＋最盛金光雨）；
+   *   75+ 正常鼓掌（返工标准：双掌掌心相对、胸前合拢分开、手指朝上、
+   *     带自然弧线和节奏；不用叠加手掌的做法——手在胸前、掌面竖直，
+   *     合拢时掌心贴合，不做横向滑动叠掌）；
+   *   60+ 挥拳头加油（单臂举拳上下挥动）；
+   *   <60 攥紧小拳头打气（双拳收在胸前轻晃）。
+   * 做不好看宁可简单干净，不贴别扭的手。人物层不设任何透明。 */
+  function fairySVG(tier, cfg) {
+    var robe = cfg.robe, deep = cfg.robeDeep, sash = cfg.sash;
+    var bobCls = (cfg.action === 'jump') ? 'cele-jump' : 'cele-bob';
+    var arms = '';
+    if (cfg.action === 'jump' || cfg.action === 'clap') {
+      /* 胸前合掌：掌面竖直、手指朝上；左右掌各向中线合拢 4px＋上抬 3px
+       * （自然弧线），合掌瞬间掌心金光星一闪。 */
+      arms = '<g class="cele-arm-l"><path d="M42 78 Q40 92 50 94" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
+        '<rect x="46" y="72" width="11" height="22" rx="5.5" fill="#FFE3C2"/>' +
+        '<path d="M49 72 L49 68 M53 72 L53 68" stroke="#E8B48C" stroke-width="1.2" stroke-linecap="round"/></g>' +
+        '<g class="cele-arm-r"><path d="M78 78 Q80 92 70 94" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
+        '<rect x="63" y="72" width="11" height="22" rx="5.5" fill="#FFE3C2"/>' +
+        '<path d="M67 72 L67 68 M71 72 L71 68" stroke="#E8B48C" stroke-width="1.2" stroke-linecap="round"/></g>' +
+        '<g class="cele-spark"><path d="M60 62 L62.5 69.5 L70 72 L62.5 74.5 L60 82 L57.5 74.5 L50 72 L57.5 69.5 Z" fill="#FFD94A"/></g>';
+    } else if (cfg.action === 'fist') {
+      /* 挥拳头加油：右臂举拳上下挥动，左臂自然下垂 */
+      arms = '<path d="M42 78 Q36 96 40 110" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
+        '<circle cx="40" cy="112" r="6" fill="#FFE3C2"/>' +
+        '<g class="cele-fist"><path d="M78 76 Q84 60 90 52" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
+        '<rect x="84" y="44" width="12" height="8" rx="4" fill="' + sash + '"/>' +
+        '<circle cx="92" cy="42" r="7" fill="#FFE3C2"/></g>';
+    } else {
+      /* 攥紧小拳头打气：双拳收在胸前轻晃 */
+      arms = '<g class="cele-cheer">' +
+        '<path d="M42 78 Q40 88 48 90" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
+        '<circle cx="49" cy="88" r="6.5" fill="#FFE3C2"/>' +
+        '<path d="M78 78 Q80 88 72 90" stroke="' + robe + '" stroke-width="9" stroke-linecap="round" fill="none"/>' +
+        '<circle cx="71" cy="88" r="6.5" fill="#FFE3C2"/></g>';
+    }
+    var petals = '';
+    if (cfg.action === 'jump') {
+      petals = '<g class="cele-petals">' +
+        '<ellipse class="cele-petal" cx="22" cy="30" rx="4" ry="7" fill="#F6A8BC" style="animation-delay:0s"/>' +
+        '<ellipse class="cele-petal" cx="98" cy="22" rx="4" ry="7" fill="#E8C34A" style="animation-delay:.4s"/>' +
+        '<ellipse class="cele-petal" cx="108" cy="60" rx="4" ry="7" fill="#F6A8BC" style="animation-delay:.8s"/>' +
+        '<ellipse class="cele-petal" cx="12" cy="66" rx="4" ry="7" fill="#E8C34A" style="animation-delay:1.2s"/></g>';
+    }
+    return '<svg class="karaoke-cele-fairy" viewBox="0 0 120 160" role="img" aria-label="小仙童">' +
+      '<defs><radialGradient id="celeGlow" cx="50%" cy="42%" r="55%">' +
+      '<stop offset="0%" stop-color="' + sash + '" stop-opacity=".9"/><stop offset="100%" stop-color="' + sash + '" stop-opacity="0"/></radialGradient></defs>' +
+      '<circle cx="60" cy="66" r="56" fill="url(#celeGlow)"/>' +
+      '<g class="' + bobCls + '">' +
+      '<circle cx="44" cy="26" r="9" fill="#3A2E22"/><circle cx="76" cy="26" r="9" fill="#3A2E22"/>' +
+      '<path d="M52 14 Q60 4 68 14" stroke="#E8C34A" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="60" cy="8" r="3" fill="#E8C34A"/>' +
+      '<circle cx="60" cy="44" r="22" fill="#FFE3C2"/>' +
+      '<path d="M40 40 Q60 22 80 40 Q80 30 60 28 Q40 30 40 40Z" fill="#3A2E22"/>' +
+      '<circle cx="52" cy="44" r="2.4" fill="#2A251B"/><circle cx="68" cy="44" r="2.4" fill="#2A251B"/>' +
+      '<path d="M54 52 Q60 57 66 52" stroke="#B23A2B" stroke-width="2" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="44" cy="51" r="3.4" fill="#F2A0A0" opacity=".7"/><circle cx="76" cy="51" r="3.4" fill="#F2A0A0" opacity=".7"/>' +
+      '<path d="M60 66 L40 74 Q34 96 38 132 L82 132 Q86 96 80 74 Z" fill="' + robe + '"/>' +
+      '<path d="M60 66 L48 76 L60 88 L72 76 Z" fill="' + sash + '"/>' +
+      '<path d="M38 132 L82 132 L84 142 L36 142 Z" fill="' + deep + '"/>' +
+      '<rect x="44" y="104" width="32" height="6" rx="3" fill="' + sash + '"/>' +
+      arms +
+      '</g>' + petals + '</svg>';
+  }
+  function showCelebration(total100) {
+    var host = $('karaoke-celebration');
+    if (!host) return;
+    hideCelebration();
+    var key = tierOf(total100);
+    var cfg = CELE_TIERS[key];
+    host.innerHTML =
+      '<div class="karaoke-cele-veil" style="opacity:.5"></div>' +
+      '<canvas class="karaoke-cele-canvas" id="karaoke-cele-canvas"></canvas>' +
+      '<div class="karaoke-cele-card">' + fairySVG(key, cfg) +
+      '<div class="karaoke-cele-score">' + total100 + '</div>' +
+      '<div class="karaoke-cele-cap">' + esc(t(cfg.cap)) + '</div>' +
+      '<div class="karaoke-cele-sub">' + esc(t('karaoke_sample_title')) + '</div></div>';
+    host.hidden = false;
+    host.style.pointerEvents = 'none';
+    host.style.setProperty('--cele-glow', cfg.glow); /* 档位光晕：JS 只写变量，强度由 CSS drop-shadow 读出 */
+    /* 点按提前消散：覆盖层 pointer-events:none 永不挡点按，点按落在下方
+     * 视图／悬浮钮上；capture 监听 document——showCelebration 由出分按钮
+     * click 同步触发，冒泡监听会在同一 click 冒到 document 时立刻误触，
+     * capture 则已错过在途事件，只响应之后的点按；不 preventDefault、
+     * 不 stopPropagation，点按的本来动作（如播放）照常执行。 */
+    if (!celeTapHide) {
+      celeTapHide = function () { hideCelebration(); };
+      document.addEventListener('click', celeTapHide, true);
+    }
+    startCeleParticles(cfg.particles);
+    celeTimer = setTimeout(function () { hideCelebration(); }, CELE_MS);
+  }
+  function hideCelebration() {
+    if (celeTimer) { clearTimeout(celeTimer); celeTimer = null; }
+    if (celeRaf) { try { cancelAnimationFrame(celeRaf); } catch (e) {} celeRaf = 0; }
+    celeParts = [];
+    if (celeTapHide) { document.removeEventListener('click', celeTapHide, true); celeTapHide = null; }
+    var host = $('karaoke-celebration');
+    if (host) { host.hidden = true; host.innerHTML = ''; host.style.removeProperty('--cele-glow'); }
+  }
+  function startCeleParticles(n) {
+    var canvas = $('karaoke-cele-canvas');
+    if (!canvas) return;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return; /* 静帧，不跑粒子 */
+    var ctx = null;
+    try { ctx = canvas.getContext('2d'); } catch (e) {}
+    if (!ctx) return;
+    var w = canvas.clientWidth || window.innerWidth || 360;
+    var h = canvas.clientHeight || window.innerHeight || 640;
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    var gold = melodyCssVar('--gold', '#C9A227');
+    celeParts = [];
+    for (var i = 0; i < n; i++) {
+      celeParts.push({ x: Math.random() * w, y: h * (0.25 + Math.random() * 0.75), r: 1.5 + Math.random() * 3.5, vy: -(0.3 + Math.random() * 0.9), vx: (Math.random() - 0.5) * 0.5, tw: Math.random() * Math.PI * 2 });
+    }
+    var start = Date.now();
+    var step = function () {
+      if (!celeParts.length) return;
+      if (Date.now() - start > CELE_MS) { celeParts = []; return; }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = gold;
+      celeParts.forEach(function (p) {
+        p.y += p.vy; p.x += p.vx; p.tw += 0.08;
+        if (p.y < -10) p.y = h + 10;
+        ctx.globalAlpha = 0.35 + 0.55 * Math.abs(Math.sin(p.tw));
+        ctx.beginPath(); ctx.arc(p.x * dpr, p.y * dpr, p.r * dpr, 0, Math.PI * 2); ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+      celeRaf = requestAnimationFrame(step);
+    };
+    celeRaf = requestAnimationFrame(step);
   }
 
   /* ---------- 打开 / 关闭 ---------- */
@@ -958,6 +1555,10 @@
     opened = true;
     var qfab = $('karaoke-qing-fab');
     if (qfab) qfab.classList.add('show'); /* 悬浮磬钮在视图之外，显隐由 open/close 管理 */
+    var rfab = $('karaoke-rec-fab');
+    if (rfab) rfab.classList.add('show'); /* 录音悬浮钮（右侧、磬钮上方），同理在视图之外 */
+    updateRecUI(); /* 录音钮文案／模式切换复位 */
+    loadRecList(); /* 本机旧录音进面板 */
     var tbox = $('karaoke-timebox');
     if (tbox) { applyTimeboxPos(); tbox.classList.add('show'); updateTimebox(audio ? (audio.currentTime || 0) : 0); }
     layoutSticky(); /* 显形后再算吸顶偏移：hidden 时 offsetHeight 为 0，须先显形再实测（C 线 §1.6 原意不变） */
@@ -997,6 +1598,12 @@
     try { if (qingAudio) qingAudio.pause(); } catch (e) {}
     var qbtn = $('karaoke-qing-fab');
     if (qbtn) qbtn.classList.remove('qing-near', 'qing-hit', 'show');
+    if (rec) stopRecording(); /* 关视图即停录（已录分片照常保存进面板） */
+    hideCelebration(); /* 关视图即收特效（清掉自消定时器与粒子循环） */
+    var rfab2 = $('karaoke-rec-fab');
+    if (rfab2) rfab2.classList.remove('show', 'recording');
+    var rtime = $('karaoke-rec-time');
+    if (rtime) rtime.hidden = true;
     var tbox2 = $('karaoke-timebox');
     if (tbox2) tbox2.classList.remove('show');
     if (scoring || arming) disarmScoring(false);
@@ -1049,6 +1656,20 @@
     });
     var qingBtn = $('karaoke-qing-fab');
     if (qingBtn) qingBtn.addEventListener('click', function () { strikeQing(); });
+    /* 录音悬浮钮（v599）：点按开始／再点停止；不支持的浏览器只提示，不崩播放器 */
+    var recFab = $('karaoke-rec-fab');
+    if (recFab) recFab.addEventListener('click', function () {
+      if (rec) stopRecording(); else startRecording();
+    });
+    /* 录音模式切换（独唱／合唱）：录制中不换 */
+    document.querySelectorAll('.karaoke-rec-mode-btn').forEach(function (b) {
+      b.addEventListener('click', function () { setRecMode(b.getAttribute('data-mode')); });
+    });
+    /* 切后台：如实标记本次录音可能中断（部分浏览器会暂停 MediaRecorder），
+     * 不静默假装正常；标记显示在录音项与状态行。 */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && rec) { rec.bgInterrupted = true; updateRecUI(); }
+    });
     bindTimeboxDrag(); /* 悬浮时间框拖动（v586 测试工具；恒可拖） */
     var spd = $('karaoke-speed');
     if (spd) spd.addEventListener('change', function () {
@@ -1085,7 +1706,11 @@
     /* 横竖屏切换重算吸顶偏移（头栏折行会变高）；只在视图开着时算 */
     window.addEventListener('resize', function () { if (opened) layoutSticky(); });
 
-    audio.addEventListener('play', function () { setPlayingUI(true); });
+    audio.addEventListener('play', function () {
+      setPlayingUI(true);
+      /* 合唱混音图建后原唱走 recCtx：切后台回来若 ctx 被挂起，原唱会静音，在此唤醒 */
+      if (recCtx && recCtx.state === 'suspended') { recCtx.resume().catch(function () {}); }
+    });
     audio.addEventListener('pause', function () { setPlayingUI(false); });
     audio.addEventListener('ended', function () {
       setPlayingUI(false);
@@ -1117,6 +1742,16 @@
       drawMelody: drawMelody,
       /* 打分耳机提示 toast */
       showHeadphonesToast: showHeadphonesToast, hideHeadphonesToast: hideHeadphonesToast,
+      /* v599 录音＋分享＋小仙童打分特效（拍手动图；人物 opacity 1、背景纱 0.5） */
+      tierOf: tierOf, CELE_TIERS: CELE_TIERS, CELE_MS: CELE_MS,
+      fairySVG: fairySVG, showCelebration: showCelebration, hideCelebration: hideCelebration,
+      pickRecMime: pickRecMime, recSupported: recSupported, recExt: recExt, fmtSize: fmtSize,
+      canShareFiles: canShareFiles, shareFile: shareFile, downloadBlob: downloadBlob,
+      drawScoreCard: drawScoreCard, shareScoreCard: shareScoreCard,
+      startRecording: startRecording, stopRecording: stopRecording,
+      setRecMode: setRecMode, getRecMode: function () { return recMode; },
+      getRecList: function () { return recList; }, renderRecList: renderRecList,
+      deleteRec: deleteRec, recItemAction: recItemAction,
       melodyLoaded: function () { return melody; },
       MELODY_FMIN: MELODY_FMIN, MELODY_FMAX: MELODY_FMAX,
       MELODY_WIN_BEFORE: MELODY_WIN_BEFORE, MELODY_WIN_AFTER: MELODY_WIN_AFTER } };

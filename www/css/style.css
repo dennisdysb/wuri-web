@@ -3795,3 +3795,103 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-score-val.fair{color:var(--gold)}
 .karaoke-score-val.poor{color:var(--cinnabar)}
 .karaoke-score-fb{color:var(--muted);font-size:12px;min-width:64px;text-align:right}
+/* ---- v599 录音悬浮钮：右侧、磬钮上方垂直叠放（用户 2026-11-09 15:24 定） ----
+ * 磬钮 bottom 114px、高 56px（顶沿 170px）；录音钮 bottom 194px（留 24px 间隙），
+ * 回顶钮在 20px——三钮右列不重叠。平时金底白字「录音」，录制中变朱砂红底
+ * 「停止」＋脉冲红点；计时 pill 贴在钮左侧。颜色只走 --gold/--cinnabar 变量链，
+ * 日/夜/红光三态由变量覆写接管（红光下 --gold 本就是红色谱）。 */
+.karaoke-rec-fab{position:fixed;right:18px;bottom:calc(194px + env(safe-area-inset-bottom));
+  z-index:70;width:56px;height:56px;border-radius:50%;border:1.5px solid var(--gold);
+  background:var(--gold);color:#fff;font-size:1rem;font-family:var(--sans);font-weight:700;
+  cursor:pointer;padding:0;line-height:1;box-shadow:0 4px 12px rgba(0,0,0,.25);
+  opacity:0;visibility:hidden;transform:translateY(8px);
+  transition:opacity .2s ease,transform .2s ease,visibility .2s,background .2s ease}
+.karaoke-rec-fab.show{opacity:.92;visibility:visible;transform:none}
+.karaoke-rec-fab.show:active{opacity:1;transform:scale(.92)}
+.karaoke-rec-fab.recording{background:var(--cinnabar);border-color:var(--cinnabar);opacity:1}
+.karaoke-rec-fab.recording::after{content:"";position:absolute;inset:-1.5px;border-radius:50%;
+  border:2px solid var(--cinnabar);animation:karaoke-rec-pulse 1.2s ease-out infinite;pointer-events:none}
+@keyframes karaoke-rec-pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+.karaoke-rec-fab:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.karaoke-rec-time{position:fixed;right:86px;bottom:calc(207px + env(safe-area-inset-bottom));
+  z-index:70;padding:5px 10px;border-radius:999px;background:var(--card);color:var(--cinnabar);
+  border:1.5px solid var(--cinnabar);font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums;
+  box-shadow:0 4px 12px rgba(0,0,0,.22);white-space:nowrap}
+.karaoke-rec-time[hidden]{display:none}
+@media (prefers-reduced-motion:reduce){.karaoke-rec-fab.recording::after{animation:none}}
+/* ---- v599 录音面板：视图内、出分屏下方；停止后弹出并滚到此处 ----
+ * 标题行＋独唱/合唱切换；列表每项：名字＋时长/大小＋试听/下载/分享/删除。
+ * 颜色只走变量链；空态只留一行 hint。 */
+.karaoke-rec-panel{margin:16px 14px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.karaoke-rec-panel[hidden]{display:none}
+.karaoke-rec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.karaoke-rec-title{font-weight:700;font-size:15px;color:var(--ink)}
+.karaoke-rec-mode{display:flex;gap:6px}
+.karaoke-rec-mode-btn.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.karaoke-rec-hint{margin:8px 0 0}
+.karaoke-rec-status{margin:8px 0 0;color:var(--cinnabar);font-weight:700}
+.karaoke-rec-status[hidden]{display:none}
+.karaoke-rec-list{margin-top:10px}
+.karaoke-rec-item{padding:10px 0;border-top:1px solid var(--line-soft)}
+.karaoke-rec-item:first-child{border-top:0;padding-top:2px}
+.karaoke-rec-name{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink)}
+.karaoke-rec-meta{color:var(--muted);font-size:12px;margin-top:2px}
+.karaoke-rec-meta .karaoke-rec-warn{color:var(--cinnabar)}
+.karaoke-rec-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.karaoke-rec-actions .mini-btn.tiny{padding:6px 10px}
+.karaoke-rec-empty{margin:10px 0 0}
+.karaoke-rec-empty[hidden]{display:none}
+/* ---- v599 打分特效覆盖层：虚构小仙童（原创卡通 SVG，不用真神仙像） ----
+ * fixed 全屏、pointer-events:none 永不挡点按；半透明靠 .karaoke-cele-veil
+ * （--card 底、opacity .5，歌词在后方隐约可见）；小仙童卡片＋金光粒子在 veil 之上。
+ * 档位只换袍色／光晕强度：90+ 金袍最盛、75+ 粉袍、60+ 青袍、<60 浅蓝袍；
+ * 四档动作各不相同（2026-11-09 15:35 用户定）：90+ 跳起来鼓掌＋花瓣、
+ * 75+ 胸前正常鼓掌（掌心相对、手指朝上）、60+ 挥拳头加油、
+ * <60 攥紧小拳头打气。最终以小样返工后的做法为准核对，本特效不算定稿。
+ * 透明度分层（2026-11-09 用户定）：人物层 opacity 1 实色不清透，半透明
+ * 50% 只是 .karaoke-cele-veil 那层背景纱（透出歌词）；绝不给整个 overlay
+ * 一个统一的 0.5 opacity。红光下 --gold/--card 已转红谱，
+ * 且 body.sky-red 的 img/svg 红移滤镜会把 SVG 一并转红；光晕另有
+ * body.sky-red svg.karaoke-cele-fairy 高特异度规则保住 drop-shadow
+ * （红光下 --cele-glow 统一收成红谱，档位色差让位于粒子数／动作区分）。 */
+.karaoke-celebration{position:fixed;inset:0;z-index:80;pointer-events:none;
+  display:flex;align-items:center;justify-content:center}
+.karaoke-celebration[hidden]{display:none}
+.karaoke-cele-veil{position:absolute;inset:0;background:var(--card);opacity:.5}
+.karaoke-cele-canvas{position:absolute;inset:0;width:100%;height:100%}
+.karaoke-cele-card{position:relative;text-align:center;padding:18px 22px;max-width:calc(100% - 40px)}
+.karaoke-cele-fairy{width:150px;height:200px;filter:drop-shadow(0 6px 18px var(--cele-glow,rgba(201,163,39,.45)))}
+/* 红光下光晕不消失：全局 body.sky-red svg 滤镜（0,1,2）会整条覆写本条
+ * drop-shadow，须以更高特异度（0,2,2）把红移链＋drop-shadow 合并写回；
+ * --cele-glow 在红光下统一收成红谱（#e0563a＝红光 --gold）。 */
+body.sky-red svg.karaoke-cele-fairy{--cele-glow:rgba(224,86,58,.5);filter:brightness(.78) sepia(1) hue-rotate(-52deg) saturate(3.2) drop-shadow(0 6px 18px var(--cele-glow,rgba(201,163,39,.45)))}
+.karaoke-cele-fairy .cele-bob{animation:karaoke-cele-bob 1s ease-in-out infinite}
+/* 90+ 跳起来鼓掌：整童大起伏（0.8s 一跳，带小回弹） */
+.karaoke-cele-fairy .cele-jump{animation:karaoke-cele-jump .8s ease-in-out infinite}
+/* 75+ 胸前正常鼓掌：左右掌各向中线合拢＋上抬（自然弧线，0.5s 交替），
+ * 合掌瞬间掌心金光星一闪（同频）；不用叠加手掌的做法。 */
+.karaoke-cele-fairy .cele-arm-l{animation:karaoke-cele-clap-l .5s ease-in-out infinite alternate}
+.karaoke-cele-fairy .cele-arm-r{animation:karaoke-cele-clap-r .5s ease-in-out infinite alternate}
+.karaoke-cele-fairy .cele-spark{transform-box:fill-box;transform-origin:center;animation:karaoke-cele-spark .5s ease-in-out infinite alternate}
+/* 60+ 挥拳头加油：举拳上下挥动；<60 攥拳打气：双拳胸前轻晃 */
+.karaoke-cele-fairy .cele-fist{animation:karaoke-cele-fist .55s ease-in-out infinite alternate}
+.karaoke-cele-fairy .cele-cheer{animation:karaoke-cele-cheer .6s ease-in-out infinite alternate}
+/* 90+ 花瓣：飘落＋旋转＋淡出（1.6s 循环，行内 animation-delay 错开） */
+.karaoke-cele-fairy .cele-petal{transform-box:fill-box;transform-origin:center;animation:karaoke-cele-petal 1.6s ease-in infinite}
+@keyframes karaoke-cele-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes karaoke-cele-jump{0%,100%{transform:translateY(0)}30%{transform:translateY(-16px)}55%{transform:translateY(0)}70%{transform:translateY(-4px)}}
+@keyframes karaoke-cele-clap-l{from{transform:translate(0,0)}to{transform:translate(4px,-3px)}}
+@keyframes karaoke-cele-clap-r{from{transform:translate(0,0)}to{transform:translate(-4px,-3px)}}
+@keyframes karaoke-cele-spark{0%{opacity:0;transform:scale(.35) rotate(0deg)}100%{opacity:1;transform:scale(1.2) rotate(20deg)}}
+@keyframes karaoke-cele-fist{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+@keyframes karaoke-cele-cheer{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+@keyframes karaoke-cele-petal{0%{transform:translateY(0) rotate(0deg);opacity:0}25%{opacity:1}100%{transform:translateY(34px) rotate(140deg);opacity:0}}
+.karaoke-cele-cap{margin-top:6px;font-family:var(--serif);font-size:19px;font-weight:700;color:var(--ink)}
+.karaoke-cele-sub{margin-top:2px;font-size:13px;color:var(--muted)}
+.karaoke-cele-score{font-family:var(--serif);font-size:40px;font-weight:700;line-height:1.1;color:var(--gold)}
+@media (prefers-reduced-motion:reduce){.karaoke-cele-fairy .cele-bob,.karaoke-cele-fairy .cele-jump,.karaoke-cele-fairy .cele-arm-l,.karaoke-cele-fairy .cele-arm-r,.karaoke-cele-fairy .cele-spark,.karaoke-cele-fairy .cele-fist,.karaoke-cele-fairy .cele-cheer,.karaoke-cele-fairy .cele-petal{animation:none}}
+/* ---- v599 出分屏操作行：再唱一次＋分享成绩卡并排；90+ 行小金光标记 ---- */
+.karaoke-score-actions{display:flex;gap:10px;margin-top:14px}
+.karaoke-score-actions .btn{flex:1}
+.karaoke-score-row-great .karaoke-score-text{color:var(--gold);font-weight:700}
+.karaoke-score-spark{color:var(--gold);margin-right:2px}

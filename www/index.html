@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=598">
+<link rel="stylesheet" href="css/style.css?v=599">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -480,6 +480,21 @@
         </div>
         <div id="karaoke-lyrics"></div>
         <div id="karaoke-score" hidden></div>
+        <!-- 录音面板（v599）：停止录音后弹出（并滚到此处）；平时收起隐藏。
+             模式 独唱/合唱 在此切换；列表每项含试听/下载/分享/删除；录音只存本机。 -->
+        <section class="karaoke-rec-panel" id="karaoke-rec-panel" hidden>
+          <div class="karaoke-rec-head">
+            <span class="karaoke-rec-title" data-i18n="karaoke_rec_title">我的录音</span>
+            <span class="karaoke-rec-mode" role="group" aria-label="录音模式">
+              <button class="mini-btn tiny karaoke-rec-mode-btn active" id="karaoke-rec-mode-solo" data-mode="solo" type="button" data-i18n="karaoke_rec_mode_solo">独唱</button>
+              <button class="mini-btn tiny karaoke-rec-mode-btn" id="karaoke-rec-mode-duet" data-mode="duet" type="button" data-i18n="karaoke_rec_mode_duet">合唱</button>
+            </span>
+          </div>
+          <p class="hint karaoke-rec-hint" data-i18n="karaoke_rec_hint">建议戴耳机录音；扬声器外放会串进麦克风，切到后台时录音可能中断。录音只存本机，不上传。</p>
+          <p class="hint karaoke-rec-status" id="karaoke-rec-status" hidden></p>
+          <div class="karaoke-rec-list" id="karaoke-rec-list"></div>
+          <p class="hint karaoke-rec-empty" id="karaoke-rec-empty" data-i18n="karaoke_rec_empty">还没有录音，点右侧录音钮开始。</p>
+        </section>
         <audio id="karaoke-audio" preload="metadata"></audio>
       </div>
       <!-- 回到顶部（C 线 §2）：必须放在 #karaoke-view 之外——fixed 元素放进可滚动的
@@ -499,6 +514,16 @@
            close() 管理。主显原始秒数（1 位小数），旁附 mm:ss.d；可拖动，
            位置持久化 localStorage（照抄读经器 #qing-btn 拖动模式）。 -->
       <div class="karaoke-timebox" id="karaoke-timebox" role="timer" aria-label="当前播放时间"><span class="karaoke-timebox-sec" id="karaoke-timebox-sec">0.0s</span><span class="karaoke-timebox-mmss" id="karaoke-timebox-mmss">0:00.0</span></div>
+      <!-- 录音悬浮钮（v599：用户 2026-11-09 15:24 定）：右侧、磬钮上方垂直叠放；
+           左边不放，会盖歌词。平时「录音」，录制中变红＋脉冲红点＋计时；点按开始／再点停止。
+           与磬钮／回顶钮同理放在 #karaoke-view 之外，显隐由 JS（.show）在 open()/close()
+           管理；文案由 karaoke.js 经 i18n 设置（录制中改「停止」），不用 data-i18n。 -->
+      <button class="karaoke-rec-fab" id="karaoke-rec-fab" type="button" aria-label="录音" title="录音">录音</button>
+      <span class="karaoke-rec-time" id="karaoke-rec-time" hidden>00:00</span>
+      <!-- 打分特效覆盖层（v599）：虚构小仙童鼓掌／加油（不用真神仙像，2026-11-09 用户定），
+           半透明 50%、pointer-events:none 不挡点按、约 4s 自消（点按提前消散）；内容由 karaoke.js 填充；
+           放在视图之外，fixed 全屏，z-index 高于视图。 -->
+      <div class="karaoke-celebration" id="karaoke-celebration" hidden></div>
   </main>
 
   <!-- ============ 提醒 ============ -->
@@ -1165,7 +1190,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.1.0（内部 v598）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.1.0（内部 v599）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -2816,71 +2841,71 @@
   </div>
 </div>
 
-<script src="js/lunar.min.js?v=598"></script>
-<script src="js/capacitor.js?v=598"></script>
-<script src="js/ln-plugin.js?v=598"></script>
-<script src="js/i18n.js?v=598"></script>
-<script src="js/dialog.js?v=598"></script>
-<script src="js/zhishen-data.js?v=598"></script>
-<script src="js/pentads-data.js?v=598"></script>
-<script src="js/poems-data.js?v=598"></script>
-<script src="jing/index.js?v=598"></script>
-<script src="js/daily-jing.js?v=598"></script>
-<script src="js/app.js?v=598"></script>
-<script src="js/pro.js?v=598"></script>
-  <script src="js/liuyao.js?v=598"></script>
-<script src="js/yearview.js?v=598"></script>
-<script src="js/media-session.js?v=598"></script>
-<script src="js/practice.js?v=598"></script>
-<script src="js/bugang.js?v=598"></script>
-<script src="js/meditation.js?v=598"></script>
-<script src="js/citydata.js?v=598"></script>
-<script src="js/bazi.js?v=598"></script>
-<script src="js/iztro.min.js?v=598"></script>
-<script src="js/ziwei.js?v=598"></script>
-<script src="js/qimen-engine.js?v=598"></script>
-<script src="js/qimen-geju.js?v=598"></script>
-<script src="js/qimen-data.js?v=598"></script>
-<script src="js/qimen-cases.js?v=598"></script>
-<script src="js/qimen-cal.js?v=598"></script>
-<script src="js/qimen-render3d.js?v=598"></script>
-<script src="js/qimen-app.js?v=598"></script>
-<script src="js/ai-analysis.js?v=598"></script>
-<script src="js/ics-generator.js?v=598"></script>
-<script src="js/t2s.js?v=598"></script>
-<script src="js/s2t.js?v=598"></script>
-<script src="js/jingwen.js?v=598"></script>
-<script src="js/karaoke.js?v=598"></script>
-<script src="js/dict.js?v=598"></script>
-<script src="js/daozang.js?v=598"></script>
-<script src="js/deities-data.js?v=598"></script>
-<script src="js/deities.js?v=598"></script>
+<script src="js/lunar.min.js?v=599"></script>
+<script src="js/capacitor.js?v=599"></script>
+<script src="js/ln-plugin.js?v=599"></script>
+<script src="js/i18n.js?v=599"></script>
+<script src="js/dialog.js?v=599"></script>
+<script src="js/zhishen-data.js?v=599"></script>
+<script src="js/pentads-data.js?v=599"></script>
+<script src="js/poems-data.js?v=599"></script>
+<script src="jing/index.js?v=599"></script>
+<script src="js/daily-jing.js?v=599"></script>
+<script src="js/app.js?v=599"></script>
+<script src="js/pro.js?v=599"></script>
+  <script src="js/liuyao.js?v=599"></script>
+<script src="js/yearview.js?v=599"></script>
+<script src="js/media-session.js?v=599"></script>
+<script src="js/practice.js?v=599"></script>
+<script src="js/bugang.js?v=599"></script>
+<script src="js/meditation.js?v=599"></script>
+<script src="js/citydata.js?v=599"></script>
+<script src="js/bazi.js?v=599"></script>
+<script src="js/iztro.min.js?v=599"></script>
+<script src="js/ziwei.js?v=599"></script>
+<script src="js/qimen-engine.js?v=599"></script>
+<script src="js/qimen-geju.js?v=599"></script>
+<script src="js/qimen-data.js?v=599"></script>
+<script src="js/qimen-cases.js?v=599"></script>
+<script src="js/qimen-cal.js?v=599"></script>
+<script src="js/qimen-render3d.js?v=599"></script>
+<script src="js/qimen-app.js?v=599"></script>
+<script src="js/ai-analysis.js?v=599"></script>
+<script src="js/ics-generator.js?v=599"></script>
+<script src="js/t2s.js?v=599"></script>
+<script src="js/s2t.js?v=599"></script>
+<script src="js/jingwen.js?v=599"></script>
+<script src="js/karaoke.js?v=599"></script>
+<script src="js/dict.js?v=599"></script>
+<script src="js/daozang.js?v=599"></script>
+<script src="js/deities-data.js?v=599"></script>
+<script src="js/deities.js?v=599"></script>
 <script>window.exports = {};</script>
-<script src="js/vendor/astronomy.js?v=598"></script>
+<script src="js/vendor/astronomy.js?v=599"></script>
 <script>window.Astronomy = window.exports; /* exports 须保留：astronomy.js 内部在调用时动态解析该全局 */</script>
-<script src="js/vendor/d3-array.min.js?v=598"></script>
-<script src="js/vendor/d3-geo.min.js?v=598"></script>
-<script src="js/sky-engine.js?v=598"></script>
-<script src="js/today-sky.js?v=598"></script>
-<script src="js/stars.js?v=598"></script>
-<script src="js/sky-chart.js?v=598"></script>
-<script src="js/sky-ar.js?v=598"></script>
-<script src="js/sky-horizon.js?v=598"></script>
-<script src="js/fengshui-data.js?v=598"></script>
-<script src="js/vendor/soul-fengshui.js?v=598"></script>
-<script src="js/fengshui.js?v=598"></script>
-<script src="js/fengshui2.js?v=598"></script>
-<script src="js/jinsuo-data.js?v=598"></script>
-<script src="js/jinsuo.js?v=598"></script>
-<script src="js/vendor/dexie.js?v=598"></script>
-<script src="js/house.js?v=598"></script>
-<script src="js/house-editor.js?v=598"></script>
-<script src="js/affinity-data.js?v=598"></script>
-<script src="js/affinity.js?v=598"></script>
-<script src="js/content-feed.js?v=598"></script>
-<script src="js/offline-download.js?v=598"></script>
-<script src="js/account.js?v=598"></script>
-<script src="js/store-update.js?v=598"></script>
+<script src="js/vendor/d3-array.min.js?v=599"></script>
+<script src="js/vendor/d3-geo.min.js?v=599"></script>
+<script src="js/sky-engine.js?v=599"></script>
+<script src="js/today-sky.js?v=599"></script>
+<script src="js/stars.js?v=599"></script>
+<script src="js/sky-chart.js?v=599"></script>
+<script src="js/sky-ar.js?v=599"></script>
+<script src="js/sky-horizon.js?v=599"></script>
+<script src="js/fengshui-data.js?v=599"></script>
+<script src="js/vendor/soul-fengshui.js?v=599"></script>
+<script src="js/fengshui.js?v=599"></script>
+<script src="js/fengshui2.js?v=599"></script>
+<script src="js/jinsuo-data.js?v=599"></script>
+<script src="js/jinsuo.js?v=599"></script>
+<script src="js/vendor/dexie.js?v=599"></script>
+<script src="js/house.js?v=599"></script>
+<script src="js/house-editor.js?v=599"></script>
+<script src="js/affinity-data.js?v=599"></script>
+<script src="js/affinity.js?v=599"></script>
+<script src="js/content-feed.js?v=599"></script>
+<script src="js/offline-download.js?v=599"></script>
+<script src="js/account.js?v=599"></script>
+<script src="js/store-update.js?v=599"></script>
 <script>
 // PWA: 注册 Service Worker（原生壳内跳过，file:// 不支持 SW）
 if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.WuBridge) {
