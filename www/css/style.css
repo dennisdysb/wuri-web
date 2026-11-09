@@ -3663,6 +3663,15 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
  * 颜色只走变量链（--paper/--line/--teal/--card/--teal-deep），无写死色值。 */
 .karaoke-seek-row{position:sticky;top:120px;z-index:15;background:var(--paper);display:flex;align-items:center;gap:6px;padding:8px 14px 10px;border-bottom:1px solid var(--line)}
 .karaoke-seek{flex:1 1 0;min-width:0;padding:0 6px;text-align:center}
+/* ---- 旋律音高线（v594）：控制条／快进退行下方、进度条上方，非吸顶，随歌词滚动。
+ * 颜色只走变量链（--gold 曲线、--cinnabar 播放头、--line-soft 网格线、
+ * --card 底、--line 边框、--muted 注解），日/夜/红光三态由变量覆写接管。
+ * melody.json 未到／损坏时整块 hidden，不留空框。 */
+.karaoke-melody{padding:10px 14px 0}
+.karaoke-melody[hidden]{display:none}
+.karaoke-melody-canvas{display:block;width:100%;height:64px;background:var(--card);border:1px solid var(--line);border-radius:10px}
+.karaoke-melody-cap{display:flex;justify-content:space-between;align-items:baseline;padding:4px 2px 0;color:var(--muted);font-size:12px}
+.karaoke-melody-note{color:var(--gold);font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
 /* ---- 打分悬浮停控制：吸顶状态条（C 线 §1） ----
  * 颜色只走 --card / --gold / --ink / --cinnabar 变量链（日/夜/红光三态由变量覆写接管；
  * 刻意不用 --gold-wash——红光未覆写它，会浮米白光晕，见 B 线 §2.2）。 */

@@ -9,6 +9,9 @@
  * 数据：content/karaoke/base_text.json（底本，唱词＋注音）＋
  *       content/karaoke/timeline.json（逐句时间轴＋参考音高，147 条）。
  * 音频：audio/karaoke/seg1|2|3.m4a（三段青玄录音）。
+ * 旋律引导（v594）：content/karaoke/melody.json（懒加载，缺失不影响播放）提供
+ *   参考音高曲线——音高线 strip（30s 窗口＋播放头）＋正弦提示音（默认关，
+ *   独立 AudioContext，与打分麦克风 Analyser 路径完全分开）。
  * 颜色一律走 CSS 变量链（--gold 已唱字、--teal 好分、--cinnabar 差分），
  *   日间／夜间／红光三态由变量覆写自动适配，不得写死色值。
  * 注意：打分时原唱经扬声器会进麦克风（回声消除仅能部分抑制），
@@ -47,6 +50,11 @@
   /* ---------- 常量 ---------- */
   var BASE_TEXT_URL = 'content/karaoke/base_text.json';
   var TIMELINE_URL = 'content/karaoke/timeline.json';
+  var MELODY_URL = 'content/karaoke/melody.json';
+  var MELODY_FMIN = 110, MELODY_FMAX = 310; /* 音高线显示窗 Hz（对数轴；实测旋律约 116–305 Hz） */
+  var MELODY_WIN_BEFORE = 8, MELODY_WIN_AFTER = 22; /* 音高线窗口：当前时刻前 8s＋后 22s */
+  var TONE_GAIN = 0.2;           /* 提示音增益（低音量，伴原唱） */
+  var TONE_GLIDE_S = 0.05;       /* 提示音频率平滑时间常数（setTargetAtTime tau） */
   var AUDIO_URL = { seg1: 'audio/karaoke/seg1.m4a', seg2: 'audio/karaoke/seg2.m4a', seg3: 'audio/karaoke/seg3.m4a' };
   var SEG_ORDER = ['seg1', 'seg2', 'seg3'];
   /* （罄）显示位置 = 该位置前的字数（按底本 note 的显式表述，与 build_s06.py 一致；
@@ -93,6 +101,15 @@
   var lastQingAt = 0;      /* 上次有效敲击的 Date.now()（节流用） */
   var opened = false;
   var loadPromise = null;
+  /* ---------- 旋律引导状态（v594） ---------- */
+  var melody = null;         /* 归一化后 {version, segments:{seg1|2|3:{frames:[{t,f0_hz,note,voiced}],duration_s}}} */
+  var melodyPromise = null;  /* 懒加载缓存；失败也缓存为 null，不阻塞播放器 */
+  var melodyFailed = false;
+  var toneOn = false;        /* 提示音开关（默认关；只由控制条「提示音」钮改） */
+  var toneCtx = null, toneOsc = null, toneGain = null; /* 提示音独占 AudioContext＋节点（与麦克风分开） */
+  var lastToneFreq = null;   /* 最近一次送给振荡器的频率（测试／诊断用） */
+  var lastToneGain = 0;      /* 最近一次目标增益 */
+  var lastMelodyNote = '';   /* 音高线当前音名（DOM 写去重用） */
 
   /* 打分 UI 四处状态的唯一同步点（打分按钮文案/class、悬浮状态条、麦克风提示）。
    * 调用点只有 arm .then/.catch、disarmScoring、open/close——不散落手写（C 线 §1.4）。 */
@@ -188,6 +205,218 @@
     qingTimes.sort(function (a, b) { return a.t - b.t; });
   }
 
+  /* ---------- 旋律引导（v594） ----------
+   * melody.json 懒加载（首次 open 时 fetch，缓存；404／损坏时 resolve null，
+   * 音高线保持 hidden、提示音钮点按无操作，播放器其余功能照常）。
+   * 接受两种形态：① 任务 schema {version, segments:{seg:{frames:[{t,f0_hz,note,voiced}]}}}
+   * ② 样本形态 {frames:[...]}（整段平铺，作 seg1）。帧时间均为段内时间，与
+   * timeline.json／音频同一时间基。 */
+  function normalizeSeg(s) {
+    var frames = (Array.isArray(s.frames) ? s.frames : []).map(function (f) {
+      return { t: (+f.t || 0), f0_hz: (f.f0_hz == null ? null : +f.f0_hz), note: f.note || null, voiced: !!f.voiced };
+    }).sort(function (a, b) { return a.t - b.t; });
+    var dur = s.duration_s ? (+s.duration_s) : (frames.length ? frames[frames.length - 1].t : 0);
+    return { audio: s.audio || null, duration_s: dur, frames: frames, breaks: s.breaks || [] };
+  }
+  function normalizeMelody(json) {
+    if (!json || typeof json !== 'object') return null;
+    var segs = {};
+    if (json.segments && typeof json.segments === 'object') {
+      Object.keys(json.segments).forEach(function (id) { segs[id] = normalizeSeg(json.segments[id] || {}); });
+    } else if (Array.isArray(json.frames)) {
+      segs.seg1 = normalizeSeg(json); /* 样本形态：整段平铺 frames（86fps，seg1） */
+    }
+    var ids = Object.keys(segs).filter(function (id) { return segs[id] && segs[id].frames.length; });
+    if (!ids.length) return null;
+    var out = { version: json.version || 1, segments: {} };
+    ids.forEach(function (id) { out.segments[id] = segs[id]; });
+    return out;
+  }
+  function loadMelody(url) {
+    if (!url && melodyPromise) return melodyPromise;
+    var u = url || MELODY_URL;
+    var p = fetch(u).then(function (r) {
+      if (!r.ok) throw new Error('melody ' + r.status);
+      return r.json();
+    }).then(function (json) {
+      melody = normalizeMelody(json);
+      melodyFailed = !melody;
+      return melody;
+    }).catch(function () {
+      melody = null; melodyFailed = true;
+      return null; /* 降级：无音高线、无提示音，其余照常 */
+    });
+    if (!url) melodyPromise = p;
+    return p;
+  }
+  function melodySeg(file) {
+    return (melody && melody.segments && melody.segments[file]) || null;
+  }
+  /* 帧间线性插值求当前基频；任一端点无声（f0_hz null＝停顿）即返回 null（提示音静默、
+   * 音高线断笔）。段外时间返回 null。 */
+  function melodyF0At(file, time) {
+    var sg = melodySeg(file);
+    if (!sg || !sg.frames.length) return null;
+    var fr = sg.frames, lo = 0, hi = fr.length - 1;
+    if (time < fr[0].t || time > fr[fr.length - 1].t) return null;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (fr[mid].t <= time) lo = mid; else hi = mid - 1; }
+    var a = fr[lo], b = fr[lo + 1];
+    if (!b) return a.f0_hz;
+    if (!a.f0_hz || !b.f0_hz) return null;
+    if (b.t <= a.t) return a.f0_hz;
+    var k = (time - a.t) / (b.t - a.t);
+    return a.f0_hz + k * (b.f0_hz - a.f0_hz);
+  }
+  /* 当前时刻最近的有声音符名（±0.15s 内），无则 null（显示 —）。 */
+  function melodyNoteAt(file, time) {
+    var sg = melodySeg(file);
+    if (!sg || !sg.frames.length) return null;
+    var fr = sg.frames, lo = 0, hi = fr.length - 1;
+    if (time < fr[0].t || time > fr[fr.length - 1].t) return null;
+    while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (fr[mid].t <= time) lo = mid; else hi = mid - 1; }
+    var best = null, bestDt = 0.15;
+    [fr[lo], fr[lo + 1]].forEach(function (f) {
+      if (!f || !f.f0_hz || !f.note) return;
+      var dt = Math.abs(f.t - time);
+      if (dt <= bestDt) { bestDt = dt; best = f.note; }
+    });
+    return best;
+  }
+  /* 音高线窗口：[time-8s, time+22s]，两端夹在 [0, duration] 内（段首段尾窗口收窄，
+   * 播放头随之移位，恒在窗内）。 */
+  function melodyWindow(file, time) {
+    var sg = melodySeg(file);
+    var dur = (sg && sg.duration_s) || (audio && audio.duration) || 0;
+    var w0 = time - MELODY_WIN_BEFORE, w1 = time + MELODY_WIN_AFTER;
+    if (w0 < 0) { w1 -= w0; w0 = 0; }
+    if (dur > 0 && w1 > dur) { w0 -= (w1 - dur); w1 = dur; if (w0 < 0) w0 = 0; }
+    return { w0: w0, w1: w1, dur: dur };
+  }
+  /* 读 CSS 变量画 canvas：getComputedStyle 解析 --gold/--cinnabar/--line-soft，
+   * 日/夜/红光三态自动跟随；变量读不到（无头环境）才用宣纸日间值回落。 */
+  function melodyCssVar(name, fallback) {
+    try {
+      var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+      if (v && v.trim()) return v.trim();
+    } catch (e) {}
+    return fallback;
+  }
+  function updateMelodyNote(time) {
+    var noteEl = $('karaoke-melody-note');
+    if (!noteEl) return;
+    var note = melodyNoteAt(curFile, time) || '—';
+    if (note !== lastMelodyNote) { lastMelodyNote = note; noteEl.textContent = note; }
+  }
+  function drawMelody(time) {
+    var strip = $('karaoke-melody');
+    var canvas = $('karaoke-melody-canvas');
+    if (!strip || !canvas) return;
+    if (strip.hidden) return;
+    var sg = melodySeg(curFile);
+    updateMelodyNote(time);
+    if (!sg || !sg.frames.length) return;
+    var ctx = null;
+    try { ctx = canvas.getContext('2d'); } catch (e) {}
+    if (!ctx) return; /* 无 2d 上下文（旧 WebView）时只更新音名，不抛错 */
+    var cssW = canvas.clientWidth || canvas.width || 300;
+    var cssH = canvas.clientHeight || canvas.height || 64;
+    var dpr = window.devicePixelRatio || 1;
+    var Wpx = Math.max(1, Math.round(cssW * dpr)), Hpx = Math.max(1, Math.round(cssH * dpr));
+    if (canvas.width !== Wpx || canvas.height !== Hpx) { canvas.width = Wpx; canvas.height = Hpx; }
+    var win = melodyWindow(curFile, time);
+    var span = Math.max(0.001, win.w1 - win.w0);
+    var logSpan = Math.log(MELODY_FMAX / MELODY_FMIN);
+    function X(t) { return (t - win.w0) / span * Wpx; }
+    function Y(f) {
+      var l = Math.log(Math.max(MELODY_FMIN, Math.min(MELODY_FMAX, f)) / MELODY_FMIN) / logSpan;
+      return Hpx - (0.08 + 0.84 * l) * Hpx;
+    }
+    ctx.clearRect(0, 0, Wpx, Hpx);
+    /* 网格线：110 / 188（中位）/ 310 Hz */
+    ctx.strokeStyle = melodyCssVar('--line-soft', '#EFE9D4');
+    ctx.lineWidth = 1;
+    [110, 188, 310].forEach(function (f) {
+      ctx.beginPath(); ctx.moveTo(0, Y(f)); ctx.lineTo(Wpx, Y(f)); ctx.stroke();
+    });
+    /* 曲线：窗内帧降采样到约 600 点；f0 null 处断笔（停顿不断线成假音高） */
+    var frames = sg.frames;
+    var stride = Math.max(1, Math.floor(frames.length / 600));
+    ctx.strokeStyle = melodyCssVar('--gold', '#A2813B');
+    ctx.lineWidth = Math.max(1, 2 * dpr);
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    var pen = false, i, fr;
+    for (i = 0; i < frames.length; i += stride) {
+      fr = frames[i];
+      if (fr.t < win.w0 || fr.t > win.w1 || !fr.f0_hz) { pen = false; continue; }
+      if (!pen) { ctx.moveTo(X(fr.t), Y(fr.f0_hz)); pen = true; }
+      else ctx.lineTo(X(fr.t), Y(fr.f0_hz));
+    }
+    ctx.stroke();
+    /* 播放头：当前时刻竖线 */
+    var px = X(time);
+    ctx.strokeStyle = melodyCssVar('--cinnabar', '#B23A2B');
+    ctx.lineWidth = Math.max(1, 2 * dpr);
+    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, Hpx); ctx.stroke();
+  }
+
+  /* ---------- 正弦提示音（v594） ----------
+   * 一个 OscillatorNode（sine）＋一个 GainNode，首次开提示音时创建并复用；
+   * 独立 AudioContext，与打分麦克风（startMic 的 getUserMedia＋Analyser）完全分开，
+   * 麦克风不经过振荡器、振荡器不进麦克风。频率每帧跟 melodyF0At 插值＋
+   * setTargetAtTime 平滑（无阶梯跳变）；停顿（f0 null）／暂停／段尾时增益归 0。 */
+  function ensureToneNodes() {
+    if (toneOsc && toneGain && toneCtx) return true;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    try {
+      toneCtx = new AC();
+      toneOsc = toneCtx.createOscillator();
+      toneOsc.type = 'sine';
+      toneOsc.frequency.value = 188;
+      toneGain = toneCtx.createGain();
+      toneGain.gain.value = 0;
+      toneOsc.connect(toneGain);
+      toneGain.connect(toneCtx.destination);
+      toneOsc.start();
+      return true;
+    } catch (e) { toneCtx = null; toneOsc = null; toneGain = null; return false; }
+  }
+  function toneSetGain(v) {
+    lastToneGain = v;
+    if (!toneGain || !toneCtx) return;
+    try {
+      if (toneGain.gain && typeof toneGain.gain.setTargetAtTime === 'function')
+        toneGain.gain.setTargetAtTime(v, toneCtx.currentTime, 0.03);
+      else toneGain.gain.value = v;
+    } catch (e) { try { toneGain.gain.value = v; } catch (e2) {} }
+  }
+  function toneSilence() { toneSetGain(0); }
+  function updateTone(time) {
+    if (!toneOn) { toneSetGain(0); return; }
+    if (!audio || audio.paused) { toneSetGain(0); return; }
+    var f0 = melodyF0At(curFile, time);
+    if (!f0) { toneSetGain(0); return; }
+    if (!ensureToneNodes()) return;
+    try { if (toneCtx.state === 'suspended' && toneCtx.resume) toneCtx.resume(); } catch (e) {}
+    try {
+      if (toneOsc.frequency && typeof toneOsc.frequency.setTargetAtTime === 'function')
+        toneOsc.frequency.setTargetAtTime(f0, toneCtx.currentTime, TONE_GLIDE_S);
+      else toneOsc.frequency.value = f0;
+    } catch (e) {}
+    lastToneFreq = f0;
+    toneSetGain(TONE_GAIN);
+  }
+  function setTone(on) {
+    toneOn = !!on;
+    var btn = $('karaoke-tone-btn');
+    if (btn) btn.classList.toggle('active', toneOn);
+    if (toneOn) {
+      /* 点按手势内建节点：iOS/Safari 的 AudioContext 须用户手势解锁 */
+      if (ensureToneNodes()) updateTone(audio ? (audio.currentTime || 0) : 0);
+    } else toneSilence();
+  }
+
   /* ---------- 歌词渲染 ---------- */
   function renderLyrics() {
     var host = $('karaoke-lyrics');
@@ -256,6 +485,7 @@
     lastLineIdx = -1;
     clearLineState();
     updateTime();
+    drawMelody(0); /* 切段即换曲线段（tick 下一帧也会跟上） */
     if (autoplay) { audio.play().catch(function () {}); }
   }
   function currentItems() {
@@ -429,6 +659,8 @@
       updateQingNear(nt);
     }
     updateTime();
+    drawMelody(nt); /* 快进/退后音高线＋提示音立即重同步到新位置 */
+    updateTone(nt);
   }
   /* ---------- 敲磬 ---------- */
   function strikeQing() {
@@ -515,6 +747,8 @@
     paintLine(idx, time);
     updateQingNear(time);
     updateTime();
+    drawMelody(time); /* 音高线窗口＋播放头跟随播放（同一 rAF 循环） */
+    updateTone(time); /* 提示音跟随当前帧音高；单句循环回绕后自动回到行首音高 */
   }
 
   /* ---------- 麦克风＋基频 ---------- */
@@ -765,6 +999,12 @@
       var host = $('karaoke-lyrics');
       if (host) host.innerHTML = '<p class="hint">' + esc(t('karaoke_loading')) + '</p>';
     });
+    /* 旋律懒加载：不阻塞播放器；到手才亮音高线，失败则整块保持 hidden */
+    loadMelody().then(function (m) {
+      var strip = $('karaoke-melody');
+      if (strip) strip.hidden = !m;
+      if (m) drawMelody(audio ? (audio.currentTime || 0) : 0);
+    });
     /* 预建磬 Audio（用户点击手势上下文，iOS 不拦截；沿冥想区 fbStart 预建口径） */
     try {
       if (!qingAudio) qingAudio = new Audio(QING_URL);
@@ -780,6 +1020,7 @@
     opened = false;
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     if (audio) audio.pause();
+    toneSilence(); /* 关视图即停提示音（开关状态保留，重开后随播放恢复） */
     try { if (qingAudio) qingAudio.pause(); } catch (e) {}
     var qbtn = $('karaoke-qing-fab');
     if (qbtn) qbtn.classList.remove('qing-near', 'qing-hit', 'show');
@@ -842,6 +1083,9 @@
     });
     var loopBtn = $('karaoke-loop');
     if (loopBtn) loopBtn.addEventListener('click', function () { setLoop(!loopOne); });
+    /* 提示音开关（v594）：默认关；点按手势内建 AudioContext 节点 */
+    var toneBtn = $('karaoke-tone-btn');
+    if (toneBtn) toneBtn.addEventListener('click', function () { setTone(!toneOn); });
     /* 快进/快退（v585）：-10s/-5s/+5s/+10s，data-seek 存秒数 */
     document.querySelectorAll('#karaoke-seek-row .karaoke-seek').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -872,9 +1116,10 @@
     window.addEventListener('resize', function () { if (opened) layoutSticky(); });
 
     audio.addEventListener('play', function () { setPlayingUI(true); });
-    audio.addEventListener('pause', function () { setPlayingUI(false); });
+    audio.addEventListener('pause', function () { setPlayingUI(false); toneSilence(); });
     audio.addEventListener('ended', function () {
       setPlayingUI(false);
+      toneSilence(); /* 段尾停提示音（'all' 连唱时下一段 loadFile＋tick 会恢复） */
       if (seg === 'all') {
         var idx = SEG_ORDER.indexOf(curFile);
         if (idx >= 0 && idx < SEG_ORDER.length - 1) {
@@ -894,6 +1139,16 @@
     bind();
   }
   window.__wuriKaraoke = { open: open, close: close, loadData: loadData,
+    loadMelody: loadMelody,
     /* 供冒烟测试的纯函数／入口（生产不调用） */
-    _test: { detectPitch: detectPitch, median: median, showScore: showScore, scoreLines: scoreLines, strikeQing: strikeQing, buildQingTimes: buildQingTimes, seekBy: seekBy, setLoop: setLoop, findLine: findLine, updateTimebox: updateTimebox, applyTimeboxPos: applyTimeboxPos } };
+    _test: { detectPitch: detectPitch, median: median, showScore: showScore, scoreLines: scoreLines, strikeQing: strikeQing, buildQingTimes: buildQingTimes, seekBy: seekBy, setLoop: setLoop, findLine: findLine, updateTimebox: updateTimebox, applyTimeboxPos: applyTimeboxPos,
+      /* v594 旋律引导 */
+      loadMelody: loadMelody, normalizeMelody: normalizeMelody, melodyF0At: melodyF0At,
+      melodyNoteAt: melodyNoteAt, melodyWindow: melodyWindow, melodySeg: melodySeg,
+      drawMelody: drawMelody, updateTone: updateTone, setTone: setTone,
+      isToneOn: function () { return toneOn; },
+      toneState: function () { return { on: toneOn, hasNodes: !!(toneOsc && toneGain && toneCtx), freq: lastToneFreq, gain: lastToneGain }; },
+      melodyLoaded: function () { return melody; },
+      MELODY_FMIN: MELODY_FMIN, MELODY_FMAX: MELODY_FMAX,
+      MELODY_WIN_BEFORE: MELODY_WIN_BEFORE, MELODY_WIN_AFTER: MELODY_WIN_AFTER, TONE_GAIN: TONE_GAIN } };
 })();
