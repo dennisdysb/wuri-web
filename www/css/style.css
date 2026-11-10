@@ -1080,12 +1080,13 @@ details.disc-foot .hint{margin-top:9px}
 .daka-date{font-size:.8rem;color:var(--muted);font-weight:400;margin-left:8px}
 .daka-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:var(--paper)}
 .daka-item.done{background:var(--bg-soft);opacity:.85}
-.daka-icon{font-size:1.6rem;width:2.2em;text-align:center}
-.daka-main{flex:1}
-.daka-name{font-weight:600;font-size:.95rem}
-.daka-type{font-size:.7rem;color:var(--teal-deep);border:1px solid var(--teal-deep);border-radius:4px;padding:0 4px;margin-left:6px}
-.daka-sub{font-size:.8rem;color:var(--muted);margin-top:2px}
-.daka-actions{display:flex;gap:6px;align-items:center}
+.daka-icon{font-size:1.6rem;width:2.2em;text-align:center;flex-shrink:0}
+.daka-main{flex:1;min-width:0}
+.daka-name{font-weight:600;font-size:.95rem;overflow-wrap:break-word}
+.daka-type{display:inline-block;white-space:nowrap;flex-shrink:0;font-size:.7rem;color:var(--teal-deep);border:1px solid var(--teal-deep);border-radius:4px;padding:0 4px;margin-left:6px}
+.daka-sub{font-size:.8rem;color:var(--muted);margin-top:2px;overflow-wrap:break-word}
+.daka-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.daka-actions button{white-space:nowrap}
 .daka-done-mark{color:var(--teal-deep);font-size:1.4rem;font-weight:700}
 .btn.small{padding:6px 14px;font-size:.85rem}
 /* 计时器弹窗 */
