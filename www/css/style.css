@@ -3837,9 +3837,6 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .points-owned{color:var(--teal);font-size:13px;font-weight:700}
 .points-locked{color:var(--muted);font-size:12px}
 .points-sync{margin-top:10px}
-/* v602 早晚课验证：打卡页传统选择行（颜色只走变量链） */
-.daka-ke-trad{margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft);font-size:13px;color:var(--muted)}
-.daka-ke-trad .mini-btn{margin-left:6px}
 /* ---- v599 录音悬浮钮：右侧、磬钮上方垂直叠放（用户 2026-11-09 15:24 定） ----
  * 磬钮 bottom 114px、高 56px（顶沿 170px）；录音钮 bottom 194px（留 24px 间隙），
  * 回顶钮在 20px——三钮右列不重叠。平时金底白字「录音」，录制中变朱砂红底

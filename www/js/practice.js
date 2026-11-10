@@ -195,7 +195,6 @@ var Practice = (function () {
 
   function renderAll() {
     renderHabits();
-    renderKeTradition();
     renderStats();
     renderCal();
     var d = new Date();
@@ -274,49 +273,12 @@ var Practice = (function () {
     });
   }
 
-  /* ---------- 早晚课打卡验证（v602 第二次修订，设计文档第三节） ----------
-   * 点早课/晚课 → 选传统（首次）→ 打开对应功课经、定位到早坛/晚坛首节；
+  /* ---------- 早晚课打卡验证（v602 第二次修订，设计文档第三节；v604 去传统选择器） ----------
+   * 点早课/晚课 → 打开对应功课经、定位到早坛/晚坛首节；
    * 结算在退出阅读器时（closeReader → WuriPoints.keEnd）或满分自动结算
    * （划到底＋前台可见停留 ≥10 分钟）；只打开也按停留分钟记（最低 1，上限 25）。
-   * 传统存 localStorage（wuri_kegong_tradition），本页可切换。 */
-  function keTraditionLabel() {
-    try {
-      var v = localStorage.getItem('wuri_kegong_tradition');
-      return v === 's01' ? '正一' : (v === 's02' ? '全真' : null);
-    } catch (e) { return null; }
-  }
-  function renderKeTradition() {
-    var el = $('#daka-ke-trad');
-    if (!el) return;
-    var lab = keTraditionLabel();
-    el.innerHTML = '早晚课传统：' + (lab ? esc(lab) : '未选择') +
-      ' <button class="mini-btn tiny" id="daka-ke-trad-switch">' + (lab ? '切换' : '选择') + '</button>';
-    var btn = $('#daka-ke-trad-switch');
-    if (btn) btn.addEventListener('click', function (e) { e.stopPropagation(); chooseKeTradition(); });
-  }
-  function chooseKeTradition() {
-    return new Promise(function (resolve) {
-      var old = document.querySelector('.ke-trad-mask');
-      if (old) old.remove();
-      var mask = document.createElement('div');
-      mask.className = 'hd-pick-mask hd-dlg-mask ke-trad-mask';
-      mask.innerHTML = '<div class="hd-pick-sheet"><div class="hd-pick-title">早晚课用哪个传统？</div>' +
-        '<div class="hd-pick-foot" style="flex-direction:column;gap:8px">' +
-        '<button class="btn primary" id="ke-trad-s01">正一 · 《正一早晚功课经》</button>' +
-        '<button class="btn primary" id="ke-trad-s02">全真 · 《全真早晚功课经》</button>' +
-        '<button class="btn" id="ke-trad-cancel">取消</button></div></div>';
-      document.body.appendChild(mask);
-      function done(v) { mask.remove(); resolve(v); }
-      function pick(sid) {
-        try { if (window.WuriPoints) window.WuriPoints.keSetTradition(sid); } catch (e) {}
-        renderKeTradition(); done(sid);
-      }
-      mask.querySelector('#ke-trad-s01').addEventListener('click', function () { pick('s01'); });
-      mask.querySelector('#ke-trad-s02').addEventListener('click', function () { pick('s02'); });
-      mask.querySelector('#ke-trad-cancel').addEventListener('click', function () { done(null); });
-      mask.addEventListener('click', function (e) { if (e.target === mask) done(null); });
-    });
-  }
+   * v604：不再弹传统选择框——未存过传统的用户默认全真 s02（points.js keStart 内置），
+   * 已存 s01/s02 的用户继续沿用原值；打卡页传统行与本页切换入口一并删除。 */
   /* 正在打开功课经（切 tab → 开卷之间）：此窗口内结算的旧会话不回跳打卡页 */
   var keOpening = false;
   function openKe(h) {
@@ -334,7 +296,6 @@ var Practice = (function () {
         if (!st.ok) {
           keOpening = false;
           if (st.reason === 'dup') WuriDlg.alert('今日' + h.name + '已完成。');
-          else if (st.reason === 'no-tradition') { chooseKeTradition().then(function (v) { if (v) openKe(h); }); }
           return;
         }
         var t = st.target;
@@ -345,8 +306,7 @@ var Practice = (function () {
         keOpening = false;
       }, 300);
     }
-    if (!window.WuriPoints.keTradition()) { chooseKeTradition().then(function (v) { if (v) go(); }); }
-    else go();
+    go(); /* v604：不再先弹传统选择框，未存传统时 keStart 默认全真 s02 */
   }
   /* 功课经会话结算：退出阅读器时回修行打卡页；满分自动结算只提示（不切页）。
    * window.toast 未定义时静默（打卡页的「今日已打卡 ✓」与我的页积分卡即反馈）。 */

@@ -416,6 +416,10 @@ var WuriPoints = (function () {
     day = day || todayStr();
     if (!KE_HABITS[hid]) return { ok: false, reason: 'not-ke' };
     var t = keTarget(hid);
+    if (!t) { /* v604：不再弹传统选择框——未存过传统默认全真 s02（已存 s01/s02 沿用原值） */
+      keSetTradition('s02');
+      t = keTarget(hid);
+    }
     if (!t) return { ok: false, reason: 'no-tradition' };
     if (hasEvent('checkin', day, null, hid)) return { ok: false, reason: 'dup' };
     if (keSession && keSession.day === day && keSession.hid === hid && !keSession.awarded) {
