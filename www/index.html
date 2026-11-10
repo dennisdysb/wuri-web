@@ -2445,25 +2445,28 @@
       </div>
     </div>
 
-    <!-- 自建表单 -->
-    <section class="card" id="daka-form-wrap" hidden>
-      <div class="card-title">＋ 自建打卡项</div>
-      <div class="form-row">
-        <label for="df-name">名称</label>
-        <input type="text" id="df-name" placeholder="如：抄经、拜忏">
+    <!-- 自建表单弹窗（v603：Maggie 上报点按钮没反应——旧页面内展开＋滚回页顶，
+         表单在视口下方看不见；改居中弹窗＋遮罩，与倒计时弹窗同一套 .daka-mask） -->
+    <div id="daka-form-wrap" class="daka-mask" role="dialog" aria-modal="true" aria-labelledby="daka-form-title">
+      <div class="daka-timer-box daka-form-box">
+        <div class="card-title" id="daka-form-title">＋ 自建打卡项</div>
+        <div class="form-row">
+          <label for="df-name">名称</label>
+          <input type="text" id="df-name" placeholder="如：抄经、拜忏">
+        </div>
+        <div class="form-row">
+          <label for="df-type">类型</label>
+          <select id="df-type">
+            <option value="count">计次（每天打卡一次）</option>
+            <option value="timed">计时（记录时长）</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="df-save">保存</button>
+          <button class="btn" id="df-cancel">取消</button>
+        </div>
       </div>
-      <div class="form-row">
-        <label for="df-type">类型</label>
-        <select id="df-type">
-          <option value="count">计次（每天打卡一次）</option>
-          <option value="timed">计时（记录时长）</option>
-        </select>
-      </div>
-      <div class="btn-row">
-        <button class="btn primary" id="df-save">保存</button>
-        <button class="btn" id="df-cancel">取消</button>
-      </div>
-    </section>
+    </div>
 
     <!-- 统计 -->
     <section class="card">

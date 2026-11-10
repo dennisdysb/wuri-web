@@ -1092,6 +1092,10 @@ details.disc-foot .hint{margin-top:9px}
 .daka-mask{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center}
 .daka-mask.show{display:flex}
 .daka-timer-box{background:var(--paper);border-radius:16px;padding:24px;min-width:280px;text-align:center}
+/* 自建打卡项弹窗（v603）：与计时器弹窗同一套遮罩＋盒子；表单左对齐、窄屏不溢出 */
+.daka-form-box{width:min(420px,calc(100vw - 48px));text-align:left}
+.daka-form-box .card-title{margin-bottom:6px}
+.daka-form-box .btn-row{justify-content:center}
 .daka-timer-name{font-size:1.1rem;font-weight:600;margin-bottom:12px}
 .daka-timer-time{font-size:3rem;font-family:var(--serif);margin:16px 0;letter-spacing:2px}
 /* 统计 */

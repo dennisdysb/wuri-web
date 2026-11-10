@@ -181,7 +181,7 @@ var Practice = (function () {
     $('#practice-view').hidden = true;
     document.body.classList.remove('practice-open');
     stopTimer();
-    var f = $('#daka-form-wrap'); if (f) f.hidden = true;
+    var f = $('#daka-form-wrap'); if (f) f.classList.remove('show');
     var m = $('#daka-timer-mask'); if (m) m.classList.remove('show');
   }
 
@@ -605,12 +605,19 @@ var Practice = (function () {
     });
   }
 
-  /* ---------- 自建 ---------- */
+  /* ---------- 自建（v603：改居中弹窗——旧页面内展开＋scrollTo(0,0) 滚回页顶，
+     表单在视口下方不可见，Maggie 实测上报“按上去好像没有反应”；旧行为彻底移除） ---------- */
   function openForm() {
-    $('#daka-form-wrap').hidden = false;
+    var w = $('#daka-form-wrap');
+    if (!w) return;
     $('#df-name').value = '';
     $('#df-type').value = 'count';
-    window.scrollTo(0, 0);
+    w.classList.add('show');
+    try { $('#df-name').focus(); } catch (e) {}
+  }
+  function closeForm() {
+    var w = $('#daka-form-wrap');
+    if (w) w.classList.remove('show');
   }
   function saveForm() {
     var name = $('#df-name').value.trim();
@@ -625,7 +632,7 @@ var Practice = (function () {
     var list = getHabits();
     list.push(h);
     saveHabits(list);
-    $('#daka-form-wrap').hidden = true;
+    closeForm();
     renderAll();
   }
 
@@ -685,7 +692,16 @@ var Practice = (function () {
     var saveBtn = $('#df-save');
     if (saveBtn) saveBtn.addEventListener('click', saveForm);
     var cancelBtn = $('#df-cancel');
-    if (cancelBtn) cancelBtn.addEventListener('click', function () { $('#daka-form-wrap').hidden = true; });
+    if (cancelBtn) cancelBtn.addEventListener('click', closeForm);
+    /* 点遮罩关闭（只认遮罩本身点按，弹窗内点按不关）；Esc 同样关闭 */
+    var formWrap = $('#daka-form-wrap');
+    if (formWrap) formWrap.addEventListener('click', function (e) { if (e.target === formWrap) closeForm(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        var w = $('#daka-form-wrap');
+        if (w && w.classList.contains('show')) closeForm();
+      }
+    });
     var prev = $('#daka-cal-prev');
     if (prev) prev.addEventListener('click', function () {
       calM--; if (calM < 0) { calM = 11; calY--; } renderCal();
