@@ -116,6 +116,20 @@
       </div>
     </section>
 
+    <!-- 功法修习入口（v603：文字教学＋官方出站链接 → #view-gongfa 子页） -->
+    <section class="hero2" id="gongfa-entry-card">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_title">功法修习</div>
+        <p class="h2-sub" data-i18n="gf_home_sub">八段锦、二十四式太极拳、金刚功：文字教学与官方教学链接。</p>
+        <div class="h2-segs" aria-hidden="true">
+          <span class="h2-seg" data-i18n="gf_bdj_title">八段锦</span>
+          <span class="h2-seg" data-i18n="gf_tj_title">太极拳</span>
+          <span class="h2-seg" data-i18n="gf_jg_title">金刚功</span>
+        </div>
+      </div>
+    </section>
+
     <div class="tab-spacer"></div>
   </main>
 
@@ -1728,6 +1742,193 @@
     <div class="tab-spacer"></div>
   </main>
 
+  <!-- ============ 功法修习（v603：文字教学＋官方出站链接；视频字段见 content/gongfa/videos.json，本期留空） ============ -->
+  <main id="view-gongfa" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gongfa-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gongfa-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_title">功法修习</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="hero2 mini" id="gf-card-baduanjin">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_bdj_title">八段锦</div>
+        <p class="h2-sub" data-i18n="gf_bdj_sub">八段动作，调理气血，老少皆宜。</p>
+      </div>
+    </section>
+
+    <section class="hero2 mini" id="gf-card-taiji">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_tj_title">二十四式太极拳</div>
+        <p class="h2-sub" data-i18n="gf_tj_sub">二十四式，松沉圆活，行云流水。</p>
+      </div>
+    </section>
+
+    <section class="hero2 mini" id="gf-card-jingang">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_jg_title">金刚功</div>
+        <p class="h2-sub" data-i18n="gf_jg_sub">道家传统功法，刚健有力，内炼丹田。</p>
+      </div>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <main id="view-gf-baduanjin" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-baduanjin-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-baduanjin-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_bdj_title">八段锦</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>八段锦是流传久远的导引养生功法，由八段动作组成，动作柔和缓慢、圆活连贯，讲究呼吸配合与意念专注，适合日常习练、调理气血。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_moves">动作要领</div>
+      <ol class="gf-list">
+        <li><b>两手托天理三焦</b>——双手十指交叉上托，仰头望手，舒展胸胁；吸气上托、呼气下落。</li>
+        <li><b>左右开弓似射雕</b>——马步下蹲，一掌前推、一手拉弓如射雕状，目视前方；左右交替，沉肩坠肘。</li>
+        <li><b>调理脾胃须单举</b>——一手上举、一手下按，掌心相对，抻拉躯干两侧；左右交替，动作缓慢均匀。</li>
+        <li><b>五劳七伤往后瞧</b>——双掌下按，转头向后看，颈部缓缓转动；左右交替，视线随头而动。</li>
+        <li><b>摇头摆尾去心火</b>——马步下蹲，上身前俯，摇头摆尾，尾闾摆动；动作圆活，勿用蛮力。</li>
+        <li><b>两手攀足固肾腰</b>——双手沿腿下滑至足面，俯身攀足，再缓缓起身；弯腰量力而行，膝微屈。</li>
+        <li><b>攒拳怒目增气力</b>——马步握拳，左右冲拳，目视拳方；出拳沉稳，呼吸配合。</li>
+        <li><b>背后七颠百病消</b>——脚跟提起下落，轻震全身；颠足轻柔，膝踝放松。</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>动作缓慢均匀，不求快、不憋气；呼吸自然，以鼻吸口呼为宜。</li>
+        <li>饭后一小时内不宜练习；空腹习练亦不宜过久。</li>
+        <li>膝、腰不适者量力而行，幅度减小，不勉强下蹲、弯腰。</li>
+        <li>初练每次一至两遍即可，循序渐进。</li>
+        <li>身体不适或患病期间，先咨询医生再练。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_links">官方教学链接</div>
+      <p class="gf-srcnote" data-i18n="gf_links_note">以下为站外官方页面，点击在新窗口打开，不属于本应用自有内容。</p>
+      <p><a href="https://www.chqa.org.cn/html/54219403.html" target="_blank" rel="noopener" data-i18n="gf_link_chqa">中国健身气功协会官网 · 八段锦</a></p>
+      <p><a href="https://www.sport.gov.cn/qgzx/" target="_blank" rel="noopener" data-i18n="gf_link_sport">国家体育总局健身气功管理中心</a></p>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <main id="view-gf-taiji" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-taiji-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-taiji-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_tj_title">二十四式太极拳</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>二十四式太极拳是国家体委于 1956 年整理推广的简化太极拳套路，取杨式太极拳精华，共二十四式，动作舒展大方、连绵不断，适合日常习练。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_moves">动作名录</div>
+      <ol class="gf-list">
+        <li>起势</li>
+        <li>左右野马分鬃</li>
+        <li>白鹤亮翅</li>
+        <li>左右搂膝拗步</li>
+        <li>手挥琵琶</li>
+        <li>左右倒卷肱</li>
+        <li>左揽雀尾</li>
+        <li>右揽雀尾</li>
+        <li>单鞭</li>
+        <li>云手</li>
+        <li>单鞭</li>
+        <li>高探马</li>
+        <li>右蹬脚</li>
+        <li>双峰贯耳</li>
+        <li>转身左蹬脚</li>
+        <li>左下势独立</li>
+        <li>右下势独立</li>
+        <li>左右穿梭</li>
+        <li>海底针</li>
+        <li>闪通臂</li>
+        <li>转身搬拦捶</li>
+        <li>如封似闭</li>
+        <li>十字手</li>
+        <li>收势</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_keys">行拳要领</div>
+      <ul class="gf-list">
+        <li>虚灵顶劲，沉肩坠肘；含胸拔背，松腰敛臀。</li>
+        <li>分清虚实，重心转换平稳；上下相随，内外合一。</li>
+        <li>呼吸深长自然，配合动作开合；速度均匀，连绵不断。</li>
+        <li>初学者先学架势，再求连贯；下势、蹬脚量力而行。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>动作缓慢均匀，不求快、不憋气；呼吸自然。</li>
+        <li>饭后一小时内不宜练习；膝关节不适者，下势、蹬脚幅度减小。</li>
+        <li>初练每次半套至一套即可，循序渐进。</li>
+        <li>身体不适或患病期间，先咨询医生再练。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_links">官方教学链接</div>
+      <p class="gf-srcnote" data-i18n="gf_links_note">以下为站外官方页面，点击在新窗口打开，不属于本应用自有内容。</p>
+      <p><a href="https://higher.smartedu.cn/course/66c51c0a711dc30c3452e8de" target="_blank" rel="noopener" data-i18n="gf_link_smartedu">国家智慧教育平台 · 北京体育大学《24式太极拳》</a></p>
+      <p><a href="https://www.icourse163.org/course/BSU-1207121812" target="_blank" rel="noopener" data-i18n="gf_link_mooc">中国大学MOOC · 北京体育大学《24式太极拳》</a></p>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <main id="view-gf-jingang" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-jingang-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-jingang-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_jg_title">金刚功</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>金刚功是道家传统内炼功法，相传源于武当，动作刚健有力，以桩功与行功结合，注重丹田呼吸与周身整劲，习练者多以强筋骨、壮气血为旨。本页只作一般介绍，不作传承认定，不附任何视频链接。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_features">特点</div>
+      <ul class="gf-list">
+        <li>刚柔相济，动静结合；以站桩为基，行功为用。</li>
+        <li>呼吸深长，意守丹田；动作简练，重在内劲不在外形。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>桩功站立时间循序渐进，不可勉强久站。</li>
+        <li>呼吸自然，不刻意憋气；饭后、酒后、身体不适时不宜习练。</li>
+        <li>膝、腰、心脏有疾者，先咨询医生再练。</li>
+        <li>功法传承说法不一，本页不作传承认定。</li>
+      </ul>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
   <!-- ============ 风水专页（2026-10-26 第一批：骨架＋罗盘） ============ -->
   <main id="view-fengshui" class="view" hidden>
     <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('fs-back').click()" title="返回">‹</button>
@@ -2903,6 +3104,7 @@
 <script src="js/karaoke.js?v=602"></script>
 <script src="js/dict.js?v=602"></script>
 <script src="js/daozang.js?v=602"></script>
+<script src="js/shushu.js?v=602"></script>
 <script src="js/deities-data.js?v=602"></script>
 <script src="js/deities.js?v=602"></script>
 <script>window.exports = {};</script>

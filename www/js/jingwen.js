@@ -318,6 +318,8 @@ var JingWen = (function () {
     host.innerHTML = html;
     /* 道藏全藏入口（daozang.js 挂钩，纯增量；无该脚本时目录不变） */
     if (window.__wuri_dzCatalog) { try { window.__wuri_dzCatalog(host); } catch (e) {} }
+    /* 术数古籍入口（v603：shushu.js 挂钩，纯增量；无该脚本时目录不变） */
+    if (window.__wuri_ssCatalog) { try { window.__wuri_ssCatalog(host); } catch (e) {} }
     decorateReadProgress();
     shelfFabSchedule();
   }
