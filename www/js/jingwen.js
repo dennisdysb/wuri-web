@@ -41,9 +41,10 @@ var JingWen = (function () {
   };
   window.__wuriShelfFreeKR = SHELF_FREE_KR;
   var jingFilter = 'all';
-  /* 「常见经文」区收起状态：仅内存，不持久化——每次进经文页默认收起
-     （resetToCatalog 复位 true；2026-11-07 用户定，推翻 2026-10-27 默认展开） */
-  var commonCollapsed = true;
+  /* 「常见经文」区展开状态：仅内存，不持久化——每次进经文页默认展开
+     （resetToCatalog 复位 false；2026-11-10 用户改主意默认展开，
+     推翻他自己 2026-11-07 默认收起的决定） */
+  var commonCollapsed = false;
   /* 经文别名：搜简称也能命中 */
   var JING_ALIAS = {
     s01: ['正一功课经', '功课经', '正一早晚功课', '早晚功课经'],
@@ -2493,13 +2494,14 @@ var JingWen = (function () {
     if (listEl) listEl.hidden = false;
     if (marksEl) marksEl.hidden = true;
     if (resultsEl) resultsEl.hidden = true;
-    // 「常见经文」每次进页默认收起（收起不持久化）
-    commonCollapsed = true;
+    // 「常见经文」每次进页默认展开（展开不持久化；2026-11-10 用户改主意，
+    // 推翻他自己 2026-11-07 默认收起的决定）
+    commonCollapsed = false;
     var csec = document.querySelector('[data-common-sec]');
     if (csec) {
-      csec.classList.add('collapsed');
+      csec.classList.remove('collapsed');
       var cbody = csec.querySelector('.jing-common-body');
-      if (cbody) cbody.hidden = true;
+      if (cbody) cbody.hidden = false;
     }
     refreshMarksRow();
     // 清空搜索框

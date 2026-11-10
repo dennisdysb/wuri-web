@@ -44,6 +44,20 @@
     return new URL('audio/jing/', location.href).href;
   }
   function relUrl(rel) { return new URL(rel, location.href).href; }
+  /* 图鉴基址（与 deities.js 的 WuriImg.base 同口径）：原生包由 prepare_*_www.py
+   * 注入 CF 线绝对基址；网页版不设，走回落分支、行为与旧版一致。末尾斜杠归一。 */
+  function imgBase() {
+    var b = (typeof window.WURI_IMG_BASE === 'string' && window.WURI_IMG_BASE) ? window.WURI_IMG_BASE : '';
+    if (b && b.charAt(b.length - 1) !== '/') b += '/';
+    return b;
+  }
+  /* 基址文件统一拼地址：只对确实由该基址域名提供的文件用基址（图鉴全图、
+   * 图鉴清单）；缩略图永远走包内相对路径（deities.js 口径），音频走 fileUrl/
+   * audioBase（缓存键须与播放请求逐字对齐），两者都不进这里。 */
+  function mediaUrl(rel) {
+    var b = imgBase();
+    return b ? b + rel : relUrl(rel);
+  }
   function fileUrl(key) { return audioBase() + key + '.mp3'; }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function loadState() {
@@ -115,7 +129,48 @@
     return tierKeys(tier).reduce(function (s, k) { return s + (map[k] ? map[k].size : 0); }, 0);
   }
 
-  /* ---------- 半透明悬浮进度 ---------- */
+  /* ---------- 半透明悬浮进度（双路并行：音频、图鉴各占一行；可缩成 pill 拖动） ---------- */
+  var FLOAT_POS_LS = 'wuri_offline_float_pos_v1';
+  var audioPct = 0, deityPct = 0;
+  function loadFloatPos() {
+    try {
+      var p = JSON.parse(localStorage.getItem(FLOAT_POS_LS) || 'null');
+      if (p && typeof p.x === 'number' && typeof p.y === 'number') return p;
+    } catch (e) {}
+    return null;
+  }
+  function saveFloatPos(x, y) {
+    try { localStorage.setItem(FLOAT_POS_LS, JSON.stringify({ x: x, y: y })); } catch (e) {}
+  }
+  function updatePill() {
+    var p = $('of-pill-pct');
+    if (!p) return;
+    var act = [];
+    if (running || curRun) act.push(audioPct + '%');
+    if (deityRunning) act.push(deityPct + '%');
+    p.textContent = act.length ? act.join(' · ') : Math.max(audioPct, deityPct) + '%';
+  }
+  function minimizeFloat() {
+    var f = $('offline-float');
+    if (!f) return;
+    f.classList.add('min');
+    var pos = loadFloatPos();
+    if (pos) {
+      f.style.left = pos.x + 'px'; f.style.top = pos.y + 'px';
+      f.style.right = 'auto'; f.style.bottom = 'auto';
+    } else {
+      /* 无存位：落右下角（默认浮条位置），不挡中间内容 */
+      f.style.left = 'auto'; f.style.right = '12px';
+      f.style.top = 'auto'; f.style.bottom = 'calc(72px + env(safe-area-inset-bottom))';
+    }
+    updatePill();
+  }
+  function restoreFloat() {
+    var f = $('offline-float');
+    if (!f) return;
+    f.classList.remove('min');
+    f.style.left = ''; f.style.top = ''; f.style.right = ''; f.style.bottom = '';
+  }
   function ensureFloat() {
     var f = $('offline-float');
     if (f) return f;
@@ -137,14 +192,60 @@
     f.id = 'offline-float';
     f.hidden = true;
     f.innerHTML =
-      '<div class="of-row"><span class="of-title" id="of-title">正在下载离线音频</span>' +
-      '<button class="of-close" id="of-close" aria-label="关闭">×</button></div>' +
+      '<div class="of-body" id="of-body">' +
+      '<div class="of-row of-head"><span class="of-head-title">离线下载</span>' +
+      '<span class="of-tools"><button class="of-min" id="of-min" aria-label="缩小" title="缩小">–</button>' +
+      '<button class="of-close" id="of-close" aria-label="关闭">×</button></span></div>' +
+      '<div class="of-run" id="of-run-audio">' +
+      '<div class="of-row"><span class="of-title" id="of-title">正在下载离线音频</span></div>' +
       '<div class="of-sub" id="of-sub"></div>' +
-      '<div class="of-track"><div class="of-fill" id="of-fill"></div></div>';
+      '<div class="of-track"><div class="of-fill" id="of-fill"></div></div></div>' +
+      '<div class="of-run" id="of-run-deity" hidden>' +
+      '<div class="of-row"><span class="of-title" id="of-deity-title">正在下载图鉴素材</span></div>' +
+      '<div class="of-sub" id="of-deity-sub"></div>' +
+      '<div class="of-track"><div class="of-fill" id="of-deity-fill"></div></div></div>' +
+      '</div>' +
+      '<div class="of-pill" id="of-pill" role="button" aria-label="展开下载进度" title="点此展开">⬇ <span id="of-pill-pct">0%</span></div>';
     document.body.appendChild(f);
     $('of-close').addEventListener('click', function (ev) {
       ev.stopPropagation();
       hideFloat();
+    });
+    $('of-min').addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      minimizeFloat();
+    });
+    var pill = $('of-pill');
+    pill.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      if (pill._dragged) { pill._dragged = false; return; } /* 拖完抬起冒出的 click 不展开 */
+      restoreFloat();
+    });
+    pill.addEventListener('pointerdown', function (ev) {
+      ev.stopPropagation();
+      if (ev.preventDefault) ev.preventDefault();
+      var rect = f.getBoundingClientRect();
+      var dx = ev.clientX - rect.left, dy = ev.clientY - rect.top;
+      var moved = false;
+      f.style.right = 'auto'; f.style.bottom = 'auto';
+      f.style.left = rect.left + 'px'; f.style.top = rect.top + 'px';
+      function onMove(e2) {
+        var x = e2.clientX - dx, y = e2.clientY - dy;
+        if (Math.abs(x - rect.left) > 4 || Math.abs(y - rect.top) > 4) moved = true;
+        x = Math.max(0, Math.min(window.innerWidth - rect.width, x));
+        y = Math.max(0, Math.min(window.innerHeight - rect.height, y));
+        f.style.left = x + 'px'; f.style.top = y + 'px';
+      }
+      function onUp() {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        if (moved) {
+          pill._dragged = true;
+          saveFloatPos(parseInt(f.style.left, 10) || 0, parseInt(f.style.top, 10) || 0);
+        }
+      }
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
     });
     f.addEventListener('click', function () {
       /* 下载未全成时点悬浮窗 = 继续下载并回到设置页查看 */
@@ -153,6 +254,10 @@
         resume();
         var tab = document.querySelector('[data-tab="tab-me"]');
         if (tab) tab.click();
+      }
+      var ds = deityLoadState();
+      if (ds && ds.status && ds.status !== 'done' && !deityRunning) {
+        deityStart();
       }
     });
     return f;
@@ -165,6 +270,18 @@
   function hideFloat() {
     var f = $('offline-float');
     if (f) f.hidden = true;
+  }
+  /* 单路完成：只收自己那行；两行都收了整条才藏（另一路还在跑时整条不淡出） */
+  function hideRunRow(which, delay) {
+    setTimeout(function () {
+      var r = $(which === 'deity' ? 'of-run-deity' : 'of-run-audio');
+      if (r) r.hidden = true;
+      maybeHideFloat();
+    }, delay || 4200);
+  }
+  function maybeHideFloat() {
+    var a = $('of-run-audio'), d = $('of-run-deity');
+    if (a && d && a.hidden && d.hidden) hideFloat();
   }
   function fadeFloat(delay) {
     var f = ensureFloat();
@@ -186,7 +303,12 @@
     });
     var total = curRun.totalBytes || 1;
     var pct = Math.min(100, Math.floor(doneBytes * 100 / total));
+    audioPct = pct;
     showFloat();
+    var ar = $('of-run-audio');
+    if (ar) ar.hidden = false;
+    if (!deityRunning) { var dr0 = $('of-run-deity'); if (dr0) dr0.hidden = true; }
+    updatePill();
     $('of-title').textContent = '正在下载离线音频（' +
       (curRun.tier === 'both' ? '双声' : VOICE_NAME[curRun.tier]) + '）· ' + pct + '%';
     $('of-sub').textContent = '第 ' + doneFiles + ' / 共 ' + curRun.items.length + ' 个 · 已下载 ' +
@@ -200,12 +322,17 @@
   }
   function paintPrefetch(done, total) {
     showFloat();
+    var ar = $('of-run-audio');
+    if (ar) ar.hidden = false;
+    if (!deityRunning) { var dr = $('of-run-deity'); if (dr) dr.hidden = true; }
     $('of-title').textContent = '正在预取经文正文与图鉴（离线阅读）';
     $('of-sub').textContent = '第 ' + done + ' / 共 ' + total + ' 项';
     $('of-fill').style.width = Math.floor(done * 100 / Math.max(1, total)) + '%';
   }
   function paintDone(failedCount) {
     showFloat();
+    audioPct = 100;
+    updatePill();
     if (failedCount > 0) {
       $('of-title').textContent = '离线下载未全部完成';
       $('of-sub').textContent = '有 ' + failedCount + ' 个文件没下完，点此继续下载';
@@ -215,7 +342,8 @@
     $('of-title').textContent = '离线音频下载完成 ✓';
     $('of-sub').textContent = '断网、飞行模式也能听经了';
     $('of-fill').style.width = '100%';
-    fadeFloat(4200);
+    if (deityRunning) hideRunRow('audio', 4200); /* 图鉴还在跑：只收音频行 */
+    else fadeFloat(4200);
   }
 
   /* ---------- 下载引擎 ---------- */
@@ -362,7 +490,6 @@
 
   function start(tier) {
     if (running) return;
-    if (deityRunning) { toast('图鉴素材正在下载，请稍候'); return; }
     if (!('caches' in window)) { toast('当前环境不支持离线缓存'); return; }
     running = true;
     abortFlag = false;
@@ -419,7 +546,9 @@
     return caches.delete(CACHE_NAME).then(function () {
       saveState(null);
       sizeMap = null;
-      hideFloat();
+      var ar = $('of-run-audio');
+      if (ar) ar.hidden = true;
+      maybeHideFloat(); /* 图鉴行还在跑时整条不藏 */
       syncCard();
       refreshStats();
       toast('离线内容已删除');
@@ -523,8 +652,7 @@
   /* ---------- 图鉴素材下载（v2.0.0 (2) 神图外置） ----------
    * 全图平时从服务器按需加载、看过的留运行时缓存；此按钮把 102 张全图一次下进
    * 同一豁免缓存（wuri-offline-v1），SW 图鉴分支命中即本地出。逐文件先查缓存＝
-   * 断点续传。与音频下载共用悬浮进度窗，互斥运行。总大小以 HEAD 实测为准，
-   * 失败回落兜底表（呈现版上线字节数，构建时实算，非估算）。删除只删全图条目，
+   * 断点续传。与音频下载共用悬浮进度窗、并行运行，各占一行。删除只删全图条目，
    * 不动同缓存里的音频/正文。 */
   var DEITY_LS = 'wuri_deity_dl_v1';
   var DEITY_FALLBACK_SIZES = {"baosheng.webp": 227964, "beidou.webp": 181270, "beiyue.webp": 226862, "bigan.webp": 217512, "bishuiyu.webp": 270218, "bixia.webp": 217648, "biyuewu.webp": 271516, "caoguojiu.webp": 189292, "changsheng.webp": 252624, "chenghuang.webp": 168268, "daode.webp": 168802, "diguan.webp": 188590, "dituhe.webp": 247930, "donghua.webp": 287960, "dongyue.webp": 258310, "doumu.webp": 178204, "doumuxie.webp": 362496, "erlang.webp": 243936, "erlang-2.webp": 185460, "fangritu.webp": 262874, "fengdu.webp": 243928, "gexuan.webp": 207172, "gouchen.webp": 221498, "guandi.webp": 215984, "guangze.webp": 241440, "guijinyang.webp": 294318, "hanxiangzi.webp": 177168, "hehe.webp": 209356, "hexiangu.webp": 131568, "houtu.webp": 188512, "huaguang.webp": 252268, "jiaomujiao.webp": 340744, "jingmugan.webp": 299832, "jishuibao.webp": 272674, "kangjinlong.webp": 300718, "kuimulang.webp": 272864, "kuixing.webp": 247098, "lancaihe.webp": 199452, "lingbao.webp": 202738, "linshui.webp": 247016, "lishan.webp": 191760, "liuhai.webp": 207310, "liutuzhang.webp": 296968, "longwang.webp": 267182, "loujingou.webp": 286124, "luban.webp": 193126, "lvdongbin.webp": 146838, "magu.webp": 223710, "maoriji.webp": 297230, "mazu.webp": 172962, "nandou.webp": 186588, "nanyue.webp": 233270, "nezha.webp": 216902, "niujinniu.webp": 280428, "nvtufu.webp": 237912, "puhua.webp": 233604, "qiuchuji.webp": 161208, "sanmao.webp": 180386, "sashoujian.webp": 207310, "shennong.webp": 273024, "shenshuiyuan.webp": 291734, "shihuozhu.webp": 266400, "shuiguan.webp": 194126, "taisui.webp": 242290, "taiyang.webp": 266428, "taiyi.webp": 221068, "taiyin.webp": 184960, "tianguan.webp": 184670, "tieguai.webp": 168592, "tudi.webp": 222826, "wangchongyang.webp": 187944, "wanglingguan.webp": 194316, "wangmu.webp": 241030, "weihuohu.webp": 283210, "weituzhi.webp": 274596, "weiyueyan.webp": 278350, "wenchang.webp": 163870, "wenqiong.webp": 223304, "xingrima.webp": 258098, "xinyuehu.webp": 282966, "xiyue.webp": 228918, "xuannv.webp": 211486, "xurishu.webp": 268168, "xuxun.webp": 222616, "yaowang.webp": 198222, "yihuoshe.webp": 304192, "yuanshi.webp": 200448, "yuelao.webp": 184452, "yuhuang.webp": 245560, "zaojun.webp": 171822, "zhangdaoling.webp": 169728, "zhangguolao.webp": 145226, "zhangsanfeng.webp": 165022, "zhangyuelu.webp": 245732, "zhaogongming.webp": 200574, "zhenshuiyin.webp": 257790, "zhenwu.webp": 195020, "zhongkui.webp": 179212, "zhongli.webp": 200756, "zhongyue.webp": 262486, "zhusheng.webp": 230742, "zihuohou.webp": 305390, "ziwei.webp": 198404};
@@ -544,7 +672,7 @@
     });
     return out;
   }
-  function deityUrl(name) { return relUrl('img/deities/' + name); }
+  function deityUrl(name) { return mediaUrl('img/deities/' + name); }
   function deityLoadState() {
     try { return JSON.parse(localStorage.getItem(DEITY_LS) || 'null'); } catch (e) { return null; }
   }
@@ -568,7 +696,7 @@
   }
   function deityManifest() {
     if (deityManifestCache) return Promise.resolve(deityManifestCache);
-    return fetch(relUrl('img/deities/manifest.json'), { cache: 'no-store' }).then(function (r) {
+    return fetch(mediaUrl('img/deities/manifest.json'), { cache: 'no-store' }).then(function (r) {
       if (!r.ok) throw new Error('manifest http');
       return r.json();
     }).then(function (m) {
@@ -613,10 +741,15 @@
   function deityPaint(doneAll, totalN, doneBytes, totalBytes) {
     showFloat();
     var pct = totalBytes ? Math.min(100, Math.floor(doneBytes * 100 / totalBytes)) : 0;
-    $('of-title').textContent = '正在下载图鉴素材 · ' + pct + '%';
-    $('of-sub').textContent = '第 ' + doneAll + ' / 共 ' + totalN + ' 张 · 已下载 ' +
+    deityPct = pct;
+    var dr = $('of-run-deity');
+    if (dr) dr.hidden = false;
+    if (!running && !curRun) { var ar = $('of-run-audio'); if (ar) ar.hidden = true; }
+    updatePill();
+    $('of-deity-title').textContent = '正在下载图鉴素材 · ' + pct + '%';
+    $('of-deity-sub').textContent = '第 ' + doneAll + ' / 共 ' + totalN + ' 张 · 已下载 ' +
       fmtMB(doneBytes) + ' / ' + fmtMB(totalBytes);
-    $('of-fill').style.width = pct + '%';
+    $('of-deity-fill').style.width = pct + '%';
     var st = $('deity-dl-status');
     if (st) st.textContent = '正在下载图鉴素材：' + pct + '%（第 ' + doneAll + '/' + totalN + ' 张），可放心切换页面。';
   }
@@ -652,7 +785,6 @@
   }
   function deityStart() {
     if (deityRunning) return;
-    if (running) { toast('离线音频正在下载，请稍候'); return; }
     if (!('caches' in window)) { toast('当前环境不支持离线缓存'); return; }
     var names = deityNames();
     if (!names.length) { toast('图鉴数据尚未就绪'); return; }
@@ -680,15 +812,18 @@
           if (deityAbort) return;
           deitySaveState({ v: 1, status: failed.length ? 'partial' : 'done', failed: failed, ts: Date.now() });
           showFloat();
+          deityPct = 100;
+          updatePill();
           if (failed.length) {
-            $('of-title').textContent = '图鉴素材未全部下载';
-            $('of-sub').textContent = '有 ' + failed.length + ' 张没下完，再点一次「一键下载图鉴素材」补齐';
-            $('of-fill').style.width = '100%';
+            $('of-deity-title').textContent = '图鉴素材未全部下载';
+            $('of-deity-sub').textContent = '有 ' + failed.length + ' 张没下完，再点一次「一键下载图鉴素材」补齐';
+            $('of-deity-fill').style.width = '100%';
           } else {
-            $('of-title').textContent = '图鉴素材下载完成 ✓';
-            $('of-sub').textContent = '断网、飞行模式也能看全图了';
-            $('of-fill').style.width = '100%';
-            fadeFloat(4200);
+            $('of-deity-title').textContent = '图鉴素材下载完成 ✓';
+            $('of-deity-sub').textContent = '断网、飞行模式也能看全图了';
+            $('of-deity-fill').style.width = '100%';
+            if (running) hideRunRow('deity', 4200); /* 音频还在跑：只收图鉴行 */
+            else fadeFloat(4200);
           }
           try { document.dispatchEvent(new Event('wuri-deity-dl-done')); } catch (e) {}
         });
@@ -749,10 +884,10 @@
   function deitySyncCard() {
     var btn = $('deity-dl-btn'), del = $('deity-del-btn'), failBox = $('deity-dl-failed');
     if (btn) {
-      btn.disabled = deityRunning || running;
+      btn.disabled = deityRunning;
       btn.textContent = deityRunning ? '正在下载…' : '一键下载图鉴素材';
     }
-    if (del) del.disabled = deityRunning || running;
+    if (del) del.disabled = deityRunning;
     var st = deityLoadState();
     if (failBox) {
       if (st && st.failed && st.failed.length && !deityRunning) {
@@ -795,10 +930,10 @@
     var del = $('deity-del-btn');
     if (del) del.addEventListener('click', function () { deityDelete(); });
     deityRefreshStats();
-    /* 中断续传：上次没下完，打开后自动接着下（与音频错峰） */
+    /* 中断续传：上次没下完，打开后自动接着下（与音频并行，不再错峰等） */
     var st = deityLoadState();
     if (st && st.status && st.status !== 'done') {
-      setTimeout(function () { if (!deityRunning && !running) deityStart(); }, 2600);
+      setTimeout(function () { if (!deityRunning) deityStart(); }, 2600);
     }
   }
 

@@ -679,6 +679,60 @@ var Meditation = (function () {
     return (m && m.tracks && typeof m.tracks === 'object') ? m : { tracks: {} };
   })();
   var mixEls = {};
+  /* ---------- 混音 Web Audio 增益链（v605：iOS 不认 element.volume） ----------
+   * iOS WebKit 忽略 HTMLAudioElement.volume（iPhone 网页音频音量只能按机身
+   * 键），混音滑杆因此「能拖、音量不变」。修法：每轨经 GainNode 走 Web Audio：
+   * source(MediaElementAudioSourceNode, 每元素只建一次) → per-track GainNode
+   * → 总 GainNode(mixMaster) → destination。主音量只在 mixMaster 计一次：
+   * 轨 gain 取轨值（不含主音量），总 gain 取主音量，合计 = 轨值 × 主音量，
+   * 与原 volume 口径一致。gain 是唯一音量控制（GainNode 桌面端同样生效），
+   * 接线成功时 element.volume 固定为 1，防 gain 与 volume 双重衰减；无
+   * AudioContext 的极旧浏览器才回落到 element.volume（mixTrackVol）。
+   * 全站此前无 AudioContext（见 primeAudio 注），此处新建一个共享的；
+   * 创建只发生在手势链路（播放/滑杆），resume 同样只在手势入口调。 */
+  var mixCtx = null, mixMaster = null;
+  var mixGains = {};   /* id -> per-track GainNode */
+  var mixSrcs = {};    /* id -> MediaElementAudioSourceNode（每元素只建一次） */
+  function mixAudioCtx() {
+    if (mixCtx) return mixCtx;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      mixCtx = new AC();
+      mixMaster = mixCtx.createGain();
+      try { mixMaster.gain.value = volume(); } catch (e) {}
+      mixMaster.connect(mixCtx.destination);
+    } catch (e) { return null; }
+    return mixCtx;
+  }
+  function mixResumeCtx() {
+    var c = mixAudioCtx();
+    if (c && c.state === 'suspended') {
+      try { var p = c.resume(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    }
+  }
+  function mixEnsureGain(id) {
+    var a = mixEnsureEl(id);
+    if (!a) return null;
+    try {
+      var ctx = mixAudioCtx();
+      if (!ctx || !mixMaster) return null;
+      if (!mixSrcs[id]) {
+        mixSrcs[id] = ctx.createMediaElementSource(a);
+        mixGains[id] = ctx.createGain();
+        mixSrcs[id].connect(mixGains[id]);
+        mixGains[id].connect(mixMaster);
+      }
+      return mixGains[id];
+    } catch (e) { return null; }
+  }
+  function mixSetGain(id, v) {
+    var g = mixGains[id];
+    if (g) { try { g.gain.value = v; } catch (e) {} }
+  }
+  function mixSetMasterGain(v) {
+    if (mixMaster) { try { mixMaster.gain.value = v; } catch (e) {} }
+  }
   var mixSession = false;   /* 当前会话由混音网页引擎驱动 */
   var mixTick = 0;
   function saveMix() { lsSet(LS_MIX, JSON.stringify(mix)); }
@@ -707,21 +761,39 @@ var Meditation = (function () {
     v = Math.max(0, Math.min(100, isNaN(v) ? 70 : v));
     return (v / 100) * volume();
   }
+  function mixTrackGain(id) {
+    /* 轨 gain 只取轨值（不含主音量）；主音量在 mixMaster 计一次 */
+    var v = parseInt(mix.tracks[id], 10);
+    v = Math.max(0, Math.min(100, isNaN(v) ? 70 : v));
+    return v / 100;
+  }
   function mixApplyVolumes() {
     for (var id in mix.tracks) {
       var a = mixEls[id];
-      if (a) { try { a.volume = mixTrackVol(id); } catch (e) {} }
+      if (a) {
+        mixEnsureGain(id);   /* 未接线时接线（滑杆手势内建链路，iOS 可 resume） */
+        if (mixGains[id]) {
+          try { a.volume = 1; } catch (e) {}   /* gain 是唯一音量控制，防双重衰减 */
+          mixSetGain(id, mixTrackGain(id));
+        } else {
+          try { a.volume = mixTrackVol(id); } catch (e) {}   /* 无 AudioContext 才回落 volume */
+        }
+      }
     }
+    mixSetMasterGain(volume());
   }
   function mixPlayAll() {
     /* 静室闸口：当前场景为无声·静室（无 loop）时混音各轨一律不起播——
      * 「无声」名副其实（2026-10-28 口径）；切回有声场景时由 onSoundChanged 续播。 */
     if (!SOUNDS[cur].loop) return;
+    mixResumeCtx();   /* 手势链路：恢复被挂起的 AudioContext */
     for (var id in mix.tracks) {
       var a = mixEnsureEl(id);
       if (!a) continue;
       try {
-        a.volume = mixTrackVol(id);
+        mixEnsureGain(id);
+        if (mixGains[id]) { a.volume = 1; mixSetGain(id, mixTrackGain(id)); }
+        else { a.volume = mixTrackVol(id); }   /* 无 AudioContext 才回落 volume */
         if (a.paused) { var p = a.play(); if (p && p.catch) p.catch(function () {}); }
       } catch (e) {}
     }
@@ -730,15 +802,17 @@ var Meditation = (function () {
     for (var k in mixEls) { try { mixEls[k].pause(); } catch (e) {} }
   }
   function mixFadeOut(done) {
-    var els = [], i, a;
-    for (var k in mix.tracks) { a = mixEls[k]; if (a && !a.paused) els.push(a); }
+    var els = [], ids = [], i, a;
+    for (var k in mix.tracks) { a = mixEls[k]; if (a && !a.paused) { els.push(a); ids.push(k); } }
     if (!els.length) { done(); return; }
-    var v0 = els.map(function (x) { return x.volume; });
+    var v0 = els.map(function (x, i) { var g = mixGains[ids[i]]; return g ? g.gain.value : x.volume; });
     var steps = 15, n = 0;
     var iv = setInterval(function () {
       n++;
       for (i = 0; i < els.length; i++) {
-        try { els[i].volume = Math.max(0, v0[i] * (1 - n / steps)); } catch (e) {}
+        var gv = Math.max(0, v0[i] * (1 - n / steps));
+        if (mixGains[ids[i]]) mixSetGain(ids[i], gv);   /* 有 GainNode 走 gain 淡出 */
+        else { try { els[i].volume = gv; } catch (e) {} }   /* 无 AudioContext 才淡 volume */
       }
       if (n >= steps) {
         clearInterval(iv);
@@ -757,6 +831,7 @@ var Meditation = (function () {
   function mixStopTick() { if (mixTick) { clearInterval(mixTick); mixTick = 0; } }
   function mixStartSession(secs) {
     totalSec = secs;
+    mixResumeCtx();   /* 开始即手势：恢复 AudioContext */
     expectDone = true;
     seenActive = true;
     mixSession = true;
@@ -789,6 +864,7 @@ var Meditation = (function () {
     mixPauseAll();
   }
   function mixResumeSession() {
+    mixResumeCtx();   /* 继续即手势：恢复 AudioContext */
     fb.paused = false;
     fb.startedAt = Date.now() - fb.elapsedMs;
     fb.endAt = Date.now() + fb.remainMs;
@@ -1346,6 +1422,22 @@ var Meditation = (function () {
   }
   /* 环境音起播（fbStart/fbResume 共用）：复用单个 Audio 对象（2026-10-11 fix，
    * iOS 上频繁 new Audio + play 会被静默拦截）；src 未变不重 load。 */
+  var fbAmbSrc = null, fbAmbGain = null; /* 单场景环境音增益链（v605）：source → gain(1) → mixMaster；元素弃置时随之作废 */
+  function fbEnsureAmbientGain() {
+    if (!fb.ambient) return null;
+    try {
+      var ctx = mixAudioCtx();
+      if (!ctx || !mixMaster) return null;
+      if (!fbAmbSrc) {
+        fbAmbSrc = ctx.createMediaElementSource(fb.ambient);
+        fbAmbGain = ctx.createGain();
+        try { fbAmbGain.gain.value = 1; } catch (e) {}
+        fbAmbSrc.connect(fbAmbGain);
+        fbAmbGain.connect(mixMaster);
+      }
+      return fbAmbGain;
+    } catch (e) { return null; }
+  }
   function fbPlayAmbient(s) {
     if (!fb.ambient) {
       fb.ambient = new Audio();
@@ -1370,7 +1462,9 @@ var Meditation = (function () {
       fb.ambient.src = s.loop;
       try { fb.ambient.load(); } catch (e2) {}
     }
-    fb.ambient.volume = volume();
+    mixResumeCtx();   /* 手势链路：恢复 AudioContext，单轨网页回落也能调音量 */
+    if (fbEnsureAmbientGain()) { try { fb.ambient.volume = 1; } catch (e) {} }   /* gain 是唯一音量控制 */
+    else { try { fb.ambient.volume = volume(); } catch (e) {} }   /* 无 AudioContext 才回落 volume */
     try {
       var p = fb.ambient.play();
       if (p && p.catch) p.catch(function () {
@@ -1395,9 +1489,13 @@ var Meditation = (function () {
   function stopSceneAudio() {
     try { if (fb.ambient) fb.ambient.pause(); } catch (e) {}
     fb.ambient = null;
+    fbAmbSrc = null; fbAmbGain = null;   /* 环境音元素已弃置，增益链随之作废 */
     fb.retriedFor = '';
     mixPauseAll();
     mixEls = {};
+    /* 元素已弃置：旧 MediaElementSource/GainNode 随之作废，新元素须重建链路 */
+    mixSrcs = {};
+    mixGains = {};
   }
   function fbStart(s, secs) {
     fbClearTimers();
@@ -1463,13 +1561,16 @@ var Meditation = (function () {
     fb.ambient = null;
     /* 环境音 3 秒淡出 → 结束铃 → 显示完成 */
     if (a) {
-      var steps = 15, i = 0, v0 = a.volume;
+      var steps = 15, i = 0, v0 = (fbAmbGain ? fbAmbGain.gain.value : a.volume);
       var iv = setInterval(function () {
         i++;
-        try { a.volume = Math.max(0, v0 * (1 - i / steps)); } catch (e) {}
+        var gv = Math.max(0, v0 * (1 - i / steps));
+        if (fbAmbGain) { try { fbAmbGain.gain.value = gv; } catch (e) {} }
+        else { try { a.volume = gv; } catch (e) {} }
         if (i >= steps) {
           clearInterval(iv);
           try { a.pause(); } catch (e) {}
+          fbAmbSrc = null; fbAmbGain = null;
           fbPlayEndBell();
         }
       }, 200);
@@ -1492,6 +1593,7 @@ var Meditation = (function () {
     fb.paused = false;
     fb.endAt = 0;
     try { if (fb.ambient) { fb.ambient.pause(); fb.ambient = null; } } catch (e) { fb.ambient = null; }
+    fbAmbSrc = null; fbAmbGain = null;
   }
 
   /* ---------- 开关 ---------- */
@@ -1578,7 +1680,11 @@ var Meditation = (function () {
       if (b && typeof b.medSetVolume === 'function') {
         try { b.medSetVolume(v); } catch (e) {}
       }
-      if (fb.ambient) { try { fb.ambient.volume = v; } catch (e) {} }
+      if (fb.ambient) {
+        if (fbAmbGain) { try { fb.ambient.volume = 1; } catch (e) {} }   /* 已接 gain 链：主音量只在 mixMaster 计一次 */
+        else { try { fb.ambient.volume = v; } catch (e) {} }   /* 无 AudioContext 才回落 volume */
+      }
+      mixSetMasterGain(v);   /* iOS 主音量走总 GainNode */
       mixApplyVolumes();
     });
     /* 混音开关/面板/配方 */
@@ -1691,12 +1797,16 @@ var Meditation = (function () {
     mixState: function () {
       var els = [];
       for (var k in mixEls) {
-        els.push({ id: k, paused: mixEls[k].paused, vol: Math.round(mixEls[k].volume * 100) });
+        els.push({ id: k, paused: mixEls[k].paused, vol: Math.round(mixEls[k].volume * 100),
+                   gain: (mixGains[k] ? +mixGains[k].gain.value.toFixed(3) : null),
+                   wired: !!mixSrcs[k] });
       }
       return {
         mode: mixMode(), count: mixCount(),
         tracks: JSON.parse(JSON.stringify(mix.tracks)),
-        session: mixSession, playing: playing, els: els
+        session: mixSession, playing: playing, els: els,
+        ctxState: mixCtx ? mixCtx.state : null,
+        masterGain: mixMaster ? +mixMaster.gain.value.toFixed(3) : null
       };
     },
     medStats: function () { return medStats(); },

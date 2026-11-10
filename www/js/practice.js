@@ -68,6 +68,16 @@ var Practice = (function () {
         break;
       }
     }
+    /* 增量迁移（v605 第 14 项＋硬约束）：只给图标缺失或为通用 ✦ 的旧项
+     * 按名字推断补默认图标；用户已设的图标绝不覆盖；其余字段原样保留；
+     * 习惯列表与历史记录的键名、schema 一律不变（wuri_daka_habits /
+     * wuri_daka_records），更新/排序/编辑保存/重装都不删项。 */
+    list.forEach(function (h) {
+      if (!h.icon || h.icon === '✦') {
+        var ic = inferIcon(h.name);
+        if (ic !== '✦') { h.icon = ic; migrated = true; }
+      }
+    });
     if (migrated) save(LS_HABITS, list);
     return list;
   }
@@ -77,6 +87,107 @@ var Practice = (function () {
     return null;
   }
   function saveHabits(list) { save(LS_HABITS, list); }
+
+  /* ---------- 顺序（v605 第 13 项：拖动排序，顺序单存一键） ----------
+   * 键 wuri_daka_order_v1 只存习惯 id 数组；习惯本体仍在 wuri_daka_habits，
+   * 顺序键绝不决定习惯项的存亡——渲染时按顺序排，顺序键里没有的 id
+   * 一律追加到末尾，顺序键里多余的旧 id 直接丢弃（只清顺序表垃圾）。 */
+  var LS_ORDER = 'wuri_daka_order_v1';
+  function loadOrder() {
+    try { var v = JSON.parse(localStorage.getItem(LS_ORDER) || '[]'); return Array.isArray(v) ? v : []; }
+    catch (e) { return []; }
+  }
+  function saveOrder(ids) {
+    try { localStorage.setItem(LS_ORDER, JSON.stringify(ids)); } catch (e) {}
+  }
+  function sortHabitsByOrder(list) {
+    var order = loadOrder(), byId = {}, out = [], seen = {}, i;
+    for (i = 0; i < list.length; i++) byId[list[i].id] = list[i];
+    for (i = 0; i < order.length; i++) {
+      if (byId[order[i]] && !seen[order[i]]) { out.push(byId[order[i]]); seen[order[i]] = true; }
+    }
+    for (i = 0; i < list.length; i++) {
+      if (!seen[list[i].id]) { out.push(list[i]); seen[list[i].id] = true; }
+    }
+    return out;
+  }
+  /* 拖动过程态（第 13 项）＋拖后点按抑制＋编辑弹窗态（第 14 项） */
+  var dragState = null;   /* {hid, el, startY, moved, targetHid, before} */
+  var dragSuppressUntil = 0;
+  var editingHid = null;  /* 编辑弹窗正在改的习惯 id，null = 新建 */
+  var formIcon = '✦';
+  var formIconPicked = false;
+  function dragClearHints() {
+    var host = $('#daka-habit-list');
+    if (!host) return;
+    host.querySelectorAll('.daka-item').forEach(function (r) {
+      r.classList.remove('drop-before');
+      r.classList.remove('drop-after');
+    });
+  }
+  function dragUpdateTarget(clientY) {
+    var host = $('#daka-habit-list');
+    if (!host || !dragState) return;
+    var rows = host.querySelectorAll('.daka-item');
+    var target = null, before = true, i, r, rect, mid;
+    for (i = 0; i < rows.length; i++) {
+      r = rows[i];
+      if (r === dragState.el) continue;
+      rect = r.getBoundingClientRect ? r.getBoundingClientRect() : null;
+      mid = rect ? (rect.top + rect.bottom) / 2 : 0;
+      if (clientY <= mid) { target = r; before = true; break; }
+    }
+    if (!target) {
+      for (i = rows.length - 1; i >= 0; i--) {
+        if (rows[i] !== dragState.el) { target = rows[i]; before = false; break; }
+      }
+    }
+    dragClearHints();
+    dragState.targetHid = null;
+    if (target) {
+      dragState.targetHid = target.getAttribute('data-hid');
+      dragState.before = before;
+      target.classList.add(before ? 'drop-before' : 'drop-after');
+    }
+  }
+  function dragEnd(commit) {
+    if (!dragState) return;
+    var st = dragState;
+    dragState = null;
+    dragClearHints();
+    if (st.el) st.el.classList.remove('dragging');
+    if (!commit || !st.moved || !st.targetHid || st.targetHid === st.hid) return;
+    dragSuppressUntil = Date.now() + 300;   /* 拖完抬手的 click 不误触进行身 */
+    var ids = sortHabitsByOrder(getHabits()).map(function (h) { return h.id; });
+    var from = ids.indexOf(st.hid);
+    if (from >= 0) ids.splice(from, 1);
+    var to = ids.indexOf(st.targetHid);
+    if (to < 0) return;
+    ids.splice(st.before ? to : to + 1, 0, st.hid);
+    saveOrder(ids);   /* 顺序表含当前全部习惯 id；习惯本体不动 */
+    renderAll();
+  }
+
+  /* ---------- 图标（v605 第 14 项：自建项可选图标，≥16 个） ---------- */
+  var DAKA_ICONS = ['🎵', '🎸', '🎤', '🎧', '🏃', '🏋️', '🧘', '📖', '📚', '✍️',
+    '🍎', '🥗', '😴', '💼', '🌳', '🚶', '🎨', '🪷', '🙏', '💧', '☕', '🌙', '🧹', '📿'];
+  /* 名字推断默认图标：只在图标缺失或为通用 ✦ 时用，绝不覆盖用户已设图标 */
+  function inferIcon(name) {
+    var n = String(name || '');
+    if (/音乐|唱歌|听歌|疗愈|琴|歌|唱诵|跟唱/.test(n)) return '🎵';
+    if (/跑步|跑|运动|健身|锻炼|瑜伽/.test(n)) return '🏃';
+    if (/散步|步行/.test(n)) return '🚶';
+    if (/阅读|读书|读经|看书/.test(n)) return '📖';
+    if (/学习|背诵|上课|练字|作业/.test(n)) return '📚';
+    if (/抄经|写字|写经|书法/.test(n)) return '✍️';
+    if (/饮食|吃饭|做饭|断食|辟谷/.test(n)) return '🍎';
+    if (/睡眠|睡觉|午睡|早睡/.test(n)) return '😴';
+    if (/工作|上班|加班/.test(n)) return '💼';
+    if (/户外|爬山/.test(n)) return '🌳';
+    if (/冥想|打坐|静坐|禅修/.test(n)) return '🧘';
+    if (/拜忏|礼佛|诵经|念佛|持咒|念诵/.test(n)) return '📿';
+    return '✦';
+  }
 
   /* ---------- 打卡记录 ---------- */
   // record: {hid, date:'YYYY-MM-DD', secs(计时)/count, ts}
@@ -203,7 +314,7 @@ var Practice = (function () {
   }
 
   function renderHabits() {
-    var habits = getHabits();
+    var habits = sortHabitsByOrder(getHabits());   /* 第 13 项：按顺序键排，新 id 追加末尾 */
     var host = $('#daka-habit-list');
     if (!habits.length) {
       host.innerHTML = '<p class="hint empty">暂无打卡项，点击下方按钮添加。</p>';
@@ -221,6 +332,7 @@ var Practice = (function () {
       }
       var remindTxt = h.remindTime ? ' · ⏰' + h.remindTime : '';
       return '<div class="daka-item' + (done ? ' done' : '') + '" data-hid="' + esc(h.id) + '">'
+        + '<span class="daka-grip" aria-hidden="true">⋮⋮</span>'
         + '<div class="daka-icon">' + esc(h.icon || '✓') + '</div>'
         + '<div class="daka-main">'
         + '<div class="daka-name">' + esc(h.name)
@@ -233,8 +345,7 @@ var Practice = (function () {
             ? '<button class="btn primary small" data-dact="check">再练</button>'
             : '<span class="daka-done-mark">✓</span>')
           : '<button class="btn primary small" data-dact="check">' + (h.type === 'timed' ? '开始' : '打卡') + '</button>')
-        + (h.preset ? '' : '<button class="mini-btn tiny danger" data-dact="del">删</button>')
-        + '</div></div>';
+        + '</div></div>';   /* 第 14 项修正：行上什么按钮都不放，删除钮已移进编辑弹窗 */
     }).join('');
     host.querySelectorAll('.daka-item').forEach(function (el) {
       var hid = el.getAttribute('data-hid');
@@ -247,22 +358,37 @@ var Practice = (function () {
         else if (hid === 'zaoke' || hid === 'wanke') openKe(h);
         else { addRecord(hid, 0); renderAll(); }
       });
-      var del = el.querySelector('[data-dact="del"]');
-      if (del) del.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var hName = (getHabit(hid) || {}).name;
-        WuriDlg.confirm('确定删除「' + hName + '」吗？历史打卡记录会保留。', '删除').then(function (ok) {
-          if (!ok) return;
-          var h = getHabit(hid);
-          if (h) cancelRemind(h);
-          saveHabits(getHabits().filter(function (x) { return x.id !== hid; }));
-          renderAll();
+      /* 抓手拖动排序（第 13 项）：pointer 事件，触屏＋鼠标通用；
+       * setPointerCapture 后 move/up 都落在抓手上；位移 >8px 才算拖动。 */
+      var grip = el.querySelector('.daka-grip');
+      if (grip) {
+        try { grip.style.touchAction = 'none'; } catch (e) {}   /* 触屏拖动不触发页面滚动 */
+        grip.addEventListener('pointerdown', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          try { grip.setPointerCapture(e.pointerId); } catch (err) {}
+          dragState = { hid: hid, el: el, startY: e.clientY, moved: false, targetHid: null, before: true };
+          el.classList.add('dragging');
         });
-      });
-      // 点整行也可打卡（计次类）；计时类点行可再开一局
-      el.addEventListener('click', function () {
+        grip.addEventListener('pointermove', function (e) {
+          if (!dragState || dragState.hid !== hid) return;
+          e.preventDefault();
+          if (Math.abs(e.clientY - dragState.startY) > 8) dragState.moved = true;
+          if (!dragState.moved) return;
+          dragUpdateTarget(e.clientY);
+        });
+        grip.addEventListener('pointerup', function () { dragEnd(true); });
+        grip.addEventListener('pointercancel', function () { dragEnd(false); });
+      }
+      /* 点行身：自建项进编辑弹窗（第 14 项修正：行上无按钮，点行身进编辑）；
+       * 内置项保持原有行为——计次类点行打卡、计时类点行再开一局。
+       * 排除抓手与「打卡」按钮；拖动位移 >8px 的抬手 click 由 dragEnd 抑制。 */
+      el.addEventListener('click', function (e) {
+        if (Date.now() < dragSuppressUntil) return;
+        if (e.target && e.target.closest && (e.target.closest('.daka-grip') || e.target.closest('[data-dact="check"]'))) return;
         var h = getHabit(hid);
         if (!h) return;
+        if (!h.preset) { openEditForm(h); return; }
         if (h.type === 'count') {
           if (todayRecord(hid)) return;
           if (hid === 'zaoke' || hid === 'wanke') { openKe(h); return; }
@@ -365,13 +491,57 @@ var Practice = (function () {
     sel.value = bgmId;
   }
   var bgmAudio = null;
+  /* 内练 BGM Web Audio 增益链（v605：iOS 不认 element.volume，修法同混音台）：
+   * source(MediaElementAudioSourceNode, 只建一次) → GainNode → destination；
+   * #daka-bgm-vol 改调 gain；gain 是唯一音量控制，接线成功时 element.volume
+   * 固定为 1，防 gain 与 volume 双重衰减；无 AudioContext 才回落 volume。 */
+  var bgmCtx = null, bgmGain = null, bgmSrc = null;
+  function bgmAudioCtx() {
+    if (bgmCtx) return bgmCtx;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      bgmCtx = new AC();
+      bgmGain = bgmCtx.createGain();
+      try { bgmGain.gain.value = (parseInt(localStorage.getItem('wuri_daka_bgmvol') || '60', 10) || 60) / 100; } catch (e) {}
+      bgmGain.connect(bgmCtx.destination);
+    } catch (e) { return null; }
+    return bgmCtx;
+  }
+  function bgmResumeCtx() {
+    var c = bgmAudioCtx();
+    if (c && c.state === 'suspended') {
+      try { var p = c.resume(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    }
+  }
+  function bgmEnsureGain() {
+    if (!bgmAudio) return null;
+    try {
+      var ctx = bgmAudioCtx();
+      if (!ctx || !bgmGain) return null;
+      if (!bgmSrc) {
+        bgmSrc = ctx.createMediaElementSource(bgmAudio);
+        bgmSrc.connect(bgmGain);
+      }
+      return bgmGain;
+    } catch (e) { return null; }
+  }
+  function bgmSetGain(v) {
+    var g = bgmEnsureGain();
+    if (g) { try { g.gain.value = v; } catch (e) {} }
+  }
+  function bgmVol0() {
+    try { return (parseInt(localStorage.getItem('wuri_daka_bgmvol') || '60', 10) || 60) / 100; } catch (e) { return 0.6; }
+  }
   var bgmId = 'rain';
   var bgmWantPlay = true; /* 用户是否想听（独立暂停键控制） */
   try { var _bv = localStorage.getItem('wuri_daka_bgm'); bgmId = (_bv === null) ? 'rain' : _bv; } catch (e) {}
   function getBgmAudio() {
     if (!bgmAudio) {
       bgmAudio = new Audio(); bgmAudio.loop = true; bgmAudio.preload = 'auto';
-      try { bgmAudio.volume = (parseInt(localStorage.getItem('wuri_daka_bgmvol') || '60', 10) || 60) / 100; } catch (e) {}
+      bgmEnsureGain();
+      if (bgmGain) { try { bgmAudio.volume = 1; } catch (e) {} bgmSetGain(bgmVol0()); }   /* gain 是唯一音量控制 */
+      else { try { bgmAudio.volume = bgmVol0(); } catch (e) {} }   /* 无 AudioContext 才回落 volume */
     }
     return bgmAudio;
   }
@@ -381,6 +551,8 @@ var Practice = (function () {
       for (var i = 0; i < BGM_LIST.length; i++) if (BGM_LIST[i].id === id) t = BGM_LIST[i];
       var a = getBgmAudio();
       if (!t) { bgmStop(); return; }
+      bgmResumeCtx();   /* 播放切换即手势：恢复 AudioContext */
+      bgmSetGain(bgmVol0());
       if (a.getAttribute('src') !== t.url) a.src = t.url;
       var p = a.play();
       if (p && p.catch) p.catch(function () {});
@@ -548,7 +720,10 @@ var Practice = (function () {
       try { vol.value = localStorage.getItem('wuri_daka_bgmvol') || '60'; } catch (e) {}
       vol.addEventListener('input', function () {
         try { localStorage.setItem('wuri_daka_bgmvol', vol.value); } catch (e) {}
-        getBgmAudio().volume = (parseInt(vol.value, 10) || 0) / 100;
+        var vv = (parseInt(vol.value, 10) || 0) / 100;
+        var _ba = getBgmAudio();
+        if (bgmGain) { try { _ba.volume = 1; } catch (e) {} bgmSetGain(vv); }   /* gain 是唯一音量控制 */
+        else { try { _ba.volume = vv; } catch (e) {} }   /* 无 AudioContext 才回落 volume */
       });
     })();
     // 完成（提前结束，按已用时间记）
@@ -567,31 +742,140 @@ var Practice = (function () {
 
   /* ---------- 自建（v603：改居中弹窗——旧页面内展开＋scrollTo(0,0) 滚回页顶，
      表单在视口下方不可见，Maggie 实测上报“按上去好像没有反应”；旧行为彻底移除） ---------- */
+  /* ---------- 自建项编辑弹窗（v605 第 14 项，复用 #daka-form-wrap） ----------
+   * 行上无任何按钮：点自建项行身进编辑；内置项行身保持原打卡行为。
+   * 编辑模式：预填名字＋图标；类型选择器禁用（建好后类型不动，防旧记录口径乱）；
+   * 删除钮只在编辑模式显示，点后 WuriDlg.confirm 确认才删。
+   * 图标网格与删除钮均由 JS 注入（不改 index.html、不改 style.css）。 */
+  function ensureFormExtras() {
+    var box = document.querySelector('#daka-form-wrap .daka-form-box');
+    if (!box) return;
+    if (!box.querySelector('.daka-icon-grid')) {
+      var grid = document.createElement('div');
+      grid.className = 'daka-icon-grid';
+      grid.setAttribute('role', 'group');
+      grid.setAttribute('aria-label', '选择图标');
+      var btnRow = box.querySelector('.btn-row');
+      if (btnRow) box.insertBefore(grid, btnRow);
+      else box.appendChild(grid);
+      renderIconGrid();
+    }
+    if (!box.querySelector('.daka-del-btn')) {
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'btn daka-del-btn';
+      del.textContent = '删除此项';
+      del.addEventListener('click', onDeleteEditing);
+      var br = box.querySelector('.btn-row');
+      if (br) br.appendChild(del);
+      else box.appendChild(del);
+    }
+  }
+  function renderIconGrid() {
+    var grid = document.querySelector('#daka-form-wrap .daka-icon-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    DAKA_ICONS.forEach(function (ic) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'daka-icon-opt' + (ic === formIcon ? ' on' : '');
+      b.textContent = ic;
+      b.setAttribute('aria-label', '图标 ' + ic);
+      b.addEventListener('click', function () {
+        formIcon = ic;
+        formIconPicked = true;
+        renderIconGrid();
+      });
+      grid.appendChild(b);
+    });
+  }
+  function syncFormMode() {
+    var title = $('#daka-form-title');
+    if (title) title.textContent = editingHid ? '编辑打卡项' : '＋ 自建打卡项';
+    var typeSel = $('#df-type');
+    if (typeSel) typeSel.disabled = !!editingHid;
+    var del = document.querySelector('#daka-form-wrap .daka-del-btn');
+    if (del) del.hidden = !editingHid;
+    renderIconGrid();
+  }
   function openForm() {
+    ensureFormExtras();
+    editingHid = null;
+    formIcon = '✦';
+    formIconPicked = false;
     var w = $('#daka-form-wrap');
     if (!w) return;
     $('#df-name').value = '';
     $('#df-type').value = 'count';
+    syncFormMode();
     w.classList.add('show');
     try { $('#df-name').focus(); } catch (e) {}
   }
+  function openEditForm(h) {
+    if (!h || h.preset) return;
+    ensureFormExtras();
+    editingHid = h.id;
+    /* 图标预填：有用户自设图标就用它；缺失或通用 ✦ 时按名字推断补默认 */
+    if (h.icon && h.icon !== '✦') { formIcon = h.icon; formIconPicked = true; }
+    else { formIcon = inferIcon(h.name); formIconPicked = false; }
+    var w = $('#daka-form-wrap');
+    if (!w) return;
+    $('#df-name').value = h.name || '';
+    var typeSel = $('#df-type');
+    if (typeSel) typeSel.value = h.type || 'count';
+    syncFormMode();
+    w.classList.add('show');
+    try { $('#df-name').focus(); } catch (e) {}
+  }
+  function onDeleteEditing() {
+    if (!editingHid) return;
+    var h = getHabit(editingHid);
+    if (!h) { closeForm(); return; }
+    var hid = editingHid;
+    WuriDlg.confirm('确定删除「' + h.name + '」吗？历史打卡记录会保留。', '删除').then(function (ok) {
+      if (!ok) return;
+      cancelRemind(h);
+      saveHabits(getHabits().filter(function (x) { return x.id !== hid; }));
+      saveOrder(loadOrder().filter(function (id) { return id !== hid; }));   /* 只清顺序表里的旧 id */
+      editingHid = null;
+      closeForm();
+      renderAll();
+    });
+  }
   function closeForm() {
+    editingHid = null;
     var w = $('#daka-form-wrap');
     if (w) w.classList.remove('show');
   }
   function saveForm() {
     var name = $('#df-name').value.trim();
     if (!name) { WuriDlg.alert('请填写名称'); return; }
+    var icon = formIconPicked ? formIcon : inferIcon(name);
+    if (editingHid) {
+      /* 合并保留原对象全部字段（只改名字＋图标），类型与提醒等原样不动 */
+      var list = getHabits();
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === editingHid) {
+          list[i] = Object.assign({}, list[i], { name: name, icon: icon });
+          break;
+        }
+      }
+      saveHabits(list);
+      editingHid = null;
+      closeForm();
+      renderAll();
+      return;
+    }
     var h = {
       id: uid(),
       name: name,
       type: $('#df-type').value,
-      icon: '✦',
+      icon: icon,
       preset: false
     };
-    var list = getHabits();
-    list.push(h);
-    saveHabits(list);
+    var list2 = getHabits();
+    list2.push(h);
+    saveHabits(list2);
     closeForm();
     renderAll();
   }
@@ -671,6 +955,12 @@ var Practice = (function () {
       calM++; if (calM > 11) { calM = 0; calY++; } renderCal();
     });
     renderBgmRow();
+    ensureFormExtras();   /* 第 14 项：图标网格＋弹窗内删除钮预注入（只建一次） */
+    var dfName = $('#df-name');
+    if (dfName) dfName.addEventListener('input', function () {
+      /* 未亲手选过图标时，名字输入即实时推断默认图标 */
+      if (!formIconPicked) { formIcon = inferIcon(dfName.value.trim()); renderIconGrid(); }
+    });
     bindTimer();
     bindKeEnded();
     // 启动时推送一次今日进度给小组件

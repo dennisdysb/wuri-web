@@ -1080,6 +1080,13 @@ details.disc-foot .hint{margin-top:9px}
 .daka-date{font-size:.8rem;color:var(--muted);font-weight:400;margin-left:8px}
 .daka-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:var(--paper)}
 .daka-item.done{background:var(--bg-soft);opacity:.85}
+/* 打卡项拖动排序（v605 ⑬）：抓手＋拖拽态＋插入线；只限 #daka-habit-list（今日打卡区），
+ * 不动持珠念诵区；颜色只走变量。插入线用 box-shadow（不占布局，不跳行） */
+#daka-habit-list .daka-grip{flex:none;cursor:grab;color:var(--muted);touch-action:none;-webkit-user-select:none;user-select:none}
+#daka-habit-list .daka-grip:active{cursor:grabbing}
+#daka-habit-list .daka-item.dragging{opacity:.55}
+#daka-habit-list .daka-item.drop-before{box-shadow:inset 0 2px 0 var(--gold)}
+#daka-habit-list .daka-item.drop-after{box-shadow:inset 0 -2px 0 var(--gold)}
 .daka-icon{font-size:1.6rem;width:2.2em;text-align:center;flex-shrink:0}
 .daka-main{flex:1;min-width:0}
 .daka-name{font-weight:600;font-size:.95rem;overflow-wrap:break-word}
@@ -1097,6 +1104,16 @@ details.disc-foot .hint{margin-top:9px}
 .daka-form-box{width:min(420px,calc(100vw - 48px));text-align:left}
 .daka-form-box .card-title{margin-bottom:6px}
 .daka-form-box .btn-row{justify-content:center}
+/* 自建打卡项编辑（v605 ⑭）：图标选择器复用“我的日子” emoji 行（#myday-icons .ichip）
+ * 同款方格＋选中金底（与图层 .on 同一语义）；删除钮为朱砂描边幽灵按钮（不用实心
+ * 大红块）；编辑模式下被禁用的类型选择器低透明度。行上不放任何按钮（用户要行面
+ * 最清爽），故无 .daka-edit 规则。作用域只限打卡弹窗 #daka-form-wrap */
+#daka-form-wrap .daka-icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px;margin:8px 0}
+#daka-form-wrap .daka-icon-grid .daka-icon-opt{font-size:1.4rem;padding:4px 6px;border-radius:8px;cursor:pointer;border:2px solid transparent;text-align:center;background:var(--card);color:var(--ink)}
+#daka-form-wrap .daka-icon-grid .daka-icon-opt.on{border-color:var(--gold);background:var(--gold);color:var(--on-accent)}
+#daka-form-wrap .daka-del-btn{display:block;width:100%;padding:9px 12px;border-radius:10px;font-size:.95rem;cursor:pointer;color:var(--cinnabar);border:1px solid var(--cinnabar);background:transparent}
+#daka-form-wrap .daka-del-btn:active{background:var(--cinnabar-wash)}
+#daka-form-wrap select:disabled,#daka-form-wrap input:disabled{opacity:.45}
 /* 功法页（v603）：列表行距与来源小字，走变量链（日间/夜间/红光三态） */
 .gf-list{margin:4px 0 2px;padding-left:22px;line-height:1.75;color:var(--ink)}
 .gf-list li{margin-bottom:4px}
@@ -1719,6 +1736,10 @@ body.sky-red{
 #myday-colors .cchip.on{border-color:var(--ink)}
 #myday-icons .ichip{font-size:1.4rem;padding:4px 6px;border-radius:8px;cursor:pointer;border:2px solid transparent}
 #myday-icons .ichip.on{border-color:var(--gold);background:var(--card)}
+/* 我的日子保存／取消等大（v605 ⑩）：markup 在 index.html（保存 .btn.primary.small
+ * vs 取消 .mini-btn，天生不等高不等宽），此处只用样式拉齐——同高 40px、行内
+ * 各占一半等宽、字号/内边距统一；颜色走变量，不写死色值 */
+#myday-form .myday-row #myday-save,#myday-form .myday-row #myday-cancel{flex:1 1 0;min-width:0;height:40px;padding:8px 10px;font-size:.95rem;line-height:1.2;display:flex;align-items:center;justify-content:center;text-align:center;box-sizing:border-box}
 .mdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:2px;vertical-align:middle}
 .dtag.tag-myday{background:var(--card);border:1px solid var(--line);}
 /* ---------- 每日经文推荐 ---------- */
@@ -2199,6 +2220,19 @@ body.bugang-open{overflow:hidden}
 .sk-seg .mini-btn:last-child{border-radius:0 10px 10px 0}
 .sk-seg .mini-btn.on{z-index:1}
 .sk-layer-note{font-size:.72rem;color:var(--muted);line-height:1.65;padding:6px 0 2px}
+/* 图层面板改悬浮窗（v605 ⑨）：复用 #daka-form-wrap 的 .daka-mask 同款做法——
+ * fixed 全屏遮罩（遮罩色与 .daka-mask 同值）＋居中卡片，× 钮在卡头；
+ * 标签列定宽 3.6em 已有（v555），此处再把标签与首个按钮拉开间距；
+ * 选中态 .on 金底规则（.sk-layers .mini-btn.on，见下行原有规则）经核对真实到达
+ * 按钮：特异度高于 .mini-btn 基规则与 [data-theme="night"] .mini-btn，
+ * --gold/--on-accent 两端主题均有定义，故不另加重复规则 */
+.sk-layers-mask{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:0 16px}
+.sk-layers-mask[hidden]{display:none}
+.sk-layers-mask .sk-layers{margin-top:0;width:min(400px,calc(100vw - 32px));max-height:min(72vh,560px);overflow-y:auto}
+.sk-layers-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 0 6px}
+.sk-layers-head .sk-layers-title{font-weight:700;font-size:.95rem;color:var(--ink)}
+.sk-layers-head .sk-layers-x{flex:none}
+.sk-layers .sk-layer-row .sk-ctl-lab{margin-right:6px}
 .sk-ecliptic{fill:none;stroke:#d8a03c;stroke-width:1.1;stroke-dasharray:6 4;opacity:.85}
 .sk-eqline{fill:none;stroke:#7d94b8;stroke-width:1;stroke-dasharray:2 4;opacity:.8}
 .sk-sun{fill:#f5b301;stroke:#fff2c0;stroke-width:1}
@@ -3984,3 +4018,26 @@ body.sky-red .karaoke-cele-frame{--cele-glow:rgba(224,86,58,.5)}
 .karaoke-score-actions .btn{flex:1}
 .karaoke-score-row-great .karaoke-score-text{color:var(--gold);font-weight:700}
 .karaoke-score-spark{color:var(--gold);margin-right:2px}
+
+/* ============ 一键离线下载悬浮窗 · 缩小 pill 与双路进度（v605） ============
+ * 浮条本体样式仍由 js/offline-download.js 内联注入；此处只补新增件：
+ * 头部工具组（缩小钮）、双路行间距、缩小态 pill。配色全走主题变量链
+ * （--card/--ink/--line/--gold/--muted），日间/夜间/红光（body.sky-red
+ * 变量重定义）三态跟随，零写死色。 */
+#offline-float .of-tools{display:flex;align-items:center;gap:2px;}
+#offline-float .of-min{background:none;border:none;color:inherit;font-size:17px;
+  line-height:1;padding:2px 6px;cursor:pointer;}
+#offline-float .of-head{margin-bottom:6px;}
+#offline-float .of-head-title{font-weight:600;letter-spacing:.08em;}
+#offline-float .of-run + .of-run{margin-top:10px;padding-top:8px;border-top:1px solid var(--line-soft);}
+#offline-float .of-pill{display:none;}
+#offline-float.min{left:auto;right:12px;width:auto;max-width:46vw;padding:0;
+  background:transparent;border-radius:999px;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;cursor:default;}
+#offline-float.min .of-body{display:none;}
+#offline-float.min .of-pill{display:flex;align-items:center;gap:6px;
+  padding:9px 14px;border-radius:999px;cursor:grab;touch-action:none;user-select:none;
+  -webkit-user-select:none;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);box-shadow:var(--shadow);font-size:13px;white-space:nowrap;}
+#offline-float.min .of-pill:active{cursor:grabbing;}
+#offline-float.min .of-pill #of-pill-pct{color:var(--gold);font-weight:700;}

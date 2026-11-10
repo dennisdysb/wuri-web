@@ -525,6 +525,7 @@
   function saveLayers() {
     try { localStorage.setItem(LAYERS_KEY, JSON.stringify(chart.layers)); } catch (e) {}
   }
+  var layersEscBound = false; /* 图层悬浮窗 Esc 全局监听只绑一次（bindChartEvents 每次重渲染都跑） */
 
   /* 分野层：fenye.json 十二次——与 today-sky.sunMansionOf 同一锚点法
    * （宿度位置↔黄经以中气定锚、分段线性），此处反解：次界宿度→黄经，
@@ -627,7 +628,10 @@
    * 点选信息条、今夜可见摘要、口径注。SVG 为矢量渲染，任意尺寸不糊，
    * 等效于 canvas 的 DPR 高清出图（且缩放不重绘位图）。 */
   /* 图层面板（④）：连线／星名（含与 AR 共用三档）／黄道·天赤道（既有
-   * lines 状态）／分野／银河（示意）／网格，各自独立开关、即时重绘 */
+   * lines 状态）／分野／银河（示意）／网格，各自独立开关、即时重绘。
+   * v605 ⑨ 改悬浮窗：复用 #daka-form-wrap 的 .daka-mask 同款做法（fixed 遮罩＋
+   * 居中卡片，见 style.css .sk-layers-mask），带 × 钮，点“图层”按钮打开，
+   * 点 ×／点 backdrop／按 Esc 关闭；开关行为（drawChart 等）不变 */
   function layerPanelHTML() {
     var L = chart.layers;
     function tg(id, on, label) {
@@ -636,7 +640,10 @@
     function lmBtn(m) {
       return '<button class="mini-btn tiny' + (chart.labelMode === m ? ' on' : '') + '" data-lmode="' + m + '">' + esc(t('sx2_ar_label_' + m)) + '</button>';
     }
-    return '<div class="sk-layers" id="sk-layers" hidden>' +
+    return '<div class="sk-layers-mask" id="sk-layers-mask" hidden>' +
+      '<div class="sk-layers" id="sk-layers" role="dialog" aria-modal="true" aria-label="' + esc(T('图层')) + '">' +
+      '<div class="sk-layers-head"><span class="sk-layers-title">' + esc(T('图层')) + '</span>' +
+      '<button class="mini-btn tiny sk-layers-x" id="sk-layers-x" type="button" aria-label="' + esc(T('关闭')) + '">✕</button></div>' +
       '<div class="sk-layer-group">' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('连线')) + '</span>' + tg('lines', L.lines, esc(T('连线'))) + '</div>' +
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('参考线')) + '</span>' +
@@ -649,7 +656,7 @@
       '<div class="sk-layer-row"><span class="sk-ctl-lab">' + esc(T('星名')) + '</span>' +
       '<span class="sk-seg" role="group" aria-label="' + esc(T('星名')) + '">' + lmBtn('smart') + lmBtn('all') + lmBtn('major') + '</span></div>' +
       '</div>' +
-      '<div class="sk-layer-note">' + esc(T('银河按银道面绘示意带，非实测轮廓；星名密度与相机认星共用一档。')) + '</div></div>';
+      '<div class="sk-layer-note">' + esc(T('银河按银道面绘示意带，非实测轮廓；星名密度与相机认星共用一档。')) + '</div></div></div>';
   }
 
   function chartSkeleton() {
@@ -1101,9 +1108,24 @@
       var ml = $('sk-mag-lab'); if (ml) ml.textContent = mg.value + ' ' + t('sx2_mag_unit');
       drawChart(); renderSideTonight();
     });
-    /* 图层面板（④）：开合＋行内开关/档位委托（状态落盘口径见 loadLayers 注） */
+    /* 图层面板（④）：悬浮窗开合（v605 ⑨）＋行内开关/档位委托（状态落盘口径见 loadLayers 注）。
+     * 开：点“图层”按钮；关：点 ×／点 backdrop／按 Esc（Esc 全局监听只绑一次） */
+    function openLayers() { var m = $('sk-layers-mask'); if (m) m.hidden = false; }
+    function closeLayers() { var m = $('sk-layers-mask'); if (m) m.hidden = true; }
     var tgl = $('sk-tg-layers');
-    if (tgl) tgl.addEventListener('click', function () { var p = $('sk-layers'); if (p) p.hidden = !p.hidden; });
+    if (tgl) tgl.addEventListener('click', function () { var m = $('sk-layers-mask'); if (!m) return; if (m.hidden) openLayers(); else closeLayers(); });
+    var lmask = $('sk-layers-mask');
+    if (lmask) lmask.addEventListener('click', function (e) { if (e.target === lmask) closeLayers(); });
+    var lx = $('sk-layers-x');
+    if (lx) lx.addEventListener('click', closeLayers);
+    if (!layersEscBound) {
+      layersEscBound = true;
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var m = document.getElementById('sk-layers-mask');
+        if (m && !m.hidden) m.hidden = true;
+      });
+    }
     var lp = $('sk-layers');
     if (lp) lp.addEventListener('click', function (e) {
       var b = e.target && e.target.closest ? e.target.closest('[data-ly],[data-lmode]') : null;
