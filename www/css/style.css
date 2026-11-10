@@ -3841,6 +3841,33 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-rec-actions .mini-btn.tiny{padding:6px 10px}
 .karaoke-rec-empty{margin:10px 0 0}
 .karaoke-rec-empty[hidden]{display:none}
+/* ---- v601 网友排名（轻量版）：入口在控制条，面板在录音面板下方 ----
+ * 只传分数，不传音频；按段切换看前 10 名；出分屏里唱满的段出上榜入口。
+ * 颜色只走变量链（--line/--card/--ink/--muted/--gold/--teal），不写死。 */
+.karaoke-board-panel{margin:16px 14px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.karaoke-board-panel[hidden]{display:none}
+.karaoke-board-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.karaoke-board-hint{margin:8px 0 0}
+.karaoke-board-segs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.karaoke-board-seg.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+.karaoke-board-status{margin:10px 0 0}
+.karaoke-board-status[hidden]{display:none}
+.karaoke-board-list{margin:10px 0 0;padding:0;list-style:none}
+.karaoke-board-row{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft)}
+.karaoke-board-rank{font-weight:700;color:var(--gold);min-width:20px;text-align:center}
+.karaoke-board-name{flex:1;font-size:15px;color:var(--ink)}
+.karaoke-board-val{font-weight:700;font-size:16px;color:var(--teal);font-variant-numeric:tabular-nums}
+.karaoke-board-empty{margin:10px 0 0}
+.karaoke-board-empty[hidden]{display:none}
+/* 出分屏里的上榜入口（只给出唱满的段） */
+.karaoke-board-submit{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.karaoke-board-one{margin-top:10px}
+.karaoke-board-one:first-child{margin-top:0}
+.karaoke-board-one-t{font-size:14px;color:var(--ink)}
+.karaoke-board-one-row{display:flex;gap:8px;margin-top:8px}
+.karaoke-board-nick{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-size:15px;font-family:var(--sans)}
+.karaoke-board-msg{margin:8px 0 0}
+.karaoke-board-msg[hidden]{display:none}
 /* ---- v600 打分特效覆盖层：小仙童写真帧（用户手绘草稿四格定稿） ----
  * fixed 全屏、pointer-events:none 永不挡点按；半透明靠 .karaoke-cele-veil
  * （--card 底、opacity .5，歌词在后方隐约可见）；写真帧＋签名元素＋金光粒子在 veil 之上。

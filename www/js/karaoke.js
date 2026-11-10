@@ -67,6 +67,24 @@
   var MELODY_WIN_BEFORE = 8, MELODY_WIN_AFTER = 22; /* 音高线窗口：当前时刻前 8s＋后 22s */
   var AUDIO_URL = { seg1: 'audio/karaoke/seg1.m4a', seg2: 'audio/karaoke/seg2.m4a', seg3: 'audio/karaoke/seg3.m4a' };
   var SEG_ORDER = ['seg1', 'seg2', 'seg3'];
+  /* ---------- 网友排名轻量版（v601） ----------
+   * 只传分数，不传音频，不登录，自愿参加。段 = timeline.json 的 section
+   * （14 段）；段分 = 该段各行打分得分的平均值（0–100，1 位小数）；
+   * 资格 = 唱满该段每一行。段行数表由 timeline.json 生成（147 行），
+   * 与服务端 worker.js 的 KARAOKE_SECTION_LINES、D1 校验共用同一份数；
+   * 改 timeline.json 时三处须同步改。同一昵称＋同一段只保留最高分
+   * （服务端先查后写）。合唱录音的公开传播须青玄道长授权，本版不做
+   * 任何服务端音频功能、不上传录音。 */
+  var BOARD_API = 'https://pay.shengboyu.ca/api/karaoke/scores';
+  var BOARD_SECTION_LINES = {
+    chengqing: 4, ju_tianzun: 3, diaogua: 8, xiang_gongyang: 1,
+    da_qiqing: 8, xiao_qiqing: 5, jingxin: 8, jingkou: 12,
+    jingshen: 8, an_tudi: 16, jing_tiandi: 22, zhu_xiang: 8,
+    jinguang: 26, xuanyun: 18
+  };
+  var BOARD_NICK_RE = /^[\u4e00-\u9fa5A-Za-z0-9_\- ]+$/;
+  var boardSection = 'chengqing'; /* 排行榜当前查看的段 */
+  var boardLoaded = false;
   /* （罄）显示位置 = 该位置前的字数（按底本 note 的显式表述，与 build_s06.py 一致；
      qing 数值数组在三处天尊句与 note 不符，以 note 为准） */
   var QING_POS = {
@@ -969,7 +987,11 @@
         '</span><span class="karaoke-score-fb">' + esc(feedbackOf(r)) + '</span></div>';
     });
     html += '</div><div class="karaoke-score-actions"><button class="btn small" id="karaoke-retry">' + esc(t('karaoke_retry')) + '</button>' +
-      '<button class="btn small" id="karaoke-share-card">' + esc(t('karaoke_share_card')) + '</button></div></div>';
+      '<button class="btn small" id="karaoke-share-card">' + esc(t('karaoke_share_card')) + '</button></div>';
+    /* v601：只给唱满的段出上榜入口（未唱满不显示）；段分 1 位小数 */
+    var boardOk = boardEligible(res);
+    if (boardOk.length) html += boardSubmitHTML(boardOk);
+    html += '</div>';
     host.innerHTML = html;
     scrollToEl(host, { block: 'start' });
     var rb = $('karaoke-retry');
@@ -980,7 +1002,166 @@
     });
     var sb = $('karaoke-share-card');
     if (sb) sb.addEventListener('click', function () { shareScoreCard(total100); });
+    if (boardOk.length) bindBoardSubmit(host, boardOk);
     showCelebration(total100); /* v600：小仙童写真帧特效（约 4s 自消，点按提前消散） */
+  }
+
+  /* ---------- 网友排名轻量版（v601） ----------
+   * 段分：scoreLines 返回的本次打分结果按 timeline section 分组，段分 =
+   * 该段已打分各行得分的平均值（0–100，1 位小数）。资格：该段已打分行数
+   * == 该段总行数（data.sections 行数，与 BOARD_SECTION_LINES 一致）。
+   * 未唱满的段不显示上榜入口；上榜自愿，昵称自填 1–12 字；重复提交
+   * 取最好成绩（服务端只在新分更高时更新）。只传分数，不传音频。 */
+  function sectionScores(res) {
+    if (!res || !res.lines || !res.lines.length || !data) return [];
+    var bySec = {};
+    /* 只计真正唱出声的行（voiced > 0）：scoreLines 按音频文件判定
+     * attempted——唱了同文件任意一行，该文件其余行也会出一条 0 分记录
+     * （voiced 0、win 0），不算唱过；否则唱一行即全段“满段”。 */
+    res.lines.forEach(function (r) {
+      if (!r.voiced) return;
+      var id = r.item.section;
+      if (!bySec[id]) bySec[id] = { section: id, section_name: r.item.section_name || id, sum: 0, n: 0 };
+      bySec[id].sum += r.score;
+      bySec[id].n++;
+    });
+    var out = [];
+    data.sections.forEach(function (s) {
+      var g = bySec[s.id];
+      if (!g) return;
+      var total = (BOARD_SECTION_LINES[s.id] != null) ? BOARD_SECTION_LINES[s.id] : s.items.length;
+      out.push({
+        section: s.id, section_name: s.name,
+        score: Math.round((g.sum / g.n) * 1000) / 10,
+        lines_sung: g.n, total: total, eligible: g.n >= total
+      });
+    });
+    return out;
+  }
+  function boardEligible(res) {
+    return sectionScores(res).filter(function (s) { return s.eligible; });
+  }
+  function validateBoardNickname(name) {
+    if (typeof name !== 'string') return false;
+    var s = name.replace(/^\s+|\s+$/g, '');
+    if (s.length < 1 || s.length > 12) return false;
+    return BOARD_NICK_RE.test(s);
+  }
+  function boardSubmit(section, nickname, score, linesSung) {
+    return fetch(BOARD_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ section: section, nickname: nickname, score: score, lines_sung: linesSung })
+    }).then(function (r) { return r.json(); });
+  }
+  function boardLoad(section) {
+    return fetch(BOARD_API + '?section=' + encodeURIComponent(section))
+      .then(function (r) { return r.json(); });
+  }
+  /* 出分屏里的上榜入口：只给唱满的段各出一个（昵称输入＋上榜钮＋状态行） */
+  function boardSubmitHTML(eligible) {
+    var html = '<div class="karaoke-board-submit">';
+    eligible.forEach(function (s) {
+      html += '<div class="karaoke-board-one" data-section="' + esc(s.section) + '">' +
+        '<div class="karaoke-board-one-t">' + esc(s.section_name) + ' · ' + esc(t('karaoke_board_score')) +
+        ' <b>' + s.score.toFixed(1) + '</b> · ' + esc(t('karaoke_board_full')) + ' ' + s.lines_sung + '/' + s.total + '</div>' +
+        '<div class="karaoke-board-one-row"><input class="karaoke-board-nick" type="text" maxlength="12" placeholder="' +
+        esc(t('karaoke_board_nick_ph')) + '" aria-label="' + esc(t('karaoke_board_nick_ph')) + '">' +
+        '<button class="btn small karaoke-board-go" type="button">' + esc(t('karaoke_board_submit')) + '</button></div>' +
+        '<p class="hint karaoke-board-msg" hidden></p></div>';
+    });
+    return html + '</div>';
+  }
+  function bindBoardSubmit(host, eligible) {
+    host.querySelectorAll('.karaoke-board-one').forEach(function (box) {
+      var go = box.querySelector('.karaoke-board-go');
+      var input = box.querySelector('.karaoke-board-nick');
+      var msg = box.querySelector('.karaoke-board-msg');
+      if (!go || !input || !msg) return;
+      go.addEventListener('click', function () {
+        var nick = input.value.replace(/^\s+|\s+$/g, '');
+        if (!validateBoardNickname(nick)) {
+          msg.hidden = false; msg.textContent = t('karaoke_board_nick_bad');
+          return;
+        }
+        var sec = null;
+        eligible.forEach(function (s) { if (s.section === box.getAttribute('data-section')) sec = s; });
+        if (!sec) return;
+        go.disabled = true;
+        msg.hidden = false; msg.textContent = t('karaoke_board_loading');
+        boardSubmit(sec.section, nick, sec.score, sec.lines_sung).then(function (r) {
+          if (r && r.ok) {
+            msg.textContent = (r.updated === false) ? t('karaoke_board_kept') : t('karaoke_board_done');
+            go.disabled = false;
+          } else {
+            msg.textContent = t('karaoke_board_err');
+            go.disabled = false;
+          }
+        }).catch(function () {
+          msg.textContent = t('karaoke_board_err');
+          go.disabled = false;
+        });
+      });
+    });
+  }
+  /* 排行榜面板：按段切换看前 10 名（段名＋昵称＋分数） */
+  function renderBoardSegs() {
+    var wrap = $('karaoke-board-segs');
+    if (!wrap || !data) return;
+    var html = '';
+    data.sections.forEach(function (s) {
+      if (!s.items.length || !s.sing) return;
+      html += '<button class="mini-btn tiny karaoke-board-seg' + (s.id === boardSection ? ' active' : '') +
+        '" type="button" data-section="' + esc(s.id) + '">' + esc(s.name) + '</button>';
+    });
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('.karaoke-board-seg').forEach(function (b) {
+      b.addEventListener('click', function () { loadBoard(b.getAttribute('data-section')); });
+    });
+  }
+  function renderBoardRows(rows) {
+    var list = $('karaoke-board-list');
+    var empty = $('karaoke-board-empty');
+    var status = $('karaoke-board-status');
+    if (!list) return;
+    if (status) status.hidden = true;
+    if (!rows || !rows.length) {
+      list.innerHTML = '';
+      if (empty) empty.hidden = false;
+      return;
+    }
+    if (empty) empty.hidden = true;
+    var html = '';
+    rows.forEach(function (r, i) {
+      html += '<li class="karaoke-board-row"><span class="karaoke-board-rank">' + (i + 1) + '</span>' +
+        '<span class="karaoke-board-name">' + esc(r.nickname) + '</span>' +
+        '<span class="karaoke-board-val">' + (Number(r.score)).toFixed(1) + '</span></li>';
+    });
+    list.innerHTML = html;
+  }
+  function loadBoard(section) {
+    boardSection = section;
+    var panel = $('karaoke-board-panel');
+    if (panel) panel.hidden = false;
+    renderBoardSegs();
+    var status = $('karaoke-board-status');
+    var list = $('karaoke-board-list');
+    var empty = $('karaoke-board-empty');
+    if (status) { status.hidden = false; status.textContent = t('karaoke_board_loading'); }
+    if (list) list.innerHTML = '';
+    if (empty) empty.hidden = true;
+    boardLoad(section).then(function (r) {
+      if (r && r.ok) { renderBoardRows(r.scores || []); boardLoaded = true; }
+      else if (status) { status.textContent = t('karaoke_board_failed'); }
+    }).catch(function () {
+      if (status) status.textContent = t('karaoke_board_failed');
+    });
+  }
+  function toggleBoard() {
+    var panel = $('karaoke-board-panel');
+    if (!panel) return;
+    if (panel.hidden) { loadBoard(boardSection); }
+    else { panel.hidden = true; }
   }
 
   /* ---------- 录音（v599） ----------
@@ -1144,7 +1325,10 @@
     if (rec) { stopRecording(); return; }
     if (!recSupported()) { alert(t('karaoke_rec_unavailable')); return; }
     var mode = recMode;
-    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (stream) {
+    /* v601 录音音质：原声约束——关掉浏览器三道语音处理（回声消除／降噪／
+     * 自动增益都会伤唱诵音质），立体声 48kHz。打分用的 getUserMedia
+     * （startMic，约 772 行）一律不动。 */
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 2, sampleRate: 48000 } }).then(function (stream) {
       var mime = pickRecMime();
       var chunks = [];
       var cur = { stream: stream, chunks: chunks, mime: (mime == null ? '' : mime), startedAt: Date.now(), mode: mode, bgInterrupted: false, timerId: 0, micSrc: null, micGain: null };
@@ -1153,9 +1337,10 @@
         if (mode === 'duet') {
           var dest = duetDest(stream, cur);
           if (!dest) throw new Error('no duet graph');
-          recorder = mime ? new MediaRecorder(dest, { mimeType: mime }) : new MediaRecorder(dest);
+          /* v601：显式 128kbps（保留 mimeType 选择逻辑） */
+          recorder = mime ? new MediaRecorder(dest, { mimeType: mime, audioBitsPerSecond: 128000 }) : new MediaRecorder(dest, { audioBitsPerSecond: 128000 });
         } else {
-          recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+          recorder = mime ? new MediaRecorder(stream, { mimeType: mime, audioBitsPerSecond: 128000 }) : new MediaRecorder(stream, { audioBitsPerSecond: 128000 });
         }
       } catch (e) {
         try { stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e2) {}
@@ -1669,6 +1854,9 @@
       if (scoring) disarmScoring(true);
       else armScoring();
     });
+    /* 排行榜入口（v601）：点按开／关面板，打开即取当前段前 10 名 */
+    var boardBtn = $('karaoke-board-btn');
+    if (boardBtn) boardBtn.addEventListener('click', function () { toggleBoard(); });
     /* 悬浮停控制：与控制条打分按钮同一漏斗（C 线 §1.3） */
     var stopBtn = $('karaoke-score-stop');
     if (stopBtn) stopBtn.addEventListener('click', function () { disarmScoring(true); });
@@ -1733,6 +1921,13 @@
       setRecMode: setRecMode, getRecMode: function () { return recMode; },
       getRecList: function () { return recList; }, renderRecList: renderRecList,
       deleteRec: deleteRec, recItemAction: recItemAction,
+      /* v601 网友排名轻量版（只传分数）＋录音音质（原声约束／128kbps） */
+      BOARD_API: BOARD_API, BOARD_SECTION_LINES: BOARD_SECTION_LINES,
+      sectionScores: sectionScores, boardEligible: boardEligible,
+      validateBoardNickname: validateBoardNickname,
+      boardSubmit: boardSubmit, boardLoad: boardLoad,
+      loadBoard: loadBoard, toggleBoard: toggleBoard, renderBoardRows: renderBoardRows,
+      getBoardSection: function () { return boardSection; },
       melodyLoaded: function () { return melody; },
       MELODY_FMIN: MELODY_FMIN, MELODY_FMAX: MELODY_FMAX,
       MELODY_WIN_BEFORE: MELODY_WIN_BEFORE, MELODY_WIN_AFTER: MELODY_WIN_AFTER } };
