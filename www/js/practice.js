@@ -106,11 +106,17 @@ var Practice = (function () {
     return n;
   }
   function addRecord(hid, secs) {
+    /* v602 第二次修订：早课/晚课不再点一下即记——须走功课经验证流程
+     * （openKe → 读功课经 → keEnd 结算）；此处拦截，防旧路径漏网。 */
+    if (hid === 'zaoke' || hid === 'wanke') return;
     var recs = getRecords();
     var t = todayStr();
     recs.push({ hid: hid, date: t, secs: secs || 0, ts: Date.now() });
     save(LS_RECORDS, recs);
     pushWidgetPractice();
+    /* v602 修订版（时间制，1 修为/分钟）：计时类按实记分钟、计次类每次 25 分钟
+     * 标准记修为，灵石为修为一半（points.js 内算）；计次类同习惯同日去重。 */
+    try { if (window.WuriPoints) window.WuriPoints.awardPractice(hid, secs || 0, t); } catch (e) {}
   }
   function recordsOn(dateStr) {
     return getRecords().filter(function (r) { return r.date === dateStr; });
@@ -189,6 +195,7 @@ var Practice = (function () {
 
   function renderAll() {
     renderHabits();
+    renderKeTradition();
     renderStats();
     renderCal();
     var d = new Date();
@@ -238,6 +245,7 @@ var Practice = (function () {
         var h = getHabit(hid);
         if (!h) return;
         if (h.type === 'timed') openTimed(h);
+        else if (hid === 'zaoke' || hid === 'wanke') openKe(h);
         else { addRecord(hid, 0); renderAll(); }
       });
       var del = el.querySelector('[data-dact="del"]');
@@ -258,10 +266,103 @@ var Practice = (function () {
         if (!h) return;
         if (h.type === 'count') {
           if (todayRecord(hid)) return;
+          if (hid === 'zaoke' || hid === 'wanke') { openKe(h); return; }
           addRecord(hid, 0); renderAll();
         }
         else openTimed(h);
       });
+    });
+  }
+
+  /* ---------- 早晚课打卡验证（v602 第二次修订，设计文档第三节） ----------
+   * 点早课/晚课 → 选传统（首次）→ 打开对应功课经、定位到早坛/晚坛首节；
+   * 结算在退出阅读器时（closeReader → WuriPoints.keEnd）或满分自动结算
+   * （划到底＋前台可见停留 ≥10 分钟）；只打开也按停留分钟记（最低 1，上限 25）。
+   * 传统存 localStorage（wuri_kegong_tradition），本页可切换。 */
+  function keTraditionLabel() {
+    try {
+      var v = localStorage.getItem('wuri_kegong_tradition');
+      return v === 's01' ? '正一' : (v === 's02' ? '全真' : null);
+    } catch (e) { return null; }
+  }
+  function renderKeTradition() {
+    var el = $('#daka-ke-trad');
+    if (!el) return;
+    var lab = keTraditionLabel();
+    el.innerHTML = '早晚课传统：' + (lab ? esc(lab) : '未选择') +
+      ' <button class="mini-btn tiny" id="daka-ke-trad-switch">' + (lab ? '切换' : '选择') + '</button>';
+    var btn = $('#daka-ke-trad-switch');
+    if (btn) btn.addEventListener('click', function (e) { e.stopPropagation(); chooseKeTradition(); });
+  }
+  function chooseKeTradition() {
+    return new Promise(function (resolve) {
+      var old = document.querySelector('.ke-trad-mask');
+      if (old) old.remove();
+      var mask = document.createElement('div');
+      mask.className = 'hd-pick-mask hd-dlg-mask ke-trad-mask';
+      mask.innerHTML = '<div class="hd-pick-sheet"><div class="hd-pick-title">早晚课用哪个传统？</div>' +
+        '<div class="hd-pick-foot" style="flex-direction:column;gap:8px">' +
+        '<button class="btn primary" id="ke-trad-s01">正一 · 《正一早晚功课经》</button>' +
+        '<button class="btn primary" id="ke-trad-s02">全真 · 《全真早晚功课经》</button>' +
+        '<button class="btn" id="ke-trad-cancel">取消</button></div></div>';
+      document.body.appendChild(mask);
+      function done(v) { mask.remove(); resolve(v); }
+      function pick(sid) {
+        try { if (window.WuriPoints) window.WuriPoints.keSetTradition(sid); } catch (e) {}
+        renderKeTradition(); done(sid);
+      }
+      mask.querySelector('#ke-trad-s01').addEventListener('click', function () { pick('s01'); });
+      mask.querySelector('#ke-trad-s02').addEventListener('click', function () { pick('s02'); });
+      mask.querySelector('#ke-trad-cancel').addEventListener('click', function () { done(null); });
+      mask.addEventListener('click', function (e) { if (e.target === mask) done(null); });
+    });
+  }
+  /* 正在打开功课经（切 tab → 开卷之间）：此窗口内结算的旧会话不回跳打卡页 */
+  var keOpening = false;
+  function openKe(h) {
+    if (!window.WuriPoints || typeof window.WuriPoints.keStart !== 'function') {
+      WuriDlg.alert('积分模块未加载，请稍后再试。'); return;
+    }
+    function go() {
+      /* 顺序关键：先切经文页（tab 切换会同步走 closeReader 结算旧会话），
+       * 300ms 后再 keStart＋开卷——否则新会话会在 0 秒时被当场结算。 */
+      keOpening = true;
+      var tabBtn = document.querySelector('[data-tab="tab-jing"]');
+      if (tabBtn) tabBtn.click();
+      setTimeout(function () {
+        var st = window.WuriPoints.keStart(h.id);
+        if (!st.ok) {
+          keOpening = false;
+          if (st.reason === 'dup') WuriDlg.alert('今日' + h.name + '已完成。');
+          else if (st.reason === 'no-tradition') { chooseKeTradition().then(function (v) { if (v) openKe(h); }); }
+          return;
+        }
+        var t = st.target;
+        try {
+          if (typeof window.JingOpenReaderAt === 'function') window.JingOpenReaderAt(t.sid, t.firstSec, 0);
+          else if (window.JingWen && window.JingWen.openReader) window.JingWen.openReader(t.sid);
+        } catch (e) {}
+        keOpening = false;
+      }, 300);
+    }
+    if (!window.WuriPoints.keTradition()) { chooseKeTradition().then(function (v) { if (v) go(); }); }
+    else go();
+  }
+  /* 功课经会话结算：退出阅读器时回修行打卡页；满分自动结算只提示（不切页）。
+   * window.toast 未定义时静默（打卡页的「今日已打卡 ✓」与我的页积分卡即反馈）。 */
+  var keEndedBound = false;
+  function bindKeEnded() {
+    if (keEndedBound) return; keEndedBound = true;
+    window.addEventListener('wuri-ke-ended', function (ev) {
+      var d = (ev && ev.detail) || {};
+      if (d.origin === 'switch' || keOpening) return; /* 切到另一会话／正在开卷，静默 */
+      var name = d.hid === 'zaoke' ? '早课' : (d.hid === 'wanke' ? '晚课' : '功课');
+      var msg = name + '：+' + d.x + ' 修为 · +' + d.l + ' 灵石' +
+        (d.full ? '（已完成 ✓）' : '（已打卡，划到底＋停留满 10 分钟可拿满 25）') +
+        (d.capped ? '（已达今日上限）' : '') + (d.double ? '（初一十五双倍）' : '');
+      try { if (window.toast) window.toast(msg); } catch (e) {}
+      try { pushWidgetPractice(); } catch (e) {}
+      if (d.origin === 'close') { renderAll(); open(); }
     });
   }
 
@@ -595,6 +696,7 @@ var Practice = (function () {
     });
     renderBgmRow();
     bindTimer();
+    bindKeEnded();
     // 启动时推送一次今日进度给小组件
     setTimeout(pushWidgetPractice, 1500);
   }

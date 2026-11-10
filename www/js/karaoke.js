@@ -1,11 +1,16 @@
 /* 跟唱播放器（2026-11-06 跟唱样板 v1 · 用户亲令上网页版）
  * 第二档：逐句真实时间轴＋句内逐字匀速推进、已唱字变金色；
  * 变速 0.5×/0.75×/1×；点句跳转＋单句循环；播放自动滚动。
- * 打分 v1：录用户音（getUserMedia），与青玄原唱逐句比对——
- *   完成度（该句时段内有声占比）＋节奏（有声重心与句中点贴合度）为主、
- *   音高（中位基频与原唱参考音高之差，八度折叠、±100 音分满分）为辅；
- *   唱诵拖腔多、音高比流行歌松，分数宽容。音高参考来自 timeline.json 的
- *   ref_pitch_hz（voiced_frac < 0.5 的句不计音高，只计完成度＋节奏）。
+ * 打分 v602（权重 40/25/25/10，档位 90/75/60 不动）：录用户音
+ *   （getUserMedia），与青玄原唱逐句比对——完成度（该句时段内有声占比）
+ *   ＋节奏（有声重心与句中点贴合度）＋音高（逐字算：按 char_t0 分字窗，
+ *   每字中位基频与原唱参考音高之差，八度折叠、±100 音分满分，再汇总成
+ *   行分）＋气息（长字/长音看响度是否稳）；唱诵拖腔多、音高比流行歌松，
+ *   分数宽容。音高参考来自 timeline.json 的 ref_pitch_hz
+ *   （voiced_frac < 0.5 的句不计音高）。无气息可测的行不扣气息分（其余
+ *   三项按权重归一化）。防作弊：静音（全程无有声采样）或“完美得可疑”
+ *   （≥4 行有音高且 ≥80% 行中位误差 <5 音分、且完成度均值 ≥0.8，疑似
+ *   放原唱）时本次打分无效、不计积分；每日修为上限 100 由 points.js 兜底。
  * 数据：content/karaoke/base_text.json（底本，唱词＋注音）＋
  *       content/karaoke/timeline.json（逐句时间轴＋参考音高，147 条）。
  * 音频：audio/karaoke/seg1|2|3.m4a（三段青玄录音）。
@@ -25,7 +30,8 @@
  *   特效不算定稿。
  *   透明度分层（2026-11-09 用户定）：人物 opacity 1 实色，半透明 50%
  *   只是背景纱层，绝不给整个 overlay 统一 0.5 opacity。
- *   打分公式与档位切分（90/75/60）冻结，不得改动。
+ *   打分权重 v602：完成度 40%＋节奏 25%＋音高 25%＋气息 10%（旧 45/25/30
+ *   已废，全文件不得残留）；档位切分（90/75/60）不动。
  * 注意：打分时原唱经扬声器会进麦克风（回声消除仅能部分抑制），
  *   建议戴耳机打分；分数以节奏＋完成度为主，音高为辅。
  */
@@ -93,6 +99,15 @@
     'jingxin|0': [2], 'jingshen|0': [3]
   };
   var RMS_VOICED = 0.012;   /* 麦克风有声阈值（RMS） */
+  /* v602 打分权重：完成度 40＋节奏 25＋音高 25＋气息 10（旧 45/25/30 已废）；
+   * 任一维不可测时不参与、其余维按权重归一化（见 combineScore）。 */
+  var SCORE_W = { c: 0.40, r: 0.25, p: 0.25, b: 0.10 };
+  var BREATH_MIN_CHAR_S = 1.2; /* 气息维：只看 ≥1.2s 的长字/长音 */
+  var BREATH_MIN_SAMPLES = 5;  /* 长字内至少 5 个有声采样才计气息 */
+  var SUSPECT_CENTS = 5;       /* “完美得可疑”：行中位音分误差 <5 音分 */
+  var SUSPECT_MIN_LINES = 4;   /* 至少 4 行有音高才判 */
+  var SUSPECT_FRAC = 0.8;      /* 其中 ≥80% 行近乎零误差 */
+  var SUSPECT_MIN_COMPLETENESS = 0.8; /* 且完成度均值 ≥0.8（放原唱才有的形态） */
   var PITCH_MIN = 80, PITCH_MAX = 400; /* 人声基频搜索范围 Hz */
   /* ---------- 敲磬（v583：改与读经器同款） ----------
    * 音源改用读经器 qing.mp3（v581 的 bell-interval.mp3 用户真机反馈听着像敲钵，不用）；
@@ -879,6 +894,86 @@
     var m = Math.floor(a.length / 2);
     return (a.length % 2) ? a[m] : (a[m - 1] + a[m]) / 2;
   }
+  function centsOf(f0, ref) {
+    var c = 1200 * Math.log(f0 / ref) / Math.log(2);
+    /* 八度折叠：差一个八度不扣分 */
+    return c - 1200 * Math.round(c / 1200);
+  }
+  function pitchScoreOfCents(ac) {
+    return ac <= 100 ? 1 : (ac >= 200 ? 0 : 1 - (ac - 100) / 100);
+  }
+  /* 逐字音准：按 char_t0 分字窗，每字中位基频与参考音比，再汇总成行分。
+   * 无 char_t0（或字窗内有声基频采样不足）时回落整行中位音高；都不足返回 null。 */
+  function charPitch(win, it) {
+    if (!it.ref_pitch_hz) return null;
+    var voiced = win.filter(function (s) { return s.rms >= RMS_VOICED; });
+    function medPitch(samples) {
+      var f0s = samples.map(function (s) { return s.f0; }).filter(function (f) { return f; });
+      if (f0s.length < 2) return null;
+      var med = median(f0s);
+      if (!med || med <= 0) return null;
+      return { cents: centsOf(med, it.ref_pitch_hz), n: f0s.length };
+    }
+    if (it.char_t0 && it.char_t0.length) {
+      var perChar = [];
+      for (var k = 0; k < it.char_t0.length; k++) {
+        var w0 = it.char_t0[k], w1 = (k + 1 < it.char_t0.length) ? it.char_t0[k + 1] : it.t1;
+        var sub = voiced.filter(function (s) { return s.t >= w0 && s.t < w1; });
+        var mp = medPitch(sub);
+        if (mp) perChar.push(mp.cents);
+      }
+      if (perChar.length) {
+        var medC = median(perChar.map(function (c) { return Math.abs(c); }));
+        var signed = median(perChar);
+        return { pitch: pitchScoreOfCents(medC), cents: signed, nChars: perChar.length };
+      }
+      return null;
+    }
+    var whole = medPitch(voiced);
+    if (!whole) return null;
+    return { pitch: pitchScoreOfCents(Math.abs(whole.cents)), cents: whole.cents, nChars: 0 };
+  }
+  /* 气息维：长字/长音看响度是否稳。长字内有声采样 RMS 的变异系数 CV 越小越稳；
+   * CV≤0.15 满分、CV≥0.75 零分，线性插值；无符合条件的长字返回 null（不扣分）。 */
+  function breathOfLine(win, it) {
+    if (!it.char_t0 || !it.char_t0.length) return null;
+    var voiced = win.filter(function (s) { return s.rms >= RMS_VOICED; });
+    var scores = [];
+    for (var k = 0; k < it.char_t0.length; k++) {
+      var w0 = it.char_t0[k], w1 = (k + 1 < it.char_t0.length) ? it.char_t0[k + 1] : it.t1;
+      if (w1 - w0 < BREATH_MIN_CHAR_S) continue;
+      var sub = voiced.filter(function (s) { return s.t >= w0 && s.t < w1; });
+      if (sub.length < BREATH_MIN_SAMPLES) continue;
+      var mean = sub.reduce(function (a, s) { return a + s.rms; }, 0) / sub.length;
+      if (mean <= 0) continue;
+      var variance = sub.reduce(function (a, s) { return a + (s.rms - mean) * (s.rms - mean); }, 0) / sub.length;
+      var cv = Math.sqrt(variance) / mean;
+      scores.push(Math.max(0, Math.min(1, 1 - Math.max(0, cv - 0.15) / 0.6)));
+    }
+    if (!scores.length) return null;
+    return scores.reduce(function (a, b) { return a + b; }, 0) / scores.length;
+  }
+  /* 四项加权：任一维 null 即不参与、其余维按权重归一化（全 null 不可能：
+   * 完成度与节奏恒有值）。 */
+  function combineScore(c, r, p, b) {
+    var sum = 0, wsum = 0;
+    if (c != null) { sum += SCORE_W.c * c; wsum += SCORE_W.c; }
+    if (r != null) { sum += SCORE_W.r * r; wsum += SCORE_W.r; }
+    if (p != null) { sum += SCORE_W.p * p; wsum += SCORE_W.p; }
+    if (b != null) { sum += SCORE_W.b * b; wsum += SCORE_W.b; }
+    return wsum ? sum / wsum : 0;
+  }
+  /* “完美得可疑”：≥4 行有音高、≥80% 行中位误差 <5 音分、完成度均值 ≥0.8
+   * ＝放原唱进麦克风的形态，真人跟唱极难同时满足（尤其完成度也满）。 */
+  function suspiciousOf(results) {
+    if (!results || !results.length) return false;
+    var pitched = results.filter(function (r) { return r.cents != null; });
+    if (pitched.length < SUSPECT_MIN_LINES) return false;
+    var near = pitched.filter(function (r) { return Math.abs(r.cents) < SUSPECT_CENTS; }).length;
+    if (near / pitched.length < SUSPECT_FRAC) return false;
+    var meanC = results.reduce(function (a, r) { return a + r.completeness; }, 0) / results.length;
+    return meanC >= SUSPECT_MIN_COMPLETENESS;
+  }
   function scoreLines(samples) {
     if (!data) return null;
     var items = currentItems();
@@ -916,33 +1011,45 @@
         rhythm = Math.max(0, 1 - off);
         rhythmOff = centroid - center; /* 正=重心偏晚，负=偏早 */
       }
-      var pitch = null, cents = null;
+      var pitch = null, cents = null, breath = null;
       var usePitch = !!(it.ref_pitch_hz && it.voiced_frac != null && it.voiced_frac >= 0.5);
       if (usePitch) {
-        var f0s = voiced.map(function (s) { return s.f0; }).filter(function (f) { return f; });
-        if (f0s.length >= 3) {
-          var med = median(f0s);
-          if (med && med > 0) {
-            cents = 1200 * Math.log(med / it.ref_pitch_hz) / Math.log(2);
-            /* 八度折叠：差一个八度不扣分 */
-            cents = cents - 1200 * Math.round(cents / 1200);
-            var ac = Math.abs(cents);
-            pitch = ac <= 100 ? 1 : (ac >= 200 ? 0 : 1 - (ac - 100) / 100);
-          }
-        }
+        var cp = charPitch(win, it);
+        if (cp) { pitch = cp.pitch; cents = cp.cents; }
       }
-      var score;
-      if (pitch != null) score = 0.45 * completeness + 0.25 * rhythm + 0.30 * pitch;
-      else score = 0.6 * completeness + 0.4 * rhythm;
+      breath = breathOfLine(win, it);
+      var score = combineScore(completeness, rhythm, pitch, breath);
+      var rmsMean = 0, rmsMax = 0;
+      win.forEach(function (sm) {
+        rmsMean += sm.rms;
+        if (sm.rms > rmsMax) rmsMax = sm.rms;
+      });
+      rmsMean = win.length ? rmsMean / win.length : 0;
       results.push({
         item: it, score: score, completeness: completeness, rhythm: rhythm,
-        rhythmOff: rhythmOff, pitch: pitch, cents: cents,
-        voiced: voiced.length, total: win.length
+        rhythmOff: rhythmOff, pitch: pitch, cents: cents, breath: breath,
+        voiced: voiced.length, total: win.length, rmsMean: rmsMean, rmsMax: rmsMax
       });
     });
     if (!results.length) return null;
     var total = results.reduce(function (a, r) { return a + r.score; }, 0) / results.length;
-    return { total: total, lines: results };
+    /* 四项均值（出分屏分开展示；音高/气息无可测行时为 null，显示 —） */
+    function meanOf(key) {
+      var vals = results.map(function (r) { return r[key]; }).filter(function (v) { return v != null; });
+      if (!vals.length) return null;
+      return vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+    }
+    var totalVoiced = results.reduce(function (a, r) { return a + r.voiced; }, 0);
+    var silent = totalVoiced === 0;
+    var suspicious = suspiciousOf(results);
+    return {
+      total: total, lines: results,
+      components: {
+        completeness: meanOf('completeness'), rhythm: meanOf('rhythm'),
+        pitch: meanOf('pitch'), breath: meanOf('breath')
+      },
+      silent: silent, suspicious: suspicious, invalid: silent || suspicious
+    };
   }
   function gradeOf(total100) {
     if (total100 >= 90) return t('karaoke_grade_excellent');
@@ -956,6 +1063,75 @@
     if (r.rhythm < 0.7) return (r.rhythmOff >= 0) ? t('karaoke_fb_late') : t('karaoke_fb_early');
     if (r.pitch != null && r.pitch < 0.7) return (r.cents > 0) ? t('karaoke_fb_high') : t('karaoke_fb_low');
     return t('karaoke_fb_good');
+  }
+  /* v602 出分屏：四项分开亮出来（完成度/节奏/音高/气息，0–100；不可测为 —）。
+   * 权重 40/25/25/10 与 combineScore 同源；行分已按权重归一化，此处只展示均值。 */
+  function scoreBreakdownHTML(res) {
+    if (!res || !res.components) return '';
+    var c = res.components;
+    function row(labelKey, v) {
+      var val = (v == null) ? '—' : String(Math.round(v * 100));
+      var bar = (v == null) ? 0 : Math.round(v * 100);
+      var bc = bar >= 75 ? 'good' : (bar >= 60 ? 'fair' : 'poor');
+      return '<div class="karaoke-score-dim"><span class="karaoke-score-dim-l">' + esc(t(labelKey)) +
+        '</span><span class="karaoke-score-dim-bar"><i class="' + bc + '" style="width:' + bar +
+        '%"></i></span><span class="karaoke-score-dim-v ' + bc + '">' + val + '</span></div>';
+    }
+    return '<div class="karaoke-score-breakdown">' +
+      row('points_dim_c', c.completeness) + row('points_dim_r', c.rhythm) +
+      row('points_dim_p', c.pitch) + row('points_dim_b', c.breath) + '</div>';
+  }
+  /* v602 积分行：本次唱所得修为/灵石（初一十五双倍、触顶提示一并标出） */
+  function pointsLineHTML(pts) {
+    if (!pts || (!pts.x && !pts.l)) return '';
+    var s = '+' + pts.x + ' ' + t('points_xiuxing') + ' · +' + pts.l + ' ' + t('points_lingshi');
+    if (pts.doubled) s += ' · ' + t('points_double_day');
+    if (pts.capped) s += ' · ' + t('points_cap_hit');
+    return '<div class="karaoke-points-line" id="karaoke-points-line">' + esc(s) + '</div>';
+  }
+  /* v602 修订版（时间制＋补差价）：唱满的段各记一段——修为 = 段时长（分钟）
+   * ×档位系数（90+ 2.0／75+ 1.5／60+ 1.0／<60 0.5），不足 1 分钟按 1 分钟计；
+   * 同一段同一天只补差价（points.js 内按当日最好成绩算）。一段都没唱满时，
+   * 本次出分整体按总分记一段（partial 键，时长 = 有声行时长和）。无效打分不调用。 */
+  function sectionDuration(sectionId) {
+    if (!data) return 1;
+    var t0 = null, t1 = null;
+    data.sections.forEach(function (s) {
+      if (s.id !== sectionId) return;
+      s.items.forEach(function (it) {
+        if (t0 == null || it.t0 < t0) t0 = it.t0;
+        if (t1 == null || it.t1 > t1) t1 = it.t1;
+      });
+    });
+    if (t0 == null || t1 == null) return 1;
+    return Math.max(0, (t1 - t0) / 60);
+  }
+  function awardSingFromScore(res, total100) {
+    if (!window.WuriPoints || !res || !res.lines) return null;
+    var secs = sectionScores(res);
+    var full = secs.filter(function (s) { return s.eligible; });
+    var out = { x: 0, l: 0, parts: [], capped: false, doubled: false };
+    function add(r) {
+      if (!r) return;
+      if (r.awarded) {
+        out.x += r.x; out.l += r.l;
+        out.capped = out.capped || !!r.capped;
+        out.doubled = out.doubled || !!r.double;
+      }
+      out.parts.push(r);
+    }
+    if (full.length) {
+      full.forEach(function (sc) {
+        add(WuriPoints.awardSing(sc.section, sc.score, sectionDuration(sc.section)));
+      });
+    } else {
+      var partMin = 0;
+      res.lines.forEach(function (r) {
+        if (r.voiced && r.item) partMin += Math.max(0, (r.item.t1 - r.item.t0));
+      });
+      add(WuriPoints.awardSing('partial', total100, partMin / 60));
+    }
+    return out;
   }
   function showScore(samples) {
     var host = $('karaoke-score');
@@ -971,10 +1147,18 @@
     }
     var total100 = Math.round(res.total * 100);
     var cls = total100 >= 75 ? 'good' : (total100 >= 60 ? 'fair' : 'poor');
+    /* v602：防作弊——静音或“完美得可疑”时本次打分无效，不计积分 */
+    var pts = res.invalid ? null : awardSingFromScore(res, total100);
     var html = '<div class="karaoke-score-card"><div class="karaoke-score-t">' +
       esc(t('karaoke_score_title')) + '</div>' +
       '<div class="karaoke-score-num ' + cls + '">' + total100 + '</div>' +
       '<div class="karaoke-score-grade">' + esc(gradeOf(total100)) + '</div>' +
+      scoreBreakdownHTML(res) +
+      (res.invalid
+        ? '<div class="karaoke-score-invalid">' +
+          esc(res.silent ? t('points_invalid_silent') : t('points_invalid_suspect')) + '</div>'
+        : '') +
+      pointsLineHTML(pts) +
       '<div class="karaoke-score-list">';
     res.lines.forEach(function (r) {
       var s = Math.round(r.score * 100);
@@ -1001,7 +1185,19 @@
       armScoring();
     });
     var sb = $('karaoke-share-card');
-    if (sb) sb.addEventListener('click', function () { shareScoreCard(total100); });
+    if (sb) sb.addEventListener('click', function () {
+      shareScoreCard(total100);
+      /* v602：分享成绩卡记 5 灵石（每日限 1 次）；已记过则静默无事 */
+      try {
+        if (window.WuriPoints) {
+          var sh = WuriPoints.awardShare();
+          if (sh && sh.awarded) {
+            var pl = $('karaoke-points-line');
+            if (pl) pl.textContent = pl.textContent + ' · +' + sh.l + ' ' + t('points_lingshi');
+          }
+        }
+      } catch (e) {}
+    });
     if (boardOk.length) bindBoardSubmit(host, boardOk);
     showCelebration(total100); /* v600：小仙童写真帧特效（约 4s 自消，点按提前消散） */
   }
@@ -1921,6 +2117,16 @@
       setRecMode: setRecMode, getRecMode: function () { return recMode; },
       getRecList: function () { return recList; }, renderRecList: renderRecList,
       deleteRec: deleteRec, recItemAction: recItemAction,
+      /* v602 打分四项改进：逐字音准＋气息维＋权重 40/25/25/10＋防作弊 */
+      SCORE_W: SCORE_W, BREATH_MIN_CHAR_S: BREATH_MIN_CHAR_S,
+      BREATH_MIN_SAMPLES: BREATH_MIN_SAMPLES,
+      SUSPECT_CENTS: SUSPECT_CENTS, SUSPECT_MIN_LINES: SUSPECT_MIN_LINES,
+      SUSPECT_FRAC: SUSPECT_FRAC,
+      centsOf: centsOf, pitchScoreOfCents: pitchScoreOfCents,
+      charPitch: charPitch, breathOfLine: breathOfLine,
+      combineScore: combineScore, suspiciousOf: suspiciousOf,
+      scoreBreakdownHTML: scoreBreakdownHTML, pointsLineHTML: pointsLineHTML,
+      awardSingFromScore: awardSingFromScore,
       /* v601 网友排名轻量版（只传分数）＋录音音质（原声约束／128kbps） */
       BOARD_API: BOARD_API, BOARD_SECTION_LINES: BOARD_SECTION_LINES,
       sectionScores: sectionScores, boardEligible: boardEligible,

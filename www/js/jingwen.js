@@ -648,6 +648,8 @@ var JingWen = (function () {
   }
 
   function openReader(id, _retry) {
+    /* v602 早晚课验证：切到别的经即结算进行中的功课经会话 */
+    try { if (window.WuriPoints) window.WuriPoints.keEndIfOtherSid(id); } catch (e) {}
     /* 内丹书籍为高级版（2026-10-14 用户定）：目录、搜索、每日推荐所有入口都经此函数，未解锁弹付费墙 */
     if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
     /* 道藏全集为高级版（2026-10-26 用户定）：正文开卷在 daozang.js openWork 已拦，
@@ -916,6 +918,47 @@ var JingWen = (function () {
   /* 跨闭包钩子：JingMark 书签存档借用同一字偏移口径 */
   window.__wuriReaderOffset = function () { try { return currentContentOffset(); } catch (e) { return 0; } };
 
+  /* v602 每日推荐封顶：指定范围的覆盖率（供 points.js 判定“读完”）。
+   * 范围 = 第 secIdx 节内、从 startOff 起 charCount 字；end 按段落切：
+   * 取离目标 end 最近的段末（不断句；无段数据时用原 end；超节尾夹到节尾）。
+   * 返回 0–1；无度量数据时返回 null（调用方本拍不判，等节加载后再试）。 */
+  function excerptCoverage(sid, secIdx, startOff, charCount) {
+    if (!currentId || currentId !== sid || !_metrics || !_metrics.total) return null;
+    var sl = _metrics.secLens[secIdx];
+    if (sl == null) return null;
+    var secStart = _metrics.cum[secIdx] || 0;
+    var a = secStart + (startOff || 0);
+    var target = a + (charCount || 0);
+    var b = target;
+    try {
+      var pc = (_metrics.paraCum && _metrics.paraCum[secIdx]) || [];
+      var pl = (_metrics.paraLens && _metrics.paraLens[secIdx]) || [];
+      var best = null;
+      for (var k = 0; k < pc.length && k < pl.length; k++) {
+        var end = secStart + pc[k] + pl[k];
+        if (end <= a) continue;
+        if (best == null || Math.abs(end - target) < Math.abs(best - target)) best = end;
+      }
+      if (best != null) b = best;
+    } catch (e) {}
+    if (b > secStart + sl) b = secStart + sl;
+    if (b <= a) return null;
+    return Math.min(1, covCoveredIn(a, b) / (b - a));
+  }
+  window.__wuriExcerptCoverage = excerptCoverage;
+
+  /* v602 早晚课验证：指定节区间的覆盖率（points.js keProgress 用）。
+   * 范围 = 第 firstSec 节首到第 lastSec 节尾的全部内容字；返回 0–1；
+   * 无度量数据时返回 null。 */
+  function kePartCoverage(sid, firstSec, lastSec) {
+    if (!currentId || currentId !== sid || !_metrics || !_metrics.total) return null;
+    var a = _metrics.cum[firstSec];
+    var b = _metrics.cum[lastSec] + (_metrics.secLens[lastSec] || 0);
+    if (a == null || b == null || b <= a) return null;
+    return Math.min(1, covCoveredIn(a, b) / (b - a));
+  }
+  window.__wuriKePartCoverage = kePartCoverage;
+
   /* ---------- 阅读覆盖账本（2026-10-29 进度误标修复） ----------
    * 旧口径之病：frac＝当前位置偏移÷全书字数（contentOffsetNow 把视口
    * 顶线以上的整节字数全计「已过」）——深链/位置恢复落到哪，前面的卷
@@ -1082,6 +1125,10 @@ var JingWen = (function () {
       e.cov = (_cov || []).map(function (iv) { return [Math.round(iv[0]), Math.round(iv[1])]; });
       e.covFrac = e.frac;
       e.covSec = _metrics.secLens.map(function (sl, si) { return sl ? Math.floor(secCovRatio(si) * 100) : 100; });
+      /* v602：今日推荐为「节」时，该节覆盖率 ≥90% 即算读完（points.js 内核对推荐＋去重） */
+      try { if (window.WuriPoints) window.WuriPoints.onDailyJingProgress(currentId, e.covSec); } catch (e2) {}
+      /* v602 早晚课验证：更新进行中的功课经会话（划到底标记；满分自动结算） */
+      try { if (window.WuriPoints) window.WuriPoints.keProgress(currentId); } catch (e2) {}
       var newlyDone = false;
       if (frac >= 0.995 && !e.done) { e.done = true; e.doneTs = Date.now(); newlyDone = true; }
       e.ts = Date.now();
@@ -1356,6 +1403,8 @@ var JingWen = (function () {
     var d = rpLoadStats();
     if (!d.fin[sid]) { d.fin[sid] = Date.now(); rpSaveStats(d); }
     rpRenderStats();
+    /* v602：今日推荐整部读完（frac≥0.995）记 10 修为（points.js 内核对推荐＋去重） */
+    try { if (window.WuriPoints) window.WuriPoints.onDailyJingRead(sid, null); } catch (e) {}
     rpSyncPushSoon();
   }
   function rpStreak(d) {
@@ -1517,6 +1566,17 @@ var JingWen = (function () {
          X%」；本卷进度与剩余时间估算不再上栏（底层 frac/速度采样/autopos
          存储口径全部不动） */
       txt.innerHTML = (secH ? '<b>' + esc(txScript(secH)) + '</b> · ' : '') + (dfrac >= 0.995 ? '已读完' : '本书 ' + pct + '%');
+      /* v602 早晚课验证：进行中的功课经会话在状态行追加进度（停留分钟/划到底） */
+      try {
+        if (window.WuriPoints && window.WuriPoints.keStatus) {
+          var ks = window.WuriPoints.keStatus(currentId);
+          if (ks && !ks.awarded) {
+            txt.innerHTML += ' · ' + (ks.kind === 'morning' ? '早课' : '晚课') + ' ' +
+              ks.visibleMin + '/' + ks.fullMin + '分钟' +
+              (ks.done ? ' · 已划到底 ✓' : ' · 文末 ' + Math.floor((ks.lastFrac || 0) * 100) + '%');
+          }
+        }
+      } catch (e) {}
     }
     if (now - _lastProgSave > 2500) { _lastProgSave = now; saveProgressNow(); }
     /* 读完瞬间立即落盘一次：滚到底后不再有滚动事件触发节流保存，
@@ -1871,6 +1931,8 @@ var JingWen = (function () {
   });
 
   function openReaderAt(id, secIdx, charOff, _retry) {
+    /* v602 早晚课验证：切到别的经即结算进行中的功课经会话（同经直达不结算） */
+    try { if (window.WuriPoints) window.WuriPoints.keEndIfOtherSid(id); } catch (e) {}
     _posSuppressUntil = Date.now() + 12000; /* 直达锚点优先：时限内不恢复书签/自动位置 */
     if (isNeidan(id) && !isPro()) { if (window.WuriPro) WuriPro.requirePro('jingwen'); return; }
     if (/^KR5/.test(id || '')) {
@@ -2390,6 +2452,8 @@ var JingWen = (function () {
       saveAutoPos(currentId, window.scrollY || window.pageYOffset || 0, collectExpandedSecs());
       saveProgressNow();
     }
+    /* v602 早晚课验证：退出阅读器即结算本次功课经会话（只打开也按停留记） */
+    try { if (window.WuriPoints) window.WuriPoints.keEnd('close'); } catch (e) {}
     var _sb = $('#jing-statusbar'); if (_sb) _sb.hidden = true;
     window._marksReturn = null; /* 真关阅读器：标记页返回链随之作废 */
     document.body.classList.remove('jing-immersive');

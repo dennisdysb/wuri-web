@@ -757,6 +757,25 @@ var JING_RECOMMEND_BY_DATE = {
   '12-8':'s10', '12-16':'s09', '12-22':'s13', '12-24':'s10',
   'dongzhi':'s09', 'xiazhi':'s09' // 冬至元始天尊圣诞、夏至灵宝天尊圣诞
 };
+/* v602 修订版：每日推荐封顶约 10 分钟（300 字/分钟，与池内 m 口径一致）。
+ * 平时：轮换池单位 m>10 只取前部（excerptChars=3000 字，end 按段落切在阅读器侧
+ * 落到段界），卡片标“节选”，全文一点即达（点卡仍进整节阅读器）。
+ * 神诞日：推所配经的第一品（secIdx 0），不推整部；第一品仍超 10 分钟同上处理。
+ * 第一品字数表：由 www/jing/sNN.js 实测（node 量取各经 sections[0] 正文 t 长度），
+ * 仅 s29 第一品 3831 字（13 分钟）超封顶。分钟数 = max(1, round(字数/300))。 */
+var JING_FIRST_SEC = {
+  s01: { t: '早坛·澄清韵', c: 57 }, s03: { t: '诵经仪则', c: 60 },
+  s04: { t: '开经玄蕴咒', c: 167 }, s05: { t: '玄天大圣赞', c: 112 },
+  s07: { t: '第一章', c: 76 }, s09: { t: '开经演教', c: 1937 },
+  s10: { t: '全文', c: 1573 }, s12: { t: '全文', c: 474 },
+  s13: { t: '全文', c: 1751 }, s15: { t: '全文', c: 2138 },
+  s18: { t: '第1章', c: 106 }, s19: { t: '大易總敘章第一', c: 206 },
+  s20: { t: '第一章 天心', c: 688 }, s26: { t: '太上老君說常清靜經', c: 735 },
+  s27: { t: '高上玉皇心印妙經', c: 260 }, s28: { t: '臨水夫人寶誥', c: 257 },
+  s29: { t: '九天应元雷声普化天尊玉枢宝经', c: 3831 }
+};
+var JING_REC_CAP_CHARS = 3000; /* 约 10 分钟封顶对应的字数 */
+var JING_REC_CAP_MIN = 10;
 /* 每日一经轮换池（2026-10-27 用户批准方案，取代旧 7 部兜底轮推）：
  * 主池＝常见经文 29 部按节拆 296 单位＋副池＝道藏全集正选 202 部拆 540 单位，
  * 合计 836 个单位（js/daily-jing.js，由 gen-daily-jing.py 生成，副池名单见
@@ -804,17 +823,30 @@ function recommendJing(l) {
     } catch (e) {}
     var u = dailyJingUnitForDay(dayNum);
     if (u) {
+      var capped = u.m > JING_REC_CAP_MIN;
       return {
         sid: u.s, reason: reason === '日常熏修' ? '每日一经' : reason,
-        secIdx: u.n, secTitle: u.h || '全文', gloss: u.g, minutes: u.m, unitTitle: u.t,
-        charOff: u.p || 0
+        secIdx: u.n, secTitle: u.h || '全文', gloss: u.g,
+        minutes: capped ? JING_REC_CAP_MIN : u.m, unitTitle: u.t,
+        charOff: u.p || 0, chars: u.c,
+        excerpt: capped, excerptChars: capped ? Math.min(u.c, JING_REC_CAP_CHARS) : null
       };
     }
-    // 池数据缺失时的最后兜底（不应发生）
-    return { sid: 's26', reason: reason, secIdx: null, secTitle: null };
+    // 池数据缺失时的最后兜底（不应发生）：s26 第一品（735 字，2 分钟）
+    return { sid: 's26', reason: reason, secIdx: 0, secTitle: '太上老君說常清靜經',
+      gloss: null, minutes: 2, unitTitle: null, charOff: 0, chars: 735,
+      excerpt: false, excerptChars: null };
   }
-  // 神诞日：推整部经文（不指定章节）
-  return { sid: sid, reason: reason, secIdx: null, secTitle: null };
+  // 神诞日：推所配经的第一品（不推整部）；第一品仍超 10 分钟的同上处理
+  var first = JING_FIRST_SEC[sid];
+  if (!first) return { sid: sid, reason: reason, secIdx: null, secTitle: null };
+  var fExcerpt = first.c > JING_REC_CAP_CHARS;
+  return {
+    sid: sid, reason: reason, secIdx: 0, secTitle: first.t,
+    gloss: null, minutes: fExcerpt ? JING_REC_CAP_MIN : Math.max(1, Math.round(first.c / 300)),
+    unitTitle: null, charOff: 0, chars: first.c,
+    excerpt: fExcerpt, excerptChars: fExcerpt ? JING_REC_CAP_CHARS : null
+  };
 }
 function jingTitleById(sid) {
   try {
@@ -1266,7 +1298,7 @@ function buildNotifications() {
       try {
         var rec = recommendJing(l);
         var recTitle = jingTitleById(rec.sid);
-        // 章节信息：每日一经精确到卷/章（用池内卷章题），神诞日推整部
+        // 章节信息：每日一经精确到卷/章（用池内卷章题），神诞日推第一品（v602 封顶）
         var chapStr = '';
         if (rec.secTitle) {
           chapStr = ' · ' + rec.secTitle;
@@ -1655,7 +1687,8 @@ function bindRemind() {
       if (titleEl) titleEl.textContent = txPoem(jt);
       if (unitEl) {
         unitEl.textContent = rec.secTitle
-          ? txPoem(rec.secTitle) + (rec.minutes ? ' · 约' + rec.minutes + '分钟' : '')
+          ? txPoem(rec.secTitle) + (rec.minutes ? ' · 约' + rec.minutes + '分钟' : '') +
+            (rec.excerpt ? ' · ' + t('jingrec_excerpt') : '')
           : '';
       }
       if (glossEl) glossEl.textContent = rec.gloss ? txPoem(rec.gloss) : '';

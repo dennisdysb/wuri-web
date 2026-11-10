@@ -3795,6 +3795,43 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-score-val.fair{color:var(--gold)}
 .karaoke-score-val.poor{color:var(--cinnabar)}
 .karaoke-score-fb{color:var(--muted);font-size:12px;min-width:64px;text-align:right}
+/* ---- v602 打分四项分解＋积分行：颜色只走变量链，日/夜/红光三态由变量覆写接管 ---- */
+.karaoke-score-breakdown{margin-top:10px;border-top:1px solid var(--line-soft);padding-top:10px}
+.karaoke-score-dim{display:flex;align-items:center;gap:10px;padding:3px 0}
+.karaoke-score-dim-l{flex:0 0 52px;font-size:13px;color:var(--muted)}
+.karaoke-score-dim-bar{flex:1;height:6px;border-radius:3px;background:var(--line-soft);overflow:hidden}
+.karaoke-score-dim-bar i{display:block;height:100%;border-radius:3px;background:var(--teal)}
+.karaoke-score-dim-bar i.fair{background:var(--gold)}
+.karaoke-score-dim-bar i.poor{background:var(--cinnabar)}
+.karaoke-score-dim-v{flex:0 0 28px;text-align:right;font-weight:700;font-size:13px}
+.karaoke-score-dim-v.good{color:var(--teal)}
+.karaoke-score-dim-v.fair{color:var(--gold)}
+.karaoke-score-dim-v.poor{color:var(--cinnabar)}
+.karaoke-score-invalid{margin-top:10px;padding:8px 10px;border:1px solid var(--cinnabar);border-radius:8px;background:var(--cinnabar-wash);color:var(--cinnabar);font-size:13px;font-weight:700}
+.karaoke-points-line{margin-top:10px;text-align:center;font-weight:700;color:var(--gold);font-size:14px}
+/* ---- v602 积分境界卡（我的页 #points-card）：颜色只走变量链 ---- */
+.points-bal-row{display:flex;gap:8px;margin-top:4px}
+.points-bal{flex:1;text-align:center;padding:8px 0;border:1px solid var(--line-soft);border-radius:8px;background:var(--paper-2)}
+.points-bal b{display:block;font-size:20px;color:var(--ink)}
+.points-bal span{font-size:12px;color:var(--muted)}
+.points-realm{margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.points-realm-name{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink)}
+.points-title-active{padding:2px 8px;border:1px solid var(--gold);border-radius:999px;color:var(--gold);font-size:12px;font-weight:700}
+.points-progress{margin-top:8px;height:8px;border-radius:4px;background:var(--line-soft);overflow:hidden}
+.points-progress-bar{display:block;height:100%;background:var(--gold);border-radius:4px}
+.points-next{margin-top:6px}
+.points-task{margin-top:4px;color:var(--ink-2)}
+.points-renew-note{margin-top:8px}
+.points-redeem{margin-top:12px;border-top:1px solid var(--line-soft);padding-top:10px}
+.points-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft)}
+.points-item-name{font-size:14px;color:var(--ink)}
+.points-item-name i{display:block;font-style:normal;font-size:12px;color:var(--muted)}
+.points-owned{color:var(--teal);font-size:13px;font-weight:700}
+.points-locked{color:var(--muted);font-size:12px}
+.points-sync{margin-top:10px}
+/* v602 早晚课验证：打卡页传统选择行（颜色只走变量链） */
+.daka-ke-trad{margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft);font-size:13px;color:var(--muted)}
+.daka-ke-trad .mini-btn{margin-left:6px}
 /* ---- v599 录音悬浮钮：右侧、磬钮上方垂直叠放（用户 2026-11-09 15:24 定） ----
  * 磬钮 bottom 114px、高 56px（顶沿 170px）；录音钮 bottom 194px（留 24px 间隙），
  * 回顶钮在 20px——三钮右列不重叠。平时金底白字「录音」，录制中变朱砂红底
