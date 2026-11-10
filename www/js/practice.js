@@ -379,10 +379,12 @@ var Practice = (function () {
         });
         grip.addEventListener('pointerup', function () { dragEnd(true); });
         grip.addEventListener('pointercancel', function () { dragEnd(false); });
+        grip.addEventListener('contextmenu', function (e) { e.preventDefault(); }); /* v606：禁长按菜单 */
       }
       /* 点行身：自建项进编辑弹窗（第 14 项修正：行上无按钮，点行身进编辑）；
        * 内置项保持原有行为——计次类点行打卡、计时类点行再开一局。
        * 排除抓手与「打卡」按钮；拖动位移 >8px 的抬手 click 由 dragEnd 抑制。 */
+      el.addEventListener('contextmenu', function (e) { e.preventDefault(); }); /* v606：行身长按也不弹菜单 */
       el.addEventListener('click', function (e) {
         if (Date.now() < dragSuppressUntil) return;
         if (e.target && e.target.closest && (e.target.closest('.daka-grip') || e.target.closest('[data-dact="check"]'))) return;

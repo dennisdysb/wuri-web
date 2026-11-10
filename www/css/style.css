@@ -1083,6 +1083,7 @@ details.disc-foot .hint{margin-top:9px}
 /* 打卡项拖动排序（v605 ⑬）：抓手＋拖拽态＋插入线；只限 #daka-habit-list（今日打卡区），
  * 不动持珠念诵区；颜色只走变量。插入线用 box-shadow（不占布局，不跳行） */
 #daka-habit-list .daka-grip{flex:none;cursor:grab;color:var(--muted);touch-action:none;-webkit-user-select:none;user-select:none}
+#daka-habit-list .daka-item{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} /* v606：行内文本禁选＋禁长按呼出，安卓长按不再出选择框、pointercancel 不再断拖 */
 #daka-habit-list .daka-grip:active{cursor:grabbing}
 #daka-habit-list .daka-item.dragging{opacity:.55}
 #daka-habit-list .daka-item.drop-before{box-shadow:inset 0 2px 0 var(--gold)}
