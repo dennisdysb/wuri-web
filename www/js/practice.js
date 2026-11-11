@@ -78,6 +78,45 @@ var Practice = (function () {
         if (ic !== '✦') { h.icon = ic; migrated = true; }
       }
     });
+    /* 增量迁移（v607：补回缺失的预设项，只增不删）：
+     * 预设只在首次播种时写入；之后存量列表一旦缺某预设——无论是旧版
+     * 播种时就没有，还是云同步整值覆盖带走了它——永不补回，列表就
+     * 永久缺项（2026-11-10 用户实测：打坐冥想从网页版消失）。
+     * 修法：每次加载核对 4 个预设，缺失的按 PRESETS 顺序插回其
+     * canonical 位置（以前一个预设之后，没有前一个则放最前）；自建项
+     * 与现有顺序一律不动。顺序键同步修补：补回的预设若不在顺序键里，
+     * 按它在列表中的位置插进顺序键，否则渲染会把它排到末尾。 */
+    var restored = [];
+    PRESETS.forEach(function (p, pi) {
+      var exists = false;
+      for (var i = 0; i < list.length; i++) { if (list[i].id === p.id) { exists = true; break; } }
+      if (exists) return;
+      var item = { id: p.id, name: p.name, type: p.type, icon: p.icon, preset: true, remindTime: p.remindTime };
+      var at = 0;
+      for (var j = pi - 1; j >= 0; j--) {
+        var prevIdx = -1;
+        for (var k = 0; k < list.length; k++) { if (list[k].id === PRESETS[j].id) { prevIdx = k; break; } }
+        if (prevIdx >= 0) { at = prevIdx + 1; break; }
+      }
+      list.splice(at, 0, item);
+      restored.push(p.id);
+      migrated = true;
+    });
+    if (restored.length) {
+      var order = loadOrder();
+      restored.forEach(function (rid) {
+        if (order.indexOf(rid) >= 0) return;
+        var idx = -1;
+        for (var i = 0; i < list.length; i++) { if (list[i].id === rid) { idx = i; break; } }
+        var atKey = order.length;
+        for (var j = idx + 1; j < list.length; j++) {
+          var k = order.indexOf(list[j].id);
+          if (k >= 0) { atKey = k; break; }
+        }
+        order.splice(atKey, 0, rid);
+      });
+      saveOrder(order);
+    }
     if (migrated) save(LS_HABITS, list);
     return list;
   }
