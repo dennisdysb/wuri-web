@@ -44,7 +44,7 @@ var JingWen = (function () {
   /* 「常见经文」区展开状态：仅内存，不持久化——每次进经文页默认展开
      （resetToCatalog 复位 false；2026-11-10 用户改主意默认展开，
      推翻他自己 2026-11-07 默认收起的决定） */
-  var commonCollapsed = false;
+  var commonCollapsed = true;
   /* 经文别名：搜简称也能命中 */
   var JING_ALIAS = {
     s01: ['正一功课经', '功课经', '正一早晚功课', '早晚功课经'],
@@ -278,7 +278,7 @@ var JingWen = (function () {
     idx.forEach(function (it) {
       if (order.indexOf(it.id) < 0 && !isNeidan(it.id)) sorted.push(it);
     });
-    /* 第一层「常见经文」：置顶、默认展开，可整区收起（不持久化，进页复位展开）；
+    /* 第一层「常见经文」：置顶、默认收起，可整区展开（不持久化，进页复位收起）；
        全部/全真/正一筛选自页面顶部移入本区标题下方，随区一同收起（2026-10-27 用户定） */
     function filterBtn(k, label) {
       return '<button class="btn small' + (jingFilter === k ? ' active' : '') + '" data-jing-filter="' + k + '">' + label + '</button>';
@@ -2494,14 +2494,14 @@ var JingWen = (function () {
     if (listEl) listEl.hidden = false;
     if (marksEl) marksEl.hidden = true;
     if (resultsEl) resultsEl.hidden = true;
-    // 「常见经文」每次进页默认展开（展开不持久化；2026-11-10 用户改主意，
-    // 推翻他自己 2026-11-07 默认收起的决定）
-    commonCollapsed = false;
+    // 「常见经文」每次进页默认收起（收起不持久化；2026-11-11 用户改主意，
+    // 推翻他自己 2026-11-10 默认展开的决定，改回默认收起）
+    commonCollapsed = true;
     var csec = document.querySelector('[data-common-sec]');
     if (csec) {
-      csec.classList.remove('collapsed');
+      csec.classList.add('collapsed');
       var cbody = csec.querySelector('.jing-common-body');
-      if (cbody) cbody.hidden = false;
+      if (cbody) cbody.hidden = true;
     }
     refreshMarksRow();
     // 清空搜索框

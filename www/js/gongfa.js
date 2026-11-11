@@ -81,6 +81,121 @@
       var t = e.target && e.target.closest ? e.target.closest('[id^="gf-"][id$="-back"], #gongfa-back') : null;
       if (t) pauseAll(null);
     });
+    gfInitReorder();
+  }
+
+  /* ---------- 功法卡片长按调序（v611） ----------
+   * 长按卡片约 0.4s 激活拖动，上下拖动换位，松手保存顺序（localStorage
+   * 键 wuri_gf_order_v1，仅本机，不进云同步）；点按打开详情不受影响：
+   * 拖动过的那次点击在捕获阶段拦掉。长按出选框会断拖动（v606 同款教训），
+   * 故子页卡片整行禁选（见 style.css #view-gongfa .hero2.mini）。 */
+  var GF_KEYS = ['baduanjin', 'taiji', 'jingang', 'yijinjing', 'wuqinxi', 'liuzijue', 'shierduanjin', 'mawangdui', 'zhanzhuang', 'changshou'];
+  var GF_ORDER_KEY = 'wuri_gf_order_v1';
+  function gfCardEl(key) { return document.getElementById('gf-card-' + key); }
+  function gfLoadOrder() {
+    var order = GF_KEYS.slice();
+    try {
+      var raw = window.localStorage && localStorage.getItem(GF_ORDER_KEY);
+      if (raw) {
+        var saved = JSON.parse(raw);
+        if (saved && saved.length) {
+          var seen = {}, clean = [], i, k;
+          for (i = 0; i < saved.length; i++) {
+            k = saved[i];
+            if (GF_KEYS.indexOf(k) >= 0 && !seen[k]) { seen[k] = 1; clean.push(k); }
+          }
+          for (i = 0; i < GF_KEYS.length; i++) {
+            if (!seen[GF_KEYS[i]]) clean.push(GF_KEYS[i]);
+          }
+          order = clean;
+        }
+      }
+    } catch (e) { /* 存坏了就回默认顺序 */ }
+    return order;
+  }
+  function gfSaveOrder() {
+    try {
+      var hub = document.getElementById('view-gongfa');
+      if (!hub || !window.localStorage) return;
+      var order = [], cards = hub.querySelectorAll('.hero2.mini[id^="gf-card-"]'), i;
+      for (i = 0; i < cards.length; i++) order.push(cards[i].id.replace('gf-card-', ''));
+      localStorage.setItem(GF_ORDER_KEY, JSON.stringify(order));
+    } catch (e) { /* 存不下也不影响打开 */ }
+  }
+  function gfApplyOrder() {
+    var hub = document.getElementById('view-gongfa');
+    if (!hub) return;
+    var spacer = hub.querySelector('.tab-spacer');
+    var order = gfLoadOrder(), i, el;
+    for (i = 0; i < order.length; i++) {
+      el = gfCardEl(order[i]);
+      if (el) hub.insertBefore(el, spacer || null);
+    }
+  }
+  function gfInitReorder() {
+    var hub = document.getElementById('view-gongfa');
+    if (!hub) return;
+    gfApplyOrder();
+    hub.addEventListener('contextmenu', function (e) {
+      if (e.target && e.target.closest && e.target.closest('.hero2.mini[id^="gf-card-"]')) e.preventDefault();
+    });
+    var suppressClick = false;
+    hub.addEventListener('click', function (e) {
+      if (suppressClick) { e.preventDefault(); e.stopPropagation(); suppressClick = false; }
+    }, true);
+    var LONG_MS = 380, MOVE_PX = 12;
+    var cards = hub.querySelectorAll('.hero2.mini[id^="gf-card-"]');
+    for (var i = 0; i < cards.length; i++) {
+      (function (card) {
+        var timer = null, sx = 0, sy = 0, dragging = false;
+        function cancel() { if (timer) { clearTimeout(timer); timer = null; } }
+        card.addEventListener('pointerdown', function (e) {
+          if (e.button !== undefined && e.button !== 0) return;
+          sx = e.clientX; sy = e.clientY;
+          cancel();
+          timer = setTimeout(function () {
+            timer = null; dragging = true;
+            card.classList.add('gf-dragging');
+            card.style.touchAction = 'none';
+            try { if (navigator.vibrate) navigator.vibrate(15); } catch (err) {}
+          }, LONG_MS);
+        });
+        /* 移动／松手必须挂在 window 上，不能挂卡片、不能靠 setPointerCapture：
+         * 卡片一挪位就离开了手指／鼠标下方，命中测试收不到后续事件
+         * （2026-11-11 真机实测：只收到 1 次 move 就断了）。 */
+        window.addEventListener('pointermove', function (e) {
+          if (timer && (Math.abs(e.clientX - sx) > MOVE_PX || Math.abs(e.clientY - sy) > MOVE_PX)) cancel();
+          if (!dragging) return;
+          var y = e.clientY;
+          var sibs = hub.querySelectorAll('.hero2.mini[id^="gf-card-"]'), j, s, r;
+          for (j = 0; j < sibs.length; j++) {
+            s = sibs[j];
+            if (s === card) continue;
+            r = s.getBoundingClientRect();
+            if (y < r.top + r.height / 2) { hub.insertBefore(card, s); return; }
+          }
+          hub.insertBefore(card, hub.querySelector('.tab-spacer') || null);
+          if (e.cancelable) e.preventDefault();
+        });
+        function end() {
+          cancel();
+          if (dragging) {
+            dragging = false;
+            card.classList.remove('gf-dragging');
+            card.style.touchAction = '';
+            gfSaveOrder();
+            suppressClick = true;
+            setTimeout(function () { suppressClick = false; }, 350);
+          }
+        }
+        window.addEventListener('pointerup', end);
+        window.addEventListener('pointercancel', end);
+        window.addEventListener('touchmove', function (e) { if (dragging && e.cancelable) e.preventDefault(); }, { passive: false });
+      })(cards[i]);
+    }
+  }
+  if (typeof window !== 'undefined') {
+    window.__wuriGf = { keys: GF_KEYS, loadOrder: gfLoadOrder, saveOrder: gfSaveOrder, applyOrder: gfApplyOrder };
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

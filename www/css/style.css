@@ -1128,6 +1128,9 @@ details.disc-foot .hint{margin-top:9px}
 .gf-player-hint{color:#f0e9d6;font-size:.92rem;letter-spacing:.08em}
 .gf-player video{display:block;width:100%;aspect-ratio:16/9;background:#000}
 .gf-player-card .gf-srcnote{margin-top:8px}
+/* 功法卡片长按调序（v611）：整行禁选（v606 同款教训，长按出选框会断拖动） */
+#view-gongfa .hero2.mini { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: pan-y; }
+#view-gongfa .hero2.mini.gf-dragging { opacity: .88; transform: scale(1.02); box-shadow: 0 10px 26px rgba(0,0,0,.35); outline: 2px solid var(--gold); outline-offset: -2px; }
 body.sky-red .gf-player{background:linear-gradient(135deg,#2a0a06,#4a120a)}
 body.sky-red .gf-play-btn{background:#e07a5f}
 body.sky-red .gf-player-hint{color:#f2c1b2}
@@ -1832,6 +1835,17 @@ body.sky-red{
 .hero2 .h2-gold::after { background: linear-gradient(to left, transparent, rgba(232,200,119,.85)); }
 /* 底图分工（夜间提鲜版；图鉴夜间用造像压暗版 deity-night，与夜卡同族） */
 .hero2 .h2-bg-practice { background-image: url('../img/heroes/practice.webp'); }
+/* 功法子页卡片：每功法一张图（v611；与 practice 同款晨雾竹林、同层遮罩，日夜/红光走同一套规则） */
+.hero2 .h2-bg-gf-baduanjin { background-image: url('../img/heroes/gf-baduanjin.webp'); }
+.hero2 .h2-bg-gf-taiji { background-image: url('../img/heroes/gf-taiji.webp'); }
+.hero2 .h2-bg-gf-jingang { background-image: url('../img/heroes/gf-jingang.webp'); }
+.hero2 .h2-bg-gf-yijinjing { background-image: url('../img/heroes/gf-yijinjing.webp'); }
+.hero2 .h2-bg-gf-wuqinxi { background-image: url('../img/heroes/gf-wuqinxi.webp'); }
+.hero2 .h2-bg-gf-liuzijue { background-image: url('../img/heroes/gf-liuzijue.webp'); }
+.hero2 .h2-bg-gf-shierduanjin { background-image: url('../img/heroes/gf-shierduanjin.webp'); }
+.hero2 .h2-bg-gf-mawangdui { background-image: url('../img/heroes/gf-mawangdui.webp'); }
+.hero2 .h2-bg-gf-zhanzhuang { background-image: url('../img/heroes/gf-zhanzhuang.webp'); }
+.hero2 .h2-bg-gf-changshou { background-image: url('../img/heroes/gf-changshou.webp'); }
 .hero2 .h2-bg-compass  { background-image: url('../img/heroes/compass.webp'); }
 .hero2 .h2-bg-deity    { background-image: url('../img/heroes/deity-night.webp'); }
 .hero2 .h2-bg-bazi     { background-image: url('../img/heroes/bazi.webp'); }
@@ -3723,7 +3737,7 @@ body.sky-red .hz-ud button{background:#2a0a05;color:#eda88f}
 .karaoke-ctl.active{background:var(--gold);color:#fff;border-color:var(--gold)}
 /* 极窄屏（≤344px）换行档：单行算术放不下「打分中…」（见上），改 2×2 两行，
  * 行内仍等宽等高；345px 及以上保持单行。 */
-@media (max-width:344px){.karaoke-controls{flex-wrap:wrap}.karaoke-play,.karaoke-speed,.karaoke-ctl{flex:1 1 45%}}
+@media (max-width:480px){.karaoke-controls{flex-wrap:wrap}.karaoke-play,.karaoke-speed,.karaoke-ctl{flex:1 1 30%}}
 /* ---- 打分耳机提示 toast：打分开始时弹一次，3s 自消失；
  * fixed 居中于歌词区（top:50%），不贴控制条／快进退行；pointer-events:none
  * 不拦截点按；颜色只走 --card/--ink/--line 变量链，日/夜/红光三态自动适配。 */
