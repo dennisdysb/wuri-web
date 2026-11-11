@@ -13,7 +13,7 @@
 <link rel="preload" as="image" href="img/logo-96.png">
 <title>戊日不上香</title>
 <script>try{var _c=JSON.parse(localStorage.getItem('wuri_cfg_v1')||'{}');var _t=_c.theme||'auto';var _n=_t==='night'||(_t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',_n?'night':'day');var _m=document.querySelector('meta[name="color-scheme"]');if(_m)_m.setAttribute('content',_n?'only dark':'only light');document.documentElement.style.colorScheme=_n?'only dark':'only light';}catch(e){document.documentElement.setAttribute('data-theme','day');}</script>
-<link rel="stylesheet" href="css/style.css?v=609">
+<link rel="stylesheet" href="css/style.css?v=610">
 <link rel="stylesheet" href="css/webfonts.css?v=1">
 <link rel="stylesheet" href="css/qimen.css?v=78">
 <link rel="stylesheet" href="css/meditation.css?v=79">
@@ -116,12 +116,12 @@
       </div>
     </section>
 
-    <!-- 强身健体入口（v603：文字教学＋官方出站链接 → #view-gongfa 子页） -->
+    <!-- 强身健体入口（v610：十种功法，详情页顶部播放器直连教学视频 → #view-gongfa 子页） -->
     <section class="hero2" id="gongfa-entry-card">
       <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
       <div class="h2-in">
         <div class="h2-title" data-i18n="gf_title">强身健体</div>
-        <p class="h2-sub" data-i18n="gf_home_sub">八段锦、二十四式太极拳、金刚功：文字教学与官方教学链接。</p>
+        <p class="h2-sub" data-i18n="gf_home_sub">十种功法，点开即看教学视频。</p>
         <div class="h2-segs" aria-hidden="true">
           <span class="h2-seg" data-i18n="gf_bdj_title">八段锦</span>
           <span class="h2-seg" data-i18n="gf_tj_title">太极拳</span>
@@ -1223,7 +1223,7 @@
 
     <section class="card">
       <div class="card-title" data-i18n="me_about">关于</div>
-      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.1.0（内部 v609）</span></div>
+      <div class="detail-row"><span class="dl" data-i18n="me_app">应用</span><span data-i18n="me_ver">戊日不上香 v3.1.0（内部 v610）</span></div>
       <div class="detail-row"><span class="dl">开发者</span><span>Shengbo Yu</span></div>
       <div class="detail-row"><span class="dl">联系邮箱</span><a href="javascript:void(0)" id="contact-email" data-email="dennisdysb@gmail.com">dennisdysb@gmail.com</a></div>
       <details class="about-more">
@@ -1742,7 +1742,7 @@
     <div class="tab-spacer"></div>
   </main>
 
-  <!-- ============ 强身健体（v603：文字教学＋官方出站链接；视频字段见 content/gongfa/videos.json，本期留空） ============ -->
+  <!-- ============ 强身健体（v610：十种功法；详情页顶部播放器，直链见 content/gongfa/videos.json） ============ -->
   <main id="view-gongfa" class="view" hidden>
     <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gongfa-back').click()" title="返回">‹</button>
     <header class="appbar brand">
@@ -1774,6 +1774,55 @@
         <p class="h2-sub" data-i18n="gf_jg_sub">道家传统功法，刚健有力，内炼丹田。</p>
       </div>
     </section>
+    <section class="hero2 mini" id="gf-card-yijinjing">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_yjj_title">易筋经</div>
+        <p class="h2-sub" data-i18n="gf_yjj_sub">十二式，抻筋拔骨，强筋健骨。</p>
+      </div>
+    </section>
+    <section class="hero2 mini" id="gf-card-wuqinxi">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_wqx_title">五禽戏</div>
+        <p class="h2-sub" data-i18n="gf_wqx_sub">五戏仿生，动静结合，活动筋骨。</p>
+      </div>
+    </section>
+    <section class="hero2 mini" id="gf-card-liuzijue">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_lzj_title">六字诀</div>
+        <p class="h2-sub" data-i18n="gf_lzj_sub">六字调息，吐纳养神，调理脏腑。</p>
+      </div>
+    </section>
+    <section class="hero2 mini" id="gf-card-shierduanjin">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_sedj_title">十二段锦</div>
+        <p class="h2-sub" data-i18n="gf_sedj_sub">坐势导引，和缓宁心，调身调息。</p>
+      </div>
+    </section>
+    <section class="hero2 mini" id="gf-card-mawangdui">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_mwd_title">马王堆导引术</div>
+        <p class="h2-sub" data-i18n="gf_mwd_sub">汉墓古法，屈伸抻筋，疏通经络。</p>
+      </div>
+    </section>
+    <section class="hero2 mini" id="gf-card-zhanzhuang">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_zz_title">站桩</div>
+        <p class="h2-sub" data-i18n="gf_zz_sub">武当根基，静立培元，松沉整劲。</p>
+      </div>
+    </section>
+    <section class="hero2 mini" id="gf-card-changshou">
+      <div class="h2-bg h2-bg-practice" aria-hidden="true"></div>
+      <div class="h2-in">
+        <div class="h2-title" data-i18n="gf_csg_title">长寿功</div>
+        <p class="h2-sub" data-i18n="gf_csg_sub">内八部，松静养神，颐养天年。</p>
+      </div>
+    </section>
     <div class="tab-spacer"></div>
   </main>
 
@@ -1785,24 +1834,21 @@
       <span class="appbar-spacer"></span>
     </header>
 
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="baduanjin" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
     <section class="card">
       <div class="card-title" data-i18n="gf_intro">简介</div>
       <p>八段锦是流传久远的导引养生功法，由八段动作组成，动作柔和缓慢、圆活连贯，讲究呼吸配合与意念专注，适合日常习练、调理气血。</p>
     </section>
 
-    <section class="card">
-      <div class="card-title" data-i18n="gf_moves">动作要领</div>
-      <ol class="gf-list">
-        <li><b>两手托天理三焦</b>——双手十指交叉上托，仰头望手，舒展胸胁；吸气上托、呼气下落。</li>
-        <li><b>左右开弓似射雕</b>——马步下蹲，一掌前推、一手拉弓如射雕状，目视前方；左右交替，沉肩坠肘。</li>
-        <li><b>调理脾胃须单举</b>——一手上举、一手下按，掌心相对，抻拉躯干两侧；左右交替，动作缓慢均匀。</li>
-        <li><b>五劳七伤往后瞧</b>——双掌下按，转头向后看，颈部缓缓转动；左右交替，视线随头而动。</li>
-        <li><b>摇头摆尾去心火</b>——马步下蹲，上身前俯，摇头摆尾，尾闾摆动；动作圆活，勿用蛮力。</li>
-        <li><b>两手攀足固肾腰</b>——双手沿腿下滑至足面，俯身攀足，再缓缓起身；弯腰量力而行，膝微屈。</li>
-        <li><b>攒拳怒目增气力</b>——马步握拳，左右冲拳，目视拳方；出拳沉稳，呼吸配合。</li>
-        <li><b>背后七颠百病消</b>——脚跟提起下落，轻震全身；颠足轻柔，膝踝放松。</li>
-      </ol>
-    </section>
 
     <section class="card">
       <div class="card-title" data-i18n="gf_notes">注意事项</div>
@@ -1815,12 +1861,6 @@
       </ul>
     </section>
 
-    <section class="card">
-      <div class="card-title" data-i18n="gf_links">官方教学链接</div>
-      <p class="gf-srcnote" data-i18n="gf_links_note">以下为站外官方页面，点击在新窗口打开，不属于本应用自有内容。</p>
-      <p><a href="https://www.chqa.org.cn/html/54219403.html" target="_blank" rel="noopener" data-i18n="gf_link_chqa">中国健身气功协会官网 · 八段锦</a></p>
-      <p><a href="https://www.sport.gov.cn/qgzx/" target="_blank" rel="noopener" data-i18n="gf_link_sport">国家体育总局健身气功管理中心</a></p>
-    </section>
     <div class="tab-spacer"></div>
   </main>
 
@@ -1832,50 +1872,22 @@
       <span class="appbar-spacer"></span>
     </header>
 
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="taiji24" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
     <section class="card">
       <div class="card-title" data-i18n="gf_intro">简介</div>
       <p>二十四式太极拳是国家体委于 1956 年整理推广的简化太极拳套路，取杨式太极拳精华，共二十四式，动作舒展大方、连绵不断，适合日常习练。</p>
     </section>
 
-    <section class="card">
-      <div class="card-title" data-i18n="gf_moves">动作名录</div>
-      <ol class="gf-list">
-        <li>起势</li>
-        <li>左右野马分鬃</li>
-        <li>白鹤亮翅</li>
-        <li>左右搂膝拗步</li>
-        <li>手挥琵琶</li>
-        <li>左右倒卷肱</li>
-        <li>左揽雀尾</li>
-        <li>右揽雀尾</li>
-        <li>单鞭</li>
-        <li>云手</li>
-        <li>单鞭</li>
-        <li>高探马</li>
-        <li>右蹬脚</li>
-        <li>双峰贯耳</li>
-        <li>转身左蹬脚</li>
-        <li>左下势独立</li>
-        <li>右下势独立</li>
-        <li>左右穿梭</li>
-        <li>海底针</li>
-        <li>闪通臂</li>
-        <li>转身搬拦捶</li>
-        <li>如封似闭</li>
-        <li>十字手</li>
-        <li>收势</li>
-      </ol>
-    </section>
 
-    <section class="card">
-      <div class="card-title" data-i18n="gf_keys">行拳要领</div>
-      <ul class="gf-list">
-        <li>虚灵顶劲，沉肩坠肘；含胸拔背，松腰敛臀。</li>
-        <li>分清虚实，重心转换平稳；上下相随，内外合一。</li>
-        <li>呼吸深长自然，配合动作开合；速度均匀，连绵不断。</li>
-        <li>初学者先学架势，再求连贯；下势、蹬脚量力而行。</li>
-      </ul>
-    </section>
 
     <section class="card">
       <div class="card-title" data-i18n="gf_notes">注意事项</div>
@@ -1887,12 +1899,6 @@
       </ul>
     </section>
 
-    <section class="card">
-      <div class="card-title" data-i18n="gf_links">官方教学链接</div>
-      <p class="gf-srcnote" data-i18n="gf_links_note">以下为站外官方页面，点击在新窗口打开，不属于本应用自有内容。</p>
-      <p><a href="https://higher.smartedu.cn/course/66c51c0a711dc30c3452e8de" target="_blank" rel="noopener" data-i18n="gf_link_smartedu">国家智慧教育平台 · 北京体育大学《24式太极拳》</a></p>
-      <p><a href="https://www.icourse163.org/course/BSU-1207121812" target="_blank" rel="noopener" data-i18n="gf_link_mooc">中国大学MOOC · 北京体育大学《24式太极拳》</a></p>
-    </section>
     <div class="tab-spacer"></div>
   </main>
 
@@ -1904,18 +1910,21 @@
       <span class="appbar-spacer"></span>
     </header>
 
-    <section class="card">
-      <div class="card-title" data-i18n="gf_intro">简介</div>
-      <p>金刚功是道家传统内炼功法，相传源于武当，动作刚健有力，以桩功与行功结合，注重丹田呼吸与周身整劲，习练者多以强筋骨、壮气血为旨。本页只作一般介绍，不作传承认定，不附任何视频链接。</p>
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="jingang" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
     </section>
 
     <section class="card">
-      <div class="card-title" data-i18n="gf_features">特点</div>
-      <ul class="gf-list">
-        <li>刚柔相济，动静结合；以站桩为基，行功为用。</li>
-        <li>呼吸深长，意守丹田；动作简练，重在内劲不在外形。</li>
-      </ul>
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>金刚功是道家传统内炼功法，相传源于武当，动作刚健有力，以桩功与行功结合，注重丹田呼吸与周身整劲，习练者多以强筋骨、壮气血为旨。本页只作一般介绍，不作传承认定。</p>
     </section>
+
 
     <section class="card">
       <div class="card-title" data-i18n="gf_notes">注意事项</div>
@@ -1923,6 +1932,245 @@
         <li>桩功站立时间循序渐进，不可勉强久站。</li>
         <li>呼吸自然，不刻意憋气；饭后、酒后、身体不适时不宜习练。</li>
         <li>膝、腰、心脏有疾者，先咨询医生再练。</li>
+        <li>功法传承说法不一，本页不作传承认定。</li>
+      </ul>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+
+  <main id="view-gf-yijinjing" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-yijinjing-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-yijinjing-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_yjj_title">易筋经</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="yijinjing" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>易筋经是流传久远的导引养生功法，相传为达摩祖师所创，共十二式，以抻筋拔骨、吐纳调息为主，动作舒展、刚柔相济，讲究以形引气、以气行血；十二式各有侧重，久练可使筋骨强健、气血通畅，适合日常习练、强筋健骨。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>动作舒展到位，不求快、不憋气；呼吸深长自然，配合动作开合。</li>
+        <li>抻拉量力而行，筋骨未开者幅度减小，忌猛拉硬抻。</li>
+        <li>饭后一小时内不宜练习；空腹习练亦不宜过久。</li>
+        <li>身体不适或患病期间，先咨询医生再练。</li>
+      </ul>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+  <main id="view-gf-wuqinxi" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-wuqinxi-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-wuqinxi-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_wqx_title">五禽戏</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="wuqinxi" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>五禽戏是东汉名医华佗创编的导引养生功法，模仿虎、鹿、熊、猿、鸟五种动物的神态动作，分虎戏、鹿戏、熊戏、猿戏、鸟戏五戏，动静结合、刚柔相济；五戏各有侧重，合练则动静相兼，久练可使筋骨灵活、气血和畅，适合日常习练。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>模仿动物神态，重在神似不在形似；动作圆活，呼吸自然。</li>
+        <li>五戏可分开习练，初学不必一次求全，熟练后再连贯成套。</li>
+        <li>饭后一小时内不宜练习；膝、腰不适者量力而行。</li>
+        <li>身体不适或患病期间，先咨询医生再练。</li>
+      </ul>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+  <main id="view-gf-liuzijue" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-liuzijue-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-liuzijue-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_lzj_title">六字诀</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="liuzijue" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>六字诀是以呼吸吐纳为主的导引养生功法，以嘘、呵、呼、呬、吹、嘻六字配六种口型与吐气法，分别调理肝、心、脾、肺、肾与三焦，读字出声、气息深长；六字各有所主，合练则五脏得调、三焦得通，久练可使气息深长、神志安宁，适合日常习练。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>吐字出声、气息均匀，不求响亮，不刻意憋气；以鼻吸气、以口呼气。</li>
+        <li>每字可单独练习，遍数量力而行，初练不必贪多。</li>
+        <li>饭后、饱腹时不宜练习；初练以安静通风处为宜。</li>
+        <li>身体不适或患病期间，先咨询医生再练。</li>
+      </ul>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+  <main id="view-gf-shierduanjin" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-shierduanjin-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-shierduanjin-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_sedj_title">十二段锦</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="shierduanjin" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>十二段锦是国家体育总局健身气功管理中心组织编创、北京体育大学承担研究的坐势导引功法，由预备势、十二式与收势组成，以坐姿调身、调息、调心为主，动作和缓、意守丹田，久练可使心神安宁、气血和畅，适合日常习练、宁心安神。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>以坐姿习练为主，腰背自然挺直，不僵硬、不塌腰。</li>
+        <li>动作和缓均匀，呼吸深长自然；意守丹田，不刻意追求气感。</li>
+        <li>饭后一小时内不宜练习；腰腿不适者量力而行。</li>
+        <li>身体不适或患病期间，先咨询医生再练。</li>
+      </ul>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+  <main id="view-gf-mawangdui" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-mawangdui-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-mawangdui-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_mwd_title">马王堆导引术</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="mawangdui" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>马王堆导引术源于长沙马王堆汉墓出土的《导引图》，原图绘有四十四式导引动作，是两千多年前古人导引行气的实证；今之功法据图整理编创，以屈伸俯仰、抻筋拔骨为主，两千年前的古法今用，讲究以动导气、以气行血，适合日常习练、疏通经络。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>动作以屈伸俯仰为主，幅度量力而行，抻拉不猛、不憋气。</li>
+        <li>讲究动静结合、呼吸配合，练时心神专注。</li>
+        <li>饭后一小时内不宜练习；腰腿、颈肩不适者量力而行。</li>
+        <li>身体不适或患病期间，先咨询医生再练。</li>
+      </ul>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+  <main id="view-gf-zhanzhuang" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-zhanzhuang-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-zhanzhuang-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_zz_title">站桩</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="zhanzhuang" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>站桩是武当内家拳的入门基础功法，以静立不动的桩式练松沉、整劲与呼吸，是武当太极拳的根基；本页采用武当袁师懋道长一脉的练法，讲究身正体松、气沉丹田；站中求松、松中求整，久练可使下盘稳固、周身整劲，适合日常习练、培元固本。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>站桩时间循序渐进，初练数分钟即可，不可勉强久站。</li>
+        <li>双膝微屈、腰背放松，肩沉肘坠；呼吸自然，不刻意憋气。</li>
+        <li>饭后、酒后、身体不适时不宜习练；膝、腰、心脏有疾者先咨询医生再练。</li>
+        <li>站时若头晕、腿抖、心慌，应立即收势休息。</li>
+      </ul>
+    </section>
+    <div class="tab-spacer"></div>
+  </main>
+  <main id="view-gf-changshou" class="view" hidden>
+    <button class="jing-back-fab show" style="position:fixed" onclick="document.getElementById('gf-changshou-back').click()" title="返回">‹</button>
+    <header class="appbar brand">
+      <button class="mini-btn" id="gf-changshou-back">‹ 返回</button>
+      <h1 class="brand-title" data-i18n="gf_csg_title">长寿功</h1>
+      <span class="appbar-spacer"></span>
+    </header>
+
+    <section class="card gf-player-card">
+      <div class="gf-player" data-gf="changshou" role="button" tabindex="0" aria-label="播放教学视频">
+        <div class="gf-player-facade">
+          <span class="gf-play-btn" aria-hidden="true">▶</span>
+          <span class="gf-player-hint" data-i18n="gf_play">点一下播放教学视频</span>
+        </div>
+      </div>
+      <p class="gf-srcnote" data-i18n="gf_video_note">视频为教学示范，直连播放；流量较大时建议用 Wi-Fi。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_intro">简介</div>
+      <p>长寿功与金刚功同出一源，为张至顺道长一脉所传的内家功法；外八部金刚功主阳、主刚、主外，内八部长寿功主阴、主柔、主内，以松、静、自然为要，意守凝神，练内功、心神与先天之气；与金刚功一外一内、一刚一柔，同练则阴阳相济，适合日常习练、颐养天年。</p>
+    </section>
+
+    <section class="card">
+      <div class="card-title" data-i18n="gf_notes">注意事项</div>
+      <ul class="gf-list">
+        <li>以松、静、自然为要，意守凝神，不刻意追求气感。</li>
+        <li>饭后一小时内不练；雨、大风、大雾、打雷等恶劣天气不在室外练功。</li>
+        <li>动作舒缓，量力而行；身体不适或患病期间，先咨询医生再练。</li>
         <li>功法传承说法不一，本页不作传承认定。</li>
       </ul>
     </section>
@@ -3064,73 +3312,74 @@
   </div>
 </div>
 
-<script src="js/lunar.min.js?v=609"></script>
-<script src="js/capacitor.js?v=609"></script>
-<script src="js/ln-plugin.js?v=609"></script>
-<script src="js/i18n.js?v=609"></script>
-<script src="js/dialog.js?v=609"></script>
-<script src="js/zhishen-data.js?v=609"></script>
-<script src="js/pentads-data.js?v=609"></script>
-<script src="js/poems-data.js?v=609"></script>
-<script src="jing/index.js?v=609"></script>
-<script src="js/daily-jing.js?v=609"></script>
-<script src="js/app.js?v=609"></script>
-<script src="js/points.js?v=609"></script>
-<script src="js/pro.js?v=609"></script>
-  <script src="js/liuyao.js?v=609"></script>
-<script src="js/yearview.js?v=609"></script>
-<script src="js/media-session.js?v=609"></script>
-<script src="js/practice.js?v=609"></script>
-<script src="js/bugang.js?v=609"></script>
-<script src="js/meditation.js?v=609"></script>
-<script src="js/citydata.js?v=609"></script>
-<script src="js/bazi.js?v=609"></script>
-<script src="js/iztro.min.js?v=609"></script>
-<script src="js/ziwei.js?v=609"></script>
-<script src="js/qimen-engine.js?v=609"></script>
-<script src="js/qimen-geju.js?v=609"></script>
-<script src="js/qimen-data.js?v=609"></script>
-<script src="js/qimen-cases.js?v=609"></script>
-<script src="js/qimen-cal.js?v=609"></script>
-<script src="js/qimen-render3d.js?v=609"></script>
-<script src="js/qimen-app.js?v=609"></script>
-<script src="js/ai-analysis.js?v=609"></script>
-<script src="js/ics-generator.js?v=609"></script>
-<script src="js/t2s.js?v=609"></script>
-<script src="js/s2t.js?v=609"></script>
-<script src="js/jingwen.js?v=609"></script>
-<script src="js/karaoke.js?v=609"></script>
-<script src="js/dict.js?v=609"></script>
-<script src="js/daozang.js?v=609"></script>
-<script src="js/shushu.js?v=609"></script>
-<script src="js/deities-data.js?v=609"></script>
-<script src="js/deities.js?v=609"></script>
+<script src="js/lunar.min.js?v=610"></script>
+<script src="js/capacitor.js?v=610"></script>
+<script src="js/ln-plugin.js?v=610"></script>
+<script src="js/i18n.js?v=610"></script>
+<script src="js/dialog.js?v=610"></script>
+<script src="js/zhishen-data.js?v=610"></script>
+<script src="js/pentads-data.js?v=610"></script>
+<script src="js/poems-data.js?v=610"></script>
+<script src="jing/index.js?v=610"></script>
+<script src="js/daily-jing.js?v=610"></script>
+<script src="js/app.js?v=610"></script>
+<script src="js/gongfa.js?v=610"></script>
+<script src="js/points.js?v=610"></script>
+<script src="js/pro.js?v=610"></script>
+  <script src="js/liuyao.js?v=610"></script>
+<script src="js/yearview.js?v=610"></script>
+<script src="js/media-session.js?v=610"></script>
+<script src="js/practice.js?v=610"></script>
+<script src="js/bugang.js?v=610"></script>
+<script src="js/meditation.js?v=610"></script>
+<script src="js/citydata.js?v=610"></script>
+<script src="js/bazi.js?v=610"></script>
+<script src="js/iztro.min.js?v=610"></script>
+<script src="js/ziwei.js?v=610"></script>
+<script src="js/qimen-engine.js?v=610"></script>
+<script src="js/qimen-geju.js?v=610"></script>
+<script src="js/qimen-data.js?v=610"></script>
+<script src="js/qimen-cases.js?v=610"></script>
+<script src="js/qimen-cal.js?v=610"></script>
+<script src="js/qimen-render3d.js?v=610"></script>
+<script src="js/qimen-app.js?v=610"></script>
+<script src="js/ai-analysis.js?v=610"></script>
+<script src="js/ics-generator.js?v=610"></script>
+<script src="js/t2s.js?v=610"></script>
+<script src="js/s2t.js?v=610"></script>
+<script src="js/jingwen.js?v=610"></script>
+<script src="js/karaoke.js?v=610"></script>
+<script src="js/dict.js?v=610"></script>
+<script src="js/daozang.js?v=610"></script>
+<script src="js/shushu.js?v=610"></script>
+<script src="js/deities-data.js?v=610"></script>
+<script src="js/deities.js?v=610"></script>
 <script>window.exports = {};</script>
-<script src="js/vendor/astronomy.js?v=609"></script>
+<script src="js/vendor/astronomy.js?v=610"></script>
 <script>window.Astronomy = window.exports; /* exports 须保留：astronomy.js 内部在调用时动态解析该全局 */</script>
-<script src="js/vendor/d3-array.min.js?v=609"></script>
-<script src="js/vendor/d3-geo.min.js?v=609"></script>
-<script src="js/sky-engine.js?v=609"></script>
-<script src="js/today-sky.js?v=609"></script>
-<script src="js/stars.js?v=609"></script>
-<script src="js/sky-chart.js?v=609"></script>
-<script src="js/sky-ar.js?v=609"></script>
-<script src="js/sky-horizon.js?v=609"></script>
-<script src="js/fengshui-data.js?v=609"></script>
-<script src="js/vendor/soul-fengshui.js?v=609"></script>
-<script src="js/fengshui.js?v=609"></script>
-<script src="js/fengshui2.js?v=609"></script>
-<script src="js/jinsuo-data.js?v=609"></script>
-<script src="js/jinsuo.js?v=609"></script>
-<script src="js/vendor/dexie.js?v=609"></script>
-<script src="js/house.js?v=609"></script>
-<script src="js/house-editor.js?v=609"></script>
-<script src="js/affinity-data.js?v=609"></script>
-<script src="js/affinity.js?v=609"></script>
-<script src="js/content-feed.js?v=609"></script>
-<script src="js/offline-download.js?v=609"></script>
-<script src="js/account.js?v=609"></script>
-<script src="js/store-update.js?v=609"></script>
+<script src="js/vendor/d3-array.min.js?v=610"></script>
+<script src="js/vendor/d3-geo.min.js?v=610"></script>
+<script src="js/sky-engine.js?v=610"></script>
+<script src="js/today-sky.js?v=610"></script>
+<script src="js/stars.js?v=610"></script>
+<script src="js/sky-chart.js?v=610"></script>
+<script src="js/sky-ar.js?v=610"></script>
+<script src="js/sky-horizon.js?v=610"></script>
+<script src="js/fengshui-data.js?v=610"></script>
+<script src="js/vendor/soul-fengshui.js?v=610"></script>
+<script src="js/fengshui.js?v=610"></script>
+<script src="js/fengshui2.js?v=610"></script>
+<script src="js/jinsuo-data.js?v=610"></script>
+<script src="js/jinsuo.js?v=610"></script>
+<script src="js/vendor/dexie.js?v=610"></script>
+<script src="js/house.js?v=610"></script>
+<script src="js/house-editor.js?v=610"></script>
+<script src="js/affinity-data.js?v=610"></script>
+<script src="js/affinity.js?v=610"></script>
+<script src="js/content-feed.js?v=610"></script>
+<script src="js/offline-download.js?v=610"></script>
+<script src="js/account.js?v=610"></script>
+<script src="js/store-update.js?v=610"></script>
 <script>
 // PWA: 注册 Service Worker（原生壳内跳过，file:// 不支持 SW）
 if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !window.WuBridge) {

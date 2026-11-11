@@ -452,7 +452,7 @@ details.disc-foot .hint{margin-top:9px}
 #view-disclaimer .appbar{position:sticky;top:0;z-index:20;background:var(--paper)}
 #view-disclaimer .appbar.brand .brand-title{position:static;transform:none;flex:1;font-size:1.12rem;letter-spacing:.12em}
 /* 功法详情页顶栏（v608）：同上，标题绝对居中＋不换行在窄屏会盖住返回键（用户 2026-11-10 实测太极拳详情页）；三详情页一起改回流内排版 */
-#view-gf-baduanjin .appbar.brand .brand-title,#view-gf-taiji .appbar.brand .brand-title,#view-gf-jingang .appbar.brand .brand-title{position:static;transform:none;flex:1;min-width:0;font-size:1.12rem;letter-spacing:.12em;white-space:normal}
+#view-gf-baduanjin .appbar.brand .brand-title,#view-gf-taiji .appbar.brand .brand-title,#view-gf-jingang .appbar.brand .brand-title,#view-gf-yijinjing .appbar.brand .brand-title,#view-gf-wuqinxi .appbar.brand .brand-title,#view-gf-liuzijue .appbar.brand .brand-title,#view-gf-shierduanjin .appbar.brand .brand-title,#view-gf-mawangdui .appbar.brand .brand-title,#view-gf-zhanzhuang .appbar.brand .brand-title,#view-gf-changshou .appbar.brand .brand-title{position:static;transform:none;flex:1;min-width:0;font-size:1.12rem;letter-spacing:.12em;white-space:normal}
 
 /* ---------- 我的 ---------- */
 .radio{display:block;padding:11px 0;font-size:1.04rem;cursor:pointer;color:var(--ink)}
@@ -1121,6 +1121,16 @@ details.disc-foot .hint{margin-top:9px}
 .gf-list{margin:4px 0 2px;padding-left:22px;line-height:1.75;color:var(--ink)}
 .gf-list li{margin-bottom:4px}
 .gf-srcnote{font-size:.82rem;color:var(--ink-2);margin:0 0 8px}
+/* 功法播放器（v610）：16:9 封面＋点播；颜色走变量链，红光模式另见文末 body.sky-red 一节 */
+.gf-player{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#1c1a16,#3a3125);cursor:pointer}
+.gf-player-facade{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.gf-play-btn{display:flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:var(--gold);color:#fff;font-size:26px;line-height:1;padding-left:4px;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.gf-player-hint{color:#f0e9d6;font-size:.92rem;letter-spacing:.08em}
+.gf-player video{display:block;width:100%;aspect-ratio:16/9;background:#000}
+.gf-player-card .gf-srcnote{margin-top:8px}
+body.sky-red .gf-player{background:linear-gradient(135deg,#2a0a06,#4a120a)}
+body.sky-red .gf-play-btn{background:#e07a5f}
+body.sky-red .gf-player-hint{color:#f2c1b2}
 .daka-timer-name{font-size:1.1rem;font-weight:600;margin-bottom:12px}
 .daka-timer-time{font-size:3rem;font-family:var(--serif);margin:16px 0;letter-spacing:2px}
 /* 统计 */

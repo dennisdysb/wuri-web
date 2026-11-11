@@ -1802,7 +1802,7 @@ function bindMe() {
   fwd('ss-ziwei', 'ziwei-enter', closeShushu);
   fwd('ss-liuyao', 'liuyao-enter', closeShushu);
   fwd('ss-qimen', 'qimen-enter', closeShushu);
-  /* 强身健体（v603）：首页入口卡 → #view-gongfa 子页；三功法卡 → 各详情页；详情返回回子页 */
+  /* 强身健体（v610）：首页入口卡 → #view-gongfa 子页；十功法卡 → 各详情页；详情返回回子页 */
   var gfHub = document.getElementById('view-gongfa');
   var gfCard = document.getElementById('gongfa-entry-card');
   if (gfCard && gfHub) gfCard.addEventListener('click', function () { gfHub.hidden = false; window.scrollTo(0, 0); });
@@ -1810,11 +1810,11 @@ function bindMe() {
   if (gfBack && gfHub) gfBack.addEventListener('click', function () { gfHub.hidden = true; });
   function closeGongfa() { if (gfHub) gfHub.hidden = true; }
   function openGf(id) { var v = document.getElementById(id); if (v) { closeGongfa(); v.hidden = false; window.scrollTo(0, 0); } }
-  [['gf-card-baduanjin', 'view-gf-baduanjin'], ['gf-card-taiji', 'view-gf-taiji'], ['gf-card-jingang', 'view-gf-jingang']].forEach(function (pair) {
+  [['gf-card-baduanjin', 'view-gf-baduanjin'], ['gf-card-taiji', 'view-gf-taiji'], ['gf-card-jingang', 'view-gf-jingang'], ['gf-card-yijinjing', 'view-gf-yijinjing'], ['gf-card-wuqinxi', 'view-gf-wuqinxi'], ['gf-card-liuzijue', 'view-gf-liuzijue'], ['gf-card-shierduanjin', 'view-gf-shierduanjin'], ['gf-card-mawangdui', 'view-gf-mawangdui'], ['gf-card-zhanzhuang', 'view-gf-zhanzhuang'], ['gf-card-changshou', 'view-gf-changshou']].forEach(function (pair) {
     var c = document.getElementById(pair[0]);
     if (c) c.addEventListener('click', function () { openGf(pair[1]); });
   });
-  [['gf-baduanjin-back', 'view-gf-baduanjin'], ['gf-taiji-back', 'view-gf-taiji'], ['gf-jingang-back', 'view-gf-jingang']].forEach(function (pair) {
+  [['gf-baduanjin-back', 'view-gf-baduanjin'], ['gf-taiji-back', 'view-gf-taiji'], ['gf-jingang-back', 'view-gf-jingang'], ['gf-yijinjing-back', 'view-gf-yijinjing'], ['gf-wuqinxi-back', 'view-gf-wuqinxi'], ['gf-liuzijue-back', 'view-gf-liuzijue'], ['gf-shierduanjin-back', 'view-gf-shierduanjin'], ['gf-mawangdui-back', 'view-gf-mawangdui'], ['gf-zhanzhuang-back', 'view-gf-zhanzhuang'], ['gf-changshou-back', 'view-gf-changshou']].forEach(function (pair) {
     var b = document.getElementById(pair[0]);
     if (b) b.addEventListener('click', function () {
       var v = document.getElementById(pair[1]);
