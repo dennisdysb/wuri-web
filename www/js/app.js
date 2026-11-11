@@ -1802,7 +1802,7 @@ function bindMe() {
   fwd('ss-ziwei', 'ziwei-enter', closeShushu);
   fwd('ss-liuyao', 'liuyao-enter', closeShushu);
   fwd('ss-qimen', 'qimen-enter', closeShushu);
-  /* 功法修习（v603）：首页入口卡 → #view-gongfa 子页；三功法卡 → 各详情页；详情返回回子页 */
+  /* 强身健体（v603）：首页入口卡 → #view-gongfa 子页；三功法卡 → 各详情页；详情返回回子页 */
   var gfHub = document.getElementById('view-gongfa');
   var gfCard = document.getElementById('gongfa-entry-card');
   if (gfCard && gfHub) gfCard.addEventListener('click', function () { gfHub.hidden = false; window.scrollTo(0, 0); });

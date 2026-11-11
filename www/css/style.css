@@ -451,6 +451,8 @@ details.disc-foot .hint{margin-top:9px}
 /* 声明页顶栏：标题较长，改回流内排版避免与返回键重叠（.appbar.brand 默认绝对居中仅适合短标题） */
 #view-disclaimer .appbar{position:sticky;top:0;z-index:20;background:var(--paper)}
 #view-disclaimer .appbar.brand .brand-title{position:static;transform:none;flex:1;font-size:1.12rem;letter-spacing:.12em}
+/* 功法详情页顶栏（v608）：同上，标题绝对居中＋不换行在窄屏会盖住返回键（用户 2026-11-10 实测太极拳详情页）；三详情页一起改回流内排版 */
+#view-gf-baduanjin .appbar.brand .brand-title,#view-gf-taiji .appbar.brand .brand-title,#view-gf-jingang .appbar.brand .brand-title{position:static;transform:none;flex:1;min-width:0;font-size:1.12rem;letter-spacing:.12em;white-space:normal}
 
 /* ---------- 我的 ---------- */
 .radio{display:block;padding:11px 0;font-size:1.04rem;cursor:pointer;color:var(--ink)}
