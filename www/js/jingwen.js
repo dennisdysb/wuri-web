@@ -4941,6 +4941,18 @@ var JingWen = (function () {
 
   document.addEventListener('DOMContentLoaded', init);
   window.closeReader = closeReader; // 供 Android 系统返回键调用
+  /* 冒烟探针（非产品 API，v612·34扩展，与 iOS 预览树同款）：读诵读音频元素状态 */
+  window.__wuriJingAudioState = function () {
+    var ms = null;
+    try { ms = (navigator.mediaSession && navigator.mediaSession.metadata) ? navigator.mediaSession.metadata.title : null; } catch (e) {}
+    return {
+      exists: !!jingAudio,
+      src: (jingAudio && jingAudio.src) || '',
+      paused: jingAudio ? !!jingAudio.paused : null,
+      isAudioElement: !!(jingAudio && jingAudio instanceof HTMLAudioElement),
+      msTitle: ms
+    };
+  };
   return { openReader: openReader, openReaderAt: openReaderAt, search: search, closeReader: closeReader, isNeidan: isNeidan, resetToCatalog: resetToCatalog };
 })();
 

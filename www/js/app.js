@@ -385,10 +385,12 @@ function renderCalendar() {
       var sd = shendanName(l); // 神诞日标记（寿桃）
       var mds = myDaysOn(l); // 我的日子标记（彩色点）
       var ltxt = l.getDay() === 1 ? tx(l.getMonthInChinese()) + '月' : tx(l.getDayInChinese());
+      var jq = l.getJieQi(); // 节气当天：格内日期下方显示节气名（v612·46号）
       var dots = '<span class="dots">' + (wu ? '<span class="wdot"></span>' : '') + (an ? '<span class="adot"></span>' : '') + (bd ? '<span class="bdot">★</span>' : '') + (sd ? '<span class="sdot">🍑</span>' : '')
         + mds.map(function (x) { return '<span class="mdot" style="background:' + escA(x.color) + '"></span>'; }).join('') + '</span>';
       cell.innerHTML = '<span class="s' + (wu ? ' wu' : an ? ' anwu' : '') + '">' + d + '</span>' +
-        '<span class="l">' + ltxt + '</span>' + dots;
+        '<span class="l">' + ltxt + '</span>' +
+        (jq ? '<span class="jq">' + tx(jq) + '</span>' : '') + dots;
       cell.addEventListener('click', function () {
         sel = { y: viewY, m: viewM, d: d }; renderCalendar();
         // 选中日期后自动滚动到详情区
@@ -518,8 +520,27 @@ function renderDetail() {
   }).join('');
   $('#detail-lunar').textContent = tx(l.getYearInChinese()) + '年' + tx(l.getMonthInChinese()) + '月' + tx(l.getDayInChinese());
   $('#detail-gz').textContent = l.getYearGan() + l.getYearZhi() + '年 ' + l.getMonthGan() + l.getMonthZhi() + '月 ' + l.getDayGan() + l.getDayZhi() + '日';
+  /* 节气行（v612·46号设计A）：当前节气＋下个节气倒计时，恒单行。
+   * 节气当天：当前即今日节气，下个取明日之后的首个节气（库的 getNextJieQi
+   * 在节气当天返回当日节气本身，故以后日推算）；非节气日：当前取
+   * getPrevJieQi，下个即 getNextJieQi。格式：节气日「冬至 · 下个 小寒 1月5日 · 剩14天」，
+   * 非节气日「立冬 · 小雪 11月22日 · 剩9天」。 */
   var jq = l.getJieQi();
-  $('#detail-jq').textContent = tx(jq) || '—';
+  var jqPrev = l.getPrevJieQi(), jqNext = l.getNextJieQi();
+  var jqCur = jq || jqPrev.getName();
+  var jqNextName = jqNext.getName(), jqNextYmd = jqNext.getSolar().toYmd();
+  if (jq) {
+    var tmr = new Date(sel.y, sel.m - 1, sel.d + 1);
+    var lTom = lunarOf(tmr.getFullYear(), tmr.getMonth() + 1, tmr.getDate());
+    var nxTom = lTom.getNextJieQi();
+    jqNextName = nxTom.getName(); jqNextYmd = nxTom.getSolar().toYmd();
+  }
+  var jqNextParts = jqNextYmd.split('-');
+  var jqNextDate = new Date(+jqNextParts[0], +jqNextParts[1] - 1, +jqNextParts[2]);
+  var jqSelDate = new Date(sel.y, sel.m - 1, sel.d);
+  var jqLeft = Math.round((jqNextDate - jqSelDate) / 86400000);
+  $('#detail-jq').textContent = tx(jqCur) + ' · ' + (jq ? '下个 ' : '') + tx(jqNextName) + ' ' +
+    fmtYmdShort(jqNextYmd) + ' · 剩' + jqLeft + '天';
   var pc = $('#pentad-card');
   if (pc) {
     var pd = null;
