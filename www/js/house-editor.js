@@ -741,7 +741,13 @@
     var s = '';
     if (w.lock) return s; /* 已锁定：不画端点手柄与长度标（同房间口径） */
     [[w.x1, w.y1, 0], [w.x2, w.y2, 1]].forEach(function (e) {
-      s += '<circle class="hpe-hdl" data-act="wallh" data-e="' + e[2] + '" cx="' + e[0] + '" cy="' + e[1] + '" r="' + (u * 1.6) + '"/>';
+      s += '<circle class="hpe-hdl" data-act="wallh" data-e="' + e[2] + '" cx="' + e[0] + '" cy="' + e[1] + '" r="' + (u * 1.6) + '"/>' +
+        /* 端点命中热区（2026-11-17 用户真机报：点圆钮就取消选中）：可见圆钮半径仅
+         * u*1.6（390px 屏约 6px），墙命中线在端点处又是平头，端点外侧半个圆钮
+         * 下方是空白——手指落点偏出约 11px 就命中空白分支清掉选中。热区圆半径
+         * u*4.8（屏上约 19px、直径约 37px，3 倍于可见圆钮），盖在可见圆钮之上
+         * 同为 wallh，点按即拖端点；透明填充、无颜色，日间／夜间／红光均无视觉变化 */
+        '<circle class="hpe-hdlhit" data-act="wallh" data-e="' + e[2] + '" cx="' + e[0] + '" cy="' + e[1] + '" r="' + (u * 4.8) + '"/>';
     });
     if (E.plan.layers.dims) {
       var fsD = u * 2.1, txt = trimNum(wallLenM(w), 2) + ' m';
@@ -2004,9 +2010,11 @@
     }
     afterChange();
     if (room) toastMsg(T('hpe_wall_room_toast'));
-    /* 画完一段留在画墙态（2026-11-17 用户口径改定：点「完成」才退出，
-     * 画墙期间落笔永远是续画；旧「画完自动卸态」口径作废——它逼用户
-     * 每画一段都要重进画墙态。想拖改刚画的墙：点「完成」回自由态再拖 */
+    /* 画完一段自动卸下画墙态（2026-11-17 用户真机改定：画完就想拖改刚画的墙，
+     * 留在画墙态反而碍事；v613 的「留态续画」口径作废）：新墙/新房保持选中
+     * 可立即拖改；要续画点托盘「画墙」再入（入态后点已有墙端点仍可接续围合）。
+     * 防「想拖却又生一段」 */
+    exitWallMode();
     if (!room) wallNextToastOnce();
   }
   /* 构件库墙件落位：不进 fixtures，直接生成 plan.walls 段（与手划同账） */
@@ -2053,9 +2061,9 @@
     syncModeBtn(); renderTray(); render(); renderAttr();
   }
   /* ---------------- 画墙悬浮钮（2026-10-28 用户真机反馈） ----------------
-   * 画墙态画完一段留态续画（2026-11-17 口径改定；旧「画完自动卸态」作废）。
-   * 托盘「画墙」钮在横滑区里、发现性差——用户想续画时找不到入口。舞台右下
-   * 常驻一枚悬浮钮（与托盘画墙同一动作、激活态双向同步），点它即切画墙态，
+   * 画完一段自动卸下画墙态（2026-11-17 用户真机改定：画完就想拖改刚画的墙；
+   * v613 的「画完留态续画」口径作废）。托盘「画墙」钮在横滑区里、发现性差——
+   * 用户想续画时找不到入口。舞台右下常驻一枚悬浮钮（与托盘画墙同一动作、
    * 再点即退出。JS 建 DOM 注入 .hpe-stage（同判定条口径，不动 index
    * 结构）；z 序 7：高于属性条（6）、低于抽屉（8）与判定条（9）；定位随
    * layoutAttr 同链——属性条/抽屉抬升时跟着抬，不压既有浮层。
@@ -2141,7 +2149,12 @@
       if (!w) return false;
       if (w.lock) { toastMsg(T('hpe_locked_toast')); return true; }
       pushUndo();
-      E.drag = { kind: 'wallend', id: w.id, e: +actEl.getAttribute('data-e'), orig: clone(w), moved: false };
+      /* 抓取偏移（2026-11-17 v614）：落点常在圆钮中心偏外（热区是可见圆钮的
+       * 3 倍），端点若直接跳到手指绝对位置，点一下圆钮不动也会把墙挪 0.1~0.2m。
+       * 记下落点与端点的差，拖动中端点按手指位移量走——点按不动墙，拖动仍跟手。 */
+      var we = +actEl.getAttribute('data-e') === 0 ? { x: w.x1, y: w.y1 } : { x: w.x2, y: w.y2 };
+      E.drag = { kind: 'wallend', id: w.id, e: +actEl.getAttribute('data-e'), orig: clone(w), moved: false,
+                 ox: pt.x - we.x, oy: pt.y - we.y };
       svg.setPointerCapture(evt.pointerId);
       return true;
     }
@@ -3168,9 +3181,19 @@
     if (d.kind === 'wallend') {
       var wen = wallById(d.id); if (!wen) return;
       var anchor = d.e === 0 ? { x: wen.x2, y: wen.y2 } : { x: wen.x1, y: wen.y1 };
-      var npe = wallStrokeEnd(anchor, pt, d.id);
-      if (d.e === 0) { wen.x1 = npe.x; wen.y1 = npe.y; } else { wen.x2 = npe.x; wen.y2 = npe.y; }
-      d.moved = true;
+      /* 减去抓取偏移：端点按手指位移量走，不跳到手指绝对位置（v614） */
+      var adj = { x: pt.x - (d.ox || 0), y: pt.y - (d.oy || 0) };
+      var npe = wallStrokeEnd(anchor, adj, d.id);
+      /* 只有端点真的动了才算 moved——纯点按不挪墙、不留无用撤销步 */
+      if (d.e === 0) {
+        if (Math.abs(npe.x - wen.x1) > 1e-9 || Math.abs(npe.y - wen.y1) > 1e-9) {
+          wen.x1 = npe.x; wen.y1 = npe.y; d.moved = true;
+        }
+      } else {
+        if (Math.abs(npe.x - wen.x2) > 1e-9 || Math.abs(npe.y - wen.y2) > 1e-9) {
+          wen.x2 = npe.x; wen.y2 = npe.y; d.moved = true;
+        }
+      }
       render();
       return;
     }

@@ -2972,6 +2972,7 @@ body.sky-red .hpe-north .cap b { color:#eda88f; }
   paint-order:stroke; stroke:var(--card); stroke-width:.16em; }
 .hpe-roomarea { fill:var(--faint); paint-order:stroke; stroke:var(--card); stroke-width:.12em; }
 .hpe-hdl { fill:var(--card); stroke:var(--gold-deep); stroke-width:.09; cursor:pointer; }
+.hpe-hdlhit { fill:rgba(0,0,0,0); pointer-events:visiblePainted; cursor:pointer; touch-action:none; }
 [data-theme="night"] .hpe-hdl { stroke:var(--gold); }
 body.sky-red .hpe-hdl { stroke:#eda88f; }
 .hpe-dim rect { fill:var(--ink); }
@@ -2999,7 +3000,7 @@ body.sky-red .hpe-wall { stroke:#f2b8a0; }
 .hpe-wall.sel { stroke:var(--gold-deep); }
 [data-theme="night"] .hpe-wall.sel { stroke:var(--gold); }
 body.sky-red .hpe-wall.sel { stroke:#eda88f; }
-.hpe-wallhit { stroke:rgba(0,0,0,0); pointer-events:stroke; cursor:pointer; touch-action:none; }
+.hpe-wallhit { stroke:rgba(0,0,0,0); stroke-linecap:round; pointer-events:stroke; cursor:pointer; touch-action:none; }
 .hpe-wallprev { stroke:var(--cinnabar); stroke-dasharray:.3 .22; pointer-events:none; }
 .hpe-wallep { fill:var(--cinnabar); pointer-events:none; }
 .hpe-ncaps { display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin:2px 0 8px; }
