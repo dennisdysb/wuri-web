@@ -3061,6 +3061,8 @@ body.sky-red .hpe-lijilab { fill:#eda88f; }
 .hpe-calibline { stroke:var(--cinnabar); stroke-dasharray:.2 .14; }
 .hpe-temprect { fill:rgba(162,129,59,.12); stroke:var(--teal-deep); stroke-dasharray:.22 .14; }
 .hpe-boxrect { fill:rgba(43,94,90,.10); stroke:var(--teal-deep); stroke-dasharray:.22 .14; pointer-events:none; }
+/* 红光下框选填充改红谱（描边已走 --teal-deep 变量链，红光自动重映射） */
+body.sky-red .hpe-boxrect { fill:rgba(255,96,72,.08); }
 /* 磁吸命中反馈：金点＋金引导线，全走变量链（日/夜自动随 --gold 换值），红光另给亮红口径（同选中墙） */
 .hpe-snapline { stroke:var(--gold); pointer-events:none; }
 .hpe-snapring { fill:none; stroke:var(--gold); opacity:.65; pointer-events:none; }
@@ -3077,7 +3079,9 @@ body.sky-red .hpe-snapdot { fill:#eda88f; }
 .hpe-corner-ghostdot { fill:var(--cinnabar); pointer-events:none; }
 .hpe-corner-ghostln { stroke:var(--cinnabar); stroke-width:1.6; stroke-dasharray:4 4; pointer-events:none; }
 /* 照片建房全程禁系统长按菜单（复制/下载/分享图片），长按只能拖角点 */
-#view-plan { -webkit-touch-callout:none; }
+#view-plan { -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+/* 编辑器内表单输入显式回开可选（属性条输数字、改名仍要长按定位光标／粘贴） */
+#view-plan input, #view-plan textarea, #view-plan select { -webkit-user-select:text; user-select:text; }
 #view-plan img { -webkit-user-drag:none; user-select:none; -webkit-user-select:none; }
 #hpe-stage-err { color:var(--cinnabar); font-weight:600; }
 .hpe-cal .btn[disabled] { opacity:.55; }
@@ -3109,6 +3113,7 @@ body.sky-red .hpe-attr .t span b { color:#eda88f; }
 .hpe-op { padding:6px 13px; border-radius:9px; border:1px solid var(--line); background:var(--card);
   font-size:.8rem; letter-spacing:.08em; color:var(--ink-2); cursor:pointer; }
 .hpe-op.danger { color:var(--cinnabar); }
+.hpe-op.on { border-color:var(--gold); background:var(--gold-wash); color:var(--gold-deep); }
 .hpe-drawer { margin-top:12px; border:1px solid var(--line); border-radius:14px; background:var(--card); padding:12px; }
 .hpe-drawer .dt { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
 .hpe-drawer .dt b { font-family:var(--serif); letter-spacing:.16em; font-size:.95rem; color:var(--ink); }

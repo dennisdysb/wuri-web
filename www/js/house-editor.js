@@ -161,8 +161,9 @@
      * 防详情页已删的行被编辑器旧稿「复活」（见 close/invalidate/switchFloor） */
     planDirty: false,
     /* 「选择」键多选：multi＝{room:{},fix:{},wall:{}} 以 id 记选中；boxMode 框选开关；
-     * boxRect＝正在拉的框（坐标单位），null＝未在拉框 */
-    multi: null, boxMode: false, boxRect: null,
+     * boxRect＝正在拉的框（坐标单位），null＝未在拉框；moveArm＝框选态已点「移动」，
+     * 拖动任意处即整体移动所选（再点「移动」退出） */
+    multi: null, boxMode: false, boxRect: null, moveArm: false,
     /* 磁吸命中反馈：{pts:[{x,y}], lines:[{x1,y1,x2,y2}]}，拖动中由吸附函数
      * 写入、render 画亮点/引导线，松手即清（见 snapHintPt/snapHintLine） */
     snapHint: null
@@ -226,7 +227,7 @@
     if (!fid || !E.plan || E.plan.floorId !== fid) return;
     clearTimeout(saveTm);
     E.plan = null; E.planDirty = false;
-    E.sel = null; E.multi = null; E.boxRect = null;
+    E.sel = null; E.multi = null; E.boxRect = null; E.moveArm = false;
     E.undoStack = []; E.redoStack = []; E.drag = null;
   }
   /* 撤销栈：变更前快照 */
@@ -240,7 +241,7 @@
     if (!E.undoStack.length) return;
     E.redoStack.push(clone(E.plan));
     E.plan = E.undoStack.pop();
-    E.sel = null; E.chartCache = null; E.cut = null; E.multi = null; E.planDirty = true;
+    E.sel = null; E.chartCache = null; E.cut = null; E.multi = null; E.moveArm = false; E.planDirty = true;
     /* 清空后撤销把房间找回时，空层起始面须让位回画布 */
     if (E.sheet === 'start' && hasContent()) closeSheet();
     afterChange(true);
@@ -249,7 +250,7 @@
     if (!E.redoStack.length) return;
     E.undoStack.push(clone(E.plan));
     E.plan = E.redoStack.pop();
-    E.sel = null; E.chartCache = null; E.cut = null; E.multi = null; E.planDirty = true;
+    E.sel = null; E.chartCache = null; E.cut = null; E.multi = null; E.moveArm = false; E.planDirty = true;
     if (E.sheet === 'start' && hasContent()) closeSheet();
     afterChange(true);
   }
@@ -1461,6 +1462,7 @@
       '<div class="hpe-tile2 act" data-tile="tpl"><span class="gic">▦</span><div class="n">' + esc(T('hpe_tpl')) + '</div></div>' +
       '<div class="hpe-tile2 act" data-tile="trace"><span class="gic">✎</span><div class="n">' + esc(T('hpe_mode_trace')) + '</div></div>' +
       '<div class="hpe-tile2 act" data-tile="wall"><span class="gic">✐</span><div class="n">' + esc(T('hpe_wall_tile')) + '</div></div>' +
+      '<div class="hpe-tile2 act" data-tile="box"><span class="gic">▣</span><div class="n">' + esc(T('hpe_box_tile')) + '</div></div>' +
       '<div class="hpe-tile2 act" data-tile="select"><span class="gic">⌖</span><div class="n">' + esc(T('hpe_select')) + '</div></div>' +
       '<div class="hpe-tile2 act" data-tile="ovcycle"><span class="gic">◎</span><div class="n">' + esc(T('hpe_lay_overlay')) + '</div>' +
       (ovLab ? '<span class="hpe-ovpill' + (E.plan.layers.overlay === 'none' ? ' off' : '') + '">' + esc(ovLab) + '</span>' : '') + '</div>' +
@@ -1541,6 +1543,7 @@
       var hot = (k === 'room' && E.arm && E.arm.kind === 'room' && E.arm.key === key) ||
         (k === 'fix' && E.placeType === key) ||
         (k === 'wall' && E.uiMode === 'wall') ||
+        (k === 'box' && E.boxMode) ||
         (k === 'select' && E.boxMode);
       el.classList.toggle('hot', !!hot);
     });
@@ -1558,6 +1561,9 @@
     }
     if (kind === 'ovcycle') { cycleOverlay(); return; }
     if (kind === 'select') { if (E.sheet === 'select') closeSheet(); else showSheet('select'); return; }
+    /* 框选直达键（2026-11-17 用户要一个看得见的框选入口）：一点即进框选态，
+     * 再点退出；与「选择」面板芯片同一开关，不另起状态 */
+    if (kind === 'box') { setBoxMode(!E.boxMode); return; }
     if (kind === 'wall') { if (E.uiMode === 'wall') exitWallMode(); else enterWallMode(); return; }
     E.trayDrag = { kind: kind, key: el.getAttribute('data-key'), sx: e.clientX, sy: e.clientY, ghost: null, el: el,
       fromLib: !!(e.target.closest && e.target.closest('#hpe-panel')) };
@@ -1635,13 +1641,27 @@
       layoutAttr();
       return;
     }
-    /* 框选模式指引条：计数＋删除所选＋退出常驻（「选择」面板收起时也能收尾） */
+    /* 框选模式指引条：计数＋移动／锁定／删除所选＋退出常驻（「选择」面板收起时也能收尾）。
+     * 移动＝点「移动」武装后拖动任意处整体移动所选，不点「移动」时拖已选元素同样可移；
+     * 锁定＝所选全已锁定时显示「解锁」，否则全部锁定（与单项锁定同一语义） */
     if (E.boxMode) {
       var bn = multiCount();
+      var blk = bn ? multiAllLocked() : false;
       box.innerHTML = '<div class="hpe-attr thin"><b>' + esc(T('hpe_boxmode')) + '</b>' +
         '<span>' + esc(TF(T('hpe_sel_count'), bn)) + '</span>' +
-        '<span class="ops">' + (bn ? '<span class="hpe-op danger" id="hpe-b-del">' + esc(T('hpe_sel_del')) + '</span>' : '') +
+        '<span class="ops">' +
+        (bn ? '<span class="hpe-op' + (E.moveArm ? ' on' : '') + '" id="hpe-b-move">' + esc(T('hpe_move')) + '</span>' : '') +
+        (bn ? '<span class="hpe-op" id="hpe-b-lock">' + esc(blk ? T('hpe_unlock') : T('hpe_lock')) + '</span>' : '') +
+        (bn ? '<span class="hpe-op danger" id="hpe-b-del">' + esc(T('hpe_sel_del')) + '</span>' : '') +
         '<span class="hpe-op" id="hpe-b-x">' + esc(T('hpe_wall_done')) + '</span></span></div>';
+      var bmv = $('hpe-b-move');
+      if (bmv) bmv.addEventListener('click', function () {
+        E.moveArm = !E.moveArm;
+        if (E.moveArm) toastMsg(T('hpe_move_hint'));
+        renderAttr();
+      });
+      var blk2 = $('hpe-b-lock');
+      if (blk2) blk2.addEventListener('click', function () { lockMulti(); });
       var bd = $('hpe-b-del');
       if (bd) bd.addEventListener('click', function () { deleteMulti(); });
       var bx2 = $('hpe-b-x');
@@ -1984,9 +2004,9 @@
     }
     afterChange();
     if (room) toastMsg(T('hpe_wall_room_toast'));
-    /* 画完一段自动卸下画墙态：新墙/新房保持选中可立即拖改；要续画点托盘「画墙」
-     * 再入（入态后点已有墙端点仍可接续围合）。防「想拖却又生一段」 */
-    exitWallMode();
+    /* 画完一段留在画墙态（2026-11-17 用户口径改定：点「完成」才退出，
+     * 画墙期间落笔永远是续画；旧「画完自动卸态」口径作废——它逼用户
+     * 每画一段都要重进画墙态。想拖改刚画的墙：点「完成」回自由态再拖 */
     if (!room) wallNextToastOnce();
   }
   /* 构件库墙件落位：不进 fixtures，直接生成 plan.walls 段（与手划同账） */
@@ -2033,10 +2053,10 @@
     syncModeBtn(); renderTray(); render(); renderAttr();
   }
   /* ---------------- 画墙悬浮钮（2026-10-28 用户真机反馈） ----------------
-   * 画完一段自动卸画墙态是既定口径（防「想拖却又生一段」），但托盘「画墙」
-   * 钮在横滑区里、发现性差——用户画完一段想续画时找不到入口。舞台右下
-   * 常驻一枚悬浮钮（与托盘画墙同一动作、激活态双向同步），画完回常态后
-   * 仍在原地作提醒。JS 建 DOM 注入 .hpe-stage（同判定条口径，不动 index
+   * 画墙态画完一段留态续画（2026-11-17 口径改定；旧「画完自动卸态」作废）。
+   * 托盘「画墙」钮在横滑区里、发现性差——用户想续画时找不到入口。舞台右下
+   * 常驻一枚悬浮钮（与托盘画墙同一动作、激活态双向同步），点它即切画墙态，
+   * 再点即退出。JS 建 DOM 注入 .hpe-stage（同判定条口径，不动 index
    * 结构）；z 序 7：高于属性条（6）、低于抽屉（8）与判定条（9）；定位随
    * layoutAttr 同链——属性条/抽屉抬升时跟着抬，不压既有浮层。
    * 显隐：无稿/描图照片舞台（E.stage）/描图态（E.mode==='trace'）/编辑器
@@ -2147,8 +2167,11 @@
         '<span>' + esc(T('hpe_len')) + ' ' + trimNum(Lm, 2) + ' m</span>' +
         '<span class="ops"><span class="hpe-op" id="hpe-a-edit">' + esc(T('hpe_edit')) + '</span>' +
         lockOpHtml(w) +
-        '<span class="hpe-op danger" id="hpe-w-del">' + esc(T('hpe_del')) + '</span></span></div>';
+        '<span class="hpe-op danger" id="hpe-w-del">' + esc(T('hpe_del')) + '</span>' +
+        (E.uiMode === 'wall' ? '<span class="hpe-op" id="hpe-wall-x">' + esc(T('hpe_wall_done')) + '</span>' : '') + '</span></div>';
       bindLockOp('wall', w.id);
+      var wxbT = $('hpe-wall-x');
+      if (wxbT) wxbT.addEventListener('click', exitWallMode);
       $('hpe-a-edit').addEventListener('click', function () { E.attrFull = true; renderAttr(); });
       $('hpe-a-thin').addEventListener('click', function (e) {
         if (e.target.closest && e.target.closest('.hpe-op')) return;
@@ -2170,7 +2193,8 @@
       '<div class="ops">' +
       (w.lock ? '<span class="hpe-locknote">' + esc(T('hpe_locked_note')) + '</span>' : '<span class="hpe-op" id="hpe-w-rot">' + esc(T('hpe_rotate')) + '</span>') +
       lockOpHtml(w) +
-      '<span class="hpe-op danger" id="hpe-w-del">' + esc(T('hpe_del')) + '</span></div></div>';
+      '<span class="hpe-op danger" id="hpe-w-del">' + esc(T('hpe_del')) + '</span>' +
+      (E.uiMode === 'wall' ? '<span class="hpe-op" id="hpe-wall-x">' + esc(T('hpe_wall_done')) + '</span>' : '') + '</div></div>';
     bindLockOp('wall', w.id);
     var ln = $('hpe-w-len');
     if (ln) {
@@ -2202,6 +2226,8 @@
       E.plan.walls = E.plan.walls.filter(function (x) { return x.id !== w.id; });
       E.sel = null; afterChange();
     });
+    var wxbF = $('hpe-wall-x');
+    if (wxbF) wxbF.addEventListener('click', exitWallMode);
   }
 
   /* ---------------- 描图面板 ---------------- */
@@ -2403,7 +2429,7 @@
     E.plan.rooms = []; E.plan.fixtures = []; E.plan.walls = []; E.plan.trace = null;
     E.plan.calibNote = ''; E.plan.mPerUnit = 1; E.plan.liji = null;
     E.sel = null; E.cut = null; E.wallPrev = null; E.view = null; E.traceURL = ''; E.chartCache = null;
-    E.multi = null; E.boxMode = false; E.boxRect = null;
+    E.multi = null; E.boxMode = false; E.boxRect = null; E.moveArm = false;
     E.calibArm = false; E.calibPts = [];
     E.planDirty = true; /* 直接改字段未走 save：显式标脏，saveNow 才落盘 */
     saveNow();
@@ -2453,6 +2479,8 @@
   function setBoxMode(on) {
     E.boxMode = !!on;
     E.boxRect = null;
+    /* 退出框选即放下多选与移动武装（下次进框选从空开始，旧选中不残留） */
+    if (!E.boxMode) { E.multi = null; E.moveArm = false; }
     if (E.boxMode) {
       /* 框选只在自由态：画墙/分切先退场，待放卸下，旧单选清掉，叠层收起 */
       if (E.uiMode === 'wall') { E.uiMode = 'free'; E.wallPrev = null; syncModeBtn(); }
@@ -2537,12 +2565,51 @@
       var mk = E.sel.kind === 'room' ? 'room' : E.sel.kind === 'fixture' ? 'fix' : 'wall';
       if (m[mk] && m[mk][E.sel.id] && !isLockedEl(E.sel.kind, E.sel.id)) E.sel = null;
     }
-    E.multi = null;
+    E.multi = null; E.moveArm = false;
     afterChange();
     if (skipped) toastMsg(TF(T('hpe_lock_skipped'), skipped));
     if (E.sheet === 'select') renderSelectPanel();
   }
   function isLockedEl(kind, id) { var el = elByKind(kind, id); return !!(el && el.lock); }
+  /* 框选命中：落笔点是否落在已选元素上（墙身/房间/构件的 data-act 命中） */
+  function hitMulti(act, actEl) {
+    if (!E.multi || !actEl) return false;
+    var id = actEl.getAttribute('data-id');
+    if (act === 'wall') return !!E.multi.wall[id];
+    if (act === 'room') return !!E.multi.room[id];
+    if (act === 'fixture') return !!E.multi.fix[id];
+    return false;
+  }
+  /* 批量移动快照：只含未锁定者（锁定元素不跟动）；全锁定返回 null */
+  function multiMoveOrigs() {
+    var m = E.multi; if (!m || !multiCount()) return null;
+    var o = { wall: {}, room: {}, fix: {} }, n = 0;
+    Object.keys(m.wall || {}).forEach(function (id) { var w = wallById(id); if (w && !w.lock) { o.wall[id] = { x1: w.x1, y1: w.y1, x2: w.x2, y2: w.y2 }; n++; } });
+    Object.keys(m.room || {}).forEach(function (id) { var r = roomById(id); if (r && !r.lock) { o.room[id] = { x: r.x, y: r.y, w: r.w, h: r.h }; n++; } });
+    Object.keys(m.fix || {}).forEach(function (id) { var f = fixById(id); if (f && !f.lock) { o.fix[id] = { x: f.x, y: f.y }; n++; } });
+    return n ? o : null;
+  }
+  /* 所选是否全已锁定（批量栏「锁定／解锁」文案用） */
+  function multiAllLocked() {
+    var m = E.multi; if (!m || !multiCount()) return false;
+    var all = true, any = false;
+    [['room', roomById], ['fix', fixById], ['wall', wallById]].forEach(function (pair) {
+      Object.keys(m[pair[0]] || {}).forEach(function (id) { var el = pair[1](id); if (el) { any = true; if (!el.lock) all = false; } });
+    });
+    return any && all;
+  }
+  /* 批量锁定：所选全已锁定→批量解锁，否则把未锁定者全部锁定（与单项
+   * 锁定同一语义：锁定后拖动/缩放/删除全停用，仍可选中查看与解锁） */
+  function lockMulti() {
+    var m = E.multi; if (!m || !multiCount()) return;
+    var unlock = multiAllLocked();
+    pushUndo();
+    Object.keys(m.room || {}).forEach(function (id) { var el = roomById(id); if (el) { if (unlock) delete el.lock; else el.lock = true; } });
+    Object.keys(m.fix || {}).forEach(function (id) { var el = fixById(id); if (el) { if (unlock) delete el.lock; else el.lock = true; } });
+    Object.keys(m.wall || {}).forEach(function (id) { var el = wallById(id); if (el) { if (unlock) delete el.lock; else el.lock = true; } });
+    afterChange();
+    if (E.sheet === 'select') renderSelectPanel();
+  }
   function renderMetrics() {
     var title = $('hpe-metric-title'), box = $('hpe-metrics');
     if (!box) return;
@@ -2864,8 +2931,20 @@
       }
       return;
     }
-    /* 框选模式：画布按下即拉框——平移与点选一律让位（模式外拖动才是平移） */
+    /* 框选模式：落在已选元素上（或已点「移动」武装）＝拖动整体移动
+     * （锁定元素不跟动；全锁定则提示不拖）；其余落笔＝拉新框——平移与
+     * 点选一律让位（模式外拖动才是平移） */
     if (E.boxMode && E.mode !== 'trace') {
+      var wantMove = E.moveArm || hitMulti(act, actEl);
+      if (wantMove && !multiCount()) { E.moveArm = false; wantMove = false; }
+      if (wantMove) {
+        var mm = multiMoveOrigs();
+        if (!mm) { toastMsg(T('hpe_locked_toast')); return; }
+        pushUndo();
+        E.drag = { kind: 'multimove', start: pt, origs: mm, moved: false };
+        svg.setPointerCapture(evt.pointerId);
+        return;
+      }
       E.drag = { kind: 'box', start: pt };
       E.boxRect = { x: pt.x, y: pt.y, w: 0, h: 0 };
       svg.setPointerCapture(evt.pointerId);
@@ -2873,10 +2952,11 @@
     }
     /* 尺寸标直改：点选中元素的尺寸胶囊输数字（优先于画墙落笔等一切编辑命中） */
     if (act === 'dim') { openDimEdit(actEl.getAttribute('data-dim')); return; }
-    /* 画墙态：点墙身走选中/拖移，其余落笔即划墙；
-     * 端点手柄在此态是「接续画墙」的起点——刚画完的墙保持选中，从它端点
-     * 串下一面墙围成房是主路径，若先被拖端点截走，闭合永远画不出来；
-     * 端点改长走自由态拖端点或属性条输数字（两处都在）。
+    /* 画墙态：落笔一律是画墙——点已有墙身／端点只借它的点作起点（吸附），
+     * 绝不选中已有墙（2026-11-17 用户真机报：点已有墙接续画时被选中、
+     * 弹出墙段栏，画不下去）。端点手柄仍是「接续画墙」的起点——刚画完
+     * 的墙保持选中，从它端点串下一面墙围成房是主路径；端点改长走自由
+     * 态拖端点或属性条输数字（两处都在）。选择逻辑只在非画墙态生效。
      * 待放构件/房间时不抢（落位分支在下面原样走） */
     if (E.uiMode === 'wall' && E.mode !== 'trace') {
       if (act === 'wallh' && E.sel && E.sel.kind === 'wall') {
@@ -2890,7 +2970,6 @@
           return;
         }
       }
-      if (beginWallHit(act, actEl, pt, evt)) return;
       if (!E.placeType && !E.arm) {
         var sp = wallStartPt(pt);
         E.drag = { kind: 'walldraw', start: sp };
@@ -3109,6 +3188,19 @@
       render();
       return;
     }
+    /* 批量移动：同一增量作用于全部快照（锁定者不在快照内、不跟动）；
+     * 增量整体按 0.1 m 网格取整（各锚点同一步进，相对位置不变形），
+     * 房间面积随 rect 走、墙段连接随端点走，松手后 afterChange 照常更新 */
+    if (d.kind === 'multimove') {
+      var mdx = pt.x - d.start.x, mdy = pt.y - d.start.y;
+      if (E.grid) { var stp3 = toU(0.1); mdx = snapVal(mdx, stp3); mdy = snapVal(mdy, stp3); }
+      Object.keys(d.origs.wall).forEach(function (id) { var w = wallById(id); if (!w) return; var o = d.origs.wall[id]; w.x1 = o.x1 + mdx; w.y1 = o.y1 + mdy; w.x2 = o.x2 + mdx; w.y2 = o.y2 + mdy; });
+      Object.keys(d.origs.room).forEach(function (id) { var r = roomById(id); if (!r) return; var o2 = d.origs.room[id]; r.x = o2.x + mdx; r.y = o2.y + mdy; });
+      Object.keys(d.origs.fix).forEach(function (id) { var f = fixById(id); if (!f) return; var o3 = d.origs.fix[id]; f.x = o3.x + mdx; f.y = o3.y + mdy; });
+      if (Math.abs(mdx) + Math.abs(mdy) > toU(0.02)) d.moved = true;
+      render();
+      return;
+    }
     var step = E.grid ? toU(0.1) : 0;
     if (d.kind === 'room') {
       var r = roomById(d.id); if (!r) return;
@@ -3193,15 +3285,16 @@
   function onUp(evt) {
     var d = E.drag; if (!d) return;
     /* 墙类拖动先按松手点结算一次：浏览器会合并 pointermove，尾点若被吞，
-     * 墙头会停在半路、端点吸附落空（闭合查无此环）——以 up 点为准 */
-    if (d.kind === 'walldraw' || d.kind === 'wallend' || d.kind === 'wallmove') onMove(evt);
+     * 墙头会停在半路、端点吸附落空（闭合查无此环）——以 up 点为准；
+     * 批量移动同理，尾点增量不能丢 */
+    if (d.kind === 'walldraw' || d.kind === 'wallend' || d.kind === 'wallmove' || d.kind === 'multimove') onMove(evt);
     E.drag = null;
     E.snapHint = null; /* 磁吸反馈随拖动结束清掉 */
     if (d.kind === 'box') {
       var brc = E.boxRect; E.boxRect = null;
       /* 几乎没拉动＝点按：清掉多选；拉出实框才按框选 */
       if (brc && toM(brc.w) > 0.15 && toM(brc.h) > 0.15) applyBoxSelect(brc);
-      else E.multi = null;
+      else { E.multi = null; E.moveArm = false; }
       render(); renderAttr();
       if (E.sheet === 'select') renderSelectPanel();
       return;
@@ -3224,6 +3317,11 @@
     }
     if (d.kind === 'walldraw') { finalizeWallStroke(); return; }
     if (d.kind === 'wallend' || d.kind === 'wallmove') {
+      if (!d.moved) E.undoStack.pop(); /* 纯点选：回滚落点时的预推快照 */
+      save(); render(); renderAttr();
+      return;
+    }
+    if (d.kind === 'multimove') {
       if (!d.moved) E.undoStack.pop(); /* 纯点选：回滚落点时的预推快照 */
       save(); render(); renderAttr();
       return;
@@ -3262,6 +3360,11 @@
     } else if (d.kind === 'wallmove' || d.kind === 'wallend') {
       var cw2 = wallById(d.id);
       if (cw2 && d.orig) { cw2.x1 = d.orig.x1; cw2.y1 = d.orig.y1; cw2.x2 = d.orig.x2; cw2.y2 = d.orig.y2; }
+      E.undoStack.pop();
+    } else if (d.kind === 'multimove') {
+      Object.keys(d.origs.wall).forEach(function (id) { var w = wallById(id); if (w) { var o = d.origs.wall[id]; w.x1 = o.x1; w.y1 = o.y1; w.x2 = o.x2; w.y2 = o.y2; } });
+      Object.keys(d.origs.room).forEach(function (id) { var r = roomById(id); if (r) { var o2 = d.origs.room[id]; r.x = o2.x; r.y = o2.y; } });
+      Object.keys(d.origs.fix).forEach(function (id) { var f = fixById(id); if (f) { var o3 = d.origs.fix[id]; f.x = o3.x; f.y = o3.y; } });
       E.undoStack.pop();
     } else if (d.kind === 'walldraw') {
       E.wallPrev = null;
@@ -4078,7 +4181,7 @@
     E.sel = null; E.placeType = null; E.arm = null; E.undoStack = []; E.redoStack = [];
     E.calibArm = false; E.calibPts = []; E.chartCache = null; E.stage = null; E.view = null; E.ptrs = null; E.pinch = null;
     E.cut = null; E.wallPrev = null; E.startPhase = 'pick'; E.uiMode = 'free'; syncModeBtn();
-    E.multi = null; E.boxMode = false; E.boxRect = null;
+    E.multi = null; E.boxMode = false; E.boxRect = null; E.moveArm = false;
     loadPlan(fid, E.houseId).then(function (p) {
       E.plan = p; E.planDirty = false;
       return regenTraceURL();
@@ -4095,7 +4198,7 @@
      * 正常退出走 close() 已落盘并置空，此处兜底防残稿在 switchFloor 里被写回 */
     clearTimeout(saveTm);
     E.plan = null; E.planDirty = false; E.drag = null;
-    E.multi = null; E.boxMode = false; E.boxRect = null;
+    E.multi = null; E.boxMode = false; E.boxRect = null; E.moveArm = false;
     Promise.all([
       db.houses.get(houseId),
       db.floors.where('houseId').equals(houseId).toArray(),
@@ -4124,7 +4227,7 @@
     /* 退出即置空内存稿：此后详情页删层/清空才不会被残稿复活（复活 bug 根因） */
     clearTimeout(saveTm);
     E.plan = null; E.planDirty = false; E.floorId = 0;
-    E.sel = null; E.drag = null; E.multi = null; E.boxMode = false; E.boxRect = null;
+    E.sel = null; E.drag = null; E.multi = null; E.boxMode = false; E.boxRect = null; E.moveArm = false;
     E.undoStack = []; E.redoStack = [];
     var v = $('view-plan'); if (v) v.hidden = true;
     if (window.__wuriHouse && __wuriHouse.openDetail) __wuriHouse.openDetail(hid);
@@ -4177,7 +4280,18 @@
     });
     /* 编辑器全程禁掉系统菜单：长按拖角点绝不弹「复制/下载/分享图片」 */
     var vp = $('view-plan');
-    if (vp) vp.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    if (vp) {
+      vp.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+      /* 长按禁选（2026-11-17 用户真机报：长按画布选中了页面文字、还弹出
+       * Google 选词条）：#view-plan 内一律禁 selectstart，输入框／下拉框
+       * 例外（属性条输数字、改名仍要长按定位光标／粘贴）；CSS 层
+       * #view-plan{user-select:none} 同口径，输入框显式回开可选 */
+      vp.addEventListener('selectstart', function (e) {
+        var t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+        e.preventDefault();
+      });
+    }
     var bk = $('hpe-back'); if (bk) bk.addEventListener('click', close);
     var un = $('hpe-undo'); if (un) un.addEventListener('click', undo);
     var re = $('hpe-redo'); if (re) re.addEventListener('click', redo);
